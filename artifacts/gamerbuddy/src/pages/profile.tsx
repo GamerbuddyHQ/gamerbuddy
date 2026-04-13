@@ -68,6 +68,12 @@ const GAMER_RULES = [
     body: "Always ask the hirer first if they want you to join Discord or use in-game VoIP. Do not assume or force voice chat. Respect their preference.",
     icon: "🎙️",
   },
+  {
+    n: 8,
+    title: "Understand the 10% Platform Fee",
+    body: "Gamerbuddy deducts a 10% platform fee from every completed Quest/Job. You keep 90% of your agreed price. This is clearly shown before every payment release. Do not try to move payments off-platform to avoid this fee — it results in an instant ban.",
+    icon: "💸",
+  },
 ];
 
 function GamerRulesCard() {

@@ -31,7 +31,7 @@ import {
   ArrowLeft, Swords, Monitor, Layers, Gavel, MessageSquare,
   CheckCircle2, Send, Star, Trophy, AlertTriangle, User, Gift,
   Flag, X, MessageCircle, Gamepad2, Target, Zap, ChevronDown, ChevronUp,
-  Phone, PhoneOff, Wifi, WifiOff, Volume2,
+  Phone, PhoneOff, Wifi, WifiOff, Volume2, ShieldCheck,
 } from "lucide-react";
 import { SafetyBanner } from "@/components/safety-banner";
 import { VerifiedBadge } from "@/components/verified-badge";
@@ -407,10 +407,31 @@ function AcceptModal({
           <button onClick={onClose} className="text-muted-foreground hover:text-white"><X className="h-5 w-5" /></button>
         </div>
 
-        <div className="rounded-xl border border-green-500/30 bg-green-500/5 p-4 space-y-1">
-          <div className="text-xs text-muted-foreground uppercase tracking-widest">Bid amount</div>
-          <div className="text-2xl font-black text-white">${bid.price.toFixed(2)}</div>
-          <div className="text-xs text-muted-foreground">This amount will be held in escrow and released to the gamer (90%) on session completion.</div>
+        <div className="rounded-xl border border-green-500/30 bg-green-500/5 p-4 space-y-3">
+          <div className="text-xs font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1.5">
+            <ShieldCheck className="h-3.5 w-3.5 text-green-400" /> Payment Breakdown
+          </div>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">Session Amount</span>
+              <span className="font-bold text-white">${bid.price.toFixed(2)}</span>
+            </div>
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground flex items-center gap-1">
+                <span className="text-amber-400 font-bold text-xs">10%</span> Platform Fee
+              </span>
+              <span className="font-bold text-amber-400">−${(bid.price * 0.1).toFixed(2)}</span>
+            </div>
+            <div className="h-px bg-green-500/20" />
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-extrabold text-white">Gamer Receives</span>
+              <span className="text-xl font-black text-green-400">${(bid.price * 0.9).toFixed(2)}</span>
+            </div>
+          </div>
+          <div className="flex items-start gap-2 rounded-lg bg-amber-500/8 border border-amber-500/20 px-2.5 py-2 text-[11px] text-amber-300/80">
+            <AlertTriangle className="h-3.5 w-3.5 text-amber-400 shrink-0 mt-0.5" />
+            10% platform fee is deducted from every completed Quest/Job. Funds are held in escrow until the session is approved.
+          </div>
         </div>
 
         <div className="space-y-1.5">

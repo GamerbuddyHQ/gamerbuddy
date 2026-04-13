@@ -409,7 +409,7 @@ export default function Home() {
               <div className="space-y-5">
                 <Step n={1} title="Post Your Request" desc="Choose your game, platform, skill level needed, and budget." />
                 <Step n={2} title="Review Bids" desc="Skilled gamers place bids with their Discord and portfolio." />
-                <Step n={3} title="Play &amp; Review" desc="Lock in escrow, session completes, both sides review." />
+                <Step n={3} title="Play &amp; Review" desc="Lock funds in escrow — session completes, you approve, both sides review. A 10% platform fee applies on every completed Quest/Job." />
               </div>
             </div>
 
@@ -441,7 +441,7 @@ export default function Home() {
               <div className="space-y-5">
                 <Step n={1} title="Build Your Quest" desc="List the games you play and the help you can offer." />
                 <Step n={2} title="Bid on Requests" desc="Find requests that match your skills and place a competitive bid." />
-                <Step n={3} title="Complete &amp; Cash Out" desc="Session done — earnings land in your wallet, withdraw anytime." />
+                <Step n={3} title="Complete &amp; Cash Out" desc="Session done — you keep 90% of your bid. Gamerbuddy takes a transparent 10% platform fee per completed Quest/Job. Withdraw anytime." />
               </div>
             </div>
           </div>
@@ -458,7 +458,7 @@ export default function Home() {
               { icon: <Shield className="h-5 w-5 text-green-400" />, label: "Escrow Protected", sub: "Funds held until session complete" },
               { icon: <Star className="h-5 w-5 text-yellow-400" />, label: "Verified Reviews", sub: "Both sides must review" },
               { icon: <Zap className="h-5 w-5 text-cyan-400" />, label: "Real-Time Chat", sub: "Built-in messaging + voice" },
-              { icon: <Shield className="h-5 w-5 text-primary" />, label: "ID Verified Gamers", sub: "Verified badge on trusted profiles" },
+              { icon: <Coins className="h-5 w-5 text-amber-400" />, label: "Transparent 10% Fee", sub: "Gamers keep 90% of every job. No hidden charges." },
             ].map(({ icon, label, sub }) => (
               <div
                 key={label}

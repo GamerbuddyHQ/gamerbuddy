@@ -50,7 +50,8 @@ const TX_META: Record<string, { label: string; icon: React.ReactNode; color: str
   request_fee:    { label: "Request Fee",     icon: <Gamepad2 className="h-3.5 w-3.5" />,       color: "text-red-400",     sign: "-" },
   escrow_held:    { label: "Escrow Held",     icon: <ShieldCheck className="h-3.5 w-3.5" />,    color: "text-blue-400",    sign: "-" },
   escrow_refund:  { label: "Escrow Refund",   icon: <RefreshCcw className="h-3.5 w-3.5" />,     color: "text-green-400",   sign: "+" },
-  session_payout: { label: "Session Payout",  icon: <TrendingUp className="h-3.5 w-3.5" />,     color: "text-green-400",   sign: "+" },
+  session_payout: { label: "Session Payout (90%)", icon: <TrendingUp className="h-3.5 w-3.5" />,  color: "text-green-400",   sign: "+" },
+  platform_fee:   { label: "Platform Fee (10%)", icon: <Receipt className="h-3.5 w-3.5" />,       color: "text-amber-400",   sign: "-" },
   gift_sent:      { label: "Tip Sent",        icon: <Gift className="h-3.5 w-3.5" />,            color: "text-red-400",     sign: "-" },
   gift_received:  { label: "Tip Received",    icon: <Gift className="h-3.5 w-3.5" />,            color: "text-green-400",   sign: "+" },
 };
@@ -201,7 +202,7 @@ export default function WalletsPage() {
               </CardTitle>
               <span className="text-xs uppercase tracking-widest text-muted-foreground bg-muted/30 px-2 py-0.5 rounded">Earn & Withdraw</span>
             </div>
-            <CardDescription>Money earned by fulfilling requests.</CardDescription>
+            <CardDescription>Money earned by fulfilling requests. You keep 90% of every job — 10% platform fee is deducted automatically on completion.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-5">
             <div className="text-center py-4 rounded-lg bg-background/60 border border-border/40">
