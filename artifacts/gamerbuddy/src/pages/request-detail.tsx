@@ -16,6 +16,7 @@ import {
   useSendGift,
   useReportUser,
   useUserProfile,
+  STREAMING_PLATFORM_META,
   type Bid,
   type ChatMessage,
 } from "@/lib/bids-api";
@@ -493,6 +494,67 @@ function BidderQuestSummary({ bidderId, gameName }: { bidderId: number; gameName
   );
 }
 
+/* ── BIDDER STREAMING BADGES ─────────────────────────────────── */
+function BidderStreamingBadges({ bidderId, compact = false }: { bidderId: number; compact?: boolean }) {
+  const { data: profile } = useUserProfile(bidderId);
+  const accounts = profile?.streamingAccounts ?? [];
+  if (accounts.length === 0) return null;
+
+  if (compact) {
+    return (
+      <>
+        {accounts.map((sa) => {
+          const meta = STREAMING_PLATFORM_META[sa.platform];
+          if (!meta) return null;
+          return (
+            <a
+              key={sa.platform}
+              href={meta.urlTemplate.replace("{username}", sa.username)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[9px] font-bold transition-all hover:brightness-110"
+              style={{ background: meta.bg, border: `1px solid ${meta.border}`, color: meta.color }}
+              title={`${meta.label}: @${sa.username}`}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <span className="leading-none">{meta.emoji}</span>
+              <span className="hidden sm:inline">{meta.label.split(" ")[0]}</span>
+            </a>
+          );
+        })}
+      </>
+    );
+  }
+
+  return (
+    <div className="rounded-xl border border-border/30 bg-background/20 p-3">
+      <div className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/60 mb-2 flex items-center gap-1">
+        <span>📡</span> Live Streaming Channels
+      </div>
+      <div className="flex flex-wrap gap-1.5">
+        {accounts.map((sa) => {
+          const meta = STREAMING_PLATFORM_META[sa.platform];
+          if (!meta) return null;
+          return (
+            <a
+              key={sa.platform}
+              href={meta.urlTemplate.replace("{username}", sa.username)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-bold transition-all hover:brightness-110 hover:scale-[1.03]"
+              style={{ background: meta.bg, border: `1px solid ${meta.border}`, color: meta.color }}
+            >
+              <span className="text-sm leading-none">{meta.emoji}</span>
+              <span>{meta.label}</span>
+              <span className="opacity-70 font-mono">@{sa.username}</span>
+            </a>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function BidCard({
   bid,
   isHirer,
@@ -548,6 +610,7 @@ function BidCard({
                     <MessageCircle className="h-3 w-3" />{bid.discordUsername}
                   </span>
                 )}
+                <BidderStreamingBadges bidderId={bid.bidderId} compact />
               </div>
               <div className="text-xs text-muted-foreground">{format(new Date(bid.createdAt), "MMM d, h:mm a")}</div>
             </div>
@@ -567,6 +630,9 @@ function BidCard({
         <p className="text-sm text-foreground/80 leading-relaxed border-l-2 border-primary/30 pl-3">
           {bid.message}
         </p>
+
+        {/* Streaming platform links */}
+        <BidderStreamingBadges bidderId={bid.bidderId} />
 
         {!isMe && <BidderQuestSummary bidderId={bid.bidderId} gameName={gameName} />}
 
