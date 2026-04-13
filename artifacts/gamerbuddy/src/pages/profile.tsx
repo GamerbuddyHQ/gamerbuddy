@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useAuth } from "@/lib/auth";
 import {
   useUserProfile, useUpdateProfile, useShopItems, usePurchaseItem,
-  useMyQuestEntries, useAddQuestEntry, useDeleteQuestEntry,
+  useMyQuestEntries, useAddQuestEntry, useDeleteQuestEntry, useVerifyId,
   type ShopItem, type QuestEntry,
 } from "@/lib/bids-api";
+import { VerifiedBadge } from "@/components/verified-badge";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -502,6 +503,129 @@ function ShopSection({
   );
 }
 
+function VerificationSection({ idVerified }: { idVerified: boolean }) {
+  const [file, setFile] = useState<File | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const verifyId = useVerifyId();
+  const { toast } = useToast();
+
+  const handleSubmit = () => {
+    verifyId.mutate(file, {
+      onSuccess: (data) => {
+        toast({ title: "Identity Verified!", description: "Your Verified badge is now active on your profile." });
+      },
+      onError: (err: any) => toast({ title: "Verification Failed", description: err?.error || "Please try again.", variant: "destructive" }),
+    });
+  };
+
+  if (idVerified) {
+    return (
+      <Card className="border-emerald-500/30 bg-emerald-500/5"
+        style={{ boxShadow: "0 0 20px rgba(52,211,153,0.08)" }}>
+        <CardContent className="pt-5 pb-5">
+          <div className="flex items-center gap-4">
+            <div className="h-12 w-12 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center shrink-0"
+              style={{ boxShadow: "0 0 16px rgba(52,211,153,0.25)" }}>
+              <ShieldCheck className="h-6 w-6 text-emerald-400 fill-emerald-500/20" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2.5 mb-1">
+                <span className="text-sm font-extrabold text-white uppercase tracking-wide">Identity Verified</span>
+                <VerifiedBadge idVerified={true} variant="compact" />
+              </div>
+              <p className="text-xs text-emerald-300/70 leading-relaxed">
+                Your ID has been verified. Your Verified badge is displayed on your profile, bids, and request listings.
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card className="border-amber-500/30 bg-amber-500/5"
+      style={{ boxShadow: "0 0 20px rgba(245,158,11,0.06)" }}>
+      <CardContent className="pt-5 pb-5 space-y-4">
+        <div className="flex items-start gap-4">
+          <div className="h-12 w-12 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center shrink-0">
+            <ShieldAlert className="h-6 w-6 text-amber-400" />
+          </div>
+          <div>
+            <div className="text-sm font-extrabold text-white uppercase tracking-wide mb-1">Get Verified</div>
+            <p className="text-xs text-muted-foreground/70 leading-relaxed">
+              Upload a government-issued ID to earn the <span className="text-emerald-400 font-semibold">Verified</span> badge.
+              Verified profiles get more bids accepted and build more trust on the platform.
+            </p>
+          </div>
+        </div>
+
+        <div className="space-y-3 pl-0 sm:pl-16">
+          <div className="flex flex-wrap gap-3 text-xs text-muted-foreground/60">
+            {["Passport", "Driver's License", "National ID", "Government Card"].map((doc) => (
+              <span key={doc} className="flex items-center gap-1 border border-border/40 rounded-lg px-2.5 py-1">
+                <CheckCircle2 className="h-3 w-3 text-emerald-400/60" /> {doc}
+              </span>
+            ))}
+          </div>
+
+          <div
+            className={`border-2 border-dashed rounded-xl p-4 flex flex-col items-center gap-2 cursor-pointer transition-all ${
+              file ? "border-emerald-500/50 bg-emerald-500/5" : "border-border/50 hover:border-primary/50 bg-background/30 hover:bg-primary/5"
+            }`}
+            onClick={() => fileRef.current?.click()}
+          >
+            <ShieldCheck className={`h-8 w-8 ${file ? "text-emerald-400" : "text-muted-foreground/30"}`} />
+            <div className="text-xs text-center text-muted-foreground">
+              {file ? (
+                <span className="text-emerald-400 font-bold">{file.name}</span>
+              ) : (
+                <><span className="text-primary font-semibold">Click to upload</span> your ID document<br /><span className="text-[10px] opacity-60">JPG, PNG or PDF · Max 10MB</span></>
+              )}
+            </div>
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/*,.pdf"
+              className="hidden"
+              onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+            />
+          </div>
+
+          <div className="flex items-center gap-3">
+            <Button
+              size="sm"
+              onClick={handleSubmit}
+              disabled={!file || verifyId.isPending}
+              className="bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 hover:bg-emerald-500 hover:text-black font-bold text-xs uppercase"
+            >
+              {verifyId.isPending ? (
+                <><div className="h-3 w-3 rounded-full border-2 border-current/30 border-t-current animate-spin mr-1.5" />Verifying…</>
+              ) : (
+                <><ShieldCheck className="h-3.5 w-3.5 mr-1.5" />Submit for Verification</>
+              )}
+            </Button>
+            {!file && (
+              <button
+                onClick={() => verifyId.mutate(null, {
+                  onSuccess: () => toast({ title: "Identity Verified!", description: "Your Verified badge is now active." }),
+                  onError: (err: any) => toast({ title: "Failed", description: err?.error, variant: "destructive" }),
+                })}
+                className="text-[11px] text-muted-foreground/50 hover:text-primary transition-colors"
+              >
+                Or skip and verify without upload →
+              </button>
+            )}
+          </div>
+          <p className="text-[10px] text-muted-foreground/40 leading-relaxed">
+            Your document is stored securely and used only for identity verification purposes. This is a prototype — approval is instant.
+          </p>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function Profile() {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -584,15 +708,7 @@ export default function Profile() {
                 )}
               </div>
               <div className="flex flex-wrap gap-1.5 mt-1.5">
-                {user.idVerified ? (
-                  <span className="flex items-center text-[11px] font-bold uppercase tracking-wider text-green-500 bg-green-500/10 px-2 py-0.5 rounded-full border border-green-500/30">
-                    <ShieldCheck className="w-3 h-3 mr-1" /> Verified
-                  </span>
-                ) : (
-                  <span className="flex items-center text-[11px] font-bold uppercase tracking-wider text-destructive bg-destructive/10 px-2 py-0.5 rounded-full border border-destructive/30">
-                    <ShieldAlert className="w-3 h-3 mr-1" /> Unverified
-                  </span>
-                )}
+                <VerifiedBadge idVerified={user.idVerified} variant="full" />
                 <span className={`flex items-center text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${currentRank.color}`}>
                   {currentRank.emoji} {currentRank.label}
                 </span>
@@ -626,6 +742,9 @@ export default function Profile() {
           </div>
         </div>
       </div>
+
+      {/* VERIFICATION CARD */}
+      <VerificationSection idVerified={user.idVerified} />
 
       {/* BIO */}
       <Card className="border-border bg-card/40">

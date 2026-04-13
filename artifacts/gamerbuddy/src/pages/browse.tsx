@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { SafetyBanner } from "@/components/safety-banner";
 import { useToast } from "@/hooks/use-toast";
+import { VerifiedBadge } from "@/components/verified-badge";
 
 const PLATFORMS = ["PC", "PlayStation", "Xbox", "Nintendo Switch", "Steam Deck", "iOS", "Android"];
 const SKILLS = ["Beginner", "Intermediate", "Expert", "Chill"];
@@ -298,9 +299,10 @@ function RequestCard({ req }: { req: GameRequest }) {
             {/* Hirer + game */}
             <div>
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+                <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
                   <User className="h-3 w-3" />
                   <span className="text-primary font-semibold">{req.userName}</span>
+                  <VerifiedBadge idVerified={req.userIdVerified ?? false} variant="icon" />
                 </span>
                 <span className="text-muted-foreground/30 text-xs">·</span>
                 <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">

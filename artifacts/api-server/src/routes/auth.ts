@@ -17,6 +17,7 @@ function formatUser(user: {
   email: string;
   phone: string;
   idVerified: boolean;
+  officialIdPath?: string | null;
   points: number;
   profileBackground?: string | null;
   profileTitle?: string | null;
@@ -28,6 +29,7 @@ function formatUser(user: {
     email: user.email,
     phone: user.phone,
     idVerified: user.idVerified,
+    officialIdPath: user.officialIdPath ?? null,
     points: user.points,
     profileBackground: user.profileBackground ?? null,
     profileTitle: user.profileTitle ?? null,

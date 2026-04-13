@@ -46,11 +46,13 @@ function formatRequest(
     lowestBid?: string | null;
   },
   userName?: string,
+  userIdVerified?: boolean,
 ) {
   return {
     id: req.id,
     userId: req.userId,
     userName: userName ?? "Unknown",
+    userIdVerified: userIdVerified ?? false,
     gameName: req.gameName,
     platform: req.platform,
     skillLevel: req.skillLevel,
@@ -82,6 +84,7 @@ router.get("/requests", async (req, res): Promise<void> => {
       status: gameRequestsTable.status,
       createdAt: gameRequestsTable.createdAt,
       userName: usersTable.name,
+      userIdVerified: usersTable.idVerified,
       bidCount: sql<number>`(SELECT COUNT(*) FROM bids WHERE bids.request_id = ${gameRequestsTable.id})`.mapWith(Number),
       lowestBid: sql<string | null>`(SELECT MIN(price) FROM bids WHERE bids.request_id = ${gameRequestsTable.id} AND bids.status = 'pending')`,
     })
@@ -96,7 +99,7 @@ router.get("/requests", async (req, res): Promise<void> => {
     return true;
   });
 
-  res.json(filtered.map((r) => formatRequest(r, r.userName ?? "Unknown")));
+  res.json(filtered.map((r) => formatRequest(r, r.userName ?? "Unknown", r.userIdVerified ?? false)));
 });
 
 router.get("/requests/my", requireAuth, async (req, res): Promise<void> => {
@@ -214,16 +217,19 @@ function formatBid(bid: {
   price: string;
   message: string;
   status: string;
+  discordUsername?: string | null;
   createdAt: Date;
-}, bidderName?: string) {
+}, bidderName?: string, bidderIdVerified?: boolean) {
   return {
     id: bid.id,
     requestId: bid.requestId,
     bidderId: bid.bidderId,
     bidderName: bidderName ?? "Unknown",
+    bidderIdVerified: bidderIdVerified ?? false,
     price: parseFloat(bid.price),
     message: bid.message,
     status: bid.status,
+    discordUsername: bid.discordUsername ?? null,
     createdAt: bid.createdAt.toISOString(),
   };
 }
@@ -243,15 +249,17 @@ router.get("/requests/:id/bids", async (req, res): Promise<void> => {
       price: bidsTable.price,
       message: bidsTable.message,
       status: bidsTable.status,
+      discordUsername: bidsTable.discordUsername,
       createdAt: bidsTable.createdAt,
       bidderName: usersTable.name,
+      bidderIdVerified: usersTable.idVerified,
     })
     .from(bidsTable)
     .leftJoin(usersTable, eq(bidsTable.bidderId, usersTable.id))
     .where(eq(bidsTable.requestId, requestId))
     .orderBy(desc(bidsTable.createdAt));
 
-  res.json(rows.map((r) => formatBid(r, r.bidderName ?? "Unknown")));
+  res.json(rows.map((r) => formatBid(r, r.bidderName ?? "Unknown", r.bidderIdVerified ?? false)));
 });
 
 router.post("/requests/:id/bids", requireAuth, async (req, res): Promise<void> => {

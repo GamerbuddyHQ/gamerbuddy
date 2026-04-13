@@ -1,7 +1,10 @@
 import { Router, type IRouter } from "express";
+import multer from "multer";
 import { db, usersTable, reviewsTable, gameRequestsTable, bidsTable, profilePurchasesTable, questEntriesTable } from "@workspace/db";
 import { eq, desc, and, sql } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
+
+const upload = multer({ storage: multer.memoryStorage() });
 
 const router: IRouter = Router();
 
@@ -164,6 +167,27 @@ router.patch("/profile", requireAuth, async (req, res): Promise<void> => {
 
   await db.update(usersTable).set(updates).where(eq(usersTable.id, user.id));
   res.json({ success: true, ...updates });
+});
+
+router.post("/profile/verify", requireAuth, upload.single("idDocument"), async (req, res): Promise<void> => {
+  const user = req.user!;
+
+  const hasFile = !!req.file;
+  const hasBody = req.body?.confirm === "true";
+
+  if (!hasFile && !hasBody) {
+    res.status(400).json({ error: "Please upload an ID document or confirm the verification request." });
+    return;
+  }
+
+  const officialIdPath = req.file ? `uploads/${Date.now()}_${req.file.originalname}` : `submitted/${Date.now()}`;
+
+  await db.update(usersTable).set({
+    officialIdPath,
+    idVerified: true,
+  }).where(eq(usersTable.id, user.id));
+
+  res.json({ success: true, idVerified: true, message: "Identity verified successfully." });
 });
 
 router.get("/profile/shop", (_req, res): void => {

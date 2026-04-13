@@ -33,6 +33,7 @@ import {
   Phone, PhoneOff, Wifi, WifiOff, Volume2,
 } from "lucide-react";
 import { SafetyBanner } from "@/components/safety-banner";
+import { VerifiedBadge } from "@/components/verified-badge";
 
 const PLATFORM_ICON: Record<string, string> = {
   PC: "🖥️", PlayStation: "🎮", Xbox: "🟩", "Nintendo Switch": "🕹️",
@@ -538,8 +539,9 @@ function BidCard({
               <User className="h-4 w-4 text-primary" />
             </div>
             <div>
-              <div className="font-bold text-white text-sm flex items-center gap-2">
+              <div className="font-bold text-white text-sm flex items-center gap-2 flex-wrap">
                 {bid.bidderName}
+                <VerifiedBadge idVerified={bid.bidderIdVerified ?? false} variant="compact" />
                 {isMe && <span className="text-xs text-secondary font-normal">(You)</span>}
                 {isAccepted && bid.discordUsername && (
                   <span className="text-xs text-indigo-400 font-normal flex items-center gap-1">
@@ -1054,8 +1056,10 @@ export default function RequestDetail() {
         <CardContent className="pt-6 space-y-4">
           <div className="flex items-start justify-between gap-3 flex-wrap">
             <div>
-              <div className="text-xs text-muted-foreground mb-1">
-                Posted by <span className="text-primary font-semibold">{request.userName}</span> · {format(new Date(request.createdAt), "MMM d, yyyy")}
+              <div className="text-xs text-muted-foreground mb-1 flex items-center gap-1.5 flex-wrap">
+                Posted by <span className="text-primary font-semibold">{request.userName}</span>
+                <VerifiedBadge idVerified={request.userIdVerified ?? false} variant="compact" />
+                · {format(new Date(request.createdAt), "MMM d, yyyy")}
               </div>
               <h1 className="text-2xl font-extrabold uppercase tracking-tight text-white flex items-center gap-2">
                 <Swords className="h-6 w-6 text-primary" />

@@ -7,6 +7,7 @@ export type Bid = {
   requestId: number;
   bidderId: number;
   bidderName: string;
+  bidderIdVerified?: boolean;
   price: number;
   message: string;
   status: string;
@@ -85,6 +86,7 @@ export type GameRequest = {
   id: number;
   userId: number;
   userName: string;
+  userIdVerified?: boolean;
   gameName: string;
   platform: string;
   skillLevel: string;
@@ -414,6 +416,32 @@ export function useDeleteNotification() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["notifications"] });
       qc.invalidateQueries({ queryKey: ["notifications-unread"] });
+    },
+  });
+}
+
+export function useVerifyId() {
+  const qc = useQueryClient();
+  return useMutation<{ success: boolean; idVerified: boolean; message: string }, any, File | null>({
+    mutationFn: async (file) => {
+      const formData = new FormData();
+      if (file) {
+        formData.append("idDocument", file);
+      } else {
+        formData.append("confirm", "true");
+      }
+      const res = await fetch(`${BASE}/profile/verify`, {
+        method: "POST",
+        credentials: "include",
+        body: formData,
+      });
+      const data = await res.json();
+      if (!res.ok) throw data;
+      return data;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["auth-me"] });
+      qc.invalidateQueries({ queryKey: ["user-profile"] });
     },
   });
 }
