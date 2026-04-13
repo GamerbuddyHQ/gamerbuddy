@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
-import { db, gameRequestsTable, walletsTable, usersTable } from "@workspace/db";
-import { eq, desc } from "drizzle-orm";
+import { db, gameRequestsTable, walletsTable, usersTable, bidsTable } from "@workspace/db";
+import { eq, desc, and } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
 
 const router: IRouter = Router();
@@ -186,6 +186,118 @@ router.post("/requests", requireAuth, async (req, res): Promise<void> => {
 
   req.log.info({ userId: user.id, gameName }, "Game request posted");
   res.status(201).json(formatRequest(gameRequest, user.name));
+});
+
+function formatBid(bid: {
+  id: number;
+  requestId: number;
+  bidderId: number;
+  price: string;
+  message: string;
+  status: string;
+  createdAt: Date;
+}, bidderName?: string) {
+  return {
+    id: bid.id,
+    requestId: bid.requestId,
+    bidderId: bid.bidderId,
+    bidderName: bidderName ?? "Unknown",
+    price: parseFloat(bid.price),
+    message: bid.message,
+    status: bid.status,
+    createdAt: bid.createdAt.toISOString(),
+  };
+}
+
+router.get("/requests/:id/bids", async (req, res): Promise<void> => {
+  const requestId = parseInt(req.params.id);
+  if (isNaN(requestId)) {
+    res.status(400).json({ error: "Invalid request ID" });
+    return;
+  }
+
+  const rows = await db
+    .select({
+      id: bidsTable.id,
+      requestId: bidsTable.requestId,
+      bidderId: bidsTable.bidderId,
+      price: bidsTable.price,
+      message: bidsTable.message,
+      status: bidsTable.status,
+      createdAt: bidsTable.createdAt,
+      bidderName: usersTable.name,
+    })
+    .from(bidsTable)
+    .leftJoin(usersTable, eq(bidsTable.bidderId, usersTable.id))
+    .where(eq(bidsTable.requestId, requestId))
+    .orderBy(desc(bidsTable.createdAt));
+
+  res.json(rows.map((r) => formatBid(r, r.bidderName ?? "Unknown")));
+});
+
+router.post("/requests/:id/bids", requireAuth, async (req, res): Promise<void> => {
+  const user = req.user!;
+  const requestId = parseInt(req.params.id);
+  if (isNaN(requestId)) {
+    res.status(400).json({ error: "Invalid request ID" });
+    return;
+  }
+
+  const [gameRequest] = await db
+    .select()
+    .from(gameRequestsTable)
+    .where(eq(gameRequestsTable.id, requestId));
+
+  if (!gameRequest) {
+    res.status(404).json({ error: "Request not found" });
+    return;
+  }
+
+  if (gameRequest.status !== "open") {
+    res.status(400).json({ error: "This request is no longer open for bids" });
+    return;
+  }
+
+  if (gameRequest.userId === user.id) {
+    res.status(400).json({ error: "You cannot bid on your own request" });
+    return;
+  }
+
+  const { price, message } = req.body as { price?: number; message?: string };
+
+  if (!price || typeof price !== "number" || price <= 0) {
+    res.status(400).json({ error: "Price must be a positive number" });
+    return;
+  }
+
+  if (!message || message.trim().length < 5) {
+    res.status(400).json({ error: "Message must be at least 5 characters" });
+    return;
+  }
+
+  const [existing] = await db
+    .select()
+    .from(bidsTable)
+    .where(and(eq(bidsTable.requestId, requestId), eq(bidsTable.bidderId, user.id)));
+
+  if (existing) {
+    res.status(409).json({ error: "You have already placed a bid on this request" });
+    return;
+  }
+
+  const [bid] = await db
+    .insert(bidsTable)
+    .values({
+      requestId,
+      bidderId: user.id,
+      price: String(price),
+      message: message.trim(),
+      status: "pending",
+    })
+    .returning();
+
+  req.log.info({ userId: user.id, requestId, price }, "Bid placed");
+  res.status(201).json(formatBid(bid, user.name));
 });
 
 export default router;
