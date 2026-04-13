@@ -1,0 +1,36 @@
+Update and finalize the "Rules for Gamers Who Want to Get Hired" section in Gamerbuddy.
+
+Create a clear, professional, and gamer-friendly rules section with the following exact rules:
+
+**Rules for Gamers Who Want to Get Hired**
+
+If you want to get hired on Gamerbuddy, you must strictly follow these rules:
+
+1. **Be Friendly and Positive at All Times**  
+   Use respectful, encouraging, and positive language. No toxicity, rage, sarcasm, or negative comments.
+
+2. **Respect the Hirer’s Objectives**  
+   Always follow the exact objectives and instructions in the request. Do not skip or change them without the hirer's permission.
+
+3. **Never Ask for Account Passwords**  
+   Never ask the hirer to share their Steam, Epic, PlayStation, Xbox, Nintendo, or any account password. This is strictly forbidden and will result in instant ban.
+
+4. **Maintain Professional Behavior**  
+   No rude backseat gaming, no sharing personal information, no advertising other services, and no trying to move the session or payment off-platform.
+
+5. **Complete the Session Honestly**  
+   Play for the agreed time and try your best to meet the objectives. Communicate honestly if you cannot deliver.
+
+6. **Respect the Hirer’s Comfort**  
+   Make the hirer feel safe and comfortable. Adjust your playstyle if they ask for a more chill or slower pace.
+
+7. **Ask About Voice Chat**  
+   Always ask the hirer first if they want you to join Discord or use in-game VoIP. Do not assume or force voice chat. Respect their preference.
+
+**Important Warning:**  
+Breaking any of these rules will result in **immediate account suspension** and loss of Trust Factor and earnings.
+
+Display this rules section clearly on the profile page for users who want to get hired.  
+Also show a short summary of these rules during the bidding process and on the "Become a Gamerbuddy" page.
+
+Use clean formatting with good spacing. Keep the tone friendly but firm. Make it easy to read on both desktop and mobile.

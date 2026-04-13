@@ -21,6 +21,140 @@ import {
   Zap, Target, ChevronDown, ChevronUp,
 } from "lucide-react";
 
+/* ── GAMER RULES CARD ───────────────────────────────────────── */
+const GAMER_RULES = [
+  {
+    n: 1,
+    title: "Be Friendly and Positive at All Times",
+    body: "Use respectful, encouraging, and positive language. No toxicity, rage, sarcasm, or negative comments.",
+    icon: "😊",
+  },
+  {
+    n: 2,
+    title: "Respect the Hirer's Objectives",
+    body: "Always follow the exact objectives and instructions in the request. Do not skip or change them without the hirer's permission.",
+    icon: "🎯",
+  },
+  {
+    n: 3,
+    title: "Never Ask for Account Passwords",
+    body: "Never ask the hirer to share their Steam, Epic, PlayStation, Xbox, Nintendo, or any account password. This is strictly forbidden and will result in instant ban.",
+    icon: "🔒",
+    highlight: true,
+  },
+  {
+    n: 4,
+    title: "Maintain Professional Behavior",
+    body: "No rude backseat gaming, no sharing personal information, no advertising other services, and no trying to move the session or payment off-platform.",
+    icon: "🤝",
+  },
+  {
+    n: 5,
+    title: "Complete the Session Honestly",
+    body: "Play for the agreed time and try your best to meet the objectives. Communicate honestly if you cannot deliver.",
+    icon: "✅",
+  },
+  {
+    n: 6,
+    title: "Respect the Hirer's Comfort",
+    body: "Make the hirer feel safe and comfortable. Adjust your playstyle if they ask for a more chill or slower pace.",
+    icon: "🛡️",
+  },
+  {
+    n: 7,
+    title: "Ask About Voice Chat",
+    body: "Always ask the hirer first if they want you to join Discord or use in-game VoIP. Do not assume or force voice chat. Respect their preference.",
+    icon: "🎙️",
+  },
+];
+
+function GamerRulesCard() {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <Card className="border-amber-500/25 bg-card/40 overflow-hidden">
+      <button
+        onClick={() => setOpen((p) => !p)}
+        className="w-full flex items-center justify-between px-5 py-4 hover:bg-amber-500/5 transition-colors group"
+      >
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg bg-amber-500/15 border border-amber-500/30 flex items-center justify-center shrink-0">
+            <ShieldCheck className="h-4 w-4 text-amber-400" />
+          </div>
+          <div className="text-left">
+            <div className="text-sm font-bold text-white">Gamer Code of Conduct</div>
+            <div className="text-xs text-muted-foreground mt-0.5">Rules for gamers who want to get hired</div>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-amber-400/70 hidden sm:block">
+            {open ? "Collapse" : "Read Rules"}
+          </span>
+          {open
+            ? <ChevronUp className="h-4 w-4 text-muted-foreground group-hover:text-white transition-colors" />
+            : <ChevronDown className="h-4 w-4 text-muted-foreground group-hover:text-white transition-colors" />}
+        </div>
+      </button>
+
+      {open && (
+        <div className="px-5 pb-5 space-y-4 border-t border-border/40">
+          <p className="text-xs text-muted-foreground leading-relaxed pt-4">
+            If you want to get hired on Gamerbuddy, you must strictly follow these rules. They keep the platform safe, friendly, and professional for everyone.
+          </p>
+
+          <div className="space-y-3">
+            {GAMER_RULES.map((rule) => (
+              <div
+                key={rule.n}
+                className={`flex gap-3 p-3 rounded-xl ${rule.highlight
+                  ? "bg-red-500/8 border border-red-500/20"
+                  : "bg-background/40 border border-border/40"}`}
+              >
+                <div className="shrink-0 flex flex-col items-center gap-1.5 pt-0.5">
+                  <div
+                    className={`w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-black ${rule.highlight
+                      ? "bg-red-500/20 text-red-400 border border-red-500/30"
+                      : "bg-primary/15 text-primary border border-primary/25"}`}
+                  >
+                    {rule.n}
+                  </div>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1.5 flex-wrap mb-0.5">
+                    <span className="text-[13px]">{rule.icon}</span>
+                    <span className={`text-xs font-bold ${rule.highlight ? "text-red-300" : "text-white"}`}>
+                      {rule.title}
+                    </span>
+                    {rule.highlight && (
+                      <span className="text-[9px] font-black uppercase tracking-widest text-red-400 bg-red-500/15 border border-red-500/25 px-1.5 py-0.5 rounded">
+                        Instant Ban
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-[11px] text-muted-foreground leading-relaxed">{rule.body}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Warning footer */}
+          <div className="flex gap-3 p-3.5 rounded-xl bg-red-500/6 border border-red-500/25">
+            <ShieldAlert className="h-4 w-4 text-red-400 shrink-0 mt-0.5" />
+            <div>
+              <div className="text-xs font-bold text-red-300 mb-0.5">Important Warning</div>
+              <p className="text-[11px] text-muted-foreground leading-relaxed">
+                Breaking any of these rules will result in{" "}
+                <span className="text-red-300 font-semibold">immediate account suspension</span>{" "}
+                and loss of Trust Factor and earnings. We take this seriously to protect all users.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+    </Card>
+  );
+}
+
 const BG_STYLES: Record<string, string> = {
   "bg-neon-purple":  "from-purple-900 via-violet-800 to-purple-950",
   "bg-cyber-blue":   "from-cyan-900 via-blue-800 to-cyan-950",
@@ -750,6 +884,9 @@ export default function Profile() {
 
       {/* MY QUEST */}
       <QuestSection />
+
+      {/* GAMER CODE OF CONDUCT */}
+      <GamerRulesCard />
 
       {/* BADGE SHOWCASE */}
       <Card className="border-border bg-card/40">

@@ -23,6 +23,54 @@ import { SafetyBanner } from "@/components/safety-banner";
 import { useToast } from "@/hooks/use-toast";
 import { VerifiedBadge } from "@/components/verified-badge";
 
+/* ── COMPACT CONDUCT REMINDER (shown in bid form) ─────────────── */
+const BID_CONDUCT_HIGHLIGHTS = [
+  { icon: "😊", text: "Be friendly and positive — no toxicity or negativity" },
+  { icon: "🔒", text: "Never ask for account passwords — instant ban if you do" },
+  { icon: "✅", text: "Complete the session honestly and meet the agreed objectives" },
+];
+
+function BidConductReminder() {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 overflow-hidden">
+      <button
+        type="button"
+        onClick={() => setOpen((p) => !p)}
+        className="w-full flex items-center justify-between px-3.5 py-2.5 gap-3 hover:bg-amber-500/8 transition-colors"
+      >
+        <div className="flex items-center gap-2">
+          <CheckCircle2 className="h-3.5 w-3.5 text-amber-400 shrink-0" />
+          <span className="text-[11px] font-semibold text-amber-300/90">
+            By bidding, you agree to follow the Gamer Code of Conduct
+          </span>
+        </div>
+        {open
+          ? <ChevronUp className="h-3.5 w-3.5 text-amber-400/60 shrink-0" />
+          : <ChevronDown className="h-3.5 w-3.5 text-amber-400/60 shrink-0" />}
+      </button>
+      {open && (
+        <div className="px-3.5 pb-3.5 space-y-2 border-t border-amber-500/15">
+          <div className="space-y-1.5 pt-2.5">
+            {BID_CONDUCT_HIGHLIGHTS.map((r, i) => (
+              <div key={i} className="flex items-start gap-2 text-[11px] text-muted-foreground">
+                <span className="text-xs shrink-0">{r.icon}</span>
+                <span>{r.text}</span>
+              </div>
+            ))}
+          </div>
+          <div className="flex items-start gap-2 rounded-lg bg-red-500/8 border border-red-500/20 px-2.5 py-2 mt-1">
+            <AlertCircle className="h-3 w-3 text-red-400 shrink-0 mt-0.5" />
+            <p className="text-[10px] text-red-300/80 leading-relaxed">
+              Breaking any rule may result in <span className="font-semibold text-red-300">immediate account suspension</span> and loss of earnings. Full rules are on your Profile page.
+            </p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 const PLATFORMS = ["PC", "PlayStation", "Xbox", "Nintendo Switch", "Steam Deck", "iOS", "Android"];
 const SKILLS = ["Beginner", "Intermediate", "Expert", "Chill"];
 
@@ -243,6 +291,9 @@ function QuickBidPanel({ req, onClose }: { req: GameRequest; onClose: () => void
           {errorMsg}
         </div>
       )}
+
+      {/* Conduct reminder */}
+      <BidConductReminder />
 
       {/* Actions */}
       <div className="flex flex-wrap gap-2.5 pt-1">
