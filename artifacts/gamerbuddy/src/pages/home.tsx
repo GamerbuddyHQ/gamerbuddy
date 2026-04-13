@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { Link } from "wouter";
-import { Gamepad2, Users, Coins, Zap, Shield, Star, ChevronRight, MonitorPlay, Tv2, Smartphone } from "lucide-react";
+import { Gamepad2, Users, Coins, Zap, Shield, Star } from "lucide-react";
 
 /* ── floating particles canvas ─────────────────────────────── */
 function ParticleCanvas() {
@@ -73,16 +73,6 @@ function ParticleCanvas() {
       className="absolute inset-0 w-full h-full pointer-events-none"
       style={{ zIndex: 1 }}
     />
-  );
-}
-
-/* ── stat item ──────────────────────────────────────────────── */
-function StatItem({ value, label }: { value: string; label: string }) {
-  return (
-    <div className="flex items-center gap-2">
-      <span className="font-black text-white text-sm">{value}</span>
-      <span className="text-muted-foreground text-sm">{label}</span>
-    </div>
   );
 }
 
@@ -222,152 +212,120 @@ export default function Home() {
           }}
         />
 
-        {/* scanline accent */}
+        {/* subtle warm accent line at bottom of hero */}
         <div
-          className="absolute left-0 right-0 h-px pointer-events-none"
+          className="absolute bottom-32 left-1/2 -translate-x-1/2 w-2/3 max-w-md h-px pointer-events-none"
           style={{
-            background: "linear-gradient(90deg, transparent 0%, rgba(168,85,247,0.4) 50%, transparent 100%)",
-            animation: "scanline 8s linear infinite",
+            background: "linear-gradient(90deg, transparent, rgba(168,85,247,0.25), rgba(34,211,238,0.15), transparent)",
             zIndex: 1,
           }}
         />
 
         {/* content */}
-        <div className="relative space-y-7 max-w-4xl mx-auto" style={{ zIndex: 2 }}>
-          {/* eyebrow badge */}
-          <div className="inline-flex items-center gap-2.5 border rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-widest"
+        <div className="relative space-y-6 max-w-3xl mx-auto" style={{ zIndex: 2 }}>
+          {/* eyebrow badge — warm, friendly, not crypto */}
+          <div
+            className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-semibold"
             style={{
-              borderColor: "rgba(168,85,247,0.4)",
-              background: "rgba(168,85,247,0.08)",
-              color: "rgba(168,85,247,1)",
-              boxShadow: "0 0 20px rgba(168,85,247,0.12)",
+              background: "rgba(168,85,247,0.12)",
+              border: "1px solid rgba(168,85,247,0.25)",
+              color: "#d8b4fe",
             }}
           >
-            <span
-              className="h-1.5 w-1.5 rounded-full bg-primary"
-              style={{ animation: "hero-glow-pulse 2s ease-in-out infinite", boxShadow: "0 0 6px rgba(168,85,247,0.9)" }}
-            />
-            Gaming Marketplace · Est. 2024
+            <Gamepad2 className="h-4 w-4" />
+            The Co-op Gaming Marketplace
           </div>
 
-          {/* headline */}
-          <h1 className="text-5xl sm:text-7xl md:text-8xl font-black tracking-tighter uppercase leading-[0.9]">
-            <span
-              className="block"
-              style={{
-                color: "#f0e6ff",
-                textShadow: "0 0 40px rgba(168,85,247,0.3)",
-              }}
-            >
-              Level Up
+          {/* headline — friendly mixed case, not all-caps aggressive */}
+          <h1 className="text-4xl sm:text-6xl md:text-7xl font-black tracking-tight leading-[1.05]">
+            <span className="block text-white">
+              Find Your Perfect
             </span>
             <span
-              className="relative inline-block mt-1"
+              className="relative block"
               style={{
-                background: "linear-gradient(90deg, #c084fc 0%, #a855f7 40%, #7c3aed 70%, #22d3ee 100%)",
+                background: "linear-gradient(90deg, #c084fc 0%, #a855f7 55%, #818cf8 100%)",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
                 backgroundClip: "text",
-                filter: "drop-shadow(0 0 24px rgba(168,85,247,0.7))",
               }}
             >
-              Your Squad
-              {/* underline glow */}
-              <span
-                className="absolute -bottom-2 left-0 right-0 h-0.5 rounded-full"
-                style={{
-                  background: "linear-gradient(90deg, rgba(168,85,247,0.9), rgba(34,211,238,0.7))",
-                  boxShadow: "0 0 14px rgba(168,85,247,0.7)",
-                }}
-              />
+              Gaming Buddy
             </span>
           </h1>
 
-          {/* subheadline */}
-          <p className="text-lg sm:text-xl text-white/70 max-w-xl mx-auto leading-relaxed font-medium">
-            Hire skilled &amp; friendly gamers for co-op and multiplayer.{" "}
-            <span className="text-white/90 font-semibold">No more toxic randoms.</span>
+          {/* subheadline — warm, complete thought */}
+          <p className="text-base sm:text-lg text-white/65 max-w-2xl mx-auto leading-relaxed">
+            Hire skilled and friendly gamers for co-op and multiplayer sessions.
+            No more toxic randoms.{" "}
+            <span className="text-white/85 font-semibold">Real teammates. Real fun.</span>
           </p>
 
-          {/* CTA buttons */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
+          {/* CTA buttons — clear action hierarchy */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-1">
             <Link href="/signup">
               <button
-                className="relative overflow-hidden group w-full sm:w-auto px-10 py-4 rounded-xl font-black text-base uppercase tracking-widest text-white transition-all duration-300"
+                className="relative overflow-hidden group w-full sm:w-auto px-8 py-3.5 rounded-2xl font-bold text-base text-white transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
                 style={{
                   background: "linear-gradient(135deg, #9333ea 0%, #7c3aed 100%)",
-                  boxShadow: "0 0 30px rgba(168,85,247,0.45), 0 4px 20px rgba(0,0,0,0.4)",
+                  boxShadow: "0 4px 24px rgba(147,51,234,0.35), 0 2px 8px rgba(0,0,0,0.3)",
                 }}
               >
-                <span className="relative z-10 flex items-center gap-2.5">
-                  <Gamepad2 className="h-4.5 w-4.5" style={{ width: "1.125rem", height: "1.125rem" }} />
-                  Join the Lair
-                  <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                <span className="relative z-10 flex items-center justify-center gap-2">
+                  <Users className="h-4 w-4" />
+                  Find a Teammate
                 </span>
-                {/* shimmer overlay */}
                 <div
-                  className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 pointer-events-none"
-                  style={{ background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent)" }}
+                  className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+                  style={{ background: "linear-gradient(135deg, #a855f7 0%, #8b5cf6 100%)" }}
                 />
               </button>
             </Link>
 
             <Link href="/browse">
               <button
-                className="group w-full sm:w-auto px-10 py-4 rounded-xl font-bold text-base uppercase tracking-widest transition-all duration-300"
+                className="group w-full sm:w-auto px-8 py-3.5 rounded-2xl font-semibold text-base text-white/75 hover:text-white transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
                 style={{
-                  border: "1.5px solid rgba(168,85,247,0.35)",
-                  background: "rgba(168,85,247,0.06)",
-                  color: "rgba(255,255,255,0.75)",
-                  boxShadow: "0 0 0 0 rgba(168,85,247,0)",
+                  background: "rgba(255,255,255,0.06)",
+                  border: "1.5px solid rgba(255,255,255,0.14)",
                 }}
                 onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLButtonElement).style.background = "rgba(168,85,247,0.15)";
-                  (e.currentTarget as HTMLButtonElement).style.color = "#fff";
-                  (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(168,85,247,0.7)";
+                  (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,0.1)";
+                  (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(255,255,255,0.25)";
                 }}
                 onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLButtonElement).style.background = "rgba(168,85,247,0.06)";
-                  (e.currentTarget as HTMLButtonElement).style.color = "rgba(255,255,255,0.75)";
-                  (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(168,85,247,0.35)";
+                  (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,0.06)";
+                  (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(255,255,255,0.14)";
                 }}
               >
-                <span className="flex items-center gap-2">
+                <span className="flex items-center justify-center gap-2">
+                  <Gamepad2 className="h-4 w-4" />
                   Browse Requests
-                  <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
                 </span>
               </button>
             </Link>
           </div>
 
-          {/* trust stats */}
-          <div
-            className="inline-flex flex-wrap items-center justify-center gap-x-5 gap-y-2 mt-4 px-6 py-3 rounded-2xl"
-            style={{
-              background: "rgba(255,255,255,0.03)",
-              border: "1px solid rgba(255,255,255,0.07)",
-            }}
-          >
-            <StatItem value="2,450+" label="gamers trust us" />
-            <span className="text-border hidden sm:block">|</span>
-            <div className="flex items-center gap-2">
-              <MonitorPlay className="h-3.5 w-3.5 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">PC</span>
+          {/* trust bar — plain text, warm and human */}
+          <div className="space-y-2 pt-2">
+            <div className="flex items-center justify-center gap-2 text-sm text-white/55">
+              <div className="flex items-center gap-0.5 shrink-0">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                ))}
+              </div>
+              <span>
+                <span className="font-semibold text-white/75">2,450+ gamers</span>
+                {" "}already found their squad
+              </span>
             </div>
-            <div className="flex items-center gap-2">
-              <Tv2 className="h-3.5 w-3.5 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">Console</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Smartphone className="h-3.5 w-3.5 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">Mobile</span>
-            </div>
-            <span className="text-border hidden sm:block">|</span>
-            <div className="flex items-center gap-1">
-              {[...Array(5)].map((_, i) => (
-                <Star key={i} className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+            <div className="flex items-center justify-center gap-2 text-xs text-white/35 flex-wrap">
+              {["PC", "PlayStation", "Xbox", "Switch", "Mobile"].map((p, i, arr) => (
+                <React.Fragment key={p}>
+                  <span>{p}</span>
+                  {i < arr.length - 1 && <span className="text-white/15">·</span>}
+                </React.Fragment>
               ))}
-              <span className="text-sm text-muted-foreground ml-1">4.9 rating</span>
             </div>
           </div>
         </div>
