@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import multer from "multer";
-import { db, usersTable, reviewsTable, gameRequestsTable, bidsTable, profilePurchasesTable, questEntriesTable } from "@workspace/db";
+import { db, usersTable, reviewsTable, gameRequestsTable, bidsTable, profilePurchasesTable, questEntriesTable, streamingAccountsTable, STREAMING_PLATFORMS } from "@workspace/db";
 import { eq, desc, and, sql } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
 
@@ -43,7 +43,7 @@ router.get("/users/:id", async (req, res): Promise<void> => {
 
   if (!user) { res.status(404).json({ error: "User not found" }); return; }
 
-  const [reviews, completedAsHirer, completedAsGamer, purchases, questEntries] = await Promise.all([
+  const [reviews, completedAsHirer, completedAsGamer, purchases, questEntries, streamingAccounts] = await Promise.all([
     db.select({
       id: reviewsTable.id,
       rating: reviewsTable.rating,
@@ -78,6 +78,10 @@ router.get("/users/:id", async (req, res): Promise<void> => {
     .from(questEntriesTable)
     .where(eq(questEntriesTable.userId, userId))
     .orderBy(questEntriesTable.createdAt),
+
+    db.select({ platform: streamingAccountsTable.platform, username: streamingAccountsTable.username })
+    .from(streamingAccountsTable)
+    .where(eq(streamingAccountsTable.userId, userId)),
   ]);
 
   const avgRating = reviews.length > 0
@@ -94,6 +98,7 @@ router.get("/users/:id", async (req, res): Promise<void> => {
     sessionsAsGamer: completedAsGamer.map((s) => ({ ...s, createdAt: s.createdAt?.toISOString() })),
     purchasedItems: purchases.map((p) => p.itemId),
     questEntries: questEntries.map((q) => ({ ...q, createdAt: q.createdAt.toISOString() })),
+    streamingAccounts,
   });
 });
 
@@ -237,6 +242,51 @@ router.post("/profile/purchase", requireAuth, async (req, res): Promise<void> =>
     purchase: { ...purchase, purchasedAt: purchase.purchasedAt.toISOString() },
     newPoints: fresh.points - item.cost,
   });
+});
+
+/* ── STREAMING ACCOUNTS ──────────────────────────────────────── */
+
+router.get("/streaming-accounts", requireAuth, async (req, res): Promise<void> => {
+  const user = req.user!;
+  const accounts = await db.select({ platform: streamingAccountsTable.platform, username: streamingAccountsTable.username })
+    .from(streamingAccountsTable)
+    .where(eq(streamingAccountsTable.userId, user.id));
+  res.json(accounts);
+});
+
+router.post("/streaming-accounts", requireAuth, async (req, res): Promise<void> => {
+  const user = req.user!;
+  const { platform, username } = req.body as { platform?: string; username?: string };
+
+  if (!platform || !(STREAMING_PLATFORMS as readonly string[]).includes(platform)) {
+    res.status(400).json({ error: "Invalid platform", valid: STREAMING_PLATFORMS });
+    return;
+  }
+  if (!username || username.trim().length < 1 || username.trim().length > 64) {
+    res.status(400).json({ error: "Username must be 1–64 characters" });
+    return;
+  }
+
+  await db.delete(streamingAccountsTable)
+    .where(and(eq(streamingAccountsTable.userId, user.id), eq(streamingAccountsTable.platform, platform)));
+
+  const [account] = await db.insert(streamingAccountsTable).values({
+    userId: user.id,
+    platform,
+    username: username.trim(),
+  }).returning({ platform: streamingAccountsTable.platform, username: streamingAccountsTable.username });
+
+  res.status(201).json({ success: true, account });
+});
+
+router.delete("/streaming-accounts/:platform", requireAuth, async (req, res): Promise<void> => {
+  const user = req.user!;
+  const { platform } = req.params;
+
+  await db.delete(streamingAccountsTable)
+    .where(and(eq(streamingAccountsTable.userId, user.id), eq(streamingAccountsTable.platform, platform)));
+
+  res.json({ success: true });
 });
 
 export default router;

@@ -52,6 +52,22 @@ export type QuestEntry = {
   createdAt: string;
 };
 
+export type StreamingAccount = {
+  platform: string;
+  username: string;
+};
+
+export const STREAMING_PLATFORM_META: Record<
+  string,
+  { label: string; color: string; bg: string; border: string; emoji: string; urlTemplate: string }
+> = {
+  twitch:   { label: "Twitch",           color: "#9146FF", bg: "rgba(145,70,255,0.12)", border: "rgba(145,70,255,0.3)",  emoji: "🎮", urlTemplate: "https://twitch.tv/{username}" },
+  youtube:  { label: "YouTube Gaming",   color: "#FF0000", bg: "rgba(255,0,0,0.10)",    border: "rgba(255,0,0,0.28)",    emoji: "▶️", urlTemplate: "https://youtube.com/@{username}" },
+  kick:     { label: "Kick",             color: "#53FC18", bg: "rgba(83,252,24,0.10)",  border: "rgba(83,252,24,0.28)",  emoji: "🟢", urlTemplate: "https://kick.com/{username}" },
+  facebook: { label: "Facebook Gaming",  color: "#1877F2", bg: "rgba(24,119,242,0.10)", border: "rgba(24,119,242,0.28)", emoji: "🎯", urlTemplate: "https://fb.gg/{username}" },
+  tiktok:   { label: "TikTok Live",      color: "#EE1D52", bg: "rgba(238,29,82,0.10)",  border: "rgba(238,29,82,0.28)",  emoji: "🎵", urlTemplate: "https://tiktok.com/@{username}" },
+};
+
 export type UserProfile = {
   id: number;
   name: string;
@@ -69,6 +85,7 @@ export type UserProfile = {
   sessionsAsGamer: { requestId: number; gameName: string | null; platform?: string | null; createdAt: string | null }[];
   purchasedItems: string[];
   questEntries: QuestEntry[];
+  streamingAccounts?: StreamingAccount[];
 };
 
 export async function apiFetch<T = any>(url: string, opts?: RequestInit): Promise<T> {
@@ -276,6 +293,37 @@ export function useUserProfile(userId: number | null) {
     queryKey: userId ? bidKeys.userProfile(userId) : ["user-profile", null],
     queryFn: () => apiFetch(`${BASE}/users/${userId}`),
     enabled: !!userId,
+  });
+}
+
+export function useMyStreamingAccounts() {
+  return useQuery<StreamingAccount[]>({
+    queryKey: ["streaming-accounts"],
+    queryFn: () => apiFetch(`${BASE}/streaming-accounts`),
+  });
+}
+
+export function useConnectStreaming() {
+  const qc = useQueryClient();
+  return useMutation<any, any, { platform: string; username: string }>({
+    mutationFn: (body) =>
+      apiFetch(`${BASE}/streaming-accounts`, { method: "POST", body: JSON.stringify(body) }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["streaming-accounts"] });
+      qc.invalidateQueries({ queryKey: ["user-profile"] });
+    },
+  });
+}
+
+export function useDisconnectStreaming() {
+  const qc = useQueryClient();
+  return useMutation<any, any, string>({
+    mutationFn: (platform) =>
+      apiFetch(`${BASE}/streaming-accounts/${platform}`, { method: "DELETE" }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["streaming-accounts"] });
+      qc.invalidateQueries({ queryKey: ["user-profile"] });
+    },
   });
 }
 

@@ -3,6 +3,8 @@ import { useAuth } from "@/lib/auth";
 import {
   useUserProfile, useUpdateProfile, useShopItems, usePurchaseItem,
   useMyQuestEntries, useAddQuestEntry, useDeleteQuestEntry, useVerifyId,
+  useMyStreamingAccounts, useConnectStreaming, useDisconnectStreaming,
+  STREAMING_PLATFORM_META,
   type ShopItem, type QuestEntry,
 } from "@/lib/bids-api";
 import { VerifiedBadge } from "@/components/verified-badge";
@@ -151,6 +153,209 @@ function GamerRulesCard() {
           </div>
         </div>
       )}
+    </Card>
+  );
+}
+
+/* ── STREAMING ACCOUNTS SECTION ─────────────────────────────── */
+const PLATFORM_ORDER = ["twitch", "youtube", "kick", "facebook", "tiktok"] as const;
+
+function StreamingAccountsSection() {
+  const { data: accounts = [], isLoading } = useMyStreamingAccounts();
+  const connect = useConnectStreaming();
+  const disconnect = useDisconnectStreaming();
+  const { toast } = useToast();
+
+  const [connecting, setConnecting] = useState<string | null>(null);
+  const [inputVal, setInputVal] = useState("");
+
+  const connectedMap = Object.fromEntries(accounts.map((a) => [a.platform, a.username]));
+
+  async function handleConnect(platform: string) {
+    const handle = inputVal.trim().replace(/^@/, "");
+    if (!handle) return;
+    try {
+      await connect.mutateAsync({ platform, username: handle });
+      toast({ title: `${STREAMING_PLATFORM_META[platform].label} connected!`, description: `@${handle}` });
+      setConnecting(null);
+      setInputVal("");
+    } catch {
+      toast({ title: "Failed to connect", description: "Please try again.", variant: "destructive" });
+    }
+  }
+
+  async function handleDisconnect(platform: string) {
+    try {
+      await disconnect.mutateAsync(platform);
+      toast({ title: `${STREAMING_PLATFORM_META[platform].label} disconnected` });
+    } catch {
+      toast({ title: "Failed to disconnect", variant: "destructive" });
+    }
+  }
+
+  const connectedCount = accounts.length;
+
+  return (
+    <Card className="border-border bg-card/40 overflow-hidden">
+      <CardHeader className="pb-3">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-xs uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+            <Zap className="h-4 w-4 text-purple-400" /> Connected Streaming Platforms
+          </CardTitle>
+          {connectedCount > 0 && (
+            <span className="text-[10px] font-bold text-green-400 bg-green-500/10 border border-green-500/20 px-2 py-0.5 rounded-full">
+              {connectedCount} connected
+            </span>
+          )}
+        </div>
+
+        {/* Connected badges strip */}
+        {connectedCount > 0 && (
+          <div className="flex flex-wrap gap-2 pt-1">
+            {accounts.map((a) => {
+              const meta = STREAMING_PLATFORM_META[a.platform];
+              if (!meta) return null;
+              return (
+                <a
+                  key={a.platform}
+                  href={meta.urlTemplate.replace("{username}", a.username)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold transition-opacity hover:opacity-80"
+                  style={{ background: meta.bg, border: `1px solid ${meta.border}`, color: meta.color }}
+                >
+                  <span className="text-xs">{meta.emoji}</span>
+                  {meta.label}
+                  <span className="opacity-70">@{a.username}</span>
+                </a>
+              );
+            })}
+          </div>
+        )}
+      </CardHeader>
+
+      <CardContent className="space-y-2.5">
+        {isLoading ? (
+          <div className="space-y-2">
+            {[1, 2, 3].map((i) => <div key={i} className="h-14 rounded-xl bg-border/20 animate-pulse" />)}
+          </div>
+        ) : (
+          PLATFORM_ORDER.map((platform) => {
+            const meta = STREAMING_PLATFORM_META[platform];
+            const connectedUsername = connectedMap[platform];
+            const isConnected = !!connectedUsername;
+            const isThisConnecting = connecting === platform;
+
+            return (
+              <div
+                key={platform}
+                className="rounded-xl border transition-all"
+                style={{
+                  background: isConnected ? meta.bg : "rgba(255,255,255,0.03)",
+                  borderColor: isConnected ? meta.border : "rgba(255,255,255,0.08)",
+                }}
+              >
+                <div className="flex items-center gap-3 px-3.5 py-3">
+                  {/* Platform icon circle */}
+                  <div
+                    className="w-9 h-9 rounded-xl flex items-center justify-center text-base shrink-0 font-black"
+                    style={{
+                      background: isConnected ? meta.bg : "rgba(255,255,255,0.05)",
+                      border: `1.5px solid ${isConnected ? meta.border : "rgba(255,255,255,0.1)"}`,
+                    }}
+                  >
+                    <span>{meta.emoji}</span>
+                  </div>
+
+                  {/* Label + username */}
+                  <div className="flex-1 min-w-0">
+                    <div
+                      className="text-xs font-bold"
+                      style={{ color: isConnected ? meta.color : "rgba(255,255,255,0.7)" }}
+                    >
+                      {meta.label}
+                    </div>
+                    {isConnected ? (
+                      <div className="flex items-center gap-1.5 mt-0.5">
+                        <CheckCircle2 className="h-3 w-3 text-green-400 shrink-0" />
+                        <span className="text-[11px] text-green-300 font-mono truncate">@{connectedUsername}</span>
+                      </div>
+                    ) : (
+                      <div className="text-[11px] text-muted-foreground/50 mt-0.5">Not connected</div>
+                    )}
+                  </div>
+
+                  {/* Action button */}
+                  {isConnected ? (
+                    <button
+                      onClick={() => handleDisconnect(platform)}
+                      disabled={disconnect.isPending}
+                      className="shrink-0 text-[10px] font-bold uppercase tracking-wide px-2.5 py-1.5 rounded-lg border border-red-500/25 text-red-400/70 hover:text-red-300 hover:bg-red-500/10 hover:border-red-500/40 transition-all"
+                    >
+                      Disconnect
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => {
+                        setConnecting(isThisConnecting ? null : platform);
+                        setInputVal("");
+                      }}
+                      className="shrink-0 text-[10px] font-bold uppercase tracking-wide px-2.5 py-1.5 rounded-lg transition-all"
+                      style={{
+                        background: isThisConnecting ? "rgba(255,255,255,0.08)" : meta.bg,
+                        border: `1px solid ${isThisConnecting ? "rgba(255,255,255,0.15)" : meta.border}`,
+                        color: isThisConnecting ? "rgba(255,255,255,0.7)" : meta.color,
+                      }}
+                    >
+                      {isThisConnecting ? "Cancel" : "Connect"}
+                    </button>
+                  )}
+                </div>
+
+                {/* Inline connect input */}
+                {isThisConnecting && (
+                  <div
+                    className="px-3.5 pb-3.5 flex gap-2 border-t"
+                    style={{ borderColor: "rgba(255,255,255,0.06)" }}
+                  >
+                    <div className="relative flex-1 mt-3">
+                      <span
+                        className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-bold"
+                        style={{ color: meta.color }}
+                      >
+                        @
+                      </span>
+                      <input
+                        type="text"
+                        placeholder={`Your ${meta.label} username`}
+                        value={inputVal}
+                        onChange={(e) => setInputVal(e.target.value)}
+                        onKeyDown={(e) => e.key === "Enter" && handleConnect(platform)}
+                        maxLength={64}
+                        className="w-full pl-7 pr-3 py-2 rounded-lg text-sm bg-background/60 border border-border/40 text-foreground placeholder:text-muted-foreground/40 focus:outline-none transition-colors"
+                        style={{ focusBorderColor: meta.color } as React.CSSProperties}
+                        autoFocus
+                      />
+                    </div>
+                    <button
+                      onClick={() => handleConnect(platform)}
+                      disabled={!inputVal.trim() || connect.isPending}
+                      className="mt-3 px-3 py-2 rounded-lg text-xs font-bold text-white disabled:opacity-40 transition-all hover:brightness-110 shrink-0"
+                      style={{ background: `linear-gradient(135deg, ${meta.color}, ${meta.color}cc)` }}
+                    >
+                      {connect.isPending ? "…" : "Save"}
+                    </button>
+                  </div>
+                )}
+              </div>
+            );
+          })
+        )}
+
+        <p className="text-[10px] text-muted-foreground/40 leading-relaxed pt-1">
+          Connected platforms appear on your public profile so hirers know you stream. Links open your channel directly.
+        </p>
+      </CardContent>
     </Card>
   );
 }
@@ -805,6 +1010,22 @@ export default function Profile() {
                     {profile.avgRating.toFixed(1)}/10 ({profile.reviewCount})
                   </span>
                 )}
+                {/* Streaming platform micro-badges */}
+                {(profile?.streamingAccounts ?? []).map((sa) => {
+                  const meta = STREAMING_PLATFORM_META[sa.platform];
+                  if (!meta) return null;
+                  return (
+                    <span
+                      key={sa.platform}
+                      className="inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full"
+                      style={{ background: meta.bg, border: `1px solid ${meta.border}`, color: meta.color }}
+                      title={`${meta.label}: @${sa.username}`}
+                    >
+                      <span>{meta.emoji}</span>
+                      <span className="hidden sm:inline">@{sa.username}</span>
+                    </span>
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -884,6 +1105,9 @@ export default function Profile() {
 
       {/* MY QUEST */}
       <QuestSection />
+
+      {/* CONNECTED STREAMING PLATFORMS */}
+      <StreamingAccountsSection />
 
       {/* GAMER CODE OF CONDUCT */}
       <GamerRulesCard />
