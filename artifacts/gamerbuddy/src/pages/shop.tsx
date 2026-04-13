@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth";
-import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   ShoppingCart, Key, Zap, X, CheckCircle2, Lock,
-  CreditCard, Smartphone, Copy, Clock, Wifi, ChevronLeft,
+  CreditCard, Smartphone, Copy, Wifi, ChevronLeft,
+  AlertCircle, ShieldCheck, BadgeCheck, Eye, EyeOff,
 } from "lucide-react";
 
 const GAME_KEYS = [
@@ -24,56 +24,399 @@ type ModalStep = "method" | "upi" | "visa" | "processing" | "done";
 
 const UPI_ID = "gamerbuddy@upi";
 
-const TEST_CARDS = [
-  { number: "4111 1111 1111 1111", label: "Visa (success)" },
-  { number: "4000 0000 0000 9995", label: "Decline test" },
+const UPI_APPS = [
+  { name: "GPay", bg: "#4285F4", letter: "G" },
+  { name: "PhonePe", bg: "#5f259f", letter: "P" },
+  { name: "Paytm", bg: "#00b9f1", letter: "P" },
+  { name: "BHIM", bg: "#ff6b35", letter: "B" },
 ];
 
-function UPIQRGrid() {
-  const cells = React.useMemo(() =>
-    Array.from({ length: 64 }).map(() => Math.random() > 0.55), []);
+function ShopQRCode({ size = 120 }: { size?: number }) {
+  const cells = React.useMemo(() => {
+    const g: boolean[][] = Array.from({ length: 21 }, () =>
+      Array.from({ length: 21 }, () => Math.random() > 0.48)
+    );
+    const finder = (r: number, c: number) => {
+      for (let dr = 0; dr < 7; dr++)
+        for (let dc = 0; dc < 7; dc++) {
+          g[r + dr][c + dc] = false;
+          if (dr === 0 || dr === 6 || dc === 0 || dc === 6) g[r + dr][c + dc] = true;
+          if (dr >= 2 && dr <= 4 && dc >= 2 && dc <= 4) g[r + dr][c + dc] = true;
+        }
+    };
+    finder(0, 0); finder(0, 14); finder(14, 0);
+    for (let i = 8; i <= 12; i++) { g[6][i] = i % 2 === 0; g[i][6] = i % 2 === 0; }
+    g[9][9] = true; g[10][10] = true; g[9][10] = true; g[10][9] = true;
+    return g;
+  }, []);
+
+  const cell = size / 21;
   return (
-    <div className="w-40 h-40 rounded-xl border-2 border-primary/40 relative overflow-hidden flex items-center justify-center"
-      style={{ boxShadow: "0 0 20px rgba(168,85,247,0.2)" }}>
-      <div className="absolute inset-0 grid grid-cols-8 gap-0">
-        {cells.map((filled, i) => (
-          <div key={i} className="border border-primary/5"
-            style={{ background: filled ? "rgba(168,85,247,0.8)" : "transparent" }} />
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="rounded-xl">
+      <rect width={size} height={size} fill="#0a0a0f" rx="10" />
+      {cells.map((row, r) =>
+        row.map((filled, c) =>
+          filled ? (
+            <rect key={`${r}-${c}`} x={c * cell + 0.5} y={r * cell + 0.5} width={cell - 1} height={cell - 1}
+              fill={(r < 7 && c < 7) || (r < 7 && c > 13) || (r > 13 && c < 7) ? "#a855f7" : "rgba(168,85,247,0.75)"}
+              rx="0.8" />
+          ) : null
+        )
+      )}
+    </svg>
+  );
+}
+
+const PROC_STAGES: Record<PayMethod, string[]> = {
+  upi: ["Connecting to UPI network…", "Verifying transaction…", "Generating your key…"],
+  visa: ["Contacting your bank…", "Authorising payment…", "Generating your key…"],
+};
+
+function ShopProcessing({ method }: { method: PayMethod }) {
+  const stages = PROC_STAGES[method];
+  const [stage, setStage] = useState(0);
+
+  useEffect(() => {
+    const t1 = setTimeout(() => setStage(1), 600);
+    const t2 = setTimeout(() => setStage(2), 1300);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+  }, []);
+
+  return (
+    <div className="py-10 flex flex-col items-center gap-6">
+      <div className="relative w-20 h-20">
+        <div className="absolute inset-0 rounded-full border-4 border-primary/10 animate-ping" style={{ animationDuration: "1.5s" }} />
+        <div className="absolute inset-0 rounded-full border-4 border-primary/20" />
+        <div className="absolute inset-0 rounded-full border-4 border-t-primary animate-spin" />
+        <div className="absolute inset-0 flex items-center justify-center">
+          {method === "upi" ? <Smartphone className="h-8 w-8 text-primary" /> : <CreditCard className="h-8 w-8 text-primary" />}
+        </div>
+      </div>
+
+      <div className="text-center">
+        <div className="font-extrabold text-white text-base">{stages[stage]}</div>
+        <div className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground mt-1.5">
+          <Wifi className="h-3 w-3 text-green-400" /> End-to-end encrypted
+        </div>
+      </div>
+
+      <div className="flex justify-center gap-2">
+        {stages.map((_, i) => (
+          <div key={i} className={`rounded-full transition-all duration-500 ${i <= stage ? "bg-primary w-5 h-2" : "bg-primary/20 w-2 h-2"}`} />
         ))}
       </div>
-      <div className="relative z-10 w-10 h-10 bg-card border border-border rounded-lg flex items-center justify-center">
-        <Key className="h-5 w-5 text-primary" />
-      </div>
+
+      <div className="text-[10px] text-muted-foreground/50 uppercase tracking-widest">Do not close this window</div>
     </div>
   );
 }
 
-function ProcessingSpinner({ method }: { method: PayMethod }) {
-  const [dots, setDots] = useState(".");
-  useEffect(() => {
-    const t = setInterval(() => setDots((d) => d.length >= 3 ? "." : d + "."), 500);
-    return () => clearInterval(t);
-  }, []);
+function UPIShopPanel({ price, onPay }: { price: number; onPay: () => void }) {
+  const [copied, setCopied] = useState(false);
+  const copyId = () => {
+    navigator.clipboard.writeText(UPI_ID);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   return (
-    <div className="py-8 flex flex-col items-center gap-5">
-      <div className="relative w-16 h-16">
-        <div className="absolute inset-0 rounded-full border-4 border-primary/20" />
-        <div className="absolute inset-0 rounded-full border-4 border-t-primary animate-spin" />
-        {method === "upi"
-          ? <Smartphone className="absolute inset-0 m-auto h-7 w-7 text-primary" />
-          : <CreditCard className="absolute inset-0 m-auto h-7 w-7 text-primary" />}
+    <div className="space-y-4">
+      {/* App row */}
+      <div className="flex items-center justify-center gap-2.5">
+        {UPI_APPS.map((a) => (
+          <div key={a.name} className="flex flex-col items-center gap-1">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white font-black text-xs shadow-md"
+              style={{ background: a.bg }}>
+              {a.letter}
+            </div>
+            <span className="text-[8px] text-muted-foreground">{a.name}</span>
+          </div>
+        ))}
       </div>
-      <div className="text-center">
-        <div className="font-bold text-white">
-          {method === "upi" ? "Verifying UPI" : "Processing Card"}{dots}
+
+      {/* QR + details */}
+      <div className="flex gap-3 items-start">
+        <div className="shrink-0 rounded-xl p-1.5 border border-primary/25"
+          style={{ background: "#0a0a0f", boxShadow: "0 0 16px rgba(168,85,247,0.15)" }}>
+          <ShopQRCode size={110} />
+          <div className="text-center mt-1">
+            <div className="text-[8px] text-primary/70 font-bold uppercase tracking-widest">Scan to pay</div>
+          </div>
         </div>
-        <div className="text-xs text-muted-foreground mt-1 flex items-center justify-center gap-1.5">
-          <Wifi className="h-3 w-3" /> Secure encrypted connection
+
+        <div className="flex-1 space-y-2.5">
+          <div className="rounded-xl border border-border bg-background/50 px-3 py-2 space-y-1">
+            <div className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">Pay to</div>
+            <div className="flex items-center gap-1.5">
+              <span className="font-mono text-xs font-bold text-white">{UPI_ID}</span>
+              <button onClick={copyId} className={`transition-colors ${copied ? "text-green-400" : "text-muted-foreground hover:text-primary"}`}>
+                {copied ? <BadgeCheck className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+              </button>
+            </div>
+            {copied && <div className="text-[9px] text-green-400 font-semibold">Copied!</div>}
+          </div>
+
+          <div className="rounded-xl border border-primary/25 bg-primary/5 px-3 py-2">
+            <div className="text-[10px] text-muted-foreground">Amount</div>
+            <div className="text-xl font-black text-white">${price.toFixed(2)}</div>
+          </div>
+
+          <div className="flex items-center gap-1.5 rounded-lg bg-green-500/5 border border-green-500/20 px-2.5 py-1.5">
+            <div className="h-1.5 w-1.5 rounded-full bg-green-400 animate-pulse shrink-0" />
+            <span className="text-[10px] text-green-400 font-semibold">Awaiting payment</span>
+          </div>
         </div>
       </div>
-      <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-        <Clock className="h-3.5 w-3.5" /> This may take a few seconds
+
+      {/* Steps */}
+      <div className="space-y-1.5">
+        {["Open any UPI app", `Scan QR or enter ${UPI_ID}`, "Enter amount & confirm", "Click the button below"].map((s, i) => (
+          <div key={i} className="flex items-center gap-2.5">
+            <div className="w-4 h-4 rounded-full bg-primary/20 border border-primary/40 flex items-center justify-center text-[9px] font-black text-primary shrink-0">{i + 1}</div>
+            <span className="text-[11px] text-muted-foreground">{s}</span>
+          </div>
+        ))}
       </div>
+
+      <div className="flex items-center gap-2 text-[10px] text-muted-foreground bg-background/60 rounded-lg border border-border px-3 py-2">
+        <Lock className="h-3 w-3 text-green-500 shrink-0" />
+        Mock demo — click below to simulate a successful UPI payment.
+      </div>
+
+      <button onClick={onPay}
+        className="w-full relative overflow-hidden rounded-xl py-3.5 font-extrabold text-sm uppercase tracking-widest bg-primary text-white hover:bg-primary/90 shadow-[0_0_20px_rgba(168,85,247,0.3)] transition-all">
+        <div className="flex items-center justify-center gap-2">
+          <Smartphone className="h-4 w-4" />
+          I've Completed UPI Payment · ${price.toFixed(2)}
+        </div>
+      </button>
+    </div>
+  );
+}
+
+function VisaShopPanel({ price, onPay }: { price: number; onPay: (name: string) => void }) {
+  const [cardNumber, setCardNumber] = useState("4111 1111 1111 1111");
+  const [cardName, setCardName] = useState("");
+  const [expiry, setExpiry] = useState("12/27");
+  const [cvv, setCvv] = useState("123");
+  const [showCvv, setShowCvv] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
+
+  const formatCard = (v: string) => v.replace(/\D/g, "").slice(0, 16).replace(/(.{4})/g, "$1 ").trim();
+  const formatExpiry = (v: string) => { const d = v.replace(/\D/g, "").slice(0, 4); return d.length > 2 ? `${d.slice(0, 2)}/${d.slice(2)}` : d; };
+
+  const validate = () => {
+    const e: Record<string, string> = {};
+    if (cardNumber.replace(/\s/g, "").length < 16) e.cardNumber = "Enter a valid 16-digit number";
+    if (!cardName.trim()) e.cardName = "Name is required";
+    if (cvv.length < 3) e.cvv = "CVV must be 3–4 digits";
+    setErrors(e);
+    return Object.keys(e).length === 0;
+  };
+
+  const handlePay = () => {
+    setTouched({ cardNumber: true, cardName: true, expiry: true, cvv: true });
+    if (validate()) onPay(cardName);
+  };
+
+  const isOk = (f: string) => touched[f] && !errors[f];
+  const hasErr = (f: string) => touched[f] && errors[f];
+
+  const FieldIcon = ({ field }: { field: string }) =>
+    isOk(field) ? <CheckCircle2 className="h-3.5 w-3.5 text-green-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+      : hasErr(field) ? <AlertCircle className="h-3.5 w-3.5 text-red-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+        : null;
+
+  return (
+    <div className="space-y-3.5">
+      {/* Card preview */}
+      <div className="relative rounded-xl overflow-hidden p-4 text-white select-none"
+        style={{ background: "linear-gradient(135deg, #3b1d8e 0%, #1a0a42 40%, #0d1b3e 100%)", boxShadow: "0 12px 40px rgba(0,0,0,0.4), 0 0 24px rgba(168,85,247,0.1)", minHeight: 140 }}>
+        <div className="absolute inset-0 opacity-15"
+          style={{ backgroundImage: "linear-gradient(115deg, transparent 40%, rgba(255,255,255,0.12) 50%, transparent 60%)" }} />
+        <div className="relative z-10 h-full flex flex-col justify-between gap-3">
+          <div className="flex justify-between items-start">
+            {/* Chip */}
+            <div className="w-8 h-5 rounded border border-yellow-500/40"
+              style={{ background: "linear-gradient(135deg, #c9a227 0%, #f5d97e 40%, #b8891a 100%)" }}>
+              <div className="grid grid-cols-2 h-full p-0.5 gap-0.5">
+                {[...Array(4)].map((_, i) => <div key={i} className="rounded-[1px]" style={{ background: "rgba(0,0,0,0.2)" }} />)}
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="flex flex-col items-center gap-px">
+                {[12, 9, 7, 4].map((w, i) => <div key={i} className="rounded-full bg-white/40" style={{ width: w, height: 1.2 }} />)}
+              </div>
+              <div className="font-black text-xl italic tracking-widest" style={{ fontFamily: "serif" }}>VISA</div>
+            </div>
+          </div>
+          <div>
+            <div className="font-mono text-base tracking-[0.18em] mb-2.5 text-white/90">
+              {formatCard(cardNumber.replace(/\s/g, "")) || "•••• •••• •••• ••••"}
+            </div>
+            <div className="flex justify-between items-end text-xs">
+              <div>
+                <div className="text-[8px] text-purple-300/70 uppercase tracking-widest">Holder</div>
+                <div className="font-semibold">{cardName || "YOUR NAME"}</div>
+              </div>
+              <div>
+                <div className="text-[8px] text-purple-300/70 uppercase tracking-widest">Expires</div>
+                <div className="font-semibold">{expiry || "MM/YY"}</div>
+              </div>
+              <div className="bg-white/10 border border-white/15 rounded-lg px-2.5 py-1">
+                <div className="font-black text-sm">${price.toFixed(2)}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Test card hint */}
+      <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 px-3 py-2.5 flex items-start gap-2">
+        <AlertCircle className="h-3.5 w-3.5 text-amber-400 shrink-0 mt-0.5" />
+        <div>
+          <div className="text-[10px] font-bold text-amber-400 uppercase tracking-widest mb-0.5">Demo Test Card</div>
+          <button onClick={() => { setCardNumber("4111 1111 1111 1111"); setTouched({}); }}
+            className="font-mono text-[11px] text-white hover:text-amber-400 transition-colors">
+            4111 1111 1111 1111
+          </button>
+          <span className="text-[11px] text-muted-foreground ml-2">· any future expiry · any 3-digit CVV</span>
+        </div>
+      </div>
+
+      {/* Fields */}
+      <div className="space-y-3">
+        <div className="space-y-1">
+          <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Card Number</Label>
+          <div className="relative">
+            <Input value={cardNumber} onChange={(e) => { setCardNumber(formatCard(e.target.value)); setTouched(t => ({ ...t, cardNumber: true })); }}
+              onBlur={() => { setTouched(t => ({ ...t, cardNumber: true })); validate(); }}
+              className={`bg-background/60 font-mono tracking-wider text-sm pr-9 ${hasErr("cardNumber") ? "border-red-500/50" : isOk("cardNumber") ? "border-green-500/40" : ""}`}
+              maxLength={19} placeholder="1234 5678 9012 3456" autoComplete="cc-number" />
+            <FieldIcon field="cardNumber" />
+          </div>
+          {hasErr("cardNumber") && <p className="text-[10px] text-red-400">{errors.cardNumber}</p>}
+        </div>
+
+        <div className="space-y-1">
+          <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Cardholder Name</Label>
+          <div className="relative">
+            <Input value={cardName} onChange={(e) => { setCardName(e.target.value); setTouched(t => ({ ...t, cardName: true })); }}
+              onBlur={() => { setTouched(t => ({ ...t, cardName: true })); validate(); }}
+              className={`bg-background/60 text-sm pr-9 ${hasErr("cardName") ? "border-red-500/50" : isOk("cardName") ? "border-green-500/40" : ""}`}
+              placeholder="As printed on card" autoComplete="cc-name" />
+            <FieldIcon field="cardName" />
+          </div>
+          {hasErr("cardName") && <p className="text-[10px] text-red-400">{errors.cardName}</p>}
+        </div>
+
+        <div className="grid grid-cols-2 gap-2.5">
+          <div className="space-y-1">
+            <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Expiry</Label>
+            <Input value={expiry} onChange={(e) => setExpiry(formatExpiry(e.target.value))}
+              className="bg-background/60 font-mono text-sm" maxLength={5} placeholder="MM/YY" autoComplete="cc-exp" />
+          </div>
+          <div className="space-y-1">
+            <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">CVV</Label>
+            <div className="relative">
+              <Input value={cvv} onChange={(e) => { setCvv(e.target.value.replace(/\D/g, "").slice(0, 4)); setTouched(t => ({ ...t, cvv: true })); }}
+                onBlur={() => { setTouched(t => ({ ...t, cvv: true })); validate(); }}
+                className={`bg-background/60 font-mono text-sm pr-9 ${hasErr("cvv") ? "border-red-500/50" : isOk("cvv") ? "border-green-500/40" : ""}`}
+                maxLength={4} type={showCvv ? "text" : "password"} placeholder="•••" autoComplete="cc-csc" />
+              <button type="button" onClick={() => setShowCvv(!showCvv)}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-white transition-colors">
+                {showCvv ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+              </button>
+            </div>
+            {hasErr("cvv") && <p className="text-[10px] text-red-400">{errors.cvv}</p>}
+          </div>
+        </div>
+      </div>
+
+      <div className="flex items-center justify-center gap-1.5 text-[10px] text-muted-foreground/60">
+        <Lock className="h-3 w-3 text-green-500" />
+        256-bit SSL · PCI-DSS · Mock demo — no real card charged
+      </div>
+
+      <button onClick={handlePay}
+        className="w-full relative overflow-hidden rounded-xl py-3.5 font-extrabold text-sm uppercase tracking-widest bg-primary text-white hover:bg-primary/90 shadow-[0_0_20px_rgba(168,85,247,0.3)] transition-all">
+        <div className="flex items-center justify-center gap-2">
+          <Lock className="h-4 w-4" />
+          Pay ${price.toFixed(2)} Securely
+        </div>
+      </button>
+    </div>
+  );
+}
+
+function ShopSuccess({ item, payMethod, cardName, onClose }: {
+  item: typeof GAME_KEYS[0];
+  payMethod: PayMethod;
+  cardName: string;
+  onClose: () => void;
+}) {
+  const [copied, setCopied] = useState(false);
+  const fakeKey = React.useMemo(() =>
+    `GB-${Math.random().toString(36).substring(2, 8).toUpperCase()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`, []);
+  const txnRef = React.useMemo(() => "GBY" + Math.random().toString(36).substring(2, 10).toUpperCase(), []);
+  const now = new Date();
+
+  const copyKey = () => {
+    navigator.clipboard.writeText(fakeKey);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2500);
+  };
+
+  return (
+    <div className="p-5 space-y-5 text-center">
+      {/* Success animation */}
+      <div className="flex justify-center">
+        <div className="relative w-16 h-16 rounded-full flex items-center justify-center"
+          style={{ background: "radial-gradient(circle, rgba(34,197,94,0.15) 0%, transparent 70%)", border: "2px solid rgba(34,197,94,0.4)" }}>
+          <CheckCircle2 className="h-9 w-9 text-green-400" strokeWidth={1.5} />
+        </div>
+      </div>
+
+      <div>
+        <div className="text-[10px] text-green-400 font-bold uppercase tracking-widest mb-1">Payment Successful</div>
+        <div className="text-xl font-extrabold text-white">{item.title}</div>
+        <div className="text-2xl font-black text-white mt-0.5">${item.price.toFixed(2)}</div>
+        <div className="text-xs text-muted-foreground mt-1">
+          paid via {payMethod === "upi" ? `UPI · ${UPI_ID}` : `Visa · ${cardName || "card"}`}
+        </div>
+      </div>
+
+      {/* Key box */}
+      <div className="rounded-xl border border-secondary/30 bg-secondary/5 p-4 space-y-2.5">
+        <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">Your Game Key</div>
+        <div className="font-mono text-lg font-black text-secondary tracking-widest">{fakeKey}</div>
+        <button onClick={copyKey}
+          className={`flex items-center gap-1.5 text-xs mx-auto transition-colors ${copied ? "text-green-400" : "text-muted-foreground hover:text-secondary"}`}>
+          {copied ? <BadgeCheck className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+          {copied ? "Copied to clipboard!" : "Copy Key"}
+        </button>
+        <div className="text-xs text-muted-foreground">Redeem on {item.platform} · Single-use only</div>
+      </div>
+
+      {/* Mini receipt */}
+      <div className="rounded-xl border border-border/40 bg-background/30 divide-y divide-border/40 text-left">
+        {[
+          { label: "Transaction Ref", value: txnRef, mono: true },
+          { label: "Date", value: `${now.toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" })} · ${now.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}` },
+        ].map(({ label, value, mono }) => (
+          <div key={label} className="flex justify-between px-3 py-2 text-xs">
+            <span className="text-muted-foreground">{label}</span>
+            <span className={`${mono ? "font-mono text-primary" : "text-white"}`}>{value}</span>
+          </div>
+        ))}
+      </div>
+
+      <div className="text-[10px] text-muted-foreground/60">Demo — no real purchase or charge was made.</div>
+
+      <Button className="w-full bg-primary font-bold uppercase tracking-wider shadow-[0_0_16px_rgba(168,85,247,0.25)]" onClick={onClose}>
+        Done
+      </Button>
     </div>
   );
 }
@@ -81,268 +424,121 @@ function ProcessingSpinner({ method }: { method: PayMethod }) {
 function CheckoutModal({ item, onClose }: { item: typeof GAME_KEYS[0]; onClose: () => void }) {
   const [step, setStep] = useState<ModalStep>("method");
   const [payMethod, setPayMethod] = useState<PayMethod>("upi");
+  const [purchasedCardName, setPurchasedCardName] = useState("");
 
-  const [cardNumber, setCardNumber] = useState("4111 1111 1111 1111");
-  const [cardName, setCardName] = useState("");
-  const [expiry, setExpiry] = useState("12/27");
-  const [cvv, setCvv] = useState("123");
-  const { toast } = useToast();
-
-  const formatCard = (val: string) =>
-    val.replace(/\D/g, "").slice(0, 16).replace(/(.{4})/g, "$1 ").trim();
-  const formatExpiry = (val: string) => {
-    const d = val.replace(/\D/g, "").slice(0, 4);
-    return d.length > 2 ? `${d.slice(0, 2)}/${d.slice(2)}` : d;
-  };
-
-  const fakeKey = React.useMemo(() =>
-    `GB-${Math.random().toString(36).substring(2, 8).toUpperCase()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`, []);
-
-  const simulatePurchase = (method: PayMethod) => {
+  const simulatePurchase = (method: PayMethod, name = "") => {
     setPayMethod(method);
+    setPurchasedCardName(name);
     setStep("processing");
     setTimeout(() => setStep("done"), method === "upi" ? 1800 : 2200);
   };
 
-  const handleUPIPay = () => simulatePurchase("upi");
-
-  const handleCardPay = () => {
-    if (!cardName.trim()) {
-      toast({ title: "Missing Info", description: "Enter the cardholder name.", variant: "destructive" });
-      return;
-    }
-    simulatePurchase("visa");
+  const getTitle = () => {
+    if (step === "method") return "Choose Payment";
+    if (step === "upi") return "Pay via UPI";
+    if (step === "visa") return "Visa Debit Card";
+    if (step === "processing") return "Processing…";
+    return "Purchase Complete!";
   };
 
-  if (step === "done") {
-    return (
-      <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-        <div className="bg-card border border-border rounded-2xl w-full max-w-md p-6 space-y-5 shadow-2xl text-center">
-          <CheckCircle2 className="h-14 w-14 mx-auto text-green-400" />
-          <div>
-            <div className="text-xl font-extrabold uppercase text-white">Purchase Complete!</div>
-            <div className="text-sm text-muted-foreground mt-1">{item.title}</div>
-            <div className="text-xs text-muted-foreground mt-0.5">
-              paid via {payMethod === "upi" ? `UPI · ${UPI_ID}` : `Visa ···· ${cardNumber.replace(/\s/g, "").slice(-4)}`}
-            </div>
-          </div>
-          <div className="rounded-xl border border-secondary/30 bg-secondary/5 p-4 space-y-2">
-            <div className="text-xs uppercase tracking-widest text-muted-foreground font-bold">Your Game Key</div>
-            <div className="font-mono text-lg font-black text-secondary tracking-widest">{fakeKey}</div>
-            <div className="flex items-center justify-center gap-2">
-              <button
-                onClick={() => { navigator.clipboard.writeText(fakeKey); }}
-                className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-secondary transition-colors"
-              >
-                <Copy className="h-3.5 w-3.5" /> Copy Key
-              </button>
-            </div>
-            <p className="text-xs text-muted-foreground">Redeem on {item.platform}. Single-use only.</p>
-          </div>
-          <p className="text-xs text-muted-foreground">Demo — no real purchase or charge was made.</p>
-          <Button className="w-full bg-primary font-bold uppercase" onClick={onClose}>Done</Button>
-        </div>
-      </div>
-    );
-  }
-
-  if (step === "processing") {
-    return (
-      <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-        <div className="bg-card border border-border rounded-2xl w-full max-w-sm p-6 shadow-2xl">
-          <ProcessingSpinner method={payMethod} />
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
-      <div className="bg-card border border-border rounded-2xl w-full max-w-md shadow-2xl my-4">
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50 p-4 overflow-y-auto">
+      <div
+        className="w-full max-w-md rounded-2xl shadow-2xl my-4 overflow-hidden"
+        style={{ background: "linear-gradient(160deg, #0f0a24 0%, #08080f 100%)", border: "1px solid rgba(168,85,247,0.2)" }}
+      >
         {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-border">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-border/40">
           <div className="flex items-center gap-2.5">
             {(step === "upi" || step === "visa") && (
-              <button onClick={() => setStep("method")} className="text-muted-foreground hover:text-white mr-1">
-                <ChevronLeft className="h-5 w-5" />
+              <button onClick={() => setStep("method")} className="h-7 w-7 rounded-lg border border-border/60 flex items-center justify-center text-muted-foreground hover:text-white transition-colors mr-1">
+                <ChevronLeft className="h-4 w-4" />
               </button>
             )}
-            <ShoppingCart className="h-5 w-5 text-primary" />
-            <span className="font-bold text-white">
-              {step === "method" ? "Choose Payment" : step === "upi" ? "Pay via UPI" : "Visa Debit Card"}
-            </span>
+            <div className="h-7 w-7 rounded-lg bg-primary/20 border border-primary/30 flex items-center justify-center">
+              {step === "done" ? <CheckCircle2 className="h-4 w-4 text-green-400" /> : <ShoppingCart className="h-4 w-4 text-primary" />}
+            </div>
+            <span className="font-bold text-white text-sm">{getTitle()}</span>
           </div>
-          <button onClick={onClose} className="text-muted-foreground hover:text-white">
-            <X className="h-5 w-5" />
-          </button>
+          {step !== "processing" && (
+            <button onClick={onClose} className="h-7 w-7 rounded-lg border border-border/60 flex items-center justify-center text-muted-foreground hover:text-white transition-colors">
+              <X className="h-4 w-4" />
+            </button>
+          )}
         </div>
 
-        <div className="p-5 space-y-4">
-          {/* Item summary */}
-          <div className="rounded-xl border border-border bg-background/50 px-4 py-3 flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <span className="text-2xl">{item.icon}</span>
-              <div className="min-w-0">
-                <div className="font-bold text-white text-sm truncate">{item.title}</div>
-                <div className="text-xs text-muted-foreground">{item.platform}</div>
+        {/* Item summary (not on done/processing) */}
+        {step !== "done" && step !== "processing" && (
+          <div className="px-5 pt-4">
+            <div className="rounded-xl border border-border/50 bg-background/30 px-4 py-3 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">{item.icon}</span>
+                <div className="min-w-0">
+                  <div className="font-bold text-white text-sm truncate">{item.title}</div>
+                  <div className="text-[10px] text-muted-foreground">{item.platform}</div>
+                </div>
               </div>
+              <div className="text-xl font-black text-white shrink-0">${item.price.toFixed(2)}</div>
             </div>
-            <div className="text-xl font-black text-white shrink-0">${item.price.toFixed(2)}</div>
           </div>
+        )}
 
-          {/* Method selection */}
+        {/* Content */}
+        <div className="p-5">
+          {step === "processing" && <ShopProcessing method={payMethod} />}
+
+          {step === "done" && (
+            <ShopSuccess item={item} payMethod={payMethod} cardName={purchasedCardName} onClose={onClose} />
+          )}
+
           {step === "method" && (
-            <div className="space-y-3">
-              <div className="text-xs uppercase tracking-widest text-muted-foreground font-bold">Select payment method</div>
-              <button
-                onClick={() => setStep("upi")}
-                className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-background/40 hover:border-primary/50 hover:bg-primary/5 transition-all text-left group"
-              >
-                <div className="h-12 w-12 rounded-xl bg-primary/20 border border-primary/30 flex items-center justify-center shrink-0 group-hover:shadow-[0_0_16px_rgba(168,85,247,0.3)] transition-all">
-                  <Smartphone className="h-6 w-6 text-primary" />
-                </div>
-                <div className="flex-1">
-                  <div className="font-bold text-white">UPI</div>
-                  <div className="text-xs text-muted-foreground mt-0.5">GPay · PhonePe · Paytm · BHIM</div>
-                </div>
-                <div className="text-xs text-primary font-bold uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity">
-                  Select →
-                </div>
-              </button>
+            <div className="space-y-3 mt-1">
+              <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">Select payment method</div>
 
-              <button
-                onClick={() => setStep("visa")}
-                className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-background/40 hover:border-primary/50 hover:bg-primary/5 transition-all text-left group"
-              >
-                <div className="h-12 w-12 rounded-xl bg-primary/20 border border-primary/30 flex items-center justify-center shrink-0 group-hover:shadow-[0_0_16px_rgba(168,85,247,0.3)] transition-all">
-                  <CreditCard className="h-6 w-6 text-primary" />
-                </div>
-                <div className="flex-1">
-                  <div className="font-bold text-white">Visa Debit Card</div>
-                  <div className="text-xs text-muted-foreground mt-0.5">All Visa debit and credit cards</div>
-                </div>
-                <div className="text-xs text-primary font-bold uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity">
-                  Select →
-                </div>
-              </button>
+              {([
+                { id: "upi" as PayMethod, icon: <Smartphone className="h-5 w-5 text-primary" />, label: "UPI", sub: "GPay · PhonePe · Paytm · BHIM", badge: "India" },
+                { id: "visa" as PayMethod, icon: <CreditCard className="h-5 w-5 text-primary" />, label: "Visa Debit Card", sub: "All Visa debit & credit cards", badge: null },
+              ]).map((m) => (
+                <button key={m.id} onClick={() => setStep(m.id)}
+                  className="w-full flex items-center gap-3.5 p-4 rounded-xl border border-border/60 bg-background/30 hover:border-primary/40 hover:bg-primary/5 transition-all text-left group">
+                  <div className="h-11 w-11 rounded-xl bg-primary/20 border border-primary/25 flex items-center justify-center shrink-0 group-hover:shadow-[0_0_16px_rgba(168,85,247,0.25)] transition-all">
+                    {m.icon}
+                  </div>
+                  <div className="flex-1">
+                    <div className="font-bold text-white text-sm flex items-center gap-2">
+                      {m.label}
+                      {m.badge && <span className="text-[9px] bg-green-500/20 border border-green-500/30 text-green-400 rounded-full px-1.5 py-0.5 font-bold uppercase tracking-wider">{m.badge}</span>}
+                    </div>
+                    <div className="text-[11px] text-muted-foreground mt-0.5">{m.sub}</div>
+                  </div>
+                  <div className="text-primary font-bold text-lg opacity-0 group-hover:opacity-100 transition-opacity">→</div>
+                </button>
+              ))}
 
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <Lock className="h-3.5 w-3.5 text-green-500 shrink-0" />
-                <span>Mock demo — no real payment will be processed.</span>
+              {/* Trust row */}
+              <div className="flex items-center justify-center gap-4 pt-1">
+                {[
+                  { icon: <Lock className="h-3 w-3 text-green-400" />, label: "SSL" },
+                  { icon: <ShieldCheck className="h-3 w-3 text-blue-400" />, label: "PCI" },
+                  { icon: <BadgeCheck className="h-3 w-3 text-primary" />, label: "Verified" },
+                ].map((b) => (
+                  <div key={b.label} className="flex items-center gap-1 text-[10px] text-muted-foreground/50 uppercase tracking-wider font-semibold">
+                    {b.icon}{b.label}
+                  </div>
+                ))}
               </div>
             </div>
           )}
 
-          {/* UPI panel */}
           {step === "upi" && (
-            <div className="space-y-4">
-              <div className="flex flex-col items-center gap-3 py-2">
-                <UPIQRGrid />
-                <div className="text-center space-y-1">
-                  <div className="text-xs text-muted-foreground uppercase tracking-widest">Scan with any UPI app</div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono font-bold text-white">{UPI_ID}</span>
-                    <button onClick={() => navigator.clipboard.writeText(UPI_ID)} className="text-muted-foreground hover:text-primary transition-colors">
-                      <Copy className="h-3.5 w-3.5" />
-                    </button>
-                  </div>
-                  <div className="text-xs text-muted-foreground">Amount: <strong className="text-white">${item.price.toFixed(2)}</strong></div>
-                </div>
-                <div className="w-full bg-primary/5 border border-primary/20 rounded-lg px-3 py-2 flex items-center gap-2">
-                  <div className="h-2 w-2 rounded-full bg-green-400 animate-pulse shrink-0" />
-                  <span className="text-xs text-green-400 font-medium">Waiting for payment confirmation</span>
-                </div>
-              </div>
-              <div className="flex items-center gap-2 text-xs text-muted-foreground bg-background/60 rounded-lg border border-border px-3 py-2">
-                <Lock className="h-3.5 w-3.5 text-green-500 shrink-0" />
-                Mock demo — click below to simulate a successful UPI payment.
-              </div>
-              <Button className="w-full bg-primary font-bold uppercase py-5" onClick={handleUPIPay}>
-                <Smartphone className="h-4 w-4 mr-2" />
-                I've Paid via UPI · ${item.price.toFixed(2)}
-              </Button>
+            <div className="mt-1">
+              <UPIShopPanel price={item.price} onPay={() => simulatePurchase("upi")} />
             </div>
           )}
 
-          {/* Visa card panel */}
           {step === "visa" && (
-            <div className="space-y-4">
-              {/* Live card preview */}
-              <div
-                className="relative rounded-xl overflow-hidden p-4 text-white"
-                style={{ background: "linear-gradient(135deg, #2d1b69 0%, #11082a 60%, #0a1a2e 100%)" }}
-              >
-                <div className="absolute inset-0 opacity-10"
-                  style={{ backgroundImage: "repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255,255,255,.04) 10px, rgba(255,255,255,.04) 20px)" }} />
-                <div className="relative z-10">
-                  <div className="flex justify-between items-start mb-4">
-                    <div className="text-[10px] uppercase tracking-widest text-purple-300 font-bold">Game Key Shop</div>
-                    <div className="font-bold text-purple-200 text-lg italic tracking-widest">VISA</div>
-                  </div>
-                  <div className="font-mono text-base tracking-widest mb-4 text-white/90">
-                    {formatCard(cardNumber.replace(/\s/g, "")) || "•••• •••• •••• ••••"}
-                  </div>
-                  <div className="flex justify-between items-end text-xs">
-                    <div>
-                      <div className="text-purple-300 uppercase tracking-wider">Holder</div>
-                      <div className="font-semibold">{cardName || "YOUR NAME"}</div>
-                    </div>
-                    <div>
-                      <div className="text-purple-300 uppercase tracking-wider">Expires</div>
-                      <div className="font-semibold">{expiry || "MM/YY"}</div>
-                    </div>
-                    <div className="bg-white/20 rounded px-2.5 py-1">
-                      <div className="text-xs font-black">${item.price.toFixed(2)}</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                {/* Demo cards hint */}
-                <div className="rounded-lg bg-amber-500/5 border border-amber-500/20 px-3 py-2 space-y-1">
-                  <div className="text-[10px] uppercase tracking-widest text-amber-400 font-bold">Demo Test Cards</div>
-                  {TEST_CARDS.map((tc) => (
-                    <button key={tc.number} onClick={() => setCardNumber(tc.number)}
-                      className="w-full text-left flex items-center justify-between text-xs py-0.5 hover:text-amber-400 transition-colors">
-                      <span className="font-mono text-white">{tc.number}</span>
-                      <span className="text-muted-foreground">{tc.label}</span>
-                    </button>
-                  ))}
-                </div>
-
-                <div className="space-y-2">
-                  <Label className="text-xs uppercase tracking-widest text-muted-foreground">Card Number</Label>
-                  <Input value={cardNumber} onChange={(e) => setCardNumber(formatCard(e.target.value))}
-                    className="bg-background font-mono tracking-wider" maxLength={19} placeholder="1234 5678 9012 3456" />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-xs uppercase tracking-widest text-muted-foreground">Cardholder Name</Label>
-                  <Input value={cardName} onChange={(e) => setCardName(e.target.value)}
-                    className="bg-background" placeholder="John Doe" autoComplete="cc-name" />
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-2">
-                    <Label className="text-xs uppercase tracking-widest text-muted-foreground">Expiry</Label>
-                    <Input value={expiry} onChange={(e) => setExpiry(formatExpiry(e.target.value))}
-                      className="bg-background font-mono" maxLength={5} placeholder="MM/YY" autoComplete="cc-exp" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-xs uppercase tracking-widest text-muted-foreground">CVV</Label>
-                    <Input value={cvv} onChange={(e) => setCvv(e.target.value.replace(/\D/g, "").slice(0, 4))}
-                      className="bg-background font-mono" maxLength={4} type="password" placeholder="•••" autoComplete="cc-csc" />
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <Lock className="h-3.5 w-3.5 text-green-500 shrink-0" />
-                256-bit SSL encrypted. Mock demo — no real card charged.
-              </div>
-              <Button className="w-full bg-primary font-bold uppercase py-5" onClick={handleCardPay}>
-                <CreditCard className="h-4 w-4 mr-2" />
-                Pay ${item.price.toFixed(2)} · Visa Debit
-              </Button>
+            <div className="mt-1">
+              <VisaShopPanel price={item.price} onPay={(name) => simulatePurchase("visa", name)} />
             </div>
           )}
         </div>
@@ -367,7 +563,7 @@ export default function Shop() {
           </h1>
           <p className="text-muted-foreground mt-1 text-sm">
             Unlock content for your favourite games. Instant delivery via digital key.
-            <span className="ml-2 text-xs text-primary/70 font-semibold">[Demo — mock payment, no real charges]</span>
+            <span className="ml-2 text-xs text-primary/60 font-semibold">[Demo — mock payment only]</span>
           </p>
         </div>
 
@@ -400,14 +596,13 @@ export default function Shop() {
                 </div>
                 <div className="flex items-center justify-between pt-1">
                   <div className="text-2xl font-black text-white">${item.price.toFixed(2)}</div>
-                  <Button
-                    size="sm"
-                    className="bg-primary/20 border border-primary/40 text-primary hover:bg-primary hover:text-white font-bold uppercase text-xs"
+                  <button
+                    className="flex items-center gap-1.5 rounded-lg bg-primary/20 border border-primary/40 text-primary hover:bg-primary hover:text-white font-bold uppercase text-xs px-3 py-2 transition-all"
                     onClick={() => user ? setSelected(item) : window.location.assign("/login")}
                   >
-                    <ShoppingCart className="h-3.5 w-3.5 mr-1.5" />
+                    <ShoppingCart className="h-3.5 w-3.5" />
                     Buy Key
-                  </Button>
+                  </button>
                 </div>
               </CardContent>
             </Card>
