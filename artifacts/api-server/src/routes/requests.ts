@@ -179,6 +179,11 @@ router.post("/requests", requireAuth, async (req, res): Promise<void> => {
     })
     .returning();
 
+  await db
+    .update(walletsTable)
+    .set({ hiringBalance: wallet.hiringBalance - MIN_HIRING_BALANCE })
+    .where(eq(walletsTable.userId, user.id));
+
   req.log.info({ userId: user.id, gameName }, "Game request posted");
   res.status(201).json(formatRequest(gameRequest, user.name));
 });
