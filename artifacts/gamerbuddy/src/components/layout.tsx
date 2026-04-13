@@ -5,7 +5,7 @@ import { useLogout } from "@workspace/api-client-react";
 import { AIChatWidget } from "@/components/ai-chat-widget";
 import {
   Gamepad2, Compass, LayoutDashboard, Wallet, User as UserIcon,
-  LogOut, FileText, Key, Bell, CheckCheck, X, Swords, Star,
+  LogOut, FileText, Bell, CheckCheck, X, Swords, Star,
   Trophy, MessageSquare, Zap, CircleDollarSign, ChevronRight, Menu,
   ArrowLeft,
 } from "lucide-react";
@@ -194,7 +194,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
   const navItems = [
     { href: "/browse", label: "Browse Requests", icon: Compass },
-    { href: "/shop", label: "Shop", icon: Key },
     ...(user
       ? [
           { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },

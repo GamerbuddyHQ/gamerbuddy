@@ -17,7 +17,6 @@ import WalletsPage from "@/pages/wallets";
 import AddFunds from "@/pages/add-funds";
 import Profile from "@/pages/profile";
 import RequestDetail from "@/pages/request-detail";
-import Shop from "@/pages/shop";
 import Notifications from "@/pages/notifications";
 
 const queryClient = new QueryClient({
@@ -59,7 +58,6 @@ function Router() {
         <Route path="/add-funds"><ProtectedRoute component={AddFunds} /></Route>
         <Route path="/profile"><ProtectedRoute component={Profile} /></Route>
         <Route path="/requests/:id" component={RequestDetail} />
-        <Route path="/shop" component={Shop} />
         <Route path="/notifications"><ProtectedRoute component={Notifications} /></Route>
         
         <Route component={NotFound} />
