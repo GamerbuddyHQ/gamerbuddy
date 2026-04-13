@@ -14,6 +14,7 @@ import Browse from "@/pages/browse";
 import MyRequests from "@/pages/my-requests";
 import PostRequest from "@/pages/post-request";
 import WalletsPage from "@/pages/wallets";
+import AddFunds from "@/pages/add-funds";
 import Profile from "@/pages/profile";
 
 const queryClient = new QueryClient({
@@ -52,6 +53,7 @@ function Router() {
         <Route path="/my-requests"><ProtectedRoute component={MyRequests} /></Route>
         <Route path="/post-request"><ProtectedRoute component={PostRequest} /></Route>
         <Route path="/wallets"><ProtectedRoute component={WalletsPage} /></Route>
+        <Route path="/add-funds"><ProtectedRoute component={AddFunds} /></Route>
         <Route path="/profile"><ProtectedRoute component={Profile} /></Route>
         
         <Route component={NotFound} />
