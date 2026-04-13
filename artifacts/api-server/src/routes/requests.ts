@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { db, gameRequestsTable, walletsTable, usersTable, bidsTable } from "@workspace/db";
-import { eq, desc, and } from "drizzle-orm";
+import { eq, desc, and, sql } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
 
 const router: IRouter = Router();
@@ -298,6 +298,64 @@ router.post("/requests/:id/bids", requireAuth, async (req, res): Promise<void> =
 
   req.log.info({ userId: user.id, requestId, price }, "Bid placed");
   res.status(201).json(formatBid(bid, user.name));
+});
+
+router.post("/requests/:id/bids/:bidId/accept", requireAuth, async (req, res): Promise<void> => {
+  const user = req.user!;
+  const requestId = parseInt(req.params.id);
+  const bidId = parseInt(req.params.bidId);
+  if (isNaN(requestId) || isNaN(bidId)) { res.status(400).json({ error: "Invalid ID" }); return; }
+
+  const [gameRequest] = await db.select().from(gameRequestsTable).where(eq(gameRequestsTable.id, requestId));
+  if (!gameRequest) { res.status(404).json({ error: "Request not found" }); return; }
+  if (gameRequest.userId !== user.id) { res.status(403).json({ error: "Only the hirer can accept bids" }); return; }
+  if (gameRequest.status !== "open") { res.status(400).json({ error: "Request is not open" }); return; }
+
+  const [bid] = await db.select().from(bidsTable).where(and(eq(bidsTable.id, bidId), eq(bidsTable.requestId, requestId)));
+  if (!bid) { res.status(404).json({ error: "Bid not found" }); return; }
+
+  await db.update(bidsTable).set({ status: "accepted" }).where(eq(bidsTable.id, bidId));
+  await db.update(bidsTable).set({ status: "rejected" }).where(and(eq(bidsTable.requestId, requestId), eq(bidsTable.status, "pending")));
+  await db.update(gameRequestsTable).set({ status: "in_progress" }).where(eq(gameRequestsTable.id, requestId));
+
+  req.log.info({ userId: user.id, requestId, bidId }, "Bid accepted");
+  res.json({ success: true, message: "Bid accepted. Session is now in progress." });
+});
+
+router.post("/requests/:id/complete", requireAuth, async (req, res): Promise<void> => {
+  const user = req.user!;
+  const requestId = parseInt(req.params.id);
+  if (isNaN(requestId)) { res.status(400).json({ error: "Invalid request ID" }); return; }
+
+  const [gameRequest] = await db.select().from(gameRequestsTable).where(eq(gameRequestsTable.id, requestId));
+  if (!gameRequest) { res.status(404).json({ error: "Request not found" }); return; }
+  if (gameRequest.userId !== user.id) { res.status(403).json({ error: "Only the hirer can complete a session" }); return; }
+  if (gameRequest.status !== "in_progress") { res.status(400).json({ error: "Request is not in progress" }); return; }
+
+  const [acceptedBid] = await db.select().from(bidsTable).where(and(eq(bidsTable.requestId, requestId), eq(bidsTable.status, "accepted")));
+
+  await db.update(gameRequestsTable).set({ status: "completed" }).where(eq(gameRequestsTable.id, requestId));
+  await db.update(usersTable).set({ points: sql`${usersTable.points} + 50` }).where(eq(usersTable.id, user.id));
+  if (acceptedBid) {
+    await db.update(usersTable).set({ points: sql`${usersTable.points} + 50` }).where(eq(usersTable.id, acceptedBid.bidderId));
+  }
+
+  req.log.info({ userId: user.id, requestId }, "Request completed — 50 points awarded");
+  res.json({ success: true, message: "Session completed! 50 points awarded to both players." });
+});
+
+router.post("/requests/:id/cancel", requireAuth, async (req, res): Promise<void> => {
+  const user = req.user!;
+  const requestId = parseInt(req.params.id);
+  if (isNaN(requestId)) { res.status(400).json({ error: "Invalid request ID" }); return; }
+
+  const [gameRequest] = await db.select().from(gameRequestsTable).where(eq(gameRequestsTable.id, requestId));
+  if (!gameRequest) { res.status(404).json({ error: "Request not found" }); return; }
+  if (gameRequest.userId !== user.id) { res.status(403).json({ error: "Only the hirer can cancel" }); return; }
+  if (!["open"].includes(gameRequest.status)) { res.status(400).json({ error: "Only open requests can be cancelled" }); return; }
+
+  await db.update(gameRequestsTable).set({ status: "cancelled" }).where(eq(gameRequestsTable.id, requestId));
+  res.json({ success: true });
 });
 
 export default router;

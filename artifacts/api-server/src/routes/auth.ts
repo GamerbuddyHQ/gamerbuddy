@@ -17,6 +17,7 @@ function formatUser(user: {
   email: string;
   phone: string;
   idVerified: boolean;
+  points: number;
   createdAt: Date;
 }) {
   return {
@@ -25,6 +26,7 @@ function formatUser(user: {
     email: user.email,
     phone: user.phone,
     idVerified: user.idVerified,
+    points: user.points,
     createdAt: user.createdAt.toISOString(),
   };
 }

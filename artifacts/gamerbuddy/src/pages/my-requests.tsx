@@ -1,90 +1,268 @@
-import React from "react";
-import { Link } from "wouter";
+import React, { useState } from "react";
+import { Link, useLocation } from "wouter";
 import { useGetMyRequests, getGetMyRequestsQueryKey } from "@workspace/api-client-react";
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { useQueryClient } from "@tanstack/react-query";
+import { useToast } from "@/hooks/use-toast";
+import { useRequestBids, useCompleteRequest, useCancelRequest, useAcceptBid, type Bid } from "@/lib/bids-api";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
-import { Plus } from "lucide-react";
+import {
+  Plus, Swords, CheckCircle2, Trophy, Gavel,
+  MessageSquare, Clock, Ban, ChevronDown, ChevronUp,
+  Shield, ArrowRight,
+} from "lucide-react";
+
+const STATUS_STYLE: Record<string, string> = {
+  open: "border-green-500/40 text-green-400 bg-green-500/10",
+  in_progress: "border-primary/40 text-primary bg-primary/10",
+  completed: "border-secondary/40 text-secondary bg-secondary/10",
+  cancelled: "border-border text-muted-foreground",
+};
+
+function RequestBidsPanel({ requestId, requestStatus }: { requestId: number; requestStatus: string }) {
+  const { toast } = useToast();
+  const qc = useQueryClient();
+  const { data: bids = [], isLoading } = useRequestBids(requestId);
+  const accept = useAcceptBid();
+  const complete = useCompleteRequest();
+  const cancel = useCancelRequest();
+
+  const handleAccept = (bidId: number) => {
+    accept.mutate({ requestId, bidId }, {
+      onSuccess: () => {
+        toast({ title: "Bid Accepted!", description: "Session is now in progress." });
+        qc.invalidateQueries({ queryKey: getGetMyRequestsQueryKey() });
+      },
+      onError: (err: any) => toast({ title: "Error", description: err?.error, variant: "destructive" }),
+    });
+  };
+
+  const handleComplete = () => {
+    complete.mutate(requestId, {
+      onSuccess: (data: any) => {
+        toast({ title: "Session Complete! 🏆", description: data?.message || "50 points awarded!" });
+        qc.invalidateQueries({ queryKey: getGetMyRequestsQueryKey() });
+      },
+      onError: (err: any) => toast({ title: "Error", description: err?.error, variant: "destructive" }),
+    });
+  };
+
+  const handleCancel = () => {
+    cancel.mutate(requestId, {
+      onSuccess: () => {
+        toast({ title: "Request Cancelled" });
+        qc.invalidateQueries({ queryKey: getGetMyRequestsQueryKey() });
+      },
+      onError: (err: any) => toast({ title: "Error", description: err?.error, variant: "destructive" }),
+    });
+  };
+
+  if (isLoading) return <div className="py-3 text-center text-xs text-muted-foreground">Loading bids…</div>;
+
+  const pendingBids = bids.filter((b: Bid) => b.status === "pending");
+  const acceptedBid = bids.find((b: Bid) => b.status === "accepted");
+
+  return (
+    <div className="space-y-3 pt-3 border-t border-border">
+      {/* Actions row */}
+      <div className="flex flex-wrap gap-2">
+        {requestStatus === "open" && (
+          <Button
+            size="sm"
+            variant="destructive"
+            className="text-xs font-bold uppercase border-destructive/40 bg-destructive/10 hover:bg-destructive text-destructive hover:text-white"
+            onClick={handleCancel}
+            disabled={cancel.isPending}
+          >
+            <Ban className="h-3.5 w-3.5 mr-1.5" /> Cancel Request
+          </Button>
+        )}
+        {requestStatus === "in_progress" && (
+          <Button
+            size="sm"
+            className="bg-green-500/20 border border-green-500/40 text-green-400 hover:bg-green-500 hover:text-white text-xs font-bold uppercase"
+            onClick={handleComplete}
+            disabled={complete.isPending}
+          >
+            <Trophy className="h-3.5 w-3.5 mr-1.5" />
+            {complete.isPending ? "Completing…" : "Mark Complete · +50 Points"}
+          </Button>
+        )}
+      </div>
+
+      {/* Accepted bid status */}
+      {acceptedBid && (
+        <div className="flex items-center gap-2.5 rounded-lg border border-green-500/30 bg-green-500/5 px-3 py-2 text-sm">
+          <CheckCircle2 className="h-4 w-4 text-green-400 shrink-0" />
+          <div>
+            <span className="text-green-400 font-bold">{acceptedBid.bidderName}</span>
+            <span className="text-muted-foreground"> accepted · ${acceptedBid.price.toFixed(2)}</span>
+          </div>
+          <Link href={`/requests/${requestId}`} className="ml-auto text-xs text-secondary underline underline-offset-2 hover:text-secondary/80 flex items-center gap-1">
+            Chat <MessageSquare className="h-3 w-3" />
+          </Link>
+        </div>
+      )}
+
+      {/* Bids list */}
+      {bids.length === 0 ? (
+        <div className="text-center py-4 text-xs text-muted-foreground border border-dashed border-border rounded-lg">
+          No bids yet — gamers can bid from the Browse page.
+        </div>
+      ) : (
+        <div className="space-y-2">
+          <div className="text-xs uppercase tracking-widest text-muted-foreground font-bold flex items-center gap-1.5">
+            <Gavel className="h-3.5 w-3.5 text-primary" />
+            {bids.length} {bids.length === 1 ? "Bid" : "Bids"} received
+            {pendingBids.length > 0 && <span className="text-amber-400 font-bold">· {pendingBids.length} pending</span>}
+          </div>
+          {bids.map((bid: Bid) => (
+            <div key={bid.id} className={`flex items-center gap-3 rounded-lg border px-3 py-2.5 ${
+              bid.status === "accepted" ? "border-green-500/30 bg-green-500/5" :
+              bid.status === "rejected" ? "border-border/30 bg-card/20 opacity-50" :
+              "border-border bg-card/40"
+            }`}>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="font-bold text-white text-sm">{bid.bidderName}</span>
+                  <span className={`text-xs px-1.5 py-0.5 rounded border font-semibold ${
+                    bid.status === "accepted" ? "border-green-500/40 text-green-400" :
+                    bid.status === "rejected" ? "border-border text-muted-foreground" :
+                    "border-amber-500/40 text-amber-400"
+                  }`}>{bid.status}</span>
+                </div>
+                <p className="text-xs text-muted-foreground truncate mt-0.5">{bid.message}</p>
+              </div>
+              <div className="text-right shrink-0">
+                <div className="font-black text-white">${bid.price.toFixed(2)}</div>
+                {requestStatus === "open" && bid.status === "pending" && (
+                  <Button
+                    size="sm"
+                    className="h-6 text-xs bg-green-500/20 border border-green-500/40 text-green-400 hover:bg-green-500 hover:text-white mt-1 font-bold px-2"
+                    onClick={() => handleAccept(bid.id)}
+                    disabled={accept.isPending}
+                  >
+                    Accept
+                  </Button>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <Link href={`/requests/${requestId}`} className="flex items-center gap-1.5 text-xs text-primary/70 hover:text-primary transition-colors">
+        <ArrowRight className="h-3.5 w-3.5" /> Full request view & chat
+      </Link>
+    </div>
+  );
+}
 
 export default function MyRequests() {
+  const [, setLocation] = useLocation();
+  const [expanded, setExpanded] = useState<number | null>(null);
+
   const { data: requests, isLoading, isError } = useGetMyRequests({
-    query: {
-      queryKey: getGetMyRequestsQueryKey()
-    }
+    query: { queryKey: getGetMyRequestsQueryKey() },
   });
+
+  const toggle = (id: number) => setExpanded((v) => (v === id ? null : id));
 
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-extrabold uppercase tracking-tight text-white drop-shadow-[0_0_10px_rgba(168,85,247,0.3)]">My Requests</h1>
-          <p className="text-muted-foreground mt-2">Manage the requests you've posted.</p>
+          <h1 className="text-3xl font-extrabold uppercase tracking-tight text-white flex items-center gap-3">
+            <Swords className="h-7 w-7 text-primary" /> My Requests
+          </h1>
+          <p className="text-muted-foreground mt-1 text-sm">Manage your posted missions and incoming bids.</p>
         </div>
-        <Button asChild className="bg-primary hover:bg-primary/90 text-white font-bold tracking-wider uppercase shadow-[0_0_10px_rgba(168,85,247,0.4)]">
+        <Button asChild className="bg-primary hover:bg-primary/90 text-white font-bold uppercase tracking-wider">
           <Link href="/post-request">
-            <Plus className="mr-2 h-5 w-5" />
-            New Request
+            <Plus className="h-4 w-4 mr-2" /> New Request
           </Link>
         </Button>
       </div>
 
+      {/* Safety reminder */}
+      <div className="flex items-start gap-3 rounded-xl border border-amber-500/30 bg-amber-500/5 px-4 py-3 text-sm text-amber-300/90">
+        <Shield className="h-4 w-4 shrink-0 mt-0.5 text-amber-400" />
+        <span><strong className="text-amber-300">Safety reminder:</strong> Only approve sessions and make payments through Gamerbuddy. Never share your password or pay outside the platform.</span>
+      </div>
+
+      {/* Content */}
       {isLoading ? (
-        <div className="space-y-4">
-          {[1, 2, 3].map(i => <Skeleton key={i} className="h-32 w-full" />)}
-        </div>
+        <div className="space-y-3">{[1, 2, 3].map((i) => <Skeleton key={i} className="h-36" />)}</div>
       ) : isError ? (
         <div className="text-center p-8 text-destructive">Failed to load your requests.</div>
       ) : !requests || requests.length === 0 ? (
-        <div className="text-center p-16 border-2 border-dashed border-border rounded-xl bg-card/10 flex flex-col items-center">
-          <h3 className="text-xl font-bold uppercase text-muted-foreground mb-4">No Requests Yet</h3>
-          <Button asChild variant="outline" className="border-primary text-primary hover:bg-primary hover:text-white">
-            <Link href="/post-request">Post Your First Request</Link>
+        <div className="text-center py-20 border-2 border-dashed border-border rounded-xl bg-card/10">
+          <Swords className="h-10 w-10 mx-auto mb-3 text-muted-foreground/30" />
+          <h3 className="text-lg font-bold uppercase text-muted-foreground">No Requests Yet</h3>
+          <p className="text-sm text-muted-foreground mt-1">Post your first mission to start hiring.</p>
+          <Button asChild className="mt-4 bg-primary font-bold uppercase">
+            <Link href="/post-request">Post a Request</Link>
           </Button>
         </div>
       ) : (
-        <div className="space-y-4">
-          {requests.map(req => (
-            <Card key={req.id} className="flex flex-col md:flex-row border-border/50 bg-card/40 hover:bg-card/80 transition-colors overflow-hidden relative">
-              <div className={`w-1 h-full absolute top-0 left-0 ${req.status === 'open' ? 'bg-primary' : req.status === 'in_progress' ? 'bg-secondary' : req.status === 'completed' ? 'bg-green-500' : 'bg-muted'}`}></div>
-              <div className="flex-1 p-6 flex flex-col justify-center">
-                <div className="flex justify-between items-start mb-2">
-                  <h3 className="text-2xl font-bold text-white tracking-wide uppercase">{req.gameName}</h3>
-                  <div className={`px-3 py-1 rounded-sm text-xs font-bold uppercase border ${
-                    req.status === 'open' ? 'border-primary text-primary bg-primary/10' : 
-                    req.status === 'in_progress' ? 'border-secondary text-secondary bg-secondary/10' : 
-                    req.status === 'completed' ? 'border-green-500 text-green-500 bg-green-500/10' : 
-                    'border-muted-foreground text-muted-foreground bg-muted/50'
-                  }`}>
-                    {req.status.replace("_", " ")}
+        <div className="space-y-3">
+          {requests.map((req) => (
+            <Card key={req.id} className="border-border/60 bg-card/40 overflow-hidden">
+              {/* Top accent */}
+              <div className={`h-0.5 ${
+                req.status === "open" ? "bg-green-500" :
+                req.status === "in_progress" ? "bg-primary" :
+                req.status === "completed" ? "bg-secondary" : "bg-border"
+              }`} />
+              <CardContent className="p-5 space-y-3">
+                {/* Header row */}
+                <div className="flex flex-wrap items-start gap-3">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-xl font-extrabold text-white uppercase tracking-wide">{req.gameName}</h3>
+                    <div className="flex flex-wrap gap-2 mt-1.5">
+                      <span className="text-xs border border-border rounded px-2 py-0.5 text-muted-foreground">{req.platform}</span>
+                      <span className="text-xs border border-border rounded px-2 py-0.5 text-muted-foreground">{req.skillLevel}</span>
+                      <span className="text-xs text-muted-foreground flex items-center gap-1">
+                        <Clock className="h-3 w-3" />{format(new Date(req.createdAt), "MMM d, yyyy")}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className={`text-xs font-bold uppercase px-3 py-1 rounded-full border ${STATUS_STYLE[req.status] ?? "border-border text-muted-foreground"}`}>
+                      {req.status.replace("_", " ")}
+                    </span>
+                    {req.status === "completed" && (
+                      <Trophy className="h-5 w-5 text-secondary" />
+                    )}
                   </div>
                 </div>
-                <div className="flex flex-wrap gap-2 mb-4">
-                  <span className="px-2 py-1 bg-background border border-border rounded text-xs font-mono text-muted-foreground">
-                    {req.platform}
-                  </span>
-                  <span className="px-2 py-1 bg-background border border-border rounded text-xs font-mono text-muted-foreground">
-                    {req.skillLevel}
-                  </span>
-                  <span className="px-2 py-1 text-xs text-muted-foreground flex items-center">
-                    Posted {format(new Date(req.createdAt), 'MMM d, yyyy')}
-                  </span>
-                </div>
-                <p className="text-sm text-foreground/80 font-sans italic border-l-2 border-border pl-3 bg-background/30 py-2">
-                  "{req.objectives}"
+
+                {/* Objectives */}
+                <p className="text-sm text-foreground/70 border-l-2 border-primary/30 pl-3 line-clamp-2 leading-relaxed">
+                  {req.objectives}
                 </p>
-              </div>
-              <div className="p-6 bg-background/50 border-t md:border-t-0 md:border-l border-border flex flex-col justify-center gap-2 min-w-[200px]">
-                {req.status === 'open' && (
-                  <>
-                    <Button variant="outline" className="w-full font-bold uppercase text-xs" disabled>Edit Request</Button>
-                    <Button variant="destructive" className="w-full font-bold uppercase text-xs">Cancel Request</Button>
-                  </>
+
+                {/* Expand bids toggle */}
+                {req.status !== "cancelled" && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-xs text-muted-foreground hover:text-white -ml-1 px-2"
+                    onClick={() => toggle(req.id)}
+                  >
+                    <Gavel className="h-3.5 w-3.5 mr-1.5" />
+                    {expanded === req.id ? "Hide" : "Manage"} Bids & Actions
+                    {expanded === req.id ? <ChevronUp className="ml-1.5 h-3.5 w-3.5" /> : <ChevronDown className="ml-1.5 h-3.5 w-3.5" />}
+                  </Button>
                 )}
-                {req.status === 'in_progress' && (
-                  <Button className="w-full bg-green-500 hover:bg-green-600 text-white font-bold uppercase text-xs">Mark Completed</Button>
+
+                {expanded === req.id && (
+                  <RequestBidsPanel requestId={req.id} requestStatus={req.status} />
                 )}
-              </div>
+              </CardContent>
             </Card>
           ))}
         </div>
