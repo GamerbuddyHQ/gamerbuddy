@@ -160,6 +160,35 @@ function GamerRulesCard() {
 /* ── STREAMING ACCOUNTS SECTION ─────────────────────────────── */
 const PLATFORM_ORDER = ["twitch", "youtube", "kick", "facebook", "tiktok"] as const;
 
+/* Official SVG logo paths (Simple Icons, 24×24 viewBox) */
+const PLATFORM_SVG: Record<string, React.ReactNode> = {
+  twitch: (
+    <svg viewBox="0 0 24 24" fill="currentColor" className="w-full h-full">
+      <path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714z" />
+    </svg>
+  ),
+  youtube: (
+    <svg viewBox="0 0 24 24" fill="currentColor" className="w-full h-full">
+      <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+    </svg>
+  ),
+  kick: (
+    <svg viewBox="0 0 24 24" fill="currentColor" className="w-full h-full">
+      <path d="M3.392 2h4.386v7.731L13.875 2H19l-7.135 9.29L19.847 22H14.46l-6.682-9.384V22H3.392V2z" />
+    </svg>
+  ),
+  facebook: (
+    <svg viewBox="0 0 24 24" fill="currentColor" className="w-full h-full">
+      <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+    </svg>
+  ),
+  tiktok: (
+    <svg viewBox="0 0 24 24" fill="currentColor" className="w-full h-full">
+      <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z" />
+    </svg>
+  ),
+};
+
 function StreamingAccountsSection() {
   const { data: accounts = [], isLoading } = useMyStreamingAccounts();
   const connect = useConnectStreaming();
@@ -170,6 +199,7 @@ function StreamingAccountsSection() {
   const [inputVal, setInputVal] = useState("");
 
   const connectedMap = Object.fromEntries(accounts.map((a) => [a.platform, a.username]));
+  const connectedCount = accounts.length;
 
   async function handleConnect(platform: string) {
     const handle = inputVal.trim().replace(/^@/, "");
@@ -193,157 +223,214 @@ function StreamingAccountsSection() {
     }
   }
 
-  const connectedCount = accounts.length;
-
   return (
-    <Card className="border-border bg-card/40 overflow-hidden">
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-xs uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-            <Zap className="h-4 w-4 text-purple-400" /> Connected Streaming Platforms
-          </CardTitle>
-          {connectedCount > 0 && (
-            <span className="text-[10px] font-bold text-green-400 bg-green-500/10 border border-green-500/20 px-2 py-0.5 rounded-full">
-              {connectedCount} connected
-            </span>
-          )}
+    <div
+      className="rounded-2xl border overflow-hidden"
+      style={{ borderColor: "rgba(168,85,247,0.2)", background: "rgba(10,8,20,0.6)" }}
+    >
+      {/* ── Header ─────────────────────────────────────── */}
+      <div className="px-5 pt-5 pb-4 flex items-center justify-between border-b" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
+        <div>
+          <div className="flex items-center gap-2 mb-0.5">
+            <Zap className="h-4 w-4 text-purple-400" />
+            <span className="text-sm font-extrabold text-white uppercase tracking-widest">Streaming Channels</span>
+          </div>
+          <p className="text-[11px] text-muted-foreground/60">
+            Link your channels — they'll appear on your profile and bid cards
+          </p>
         </div>
-
-        {/* Connected badges strip */}
         {connectedCount > 0 && (
-          <div className="flex flex-wrap gap-2 pt-1">
-            {accounts.map((a) => {
-              const meta = STREAMING_PLATFORM_META[a.platform];
-              if (!meta) return null;
-              return (
-                <a
-                  key={a.platform}
-                  href={meta.urlTemplate.replace("{username}", a.username)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold transition-opacity hover:opacity-80"
-                  style={{ background: meta.bg, border: `1px solid ${meta.border}`, color: meta.color }}
-                >
-                  <span className="text-xs">{meta.emoji}</span>
-                  {meta.label}
-                  <span className="opacity-70">@{a.username}</span>
-                </a>
-              );
-            })}
+          <div className="shrink-0 flex flex-col items-end gap-1">
+            <span
+              className="text-[11px] font-black px-3 py-1 rounded-full"
+              style={{ background: "rgba(34,197,94,0.12)", border: "1px solid rgba(34,197,94,0.3)", color: "#4ade80" }}
+            >
+              {connectedCount} / {PLATFORM_ORDER.length} Live
+            </span>
           </div>
         )}
-      </CardHeader>
+      </div>
 
-      <CardContent className="space-y-2.5">
+      {/* ── Connected quick-links strip ─────────────────── */}
+      {connectedCount > 0 && (
+        <div className="px-5 py-3 flex flex-wrap gap-2 border-b" style={{ borderColor: "rgba(255,255,255,0.05)", background: "rgba(255,255,255,0.02)" }}>
+          {accounts.map((a) => {
+            const meta = STREAMING_PLATFORM_META[a.platform];
+            if (!meta) return null;
+            return (
+              <a
+                key={a.platform}
+                href={meta.urlTemplate.replace("{username}", a.username)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-full text-[11px] font-bold transition-all hover:brightness-125 hover:scale-105"
+                style={{ background: meta.bg, border: `1px solid ${meta.border}`, color: meta.color }}
+              >
+                <span className="w-3.5 h-3.5 shrink-0" style={{ color: meta.color }}>
+                  {PLATFORM_SVG[a.platform]}
+                </span>
+                <span>{meta.label}</span>
+                <span className="opacity-60 font-mono text-[10px]">@{a.username}</span>
+              </a>
+            );
+          })}
+        </div>
+      )}
+
+      {/* ── Platform cards ──────────────────────────────── */}
+      <div className="p-4 space-y-2.5">
         {isLoading ? (
-          <div className="space-y-2">
-            {[1, 2, 3].map((i) => <div key={i} className="h-14 rounded-xl bg-border/20 animate-pulse" />)}
+          <div className="space-y-2.5">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-[72px] rounded-2xl animate-pulse" style={{ background: "rgba(255,255,255,0.04)" }} />
+            ))}
           </div>
         ) : (
           PLATFORM_ORDER.map((platform) => {
             const meta = STREAMING_PLATFORM_META[platform];
-            const connectedUsername = connectedMap[platform];
-            const isConnected = !!connectedUsername;
+            const username = connectedMap[platform];
+            const isConnected = !!username;
             const isThisConnecting = connecting === platform;
 
             return (
-              <div
-                key={platform}
-                className="rounded-xl border transition-all"
-                style={{
-                  background: isConnected ? meta.bg : "rgba(255,255,255,0.03)",
-                  borderColor: isConnected ? meta.border : "rgba(255,255,255,0.08)",
-                }}
-              >
-                <div className="flex items-center gap-3 px-3.5 py-3">
-                  {/* Platform icon circle */}
-                  <div
-                    className="w-9 h-9 rounded-xl flex items-center justify-center text-base shrink-0 font-black"
-                    style={{
-                      background: isConnected ? meta.bg : "rgba(255,255,255,0.05)",
-                      border: `1.5px solid ${isConnected ? meta.border : "rgba(255,255,255,0.1)"}`,
-                    }}
-                  >
-                    <span>{meta.emoji}</span>
-                  </div>
-
-                  {/* Label + username */}
-                  <div className="flex-1 min-w-0">
+              <div key={platform}>
+                <div
+                  className="rounded-2xl overflow-hidden transition-all duration-200"
+                  style={{
+                    border: isConnected
+                      ? `1px solid ${meta.border}`
+                      : isThisConnecting
+                        ? "1px solid rgba(255,255,255,0.12)"
+                        : "1px solid rgba(255,255,255,0.06)",
+                    background: isConnected
+                      ? `linear-gradient(135deg, ${meta.bg}, rgba(0,0,0,0.4))`
+                      : "rgba(255,255,255,0.03)",
+                    boxShadow: isConnected ? `0 0 20px -8px ${meta.color}60` : "none",
+                  }}
+                >
+                  <div className="flex items-center gap-0">
+                    {/* Icon panel */}
                     <div
-                      className="text-xs font-bold"
-                      style={{ color: isConnected ? meta.color : "rgba(255,255,255,0.7)" }}
-                    >
-                      {meta.label}
-                    </div>
-                    {isConnected ? (
-                      <div className="flex items-center gap-1.5 mt-0.5">
-                        <CheckCircle2 className="h-3 w-3 text-green-400 shrink-0" />
-                        <span className="text-[11px] text-green-300 font-mono truncate">@{connectedUsername}</span>
-                      </div>
-                    ) : (
-                      <div className="text-[11px] text-muted-foreground/50 mt-0.5">Not connected</div>
-                    )}
-                  </div>
-
-                  {/* Action button */}
-                  {isConnected ? (
-                    <button
-                      onClick={() => handleDisconnect(platform)}
-                      disabled={disconnect.isPending}
-                      className="shrink-0 text-[10px] font-bold uppercase tracking-wide px-2.5 py-1.5 rounded-lg border border-red-500/25 text-red-400/70 hover:text-red-300 hover:bg-red-500/10 hover:border-red-500/40 transition-all"
-                    >
-                      Disconnect
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => {
-                        setConnecting(isThisConnecting ? null : platform);
-                        setInputVal("");
-                      }}
-                      className="shrink-0 text-[10px] font-bold uppercase tracking-wide px-2.5 py-1.5 rounded-lg transition-all"
+                      className="w-16 h-16 shrink-0 flex items-center justify-center relative overflow-hidden"
                       style={{
-                        background: isThisConnecting ? "rgba(255,255,255,0.08)" : meta.bg,
-                        border: `1px solid ${isThisConnecting ? "rgba(255,255,255,0.15)" : meta.border}`,
-                        color: isThisConnecting ? "rgba(255,255,255,0.7)" : meta.color,
+                        background: isConnected
+                          ? `linear-gradient(135deg, ${meta.color}30, ${meta.color}10)`
+                          : "rgba(255,255,255,0.04)",
+                        borderRight: `1px solid ${isConnected ? meta.border : "rgba(255,255,255,0.06)"}`,
                       }}
                     >
-                      {isThisConnecting ? "Cancel" : "Connect"}
-                    </button>
-                  )}
+                      {/* Glow blob behind icon */}
+                      {isConnected && (
+                        <div
+                          className="absolute inset-0 opacity-30"
+                          style={{ background: `radial-gradient(circle at center, ${meta.color}80 0%, transparent 70%)` }}
+                        />
+                      )}
+                      <div
+                        className="relative w-7 h-7"
+                        style={{ color: isConnected ? meta.color : "rgba(255,255,255,0.2)" }}
+                      >
+                        {PLATFORM_SVG[platform]}
+                      </div>
+                    </div>
+
+                    {/* Info */}
+                    <div className="flex-1 min-w-0 px-4 py-3">
+                      <div
+                        className="text-sm font-extrabold leading-tight"
+                        style={{ color: isConnected ? meta.color : "rgba(255,255,255,0.65)" }}
+                      >
+                        {meta.label}
+                      </div>
+                      {isConnected ? (
+                        <div className="flex items-center gap-1.5 mt-1">
+                          <span
+                            className="inline-block w-1.5 h-1.5 rounded-full shrink-0 animate-pulse"
+                            style={{ background: "#4ade80" }}
+                          />
+                          <a
+                            href={meta.urlTemplate.replace("{username}", username)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-[11px] font-mono font-semibold hover:underline truncate"
+                            style={{ color: "#86efac" }}
+                          >
+                            @{username}
+                          </a>
+                        </div>
+                      ) : (
+                        <div className="text-[11px] text-muted-foreground/40 mt-0.5">
+                          {isThisConnecting ? "Enter your username below ↓" : "Not connected"}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* CTA */}
+                    <div className="pr-3 shrink-0">
+                      {isConnected ? (
+                        <button
+                          onClick={() => handleDisconnect(platform)}
+                          disabled={disconnect.isPending}
+                          className="text-[10px] font-bold uppercase tracking-widest px-2.5 py-1.5 rounded-xl transition-all hover:bg-red-500/15 hover:text-red-300 disabled:opacity-40"
+                          style={{ color: "rgba(248,113,113,0.6)", border: "1px solid rgba(248,113,113,0.18)" }}
+                        >
+                          {disconnect.isPending ? "···" : "Remove"}
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => {
+                            setConnecting(isThisConnecting ? null : platform);
+                            setInputVal("");
+                          }}
+                          className="text-[11px] font-extrabold uppercase tracking-wide px-3.5 py-1.5 rounded-xl transition-all hover:brightness-110 active:scale-95"
+                          style={{
+                            background: isThisConnecting
+                              ? "rgba(255,255,255,0.06)"
+                              : `linear-gradient(135deg, ${meta.color}25, ${meta.color}10)`,
+                            border: `1px solid ${isThisConnecting ? "rgba(255,255,255,0.12)" : meta.border}`,
+                            color: isThisConnecting ? "rgba(255,255,255,0.5)" : meta.color,
+                          }}
+                        >
+                          {isThisConnecting ? "✕ Cancel" : "Connect"}
+                        </button>
+                      )}
+                    </div>
+                  </div>
                 </div>
 
-                {/* Inline connect input */}
+                {/* Inline connect input — slides below the card */}
                 {isThisConnecting && (
                   <div
-                    className="px-3.5 pb-3.5 flex gap-2 border-t"
-                    style={{ borderColor: "rgba(255,255,255,0.06)" }}
+                    className="mt-1 rounded-2xl px-4 py-3 flex items-center gap-3"
+                    style={{
+                      background: `linear-gradient(135deg, ${meta.color}10, rgba(0,0,0,0.3))`,
+                      border: `1px solid ${meta.border}`,
+                    }}
                   >
-                    <div className="relative flex-1 mt-3">
-                      <span
-                        className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-bold"
-                        style={{ color: meta.color }}
-                      >
-                        @
-                      </span>
-                      <input
-                        type="text"
-                        placeholder={`Your ${meta.label} username`}
-                        value={inputVal}
-                        onChange={(e) => setInputVal(e.target.value)}
-                        onKeyDown={(e) => e.key === "Enter" && handleConnect(platform)}
-                        maxLength={64}
-                        className="w-full pl-7 pr-3 py-2 rounded-lg text-sm bg-background/60 border border-border/40 text-foreground placeholder:text-muted-foreground/40 focus:outline-none transition-colors"
-                        style={{ focusBorderColor: meta.color } as React.CSSProperties}
-                        autoFocus
-                      />
+                    <div
+                      className="w-6 h-6 shrink-0 flex items-center justify-center rounded-lg"
+                      style={{ background: meta.bg, border: `1px solid ${meta.border}`, color: meta.color }}
+                    >
+                      <div className="w-3.5 h-3.5">{PLATFORM_SVG[platform]}</div>
                     </div>
+                    <span className="text-sm font-bold shrink-0" style={{ color: meta.color }}>@</span>
+                    <input
+                      type="text"
+                      placeholder={`your ${meta.label} username`}
+                      value={inputVal}
+                      onChange={(e) => setInputVal(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && handleConnect(platform)}
+                      maxLength={64}
+                      autoFocus
+                      className="flex-1 min-w-0 bg-transparent text-sm text-white placeholder:text-muted-foreground/40 focus:outline-none font-mono"
+                    />
                     <button
                       onClick={() => handleConnect(platform)}
                       disabled={!inputVal.trim() || connect.isPending}
-                      className="mt-3 px-3 py-2 rounded-lg text-xs font-bold text-white disabled:opacity-40 transition-all hover:brightness-110 shrink-0"
-                      style={{ background: `linear-gradient(135deg, ${meta.color}, ${meta.color}cc)` }}
+                      className="shrink-0 px-4 py-1.5 rounded-xl text-xs font-black uppercase tracking-widest text-white disabled:opacity-30 transition-all hover:brightness-110 active:scale-95"
+                      style={{ background: `linear-gradient(135deg, ${meta.color}, ${meta.color}bb)` }}
                     >
-                      {connect.isPending ? "…" : "Save"}
+                      {connect.isPending ? "···" : "Save"}
                     </button>
                   </div>
                 )}
@@ -351,12 +438,8 @@ function StreamingAccountsSection() {
             );
           })
         )}
-
-        <p className="text-[10px] text-muted-foreground/40 leading-relaxed pt-1">
-          Connected platforms appear on your public profile so hirers know you stream. Links open your channel directly.
-        </p>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
 
