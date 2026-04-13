@@ -322,15 +322,23 @@ export default function Home() {
       <section className="relative px-4 pb-16 -mt-4">
         <div className="max-w-5xl mx-auto">
           {/* section label */}
-          <div className="text-center mb-10">
-            <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-foreground mb-3">
-              <div className="h-px w-8 bg-border" />
-              Why Gamerbuddy
-              <div className="h-px w-8 bg-border" />
+          <div className="text-center mb-12 px-2">
+            <div className="inline-flex items-center gap-3 text-[11px] font-bold uppercase tracking-[0.2em] text-purple-400/80 mb-5">
+              <div className="h-px w-10 bg-gradient-to-r from-transparent to-purple-500/60" />
+              Why Gamers Love Gamerbuddy
+              <div className="h-px w-10 bg-gradient-to-l from-transparent to-purple-500/60" />
             </div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-white uppercase tracking-tight">
-              Built for real gamers
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-white leading-tight mb-4">
+              Why Gamers{" "}
+              <span style={{ color: "#a855f7", textShadow: "0 0 24px rgba(168,85,247,0.5)" }}>
+                Love
+              </span>{" "}
+              Gamerbuddy
             </h2>
+            <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+              The safest and most fun way to find real teammates for co-op and multiplayer games.{" "}
+              <span className="text-white/80 font-medium">No more toxic randoms or waiting for friends.</span>
+            </p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
