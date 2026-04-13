@@ -21,8 +21,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
 import {
   ArrowLeft, Swords, Monitor, Layers, Gavel, MessageSquare,
-  CheckCircle2, Send, Shield, Star, Trophy, AlertTriangle, User,
+  CheckCircle2, Send, Star, Trophy, AlertTriangle, User,
 } from "lucide-react";
+import { SafetyBanner } from "@/components/safety-banner";
 
 const PLATFORM_ICON: Record<string, string> = {
   PC: "🖥️", PlayStation: "🎮", Xbox: "🟩", "Nintendo Switch": "🕹️",
@@ -270,11 +271,7 @@ export default function RequestDetail() {
         <ArrowLeft className="h-4 w-4" /> Back to Browse
       </button>
 
-      {/* Safety warning */}
-      <div className="flex items-start gap-3 rounded-xl border border-amber-500/30 bg-amber-500/5 px-4 py-3 text-sm text-amber-300/90">
-        <Shield className="h-4 w-4 shrink-0 mt-0.5 text-amber-400" />
-        <span><strong className="text-amber-300">Never share passwords or personal info.</strong> Keep all communication on this platform. Gamerbuddy will never ask for your password.</span>
-      </div>
+      <SafetyBanner storageKey="gb_safety_detail" />
 
       {/* Request card */}
       <Card className="border-border bg-card/50 overflow-hidden">

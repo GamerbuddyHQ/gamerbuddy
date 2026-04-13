@@ -10,9 +10,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
 import {
   Plus, Swords, CheckCircle2, Trophy, Gavel,
-  MessageSquare, Clock, Ban, ChevronDown, ChevronUp,
-  Shield, ArrowRight,
+  MessageSquare, Clock, Ban, ChevronDown, ChevronUp, ArrowRight,
 } from "lucide-react";
+import { SafetyBanner } from "@/components/safety-banner";
 
 const STATUS_STYLE: Record<string, string> = {
   open: "border-green-500/40 text-green-400 bg-green-500/10",
@@ -187,11 +187,7 @@ export default function MyRequests() {
         </Button>
       </div>
 
-      {/* Safety reminder */}
-      <div className="flex items-start gap-3 rounded-xl border border-amber-500/30 bg-amber-500/5 px-4 py-3 text-sm text-amber-300/90">
-        <Shield className="h-4 w-4 shrink-0 mt-0.5 text-amber-400" />
-        <span><strong className="text-amber-300">Safety reminder:</strong> Only approve sessions and make payments through Gamerbuddy. Never share your password or pay outside the platform.</span>
-      </div>
+      <SafetyBanner showSelfHire={false} storageKey="gb_safety_my" />
 
       {/* Content */}
       {isLoading ? (

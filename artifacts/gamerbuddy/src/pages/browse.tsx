@@ -7,7 +7,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { format } from "date-fns";
-import { Search, Swords, Monitor, Layers, Gavel, ArrowRight, Shield } from "lucide-react";
+import { Search, Swords, Monitor, Layers, Gavel, ArrowRight } from "lucide-react";
+import { SafetyBanner } from "@/components/safety-banner";
 
 const PLATFORMS = ["PC", "PlayStation", "Xbox", "Nintendo Switch", "Steam Deck", "iOS", "Android"];
 const SKILLS = ["Beginner", "Intermediate", "Expert", "Chill"];
@@ -66,13 +67,7 @@ export default function Browse() {
         )}
       </div>
 
-      {/* Safety banner */}
-      <div className="flex items-start gap-3 rounded-xl border border-amber-500/30 bg-amber-500/5 px-4 py-3 text-sm text-amber-300/90">
-        <Shield className="h-4 w-4 shrink-0 mt-0.5 text-amber-400" />
-        <span>
-          <strong className="text-amber-300">Safety reminder:</strong> Never share your account password, personal payment details, or communicate outside of Gamerbuddy. All sessions should stay on-platform.
-        </span>
-      </div>
+      <SafetyBanner showSelfHire={false} storageKey="gb_safety_browse" />
 
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3 p-4 rounded-xl border border-border bg-card/30">

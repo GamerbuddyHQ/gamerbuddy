@@ -35,6 +35,7 @@ import {
   Layers,
   Star,
 } from "lucide-react";
+import { SafetyBanner } from "@/components/safety-banner";
 
 const requestSchema = z.object({
   gameName: z.string().min(1, "Game name is required"),
@@ -162,6 +163,8 @@ export default function PostRequest() {
           <span className="text-primary font-semibold">$10.75</span> from your Hiring Wallet.
         </p>
       </div>
+
+      <SafetyBanner variant="compact" showSelfHire storageKey="gb_safety_post" />
 
       {/* Wallet status bar */}
       {!isLoadingWallets && (
