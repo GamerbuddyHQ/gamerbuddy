@@ -7,6 +7,7 @@ import {
   useRequestBids,
   usePlaceBid,
   useAcceptBid,
+  useStartSession,
   useCompleteRequest,
   useBidMessages,
   useSendMessage,
@@ -50,22 +51,47 @@ const REPORT_REASONS = [
   "Other",
 ];
 
-function StarRating({ value, onChange }: { value: number; onChange: (v: number) => void }) {
+const SCORE_LABELS: Record<number, string> = {
+  1: "Terrible", 2: "Very Bad", 3: "Bad", 4: "Below Average", 5: "Average",
+  6: "Good", 7: "Very Good", 8: "Great", 9: "Excellent", 10: "Perfect",
+};
+const SCORE_COLOR: Record<number, string> = {
+  1: "bg-red-600", 2: "bg-red-500", 3: "bg-orange-500", 4: "bg-orange-400",
+  5: "bg-yellow-500", 6: "bg-yellow-400", 7: "bg-lime-500", 8: "bg-green-500",
+  9: "bg-green-400", 10: "bg-emerald-400",
+};
+
+function ScoreRating({ value, onChange }: { value: number; onChange: (v: number) => void }) {
   const [hover, setHover] = useState(0);
+  const active = hover || value;
   return (
-    <div className="flex gap-1">
-      {[1, 2, 3, 4, 5].map((n) => (
-        <button
-          key={n}
-          type="button"
-          onClick={() => onChange(n)}
-          onMouseEnter={() => setHover(n)}
-          onMouseLeave={() => setHover(0)}
-          className="transition-colors"
-        >
-          <Star className={`h-6 w-6 ${n <= (hover || value) ? "text-yellow-400 fill-yellow-400" : "text-muted-foreground"}`} />
-        </button>
-      ))}
+    <div className="space-y-3">
+      <div className="flex gap-1.5 flex-wrap">
+        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => (
+          <button
+            key={n}
+            type="button"
+            onClick={() => onChange(n)}
+            onMouseEnter={() => setHover(n)}
+            onMouseLeave={() => setHover(0)}
+            className={`w-9 h-9 rounded-lg font-black text-sm transition-all duration-100 border
+              ${n <= active
+                ? `${SCORE_COLOR[n] ?? "bg-green-500"} border-transparent text-black scale-110 shadow-lg`
+                : "border-border bg-background/60 text-muted-foreground hover:border-primary/50 hover:text-white"
+              }`}
+          >
+            {n}
+          </button>
+        ))}
+      </div>
+      {active > 0 && (
+        <div className="flex items-center gap-2">
+          <span className={`text-xs font-bold px-2 py-0.5 rounded ${SCORE_COLOR[active]} text-black`}>
+            {active}/10
+          </span>
+          <span className="text-xs text-muted-foreground">{SCORE_LABELS[active]}</span>
+        </div>
+      )}
     </div>
   );
 }
@@ -442,37 +468,52 @@ function GiftPanel({ requestId }: { requestId: number }) {
 function ReviewPanel({ requestId, currentUserId }: { requestId: number; currentUserId: number }) {
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
-  const { data: reviews = [] } = useRequestReviews(requestId);
+  const { data: reviews = [], refetch } = useRequestReviews(requestId);
   const submit = useSubmitReview();
   const { toast } = useToast();
 
   const myReview = reviews.find((r) => r.reviewerId === currentUserId);
 
   if (myReview) {
+    const color = SCORE_COLOR[myReview.rating] ?? "bg-green-500";
+    const label = SCORE_LABELS[myReview.rating] ?? "";
     return (
       <div className="rounded-xl border border-yellow-500/30 bg-yellow-500/5 p-4 space-y-2">
-        <div className="flex items-center gap-2 text-yellow-400 font-bold text-sm">
-          <Star className="h-4 w-4 fill-yellow-400" />
-          You left a review
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 text-yellow-400 font-bold text-sm">
+            <Star className="h-4 w-4 fill-yellow-400" />
+            Your Review
+          </div>
+          <div className="flex items-center gap-2">
+            <span className={`text-sm font-black px-2.5 py-1 rounded ${color} text-black`}>
+              {myReview.rating}/10
+            </span>
+            <span className="text-xs text-muted-foreground">{label}</span>
+          </div>
         </div>
-        <div className="flex gap-0.5">
-          {[1,2,3,4,5].map((n) => (
-            <Star key={n} className={`h-5 w-5 ${n <= myReview.rating ? "text-yellow-400 fill-yellow-400" : "text-muted-foreground"}`} />
-          ))}
+        {myReview.comment && <p className="text-sm text-foreground/80 leading-relaxed border-l-2 border-yellow-500/30 pl-3">{myReview.comment}</p>}
+        <div className="flex items-center gap-1.5 text-xs text-yellow-400/70 pt-1">
+          <Trophy className="h-3.5 w-3.5" />
+          +50 points awarded for reviewing!
         </div>
-        {myReview.comment && <p className="text-sm text-foreground/80">{myReview.comment}</p>}
       </div>
     );
   }
 
   return (
-    <div className="rounded-xl border border-yellow-500/30 bg-yellow-500/5 p-4 space-y-3">
-      <div className="flex items-center gap-2 text-yellow-400 font-bold text-sm">
-        <Star className="h-4 w-4" />
-        Rate this session
+    <div className="rounded-xl border border-yellow-500/30 bg-yellow-500/5 p-4 space-y-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2 text-yellow-400 font-bold text-sm">
+          <Star className="h-4 w-4" />
+          Rate this Session
+        </div>
+        <div className="flex items-center gap-1 text-xs text-yellow-400/60">
+          <Trophy className="h-3.5 w-3.5" />
+          +50 pts on submit
+        </div>
       </div>
-      <p className="text-xs text-muted-foreground">Your review builds trust on the platform and earns you points.</p>
-      <StarRating value={rating} onChange={setRating} />
+      <p className="text-xs text-muted-foreground -mt-1">Rate on a scale of 1–10. Your review affects the other player's Trust Factor.</p>
+      <ScoreRating value={rating} onChange={setRating} />
       <Textarea
         value={comment}
         onChange={(e) => setComment(e.target.value)}
@@ -480,19 +521,25 @@ function ReviewPanel({ requestId, currentUserId }: { requestId: number; currentU
         className="resize-none h-20 bg-background text-sm"
         maxLength={300}
       />
+      <div className="flex items-center justify-between text-xs text-muted-foreground">
+        <span>{comment.length}/300</span>
+      </div>
       <Button
-        className="bg-yellow-500/20 border border-yellow-500/40 text-yellow-400 hover:bg-yellow-500 hover:text-black font-bold uppercase"
+        className="w-full bg-yellow-500/20 border border-yellow-500/40 text-yellow-400 hover:bg-yellow-500 hover:text-black font-bold uppercase tracking-wider"
         onClick={() => {
-          if (!rating) { toast({ title: "Pick a rating", variant: "destructive" }); return; }
+          if (!rating) { toast({ title: "Pick a score first", variant: "destructive" }); return; }
           submit.mutate({ requestId, rating, comment: comment.trim() || undefined }, {
-            onSuccess: () => toast({ title: "Review submitted!", description: "Thank you for your feedback." }),
+            onSuccess: () => {
+              toast({ title: "Review submitted! +50 points", description: `You rated this session ${rating}/10 — ${SCORE_LABELS[rating]}` });
+              refetch();
+            },
             onError: (err: any) => toast({ title: "Error", description: err?.error || "Failed", variant: "destructive" }),
           });
         }}
         disabled={!rating || submit.isPending}
       >
         <Star className="h-4 w-4 mr-1.5" />
-        {submit.isPending ? "Submitting…" : "Submit Review"}
+        {submit.isPending ? "Submitting…" : `Submit Review · ${rating > 0 ? `${rating}/10` : "choose score"}`}
       </Button>
     </div>
   );
@@ -512,12 +559,14 @@ export default function RequestDetail() {
   const [bidPrice, setBidPrice] = useState("");
   const [bidMessage, setBidMessage] = useState("");
   const placeBid = usePlaceBid();
+  const startSession = useStartSession();
   const completeRequest = useCompleteRequest();
 
   const isHirer = user?.id === request?.userId;
   const myBid = bids.find((b: Bid) => b.bidderId === user?.id);
   const acceptedBid = bids.find((b: Bid) => b.status === "accepted");
   const isGamer = myBid?.status === "accepted";
+  const sessionStarted = !!(request as any)?.startedAt;
   const canBid = user && !isHirer && !myBid && request?.status === "open";
   const canReview = user && request?.status === "completed" && (isHirer || isGamer);
 
@@ -541,11 +590,18 @@ export default function RequestDetail() {
     });
   };
 
+  const handleStartSession = () => {
+    startSession.mutate(requestId, {
+      onSuccess: () => toast({ title: "Session Started! 🎮", description: "The hirer has been notified. Play on!" }),
+      onError: (err: any) => toast({ title: "Error", description: err?.error || "Failed", variant: "destructive" }),
+    });
+  };
+
   const handleComplete = () => {
     completeRequest.mutate(requestId, {
       onSuccess: (data: any) => toast({
-        title: "Session Approved!",
-        description: `${data?.gamerPayout ? `$${data.gamerPayout.toFixed(2)} released to gamer (10% platform fee kept). ` : ""}+50 points to both players!`,
+        title: "Payment Approved! 🏆",
+        description: `${data?.gamerPayout ? `$${(data.gamerPayout as number).toFixed(2)} released to gamer. ` : ""}Leave a review to claim your 50 points!`,
       }),
       onError: (err: any) => toast({ title: "Error", description: err?.error || "Failed", variant: "destructive" }),
     });
@@ -637,23 +693,88 @@ export default function RequestDetail() {
             </div>
           )}
 
-          {/* Hirer: complete session */}
-          {isHirer && request.status === "in_progress" && (
-            <div className="rounded-xl border border-green-500/30 bg-green-500/5 p-4 space-y-3">
-              <div className="flex items-center gap-2 text-green-400 font-bold text-sm">
-                <Trophy className="h-4 w-4" />
-                Session in progress — approve when done
+          {/* Gamer: Start Session button */}
+          {isGamer && request.status === "in_progress" && !sessionStarted && (
+            <div className="rounded-xl border border-primary/40 bg-primary/5 p-4 space-y-3">
+              <div className="flex items-center gap-2 text-primary font-bold text-sm">
+                <Swords className="h-4 w-4" />
+                Your bid was accepted — ready to play?
               </div>
               <p className="text-xs text-muted-foreground">
-                Approving releases <strong className="text-white">90%</strong> of the escrowed amount to the gamer (10% platform fee) and awards <strong className="text-white">50 points</strong> to both players.
+                Click <strong className="text-white">Start Session</strong> to let the hirer know you're online and beginning. They'll be able to approve payment once you're done.
               </p>
               <Button
-                className="bg-green-500/20 border border-green-500/40 text-green-400 hover:bg-green-500 hover:text-white font-bold uppercase text-sm"
+                className="bg-primary font-bold uppercase text-sm shadow-[0_0_16px_rgba(168,85,247,0.3)] hover:shadow-[0_0_24px_rgba(168,85,247,0.5)] transition-all"
+                onClick={handleStartSession}
+                disabled={startSession.isPending}
+              >
+                <Swords className="h-4 w-4 mr-2" />
+                {startSession.isPending ? "Starting…" : "Start Session"}
+              </Button>
+            </div>
+          )}
+
+          {/* Gamer: session active */}
+          {isGamer && request.status === "in_progress" && sessionStarted && (
+            <div className="rounded-xl border border-green-500/30 bg-green-500/5 p-4 flex items-center gap-3">
+              <div className="h-2.5 w-2.5 rounded-full bg-green-400 animate-pulse shrink-0" />
+              <div>
+                <div className="text-green-400 font-bold text-sm">Session Active</div>
+                <div className="text-xs text-muted-foreground mt-0.5">Play hard! The hirer will approve payment when you've completed the objectives.</div>
+              </div>
+            </div>
+          )}
+
+          {/* Hirer: waiting for gamer to start */}
+          {isHirer && request.status === "in_progress" && !sessionStarted && (
+            <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-4 space-y-2">
+              <div className="flex items-center gap-2 text-amber-400 font-bold text-sm">
+                <AlertTriangle className="h-4 w-4" />
+                Waiting for gamer to start
+              </div>
+              <p className="text-xs text-muted-foreground">
+                The gamer needs to click <strong className="text-white">Start Session</strong> before you can approve payment. You'll see the approval button once they're ready.
+              </p>
+            </div>
+          )}
+
+          {/* Hirer: approve payment (after session started) */}
+          {isHirer && request.status === "in_progress" && sessionStarted && (
+            <div className="rounded-xl border border-green-500/30 bg-green-500/5 p-4 space-y-3">
+              <div className="flex items-center justify-between gap-3 flex-wrap">
+                <div className="flex items-center gap-2 text-green-400 font-bold text-sm">
+                  <Trophy className="h-4 w-4" />
+                  Session Active — Approve when objectives are met
+                </div>
+                <div className="flex items-center gap-1.5 text-xs text-green-400/60">
+                  <div className="h-2 w-2 rounded-full bg-green-400 animate-pulse" />
+                  Live
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Approving releases <strong className="text-white">90%</strong> of escrow to the gamer (10% platform fee). Both players earn <strong className="text-white">50 points</strong> when they leave a review.
+              </p>
+              <div className="flex items-center gap-2 text-xs text-muted-foreground bg-background/60 rounded-lg border border-border/40 px-3 py-2">
+                <span className="text-white font-bold">
+                  ${((request as any).escrowAmount ?? 0).toFixed(2)}
+                </span>
+                in escrow →
+                <span className="text-green-400 font-bold">
+                  ${(((request as any).escrowAmount ?? 0) * 0.9).toFixed(2)}
+                </span>
+                to gamer +
+                <span className="text-amber-400 font-bold">
+                  ${(((request as any).escrowAmount ?? 0) * 0.1).toFixed(2)}
+                </span>
+                platform fee
+              </div>
+              <Button
+                className="w-full bg-green-500/20 border border-green-500/40 text-green-400 hover:bg-green-500 hover:text-white font-bold uppercase text-sm py-5"
                 onClick={handleComplete}
                 disabled={completeRequest.isPending}
               >
                 <Trophy className="h-4 w-4 mr-2" />
-                {completeRequest.isPending ? "Completing…" : "Approve & Release Payment"}
+                {completeRequest.isPending ? "Approving…" : "Approve Payment & Complete Session"}
               </Button>
             </div>
           )}
@@ -663,7 +784,7 @@ export default function RequestDetail() {
             <div className="rounded-xl border border-secondary/30 bg-secondary/5 p-4 text-center">
               <Star className="h-8 w-8 mx-auto text-secondary mb-2 fill-secondary" />
               <div className="font-bold text-white">Session Completed!</div>
-              <div className="text-xs text-muted-foreground mt-1">90% was released to the gamer · 50 points awarded to both players.</div>
+              <div className="text-xs text-muted-foreground mt-1">90% released to the gamer · Leave a review to earn your 50 points.</div>
             </div>
           )}
         </CardContent>

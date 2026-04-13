@@ -105,6 +105,18 @@ export function useAcceptBid() {
   });
 }
 
+export function useStartSession() {
+  const qc = useQueryClient();
+  return useMutation<any, any, number>({
+    mutationFn: (requestId) =>
+      apiFetch(`${BASE}/requests/${requestId}/start`, { method: "POST" }),
+    onSuccess: (_, requestId) => {
+      qc.invalidateQueries({ queryKey: ["request", requestId] });
+      qc.invalidateQueries({ queryKey: ["my-requests"] });
+    },
+  });
+}
+
 export function useCompleteRequest() {
   const qc = useQueryClient();
   return useMutation<any, any, number>({

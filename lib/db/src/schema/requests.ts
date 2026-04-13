@@ -13,6 +13,7 @@ export const gameRequestsTable = pgTable("game_requests", {
   status: text("status").notNull().default("open"),
   escrowAmount: numeric("escrow_amount", { precision: 10, scale: 2 }),
   acceptedBidId: integer("accepted_bid_id"),
+  startedAt: timestamp("started_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

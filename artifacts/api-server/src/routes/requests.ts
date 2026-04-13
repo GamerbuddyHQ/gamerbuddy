@@ -38,6 +38,8 @@ function formatRequest(
     skillLevel: string;
     objectives: string;
     status: string;
+    escrowAmount?: string | null;
+    startedAt?: Date | null;
     createdAt: Date;
   },
   userName?: string,
@@ -51,6 +53,8 @@ function formatRequest(
     skillLevel: req.skillLevel,
     objectives: req.objectives,
     status: req.status,
+    escrowAmount: req.escrowAmount ? parseFloat(String(req.escrowAmount)) : null,
+    startedAt: req.startedAt ? req.startedAt.toISOString() : null,
     createdAt: req.createdAt.toISOString(),
   };
 }
@@ -125,6 +129,8 @@ router.get("/requests/:id", async (req, res): Promise<void> => {
       skillLevel: gameRequestsTable.skillLevel,
       objectives: gameRequestsTable.objectives,
       status: gameRequestsTable.status,
+      escrowAmount: gameRequestsTable.escrowAmount,
+      startedAt: gameRequestsTable.startedAt,
       createdAt: gameRequestsTable.createdAt,
       userName: usersTable.name,
     })
@@ -354,6 +360,29 @@ router.post("/requests/:id/bids/:bidId/accept", requireAuth, async (req, res): P
   res.json({ success: true, message: "Bid accepted. Funds are held in escrow until session is complete." });
 });
 
+router.post("/requests/:id/start", requireAuth, async (req, res): Promise<void> => {
+  const user = req.user!;
+  const requestId = parseInt(req.params.id);
+  if (isNaN(requestId)) { res.status(400).json({ error: "Invalid request ID" }); return; }
+
+  const [gameRequest] = await db.select().from(gameRequestsTable).where(eq(gameRequestsTable.id, requestId));
+  if (!gameRequest) { res.status(404).json({ error: "Request not found" }); return; }
+  if (gameRequest.status !== "in_progress") { res.status(400).json({ error: "No active session to start" }); return; }
+  if (gameRequest.startedAt) { res.status(400).json({ error: "Session already started" }); return; }
+
+  const [acceptedBid] = await db.select().from(bidsTable).where(and(eq(bidsTable.requestId, requestId), eq(bidsTable.status, "accepted")));
+  if (!acceptedBid || acceptedBid.bidderId !== user.id) {
+    res.status(403).json({ error: "Only the accepted gamer can start the session" });
+    return;
+  }
+
+  const now = new Date();
+  await db.update(gameRequestsTable).set({ startedAt: now }).where(eq(gameRequestsTable.id, requestId));
+
+  req.log.info({ userId: user.id, requestId }, "Session started by gamer");
+  res.json({ success: true, startedAt: now.toISOString(), message: "Session started! The hirer will be notified." });
+});
+
 router.post("/requests/:id/complete", requireAuth, async (req, res): Promise<void> => {
   const user = req.user!;
   const requestId = parseInt(req.params.id);
@@ -363,6 +392,7 @@ router.post("/requests/:id/complete", requireAuth, async (req, res): Promise<voi
   if (!gameRequest) { res.status(404).json({ error: "Request not found" }); return; }
   if (gameRequest.userId !== user.id) { res.status(403).json({ error: "Only the hirer can complete a session" }); return; }
   if (gameRequest.status !== "in_progress") { res.status(400).json({ error: "Request is not in progress" }); return; }
+  if (!gameRequest.startedAt) { res.status(400).json({ error: "The gamer must start the session before you can approve payment" }); return; }
 
   const [acceptedBid] = await db.select().from(bidsTable).where(and(eq(bidsTable.requestId, requestId), eq(bidsTable.status, "accepted")));
 
@@ -371,25 +401,21 @@ router.post("/requests/:id/complete", requireAuth, async (req, res): Promise<voi
   const platformFee = round2(escrow - gamerPayout);
 
   await db.update(gameRequestsTable).set({ status: "completed" }).where(eq(gameRequestsTable.id, requestId));
-  await db.update(usersTable).set({ points: sql`${usersTable.points} + 50` }).where(eq(usersTable.id, user.id));
 
-  if (acceptedBid) {
-    await db.update(usersTable).set({ points: sql`${usersTable.points} + 50` }).where(eq(usersTable.id, acceptedBid.bidderId));
-    if (gamerPayout > 0) {
-      const [gamerWallet] = await db.select().from(walletsTable).where(eq(walletsTable.userId, acceptedBid.bidderId));
-      if (gamerWallet) {
-        await db.update(walletsTable)
-          .set({ earningsBalance: round2(gamerWallet.earningsBalance + gamerPayout) })
-          .where(eq(walletsTable.userId, acceptedBid.bidderId));
-      }
-      await recordTx(acceptedBid.bidderId, "earnings", "session_payout", gamerPayout, `Earnings for session: ${gameRequest.gameName} (90% after fee)`);
+  if (acceptedBid && gamerPayout > 0) {
+    const [gamerWallet] = await db.select().from(walletsTable).where(eq(walletsTable.userId, acceptedBid.bidderId));
+    if (gamerWallet) {
+      await db.update(walletsTable)
+        .set({ earningsBalance: round2(gamerWallet.earningsBalance + gamerPayout) })
+        .where(eq(walletsTable.userId, acceptedBid.bidderId));
     }
+    await recordTx(acceptedBid.bidderId, "earnings", "session_payout", gamerPayout, `Earnings for session: ${gameRequest.gameName} (90% after fee)`);
   }
 
   req.log.info({ userId: user.id, requestId, gamerPayout, platformFee }, "Request completed — payout released");
   res.json({
     success: true,
-    message: "Session approved! Earnings released.",
+    message: "Session approved! Earnings released. Leave a review to earn your 50 points!",
     gamerPayout,
     platformFee,
   });
@@ -471,7 +497,10 @@ router.post("/requests/:id/reviews", requireAuth, async (req, res): Promise<void
   if (existing) { res.status(409).json({ error: "You have already reviewed this session" }); return; }
 
   const { rating, comment } = req.body as { rating?: number; comment?: string };
-  if (!rating || rating < 1 || rating > 5) { res.status(400).json({ error: "Rating must be 1–5" }); return; }
+  if (!rating || !Number.isInteger(rating) || rating < 1 || rating > 10) {
+    res.status(400).json({ error: "Rating must be a whole number from 1 to 10" });
+    return;
+  }
 
   const [review] = await db.insert(reviewsTable).values({
     requestId,
@@ -481,11 +510,16 @@ router.post("/requests/:id/reviews", requireAuth, async (req, res): Promise<void
     comment: comment?.trim() || null,
   }).returning();
 
+  const trustDelta = Math.round((rating - 5) * 2);
   await db.update(usersTable)
-    .set({ trustFactor: sql`LEAST(${usersTable.trustFactor} + ${Math.round((rating - 3) * 5)}, 1000)` })
+    .set({ trustFactor: sql`LEAST(GREATEST(${usersTable.trustFactor} + ${trustDelta}, 0), 1000)` })
     .where(eq(usersTable.id, revieweeId));
 
-  res.status(201).json({ ...review, createdAt: review.createdAt.toISOString() });
+  await db.update(usersTable)
+    .set({ points: sql`${usersTable.points} + 50` })
+    .where(eq(usersTable.id, user.id));
+
+  res.status(201).json({ ...review, createdAt: review.createdAt.toISOString(), pointsAwarded: 50 });
 });
 
 router.post("/requests/:id/gift", requireAuth, async (req, res): Promise<void> => {
