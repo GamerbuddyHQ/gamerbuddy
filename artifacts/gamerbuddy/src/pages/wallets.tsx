@@ -6,13 +6,15 @@ import {
   useWithdrawEarningsWallet,
   getGetDashboardSummaryQueryKey,
 } from "@workspace/api-client-react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import { apiFetch } from "@/lib/bids-api";
 import {
   Wallet,
   ArrowUpFromLine,
@@ -21,19 +23,60 @@ import {
   AlertTriangle,
   CheckCircle2,
   TrendingUp,
+  ArrowDownLeft,
+  ArrowUpRight,
+  ShieldCheck,
+  RefreshCcw,
+  Gift,
+  Gamepad2,
+  Receipt,
 } from "lucide-react";
 
 const MIN_DEPOSIT = 10.75;
 const WITHDRAWAL_THRESHOLD = 100;
 
+interface WalletTx {
+  id: number;
+  wallet: "hiring" | "earnings";
+  type: string;
+  amount: number;
+  description: string;
+  createdAt: string;
+}
+
+const TX_META: Record<string, { label: string; icon: React.ReactNode; color: string; sign: "+" | "-" }> = {
+  deposit:        { label: "Deposit",         icon: <ArrowDownLeft className="h-3.5 w-3.5" />, color: "text-green-400",   sign: "+" },
+  withdrawal:     { label: "Withdrawal",      icon: <ArrowUpRight className="h-3.5 w-3.5" />,  color: "text-amber-400",   sign: "-" },
+  request_fee:    { label: "Request Fee",     icon: <Gamepad2 className="h-3.5 w-3.5" />,       color: "text-red-400",     sign: "-" },
+  escrow_held:    { label: "Escrow Held",     icon: <ShieldCheck className="h-3.5 w-3.5" />,    color: "text-blue-400",    sign: "-" },
+  escrow_refund:  { label: "Escrow Refund",   icon: <RefreshCcw className="h-3.5 w-3.5" />,     color: "text-green-400",   sign: "+" },
+  session_payout: { label: "Session Payout",  icon: <TrendingUp className="h-3.5 w-3.5" />,     color: "text-green-400",   sign: "+" },
+  gift_sent:      { label: "Tip Sent",        icon: <Gift className="h-3.5 w-3.5" />,            color: "text-red-400",     sign: "-" },
+  gift_received:  { label: "Tip Received",    icon: <Gift className="h-3.5 w-3.5" />,            color: "text-green-400",   sign: "+" },
+};
+
+function txMeta(type: string) {
+  return TX_META[type] ?? { label: type, icon: <Receipt className="h-3.5 w-3.5" />, color: "text-muted-foreground", sign: "+" as const };
+}
+
+function useTransactions() {
+  return useQuery<WalletTx[]>({
+    queryKey: ["wallet-transactions"],
+    queryFn: () => apiFetch<WalletTx[]>("/api/wallets/transactions"),
+    staleTime: 10_000,
+  });
+}
+
 export default function WalletsPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [withdrawAmount, setWithdrawAmount] = useState<string>("");
+  const [txFilter, setTxFilter] = useState<"all" | "hiring" | "earnings">("all");
 
   const { data: wallets, isLoading, isError } = useGetWallets({
     query: { queryKey: getGetWalletsQueryKey() },
   });
+  const { data: transactions, isLoading: txLoading } = useTransactions();
 
   const withdrawMutation = useWithdrawEarningsWallet();
 
@@ -58,6 +101,7 @@ export default function WalletsPage() {
         onSuccess: (updated) => {
           queryClient.setQueryData(getGetWalletsQueryKey(), updated);
           queryClient.invalidateQueries({ queryKey: getGetDashboardSummaryQueryKey() });
+          queryClient.invalidateQueries({ queryKey: ["wallet-transactions"] });
           setWithdrawAmount("");
           toast({ title: "Withdrawal Initiated", description: `$${amount.toFixed(2)} will arrive in your account shortly.` });
         },
@@ -86,6 +130,10 @@ export default function WalletsPage() {
 
   const earningsPct = Math.min((wallets.earningsBalance / WITHDRAWAL_THRESHOLD) * 100, 100);
   const remaining = Math.max(WITHDRAWAL_THRESHOLD - wallets.earningsBalance, 0);
+
+  const filteredTxns = (transactions ?? []).filter(
+    (t) => txFilter === "all" || t.wallet === txFilter
+  );
 
   return (
     <div className="max-w-4xl mx-auto space-y-8">
@@ -133,7 +181,6 @@ export default function WalletsPage() {
               </Link>
             </Button>
 
-            {/* No-withdraw notice */}
             <div className="flex items-start gap-2.5 rounded-lg bg-amber-500/5 border border-amber-500/20 p-3 text-xs text-amber-300/80">
               <Ban className="h-4 w-4 shrink-0 mt-0.5 text-amber-400" />
               <span>
@@ -171,7 +218,6 @@ export default function WalletsPage() {
               )}
             </div>
 
-            {/* Progress toward withdrawal threshold */}
             {!wallets.canWithdraw && (
               <div className="space-y-1.5">
                 <div className="flex justify-between text-xs text-muted-foreground">
@@ -263,6 +309,78 @@ export default function WalletsPage() {
               </div>
             </div>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Transaction History */}
+      <Card className="border-border bg-card/40">
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between flex-wrap gap-3">
+            <CardTitle className="text-base uppercase tracking-wider flex items-center gap-2">
+              <Receipt className="h-4 w-4 text-primary" /> Transaction History
+            </CardTitle>
+            <div className="flex gap-1.5">
+              {(["all", "hiring", "earnings"] as const).map((f) => (
+                <Button
+                  key={f}
+                  size="sm"
+                  variant={txFilter === f ? "default" : "outline"}
+                  className={`text-xs uppercase tracking-wide h-7 px-3 ${txFilter === f ? "bg-primary" : ""}`}
+                  onClick={() => setTxFilter(f)}
+                >
+                  {f === "all" ? "All" : f === "hiring" ? "Hiring" : "Earnings"}
+                </Button>
+              ))}
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {txLoading ? (
+            <div className="space-y-3">
+              {[1, 2, 3].map((i) => <Skeleton key={i} className="h-14 w-full" />)}
+            </div>
+          ) : filteredTxns.length === 0 ? (
+            <div className="text-center py-10 text-muted-foreground text-sm">
+              No transactions yet. Deposit funds or complete a session to see history here.
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {filteredTxns.map((tx) => {
+                const meta = txMeta(tx.type);
+                const isCredit = meta.sign === "+";
+                return (
+                  <div
+                    key={tx.id}
+                    className="flex items-center gap-3 p-3 rounded-lg bg-background/40 border border-border/40 hover:border-border/80 transition-colors"
+                  >
+                    <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${isCredit ? "bg-green-500/10 text-green-400" : "bg-red-500/10 text-red-400"}`}>
+                      {meta.icon}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-sm font-semibold text-white">{meta.label}</span>
+                        <Badge
+                          variant="outline"
+                          className={`text-xs py-0 ${tx.wallet === "hiring" ? "border-primary/40 text-primary/70" : "border-secondary/40 text-secondary/70"}`}
+                        >
+                          {tx.wallet === "hiring" ? "Hiring" : "Earnings"}
+                        </Badge>
+                      </div>
+                      <p className="text-xs text-muted-foreground truncate mt-0.5">{tx.description}</p>
+                    </div>
+                    <div className="text-right flex-shrink-0">
+                      <div className={`text-base font-bold tabular-nums ${isCredit ? "text-green-400" : "text-red-400"}`}>
+                        {meta.sign}${tx.amount.toFixed(2)}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {new Date(tx.createdAt).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

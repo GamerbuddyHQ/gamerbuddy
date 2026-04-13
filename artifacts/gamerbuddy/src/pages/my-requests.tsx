@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "wouter";
-import { useGetMyRequests, getGetMyRequestsQueryKey } from "@workspace/api-client-react";
+import { useGetMyRequests, getGetMyRequestsQueryKey, getGetWalletsQueryKey, getGetDashboardSummaryQueryKey } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { useRequestBids, useCompleteRequest, useCancelRequest, useAcceptBid, type Bid } from "@/lib/bids-api";
@@ -51,9 +51,16 @@ function RequestBidsPanel({ requestId, requestStatus }: { requestId: number; req
 
   const handleCancel = () => {
     cancel.mutate(requestId, {
-      onSuccess: () => {
-        toast({ title: "Request Cancelled" });
+      onSuccess: (data: any) => {
+        const refund = data?.refundAmount;
+        toast({
+          title: "Request Cancelled",
+          description: refund && refund > 0 ? `$${Number(refund).toFixed(2)} escrow refunded to your Hiring Wallet.` : undefined,
+        });
         qc.invalidateQueries({ queryKey: getGetMyRequestsQueryKey() });
+        qc.invalidateQueries({ queryKey: getGetWalletsQueryKey() });
+        qc.invalidateQueries({ queryKey: getGetDashboardSummaryQueryKey() });
+        qc.invalidateQueries({ queryKey: ["wallet-transactions"] });
       },
       onError: (err: any) => toast({ title: "Error", description: err?.error, variant: "destructive" }),
     });
@@ -68,15 +75,17 @@ function RequestBidsPanel({ requestId, requestStatus }: { requestId: number; req
     <div className="space-y-3 pt-3 border-t border-border">
       {/* Actions row */}
       <div className="flex flex-wrap gap-2">
-        {requestStatus === "open" && (
+        {(requestStatus === "open" || requestStatus === "in_progress") && (
           <Button
             size="sm"
             variant="destructive"
             className="text-xs font-bold uppercase border-destructive/40 bg-destructive/10 hover:bg-destructive text-destructive hover:text-white"
             onClick={handleCancel}
             disabled={cancel.isPending}
+            title={requestStatus === "in_progress" ? "Escrow will be refunded to your Hiring Wallet" : undefined}
           >
-            <Ban className="h-3.5 w-3.5 mr-1.5" /> Cancel Request
+            <Ban className="h-3.5 w-3.5 mr-1.5" />
+            {requestStatus === "in_progress" ? "Cancel & Refund Escrow" : "Cancel Request"}
           </Button>
         )}
         {requestStatus === "in_progress" && (

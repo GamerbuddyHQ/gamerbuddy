@@ -49,7 +49,7 @@ export type UserProfile = {
   sessionsAsGamer: { requestId: number; gameName: string | null; createdAt: string | null }[];
 };
 
-async function apiFetch<T = any>(url: string, opts?: RequestInit): Promise<T> {
+export async function apiFetch<T = any>(url: string, opts?: RequestInit): Promise<T> {
   const res = await fetch(url, {
     credentials: "include",
     headers: { "Content-Type": "application/json", ...(opts?.headers ?? {}) },

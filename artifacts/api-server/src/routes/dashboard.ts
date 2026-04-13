@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { db, walletsTable, gameRequestsTable } from "@workspace/db";
-import { eq, desc, count } from "drizzle-orm";
+import { eq, desc, count, and } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
 
 const router: IRouter = Router();
@@ -31,7 +31,7 @@ router.get("/dashboard/summary", requireAuth, async (req, res): Promise<void> =>
   const [openCountResult] = await db
     .select({ count: count() })
     .from(gameRequestsTable)
-    .where(eq(gameRequestsTable.userId, user.id));
+    .where(and(eq(gameRequestsTable.userId, user.id), eq(gameRequestsTable.status, "open")));
 
   const hiringBalance = wallet?.hiringBalance ?? 0;
   const earningsBalance = wallet?.earningsBalance ?? 0;

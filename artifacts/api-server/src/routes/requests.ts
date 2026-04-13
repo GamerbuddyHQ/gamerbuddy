@@ -1,11 +1,21 @@
 import { Router, type IRouter } from "express";
-import { db, gameRequestsTable, walletsTable, usersTable, bidsTable, reviewsTable } from "@workspace/db";
+import { db, gameRequestsTable, walletsTable, usersTable, bidsTable, reviewsTable, walletTransactionsTable } from "@workspace/db";
 import { eq, desc, and, sql } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
 
 const router: IRouter = Router();
 
 const MIN_HIRING_BALANCE = 10.75;
+
+function round2(n: number) {
+  return Math.round(n * 100) / 100;
+}
+
+async function recordTx(userId: number, wallet: "hiring" | "earnings", type: string, amount: number, description: string) {
+  await db.insert(walletTransactionsTable).values({
+    userId, wallet, type, amount: String(round2(Math.abs(amount))), description,
+  });
+}
 
 const VALID_PLATFORMS = [
   "PC",
@@ -179,10 +189,13 @@ router.post("/requests", requireAuth, async (req, res): Promise<void> => {
     })
     .returning();
 
+  const newHiringBalance = round2(wallet.hiringBalance - MIN_HIRING_BALANCE);
   await db
     .update(walletsTable)
-    .set({ hiringBalance: wallet.hiringBalance - MIN_HIRING_BALANCE })
+    .set({ hiringBalance: newHiringBalance })
     .where(eq(walletsTable.userId, user.id));
+
+  await recordTx(user.id, "hiring", "request_fee", MIN_HIRING_BALANCE, `Platform fee for posting: ${gameName}`);
 
   req.log.info({ userId: user.id, gameName }, "Game request posted");
   res.status(201).json(formatRequest(gameRequest, user.name));
@@ -324,8 +337,9 @@ router.post("/requests/:id/bids/:bidId/accept", requireAuth, async (req, res): P
 
   const { discordUsername } = req.body as { discordUsername?: string };
 
+  const newHiringBalance = round2(wallet.hiringBalance - bidPrice);
   await db.update(walletsTable)
-    .set({ hiringBalance: wallet.hiringBalance - bidPrice })
+    .set({ hiringBalance: newHiringBalance })
     .where(eq(walletsTable.userId, user.id));
 
   await db.update(bidsTable).set({ status: "accepted", discordUsername: discordUsername?.trim() || null }).where(eq(bidsTable.id, bidId));
@@ -333,6 +347,8 @@ router.post("/requests/:id/bids/:bidId/accept", requireAuth, async (req, res): P
   await db.update(gameRequestsTable)
     .set({ status: "in_progress", escrowAmount: String(bidPrice), acceptedBidId: bidId })
     .where(eq(gameRequestsTable.id, requestId));
+
+  await recordTx(user.id, "hiring", "escrow_held", bidPrice, `Escrow held for session: ${gameRequest.gameName}`);
 
   req.log.info({ userId: user.id, requestId, bidId, escrow: bidPrice }, "Bid accepted — escrow held");
   res.json({ success: true, message: "Bid accepted. Funds are held in escrow until session is complete." });
@@ -350,8 +366,9 @@ router.post("/requests/:id/complete", requireAuth, async (req, res): Promise<voi
 
   const [acceptedBid] = await db.select().from(bidsTable).where(and(eq(bidsTable.requestId, requestId), eq(bidsTable.status, "accepted")));
 
-  const escrow = parseFloat(String(gameRequest.escrowAmount ?? "0"));
-  const gamerPayout = Math.round(escrow * 0.9 * 100) / 100;
+  const escrow = round2(parseFloat(String(gameRequest.escrowAmount ?? "0")));
+  const gamerPayout = round2(escrow * 0.9);
+  const platformFee = round2(escrow - gamerPayout);
 
   await db.update(gameRequestsTable).set({ status: "completed" }).where(eq(gameRequestsTable.id, requestId));
   await db.update(usersTable).set({ points: sql`${usersTable.points} + 50` }).where(eq(usersTable.id, user.id));
@@ -359,18 +376,22 @@ router.post("/requests/:id/complete", requireAuth, async (req, res): Promise<voi
   if (acceptedBid) {
     await db.update(usersTable).set({ points: sql`${usersTable.points} + 50` }).where(eq(usersTable.id, acceptedBid.bidderId));
     if (gamerPayout > 0) {
-      await db.update(walletsTable)
-        .set({ earningsBalance: sql`${walletsTable.earningsBalance} + ${gamerPayout}` })
-        .where(eq(walletsTable.userId, acceptedBid.bidderId));
+      const [gamerWallet] = await db.select().from(walletsTable).where(eq(walletsTable.userId, acceptedBid.bidderId));
+      if (gamerWallet) {
+        await db.update(walletsTable)
+          .set({ earningsBalance: round2(gamerWallet.earningsBalance + gamerPayout) })
+          .where(eq(walletsTable.userId, acceptedBid.bidderId));
+      }
+      await recordTx(acceptedBid.bidderId, "earnings", "session_payout", gamerPayout, `Earnings for session: ${gameRequest.gameName} (90% after fee)`);
     }
   }
 
-  req.log.info({ userId: user.id, requestId, gamerPayout, platformFee: escrow - gamerPayout }, "Request completed — payout released");
+  req.log.info({ userId: user.id, requestId, gamerPayout, platformFee }, "Request completed — payout released");
   res.json({
     success: true,
     message: "Session approved! Earnings released.",
     gamerPayout,
-    platformFee: Math.round((escrow - gamerPayout) * 100) / 100,
+    platformFee,
   });
 });
 
@@ -382,10 +403,28 @@ router.post("/requests/:id/cancel", requireAuth, async (req, res): Promise<void>
   const [gameRequest] = await db.select().from(gameRequestsTable).where(eq(gameRequestsTable.id, requestId));
   if (!gameRequest) { res.status(404).json({ error: "Request not found" }); return; }
   if (gameRequest.userId !== user.id) { res.status(403).json({ error: "Only the hirer can cancel" }); return; }
-  if (!["open"].includes(gameRequest.status)) { res.status(400).json({ error: "Only open requests can be cancelled" }); return; }
+  if (!["open", "in_progress"].includes(gameRequest.status)) {
+    res.status(400).json({ error: "Only open or in-progress requests can be cancelled" });
+    return;
+  }
+
+  let refundAmount = 0;
+
+  if (gameRequest.status === "in_progress" && gameRequest.escrowAmount) {
+    refundAmount = round2(parseFloat(String(gameRequest.escrowAmount)));
+    if (refundAmount > 0) {
+      const [wallet] = await db.select().from(walletsTable).where(eq(walletsTable.userId, user.id));
+      if (wallet) {
+        await db.update(walletsTable)
+          .set({ hiringBalance: round2(wallet.hiringBalance + refundAmount) })
+          .where(eq(walletsTable.userId, user.id));
+        await recordTx(user.id, "hiring", "escrow_refund", refundAmount, `Escrow refunded: ${gameRequest.gameName} (session cancelled)`);
+      }
+    }
+  }
 
   await db.update(gameRequestsTable).set({ status: "cancelled" }).where(eq(gameRequestsTable.id, requestId));
-  res.json({ success: true });
+  res.json({ success: true, refundAmount });
 });
 
 router.get("/requests/:id/reviews", async (req, res): Promise<void> => {
@@ -468,12 +507,20 @@ router.post("/requests/:id/gift", requireAuth, async (req, res): Promise<void> =
   const [acceptedBid] = await db.select().from(bidsTable).where(and(eq(bidsTable.requestId, requestId), eq(bidsTable.status, "accepted")));
   if (!acceptedBid) { res.status(404).json({ error: "No accepted bid found" }); return; }
 
-  await db.update(walletsTable).set({ hiringBalance: wallet.hiringBalance - amount }).where(eq(walletsTable.userId, user.id));
-  await db.update(walletsTable)
-    .set({ earningsBalance: sql`${walletsTable.earningsBalance} + ${amount}` })
-    .where(eq(walletsTable.userId, acceptedBid.bidderId));
+  const giftAmount = round2(amount);
+  const [gamerWalletForGift] = await db.select().from(walletsTable).where(eq(walletsTable.userId, acceptedBid.bidderId));
 
-  res.json({ success: true, message: `Gift of $${amount.toFixed(2)} sent!` });
+  await db.update(walletsTable).set({ hiringBalance: round2(wallet.hiringBalance - giftAmount) }).where(eq(walletsTable.userId, user.id));
+  if (gamerWalletForGift) {
+    await db.update(walletsTable)
+      .set({ earningsBalance: round2(gamerWalletForGift.earningsBalance + giftAmount) })
+      .where(eq(walletsTable.userId, acceptedBid.bidderId));
+  }
+
+  await recordTx(user.id, "hiring", "gift_sent", giftAmount, `Tip/gift sent for session: ${gameRequest.gameName}`);
+  await recordTx(acceptedBid.bidderId, "earnings", "gift_received", giftAmount, `Tip/gift received for session: ${gameRequest.gameName}`);
+
+  res.json({ success: true, message: `Gift of $${giftAmount.toFixed(2)} sent!` });
 });
 
 export default router;
