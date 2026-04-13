@@ -642,17 +642,18 @@ export default function Profile() {
           )}
         </div>
 
-        <div className="bg-card/80 backdrop-blur-sm px-6 pb-5 -mt-px relative">
-          <div className="flex items-end gap-5 -translate-y-10 mb-0">
+        <div className="bg-card/80 backdrop-blur-sm px-4 sm:px-6 pb-5 -mt-px relative">
+          {/* Avatar row — floats up over the banner */}
+          <div className="flex flex-col sm:flex-row sm:items-end gap-3 sm:gap-5 -translate-y-8 sm:-translate-y-10 mb-0">
             <div
-              className="h-24 w-24 rounded-full border-4 border-card flex items-center justify-center shrink-0"
+              className="h-20 w-20 sm:h-24 sm:w-24 rounded-full border-4 border-card flex items-center justify-center shrink-0"
               style={{ background: `linear-gradient(135deg, ${bgAccent.replace("0.6", "0.3")}, rgba(0,0,0,0.8))`, boxShadow: `0 0 24px ${bgAccent}` }}
             >
-              <span className="text-4xl font-black text-white uppercase">{user.name.charAt(0)}</span>
+              <span className="text-3xl sm:text-4xl font-black text-white uppercase">{user.name.charAt(0)}</span>
             </div>
-            <div className="flex-1 min-w-0 pb-1 translate-y-4">
+            <div className="flex-1 min-w-0 sm:pb-1 sm:translate-y-4">
               <div className="flex flex-wrap items-center gap-2 mb-1">
-                <h1 className="text-2xl font-extrabold text-white uppercase tracking-tight leading-none">{user.name}</h1>
+                <h1 className="text-xl sm:text-2xl font-extrabold text-white uppercase tracking-tight leading-none">{user.name}</h1>
                 {titleLabel && (
                   <span className="text-xs font-black uppercase tracking-widest text-primary border border-primary/40 bg-primary/10 px-2.5 py-0.5 rounded-full">
                     {titleLabel}
@@ -674,20 +675,20 @@ export default function Profile() {
             </div>
           </div>
 
-          <div className="-mt-6 space-y-4">
+          <div className="-mt-4 sm:-mt-6 space-y-4">
             <TrustMeter value={trustFactor} />
-            <div className="grid grid-cols-3 gap-3">
-              <div className="p-3 bg-background/50 rounded-xl border border-border text-center space-y-1">
-                <div className="text-2xl font-black text-primary">{points}</div>
+            <div className="grid grid-cols-3 gap-2 sm:gap-3">
+              <div className="p-2.5 sm:p-3 bg-background/50 rounded-xl border border-border text-center space-y-1">
+                <div className="text-xl sm:text-2xl font-black text-primary">{points}</div>
                 <div className="text-[10px] text-muted-foreground uppercase tracking-widest">Points</div>
-                {nextRank && <div className="text-[9px] text-muted-foreground/60">{nextRank.min - points} to {nextRank.label}</div>}
+                {nextRank && <div className="text-[9px] text-muted-foreground/60 hidden sm:block">{nextRank.min - points} to {nextRank.label}</div>}
               </div>
-              <div className="p-3 bg-background/50 rounded-xl border border-border text-center space-y-1">
-                <div className="text-2xl font-black text-secondary">{profile?.sessionsAsHirer?.length ?? 0}</div>
+              <div className="p-2.5 sm:p-3 bg-background/50 rounded-xl border border-border text-center space-y-1">
+                <div className="text-xl sm:text-2xl font-black text-secondary">{profile?.sessionsAsHirer?.length ?? 0}</div>
                 <div className="text-[10px] text-muted-foreground uppercase tracking-widest">Hired</div>
               </div>
-              <div className="p-3 bg-background/50 rounded-xl border border-border text-center space-y-1">
-                <div className="text-2xl font-black text-green-400">{profile?.sessionsAsGamer?.length ?? 0}</div>
+              <div className="p-2.5 sm:p-3 bg-background/50 rounded-xl border border-border text-center space-y-1">
+                <div className="text-xl sm:text-2xl font-black text-green-400">{profile?.sessionsAsGamer?.length ?? 0}</div>
                 <div className="text-[10px] text-muted-foreground uppercase tracking-widest">Played</div>
               </div>
             </div>

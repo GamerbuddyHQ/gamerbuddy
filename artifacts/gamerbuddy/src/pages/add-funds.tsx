@@ -145,7 +145,7 @@ function UPIPanel({
       </div>
 
       {/* QR + amount row */}
-      <div className="flex gap-4 items-start">
+      <div className="flex flex-col sm:flex-row gap-4 items-start">
         <div
           className="shrink-0 rounded-2xl p-2 border border-primary/30"
           style={{ background: "#0a0a0f", boxShadow: "0 0 24px rgba(168,85,247,0.2)" }}
@@ -719,7 +719,7 @@ function TrustBadges() {
     { icon: <Wifi className="h-3.5 w-3.5 text-cyan-400" />, label: "Encrypted" },
   ];
   return (
-    <div className="flex items-center justify-center gap-5 py-3 border-t border-border/30 mt-4">
+    <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 py-3 border-t border-border/30 mt-4">
       {badges.map((b) => (
         <div key={b.label} className="flex items-center gap-1.5 text-[10px] text-muted-foreground/50 uppercase tracking-wider font-semibold">
           {b.icon}{b.label}

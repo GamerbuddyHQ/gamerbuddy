@@ -5,7 +5,7 @@ import { useLogout } from "@workspace/api-client-react";
 import {
   Gamepad2, Compass, LayoutDashboard, Wallet, User as UserIcon,
   LogOut, FileText, Key, Bell, CheckCheck, X, Swords, Star,
-  Trophy, MessageSquare, Zap, CircleDollarSign, ChevronRight,
+  Trophy, MessageSquare, Zap, CircleDollarSign, ChevronRight, Menu,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -103,17 +103,22 @@ function NotificationBell() {
         onClick={() => setOpen(!open)}
         className="relative h-9 w-9 flex items-center justify-center rounded-xl border border-border/60 bg-background/60 hover:border-primary/50 hover:bg-primary/10 transition-all"
       >
-        <Bell className="h-4.5 w-4.5 text-muted-foreground" />
+        <Bell className="h-4 w-4 text-muted-foreground" />
         {unread > 0 && (
-          <span className="absolute -top-1 -right-1 h-4.5 min-w-[1.125rem] px-0.5 rounded-full bg-primary text-white text-[9px] font-black flex items-center justify-center leading-none shadow-[0_0_8px_rgba(168,85,247,0.6)]">
+          <span className="absolute -top-1 -right-1 h-4 min-w-[1rem] px-0.5 rounded-full bg-primary text-white text-[9px] font-black flex items-center justify-center leading-none shadow-[0_0_8px_rgba(168,85,247,0.6)]">
             {unread > 99 ? "99+" : unread}
           </span>
         )}
       </button>
 
       {open && (
-        <div className="absolute right-0 top-11 w-80 rounded-2xl border border-border bg-card shadow-2xl z-[200] overflow-hidden"
-          style={{ boxShadow: "0 20px 60px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.05)" }}>
+        <div
+          className="absolute right-0 top-11 rounded-2xl border border-border bg-card shadow-2xl z-[200] overflow-hidden"
+          style={{
+            width: "min(320px, calc(100vw - 24px))",
+            boxShadow: "0 20px 60px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.05)",
+          }}
+        >
           <div className="h-0.5 bg-gradient-to-r from-transparent via-primary to-transparent" />
 
           <div className="flex items-center justify-between px-4 py-3 border-b border-border/40">
@@ -172,6 +177,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const { user, logout: clearAuth } = useAuth();
   const [location, setLocation] = useLocation();
   const logoutMutation = useLogout();
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  useEffect(() => { setMobileOpen(false); }, [location]);
 
   const handleLogout = () => {
     logoutMutation.mutate(undefined, {
@@ -198,20 +206,21 @@ export function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-[100dvh] flex flex-col bg-background text-foreground font-sans">
       <header className="sticky top-0 z-50 w-full border-b border-border bg-background/80 backdrop-blur-sm">
-        <div className="container flex h-16 items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 text-primary">
+        <div className="container flex h-16 items-center justify-between gap-3">
+          <Link href="/" className="flex items-center gap-2 text-primary shrink-0">
             <Gamepad2 className="h-6 w-6" />
             <span className="font-bold text-xl tracking-tight uppercase">GAMERBUDDY</span>
           </Link>
 
-          <nav className="hidden md:flex gap-6">
+          {/* Desktop nav */}
+          <nav className="hidden md:flex gap-6 flex-1 justify-center">
             {navItems.map((item) => {
               const isActive = location.startsWith(item.href);
               return (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex items-center gap-2 text-sm font-medium transition-colors hover:text-primary ${
+                  className={`flex items-center gap-2 text-sm font-medium transition-colors hover:text-primary whitespace-nowrap ${
                     isActive ? "text-primary" : "text-muted-foreground"
                   }`}
                 >
@@ -222,28 +231,85 @@ export function Layout({ children }: { children: React.ReactNode }) {
             })}
           </nav>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 shrink-0">
             <NotificationBell />
+
+            {/* Desktop auth */}
             {user ? (
-              <Button variant="ghost" size="sm" onClick={handleLogout} className="text-muted-foreground hover:text-destructive">
+              <Button variant="ghost" size="sm" onClick={handleLogout} className="hidden md:flex text-muted-foreground hover:text-destructive">
                 <LogOut className="h-4 w-4 mr-2" />
                 Sign Out
               </Button>
             ) : (
-              <>
+              <div className="hidden md:flex items-center gap-2">
                 <Button variant="ghost" asChild>
                   <Link href="/login">Log In</Link>
                 </Button>
                 <Button asChild className="bg-primary text-primary-foreground hover:bg-primary/90">
                   <Link href="/signup">Sign Up</Link>
                 </Button>
-              </>
+              </div>
             )}
+
+            {/* Hamburger */}
+            <button
+              className="md:hidden h-9 w-9 flex items-center justify-center rounded-xl border border-border/60 bg-background/60 hover:border-primary/50 transition-all"
+              onClick={() => setMobileOpen((o) => !o)}
+              aria-label="Toggle menu"
+            >
+              {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
           </div>
         </div>
       </header>
 
-      <main className="flex-1 container py-8">
+      {/* Mobile menu */}
+      {mobileOpen && (
+        <div className="md:hidden fixed inset-0 top-16 z-40 bg-background/98 backdrop-blur-md overflow-y-auto">
+          <div className="container py-6 space-y-2">
+            {navItems.map((item) => {
+              const isActive = location.startsWith(item.href);
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`flex items-center gap-3 px-4 py-3.5 rounded-xl border font-semibold text-base transition-all ${
+                    isActive
+                      ? "border-primary/40 bg-primary/10 text-primary"
+                      : "border-border/40 text-muted-foreground hover:border-primary/30 hover:text-white hover:bg-card/60"
+                  }`}
+                >
+                  <item.icon className="h-5 w-5 shrink-0" />
+                  {item.label}
+                </Link>
+              );
+            })}
+
+            <div className="pt-4 border-t border-border/40 mt-2">
+              {user ? (
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center gap-3 w-full px-4 py-3.5 rounded-xl border border-destructive/30 text-destructive bg-destructive/5 font-semibold text-base transition-all hover:bg-destructive/10"
+                >
+                  <LogOut className="h-5 w-5 shrink-0" />
+                  Sign Out
+                </button>
+              ) : (
+                <div className="flex flex-col gap-3">
+                  <Button asChild size="lg" className="w-full bg-primary text-primary-foreground font-bold text-base">
+                    <Link href="/signup">Sign Up</Link>
+                  </Button>
+                  <Button asChild size="lg" variant="outline" className="w-full font-bold text-base">
+                    <Link href="/login">Log In</Link>
+                  </Button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      <main className="flex-1 container py-6 md:py-8">
         {children}
       </main>
     </div>

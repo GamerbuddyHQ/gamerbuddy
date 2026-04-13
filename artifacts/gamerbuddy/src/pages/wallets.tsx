@@ -136,16 +136,16 @@ export default function WalletsPage() {
   );
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
+    <div className="max-w-4xl mx-auto space-y-6 md:space-y-8">
       <div>
-        <h1 className="text-3xl font-extrabold uppercase tracking-tight text-white flex items-center gap-3">
-          <Wallet className="h-8 w-8 text-primary" />
+        <h1 className="text-2xl md:text-3xl font-extrabold uppercase tracking-tight text-white flex items-center gap-3">
+          <Wallet className="h-7 w-7 md:h-8 md:w-8 text-primary" />
           My Wallets
         </h1>
-        <p className="text-muted-foreground mt-1">Manage your hiring funds and track your earnings.</p>
+        <p className="text-muted-foreground mt-1 text-sm">Manage your hiring funds and track your earnings.</p>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-6">
+      <div className="grid md:grid-cols-2 gap-4 md:gap-6">
 
         {/* ── HIRING WALLET ── */}
         <Card className="border-primary/30 bg-card/60 overflow-hidden relative">
@@ -160,9 +160,9 @@ export default function WalletsPage() {
             <CardDescription>Funds used to post game requests.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-5">
-            <div className="text-center py-5 rounded-lg bg-background/60 border border-border/40">
+            <div className="text-center py-4 rounded-lg bg-background/60 border border-border/40">
               <div className="text-xs uppercase tracking-widest text-muted-foreground mb-1">Current Balance</div>
-              <div className="text-5xl font-black text-white tabular-nums">${wallets.hiringBalance.toFixed(2)}</div>
+              <div className="text-4xl md:text-5xl font-black text-white tabular-nums">${wallets.hiringBalance.toFixed(2)}</div>
               {wallets.canPostRequest ? (
                 <div className="mt-2 inline-flex items-center gap-1.5 text-xs text-green-400 font-medium">
                   <CheckCircle2 className="h-3.5 w-3.5" /> Ready to post requests
@@ -204,9 +204,9 @@ export default function WalletsPage() {
             <CardDescription>Money earned by fulfilling requests.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-5">
-            <div className="text-center py-5 rounded-lg bg-background/60 border border-border/40">
+            <div className="text-center py-4 rounded-lg bg-background/60 border border-border/40">
               <div className="text-xs uppercase tracking-widest text-muted-foreground mb-1">Current Balance</div>
-              <div className="text-5xl font-black text-white tabular-nums">${wallets.earningsBalance.toFixed(2)}</div>
+              <div className="text-4xl md:text-5xl font-black text-white tabular-nums">${wallets.earningsBalance.toFixed(2)}</div>
               {wallets.canWithdraw ? (
                 <div className="mt-2 inline-flex items-center gap-1.5 text-xs text-green-400 font-medium">
                   <CheckCircle2 className="h-3.5 w-3.5" /> Eligible to withdraw
@@ -240,7 +240,7 @@ export default function WalletsPage() {
             {wallets.canWithdraw && (
               <div className="space-y-3">
                 <Label className="text-xs uppercase tracking-widest text-muted-foreground">Withdraw Amount</Label>
-                <div className="flex gap-2">
+                <div className="flex flex-col sm:flex-row gap-2">
                   <div className="relative flex-1">
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">$</span>
                     <Input
@@ -258,19 +258,17 @@ export default function WalletsPage() {
                     onClick={handleWithdraw}
                     disabled={withdrawMutation.isPending || !withdrawAmount}
                     variant="outline"
-                    className="border-secondary text-secondary hover:bg-secondary hover:text-black font-bold uppercase"
+                    className="border-secondary text-secondary hover:bg-secondary hover:text-black font-bold uppercase h-10 sm:h-auto"
                   >
                     {withdrawMutation.isPending ? "Sending..." : "Withdraw"}
                   </Button>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-xs text-muted-foreground hover:text-white"
+                <button
+                  className="text-xs text-muted-foreground hover:text-white transition-colors"
                   onClick={() => setWithdrawAmount(String(wallets.earningsBalance))}
                 >
                   Withdraw all (${wallets.earningsBalance.toFixed(2)})
-                </Button>
+                </button>
               </div>
             )}
 
@@ -289,22 +287,22 @@ export default function WalletsPage() {
       {/* Summary row */}
       <Card className="border-border bg-card/30">
         <CardContent className="pt-5 pb-5">
-          <div className="grid grid-cols-3 divide-x divide-border text-center">
-            <div className="px-4">
-              <div className="text-xs uppercase tracking-widest text-muted-foreground mb-1">Total Funds</div>
-              <div className="text-xl font-extrabold text-white">
+          <div className="grid grid-cols-3 gap-3 text-center">
+            <div className="px-2 py-2 rounded-lg bg-background/40 border border-border/40">
+              <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">Total</div>
+              <div className="text-lg font-extrabold text-white tabular-nums">
                 ${(wallets.hiringBalance + wallets.earningsBalance).toFixed(2)}
               </div>
             </div>
-            <div className="px-4">
-              <div className="text-xs uppercase tracking-widest text-muted-foreground mb-1">Can Post Requests</div>
-              <div className={`text-xl font-extrabold ${wallets.canPostRequest ? "text-green-400" : "text-destructive"}`}>
+            <div className="px-2 py-2 rounded-lg bg-background/40 border border-border/40">
+              <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">Can Post</div>
+              <div className={`text-lg font-extrabold ${wallets.canPostRequest ? "text-green-400" : "text-destructive"}`}>
                 {wallets.canPostRequest ? "Yes" : "No"}
               </div>
             </div>
-            <div className="px-4">
-              <div className="text-xs uppercase tracking-widest text-muted-foreground mb-1">Can Withdraw</div>
-              <div className={`text-xl font-extrabold ${wallets.canWithdraw ? "text-green-400" : "text-destructive"}`}>
+            <div className="px-2 py-2 rounded-lg bg-background/40 border border-border/40">
+              <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">Withdraw</div>
+              <div className={`text-lg font-extrabold ${wallets.canWithdraw ? "text-green-400" : "text-destructive"}`}>
                 {wallets.canWithdraw ? "Yes" : "No"}
               </div>
             </div>

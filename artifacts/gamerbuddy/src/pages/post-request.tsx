@@ -169,7 +169,7 @@ export default function PostRequest() {
       {/* Wallet status bar */}
       {!isLoadingWallets && (
         <div
-          className={`flex items-center justify-between rounded-xl border px-5 py-3.5 ${
+          className={`flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-xl border px-4 py-3.5 ${
             canPost
               ? "border-green-500/30 bg-green-500/5"
               : "border-destructive/40 bg-destructive/5"
@@ -200,7 +200,7 @@ export default function PostRequest() {
             <Button
               asChild
               size="sm"
-              className="bg-primary text-white font-bold uppercase text-xs tracking-wider"
+              className="bg-primary text-white font-bold uppercase text-xs tracking-wider self-start sm:self-auto"
             >
               <Link href="/add-funds">
                 <Zap className="h-3.5 w-3.5 mr-1.5" />

@@ -245,15 +245,15 @@ function QuickBidPanel({ req, onClose }: { req: GameRequest; onClose: () => void
       )}
 
       {/* Actions */}
-      <div className="flex gap-2.5 pt-1">
-        <Button type="button" variant="outline" size="sm" onClick={onClose} className="text-xs">
+      <div className="flex flex-wrap gap-2.5 pt-1">
+        <Button type="button" variant="outline" size="sm" onClick={onClose} className="text-xs h-10">
           Cancel
         </Button>
         <Button
           type="submit"
           size="sm"
           disabled={!canSubmit}
-          className="bg-primary hover:bg-primary/90 flex-1 font-bold uppercase tracking-wider text-xs shadow-[0_0_16px_rgba(168,85,247,0.25)] disabled:opacity-50 disabled:cursor-not-allowed"
+          className="bg-primary hover:bg-primary/90 flex-1 min-w-[120px] font-bold uppercase tracking-wider text-xs shadow-[0_0_16px_rgba(168,85,247,0.25)] disabled:opacity-50 disabled:cursor-not-allowed h-10"
         >
           {state === "submitting" ? (
             <span className="flex items-center gap-1.5">
@@ -271,7 +271,7 @@ function QuickBidPanel({ req, onClose }: { req: GameRequest; onClose: () => void
           type="button"
           size="sm"
           variant="outline"
-          className="text-xs border-secondary/40 text-secondary hover:bg-secondary hover:text-black"
+          className="text-xs border-secondary/40 text-secondary hover:bg-secondary hover:text-black h-10"
           onClick={() => setLocation(`/requests/${req.id}`)}
         >
           Full Details <ExternalLink className="ml-1 h-3 w-3" />
@@ -361,10 +361,10 @@ function RequestCard({ req }: { req: GameRequest }) {
           </div>
 
           {/* Right: actions */}
-          <div className="flex sm:flex-col items-center sm:items-end gap-2 shrink-0">
+          <div className="flex sm:flex-col items-center sm:items-end gap-2 shrink-0 self-start sm:self-auto">
             <button
               onClick={() => setExpanded(!expanded)}
-              className={`flex items-center gap-1.5 rounded-lg border font-bold uppercase text-xs px-3.5 py-2 transition-all ${
+              className={`flex items-center gap-1.5 rounded-lg border font-bold uppercase text-xs px-3.5 py-2.5 sm:py-2 transition-all ${
                 expanded
                   ? "bg-primary text-white border-primary shadow-[0_0_16px_rgba(168,85,247,0.3)]"
                   : "bg-primary/10 border-primary/40 text-primary hover:bg-primary hover:text-white hover:shadow-[0_0_12px_rgba(168,85,247,0.25)]"
@@ -376,7 +376,7 @@ function RequestCard({ req }: { req: GameRequest }) {
             </button>
             <button
               onClick={() => setLocation(`/requests/${req.id}`)}
-              className="flex items-center gap-1 text-xs text-muted-foreground hover:text-secondary transition-colors font-semibold"
+              className="flex items-center gap-1 text-xs text-muted-foreground hover:text-secondary transition-colors font-semibold whitespace-nowrap"
             >
               Full Details <ArrowRight className="h-3.5 w-3.5" />
             </button>
@@ -481,7 +481,7 @@ export default function Browse() {
 
       {/* Sort bar */}
       {!isLoading && requests && requests.length > 1 && (
-        <div className="flex items-center gap-2 text-xs">
+        <div className="flex flex-wrap items-center gap-2 text-xs">
           <span className="text-muted-foreground font-semibold uppercase tracking-widest">Sort:</span>
           {([
             { value: "newest", label: "Newest" },
@@ -491,7 +491,7 @@ export default function Browse() {
             <button
               key={opt.value}
               onClick={() => setSort(opt.value)}
-              className={`px-3 py-1.5 rounded-lg border font-semibold transition-all ${
+              className={`px-3 py-2 rounded-lg border font-semibold transition-all ${
                 sort === opt.value
                   ? "bg-primary/20 border-primary/50 text-primary"
                   : "border-border/50 text-muted-foreground hover:border-border hover:text-white"
