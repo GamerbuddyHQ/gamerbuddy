@@ -357,3 +357,63 @@ export function usePurchaseItem() {
     },
   });
 }
+
+export type AppNotification = {
+  id: number;
+  userId: number;
+  type: string;
+  title: string;
+  message: string;
+  link: string | null;
+  isRead: boolean;
+  createdAt: string;
+};
+
+export function useNotifications() {
+  return useQuery<AppNotification[]>({
+    queryKey: ["notifications"],
+    queryFn: () => apiFetch(`${BASE}/notifications`),
+    refetchInterval: 30000,
+  });
+}
+
+export function useUnreadCount() {
+  return useQuery<{ count: number }>({
+    queryKey: ["notifications-unread"],
+    queryFn: () => apiFetch(`${BASE}/notifications/unread-count`),
+    refetchInterval: 15000,
+  });
+}
+
+export function useMarkNotificationRead() {
+  const qc = useQueryClient();
+  return useMutation<any, any, number>({
+    mutationFn: (id) => apiFetch(`${BASE}/notifications/${id}/read`, { method: "POST" }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["notifications"] });
+      qc.invalidateQueries({ queryKey: ["notifications-unread"] });
+    },
+  });
+}
+
+export function useMarkAllRead() {
+  const qc = useQueryClient();
+  return useMutation<any, any, void>({
+    mutationFn: () => apiFetch(`${BASE}/notifications/read-all`, { method: "POST" }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["notifications"] });
+      qc.invalidateQueries({ queryKey: ["notifications-unread"] });
+    },
+  });
+}
+
+export function useDeleteNotification() {
+  const qc = useQueryClient();
+  return useMutation<any, any, number>({
+    mutationFn: (id) => apiFetch(`${BASE}/notifications/${id}`, { method: "DELETE" }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["notifications"] });
+      qc.invalidateQueries({ queryKey: ["notifications-unread"] });
+    },
+  });
+}

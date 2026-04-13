@@ -2,6 +2,7 @@ import { Router, type IRouter } from "express";
 import { db, gameRequestsTable, walletsTable, usersTable, bidsTable, reviewsTable, walletTransactionsTable } from "@workspace/db";
 import { eq, desc, and, sql } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
+import { createNotification, sendEmailNotification } from "../notifications-helper";
 
 const router: IRouter = Router();
 
@@ -315,6 +316,16 @@ router.post("/requests/:id/bids", requireAuth, async (req, res): Promise<void> =
     .returning();
 
   req.log.info({ userId: user.id, requestId, price }, "Bid placed");
+
+  // Notify the request owner about the new bid
+  void createNotification({
+    userId: gameRequest.userId,
+    type: "new_bid",
+    title: "New Bid Received",
+    message: `${user.name} placed a bid of $${price.toFixed(2)} on your ${gameRequest.gameName} request.`,
+    link: `/requests/${requestId}`,
+  });
+
   res.status(201).json(formatBid(bid, user.name));
 });
 
@@ -355,6 +366,15 @@ router.post("/requests/:id/bids/:bidId/accept", requireAuth, async (req, res): P
 
   await recordTx(user.id, "hiring", "escrow_held", bidPrice, `Escrow held for session: ${gameRequest.gameName}`);
 
+  // Notify the accepted gamer
+  void createNotification({
+    userId: bid.bidderId,
+    type: "bid_accepted",
+    title: "Your Bid Was Accepted! 🎮",
+    message: `${user.name} accepted your bid of $${bidPrice.toFixed(2)} for ${gameRequest.gameName}. Head to the session to get started!`,
+    link: `/requests/${requestId}`,
+  });
+
   req.log.info({ userId: user.id, requestId, bidId, escrow: bidPrice }, "Bid accepted — escrow held");
   res.json({ success: true, message: "Bid accepted. Funds are held in escrow until session is complete." });
 });
@@ -377,6 +397,15 @@ router.post("/requests/:id/start", requireAuth, async (req, res): Promise<void> 
 
   const now = new Date();
   await db.update(gameRequestsTable).set({ startedAt: now }).where(eq(gameRequestsTable.id, requestId));
+
+  // Notify the hirer that the session has started
+  void createNotification({
+    userId: gameRequest.userId,
+    type: "session_started",
+    title: "Session Started! 🎮",
+    message: `The gamer has started the ${gameRequest.gameName} session. You'll be able to approve payment once they're done.`,
+    link: `/requests/${requestId}`,
+  });
 
   req.log.info({ userId: user.id, requestId }, "Session started by gamer");
   res.json({ success: true, startedAt: now.toISOString(), message: "Session started! The hirer will be notified." });
@@ -412,6 +441,34 @@ router.post("/requests/:id/complete", requireAuth, async (req, res): Promise<voi
     }
     await recordTx(acceptedBid.bidderId, "earnings", "session_payout", gamerPayout, `Earnings for session: ${gameRequest.gameName} (90% after fee)`);
   }
+
+  // Notify the gamer that payment has been released
+  if (acceptedBid) {
+    const [gamerUser] = await db.select({ email: usersTable.email, name: usersTable.name }).from(usersTable).where(eq(usersTable.id, acceptedBid.bidderId));
+    void createNotification({
+      userId: acceptedBid.bidderId,
+      type: "payment_released",
+      title: "Payment Released! 💸",
+      message: `$${gamerPayout.toFixed(2)} has been released to your Earnings wallet for ${gameRequest.gameName}. Leave a review to earn 50 bonus points!`,
+      link: `/requests/${requestId}`,
+    });
+    if (gamerUser) {
+      void sendEmailNotification({
+        to: gamerUser.email,
+        subject: `Payment of $${gamerPayout.toFixed(2)} received — Gamerbuddy`,
+        body: `Hi ${gamerUser.name},\n\n$${gamerPayout.toFixed(2)} has been added to your Earnings wallet for your ${gameRequest.gameName} session.\n\nLeave a review to earn 50 bonus points!\n\nGamerbuddy`,
+      });
+    }
+  }
+
+  // Also notify the hirer to leave their review
+  void createNotification({
+    userId: user.id,
+    type: "payment_released",
+    title: "Payment Approved — Review Required",
+    message: `You released $${gamerPayout.toFixed(2)} for ${gameRequest.gameName}. Leave a review now to earn 50 points!`,
+    link: `/requests/${requestId}`,
+  });
 
   req.log.info({ userId: user.id, requestId, gamerPayout, platformFee }, "Payment released — awaiting reviews");
   res.json({
@@ -523,6 +580,15 @@ router.post("/requests/:id/reviews", requireAuth, async (req, res): Promise<void
     .set({ trustFactor: sql`LEAST(GREATEST(${usersTable.trustFactor} + ${trustDelta}, 0), 1000)` })
     .where(eq(usersTable.id, revieweeId));
 
+  // Notify the reviewee about the new review
+  void createNotification({
+    userId: revieweeId,
+    type: "review_received",
+    title: "You Received a Review",
+    message: `${user.name} rated the ${gameRequest.gameName} session ${rating}/10.${comment?.trim() ? ` "${comment.trim().slice(0, 60)}${comment.trim().length > 60 ? "…" : ""}"` : ""}`,
+    link: `/requests/${requestId}`,
+  });
+
   // Check if both hirer AND gamer have now submitted reviews
   const allReviews = await db.select().from(reviewsTable).where(eq(reviewsTable.requestId, requestId));
   const hirerId = gameRequest.userId;
@@ -545,6 +611,24 @@ router.post("/requests/:id/reviews", requireAuth, async (req, res): Promise<void
       await db.update(usersTable)
         .set({ points: sql`${usersTable.points} + 50` })
         .where(eq(usersTable.id, gamerId));
+    }
+
+    // Notify both parties that the session is fully complete
+    void createNotification({
+      userId: hirerId,
+      type: "session_complete",
+      title: "Session Complete! +50 Points 🏆",
+      message: `The ${gameRequest.gameName} session is fully complete. Both reviews received — 50 points added to your account!`,
+      link: `/requests/${requestId}`,
+    });
+    if (gamerId != null) {
+      void createNotification({
+        userId: gamerId,
+        type: "session_complete",
+        title: "Session Complete! +50 Points 🏆",
+        message: `The ${gameRequest.gameName} session is fully complete. Both reviews received — 50 points added to your account!`,
+        link: `/requests/${requestId}`,
+      });
     }
 
     req.log.info({ requestId, hirerId, gamerId }, "Both reviews submitted — session completed, 50 pts awarded each");

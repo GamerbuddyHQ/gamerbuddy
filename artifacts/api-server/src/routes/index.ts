@@ -7,6 +7,7 @@ import dashboardRouter from "./dashboard";
 import messagesRouter from "./messages";
 import reportsRouter from "./reports";
 import usersRouter from "./users";
+import notificationsRouter from "./notifications";
 
 const router: IRouter = Router();
 
@@ -18,5 +19,6 @@ router.use(dashboardRouter);
 router.use(messagesRouter);
 router.use(reportsRouter);
 router.use(usersRouter);
+router.use(notificationsRouter);
 
 export default router;
