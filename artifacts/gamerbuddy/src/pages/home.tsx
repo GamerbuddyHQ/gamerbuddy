@@ -169,34 +169,24 @@ export default function Home() {
   return (
     <div className="overflow-x-hidden">
       {/* ═══════════════════ HERO ═══════════════════ */}
-      <section className="relative min-h-[92vh] flex flex-col items-center justify-center text-center px-4 overflow-hidden">
+      <section className="relative flex flex-col items-center justify-center text-center px-4 pt-16 pb-20 overflow-hidden">
         {/* animated canvas particles */}
         <ParticleCanvas />
 
-        {/* background orbs */}
+        {/* background orbs — softened, warmer */}
         <div
-          className="absolute top-[-10%] left-[-5%] w-[55vw] h-[55vw] max-w-[680px] max-h-[680px] rounded-full pointer-events-none"
+          className="absolute top-[-5%] left-[-8%] w-[50vw] h-[50vw] max-w-[600px] max-h-[600px] rounded-full pointer-events-none"
           style={{
-            background: "radial-gradient(circle, rgba(168,85,247,0.18) 0%, transparent 65%)",
-            animation: "float-slow 9s ease-in-out infinite",
+            background: "radial-gradient(circle, rgba(168,85,247,0.13) 0%, transparent 65%)",
+            animation: "float-slow 10s ease-in-out infinite",
             zIndex: 0,
-            filter: "blur(2px)",
           }}
         />
         <div
-          className="absolute bottom-[5%] right-[-8%] w-[45vw] h-[45vw] max-w-[560px] max-h-[560px] rounded-full pointer-events-none"
+          className="absolute bottom-[0%] right-[-5%] w-[40vw] h-[40vw] max-w-[500px] max-h-[500px] rounded-full pointer-events-none"
           style={{
-            background: "radial-gradient(circle, rgba(34,211,238,0.13) 0%, transparent 65%)",
-            animation: "float-slow-reverse 11s ease-in-out infinite",
-            zIndex: 0,
-            filter: "blur(2px)",
-          }}
-        />
-        <div
-          className="absolute top-[40%] left-[30%] w-[30vw] h-[30vw] max-w-[380px] max-h-[380px] rounded-full pointer-events-none"
-          style={{
-            background: "radial-gradient(circle, rgba(168,85,247,0.08) 0%, transparent 70%)",
-            animation: "float-slow 14s ease-in-out infinite 3s",
+            background: "radial-gradient(circle, rgba(34,211,238,0.09) 0%, transparent 65%)",
+            animation: "float-slow-reverse 12s ease-in-out infinite",
             zIndex: 0,
           }}
         />
@@ -205,97 +195,85 @@ export default function Home() {
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            backgroundImage: "radial-gradient(circle, rgba(168,85,247,0.12) 1px, transparent 1px)",
-            backgroundSize: "40px 40px",
+            backgroundImage: "radial-gradient(circle, rgba(168,85,247,0.09) 1px, transparent 1px)",
+            backgroundSize: "44px 44px",
             zIndex: 0,
-            maskImage: "radial-gradient(ellipse 80% 60% at 50% 50%, black 30%, transparent 100%)",
-          }}
-        />
-
-        {/* subtle warm accent line at bottom of hero */}
-        <div
-          className="absolute bottom-32 left-1/2 -translate-x-1/2 w-2/3 max-w-md h-px pointer-events-none"
-          style={{
-            background: "linear-gradient(90deg, transparent, rgba(168,85,247,0.25), rgba(34,211,238,0.15), transparent)",
-            zIndex: 1,
+            maskImage: "radial-gradient(ellipse 70% 60% at 50% 40%, black 20%, transparent 100%)",
           }}
         />
 
         {/* content */}
-        <div className="relative space-y-6 max-w-3xl mx-auto" style={{ zIndex: 2 }}>
-          {/* eyebrow badge — warm, friendly, not crypto */}
-          <div
-            className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-semibold"
-            style={{
-              background: "rgba(168,85,247,0.12)",
-              border: "1px solid rgba(168,85,247,0.25)",
-              color: "#d8b4fe",
-            }}
-          >
-            <Gamepad2 className="h-4 w-4" />
-            The Co-op Gaming Marketplace
+        <div className="relative max-w-3xl mx-auto w-full" style={{ zIndex: 2 }}>
+
+          {/* eyebrow badge */}
+          <div className="flex justify-center mb-6">
+            <div
+              className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-medium"
+              style={{
+                background: "rgba(168,85,247,0.1)",
+                border: "1px solid rgba(168,85,247,0.22)",
+                color: "#c4b5fd",
+              }}
+            >
+              <Gamepad2 className="h-3.5 w-3.5" />
+              The Co-op Gaming Marketplace
+            </div>
           </div>
 
-          {/* headline — friendly mixed case, not all-caps aggressive */}
-          <h1 className="text-4xl sm:text-6xl md:text-7xl font-black tracking-tight leading-[1.05]">
-            <span className="block text-white">
+          {/* headline — solid colors, no background-clip (avoids purple block bug) */}
+          <h1 className="font-black tracking-tight leading-tight mb-5">
+            <span
+              className="block text-white text-4xl sm:text-6xl md:text-7xl"
+              style={{ textShadow: "0 2px 20px rgba(255,255,255,0.08)" }}
+            >
               Find Your Perfect
             </span>
             <span
-              className="relative block"
+              className="block text-4xl sm:text-6xl md:text-7xl"
               style={{
-                background: "linear-gradient(90deg, #c084fc 0%, #a855f7 55%, #818cf8 100%)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                backgroundClip: "text",
+                color: "#b87ef7",
+                textShadow: "0 0 40px rgba(168,85,247,0.55), 0 2px 12px rgba(168,85,247,0.3)",
               }}
             >
-              Gaming Buddy
+              Gaming Partner
             </span>
           </h1>
 
-          {/* subheadline — warm, complete thought */}
-          <p className="text-base sm:text-lg text-white/65 max-w-2xl mx-auto leading-relaxed">
-            Hire skilled and friendly gamers for co-op and multiplayer sessions.
+          {/* subheadline */}
+          <p className="text-base sm:text-lg leading-relaxed mb-8 mx-auto max-w-2xl"
+            style={{ color: "rgba(255,255,255,0.6)" }}
+          >
+            Hire skilled &amp; friendly gamers for co-op and multiplayer.
             No more toxic randoms.{" "}
-            <span className="text-white/85 font-semibold">Real teammates. Real fun.</span>
+            <span style={{ color: "rgba(255,255,255,0.85)", fontWeight: 600 }}>
+              Real teammates. Real fun.
+            </span>
           </p>
 
-          {/* CTA buttons — clear action hierarchy */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-1">
+          {/* CTA buttons */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-8">
             <Link href="/signup">
               <button
-                className="relative overflow-hidden group w-full sm:w-auto px-8 py-3.5 rounded-2xl font-bold text-base text-white transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                className="group w-full sm:w-auto px-8 py-3.5 rounded-2xl font-bold text-base text-white transition-all duration-200 hover:brightness-110 active:scale-[0.98]"
                 style={{
                   background: "linear-gradient(135deg, #9333ea 0%, #7c3aed 100%)",
-                  boxShadow: "0 4px 24px rgba(147,51,234,0.35), 0 2px 8px rgba(0,0,0,0.3)",
+                  boxShadow: "0 4px 20px rgba(147,51,234,0.4), 0 1px 4px rgba(0,0,0,0.3)",
                 }}
               >
-                <span className="relative z-10 flex items-center justify-center gap-2">
+                <span className="flex items-center justify-center gap-2">
                   <Users className="h-4 w-4" />
                   Find a Teammate
                 </span>
-                <div
-                  className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
-                  style={{ background: "linear-gradient(135deg, #a855f7 0%, #8b5cf6 100%)" }}
-                />
               </button>
             </Link>
 
             <Link href="/browse">
               <button
-                className="group w-full sm:w-auto px-8 py-3.5 rounded-2xl font-semibold text-base text-white/75 hover:text-white transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                className="group w-full sm:w-auto px-8 py-3.5 rounded-2xl font-semibold text-base transition-all duration-200 hover:brightness-125 active:scale-[0.98]"
                 style={{
-                  background: "rgba(255,255,255,0.06)",
-                  border: "1.5px solid rgba(255,255,255,0.14)",
-                }}
-                onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,0.1)";
-                  (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(255,255,255,0.25)";
-                }}
-                onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,0.06)";
-                  (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(255,255,255,0.14)";
+                  background: "rgba(255,255,255,0.07)",
+                  border: "1.5px solid rgba(255,255,255,0.15)",
+                  color: "rgba(255,255,255,0.72)",
                 }}
               >
                 <span className="flex items-center justify-center gap-2">
@@ -306,33 +284,33 @@ export default function Home() {
             </Link>
           </div>
 
-          {/* trust bar — plain text, warm and human */}
-          <div className="space-y-2 pt-2">
-            <div className="flex items-center justify-center gap-2 text-sm text-white/55">
-              <div className="flex items-center gap-0.5 shrink-0">
+          {/* trust bar */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-center gap-2">
+              <div className="flex items-center gap-0.5">
                 {[...Array(5)].map((_, i) => (
                   <Star key={i} className="h-3 w-3 fill-yellow-400 text-yellow-400" />
                 ))}
               </div>
-              <span>
-                <span className="font-semibold text-white/75">2,450+ gamers</span>
+              <span className="text-sm" style={{ color: "rgba(255,255,255,0.5)" }}>
+                <span style={{ color: "rgba(255,255,255,0.75)", fontWeight: 600 }}>2,450+ gamers</span>
                 {" "}already found their squad
               </span>
             </div>
-            <div className="flex items-center justify-center gap-2 text-xs text-white/35 flex-wrap">
+            <div className="flex items-center justify-center gap-2 flex-wrap" style={{ color: "rgba(255,255,255,0.3)" }}>
               {["PC", "PlayStation", "Xbox", "Switch", "Mobile"].map((p, i, arr) => (
                 <React.Fragment key={p}>
-                  <span>{p}</span>
-                  {i < arr.length - 1 && <span className="text-white/15">·</span>}
+                  <span className="text-xs">{p}</span>
+                  {i < arr.length - 1 && <span className="text-xs" style={{ color: "rgba(255,255,255,0.12)" }}>·</span>}
                 </React.Fragment>
               ))}
             </div>
           </div>
         </div>
 
-        {/* bottom fade */}
+        {/* bottom fade into next section */}
         <div
-          className="absolute bottom-0 left-0 right-0 h-32 pointer-events-none"
+          className="absolute bottom-0 left-0 right-0 h-24 pointer-events-none"
           style={{
             background: "linear-gradient(to bottom, transparent, hsl(var(--background)))",
             zIndex: 2,
