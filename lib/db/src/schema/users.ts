@@ -13,6 +13,8 @@ export const usersTable = pgTable("users", {
   points: integer("points").notNull().default(0),
   bio: text("bio"),
   trustFactor: integer("trust_factor").notNull().default(100),
+  profileBackground: text("profile_background"),
+  profileTitle: text("profile_title"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

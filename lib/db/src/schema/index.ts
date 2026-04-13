@@ -7,3 +7,4 @@ export * from "./messages";
 export * from "./reviews";
 export * from "./reports";
 export * from "./transactions";
+export * from "./profile_purchases";

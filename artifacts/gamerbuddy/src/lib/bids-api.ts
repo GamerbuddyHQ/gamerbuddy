@@ -34,6 +34,14 @@ export type Review = {
   createdAt: string;
 };
 
+export type ShopItem = {
+  id: string;
+  type: "background" | "title";
+  label: string;
+  cost: number;
+  description: string;
+};
+
 export type UserProfile = {
   id: number;
   name: string;
@@ -41,12 +49,15 @@ export type UserProfile = {
   trustFactor: number;
   points: number;
   idVerified: boolean;
+  profileBackground: string | null;
+  profileTitle: string | null;
   createdAt: string;
   avgRating: number | null;
   reviewCount: number;
   reviews: Review[];
-  sessionsAsHirer: { id: number; gameName: string; createdAt: string }[];
-  sessionsAsGamer: { requestId: number; gameName: string | null; createdAt: string | null }[];
+  sessionsAsHirer: { id: number; gameName: string; platform?: string; createdAt: string }[];
+  sessionsAsGamer: { requestId: number; gameName: string | null; platform?: string | null; createdAt: string | null }[];
+  purchasedItems: string[];
 };
 
 export async function apiFetch<T = any>(url: string, opts?: RequestInit): Promise<T> {
@@ -236,6 +247,44 @@ export function useUpdateBio() {
       }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["auth-me"] });
+    },
+  });
+}
+
+export function useUpdateProfile() {
+  const qc = useQueryClient();
+  return useMutation<any, any, { bio?: string; profileBackground?: string | null; profileTitle?: string | null }>({
+    mutationFn: (updates) =>
+      apiFetch(`${BASE}/profile`, {
+        method: "PATCH",
+        body: JSON.stringify(updates),
+      }),
+    onSuccess: (_data, _vars, _ctx) => {
+      qc.invalidateQueries({ queryKey: ["auth-me"] });
+      qc.invalidateQueries({ queryKey: ["user-profile"] });
+    },
+  });
+}
+
+export function useShopItems() {
+  return useQuery<ShopItem[]>({
+    queryKey: ["shop-items"],
+    queryFn: () => apiFetch(`${BASE}/profile/shop`),
+    staleTime: Infinity,
+  });
+}
+
+export function usePurchaseItem() {
+  const qc = useQueryClient();
+  return useMutation<{ success: boolean; newPoints: number }, any, string>({
+    mutationFn: (itemId) =>
+      apiFetch(`${BASE}/profile/purchase`, {
+        method: "POST",
+        body: JSON.stringify({ itemId }),
+      }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["auth-me"] });
+      qc.invalidateQueries({ queryKey: ["user-profile"] });
     },
   });
 }

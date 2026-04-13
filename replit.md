@@ -31,48 +31,68 @@ A full-stack gaming marketplace web app where users can hire other gamers to pla
 
 1. **Authentication**: Signup (name, email, password, phone, official ID upload) + Login with session cookies
 2. **Two Wallets**:
-   - Hiring Wallet: deposit only (min $10.75, max $1000) — used to post requests
+   - Hiring Wallet: deposit only (min $10.75, max $1000) — used to post requests and escrow bids
    - Earnings Wallet: withdraw only when balance >= $100
-3. **Game Requests**: Post requests with game name, platform, skill level, and objectives (requires $10.75 in hiring wallet)
-4. **Browse**: Public feed of all open requests with filters
+3. **Game Requests + Bidding**: Post requests → gamers bid → hirer accepts (escrow) → gamer starts → hirer approves → payout (90%/10% fee)
+4. **Session Flow**: open → bid accepted (Discord + escrow) → in_progress → gamer "Start Session" → hirer approves → completed → both review
+5. **Reviews**: 1–10 score system; trust factor delta = `(rating-5)*2` capped 0–1000; +50 pts to reviewer
+6. **Private Chat**: per-bid chat polling every 4s
+7. **Wallet Transactions**: full history with type filtering
+8. **Points Shop**: buy backgrounds (200–500 pts) and titles (100–200 pts), equip to customize profile
+9. **Steam-Style Profile**: animated banner (equipped background), rank badges, bio editing, session history, reviews received
+10. **Game Key Shop**: browse and purchase game keys with Earnings Wallet
+11. **Reports**: report users with reason + description
+12. **Gift/Tip**: send tips to gamers after sessions
+13. **Safety Banner**: platform safety warnings on request pages
 
 ## Database Schema
 
-- `users` — user accounts (name, email, passwordHash, phone, officialIdPath, idVerified)
-- `wallets` — per-user wallet (hiringBalance, earningsBalance)
-- `sessions` — session tokens for auth
-- `game_requests` — game hire requests (gameName, platform, skillLevel, objectives, status)
+- `users` — accounts + points, trustFactor, bio, profileBackground, profileTitle
+- `wallets` — hiringBalance, earningsBalance (doublePrecision)
+- `wallet_transactions` — all money movements (type, amount, description)
+- `sessions` — session tokens (7-day expiry)
+- `game_requests` — requests with escrowAmount, acceptedBidId, startedAt
+- `bids` — bids with discordUsername
+- `messages` — per-bid private chat
+- `reviews` — 1–10 ratings
+- `reports` — user reports
+- `profile_purchases` — items bought from points shop
 
 ## Key Commands
 
 - `pnpm run typecheck` — full typecheck across all packages
 - `pnpm run build` — typecheck + build all packages
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas
-- `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
 
 ## API Routes
 
 - `POST /api/auth/signup` — register (multipart/form-data)
-- `POST /api/auth/login` — login
-- `POST /api/auth/logout` — logout
-- `GET /api/auth/me` — get current user
-- `GET /api/wallets` — get wallet balances
-- `POST /api/wallets/deposit` — add to hiring wallet
-- `POST /api/wallets/withdraw` — withdraw from earnings wallet
-- `GET /api/requests` — list all requests (filterable)
-- `POST /api/requests` — create a new request
-- `GET /api/requests/my` — current user's requests
-- `GET /api/requests/:id` — get request by ID
-- `GET /api/dashboard/summary` — dashboard summary
+- `POST /api/auth/login` / `POST /api/auth/logout` / `GET /api/auth/me`
+- `GET /api/wallets` / `POST /api/wallets/deposit` / `POST /api/wallets/withdraw` / `GET /api/wallets/transactions`
+- `GET /api/requests` / `POST /api/requests` / `GET /api/requests/my` / `GET /api/requests/:id`
+- `POST /api/requests/:id/bids` / `POST /api/requests/:id/bids/:bidId/accept`
+- `POST /api/requests/:id/start` (gamer) / `POST /api/requests/:id/complete` (hirer)
+- `POST /api/requests/:id/cancel` / `GET /api/requests/:id/reviews` / `POST /api/requests/:id/reviews`
+- `POST /api/requests/:id/gift`
+- `GET /api/bids/:bidId/messages` / `POST /api/bids/:bidId/messages`
+- `GET /api/users/:id` — public profile with purchases
+- `PATCH /api/profile` — update bio, profileBackground, profileTitle
+- `GET /api/profile/shop` — all shop items
+- `GET /api/profile/purchases` — user's purchases
+- `POST /api/profile/purchase` — spend points on an item
+- `POST /api/reports` — report a user
+- `GET /api/dashboard/summary`
 
 ## Pages
 
 - `/` — Landing/home page
-- `/login` — Login form
-- `/signup` — Signup form with file upload
-- `/dashboard` — Dashboard (wallets + recent requests)
-- `/browse` — Browse all open requests
-- `/my-requests` — User's requests
-- `/post-request` — Post a new request form
-- `/wallets` — Wallet management
-- `/profile` — User profile
+- `/login` / `/signup` — Auth forms
+- `/dashboard` — Dashboard (wallets + open requests count)
+- `/browse` — Browse open requests
+- `/my-requests` — User's requests (with cancel + session flow)
+- `/requests/:id` — Request detail (bids, chat, session flow, reviews, gift)
+- `/post-request` — Create new request
+- `/wallets` — Wallet management + transaction history
+- `/profile` — Steam-style profile (banner, badges, bio, shop, history, reviews)
+- `/shop` — Game Key Shop
+- `/add-funds` — Add funds to hiring wallet

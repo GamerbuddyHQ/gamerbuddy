@@ -18,6 +18,8 @@ function formatUser(user: {
   phone: string;
   idVerified: boolean;
   points: number;
+  profileBackground?: string | null;
+  profileTitle?: string | null;
   createdAt: Date;
 }) {
   return {
@@ -27,6 +29,8 @@ function formatUser(user: {
     phone: user.phone,
     idVerified: user.idVerified,
     points: user.points,
+    profileBackground: user.profileBackground ?? null,
+    profileTitle: user.profileTitle ?? null,
     createdAt: user.createdAt.toISOString(),
   };
 }
