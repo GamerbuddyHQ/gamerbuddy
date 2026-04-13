@@ -197,7 +197,7 @@ export function useBidMessages(bidId: number | null) {
     queryKey: bidId ? bidKeys.messages(bidId) : ["messages", null],
     queryFn: () => apiFetch(`${BASE}/bids/${bidId}/messages`),
     enabled: !!bidId,
-    refetchInterval: 4000,
+    refetchInterval: 60000,
   });
 }
 

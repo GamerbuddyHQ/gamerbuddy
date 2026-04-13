@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useParams, useLocation, Link } from "wouter";
 import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
@@ -19,6 +19,7 @@ import {
   type Bid,
   type ChatMessage,
 } from "@/lib/bids-api";
+import { getSocket } from "@/lib/socket";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,6 +30,7 @@ import {
   ArrowLeft, Swords, Monitor, Layers, Gavel, MessageSquare,
   CheckCircle2, Send, Star, Trophy, AlertTriangle, User, Gift,
   Flag, X, MessageCircle, Gamepad2, Target, Zap, ChevronDown, ChevronUp,
+  Phone, PhoneOff, Wifi, WifiOff, Volume2,
 } from "lucide-react";
 import { SafetyBanner } from "@/components/safety-banner";
 
@@ -97,66 +99,202 @@ function ScoreRating({ value, onChange }: { value: number; onChange: (v: number)
   );
 }
 
-function ChatPanel({ bidId, currentUserId }: { bidId: number; currentUserId: number }) {
+function ChatPanel({
+  bidId,
+  currentUserId,
+  discordUsername,
+}: {
+  bidId: number;
+  currentUserId: number;
+  discordUsername?: string | null;
+}) {
   const [draft, setDraft] = useState("");
+  const [liveMessages, setLiveMessages] = useState<ChatMessage[]>([]);
+  const [connected, setConnected] = useState(false);
+  const [typing, setTyping] = useState(false);
+  const [otherTyping, setOtherTyping] = useState(false);
+  const typingTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
-  const { data: messages = [], isLoading } = useBidMessages(bidId);
+  const { data: fetched = [], isLoading } = useBidMessages(bidId);
   const send = useSendMessage();
   const { toast } = useToast();
 
+  const jitsiUrl = `https://meet.jit.si/gamerbuddy-bid-${bidId}`;
+
+  useEffect(() => {
+    const seenIds = new Set(fetched.map((m) => m.id));
+    setLiveMessages((prev) => {
+      const deduped = prev.filter((m) => !seenIds.has(m.id));
+      return deduped;
+    });
+  }, [fetched]);
+
+  const allMessages = [...fetched, ...liveMessages].sort(
+    (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+  );
+
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages.length]);
+  }, [allMessages.length]);
+
+  useEffect(() => {
+    const socket = getSocket();
+
+    const onConnect = () => setConnected(true);
+    const onDisconnect = () => setConnected(false);
+    const onNewMessage = (msg: ChatMessage) => {
+      if (msg.senderId !== currentUserId) setOtherTyping(false);
+      setLiveMessages((prev) => {
+        if (prev.some((m) => m.id === msg.id)) return prev;
+        return [...prev, msg];
+      });
+    };
+    const onTyping = ({ userId }: { userId: number }) => {
+      if (userId !== currentUserId) {
+        setOtherTyping(true);
+        setTimeout(() => setOtherTyping(false), 3000);
+      }
+    };
+
+    socket.on("connect", onConnect);
+    socket.on("disconnect", onDisconnect);
+    socket.on("new_message", onNewMessage);
+    socket.on("typing", onTyping);
+
+    if (socket.connected) setConnected(true);
+    socket.emit("join_bid", bidId);
+
+    return () => {
+      socket.emit("leave_bid", bidId);
+      socket.off("connect", onConnect);
+      socket.off("disconnect", onDisconnect);
+      socket.off("new_message", onNewMessage);
+      socket.off("typing", onTyping);
+    };
+  }, [bidId, currentUserId]);
+
+  const handleTyping = () => {
+    const socket = getSocket();
+    if (!typing) {
+      setTyping(true);
+      socket.emit("typing", { bidId, userId: currentUserId });
+    }
+    if (typingTimeout.current) clearTimeout(typingTimeout.current);
+    typingTimeout.current = setTimeout(() => setTyping(false), 2000);
+  };
 
   const handleSend = () => {
     const content = draft.trim();
     if (!content) return;
     setDraft("");
+    setTyping(false);
     send.mutate({ bidId, content }, {
-      onError: (err: any) => toast({ title: "Failed to send", description: err?.error || "Error", variant: "destructive" }),
+      onError: (err: any) =>
+        toast({ title: "Failed to send", description: err?.error || "Error", variant: "destructive" }),
     });
   };
 
   return (
-    <div className="flex flex-col h-72 border border-border rounded-xl overflow-hidden bg-background/50">
-      <div className="px-4 py-2.5 border-b border-border bg-card/60 flex items-center gap-2 text-xs uppercase tracking-widest text-muted-foreground font-bold">
-        <MessageSquare className="h-3.5 w-3.5 text-secondary" /> Private Chat
+    <div className="flex flex-col border border-secondary/30 rounded-2xl overflow-hidden bg-background/60 shadow-[0_0_20px_rgba(6,182,212,0.08)]">
+      {/* Header */}
+      <div className="px-4 py-2.5 border-b border-border/60 bg-card/70 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <MessageSquare className="h-3.5 w-3.5 text-secondary" />
+          <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Private Chat</span>
+          <div className={`flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-full border ${
+            connected
+              ? "border-green-500/30 text-green-400 bg-green-500/10"
+              : "border-border/40 text-muted-foreground/50 bg-background/30"
+          }`}>
+            {connected ? <Wifi className="h-2.5 w-2.5" /> : <WifiOff className="h-2.5 w-2.5" />}
+            {connected ? "Live" : "Reconnecting…"}
+          </div>
+        </div>
+        {/* Voice Chat */}
+        <a
+          href={jitsiUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-emerald-400 border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 px-2.5 py-1 rounded-lg transition-all"
+          title={discordUsername ? `Discord: ${discordUsername}` : "Start Voice Chat"}
+        >
+          <Volume2 className="h-3.5 w-3.5" />
+          Voice Chat
+        </a>
       </div>
-      <div className="flex-1 overflow-y-auto p-3 space-y-2">
+
+      {/* Discord hint if available */}
+      {discordUsername && (
+        <div className="px-4 py-1.5 border-b border-border/40 bg-indigo-500/5 flex items-center gap-2">
+          <MessageCircle className="h-3 w-3 text-indigo-400" />
+          <span className="text-[11px] text-indigo-300">Discord: <strong>{discordUsername}</strong></span>
+          <span className="text-[10px] text-muted-foreground/40 ml-1">· or use the Voice Chat button above</span>
+        </div>
+      )}
+
+      {/* Messages */}
+      <div className="flex-1 overflow-y-auto p-3 space-y-2 min-h-[220px] max-h-72">
         {isLoading ? (
-          <div className="text-center text-xs text-muted-foreground py-4">Loading…</div>
-        ) : messages.length === 0 ? (
-          <div className="text-center text-xs text-muted-foreground py-8">No messages yet. Say hi!</div>
+          <div className="space-y-2 pt-2">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className={`flex ${i % 2 === 0 ? "justify-end" : "justify-start"}`}>
+                <Skeleton className={`h-10 rounded-xl ${i % 2 === 0 ? "w-40" : "w-52"}`} />
+              </div>
+            ))}
+          </div>
+        ) : allMessages.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-32 gap-2 text-center">
+            <MessageSquare className="h-8 w-8 text-muted-foreground/15" />
+            <div className="text-xs text-muted-foreground/40">No messages yet. Say hi!</div>
+          </div>
         ) : (
-          messages.map((msg: ChatMessage) => {
+          allMessages.map((msg: ChatMessage) => {
             const isMe = msg.senderId === currentUserId;
             return (
               <div key={msg.id} className={`flex ${isMe ? "justify-end" : "justify-start"}`}>
-                <div className={`max-w-[75%] rounded-xl px-3 py-2 text-sm ${
+                <div className={`max-w-[78%] rounded-2xl px-3.5 py-2 text-sm shadow-sm ${
                   isMe
-                    ? "bg-primary text-white rounded-br-none"
-                    : "bg-card border border-border text-foreground rounded-bl-none"
+                    ? "bg-primary text-white rounded-br-none shadow-[0_0_12px_rgba(168,85,247,0.3)]"
+                    : "bg-card border border-border/60 text-foreground rounded-bl-none"
                 }`}>
-                  {!isMe && <div className="text-xs font-bold text-secondary mb-0.5">{msg.senderName}</div>}
-                  <p>{msg.content}</p>
-                  <div className="text-[10px] opacity-60 mt-1 text-right">{format(new Date(msg.createdAt), "h:mm a")}</div>
+                  {!isMe && <div className="text-[11px] font-bold text-secondary mb-0.5">{msg.senderName}</div>}
+                  <p className="leading-snug break-words">{msg.content}</p>
+                  <div className="text-[10px] opacity-50 mt-1 text-right">{format(new Date(msg.createdAt), "h:mm a")}</div>
                 </div>
               </div>
             );
           })
         )}
+        {otherTyping && (
+          <div className="flex justify-start">
+            <div className="bg-card border border-border/50 rounded-2xl rounded-bl-none px-4 py-2.5 flex gap-1 items-center">
+              <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/50 animate-bounce [animation-delay:0ms]" />
+              <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/50 animate-bounce [animation-delay:150ms]" />
+              <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/50 animate-bounce [animation-delay:300ms]" />
+            </div>
+          </div>
+        )}
         <div ref={bottomRef} />
       </div>
-      <div className="border-t border-border p-2 flex gap-2 bg-card/40">
+
+      {/* Input */}
+      <div className="border-t border-border/60 p-2 flex gap-2 bg-card/50">
         <Input
           value={draft}
-          onChange={(e) => setDraft(e.target.value)}
+          onChange={(e) => { setDraft(e.target.value); handleTyping(); }}
           placeholder="Type a message…"
-          className="bg-background text-sm h-9"
+          className="bg-background/80 text-sm h-9 border-border/50 focus:border-primary/50"
           maxLength={1000}
-          onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); }
+          }}
         />
-        <Button size="sm" className="h-9 px-3 bg-primary" onClick={handleSend} disabled={!draft.trim() || send.isPending}>
+        <Button
+          size="sm"
+          className="h-9 px-3 bg-primary hover:bg-primary/90 shadow-[0_0_12px_rgba(168,85,247,0.4)]"
+          onClick={handleSend}
+          disabled={!draft.trim() || send.isPending}
+        >
           <Send className="h-4 w-4" />
         </Button>
       </div>
@@ -465,7 +603,9 @@ function BidCard({
           )}
         </div>
 
-        {chatOpen && canChat && <ChatPanel bidId={bid.id} currentUserId={currentUserId} />}
+        {chatOpen && canChat && (
+          <ChatPanel bidId={bid.id} currentUserId={currentUserId} discordUsername={bid.discordUsername} />
+        )}
       </div>
     </>
   );

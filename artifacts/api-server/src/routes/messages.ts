@@ -2,34 +2,37 @@ import { Router, type IRouter } from "express";
 import { db, bidsTable, messagesTable, usersTable, gameRequestsTable } from "@workspace/db";
 import { eq, asc } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
+import { emitNewMessage } from "../socket-server";
 
 const router: IRouter = Router();
+
+async function getBidAccess(bidId: number, userId: number) {
+  const [bid] = await db
+    .select({ id: bidsTable.id, bidderId: bidsTable.bidderId, requestId: bidsTable.requestId })
+    .from(bidsTable)
+    .where(eq(bidsTable.id, bidId));
+  if (!bid) return null;
+
+  const [request] = await db
+    .select({ userId: gameRequestsTable.userId })
+    .from(gameRequestsTable)
+    .where(eq(gameRequestsTable.id, bid.requestId));
+  if (!request) return null;
+
+  const isHirer = request.userId === userId;
+  const isBidder = bid.bidderId === userId;
+  if (!isHirer && !isBidder) return null;
+
+  return { bid, request };
+}
 
 router.get("/bids/:bidId/messages", requireAuth, async (req, res): Promise<void> => {
   const user = req.user!;
   const bidId = parseInt(req.params.bidId);
   if (isNaN(bidId)) { res.status(400).json({ error: "Invalid bid ID" }); return; }
 
-  const [bid] = await db
-    .select({ id: bidsTable.id, bidderId: bidsTable.bidderId, requestId: bidsTable.requestId })
-    .from(bidsTable)
-    .where(eq(bidsTable.id, bidId));
-
-  if (!bid) { res.status(404).json({ error: "Bid not found" }); return; }
-
-  const [request] = await db
-    .select({ userId: gameRequestsTable.userId })
-    .from(gameRequestsTable)
-    .where(eq(gameRequestsTable.id, bid.requestId));
-
-  if (!request) { res.status(404).json({ error: "Request not found" }); return; }
-
-  const isHirer = request.userId === user.id;
-  const isBidder = bid.bidderId === user.id;
-  if (!isHirer && !isBidder) {
-    res.status(403).json({ error: "Access denied" });
-    return;
-  }
+  const access = await getBidAccess(bidId, user.id);
+  if (!access) { res.status(403).json({ error: "Access denied" }); return; }
 
   const rows = await db
     .select({
@@ -60,26 +63,8 @@ router.post("/bids/:bidId/messages", requireAuth, async (req, res): Promise<void
   const bidId = parseInt(req.params.bidId);
   if (isNaN(bidId)) { res.status(400).json({ error: "Invalid bid ID" }); return; }
 
-  const [bid] = await db
-    .select({ id: bidsTable.id, bidderId: bidsTable.bidderId, requestId: bidsTable.requestId })
-    .from(bidsTable)
-    .where(eq(bidsTable.id, bidId));
-
-  if (!bid) { res.status(404).json({ error: "Bid not found" }); return; }
-
-  const [request] = await db
-    .select({ userId: gameRequestsTable.userId })
-    .from(gameRequestsTable)
-    .where(eq(gameRequestsTable.id, bid.requestId));
-
-  if (!request) { res.status(404).json({ error: "Request not found" }); return; }
-
-  const isHirer = request.userId === user.id;
-  const isBidder = bid.bidderId === user.id;
-  if (!isHirer && !isBidder) {
-    res.status(403).json({ error: "Access denied" });
-    return;
-  }
+  const access = await getBidAccess(bidId, user.id);
+  if (!access) { res.status(403).json({ error: "Access denied" }); return; }
 
   const { content } = req.body as { content?: string };
   if (!content || content.trim().length < 1) {
@@ -96,14 +81,18 @@ router.post("/bids/:bidId/messages", requireAuth, async (req, res): Promise<void
     .values({ bidId, senderId: user.id, content: content.trim() })
     .returning();
 
-  res.status(201).json({
+  const payload = {
     id: msg.id,
     bidId: msg.bidId,
     senderId: msg.senderId,
     senderName: user.name,
     content: msg.content,
     createdAt: msg.createdAt.toISOString(),
-  });
+  };
+
+  emitNewMessage(bidId, payload);
+
+  res.status(201).json(payload);
 });
 
 export default router;
