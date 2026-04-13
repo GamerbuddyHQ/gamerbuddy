@@ -42,6 +42,15 @@ export type ShopItem = {
   description: string;
 };
 
+export type QuestEntry = {
+  id: number;
+  userId: number;
+  gameName: string;
+  helpType: string;
+  playstyle: string;
+  createdAt: string;
+};
+
 export type UserProfile = {
   id: number;
   name: string;
@@ -58,6 +67,7 @@ export type UserProfile = {
   sessionsAsHirer: { id: number; gameName: string; platform?: string; createdAt: string }[];
   sessionsAsGamer: { requestId: number; gameName: string | null; platform?: string | null; createdAt: string | null }[];
   purchasedItems: string[];
+  questEntries: QuestEntry[];
 };
 
 export async function apiFetch<T = any>(url: string, opts?: RequestInit): Promise<T> {
@@ -264,6 +274,35 @@ export function useUserProfile(userId: number | null) {
     queryKey: userId ? bidKeys.userProfile(userId) : ["user-profile", null],
     queryFn: () => apiFetch(`${BASE}/users/${userId}`),
     enabled: !!userId,
+  });
+}
+
+export function useMyQuestEntries() {
+  return useQuery<QuestEntry[]>({
+    queryKey: ["quest-entries"],
+    queryFn: () => apiFetch(`${BASE}/quest`),
+  });
+}
+
+export function useAddQuestEntry() {
+  const qc = useQueryClient();
+  return useMutation<QuestEntry, any, { gameName: string; helpType: string; playstyle: string }>({
+    mutationFn: (data) => apiFetch(`${BASE}/quest`, { method: "POST", body: JSON.stringify(data) }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["quest-entries"] });
+      qc.invalidateQueries({ queryKey: ["user-profile"] });
+    },
+  });
+}
+
+export function useDeleteQuestEntry() {
+  const qc = useQueryClient();
+  return useMutation<any, any, number>({
+    mutationFn: (id) => apiFetch(`${BASE}/quest/${id}`, { method: "DELETE" }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["quest-entries"] });
+      qc.invalidateQueries({ queryKey: ["user-profile"] });
+    },
   });
 }
 

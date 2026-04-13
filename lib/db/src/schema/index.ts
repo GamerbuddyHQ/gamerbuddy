@@ -8,3 +8,4 @@ export * from "./reviews";
 export * from "./reports";
 export * from "./transactions";
 export * from "./profile_purchases";
+export * from "./quest_entries";

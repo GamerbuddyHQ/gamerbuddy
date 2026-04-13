@@ -15,6 +15,7 @@ import {
   useSubmitReview,
   useSendGift,
   useReportUser,
+  useUserProfile,
   type Bid,
   type ChatMessage,
 } from "@/lib/bids-api";
@@ -27,7 +28,7 @@ import { format } from "date-fns";
 import {
   ArrowLeft, Swords, Monitor, Layers, Gavel, MessageSquare,
   CheckCircle2, Send, Star, Trophy, AlertTriangle, User, Gift,
-  Flag, X, MessageCircle,
+  Flag, X, MessageCircle, Gamepad2, Target, Zap, ChevronDown, ChevronUp,
 } from "lucide-react";
 import { SafetyBanner } from "@/components/safety-banner";
 
@@ -299,18 +300,74 @@ function AcceptModal({
   );
 }
 
+function BidderQuestSummary({ bidderId, gameName }: { bidderId: number; gameName: string }) {
+  const { data: profile } = useUserProfile(bidderId);
+  const [expanded, setExpanded] = useState(false);
+  const entries = profile?.questEntries ?? [];
+
+  if (!profile) return null;
+  if (entries.length === 0) return null;
+
+  const relevantFirst = [...entries].sort((a, b) =>
+    a.gameName.toLowerCase().includes(gameName.toLowerCase()) ? -1 :
+    b.gameName.toLowerCase().includes(gameName.toLowerCase()) ? 1 : 0
+  );
+  const shown = expanded ? relevantFirst : relevantFirst.slice(0, 2);
+
+  return (
+    <div className="rounded-xl border border-border/40 bg-background/30 p-3 space-y-2">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-widest font-bold text-muted-foreground">
+          <Gamepad2 className="h-3 w-3 text-primary" />
+          Quest — Games This Gamer Offers
+        </div>
+        {entries.length > 2 && (
+          <button onClick={() => setExpanded(!expanded)}
+            className="text-[10px] text-primary hover:text-white transition-colors flex items-center gap-0.5 font-semibold">
+            {expanded ? <><ChevronUp className="h-3 w-3" />Less</> : <><ChevronDown className="h-3 w-3" />{entries.length - 2} more</>}
+          </button>
+        )}
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        {shown.map((entry) => (
+          <div key={entry.id}
+            className={`rounded-lg border px-3 py-2 space-y-1.5 transition-all ${entry.gameName.toLowerCase().includes(gameName.toLowerCase()) ? "border-primary/30 bg-primary/5" : "border-border/40 bg-background/30"}`}>
+            <div className="flex items-center gap-1.5">
+              <Gamepad2 className="h-3 w-3 text-primary shrink-0" />
+              <span className="font-bold text-white text-xs truncate">{entry.gameName}</span>
+              {entry.gameName.toLowerCase().includes(gameName.toLowerCase()) && (
+                <span className="text-[8px] bg-primary/20 text-primary border border-primary/30 rounded-full px-1.5 py-0.5 font-bold uppercase tracking-wider shrink-0">Match</span>
+              )}
+            </div>
+            <div className="flex items-center gap-1.5">
+              <Target className="h-2.5 w-2.5 text-secondary shrink-0" />
+              <span className="text-[10px] text-foreground/70">{entry.helpType}</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <Zap className="h-2.5 w-2.5 text-amber-400 shrink-0" />
+              <span className="text-[10px] text-amber-400/80 font-semibold">{entry.playstyle}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function BidCard({
   bid,
   isHirer,
   requestStatus,
   currentUserId,
   requestId,
+  gameName,
 }: {
   bid: Bid;
   isHirer: boolean;
   requestStatus: string;
   currentUserId: number;
   requestId: number;
+  gameName: string;
 }) {
   const [chatOpen, setChatOpen] = useState(false);
   const [showAcceptModal, setShowAcceptModal] = useState(false);
@@ -370,6 +427,8 @@ function BidCard({
         <p className="text-sm text-foreground/80 leading-relaxed border-l-2 border-primary/30 pl-3">
           {bid.message}
         </p>
+
+        {!isMe && <BidderQuestSummary bidderId={bid.bidderId} gameName={gameName} />}
 
         <div className="flex gap-2 flex-wrap">
           {isHirer && bid.status === "pending" && requestStatus === "open" && (
@@ -898,6 +957,7 @@ export default function RequestDetail() {
             requestStatus={request.status}
             currentUserId={user?.id ?? -1}
             requestId={requestId}
+            gameName={request.gameName}
           />
         ))}
       </div>

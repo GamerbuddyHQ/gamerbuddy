@@ -2,18 +2,22 @@ import React, { useState } from "react";
 import { useAuth } from "@/lib/auth";
 import {
   useUserProfile, useUpdateProfile, useShopItems, usePurchaseItem,
-  type ShopItem,
+  useMyQuestEntries, useAddQuestEntry, useDeleteQuestEntry,
+  type ShopItem, type QuestEntry,
 } from "@/lib/bids-api";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
 import {
   User, Mail, Phone, Calendar, ShieldCheck, ShieldAlert,
   Star, Trophy, Swords, Edit3, Check, X, Palette, Tag,
-  Sparkles, Lock, CheckCircle2,
+  Sparkles, Lock, CheckCircle2, Plus, Trash2, Gamepad2,
+  Zap, Target, ChevronDown, ChevronUp,
 } from "lucide-react";
 
 const BG_STYLES: Record<string, string> = {
@@ -44,6 +48,32 @@ const RANK_BADGES = [
   { min: 5000, label: "Champion", emoji: "👑", color: "text-secondary border-secondary/40 bg-secondary/10" },
 ];
 
+const POPULAR_GAMES = [
+  "Apex Legends", "Valorant", "Fortnite", "Call of Duty", "League of Legends",
+  "Dota 2", "CS2", "Minecraft", "Overwatch 2", "Rocket League", "FIFA",
+  "Rainbow Six Siege", "PUBG", "Elden Ring", "World of Warcraft",
+];
+
+const HELP_TYPE_SUGGESTIONS = [
+  "Expert carry", "Rank boosting", "Teaching beginners", "Chill co-op partner",
+  "PvP coaching", "Raid & dungeon runs", "Storyline completion", "Speed running",
+  "Achievement hunting", "Pro duo queue",
+];
+
+const PLAYSTYLE_OPTIONS = [
+  "Competitive", "Chill & laid-back", "Supportive", "Strategic", "Patient",
+  "Aggressive", "Team-oriented", "Friendly", "Solo-carry", "Communicative",
+];
+
+const GAME_COLORS = [
+  "border-primary/40 bg-primary/5",
+  "border-secondary/40 bg-secondary/5",
+  "border-green-500/40 bg-green-500/5",
+  "border-amber-500/40 bg-amber-500/5",
+  "border-pink-500/40 bg-pink-500/5",
+  "border-indigo-500/40 bg-indigo-500/5",
+];
+
 function TrustMeter({ value }: { value: number }) {
   const pct = Math.min(100, Math.max(0, (value / 1000) * 100));
   const color =
@@ -65,10 +95,7 @@ function TrustMeter({ value }: { value: number }) {
         </div>
       </div>
       <div className="h-3 rounded-full bg-background border border-border/60 overflow-hidden">
-        <div
-          className={`h-full rounded-full bg-gradient-to-r ${color} transition-all duration-700 shadow-sm`}
-          style={{ width: `${pct}%` }}
-        />
+        <div className={`h-full rounded-full bg-gradient-to-r ${color} transition-all duration-700 shadow-sm`} style={{ width: `${pct}%` }} />
       </div>
       <div className="flex justify-between text-[10px] text-muted-foreground/50">
         <span>Risky</span><span>Neutral</span><span>Excellent</span>
@@ -85,6 +112,246 @@ function ScoreBadge({ rating }: { rating: number }) {
     rating >= 3 ? "bg-orange-500 text-white" :
     "bg-red-500 text-white";
   return <span className={`text-xs font-black px-2 py-0.5 rounded ${color}`}>{rating}/10</span>;
+}
+
+function QuestEntryCard({ entry, onDelete, colorClass }: { entry: QuestEntry; onDelete: () => void; colorClass: string }) {
+  const [confirming, setConfirming] = useState(false);
+  return (
+    <div className={`rounded-xl border p-4 space-y-3 transition-all ${colorClass}`}>
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="h-9 w-9 rounded-lg bg-background/60 border border-border/50 flex items-center justify-center shrink-0">
+            <Gamepad2 className="h-4.5 w-4.5 text-primary" />
+          </div>
+          <div className="min-w-0">
+            <div className="font-extrabold text-white text-sm truncate">{entry.gameName}</div>
+            <div className="text-[10px] text-muted-foreground/70 uppercase tracking-widest font-semibold">Game</div>
+          </div>
+        </div>
+        {!confirming ? (
+          <button onClick={() => setConfirming(true)} className="shrink-0 text-muted-foreground hover:text-red-400 transition-colors p-1 rounded">
+            <Trash2 className="h-3.5 w-3.5" />
+          </button>
+        ) : (
+          <div className="flex items-center gap-1.5 shrink-0">
+            <span className="text-xs text-red-400 font-semibold">Remove?</span>
+            <button onClick={onDelete} className="text-red-400 hover:text-red-300 transition-colors p-1"><Check className="h-3.5 w-3.5" /></button>
+            <button onClick={() => setConfirming(false)} className="text-muted-foreground hover:text-white transition-colors p-1"><X className="h-3.5 w-3.5" /></button>
+          </div>
+        )}
+      </div>
+
+      <div className="space-y-2">
+        <div className="flex items-start gap-2">
+          <Target className="h-3.5 w-3.5 text-secondary shrink-0 mt-0.5" />
+          <div>
+            <div className="text-[9px] uppercase tracking-widest text-muted-foreground font-bold mb-0.5">What I Offer</div>
+            <div className="text-xs font-semibold text-white">{entry.helpType}</div>
+          </div>
+        </div>
+        <div className="flex items-start gap-2">
+          <Zap className="h-3.5 w-3.5 text-amber-400 shrink-0 mt-0.5" />
+          <div>
+            <div className="text-[9px] uppercase tracking-widest text-muted-foreground font-bold mb-0.5">Playstyle</div>
+            <div className="text-xs font-semibold text-white">{entry.playstyle}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AddQuestForm({ onCancel }: { onCancel: () => void }) {
+  const [gameName, setGameName] = useState("");
+  const [helpType, setHelpType] = useState("");
+  const [playstyle, setPlaystyle] = useState("");
+  const [showGameSuggestions, setShowGameSuggestions] = useState(false);
+  const addEntry = useAddQuestEntry();
+  const { toast } = useToast();
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!gameName.trim() || !helpType.trim() || !playstyle.trim()) return;
+    addEntry.mutate(
+      { gameName: gameName.trim(), helpType: helpType.trim(), playstyle: playstyle.trim() },
+      {
+        onSuccess: () => {
+          toast({ title: "Game added to your Quest!" });
+          onCancel();
+        },
+        onError: (err: any) => toast({ title: "Failed", description: err?.error || "Error", variant: "destructive" }),
+      }
+    );
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="rounded-xl border border-primary/30 bg-primary/5 p-5 space-y-4"
+      style={{ boxShadow: "0 0 24px rgba(168,85,247,0.06) inset" }}>
+      <div className="text-xs font-bold uppercase tracking-widest text-primary flex items-center gap-2">
+        <Plus className="h-3.5 w-3.5" /> Add Game to Quest
+      </div>
+
+      {/* Game Name */}
+      <div className="space-y-1.5 relative">
+        <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Game Name *</Label>
+        <Input
+          value={gameName}
+          onChange={(e) => { setGameName(e.target.value); setShowGameSuggestions(e.target.value.length > 0); }}
+          onFocus={() => setShowGameSuggestions(true)}
+          onBlur={() => setTimeout(() => setShowGameSuggestions(false), 200)}
+          placeholder="e.g. Apex Legends"
+          className="bg-background/60 text-sm"
+          maxLength={60}
+          required
+        />
+        {showGameSuggestions && (
+          <div className="absolute top-full left-0 right-0 z-20 mt-1 rounded-xl border border-border bg-card shadow-xl max-h-44 overflow-y-auto">
+            {POPULAR_GAMES.filter((g) => g.toLowerCase().includes(gameName.toLowerCase()) && g.toLowerCase() !== gameName.toLowerCase()).slice(0, 8).map((g) => (
+              <button key={g} type="button" onMouseDown={() => { setGameName(g); setShowGameSuggestions(false); }}
+                className="w-full text-left px-3 py-2 text-sm hover:bg-primary/10 hover:text-primary transition-colors text-foreground/80">
+                {g}
+              </button>
+            ))}
+            {POPULAR_GAMES.filter((g) => g.toLowerCase().includes(gameName.toLowerCase()) && g.toLowerCase() !== gameName.toLowerCase()).length === 0 && gameName && (
+              <div className="px-3 py-2 text-sm text-muted-foreground italic">Press enter to use "{gameName}"</div>
+            )}
+          </div>
+        )}
+        {/* Popular chips */}
+        <div className="flex flex-wrap gap-1.5 mt-1">
+          {POPULAR_GAMES.slice(0, 6).map((g) => (
+            <button key={g} type="button" onClick={() => setGameName(g)}
+              className={`text-[10px] px-2 py-0.5 rounded-full border font-semibold transition-all ${gameName === g ? "bg-primary/20 border-primary/50 text-primary" : "border-border/50 text-muted-foreground hover:border-primary/30 hover:text-white"}`}>
+              {g}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Help Type */}
+      <div className="space-y-1.5">
+        <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">What Can You Help With? *</Label>
+        <Input
+          value={helpType}
+          onChange={(e) => setHelpType(e.target.value)}
+          placeholder='e.g. "Expert carry for raids"'
+          className="bg-background/60 text-sm"
+          maxLength={100}
+          required
+        />
+        <div className="flex flex-wrap gap-1.5">
+          {HELP_TYPE_SUGGESTIONS.map((s) => (
+            <button key={s} type="button" onClick={() => setHelpType(s)}
+              className={`text-[10px] px-2 py-0.5 rounded-full border font-semibold transition-all ${helpType === s ? "bg-secondary/20 border-secondary/50 text-secondary" : "border-border/50 text-muted-foreground hover:border-secondary/30 hover:text-white"}`}>
+              {s}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Playstyle */}
+      <div className="space-y-1.5">
+        <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Your Playstyle *</Label>
+        <div className="flex flex-wrap gap-1.5">
+          {PLAYSTYLE_OPTIONS.map((s) => (
+            <button key={s} type="button" onClick={() => setPlaystyle(s)}
+              className={`text-[10px] px-2.5 py-1 rounded-full border font-semibold transition-all ${playstyle === s ? "bg-amber-500/20 border-amber-500/50 text-amber-400" : "border-border/50 text-muted-foreground hover:border-amber-500/30 hover:text-white"}`}>
+              {s}
+            </button>
+          ))}
+        </div>
+        {playstyle && (
+          <div className="text-xs text-muted-foreground">Selected: <span className="text-amber-400 font-semibold">{playstyle}</span></div>
+        )}
+      </div>
+
+      <div className="flex gap-2.5 pt-1">
+        <Button type="button" variant="outline" size="sm" onClick={onCancel} className="text-xs font-bold uppercase">
+          <X className="h-3.5 w-3.5 mr-1" /> Cancel
+        </Button>
+        <Button type="submit" size="sm" disabled={!gameName.trim() || !helpType.trim() || !playstyle.trim() || addEntry.isPending}
+          className="bg-primary hover:bg-primary/90 text-xs font-bold uppercase flex-1 shadow-[0_0_12px_rgba(168,85,247,0.2)]">
+          {addEntry.isPending ? (
+            <span className="flex items-center gap-1.5"><div className="h-3 w-3 rounded-full border-2 border-white/30 border-t-white animate-spin" />Adding…</span>
+          ) : (
+            <><Plus className="h-3.5 w-3.5 mr-1" /> Add Game</>
+          )}
+        </Button>
+      </div>
+    </form>
+  );
+}
+
+function QuestSection() {
+  const { data: entries = [], isLoading } = useMyQuestEntries();
+  const deleteEntry = useDeleteQuestEntry();
+  const [adding, setAdding] = useState(false);
+  const { toast } = useToast();
+
+  const handleDelete = (id: number) => {
+    deleteEntry.mutate(id, {
+      onSuccess: () => toast({ title: "Game removed from Quest" }),
+      onError: (err: any) => toast({ title: "Failed", description: err?.error, variant: "destructive" }),
+    });
+  };
+
+  return (
+    <Card className="border-border bg-card/40">
+      <CardHeader className="pb-3">
+        <div className="flex items-center justify-between flex-wrap gap-3">
+          <CardTitle className="text-sm uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+            <Gamepad2 className="h-4 w-4 text-primary" />
+            My Quest
+            <span className="text-[10px] font-normal text-muted-foreground/60 normal-case tracking-normal">
+              — games you offer to play for hire
+            </span>
+          </CardTitle>
+          {!adding && entries.length < 10 && (
+            <Button size="sm" onClick={() => setAdding(true)}
+              className="bg-primary/20 border border-primary/40 text-primary hover:bg-primary hover:text-white text-xs font-bold uppercase h-7 px-3">
+              <Plus className="h-3.5 w-3.5 mr-1" /> Add Game
+            </Button>
+          )}
+        </div>
+        <p className="text-xs text-muted-foreground/70 mt-1 leading-relaxed">
+          List the games you're available to play and what kind of help you can provide. This shows on your public profile and on your bids.
+        </p>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {adding && <AddQuestForm onCancel={() => setAdding(false)} />}
+
+        {isLoading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {[1, 2].map((i) => <Skeleton key={i} className="h-28 rounded-xl" />)}
+          </div>
+        ) : entries.length === 0 && !adding ? (
+          <div className="text-center py-10 border-2 border-dashed border-border/40 rounded-xl bg-background/20">
+            <Gamepad2 className="h-9 w-9 mx-auto mb-3 text-muted-foreground/25" />
+            <div className="text-sm font-bold text-muted-foreground/60">No games in your Quest yet</div>
+            <div className="text-xs text-muted-foreground/40 mt-1">Add the games you play to start getting hired.</div>
+            <Button size="sm" onClick={() => setAdding(true)} className="mt-4 bg-primary/20 border border-primary/40 text-primary hover:bg-primary hover:text-white text-xs font-bold uppercase">
+              <Plus className="h-3.5 w-3.5 mr-1" /> Add Your First Game
+            </Button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {entries.map((entry, idx) => (
+              <QuestEntryCard
+                key={entry.id}
+                entry={entry}
+                colorClass={GAME_COLORS[idx % GAME_COLORS.length]}
+                onDelete={() => handleDelete(entry.id)}
+              />
+            ))}
+          </div>
+        )}
+
+        {entries.length >= 10 && (
+          <p className="text-xs text-muted-foreground/50 text-center">Maximum 10 games reached.</p>
+        )}
+      </CardContent>
+    </Card>
+  );
 }
 
 function ShopSection({
@@ -113,16 +380,9 @@ function ShopSection({
   const handlePurchase = (item: ShopItem) => {
     purchase.mutate(item.id, {
       onSuccess: (data) => {
-        toast({
-          title: `${item.label} unlocked!`,
-          description: `Spent ${item.cost} pts · ${data.newPoints} pts remaining`,
-        });
+        toast({ title: `${item.label} unlocked!`, description: `Spent ${item.cost} pts · ${data.newPoints} pts remaining` });
       },
-      onError: (err: any) => toast({
-        title: "Purchase failed",
-        description: err?.error || "Error",
-        variant: "destructive",
-      }),
+      onError: (err: any) => toast({ title: "Purchase failed", description: err?.error || "Error", variant: "destructive" }),
     });
   };
 
@@ -132,9 +392,7 @@ function ShopSection({
     updateProfile.mutate(
       { [field]: alreadyEquipped ? null : item.id },
       {
-        onSuccess: () => toast({
-          title: alreadyEquipped ? "Unequipped" : `${item.label} equipped!`,
-        }),
+        onSuccess: () => toast({ title: alreadyEquipped ? "Unequipped" : `${item.label} equipped!` }),
         onError: (err: any) => toast({ title: "Error", description: err?.error, variant: "destructive" }),
       }
     );
@@ -162,9 +420,7 @@ function ShopSection({
               key={t}
               onClick={() => setTab(t)}
               className={`flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg border transition-all ${
-                tab === t
-                  ? "bg-primary/20 border-primary/50 text-primary"
-                  : "border-border text-muted-foreground hover:border-border/80"
+                tab === t ? "bg-primary/20 border-primary/50 text-primary" : "border-border text-muted-foreground hover:border-border/80"
               }`}
             >
               {t === "background" ? <Palette className="h-3.5 w-3.5" /> : <Tag className="h-3.5 w-3.5" />}
@@ -220,11 +476,7 @@ function ShopSection({
                       onClick={() => handleEquip(item)}
                       disabled={updateProfile.isPending}
                     >
-                      {equippedNow ? (
-                        <><CheckCircle2 className="h-3.5 w-3.5 mr-1" /> Equipped</>
-                      ) : (
-                        "Equip"
-                      )}
+                      {equippedNow ? <><CheckCircle2 className="h-3.5 w-3.5 mr-1" /> Equipped</> : "Equip"}
                     </Button>
                   ) : (
                     <Button
@@ -237,11 +489,7 @@ function ShopSection({
                       onClick={() => canAfford && handlePurchase(item)}
                       disabled={!canAfford || purchase.isPending}
                     >
-                      {canAfford ? (
-                        <><Trophy className="h-3.5 w-3.5 mr-1" /> Buy · {item.cost} pts</>
-                      ) : (
-                        <><Lock className="h-3.5 w-3.5 mr-1" /> {item.cost} pts</>
-                      )}
+                      {canAfford ? <><Trophy className="h-3.5 w-3.5 mr-1" /> Buy · {item.cost} pts</> : <><Lock className="h-3.5 w-3.5 mr-1" /> {item.cost} pts</>}
                     </Button>
                   )}
                 </div>
@@ -268,7 +516,8 @@ export default function Profile() {
     <div className="max-w-3xl mx-auto space-y-4">
       <Skeleton className="h-48 rounded-2xl" />
       <Skeleton className="h-32 rounded-2xl" />
-      <Skeleton className="h-48 rounded-2xl" />
+      <Skeleton className="h-64 rounded-2xl" />
+      <Skeleton className="h-32 rounded-2xl" />
     </div>
   );
 
@@ -308,7 +557,6 @@ export default function Profile() {
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_50%,rgba(255,255,255,0.04),transparent_70%)]" />
           <div className="absolute inset-0 opacity-10"
             style={{ backgroundImage: "repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(255,255,255,0.03) 35px, rgba(255,255,255,0.03) 70px)" }} />
-
           {bgId && (
             <div className="absolute top-3 right-3">
               <span className="text-[10px] uppercase tracking-widest text-white/50 font-bold border border-white/20 px-2 py-0.5 rounded-full backdrop-blur-sm">
@@ -326,7 +574,6 @@ export default function Profile() {
             >
               <span className="text-4xl font-black text-white uppercase">{user.name.charAt(0)}</span>
             </div>
-
             <div className="flex-1 min-w-0 pb-1 translate-y-4">
               <div className="flex flex-wrap items-center gap-2 mb-1">
                 <h1 className="text-2xl font-extrabold text-white uppercase tracking-tight leading-none">{user.name}</h1>
@@ -361,14 +608,11 @@ export default function Profile() {
 
           <div className="-mt-6 space-y-4">
             <TrustMeter value={trustFactor} />
-
             <div className="grid grid-cols-3 gap-3">
               <div className="p-3 bg-background/50 rounded-xl border border-border text-center space-y-1">
                 <div className="text-2xl font-black text-primary">{points}</div>
                 <div className="text-[10px] text-muted-foreground uppercase tracking-widest">Points</div>
-                {nextRank && (
-                  <div className="text-[9px] text-muted-foreground/60">{nextRank.min - points} to {nextRank.label}</div>
-                )}
+                {nextRank && <div className="text-[9px] text-muted-foreground/60">{nextRank.min - points} to {nextRank.label}</div>}
               </div>
               <div className="p-3 bg-background/50 rounded-xl border border-border text-center space-y-1">
                 <div className="text-2xl font-black text-secondary">{profile?.sessionsAsHirer?.length ?? 0}</div>
@@ -432,6 +676,9 @@ export default function Profile() {
         </CardContent>
       </Card>
 
+      {/* MY QUEST */}
+      <QuestSection />
+
       {/* BADGE SHOWCASE */}
       <Card className="border-border bg-card/40">
         <CardHeader className="pb-2">
@@ -452,11 +699,7 @@ export default function Profile() {
                 >
                   <span className="text-2xl">{badge.emoji}</span>
                   <span className="text-[10px] font-bold uppercase tracking-widest">{badge.label}</span>
-                  {earned ? (
-                    <span className="text-[9px] text-muted-foreground">Earned</span>
-                  ) : (
-                    <span className="text-[9px] text-muted-foreground">{badge.min} pts</span>
-                  )}
+                  {earned ? <span className="text-[9px] text-muted-foreground">Earned</span> : <span className="text-[9px] text-muted-foreground">{badge.min} pts</span>}
                 </div>
               );
             })}

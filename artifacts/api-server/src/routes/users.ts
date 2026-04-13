@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { db, usersTable, reviewsTable, gameRequestsTable, bidsTable, profilePurchasesTable } from "@workspace/db";
+import { db, usersTable, reviewsTable, gameRequestsTable, bidsTable, profilePurchasesTable, questEntriesTable } from "@workspace/db";
 import { eq, desc, and, sql } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
 
@@ -40,8 +40,8 @@ router.get("/users/:id", async (req, res): Promise<void> => {
 
   if (!user) { res.status(404).json({ error: "User not found" }); return; }
 
-  const reviews = await db
-    .select({
+  const [reviews, completedAsHirer, completedAsGamer, purchases, questEntries] = await Promise.all([
+    db.select({
       id: reviewsTable.id,
       rating: reviewsTable.rating,
       comment: reviewsTable.comment,
@@ -52,27 +52,30 @@ router.get("/users/:id", async (req, res): Promise<void> => {
     .leftJoin(usersTable, eq(reviewsTable.reviewerId, usersTable.id))
     .where(eq(reviewsTable.revieweeId, userId))
     .orderBy(desc(reviewsTable.createdAt))
-    .limit(10);
+    .limit(10),
 
-  const completedAsHirer = await db
-    .select({ id: gameRequestsTable.id, gameName: gameRequestsTable.gameName, platform: gameRequestsTable.platform, createdAt: gameRequestsTable.createdAt })
+    db.select({ id: gameRequestsTable.id, gameName: gameRequestsTable.gameName, platform: gameRequestsTable.platform, createdAt: gameRequestsTable.createdAt })
     .from(gameRequestsTable)
     .where(and(eq(gameRequestsTable.userId, userId), eq(gameRequestsTable.status, "completed")))
     .orderBy(desc(gameRequestsTable.createdAt))
-    .limit(10);
+    .limit(10),
 
-  const completedAsGamer = await db
-    .select({ requestId: bidsTable.requestId, gameName: gameRequestsTable.gameName, platform: gameRequestsTable.platform, createdAt: bidsTable.createdAt })
+    db.select({ requestId: bidsTable.requestId, gameName: gameRequestsTable.gameName, platform: gameRequestsTable.platform, createdAt: bidsTable.createdAt })
     .from(bidsTable)
     .leftJoin(gameRequestsTable, eq(bidsTable.requestId, gameRequestsTable.id))
     .where(and(eq(bidsTable.bidderId, userId), eq(bidsTable.status, "accepted"), eq(gameRequestsTable.status, "completed")))
     .orderBy(desc(bidsTable.createdAt))
-    .limit(10);
+    .limit(10),
 
-  const purchases = await db
-    .select({ itemId: profilePurchasesTable.itemId })
+    db.select({ itemId: profilePurchasesTable.itemId })
     .from(profilePurchasesTable)
-    .where(eq(profilePurchasesTable.userId, userId));
+    .where(eq(profilePurchasesTable.userId, userId)),
+
+    db.select()
+    .from(questEntriesTable)
+    .where(eq(questEntriesTable.userId, userId))
+    .orderBy(questEntriesTable.createdAt),
+  ]);
 
   const avgRating = reviews.length > 0
     ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
@@ -87,7 +90,51 @@ router.get("/users/:id", async (req, res): Promise<void> => {
     sessionsAsHirer: completedAsHirer.map((s) => ({ ...s, createdAt: s.createdAt.toISOString() })),
     sessionsAsGamer: completedAsGamer.map((s) => ({ ...s, createdAt: s.createdAt?.toISOString() })),
     purchasedItems: purchases.map((p) => p.itemId),
+    questEntries: questEntries.map((q) => ({ ...q, createdAt: q.createdAt.toISOString() })),
   });
+});
+
+router.get("/quest", requireAuth, async (req, res): Promise<void> => {
+  const user = req.user!;
+  const entries = await db.select().from(questEntriesTable).where(eq(questEntriesTable.userId, user.id)).orderBy(questEntriesTable.createdAt);
+  res.json(entries.map((q) => ({ ...q, createdAt: q.createdAt.toISOString() })));
+});
+
+router.post("/quest", requireAuth, async (req, res): Promise<void> => {
+  const user = req.user!;
+  const { gameName, helpType, playstyle } = req.body as { gameName?: string; helpType?: string; playstyle?: string };
+
+  if (!gameName?.trim() || !helpType?.trim() || !playstyle?.trim()) {
+    res.status(400).json({ error: "gameName, helpType, and playstyle are required" });
+    return;
+  }
+
+  const existing = await db.select().from(questEntriesTable).where(eq(questEntriesTable.userId, user.id));
+  if (existing.length >= 10) {
+    res.status(400).json({ error: "Maximum 10 quest entries allowed" });
+    return;
+  }
+
+  const [entry] = await db.insert(questEntriesTable).values({
+    userId: user.id,
+    gameName: gameName.trim().slice(0, 60),
+    helpType: helpType.trim().slice(0, 100),
+    playstyle: playstyle.trim().slice(0, 60),
+  }).returning();
+
+  res.status(201).json({ ...entry, createdAt: entry.createdAt.toISOString() });
+});
+
+router.delete("/quest/:id", requireAuth, async (req, res): Promise<void> => {
+  const user = req.user!;
+  const entryId = parseInt(req.params.id);
+  if (isNaN(entryId)) { res.status(400).json({ error: "Invalid entry ID" }); return; }
+
+  const [entry] = await db.select().from(questEntriesTable).where(and(eq(questEntriesTable.id, entryId), eq(questEntriesTable.userId, user.id)));
+  if (!entry) { res.status(404).json({ error: "Entry not found" }); return; }
+
+  await db.delete(questEntriesTable).where(eq(questEntriesTable.id, entryId));
+  res.json({ success: true });
 });
 
 router.patch("/profile", requireAuth, async (req, res): Promise<void> => {
