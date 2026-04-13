@@ -5,7 +5,6 @@ import {
   useBrowseRequests, usePlaceBid,
   type GameRequest,
 } from "@/lib/bids-api";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -17,14 +16,32 @@ import {
   Search, Swords, Monitor, Layers, Gavel, ArrowRight,
   ChevronDown, ChevronUp, DollarSign, MessageSquare,
   CheckCircle2, AlertCircle, User, Clock, TrendingDown,
-  Zap, ExternalLink, LogIn,
+  Zap, ExternalLink, LogIn, Trophy, Shield, Star,
+  Flame, Target, Users,
 } from "lucide-react";
 import { SafetyBanner } from "@/components/safety-banner";
 import { useToast } from "@/hooks/use-toast";
 import { VerifiedBadge } from "@/components/verified-badge";
 import { ReportButton } from "@/components/report-modal";
 
-/* ── COMPACT CONDUCT REMINDER (shown in bid form) ─────────────── */
+/* ── SKILL CONFIG ────────────────────────────────────────────────────────── */
+const SKILL_CONFIG: Record<string, { border: string; text: string; bg: string; glow: string; bar: string }> = {
+  Beginner:     { border: "border-green-500/40",  text: "text-green-400",  bg: "bg-green-500/10",  glow: "rgba(34,197,94,0.15)",   bar: "#22c55e" },
+  Intermediate: { border: "border-yellow-500/40", text: "text-yellow-400", bg: "bg-yellow-500/10", glow: "rgba(234,179,8,0.15)",    bar: "#eab308" },
+  Expert:       { border: "border-primary/40",    text: "text-primary",    bg: "bg-primary/10",    glow: "rgba(168,85,247,0.2)",    bar: "#a855f7" },
+  Chill:        { border: "border-cyan-500/40",   text: "text-cyan-400",   bg: "bg-cyan-500/10",   glow: "rgba(34,211,238,0.15)",   bar: "#22d3ee" },
+};
+const DEFAULT_SKILL = { border: "border-primary/30", text: "text-primary", bg: "bg-primary/10", glow: "rgba(168,85,247,0.15)", bar: "#a855f7" };
+
+const PLATFORMS = ["PC", "PlayStation", "Xbox", "Nintendo Switch", "Steam Deck", "iOS", "Android"];
+const SKILLS = ["Beginner", "Intermediate", "Expert", "Chill"];
+
+const PLATFORM_ICON: Record<string, string> = {
+  PC: "🖥️", PlayStation: "🎮", Xbox: "🟩", "Nintendo Switch": "🕹️",
+  "Steam Deck": "🎲", iOS: "📱", Android: "🤖",
+};
+
+/* ── CONDUCT REMINDER ───────────────────────────────────────────────────── */
 const BID_CONDUCT_HIGHLIGHTS = [
   { icon: "😊", text: "Be friendly and positive — no toxicity or negativity" },
   { icon: "🔒", text: "Never ask for account passwords — instant ban if you do" },
@@ -38,7 +55,7 @@ function BidConductReminder() {
       <button
         type="button"
         onClick={() => setOpen((p) => !p)}
-        className="w-full flex items-center justify-between px-3.5 py-2.5 gap-3 hover:bg-amber-500/8 transition-colors"
+        className="w-full flex items-center justify-between px-3.5 py-2.5 gap-3 hover:bg-amber-500/5 transition-colors"
       >
         <div className="flex items-center gap-2">
           <CheckCircle2 className="h-3.5 w-3.5 text-amber-400 shrink-0" />
@@ -46,9 +63,7 @@ function BidConductReminder() {
             By bidding, you agree to follow the Gamer Code of Conduct
           </span>
         </div>
-        {open
-          ? <ChevronUp className="h-3.5 w-3.5 text-amber-400/60 shrink-0" />
-          : <ChevronDown className="h-3.5 w-3.5 text-amber-400/60 shrink-0" />}
+        {open ? <ChevronUp className="h-3.5 w-3.5 text-amber-400/60 shrink-0" /> : <ChevronDown className="h-3.5 w-3.5 text-amber-400/60 shrink-0" />}
       </button>
       {open && (
         <div className="px-3.5 pb-3.5 space-y-2 border-t border-amber-500/15">
@@ -63,7 +78,7 @@ function BidConductReminder() {
           <div className="flex items-start gap-2 rounded-lg bg-red-500/8 border border-red-500/20 px-2.5 py-2 mt-1">
             <AlertCircle className="h-3 w-3 text-red-400 shrink-0 mt-0.5" />
             <p className="text-[10px] text-red-300/80 leading-relaxed">
-              Breaking any rule may result in <span className="font-semibold text-red-300">immediate account suspension</span> and loss of earnings. Full rules are on your Profile page.
+              Breaking any rule may result in <span className="font-semibold text-red-300">immediate account suspension</span> and loss of earnings. Full rules on your Profile page.
             </p>
           </div>
         </div>
@@ -72,57 +87,51 @@ function BidConductReminder() {
   );
 }
 
-const PLATFORMS = ["PC", "PlayStation", "Xbox", "Nintendo Switch", "Steam Deck", "iOS", "Android"];
-const SKILLS = ["Beginner", "Intermediate", "Expert", "Chill"];
-
-const PLATFORM_ICON: Record<string, string> = {
-  PC: "🖥️", PlayStation: "🎮", Xbox: "🟩", "Nintendo Switch": "🕹️",
-  "Steam Deck": "🎲", iOS: "📱", Android: "🤖",
-};
-
-const SKILL_COLOR: Record<string, string> = {
-  Beginner: "border-green-500/40 text-green-400 bg-green-500/10",
-  Intermediate: "border-yellow-500/40 text-yellow-400 bg-yellow-500/10",
-  Expert: "border-primary/40 text-primary bg-primary/10",
-  Chill: "border-secondary/40 text-secondary bg-secondary/10",
-};
-
+/* ── SKELETON ────────────────────────────────────────────────────────────── */
 function RequestCardSkeleton() {
   return (
-    <div className="rounded-xl border border-border/30 bg-card/40 p-5 space-y-3 animate-pulse">
-      <div className="flex justify-between">
-        <div className="space-y-2">
-          <Skeleton className="h-3 w-24" />
-          <Skeleton className="h-6 w-48" />
+    <div className="rounded-2xl border border-border/30 bg-card/40 overflow-hidden animate-pulse">
+      <div className="flex">
+        <div className="w-1.5 shrink-0 bg-primary/20" />
+        <div className="flex-1 p-5 space-y-4">
+          <div className="flex justify-between items-start gap-4">
+            <div className="space-y-2 flex-1">
+              <div className="flex gap-2">
+                <Skeleton className="h-4 w-20 rounded-full" />
+                <Skeleton className="h-4 w-20 rounded-full" />
+              </div>
+              <Skeleton className="h-8 w-56" />
+              <Skeleton className="h-4 w-36" />
+            </div>
+            <Skeleton className="h-11 w-32 rounded-xl shrink-0" />
+          </div>
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-3/4" />
+          <div className="flex gap-4">
+            <Skeleton className="h-5 w-20 rounded-full" />
+            <Skeleton className="h-5 w-28 rounded-full" />
+          </div>
         </div>
-        <Skeleton className="h-8 w-24 rounded-lg" />
-      </div>
-      <Skeleton className="h-3 w-full" />
-      <Skeleton className="h-3 w-3/4" />
-      <div className="flex gap-2">
-        <Skeleton className="h-5 w-20 rounded-full" />
-        <Skeleton className="h-5 w-20 rounded-full" />
       </div>
     </div>
   );
 }
 
+/* ── QUICK BID PANEL ─────────────────────────────────────────────────────── */
 type BidFormState = "idle" | "submitting" | "success" | "error";
 
 function QuickBidPanel({ req, onClose }: { req: GameRequest; onClose: () => void }) {
   const { user } = useAuth();
-  const { toast } = useToast();
   const [price, setPrice] = useState("");
   const [message, setMessage] = useState("");
   const [, setLocation] = useLocation();
   const [state, setState] = useState<BidFormState>("idle");
   const [errorMsg, setErrorMsg] = useState("");
-
   const placeBid = usePlaceBid();
 
   if (!user) {
     return (
-      <div className="mt-2 rounded-xl border border-amber-500/25 bg-amber-500/5 p-5 flex flex-col sm:flex-row items-center gap-4">
+      <div className="mt-4 rounded-xl border border-amber-500/25 bg-amber-500/5 p-5 flex flex-col sm:flex-row items-center gap-4">
         <LogIn className="h-8 w-8 text-amber-400 shrink-0" />
         <div className="flex-1 text-center sm:text-left">
           <div className="font-bold text-amber-300 text-sm">Log in to place a bid</div>
@@ -138,21 +147,21 @@ function QuickBidPanel({ req, onClose }: { req: GameRequest; onClose: () => void
 
   if (user.id === req.userId) {
     return (
-      <div className="mt-2 rounded-xl border border-border/40 bg-background/30 p-4 text-sm text-muted-foreground text-center">
-        This is your own request — you can manage it from <Link href="/my-requests" className="text-primary hover:underline">My Requests</Link>.
+      <div className="mt-4 rounded-xl border border-border/40 bg-background/30 p-4 text-sm text-muted-foreground text-center">
+        This is your own request — manage it from <Link href="/my-requests" className="text-primary hover:underline">My Requests</Link>.
       </div>
     );
   }
 
   if (state === "success") {
     return (
-      <div className="mt-2 rounded-xl border border-green-500/30 bg-green-500/5 p-5 flex flex-col items-center gap-3 text-center">
-        <CheckCircle2 className="h-10 w-10 text-green-400" strokeWidth={1.5} />
+      <div className="mt-4 rounded-xl border border-green-500/30 bg-green-500/5 p-6 flex flex-col items-center gap-3 text-center">
+        <div className="w-16 h-16 rounded-full bg-green-500/10 border border-green-500/30 flex items-center justify-center">
+          <CheckCircle2 className="h-8 w-8 text-green-400" strokeWidth={1.5} />
+        </div>
         <div>
-          <div className="font-extrabold text-green-400 text-base">Bid Placed!</div>
-          <div className="text-xs text-muted-foreground mt-1">
-            The hirer will review your pitch and may accept your bid.
-          </div>
+          <div className="font-extrabold text-green-400 text-lg">Bid Placed!</div>
+          <div className="text-xs text-muted-foreground mt-1">The hirer will review your pitch and may accept your bid.</div>
         </div>
         <div className="flex gap-2 mt-1">
           <Button size="sm" variant="outline" className="text-xs" onClick={onClose}>Back to Browse</Button>
@@ -180,27 +189,24 @@ function QuickBidPanel({ req, onClose }: { req: GameRequest; onClose: () => void
     } catch (err: any) {
       const msg: string = err?.error || err?.message || "";
       if (msg.toLowerCase().includes("already placed a bid")) {
-        setState("error");
-        setErrorMsg("already_bid");
+        setState("error"); setErrorMsg("already_bid");
       } else {
-        setState("error");
-        setErrorMsg(msg || "Failed to place bid. Please try again.");
+        setState("error"); setErrorMsg(msg || "Failed to place bid. Please try again.");
       }
     }
   };
 
   return (
     <form onSubmit={handleSubmit}
-      className="mt-2 rounded-xl border border-primary/25 bg-primary/5 p-5 space-y-4"
-      style={{ boxShadow: "0 0 24px rgba(168,85,247,0.07) inset" }}>
-
+      className="mt-4 rounded-xl border border-primary/25 bg-primary/5 p-5 space-y-4"
+      style={{ boxShadow: "0 0 24px rgba(168,85,247,0.07) inset" }}
+    >
       <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-primary">
         <Gavel className="h-3.5 w-3.5" /> Place Your Bid
       </div>
 
-      {/* Bid hints */}
       {req.lowestBid && (
-        <div className="flex items-center gap-2 text-xs text-secondary bg-secondary/5 border border-secondary/20 rounded-lg px-3 py-2">
+        <div className="flex items-center gap-2 text-xs text-cyan-400 bg-cyan-500/5 border border-cyan-500/20 rounded-lg px-3 py-2">
           <TrendingDown className="h-3.5 w-3.5 shrink-0" />
           Lowest current bid: <span className="font-bold text-white ml-1">${req.lowestBid.toFixed(2)}</span>
           <span className="text-muted-foreground ml-1">— bid lower to stand out</span>
@@ -208,36 +214,25 @@ function QuickBidPanel({ req, onClose }: { req: GameRequest; onClose: () => void
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {/* Price */}
         <div className="space-y-1.5">
-          <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-            Your Price (USD) *
-          </Label>
+          <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Your Price (USD) *</Label>
           <div className="relative">
             <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              type="number"
-              min="1"
-              max="9999"
-              step="0.01"
-              placeholder="e.g. 15.00"
+              type="number" min="1" max="9999" step="0.01" placeholder="e.g. 15.00"
               value={price}
               onChange={(e) => { setPrice(e.target.value); if (state === "error") setState("idle"); }}
               className={`pl-9 bg-background/60 font-mono text-sm ${price && !priceValid ? "border-red-500/50" : price && priceValid ? "border-green-500/40" : ""}`}
               required
             />
           </div>
-          {price && !priceValid && (
-            <p className="text-[10px] text-red-400">Enter a price between $1 and $9,999</p>
-          )}
+          {price && !priceValid && <p className="text-[10px] text-red-400">Enter a price between $1 and $9,999</p>}
           {price && priceValid && (
             <p className="text-[10px] text-muted-foreground">
               You earn <span className="text-green-400 font-bold">${(priceNum * 0.9).toFixed(2)}</span> after 10% platform fee
             </p>
           )}
         </div>
-
-        {/* Quick tip */}
         <div className="space-y-1.5 flex flex-col justify-end">
           <div className="rounded-xl border border-border/40 bg-background/30 p-3 text-xs space-y-1.5">
             <div className="font-bold text-white text-[11px] flex items-center gap-1.5">
@@ -252,7 +247,6 @@ function QuickBidPanel({ req, onClose }: { req: GameRequest; onClose: () => void
         </div>
       </div>
 
-      {/* Message */}
       <div className="space-y-1.5">
         <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
           Your Pitch * <span className="normal-case tracking-normal text-muted-foreground/60">(min 10 chars)</span>
@@ -265,47 +259,36 @@ function QuickBidPanel({ req, onClose }: { req: GameRequest; onClose: () => void
           required
         />
         <div className="flex justify-between items-center">
-          {message && !messageValid && (
-            <p className="text-[10px] text-red-400">Pitch too short — tell them more about yourself</p>
-          )}
+          {message && !messageValid && <p className="text-[10px] text-red-400">Pitch too short — tell them more about yourself</p>}
           <div className="ml-auto text-[10px] text-muted-foreground/50">{message.length} chars</div>
         </div>
       </div>
 
-      {/* Error */}
       {state === "error" && errorMsg === "already_bid" && (
-        <div className="rounded-xl border border-secondary/30 bg-secondary/5 p-4 flex flex-col sm:flex-row items-start sm:items-center gap-3">
-          <CheckCircle2 className="h-5 w-5 text-secondary shrink-0" />
+        <div className="rounded-xl border border-cyan-500/30 bg-cyan-500/5 p-4 flex flex-col sm:flex-row items-start sm:items-center gap-3">
+          <CheckCircle2 className="h-5 w-5 text-cyan-400 shrink-0" />
           <div className="flex-1">
-            <div className="font-bold text-secondary text-sm">You already bid on this request</div>
+            <div className="font-bold text-cyan-400 text-sm">You already bid on this request</div>
             <div className="text-xs text-muted-foreground mt-0.5">Track your bid status from the full request page.</div>
           </div>
-          <Button size="sm" variant="outline" className="text-xs border-secondary/40 text-secondary hover:bg-secondary hover:text-black shrink-0"
-            onClick={() => setLocation(`/requests/${req.id}`)}>
+          <Button size="sm" variant="outline" className="text-xs border-cyan-500/40 text-cyan-400 shrink-0" onClick={() => setLocation(`/requests/${req.id}`)}>
             View Bid <ExternalLink className="ml-1 h-3 w-3" />
           </Button>
         </div>
       )}
       {state === "error" && errorMsg !== "already_bid" && (
         <div className="flex items-center gap-2 rounded-lg border border-red-500/30 bg-red-500/5 px-3 py-2.5 text-xs text-red-400">
-          <AlertCircle className="h-3.5 w-3.5 shrink-0" />
-          {errorMsg}
+          <AlertCircle className="h-3.5 w-3.5 shrink-0" /> {errorMsg}
         </div>
       )}
 
-      {/* Conduct reminder */}
       <BidConductReminder />
 
-      {/* Actions */}
       <div className="flex flex-wrap gap-2.5 pt-1">
-        <Button type="button" variant="outline" size="sm" onClick={onClose} className="text-xs h-10">
-          Cancel
-        </Button>
+        <Button type="button" variant="outline" size="sm" onClick={onClose} className="text-xs h-10">Cancel</Button>
         <Button
-          type="submit"
-          size="sm"
-          disabled={!canSubmit}
-          className="bg-primary hover:bg-primary/90 flex-1 min-w-[120px] font-bold uppercase tracking-wider text-xs shadow-[0_0_16px_rgba(168,85,247,0.25)] disabled:opacity-50 disabled:cursor-not-allowed h-10"
+          type="submit" size="sm" disabled={!canSubmit}
+          className="bg-primary hover:bg-primary/90 flex-1 min-w-[140px] font-bold uppercase tracking-wider text-xs shadow-[0_0_20px_rgba(168,85,247,0.3)] disabled:opacity-50 h-10"
         >
           {state === "submitting" ? (
             <span className="flex items-center gap-1.5">
@@ -320,10 +303,8 @@ function QuickBidPanel({ req, onClose }: { req: GameRequest; onClose: () => void
           )}
         </Button>
         <Button
-          type="button"
-          size="sm"
-          variant="outline"
-          className="text-xs border-secondary/40 text-secondary hover:bg-secondary hover:text-black h-10"
+          type="button" size="sm" variant="outline"
+          className="text-xs border-primary/30 text-primary hover:bg-primary hover:text-white h-10"
           onClick={() => setLocation(`/requests/${req.id}`)}
         >
           Full Details <ExternalLink className="ml-1 h-3 w-3" />
@@ -333,118 +314,257 @@ function QuickBidPanel({ req, onClose }: { req: GameRequest; onClose: () => void
   );
 }
 
+/* ── REQUEST CARD ────────────────────────────────────────────────────────── */
 function RequestCard({ req }: { req: GameRequest }) {
   const [expanded, setExpanded] = useState(false);
   const [, setLocation] = useLocation();
 
+  const skill = SKILL_CONFIG[req.skillLevel] ?? DEFAULT_SKILL;
+  const isZeroBids = req.bidCount === 0;
+
   return (
     <div
-      className={`rounded-xl border transition-all duration-200 overflow-hidden ${expanded ? "border-primary/40 bg-card/80 shadow-[0_0_24px_rgba(168,85,247,0.08)]" : "border-border/50 bg-card/40 hover:bg-card/70 hover:border-primary/25"}`}
+      className={`group rounded-2xl border overflow-hidden transition-all duration-300 ${
+        expanded
+          ? "border-primary/50 shadow-[0_0_40px_rgba(168,85,247,0.12)]"
+          : "border-border/50 hover:border-primary/30 hover:shadow-[0_0_24px_rgba(168,85,247,0.08)]"
+      }`}
+      style={{
+        background: expanded
+          ? "linear-gradient(135deg, rgba(168,85,247,0.05) 0%, rgba(0,0,0,0.6) 100%)"
+          : "linear-gradient(135deg, rgba(255,255,255,0.02) 0%, rgba(0,0,0,0.4) 100%)",
+      }}
     >
-      {/* Top accent bar on expand */}
-      {expanded && <div className="h-0.5 bg-gradient-to-r from-transparent via-primary/60 to-transparent" />}
+      {/* Skill-level accent bar */}
+      <div className="h-0.5 w-full" style={{ background: `linear-gradient(90deg, transparent, ${skill.bar}, transparent)` }} />
 
-      <div className="p-5">
-        <div className="flex flex-col sm:flex-row sm:items-start gap-4">
-          {/* Left: main info */}
-          <div className="flex-1 space-y-3 min-w-0">
-            {/* Hirer + game */}
-            <div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <User className="h-3 w-3" />
-                  <span className="text-primary font-semibold">{req.userName}</span>
-                  <VerifiedBadge idVerified={req.userIdVerified ?? false} variant="icon" />
-                  <ReportButton userId={req.userId} userName={req.userName} variant="icon" />
+      <div className="flex">
+        {/* Left skill bar */}
+        <div className="w-1 shrink-0 rounded-none" style={{ background: skill.bar, opacity: 0.7 }} />
+
+        <div className="flex-1 p-5 md:p-6">
+          {/* Main row */}
+          <div className="flex flex-col sm:flex-row sm:items-start gap-4">
+            {/* Left content */}
+            <div className="flex-1 space-y-3 min-w-0">
+              {/* Badges */}
+              <div className="flex flex-wrap gap-2 items-center">
+                <span className="inline-flex items-center gap-1.5 text-xs border border-border/60 rounded-full px-3 py-1 font-semibold text-muted-foreground bg-background/60">
+                  <span>{PLATFORM_ICON[req.platform] ?? "🎮"}</span>
+                  {req.platform}
                 </span>
-                <span className="text-muted-foreground/30 text-xs">·</span>
-                <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
-                  <Clock className="h-3 w-3" />
-                  {format(new Date(req.createdAt), "MMM d")}
+                <span className={`inline-flex items-center text-xs border rounded-full px-3 py-1 font-bold ${skill.border} ${skill.text} ${skill.bg}`}>
+                  {req.skillLevel}
                 </span>
-              </div>
-              <h3
-                className="text-xl font-extrabold text-white mt-1 cursor-pointer hover:text-primary transition-colors leading-tight"
-                onClick={() => setLocation(`/requests/${req.id}`)}
-              >
-                {req.gameName}
-              </h3>
-            </div>
-
-            {/* Badges */}
-            <div className="flex flex-wrap gap-1.5">
-              <span className="text-xs border border-border/60 rounded-full px-2.5 py-0.5 font-semibold text-muted-foreground bg-background/60">
-                {PLATFORM_ICON[req.platform] ?? "🎮"} {req.platform}
-              </span>
-              <span className={`text-xs border rounded-full px-2.5 py-0.5 font-semibold ${SKILL_COLOR[req.skillLevel] ?? "text-muted-foreground border-border"}`}>
-                {req.skillLevel}
-              </span>
-            </div>
-
-            {/* Objectives */}
-            <p className="text-sm text-foreground/70 leading-relaxed border-l-2 border-primary/30 pl-3 line-clamp-2">
-              {req.objectives}
-            </p>
-
-            {/* Bid stats row */}
-            <div className="flex flex-wrap items-center gap-3">
-              <div className="flex items-center gap-1.5">
-                <Gavel className="h-3.5 w-3.5 text-muted-foreground" />
-                <span className="text-xs font-semibold text-white">
-                  {req.bidCount === 0 ? "No bids yet" : `${req.bidCount} bid${req.bidCount === 1 ? "" : "s"}`}
-                </span>
-                {req.bidCount === 0 && (
-                  <span className="text-[9px] bg-green-500/15 border border-green-500/25 text-green-400 rounded-full px-1.5 py-0.5 font-bold uppercase tracking-wider">
-                    First bid!
+                {isZeroBids && (
+                  <span className="inline-flex items-center gap-1 text-[10px] bg-green-500/15 border border-green-500/30 text-green-400 rounded-full px-2.5 py-1 font-black uppercase tracking-wider animate-pulse">
+                    <Flame className="h-3 w-3" /> First bid!
                   </span>
                 )}
               </div>
-              {req.lowestBid && (
-                <div className="flex items-center gap-1.5">
-                  <TrendingDown className="h-3.5 w-3.5 text-secondary" />
-                  <span className="text-xs text-muted-foreground">
-                    Lowest bid: <span className="font-bold text-white">${req.lowestBid.toFixed(2)}</span>
+
+              {/* Game title + hirer */}
+              <div>
+                <h3
+                  className="text-2xl md:text-3xl font-extrabold text-white leading-tight cursor-pointer hover:text-primary transition-colors tracking-tight"
+                  onClick={() => setLocation(`/requests/${req.id}`)}
+                >
+                  {req.gameName}
+                </h3>
+                <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                  <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <User className="h-3 w-3" />
+                    <span className="text-primary font-semibold">{req.userName}</span>
+                    <VerifiedBadge idVerified={req.userIdVerified ?? false} variant="icon" />
+                    <ReportButton userId={req.userId} userName={req.userName} variant="icon" />
+                  </span>
+                  <span className="text-muted-foreground/30 text-xs hidden sm:inline">·</span>
+                  <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+                    <Clock className="h-3 w-3" />
+                    {format(new Date(req.createdAt), "MMM d")}
                   </span>
                 </div>
-              )}
-              {req.bidCount === 0 && (
-                <span className="text-xs text-muted-foreground/60">— be the first!</span>
-              )}
+              </div>
+
+              {/* Objectives */}
+              <p className="text-sm text-foreground/70 leading-relaxed border-l-2 pl-3 line-clamp-2" style={{ borderColor: skill.bar + "60" }}>
+                {req.objectives}
+              </p>
+
+              {/* Bid stats */}
+              <div className="flex flex-wrap items-center gap-3">
+                <div
+                  className="flex items-center gap-1.5 rounded-lg border px-3 py-1.5"
+                  style={{ borderColor: "rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.03)" }}
+                >
+                  <Gavel className="h-3.5 w-3.5 text-muted-foreground" />
+                  <span className="text-xs font-bold text-white">
+                    {isZeroBids ? "No bids yet" : `${req.bidCount} bid${req.bidCount === 1 ? "" : "s"}`}
+                  </span>
+                  {isZeroBids && <span className="text-muted-foreground/60 text-xs">— be first!</span>}
+                </div>
+                {req.lowestBid && (
+                  <div
+                    className="flex items-center gap-1.5 rounded-lg border px-3 py-1.5"
+                    style={{ borderColor: "rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.03)" }}
+                  >
+                    <TrendingDown className="h-3.5 w-3.5 text-cyan-400" />
+                    <span className="text-xs text-muted-foreground">
+                      Lowest bid: <span className="font-bold text-white">${req.lowestBid.toFixed(2)}</span>
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Right: CTA buttons */}
+            <div className="flex sm:flex-col items-center sm:items-stretch gap-2 shrink-0">
+              <button
+                onClick={() => setExpanded(!expanded)}
+                className={`flex items-center justify-center gap-2 rounded-xl font-extrabold text-sm px-5 py-3 transition-all uppercase tracking-wider whitespace-nowrap ${
+                  expanded
+                    ? "bg-primary/20 text-primary border border-primary/50"
+                    : "bg-primary text-white border border-primary hover:bg-primary/90 shadow-[0_0_20px_rgba(168,85,247,0.4)] hover:shadow-[0_0_30px_rgba(168,85,247,0.55)]"
+                }`}
+              >
+                <Gavel className="h-4 w-4" />
+                {expanded ? "Cancel" : "Place Bid"}
+                {expanded ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+              </button>
+              <button
+                onClick={() => setLocation(`/requests/${req.id}`)}
+                className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors font-semibold whitespace-nowrap px-3 py-2 rounded-xl border border-border/40 hover:border-primary/30 hover:bg-primary/5"
+              >
+                Full Details <ArrowRight className="h-3.5 w-3.5" />
+              </button>
             </div>
           </div>
 
-          {/* Right: actions */}
-          <div className="flex sm:flex-col items-center sm:items-end gap-2 shrink-0 self-start sm:self-auto">
-            <button
-              onClick={() => setExpanded(!expanded)}
-              className={`flex items-center gap-1.5 rounded-lg border font-bold uppercase text-xs px-3.5 py-2.5 sm:py-2 transition-all ${
-                expanded
-                  ? "bg-primary text-white border-primary shadow-[0_0_16px_rgba(168,85,247,0.3)]"
-                  : "bg-primary/10 border-primary/40 text-primary hover:bg-primary hover:text-white hover:shadow-[0_0_12px_rgba(168,85,247,0.25)]"
-              }`}
-            >
-              <Gavel className="h-3.5 w-3.5" />
-              {expanded ? "Cancel" : "Place Bid"}
-              {expanded ? <ChevronUp className="h-3 w-3 ml-0.5" /> : <ChevronDown className="h-3 w-3 ml-0.5" />}
-            </button>
-            <button
-              onClick={() => setLocation(`/requests/${req.id}`)}
-              className="flex items-center gap-1 text-xs text-muted-foreground hover:text-secondary transition-colors font-semibold whitespace-nowrap"
-            >
-              Full Details <ArrowRight className="h-3.5 w-3.5" />
-            </button>
-          </div>
+          {/* Inline bid panel */}
+          {expanded && <QuickBidPanel req={req} onClose={() => setExpanded(false)} />}
         </div>
-
-        {/* Inline bid panel */}
-        {expanded && (
-          <QuickBidPanel req={req} onClose={() => setExpanded(false)} />
-        )}
       </div>
     </div>
   );
 }
 
+/* ── EMPTY STATE ─────────────────────────────────────────────────────────── */
+function EmptyState({ hasFilters, onClear }: { hasFilters: boolean; onClear: () => void }) {
+  const [, setLocation] = useLocation();
+  return (
+    <div className="space-y-6">
+      <div
+        className="rounded-2xl border border-dashed border-border/50 p-12 text-center"
+        style={{ background: "radial-gradient(ellipse at 50% 0%, rgba(168,85,247,0.04) 0%, transparent 70%)" }}
+      >
+        <div className="w-20 h-20 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto mb-4">
+          <Swords className="h-9 w-9 text-primary/40" />
+        </div>
+        <h3 className="text-xl font-extrabold uppercase tracking-wide text-muted-foreground/60 mb-2">
+          {hasFilters ? "No Matching Requests" : "No Open Requests Yet"}
+        </h3>
+        <p className="text-sm text-muted-foreground/50 max-w-sm mx-auto">
+          {hasFilters
+            ? "Try different keywords or clear your filters to see all requests."
+            : "Be the first! Post a request and get bids from skilled gamers within minutes."}
+        </p>
+        <div className="flex items-center justify-center gap-3 mt-6">
+          {hasFilters && (
+            <Button variant="outline" size="sm" className="text-xs" onClick={onClear}>Clear Filters</Button>
+          )}
+          <Button size="sm" className="bg-primary text-white text-xs shadow-[0_0_16px_rgba(168,85,247,0.3)]" onClick={() => setLocation("/post-request")}>
+            Post a Request
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── FILLER SECTION ──────────────────────────────────────────────────────── */
+// Shown below the card list when there are ≤3 requests, to reduce dead space
+function FillerSection() {
+  const [, setLocation] = useLocation();
+  const { user } = useAuth();
+
+  const steps = [
+    { icon: <Search className="h-5 w-5 text-primary" />, title: "Browse Missions", desc: "Find game requests that match your skills and schedule." },
+    { icon: <Gavel className="h-5 w-5 text-cyan-400" />, title: "Place a Bid", desc: "Set your price and pitch yourself — no middleman." },
+    { icon: <Trophy className="h-5 w-5 text-yellow-400" />, title: "Get Paid", desc: "Complete the session, get reviewed, and earn straight away." },
+  ];
+
+  return (
+    <div className="space-y-4 pt-4">
+      {/* Divider */}
+      <div className="flex items-center gap-3">
+        <div className="flex-1 h-px bg-border/40" />
+        <span className="text-[10px] text-muted-foreground/40 uppercase tracking-widest font-bold">How it works</span>
+        <div className="flex-1 h-px bg-border/40" />
+      </div>
+
+      {/* Steps */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        {steps.map((s, i) => (
+          <div
+            key={i}
+            className="rounded-xl border border-border/40 p-4 flex items-start gap-3"
+            style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.02) 0%, rgba(0,0,0,0.3) 100%)" }}
+          >
+            <div className="shrink-0 w-10 h-10 rounded-xl bg-background border border-border/60 flex items-center justify-center">
+              {s.icon}
+            </div>
+            <div>
+              <div className="text-sm font-bold text-white">{s.title}</div>
+              <div className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{s.desc}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* CTA row */}
+      <div
+        className="rounded-2xl border border-primary/20 p-5 flex flex-col sm:flex-row items-center gap-4 justify-between"
+        style={{ background: "linear-gradient(135deg, rgba(168,85,247,0.06) 0%, rgba(0,0,0,0.3) 100%)" }}
+      >
+        <div className="text-center sm:text-left">
+          <div className="font-extrabold text-white text-base">Need a skilled teammate?</div>
+          <div className="text-sm text-muted-foreground mt-0.5">Post your game request and receive bids from verified gamers.</div>
+        </div>
+        <div className="flex items-center gap-3 shrink-0">
+          {!user && (
+            <Button variant="outline" size="sm" onClick={() => setLocation("/login")} className="text-xs border-primary/30 text-primary">
+              Log In
+            </Button>
+          )}
+          <Button
+            size="sm"
+            onClick={() => setLocation(user ? "/post-request" : "/signup")}
+            className="bg-primary text-white font-bold uppercase tracking-wider text-xs px-5 shadow-[0_0_20px_rgba(168,85,247,0.3)] hover:shadow-[0_0_30px_rgba(168,85,247,0.45)]"
+          >
+            <Zap className="h-3.5 w-3.5 mr-1.5" />
+            {user ? "Post a Request" : "Get Started Free"}
+          </Button>
+        </div>
+      </div>
+
+      {/* Trust strip */}
+      <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-2 py-2">
+        {[
+          { icon: <Shield className="h-3.5 w-3.5 text-green-400" />, text: "Verified gamers only" },
+          { icon: <Star className="h-3.5 w-3.5 text-yellow-400" />, text: "Rated after every session" },
+          { icon: <Users className="h-3.5 w-3.5 text-primary" />, text: "2,450+ gamers registered" },
+          { icon: <Target className="h-3.5 w-3.5 text-cyan-400" />, text: "Escrow-secured payments" },
+        ].map((t) => (
+          <div key={t.text} className="flex items-center gap-1.5 text-[11px] text-muted-foreground/50 font-medium">
+            {t.icon} {t.text}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ── MAIN PAGE ───────────────────────────────────────────────────────────── */
 export default function Browse() {
   const [platform, setPlatform] = useState("all");
   const [skillLevel, setSkillLevel] = useState("all");
@@ -470,58 +590,86 @@ export default function Browse() {
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     });
 
+  const hasFilters = platform !== "all" || skillLevel !== "all" || search.trim() !== "";
+  const clearFilters = () => { setPlatform("all"); setSkillLevel("all"); setSearch(""); };
+  const showFiller = !isLoading && !isError && requests && requests.length > 0 && requests.length <= 3;
+
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
+    <div className="space-y-5 relative">
+      {/* Subtle background glow */}
+      <div
+        className="pointer-events-none fixed inset-0 -z-10 opacity-30"
+        style={{
+          background: "radial-gradient(ellipse 60% 40% at 70% 10%, rgba(168,85,247,0.08) 0%, transparent 60%), radial-gradient(ellipse 40% 30% at 20% 80%, rgba(34,211,238,0.04) 0%, transparent 50%)",
+        }}
+      />
+
+      {/* ── Header ── */}
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold uppercase tracking-tight text-white flex items-center gap-3 drop-shadow-[0_0_10px_rgba(168,85,247,0.2)]">
-            <Swords className="h-7 w-7 text-primary" />
-            Browse Requests
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/70 border border-primary/25 rounded-full px-2.5 py-1">
+              Live Marketplace
+            </span>
+          </div>
+          <h1 className="text-4xl md:text-5xl font-extrabold uppercase tracking-tight text-white leading-none" style={{ letterSpacing: "-0.02em" }}>
+            <span className="inline-flex items-center gap-3">
+              <Swords className="h-9 w-9 md:h-11 md:w-11 text-primary shrink-0" />
+              Browse Requests
+            </span>
           </h1>
-          <p className="text-muted-foreground mt-1 text-sm">
+          <p className="text-muted-foreground mt-2 text-sm max-w-md">
             Find open missions and place your bid directly — no page reload needed.
           </p>
         </div>
-        {requests && (
-          <span className="text-xs uppercase tracking-widest text-muted-foreground font-bold shrink-0">
-            {requests.length} {requests.length === 1 ? "request" : "requests"} open
-          </span>
+
+        {/* Live counter */}
+        {!isLoading && requests !== undefined && (
+          <div className="flex items-center gap-2 shrink-0 self-start sm:self-auto">
+            <div
+              className="flex items-center gap-2.5 rounded-xl border border-primary/30 px-4 py-2.5"
+              style={{ background: "linear-gradient(135deg, rgba(168,85,247,0.1) 0%, rgba(0,0,0,0.3) 100%)" }}
+            >
+              <div className="h-2 w-2 rounded-full bg-green-400 animate-pulse shadow-[0_0_6px_rgba(74,222,128,0.6)]" />
+              <span className="text-sm font-extrabold text-white">{requests.length}</span>
+              <span className="text-xs text-muted-foreground uppercase tracking-widest font-semibold">
+                {requests.length === 1 ? "Request" : "Requests"} Open
+              </span>
+            </div>
+          </div>
         )}
       </div>
 
       <SafetyBanner showSelfHire={false} storageKey="gb_safety_browse" />
 
-      {/* Filters */}
-      <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 p-4 rounded-xl border border-border bg-card/30">
-        {/* Search */}
+      {/* ── Filters ── */}
+      <div
+        className="grid grid-cols-1 sm:grid-cols-4 gap-3 p-4 rounded-2xl border border-border/50"
+        style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.02) 0%, rgba(0,0,0,0.3) 100%)" }}
+      >
         <div className="relative sm:col-span-2">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search game, objectives, or player…"
-            className="pl-9 bg-background"
+            className="pl-9 bg-background/60 border-border/60"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
 
-        {/* Platform */}
         <Select value={platform} onValueChange={setPlatform}>
-          <SelectTrigger className="bg-background border-border">
+          <SelectTrigger className="bg-background/60 border-border/60">
             <Monitor className="h-4 w-4 mr-2 text-muted-foreground shrink-0" />
             <SelectValue placeholder="Platform" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Platforms</SelectItem>
-            {PLATFORMS.map((p) => (
-              <SelectItem key={p} value={p}>{PLATFORM_ICON[p]} {p}</SelectItem>
-            ))}
+            {PLATFORMS.map((p) => <SelectItem key={p} value={p}>{PLATFORM_ICON[p]} {p}</SelectItem>)}
           </SelectContent>
         </Select>
 
-        {/* Skill */}
         <Select value={skillLevel} onValueChange={setSkillLevel}>
-          <SelectTrigger className="bg-background border-border">
+          <SelectTrigger className="bg-background/60 border-border/60">
             <Layers className="h-4 w-4 mr-2 text-muted-foreground shrink-0" />
             <SelectValue placeholder="Skill Level" />
           </SelectTrigger>
@@ -532,7 +680,7 @@ export default function Browse() {
         </Select>
       </div>
 
-      {/* Sort bar */}
+      {/* ── Sort bar ── */}
       {!isLoading && requests && requests.length > 1 && (
         <div className="flex flex-wrap items-center gap-2 text-xs">
           <span className="text-muted-foreground font-semibold uppercase tracking-widest">Sort:</span>
@@ -547,7 +695,7 @@ export default function Browse() {
               className={`px-3 py-2 rounded-lg border font-semibold transition-all ${
                 sort === opt.value
                   ? "bg-primary/20 border-primary/50 text-primary"
-                  : "border-border/50 text-muted-foreground hover:border-border hover:text-white"
+                  : "border-border/50 text-muted-foreground hover:border-primary/30 hover:text-white"
               }`}
             >
               {opt.label}
@@ -556,40 +704,29 @@ export default function Browse() {
         </div>
       )}
 
-      {/* List */}
+      {/* ── Content ── */}
       {isLoading ? (
-        <div className="space-y-3">
-          {[1, 2, 3, 4].map((i) => <RequestCardSkeleton key={i} />)}
+        <div className="space-y-4">
+          {[1, 2, 3].map((i) => <RequestCardSkeleton key={i} />)}
         </div>
       ) : isError ? (
-        <div className="text-center p-8 text-destructive flex flex-col items-center gap-3">
-          <AlertCircle className="h-8 w-8" />
-          <p className="font-semibold">Failed to load requests.</p>
-          <p className="text-sm text-muted-foreground">Check your connection and try again.</p>
+        <div className="rounded-2xl border border-red-500/20 bg-red-500/5 p-10 text-center flex flex-col items-center gap-3">
+          <AlertCircle className="h-10 w-10 text-red-400/60" />
+          <div>
+            <p className="font-bold text-red-400">Failed to load requests</p>
+            <p className="text-sm text-muted-foreground mt-1">Check your connection and try refreshing.</p>
+          </div>
         </div>
       ) : !requests || requests.length === 0 ? (
-        <div className="text-center py-20 border-2 border-dashed border-border/50 rounded-xl bg-card/10">
-          <Swords className="h-12 w-12 mx-auto mb-4 text-muted-foreground/20" />
-          <h3 className="text-lg font-bold uppercase tracking-wide text-muted-foreground/60">No Open Requests</h3>
-          <p className="text-sm text-muted-foreground/50 mt-1 max-w-xs mx-auto">
-            {search ? "No requests match your search. Try different keywords." : "Check back soon or clear your filters."}
-          </p>
-          {(platform !== "all" || skillLevel !== "all" || search) && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="mt-4 text-xs"
-              onClick={() => { setPlatform("all"); setSkillLevel("all"); setSearch(""); }}
-            >
-              Clear Filters
-            </Button>
-          )}
-        </div>
+        <EmptyState hasFilters={hasFilters} onClear={clearFilters} />
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-4">
           {requests.map((req) => <RequestCard key={req.id} req={req} />)}
         </div>
       )}
+
+      {/* ── Filler section (shows when ≤3 requests to remove dead space) ── */}
+      {showFiller && <FillerSection />}
     </div>
   );
 }
