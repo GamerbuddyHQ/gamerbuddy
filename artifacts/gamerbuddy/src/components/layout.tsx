@@ -7,6 +7,7 @@ import {
   Gamepad2, Compass, LayoutDashboard, Wallet, User as UserIcon,
   LogOut, FileText, Key, Bell, CheckCheck, X, Swords, Star,
   Trophy, MessageSquare, Zap, CircleDollarSign, ChevronRight, Menu,
+  ArrowLeft,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -208,10 +209,23 @@ export function Layout({ children }: { children: React.ReactNode }) {
     <div className="min-h-[100dvh] flex flex-col bg-background text-foreground font-sans">
       <header className="sticky top-0 z-50 w-full border-b border-border bg-background/80 backdrop-blur-sm">
         <div className="container flex h-16 items-center justify-between gap-3">
-          <Link href="/" className="flex items-center gap-2 text-primary shrink-0">
-            <Gamepad2 className="h-6 w-6" />
-            <span className="font-bold text-xl tracking-tight uppercase">GAMERBUDDY</span>
-          </Link>
+          <div className="flex items-center gap-2 shrink-0">
+            {location !== "/" && (
+              <button
+                onClick={() => window.history.back()}
+                className="flex items-center gap-1.5 h-9 px-2.5 rounded-xl border border-border/60 bg-background/60 hover:border-primary/50 hover:bg-primary/10 hover:text-primary text-muted-foreground transition-all text-sm font-semibold"
+                aria-label="Go back"
+              >
+                <ArrowLeft className="h-4 w-4 shrink-0" />
+                <span className="hidden sm:inline">Back</span>
+              </button>
+            )}
+            <Link href="/" className="flex items-center gap-2 text-primary">
+              <Gamepad2 className="h-6 w-6" />
+              <span className="font-bold text-xl tracking-tight uppercase hidden sm:inline">GAMERBUDDY</span>
+              <span className="font-bold text-lg tracking-tight uppercase sm:hidden">GB</span>
+            </Link>
+          </div>
 
           {/* Desktop nav */}
           <nav className="hidden md:flex gap-6 flex-1 justify-center">
