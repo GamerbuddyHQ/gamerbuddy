@@ -41,6 +41,8 @@ function formatRequest(
     escrowAmount?: string | null;
     startedAt?: Date | null;
     createdAt: Date;
+    bidCount?: number | null;
+    lowestBid?: string | null;
   },
   userName?: string,
 ) {
@@ -56,6 +58,8 @@ function formatRequest(
     escrowAmount: req.escrowAmount ? parseFloat(String(req.escrowAmount)) : null,
     startedAt: req.startedAt ? req.startedAt.toISOString() : null,
     createdAt: req.createdAt.toISOString(),
+    bidCount: req.bidCount ?? 0,
+    lowestBid: req.lowestBid ? parseFloat(String(req.lowestBid)) : null,
   };
 }
 
@@ -66,7 +70,7 @@ router.get("/requests", async (req, res): Promise<void> => {
     status?: string;
   };
 
-  let query = db
+  const result = await db
     .select({
       id: gameRequestsTable.id,
       userId: gameRequestsTable.userId,
@@ -77,13 +81,12 @@ router.get("/requests", async (req, res): Promise<void> => {
       status: gameRequestsTable.status,
       createdAt: gameRequestsTable.createdAt,
       userName: usersTable.name,
+      bidCount: sql<number>`(SELECT COUNT(*) FROM bids WHERE bids.request_id = ${gameRequestsTable.id})`.mapWith(Number),
+      lowestBid: sql<string | null>`(SELECT MIN(price) FROM bids WHERE bids.request_id = ${gameRequestsTable.id} AND bids.status = 'pending')`,
     })
     .from(gameRequestsTable)
     .leftJoin(usersTable, eq(gameRequestsTable.userId, usersTable.id))
-    .orderBy(desc(gameRequestsTable.createdAt))
-    .$dynamic();
-
-  const result = await query;
+    .orderBy(desc(gameRequestsTable.createdAt));
 
   const filtered = result.filter((r) => {
     if (platform && r.platform !== platform) return false;
@@ -92,11 +95,7 @@ router.get("/requests", async (req, res): Promise<void> => {
     return true;
   });
 
-  res.json(
-    filtered.map((r) =>
-      formatRequest(r, r.userName ?? "Unknown"),
-    ),
-  );
+  res.json(filtered.map((r) => formatRequest(r, r.userName ?? "Unknown")));
 });
 
 router.get("/requests/my", requireAuth, async (req, res): Promise<void> => {

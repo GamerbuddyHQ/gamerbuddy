@@ -71,12 +71,41 @@ export async function apiFetch<T = any>(url: string, opts?: RequestInit): Promis
   return data;
 }
 
+export type GameRequest = {
+  id: number;
+  userId: number;
+  userName: string;
+  gameName: string;
+  platform: string;
+  skillLevel: string;
+  objectives: string;
+  status: string;
+  escrowAmount: number | null;
+  startedAt: string | null;
+  createdAt: string;
+  bidCount: number;
+  lowestBid: number | null;
+};
+
 export const bidKeys = {
   list: (requestId: number) => ["bids", requestId] as const,
   messages: (bidId: number) => ["messages", bidId] as const,
   reviews: (requestId: number) => ["reviews", requestId] as const,
   userProfile: (userId: number) => ["user-profile", userId] as const,
+  requests: (params: Record<string, string>) => ["browse-requests", params] as const,
 };
+
+export function useBrowseRequests(params: { platform?: string; skillLevel?: string; status?: string } = {}) {
+  const filtered: Record<string, string> = {};
+  if (params.platform) filtered.platform = params.platform;
+  if (params.skillLevel) filtered.skillLevel = params.skillLevel;
+  if (params.status) filtered.status = params.status;
+  const qs = new URLSearchParams(filtered).toString();
+  return useQuery<GameRequest[]>({
+    queryKey: bidKeys.requests(filtered),
+    queryFn: () => apiFetch(`${BASE}/requests${qs ? `?${qs}` : ""}`),
+  });
+}
 
 export function useRequestBids(requestId: number) {
   return useQuery<Bid[]>({
@@ -96,6 +125,7 @@ export function usePlaceBid() {
       }),
     onSuccess: (_, vars) => {
       qc.invalidateQueries({ queryKey: bidKeys.list(vars.requestId) });
+      qc.invalidateQueries({ queryKey: ["browse-requests"] });
     },
   });
 }
