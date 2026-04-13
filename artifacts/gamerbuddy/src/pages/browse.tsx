@@ -22,6 +22,7 @@ import {
 import { SafetyBanner } from "@/components/safety-banner";
 import { useToast } from "@/hooks/use-toast";
 import { VerifiedBadge } from "@/components/verified-badge";
+import { ReportButton } from "@/components/report-modal";
 
 /* ── COMPACT CONDUCT REMINDER (shown in bid form) ─────────────── */
 const BID_CONDUCT_HIGHLIGHTS = [
@@ -354,6 +355,7 @@ function RequestCard({ req }: { req: GameRequest }) {
                   <User className="h-3 w-3" />
                   <span className="text-primary font-semibold">{req.userName}</span>
                   <VerifiedBadge idVerified={req.userIdVerified ?? false} variant="icon" />
+                  <ReportButton userId={req.userId} userName={req.userName} variant="icon" />
                 </span>
                 <span className="text-muted-foreground/30 text-xs">·</span>
                 <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">

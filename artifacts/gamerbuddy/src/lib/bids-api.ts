@@ -420,6 +420,15 @@ export function useDeleteNotification() {
   });
 }
 
+export const REPORT_REASONS = [
+  "Fraud / Scam attempt",
+  "Asking for passwords or account login",
+  "Toxicity or harassment",
+  "Fake profile / impersonation",
+  "Not following objectives",
+  "Other",
+] as const;
+
 export function useVerifyId() {
   const qc = useQueryClient();
   return useMutation<{ success: boolean; idVerified: boolean; message: string }, any, File | null>({

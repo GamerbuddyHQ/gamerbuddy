@@ -6,11 +6,11 @@ import { requireAuth } from "../middlewares/auth";
 const router: IRouter = Router();
 
 const VALID_REASONS = [
-  "Off-platform payment request",
-  "Toxicity / harassment",
-  "Account sharing / fraud",
-  "No-show / abandoned session",
-  "Inappropriate content",
+  "Fraud / Scam attempt",
+  "Asking for passwords or account login",
+  "Toxicity or harassment",
+  "Fake profile / impersonation",
+  "Not following objectives",
   "Other",
 ];
 

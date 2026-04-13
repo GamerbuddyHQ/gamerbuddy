@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/lib/auth";
 import { useLogout } from "@workspace/api-client-react";
+import { AIChatWidget } from "@/components/ai-chat-widget";
 import {
   Gamepad2, Compass, LayoutDashboard, Wallet, User as UserIcon,
   LogOut, FileText, Key, Bell, CheckCheck, X, Swords, Star,
@@ -312,6 +313,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <main className="flex-1 container py-6 md:py-8">
         {children}
       </main>
+
+      {/* Floating AI chat support */}
+      <AIChatWidget />
     </div>
   );
 }
