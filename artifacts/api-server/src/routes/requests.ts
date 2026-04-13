@@ -399,8 +399,10 @@ router.post("/requests/:id/complete", requireAuth, async (req, res): Promise<voi
   const gamerPayout = round2(escrow * 0.9);
   const platformFee = round2(escrow - gamerPayout);
 
-  await db.update(gameRequestsTable).set({ status: "completed" }).where(eq(gameRequestsTable.id, requestId));
+  // Move to awaiting_reviews — both parties must review before it's fully complete
+  await db.update(gameRequestsTable).set({ status: "awaiting_reviews" }).where(eq(gameRequestsTable.id, requestId));
 
+  // Release escrow to gamer immediately (payout is guaranteed once hirer approves)
   if (acceptedBid && gamerPayout > 0) {
     const [gamerWallet] = await db.select().from(walletsTable).where(eq(walletsTable.userId, acceptedBid.bidderId));
     if (gamerWallet) {
@@ -411,12 +413,13 @@ router.post("/requests/:id/complete", requireAuth, async (req, res): Promise<voi
     await recordTx(acceptedBid.bidderId, "earnings", "session_payout", gamerPayout, `Earnings for session: ${gameRequest.gameName} (90% after fee)`);
   }
 
-  req.log.info({ userId: user.id, requestId, gamerPayout, platformFee }, "Request completed — payout released");
+  req.log.info({ userId: user.id, requestId, gamerPayout, platformFee }, "Payment released — awaiting reviews");
   res.json({
     success: true,
-    message: "Session approved! Earnings released. Leave a review to earn your 50 points!",
+    message: "Payment released! Both players must now leave a review to earn 50 points each.",
     gamerPayout,
     platformFee,
+    awaitingReviews: true,
   });
 });
 
@@ -481,7 +484,12 @@ router.post("/requests/:id/reviews", requireAuth, async (req, res): Promise<void
 
   const [gameRequest] = await db.select().from(gameRequestsTable).where(eq(gameRequestsTable.id, requestId));
   if (!gameRequest) { res.status(404).json({ error: "Request not found" }); return; }
-  if (gameRequest.status !== "completed") { res.status(400).json({ error: "Can only review completed sessions" }); return; }
+
+  // Allow review when awaiting_reviews OR already completed (late review edge-case)
+  if (!["awaiting_reviews", "completed"].includes(gameRequest.status)) {
+    res.status(400).json({ error: "Reviews can only be submitted after payment is released" });
+    return;
+  }
 
   const [acceptedBid] = await db.select().from(bidsTable).where(and(eq(bidsTable.requestId, requestId), eq(bidsTable.status, "accepted")));
 
@@ -509,16 +517,54 @@ router.post("/requests/:id/reviews", requireAuth, async (req, res): Promise<void
     comment: comment?.trim() || null,
   }).returning();
 
+  // Adjust reviewee's trust factor
   const trustDelta = Math.round((rating - 5) * 2);
   await db.update(usersTable)
     .set({ trustFactor: sql`LEAST(GREATEST(${usersTable.trustFactor} + ${trustDelta}, 0), 1000)` })
     .where(eq(usersTable.id, revieweeId));
 
-  await db.update(usersTable)
-    .set({ points: sql`${usersTable.points} + 50` })
-    .where(eq(usersTable.id, user.id));
+  // Check if both hirer AND gamer have now submitted reviews
+  const allReviews = await db.select().from(reviewsTable).where(eq(reviewsTable.requestId, requestId));
+  const hirerId = gameRequest.userId;
+  const gamerId = acceptedBid?.bidderId;
+  const hirerReviewed = allReviews.some((r) => r.reviewerId === hirerId);
+  const gamerReviewed = gamerId != null && allReviews.some((r) => r.reviewerId === gamerId);
+  const bothReviewed = hirerReviewed && gamerReviewed;
 
-  res.status(201).json({ ...review, createdAt: review.createdAt.toISOString(), pointsAwarded: 50 });
+  if (bothReviewed) {
+    // Mark session as fully completed and award 50 pts to each party
+    await db.update(gameRequestsTable)
+      .set({ status: "completed" })
+      .where(eq(gameRequestsTable.id, requestId));
+
+    await db.update(usersTable)
+      .set({ points: sql`${usersTable.points} + 50` })
+      .where(eq(usersTable.id, hirerId));
+
+    if (gamerId != null) {
+      await db.update(usersTable)
+        .set({ points: sql`${usersTable.points} + 50` })
+        .where(eq(usersTable.id, gamerId));
+    }
+
+    req.log.info({ requestId, hirerId, gamerId }, "Both reviews submitted — session completed, 50 pts awarded each");
+    res.status(201).json({
+      ...review,
+      createdAt: review.createdAt.toISOString(),
+      bothReviewed: true,
+      pointsAwarded: 50,
+      sessionCompleted: true,
+    });
+  } else {
+    // Only one review submitted so far — waiting on the other party
+    res.status(201).json({
+      ...review,
+      createdAt: review.createdAt.toISOString(),
+      bothReviewed: false,
+      pointsAwarded: 0,
+      sessionCompleted: false,
+    });
+  }
 });
 
 router.post("/requests/:id/gift", requireAuth, async (req, res): Promise<void> => {

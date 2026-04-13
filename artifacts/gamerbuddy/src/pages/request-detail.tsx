@@ -524,7 +524,7 @@ function GiftPanel({ requestId }: { requestId: number }) {
   );
 }
 
-function ReviewPanel({ requestId, currentUserId }: { requestId: number; currentUserId: number }) {
+function ReviewPanel({ requestId, currentUserId, awaitingReviews }: { requestId: number; currentUserId: number; awaitingReviews?: boolean }) {
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
   const { data: reviews = [], refetch } = useRequestReviews(requestId);
@@ -541,7 +541,7 @@ function ReviewPanel({ requestId, currentUserId }: { requestId: number; currentU
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-yellow-400 font-bold text-sm">
             <Star className="h-4 w-4 fill-yellow-400" />
-            Your Review
+            Your Review — Submitted
           </div>
           <div className="flex items-center gap-2">
             <span className={`text-sm font-black px-2.5 py-1 rounded ${color} text-black`}>
@@ -551,9 +551,12 @@ function ReviewPanel({ requestId, currentUserId }: { requestId: number; currentU
           </div>
         </div>
         {myReview.comment && <p className="text-sm text-foreground/80 leading-relaxed border-l-2 border-yellow-500/30 pl-3">{myReview.comment}</p>}
-        <div className="flex items-center gap-1.5 text-xs text-yellow-400/70 pt-1">
-          <Trophy className="h-3.5 w-3.5" />
-          +50 points awarded for reviewing!
+        <div className="flex items-center gap-1.5 text-xs pt-1">
+          {awaitingReviews ? (
+            <><div className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" /><span className="text-amber-400">Waiting for the other player to submit their review…</span></>
+          ) : (
+            <><Trophy className="h-3.5 w-3.5 text-yellow-400" /><span className="text-yellow-400">+50 points awarded — session fully complete!</span></>
+          )}
         </div>
       </div>
     );
@@ -568,7 +571,7 @@ function ReviewPanel({ requestId, currentUserId }: { requestId: number; currentU
         </div>
         <div className="flex items-center gap-1 text-xs text-yellow-400/60">
           <Trophy className="h-3.5 w-3.5" />
-          +50 pts on submit
+          +50 pts when both review
         </div>
       </div>
       <p className="text-xs text-muted-foreground -mt-1">Rate on a scale of 1–10. Your review affects the other player's Trust Factor.</p>
@@ -576,30 +579,211 @@ function ReviewPanel({ requestId, currentUserId }: { requestId: number; currentU
       <Textarea
         value={comment}
         onChange={(e) => setComment(e.target.value)}
-        placeholder="Share your experience (optional)…"
+        placeholder="Share your experience (at least 10 characters)…"
         className="resize-none h-20 bg-background text-sm"
         maxLength={300}
       />
       <div className="flex items-center justify-between text-xs text-muted-foreground">
-        <span>{comment.length}/300</span>
+        <span className={comment.length < 10 && comment.length > 0 ? "text-destructive" : ""}>{comment.length}/300 {comment.length < 10 ? `(${10 - comment.length} more to go)` : ""}</span>
       </div>
       <Button
         className="w-full bg-yellow-500/20 border border-yellow-500/40 text-yellow-400 hover:bg-yellow-500 hover:text-black font-bold uppercase tracking-wider"
         onClick={() => {
           if (!rating) { toast({ title: "Pick a score first", variant: "destructive" }); return; }
-          submit.mutate({ requestId, rating, comment: comment.trim() || undefined }, {
-            onSuccess: () => {
-              toast({ title: "Review submitted! +50 points", description: `You rated this session ${rating}/10 — ${SCORE_LABELS[rating]}` });
+          if (comment.trim().length < 10) { toast({ title: "Comment too short", description: "Write at least 10 characters.", variant: "destructive" }); return; }
+          submit.mutate({ requestId, rating, comment: comment.trim() }, {
+            onSuccess: (data: any) => {
+              if (data?.bothReviewed) {
+                toast({ title: "+50 Points Earned!", description: "Both reviews are in — session is officially complete!", duration: 7000 });
+              } else {
+                toast({ title: "Review Submitted!", description: "Waiting for the other player to review…", duration: 7000 });
+              }
               refetch();
             },
             onError: (err: any) => toast({ title: "Error", description: err?.error || "Failed", variant: "destructive" }),
           });
         }}
-        disabled={!rating || submit.isPending}
+        disabled={!rating || comment.trim().length < 10 || submit.isPending}
       >
         <Star className="h-4 w-4 mr-1.5" />
         {submit.isPending ? "Submitting…" : `Submit Review · ${rating > 0 ? `${rating}/10` : "choose score"}`}
       </Button>
+    </div>
+  );
+}
+
+function ForcedReviewModal({
+  requestId,
+  gameName,
+  currentUserId,
+  otherPersonName,
+  isHirer,
+  onDone,
+}: {
+  requestId: number;
+  gameName: string;
+  currentUserId: number;
+  otherPersonName: string;
+  isHirer: boolean;
+  onDone: () => void;
+}) {
+  const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+  const [bothDone, setBothDone] = useState(false);
+  const { data: reviews = [], refetch } = useRequestReviews(requestId);
+  const submit = useSubmitReview();
+  const { toast } = useToast();
+
+  const myReview = reviews.find((r) => r.reviewerId === currentUserId);
+
+  const handleSubmit = () => {
+    if (!rating) { toast({ title: "Pick a score first", description: "Tap a number to rate the session.", variant: "destructive" }); return; }
+    if (comment.trim().length < 10) { toast({ title: "Review too short", description: "Write at least 10 characters.", variant: "destructive" }); return; }
+    submit.mutate({ requestId, rating, comment: comment.trim() }, {
+      onSuccess: (data: any) => {
+        const both = !!(data as any)?.bothReviewed;
+        setSubmitted(true);
+        setBothDone(both);
+        refetch();
+        if (both) onDone();
+      },
+      onError: (err: any) => toast({ title: "Submission failed", description: err?.error || "Please try again.", variant: "destructive" }),
+    });
+  };
+
+  // If already reviewed before modal opened
+  const alreadyReviewed = !!myReview;
+
+  const scoreLabel = rating > 0 ? SCORE_LABELS[rating] ?? "" : "";
+  const scoreColor = rating > 0 ? (SCORE_COLOR[rating] ?? "bg-green-500") : "bg-muted";
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+      style={{ background: "rgba(0,0,0,0.92)", backdropFilter: "blur(8px)" }}>
+      <div className="w-full max-w-lg rounded-2xl border border-yellow-500/40 bg-card overflow-hidden shadow-2xl"
+        style={{ boxShadow: "0 0 60px rgba(234,179,8,0.12), 0 25px 60px rgba(0,0,0,0.8)" }}>
+
+        {/* Header stripe */}
+        <div className="h-1 bg-gradient-to-r from-yellow-500 via-amber-400 to-yellow-500" />
+
+        <div className="p-6 space-y-5">
+          {/* Icon + title */}
+          <div className="text-center space-y-2">
+            <div className="inline-flex h-14 w-14 rounded-full items-center justify-center border-2 border-yellow-500/40 bg-yellow-500/10 mx-auto">
+              <Star className="h-7 w-7 text-yellow-400" />
+            </div>
+            <h2 className="text-xl font-extrabold uppercase tracking-tight text-white">
+              {alreadyReviewed || submitted ? "Review Submitted" : "Rate the Session"}
+            </h2>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              {alreadyReviewed || submitted
+                ? submitted && bothDone
+                  ? "Both reviews are in — session is fully complete and 50 points have been awarded!"
+                  : "Waiting for the other player to leave their review…"
+                : <>
+                    Payment has been released for <strong className="text-white">{gameName}</strong>.
+                    Both {isHirer ? "you and the gamer" : "you and the hirer"} must leave a review before the session is fully complete.
+                  </>
+              }
+            </p>
+          </div>
+
+          {/* Prize callout */}
+          {!alreadyReviewed && !submitted && (
+            <div className="flex items-center justify-center gap-2 rounded-xl border border-yellow-500/30 bg-yellow-500/10 px-4 py-3">
+              <Trophy className="h-4 w-4 text-yellow-400 shrink-0" />
+              <span className="text-sm font-bold text-yellow-300">
+                Both players earn <span className="text-white">+50 points</span> when both reviews are submitted
+              </span>
+            </div>
+          )}
+
+          {/* Waiting state */}
+          {(alreadyReviewed || submitted) && !bothDone && (
+            <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-4 text-center space-y-2">
+              <div className="h-2.5 w-2.5 rounded-full bg-amber-400 animate-pulse mx-auto" />
+              <div className="text-sm font-bold text-amber-400">Waiting on {otherPersonName}</div>
+              <p className="text-xs text-muted-foreground">
+                {isHirer ? "The gamer" : "The hirer"} still needs to submit their review.
+                You'll both receive 50 points once they do.
+              </p>
+              <Button
+                onClick={onDone}
+                className="mt-2 bg-background border border-border text-muted-foreground hover:border-amber-500/40 hover:text-amber-400 text-xs font-bold uppercase"
+                size="sm"
+              >
+                Close — I'll come back later
+              </Button>
+            </div>
+          )}
+
+          {/* Both done state */}
+          {(submitted && bothDone) && (
+            <div className="rounded-xl border border-green-500/30 bg-green-500/5 p-4 text-center space-y-3">
+              <CheckCircle2 className="h-10 w-10 text-green-400 mx-auto" />
+              <div className="text-base font-bold text-green-400">Session Complete!</div>
+              <div className="text-xs text-muted-foreground">Both reviews submitted · <span className="text-yellow-400 font-bold">+50 points</span> awarded to each player</div>
+              <Button onClick={onDone} className="bg-green-500 text-black font-bold uppercase w-full">
+                <CheckCircle2 className="h-4 w-4 mr-2" /> Done
+              </Button>
+            </div>
+          )}
+
+          {/* Review form */}
+          {!alreadyReviewed && !submitted && (
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                  Rate {otherPersonName} (1–10) *
+                </div>
+                <ScoreRating value={rating} onChange={setRating} />
+                {rating > 0 && (
+                  <div className="flex items-center gap-2">
+                    <span className={`text-sm font-black px-2.5 py-1 rounded ${scoreColor} text-black`}>{rating}/10</span>
+                    <span className="text-sm text-muted-foreground">{scoreLabel}</span>
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-1.5">
+                <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                  Your Review * <span className="text-muted-foreground/50 font-normal normal-case tracking-normal">(minimum 10 characters)</span>
+                </div>
+                <Textarea
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                  placeholder={`Describe your experience playing with ${otherPersonName}…`}
+                  className="resize-none h-24 bg-background text-sm"
+                  maxLength={300}
+                />
+                <div className="flex items-center justify-between text-xs">
+                  <span className={comment.length > 0 && comment.trim().length < 10 ? "text-destructive" : "text-muted-foreground"}>
+                    {comment.trim().length}/300 {comment.trim().length < 10 && comment.trim().length > 0 ? `— ${10 - comment.trim().length} more chars needed` : ""}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-2 pt-1">
+                <Button
+                  onClick={handleSubmit}
+                  disabled={!rating || comment.trim().length < 10 || submit.isPending}
+                  className="w-full bg-yellow-500 hover:bg-yellow-400 text-black font-black uppercase tracking-wider text-sm py-5 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  {submit.isPending ? (
+                    <span className="flex items-center gap-2"><div className="h-4 w-4 rounded-full border-2 border-black/30 border-t-black animate-spin" />Submitting…</span>
+                  ) : (
+                    <><Star className="h-4 w-4 mr-2" />Submit Review {rating > 0 ? `· ${rating}/10` : ""}</>
+                  )}
+                </Button>
+                <p className="text-center text-[10px] text-muted-foreground/60 uppercase tracking-widest">
+                  A review is required to finalise the session
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
@@ -610,6 +794,7 @@ export default function RequestDetail() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [showReportHirer, setShowReportHirer] = useState(false);
+  const [reviewDismissed, setReviewDismissed] = useState(false);
 
   const requestId = parseInt(params.id ?? "0");
   const { data: request, isLoading: loadingReq } = useRequest(requestId);
@@ -627,7 +812,8 @@ export default function RequestDetail() {
   const isGamer = myBid?.status === "accepted";
   const sessionStarted = !!(request as any)?.startedAt;
   const canBid = user && !isHirer && !myBid && request?.status === "open";
-  const canReview = user && request?.status === "completed" && (isHirer || isGamer);
+  const canReview = user && (request?.status === "completed" || request?.status === "awaiting_reviews") && (isHirer || isGamer);
+  const mustReview = user && request?.status === "awaiting_reviews" && (isHirer || isGamer);
 
   const handlePlaceBid = () => {
     const price = parseFloat(bidPrice);
@@ -659,8 +845,9 @@ export default function RequestDetail() {
   const handleComplete = () => {
     completeRequest.mutate(requestId, {
       onSuccess: (data: any) => toast({
-        title: "Payment Approved! 🏆",
-        description: `${data?.gamerPayout ? `$${(data.gamerPayout as number).toFixed(2)} released to gamer. ` : ""}Leave a review to claim your 50 points!`,
+        title: "Payment Released!",
+        description: `${data?.gamerPayout ? `$${(data.gamerPayout as number).toFixed(2)} sent to gamer. ` : ""}Leave a review now to complete the session and earn 50 points!`,
+        duration: 7000,
       }),
       onError: (err: any) => toast({ title: "Error", description: err?.error || "Failed", variant: "destructive" }),
     });
@@ -681,6 +868,7 @@ export default function RequestDetail() {
   const statusColor: Record<string, string> = {
     open: "border-green-500/40 text-green-400 bg-green-500/10",
     in_progress: "border-primary/40 text-primary bg-primary/10",
+    awaiting_reviews: "border-yellow-500/40 text-yellow-400 bg-yellow-500/10",
     completed: "border-secondary/40 text-secondary bg-secondary/10",
     cancelled: "border-border text-muted-foreground",
   };
@@ -689,6 +877,18 @@ export default function RequestDetail() {
     <div className="max-w-2xl mx-auto space-y-6">
       {showReportHirer && (
         <ReportModal reportedUserId={request.userId} reportedName={request.userName} onClose={() => setShowReportHirer(false)} />
+      )}
+
+      {/* Forced review modal — shown when payment is released and user hasn't reviewed */}
+      {mustReview && !reviewDismissed && (
+        <ForcedReviewModal
+          requestId={requestId}
+          gameName={request.gameName}
+          currentUserId={user!.id}
+          otherPersonName={isHirer ? (acceptedBid?.bidderName ?? "the gamer") : request.userName}
+          isHirer={!!isHirer}
+          onDone={() => setReviewDismissed(true)}
+        />
       )}
 
       {/* Back */}
@@ -838,22 +1038,50 @@ export default function RequestDetail() {
             </div>
           )}
 
+          {/* Awaiting reviews banner */}
+          {request.status === "awaiting_reviews" && (
+            <div className="rounded-xl border border-yellow-500/30 bg-yellow-500/5 p-4 space-y-2">
+              <div className="flex items-center gap-2 text-yellow-400 font-bold text-sm">
+                <Star className="h-4 w-4" />
+                Payment Released — Reviews Required
+              </div>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Payment has been sent to the gamer. Both players must leave a review to fully complete the session and earn <strong className="text-white">50 points</strong> each.
+              </p>
+              {mustReview && (
+                <Button
+                  size="sm"
+                  onClick={() => setReviewDismissed(false)}
+                  className="bg-yellow-500/20 border border-yellow-500/40 text-yellow-400 hover:bg-yellow-500 hover:text-black text-xs font-bold uppercase mt-1"
+                >
+                  <Star className="h-3.5 w-3.5 mr-1.5" /> Leave Your Review
+                </Button>
+              )}
+            </div>
+          )}
+
           {/* Completed banner */}
           {request.status === "completed" && (
             <div className="rounded-xl border border-secondary/30 bg-secondary/5 p-4 text-center">
-              <Star className="h-8 w-8 mx-auto text-secondary mb-2 fill-secondary" />
-              <div className="font-bold text-white">Session Completed!</div>
-              <div className="text-xs text-muted-foreground mt-1">90% released to the gamer · Leave a review to earn your 50 points.</div>
+              <CheckCircle2 className="h-8 w-8 mx-auto text-secondary mb-2" />
+              <div className="font-bold text-white">Session Fully Complete!</div>
+              <div className="text-xs text-muted-foreground mt-1">Both reviews received · 50 points awarded to each player.</div>
             </div>
           )}
         </CardContent>
       </Card>
 
-      {/* Gift panel — hirer after completion */}
-      {isHirer && request.status === "completed" && <GiftPanel requestId={requestId} />}
+      {/* Gift panel — hirer after completion or awaiting reviews */}
+      {isHirer && (request.status === "completed" || request.status === "awaiting_reviews") && <GiftPanel requestId={requestId} />}
 
-      {/* Review panel — both sides after completion */}
-      {canReview && <ReviewPanel requestId={requestId} currentUserId={user!.id} />}
+      {/* Review panel — both sides after payment release */}
+      {canReview && (
+        <ReviewPanel
+          requestId={requestId}
+          currentUserId={user!.id}
+          awaitingReviews={request.status === "awaiting_reviews"}
+        />
+      )}
 
       {/* Place bid */}
       {!user && (
