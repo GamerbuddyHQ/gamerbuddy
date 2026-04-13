@@ -1,0 +1,45 @@
+Key features to implement:
+
+1. **User Authentication**
+   - Signup/Login with email + password
+   - Mandatory fields: Official ID upload (file upload field), phone number
+   - Enable 2FA (TOTP) option in settings
+   - User roles: Hirer and Gamer (who wants to get hired)
+
+2. **Two Wallets**
+   - Hiring Wallet: Users add money (min 10.75 USD, max 1000 USD). Cannot withdraw. Used for hiring and buying game keys.
+   - Earnings Wallet: Money earned when hired. Can withdraw only after reaching 100 USD.
+   - Show both wallets clearly on dashboard.
+
+3. **Post Request (Hirer side)**
+   - Form with: Game name, Platform (PC, PlayStation, Xbox, Nintendo Switch, Steam Deck, iOS, Android), Skill level, Clear Objectives (required textarea)
+   - Users must have at least 10.75 in Hiring Wallet to post.
+
+4. **Bidding & Chat**
+   - Gamers can bid on requests with proposed price.
+   - Private in-platform chat between hirer and bidders.
+
+5. **Hiring Flow**
+   - Hirer selects a bid → Deposit to escrow from Hiring Wallet.
+   - Hired gamer must join Discord (just a text field for Discord username).
+   - After session, hirer approves release (90% to gamer, 10% platform fee).
+   - Optional Gift Button after approval.
+
+6. **Points System**
+   - Both sides earn 50 points per completed session + review.
+   - Points can be used later for profile customizations.
+
+7. **Profile**
+   - Steam-like customizable profile (bio, background, badges showcase).
+   - Trust Factor Meter (simple number for now, increases with good reviews).
+   - Display linked platforms and past sessions.
+
+8. **Safety Features**
+   - Clear warning: "Never share your Steam/Epic/Console passwords with anyone"
+   - Report User button with reasons (toxicity, off-platform payment request, etc.)
+   - Rule: You cannot hire yourself (block if same user ID)
+
+9. **Other**
+   - Simple game key buying page (mock products for now)
+   - Responsive design, clean gamer UI (dark theme preferred)
+   - Use fake payment for testing (later replace with Stripe)

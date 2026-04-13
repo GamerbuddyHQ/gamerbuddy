@@ -10,6 +10,10 @@ import {
   useCompleteRequest,
   useBidMessages,
   useSendMessage,
+  useRequestReviews,
+  useSubmitReview,
+  useSendGift,
+  useReportUser,
   type Bid,
   type ChatMessage,
 } from "@/lib/bids-api";
@@ -21,7 +25,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
 import {
   ArrowLeft, Swords, Monitor, Layers, Gavel, MessageSquare,
-  CheckCircle2, Send, Star, Trophy, AlertTriangle, User,
+  CheckCircle2, Send, Star, Trophy, AlertTriangle, User, Gift,
+  Flag, X, MessageCircle,
 } from "lucide-react";
 import { SafetyBanner } from "@/components/safety-banner";
 
@@ -35,6 +40,35 @@ const SKILL_COLOR: Record<string, string> = {
   Expert: "border-primary/40 text-primary bg-primary/10",
   Chill: "border-secondary/40 text-secondary bg-secondary/10",
 };
+
+const REPORT_REASONS = [
+  "Off-platform payment request",
+  "Toxicity / harassment",
+  "Account sharing / fraud",
+  "No-show / abandoned session",
+  "Inappropriate content",
+  "Other",
+];
+
+function StarRating({ value, onChange }: { value: number; onChange: (v: number) => void }) {
+  const [hover, setHover] = useState(0);
+  return (
+    <div className="flex gap-1">
+      {[1, 2, 3, 4, 5].map((n) => (
+        <button
+          key={n}
+          type="button"
+          onClick={() => onChange(n)}
+          onMouseEnter={() => setHover(n)}
+          onMouseLeave={() => setHover(0)}
+          className="transition-colors"
+        >
+          <Star className={`h-6 w-6 ${n <= (hover || value) ? "text-yellow-400 fill-yellow-400" : "text-muted-foreground"}`} />
+        </button>
+      ))}
+    </div>
+  );
+}
 
 function ChatPanel({ bidId, currentUserId }: { bidId: number; currentUserId: number }) {
   const [draft, setDraft] = useState("");
@@ -103,6 +137,142 @@ function ChatPanel({ bidId, currentUserId }: { bidId: number; currentUserId: num
   );
 }
 
+function ReportModal({ reportedUserId, reportedName, onClose }: { reportedUserId: number; reportedName: string; onClose: () => void }) {
+  const [reason, setReason] = useState("");
+  const [description, setDescription] = useState("");
+  const report = useReportUser();
+  const { toast } = useToast();
+
+  const handleSubmit = () => {
+    if (!reason) return;
+    report.mutate({ reportedUserId, reason, description: description.trim() || undefined }, {
+      onSuccess: () => {
+        toast({ title: "Report submitted", description: "Our team will review it shortly." });
+        onClose();
+      },
+      onError: (err: any) => toast({ title: "Failed", description: err?.error || "Error", variant: "destructive" }),
+    });
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-card border border-border rounded-2xl w-full max-w-md p-6 space-y-4 shadow-2xl">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 text-destructive font-bold">
+            <Flag className="h-5 w-5" />
+            Report {reportedName}
+          </div>
+          <button onClick={onClose} className="text-muted-foreground hover:text-white"><X className="h-5 w-5" /></button>
+        </div>
+        <div className="space-y-2">
+          <label className="text-xs uppercase tracking-widest text-muted-foreground">Reason *</label>
+          <div className="space-y-1.5">
+            {REPORT_REASONS.map((r) => (
+              <button
+                key={r}
+                type="button"
+                onClick={() => setReason(r)}
+                className={`w-full text-left text-sm px-3 py-2 rounded-lg border transition-all ${
+                  reason === r
+                    ? "border-destructive/60 bg-destructive/10 text-destructive"
+                    : "border-border bg-background/50 text-muted-foreground hover:border-destructive/40 hover:text-white"
+                }`}
+              >
+                {r}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="space-y-1.5">
+          <label className="text-xs uppercase tracking-widest text-muted-foreground">Additional details (optional)</label>
+          <Textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Describe what happened…"
+            className="resize-none h-20 bg-background text-sm"
+            maxLength={500}
+          />
+        </div>
+        <Button
+          className="w-full bg-destructive/20 border border-destructive/40 text-destructive hover:bg-destructive hover:text-white font-bold uppercase"
+          onClick={handleSubmit}
+          disabled={!reason || report.isPending}
+        >
+          <Flag className="h-4 w-4 mr-2" />
+          {report.isPending ? "Submitting…" : "Submit Report"}
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+function AcceptModal({
+  bid,
+  requestId,
+  onClose,
+}: {
+  bid: Bid;
+  requestId: number;
+  onClose: () => void;
+}) {
+  const [discord, setDiscord] = useState("");
+  const acceptBid = useAcceptBid();
+  const { toast } = useToast();
+
+  const handleAccept = () => {
+    acceptBid.mutate({ requestId, bidId: bid.id, discordUsername: discord.trim() || undefined }, {
+      onSuccess: () => {
+        toast({ title: "Bid Accepted!", description: "Funds moved to escrow. Session is now in progress." });
+        onClose();
+      },
+      onError: (err: any) => toast({ title: "Error", description: err?.error || "Failed", variant: "destructive" }),
+    });
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-card border border-border rounded-2xl w-full max-w-md p-6 space-y-5 shadow-2xl">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 text-green-400 font-bold">
+            <CheckCircle2 className="h-5 w-5" />
+            Accept Bid from {bid.bidderName}
+          </div>
+          <button onClick={onClose} className="text-muted-foreground hover:text-white"><X className="h-5 w-5" /></button>
+        </div>
+
+        <div className="rounded-xl border border-green-500/30 bg-green-500/5 p-4 space-y-1">
+          <div className="text-xs text-muted-foreground uppercase tracking-widest">Bid amount</div>
+          <div className="text-2xl font-black text-white">${bid.price.toFixed(2)}</div>
+          <div className="text-xs text-muted-foreground">This amount will be held in escrow and released to the gamer (90%) on session completion.</div>
+        </div>
+
+        <div className="space-y-1.5">
+          <label className="text-xs uppercase tracking-widest text-muted-foreground">
+            <MessageCircle className="inline h-3.5 w-3.5 mr-1" />
+            Your Discord username (optional)
+          </label>
+          <Input
+            value={discord}
+            onChange={(e) => setDiscord(e.target.value)}
+            placeholder="e.g. GamerBuddy#1234"
+            className="bg-background"
+          />
+          <p className="text-xs text-muted-foreground">Share your Discord to coordinate your session outside the platform. Never share account passwords.</p>
+        </div>
+
+        <Button
+          className="w-full bg-green-500/20 border border-green-500/40 text-green-400 hover:bg-green-500 hover:text-white font-bold uppercase py-5"
+          onClick={handleAccept}
+          disabled={acceptBid.isPending}
+        >
+          <CheckCircle2 className="h-4 w-4 mr-2" />
+          {acceptBid.isPending ? "Accepting…" : "Confirm & Lock Escrow"}
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 function BidCard({
   bid,
   isHirer,
@@ -117,7 +287,8 @@ function BidCard({
   requestId: number;
 }) {
   const [chatOpen, setChatOpen] = useState(false);
-  const acceptBid = useAcceptBid();
+  const [showAcceptModal, setShowAcceptModal] = useState(false);
+  const [showReport, setShowReport] = useState(false);
   const { toast } = useToast();
 
   const isMe = bid.bidderId === currentUserId;
@@ -125,75 +296,204 @@ function BidCard({
   const isRejected = bid.status === "rejected";
   const canChat = (isHirer || isMe) && (isAccepted || isMe);
 
-  const handleAccept = () => {
-    acceptBid.mutate({ requestId, bidId: bid.id }, {
-      onSuccess: () => toast({ title: "Bid Accepted!", description: "The session is now in progress." }),
+  return (
+    <>
+      {showAcceptModal && (
+        <AcceptModal bid={bid} requestId={requestId} onClose={() => setShowAcceptModal(false)} />
+      )}
+      {showReport && (
+        <ReportModal reportedUserId={bid.bidderId} reportedName={bid.bidderName} onClose={() => setShowReport(false)} />
+      )}
+
+      <div className={`rounded-xl border p-4 space-y-3 transition-all ${
+        isAccepted ? "border-green-500/40 bg-green-500/5" :
+        isRejected ? "border-border/30 bg-card/20 opacity-50" :
+        isMe ? "border-secondary/40 bg-secondary/5" :
+        "border-border bg-card/40"
+      }`}>
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            <div className="h-9 w-9 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center">
+              <User className="h-4 w-4 text-primary" />
+            </div>
+            <div>
+              <div className="font-bold text-white text-sm flex items-center gap-2">
+                {bid.bidderName}
+                {isMe && <span className="text-xs text-secondary font-normal">(You)</span>}
+                {isAccepted && bid.discordUsername && (
+                  <span className="text-xs text-indigo-400 font-normal flex items-center gap-1">
+                    <MessageCircle className="h-3 w-3" />{bid.discordUsername}
+                  </span>
+                )}
+              </div>
+              <div className="text-xs text-muted-foreground">{format(new Date(bid.createdAt), "MMM d, h:mm a")}</div>
+            </div>
+          </div>
+          <div className="text-right shrink-0">
+            <div className="text-lg font-black text-white">${bid.price.toFixed(2)}</div>
+            <div className={`text-xs font-semibold uppercase px-2 py-0.5 rounded-full border mt-1 inline-block ${
+              isAccepted ? "border-green-500/40 text-green-400 bg-green-500/10" :
+              isRejected ? "border-border text-muted-foreground" :
+              "border-amber-500/40 text-amber-400 bg-amber-500/10"
+            }`}>
+              {bid.status}
+            </div>
+          </div>
+        </div>
+
+        <p className="text-sm text-foreground/80 leading-relaxed border-l-2 border-primary/30 pl-3">
+          {bid.message}
+        </p>
+
+        <div className="flex gap-2 flex-wrap">
+          {isHirer && bid.status === "pending" && requestStatus === "open" && (
+            <Button
+              size="sm"
+              className="bg-green-500/20 border border-green-500/40 text-green-400 hover:bg-green-500 hover:text-white text-xs font-bold uppercase"
+              onClick={() => setShowAcceptModal(true)}
+            >
+              <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" />
+              Accept Bid
+            </Button>
+          )}
+          {canChat && (
+            <Button
+              size="sm"
+              variant="outline"
+              className={`text-xs font-bold uppercase border-secondary/40 text-secondary hover:bg-secondary hover:text-black ${chatOpen ? "bg-secondary/10" : ""}`}
+              onClick={() => setChatOpen((v) => !v)}
+            >
+              <MessageSquare className="h-3.5 w-3.5 mr-1.5" />
+              {chatOpen ? "Close Chat" : "Open Chat"}
+            </Button>
+          )}
+          {!isMe && (
+            <Button
+              size="sm"
+              variant="outline"
+              className="text-xs font-bold uppercase border-destructive/30 text-destructive/60 hover:border-destructive/60 hover:text-destructive hover:bg-destructive/10"
+              onClick={() => setShowReport(true)}
+            >
+              <Flag className="h-3.5 w-3.5 mr-1.5" />
+              Report
+            </Button>
+          )}
+        </div>
+
+        {chatOpen && canChat && <ChatPanel bidId={bid.id} currentUserId={currentUserId} />}
+      </div>
+    </>
+  );
+}
+
+function GiftPanel({ requestId }: { requestId: number }) {
+  const [amount, setAmount] = useState("");
+  const gift = useSendGift();
+  const { toast } = useToast();
+
+  const handleGift = () => {
+    const n = parseFloat(amount);
+    if (isNaN(n) || n <= 0) {
+      toast({ title: "Invalid amount", variant: "destructive" });
+      return;
+    }
+    gift.mutate({ requestId, amount: n }, {
+      onSuccess: (d: any) => {
+        toast({ title: "Gift sent!", description: d?.message });
+        setAmount("");
+      },
       onError: (err: any) => toast({ title: "Error", description: err?.error || "Failed", variant: "destructive" }),
     });
   };
 
   return (
-    <div className={`rounded-xl border p-4 space-y-3 transition-all ${
-      isAccepted ? "border-green-500/40 bg-green-500/5" :
-      isRejected ? "border-border/30 bg-card/20 opacity-50" :
-      isMe ? "border-secondary/40 bg-secondary/5" :
-      "border-border bg-card/40"
-    }`}>
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex items-center gap-2.5">
-          <div className="h-9 w-9 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center">
-            <User className="h-4 w-4 text-primary" />
-          </div>
-          <div>
-            <div className="font-bold text-white text-sm flex items-center gap-2">
-              {bid.bidderName}
-              {isMe && <span className="text-xs text-secondary font-normal">(You)</span>}
-            </div>
-            <div className="text-xs text-muted-foreground">{format(new Date(bid.createdAt), "MMM d, h:mm a")}</div>
-          </div>
-        </div>
-        <div className="text-right shrink-0">
-          <div className="text-lg font-black text-white">${bid.price.toFixed(2)}</div>
-          <div className={`text-xs font-semibold uppercase px-2 py-0.5 rounded-full border mt-1 inline-block ${
-            isAccepted ? "border-green-500/40 text-green-400 bg-green-500/10" :
-            isRejected ? "border-border text-muted-foreground" :
-            "border-amber-500/40 text-amber-400 bg-amber-500/10"
-          }`}>
-            {bid.status}
-          </div>
-        </div>
+    <div className="rounded-xl border border-pink-500/30 bg-pink-500/5 p-4 space-y-3">
+      <div className="flex items-center gap-2 text-pink-400 font-bold text-sm">
+        <Gift className="h-4 w-4" />
+        Send a Tip / Gift
       </div>
-
-      <p className="text-sm text-foreground/80 leading-relaxed border-l-2 border-primary/30 pl-3">
-        {bid.message}
-      </p>
-
-      <div className="flex gap-2 flex-wrap">
-        {isHirer && bid.status === "pending" && requestStatus === "open" && (
-          <Button
-            size="sm"
-            className="bg-green-500/20 border border-green-500/40 text-green-400 hover:bg-green-500 hover:text-white text-xs font-bold uppercase"
-            onClick={handleAccept}
-            disabled={acceptBid.isPending}
-          >
-            <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" />
-            Accept Bid
-          </Button>
-        )}
-        {canChat && (
-          <Button
-            size="sm"
-            variant="outline"
-            className={`text-xs font-bold uppercase border-secondary/40 text-secondary hover:bg-secondary hover:text-black ${chatOpen ? "bg-secondary/10" : ""}`}
-            onClick={() => setChatOpen((v) => !v)}
-          >
-            <MessageSquare className="h-3.5 w-3.5 mr-1.5" />
-            {chatOpen ? "Close Chat" : "Open Chat"}
-          </Button>
-        )}
+      <p className="text-xs text-muted-foreground">Enjoyed the session? Send an optional tip directly from your Hiring Wallet.</p>
+      <div className="flex gap-2">
+        <div className="relative flex-1">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-medium text-sm">$</span>
+          <Input
+            type="number"
+            min={1}
+            step={0.5}
+            placeholder="0.00"
+            className="pl-8 bg-background"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+          />
+        </div>
+        <Button
+          className="bg-pink-500/20 border border-pink-500/40 text-pink-400 hover:bg-pink-500 hover:text-white font-bold uppercase"
+          onClick={handleGift}
+          disabled={!amount || gift.isPending}
+        >
+          <Gift className="h-4 w-4 mr-1.5" />
+          {gift.isPending ? "Sending…" : "Send"}
+        </Button>
       </div>
+    </div>
+  );
+}
 
-      {chatOpen && canChat && <ChatPanel bidId={bid.id} currentUserId={currentUserId} />}
+function ReviewPanel({ requestId, currentUserId }: { requestId: number; currentUserId: number }) {
+  const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState("");
+  const { data: reviews = [] } = useRequestReviews(requestId);
+  const submit = useSubmitReview();
+  const { toast } = useToast();
+
+  const myReview = reviews.find((r) => r.reviewerId === currentUserId);
+
+  if (myReview) {
+    return (
+      <div className="rounded-xl border border-yellow-500/30 bg-yellow-500/5 p-4 space-y-2">
+        <div className="flex items-center gap-2 text-yellow-400 font-bold text-sm">
+          <Star className="h-4 w-4 fill-yellow-400" />
+          You left a review
+        </div>
+        <div className="flex gap-0.5">
+          {[1,2,3,4,5].map((n) => (
+            <Star key={n} className={`h-5 w-5 ${n <= myReview.rating ? "text-yellow-400 fill-yellow-400" : "text-muted-foreground"}`} />
+          ))}
+        </div>
+        {myReview.comment && <p className="text-sm text-foreground/80">{myReview.comment}</p>}
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-xl border border-yellow-500/30 bg-yellow-500/5 p-4 space-y-3">
+      <div className="flex items-center gap-2 text-yellow-400 font-bold text-sm">
+        <Star className="h-4 w-4" />
+        Rate this session
+      </div>
+      <p className="text-xs text-muted-foreground">Your review builds trust on the platform and earns you points.</p>
+      <StarRating value={rating} onChange={setRating} />
+      <Textarea
+        value={comment}
+        onChange={(e) => setComment(e.target.value)}
+        placeholder="Share your experience (optional)…"
+        className="resize-none h-20 bg-background text-sm"
+        maxLength={300}
+      />
+      <Button
+        className="bg-yellow-500/20 border border-yellow-500/40 text-yellow-400 hover:bg-yellow-500 hover:text-black font-bold uppercase"
+        onClick={() => {
+          if (!rating) { toast({ title: "Pick a rating", variant: "destructive" }); return; }
+          submit.mutate({ requestId, rating, comment: comment.trim() || undefined }, {
+            onSuccess: () => toast({ title: "Review submitted!", description: "Thank you for your feedback." }),
+            onError: (err: any) => toast({ title: "Error", description: err?.error || "Failed", variant: "destructive" }),
+          });
+        }}
+        disabled={!rating || submit.isPending}
+      >
+        <Star className="h-4 w-4 mr-1.5" />
+        {submit.isPending ? "Submitting…" : "Submit Review"}
+      </Button>
     </div>
   );
 }
@@ -203,6 +503,7 @@ export default function RequestDetail() {
   const [, setLocation] = useLocation();
   const { user } = useAuth();
   const { toast } = useToast();
+  const [showReportHirer, setShowReportHirer] = useState(false);
 
   const requestId = parseInt(params.id ?? "0");
   const { data: request, isLoading: loadingReq } = useRequest(requestId);
@@ -216,7 +517,9 @@ export default function RequestDetail() {
   const isHirer = user?.id === request?.userId;
   const myBid = bids.find((b: Bid) => b.bidderId === user?.id);
   const acceptedBid = bids.find((b: Bid) => b.status === "accepted");
+  const isGamer = myBid?.status === "accepted";
   const canBid = user && !isHirer && !myBid && request?.status === "open";
+  const canReview = user && request?.status === "completed" && (isHirer || isGamer);
 
   const handlePlaceBid = () => {
     const price = parseFloat(bidPrice);
@@ -240,7 +543,10 @@ export default function RequestDetail() {
 
   const handleComplete = () => {
     completeRequest.mutate(requestId, {
-      onSuccess: (data: any) => toast({ title: "Session Complete! 🏆", description: data?.message || "50 points awarded to both players!" }),
+      onSuccess: (data: any) => toast({
+        title: "Session Approved!",
+        description: `${data?.gamerPayout ? `$${data.gamerPayout.toFixed(2)} released to gamer (10% platform fee kept). ` : ""}+50 points to both players!`,
+      }),
       onError: (err: any) => toast({ title: "Error", description: err?.error || "Failed", variant: "destructive" }),
     });
   };
@@ -266,10 +572,24 @@ export default function RequestDetail() {
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
+      {showReportHirer && (
+        <ReportModal reportedUserId={request.userId} reportedName={request.userName} onClose={() => setShowReportHirer(false)} />
+      )}
+
       {/* Back */}
-      <button onClick={() => setLocation("/browse")} className="flex items-center gap-2 text-muted-foreground hover:text-white text-sm transition-colors">
-        <ArrowLeft className="h-4 w-4" /> Back to Browse
-      </button>
+      <div className="flex items-center justify-between">
+        <button onClick={() => setLocation("/browse")} className="flex items-center gap-2 text-muted-foreground hover:text-white text-sm transition-colors">
+          <ArrowLeft className="h-4 w-4" /> Back to Browse
+        </button>
+        {user && !isHirer && (
+          <button
+            onClick={() => setShowReportHirer(true)}
+            className="flex items-center gap-1.5 text-xs text-destructive/50 hover:text-destructive transition-colors"
+          >
+            <Flag className="h-3.5 w-3.5" /> Report Hirer
+          </button>
+        )}
+      </div>
 
       <SafetyBanner storageKey="gb_safety_detail" />
 
@@ -306,34 +626,54 @@ export default function RequestDetail() {
             <p className="text-sm text-foreground/90 leading-relaxed">{request.objectives}</p>
           </div>
 
-          {/* Hirer actions */}
+          {/* Accepted bid discord info (shown to hirer) */}
+          {isHirer && request.status === "in_progress" && acceptedBid?.discordUsername && (
+            <div className="flex items-center gap-3 rounded-xl border border-indigo-500/30 bg-indigo-500/5 px-4 py-3 text-sm">
+              <MessageCircle className="h-4 w-4 text-indigo-400 shrink-0" />
+              <div>
+                <div className="text-xs text-muted-foreground mb-0.5">Gamer's Discord</div>
+                <div className="font-bold text-indigo-300">{acceptedBid.discordUsername}</div>
+              </div>
+            </div>
+          )}
+
+          {/* Hirer: complete session */}
           {isHirer && request.status === "in_progress" && (
             <div className="rounded-xl border border-green-500/30 bg-green-500/5 p-4 space-y-3">
               <div className="flex items-center gap-2 text-green-400 font-bold text-sm">
                 <Trophy className="h-4 w-4" />
-                Session is in progress — ready to mark complete?
+                Session in progress — approve when done
               </div>
-              <p className="text-xs text-muted-foreground">Once you mark this complete, <strong className="text-white">50 points</strong> will be awarded to both you and the gamer.</p>
+              <p className="text-xs text-muted-foreground">
+                Approving releases <strong className="text-white">90%</strong> of the escrowed amount to the gamer (10% platform fee) and awards <strong className="text-white">50 points</strong> to both players.
+              </p>
               <Button
                 className="bg-green-500/20 border border-green-500/40 text-green-400 hover:bg-green-500 hover:text-white font-bold uppercase text-sm"
                 onClick={handleComplete}
                 disabled={completeRequest.isPending}
               >
                 <Trophy className="h-4 w-4 mr-2" />
-                {completeRequest.isPending ? "Completing…" : "Mark Session Complete · +50 Points"}
+                {completeRequest.isPending ? "Completing…" : "Approve & Release Payment"}
               </Button>
             </div>
           )}
 
+          {/* Completed banner */}
           {request.status === "completed" && (
             <div className="rounded-xl border border-secondary/30 bg-secondary/5 p-4 text-center">
-              <Star className="h-8 w-8 mx-auto text-secondary mb-2" />
+              <Star className="h-8 w-8 mx-auto text-secondary mb-2 fill-secondary" />
               <div className="font-bold text-white">Session Completed!</div>
-              <div className="text-xs text-muted-foreground mt-1">50 points were awarded to both players.</div>
+              <div className="text-xs text-muted-foreground mt-1">90% was released to the gamer · 50 points awarded to both players.</div>
             </div>
           )}
         </CardContent>
       </Card>
+
+      {/* Gift panel — hirer after completion */}
+      {isHirer && request.status === "completed" && <GiftPanel requestId={requestId} />}
+
+      {/* Review panel — both sides after completion */}
+      {canReview && <ReviewPanel requestId={requestId} currentUserId={user!.id} />}
 
       {/* Place bid */}
       {!user && (
@@ -400,7 +740,7 @@ export default function RequestDetail() {
         </Card>
       )}
 
-      {isHirer && myBid === undefined && !canBid && request.status === "open" && (
+      {isHirer && !canBid && request.status === "open" && (
         <div className="text-center text-xs text-muted-foreground py-2 flex items-center justify-center gap-1.5">
           <AlertTriangle className="h-3.5 w-3.5 text-amber-400" />
           You cannot bid on your own request.
@@ -418,34 +758,27 @@ export default function RequestDetail() {
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-            <Gavel className="h-4 w-4 text-primary" />
-            {bids.length} {bids.length === 1 ? "Bid" : "Bids"}
+            <Gavel className="h-4 w-4 text-secondary" />
+            {loadingBids ? "Loading bids…" : `${bids.length} Bid${bids.length !== 1 ? "s" : ""}`}
           </h2>
-          {acceptedBid && (
-            <span className="text-xs text-green-400 font-semibold flex items-center gap-1">
-              <CheckCircle2 className="h-3.5 w-3.5" /> Bid accepted
-            </span>
-          )}
         </div>
 
-        {loadingBids ? (
-          <div className="space-y-2">{[1, 2].map((i) => <Skeleton key={i} className="h-28" />)}</div>
-        ) : bids.length === 0 ? (
-          <div className="text-center py-8 border-2 border-dashed border-border rounded-xl text-muted-foreground text-sm">
-            No bids yet — be the first!
+        {!loadingBids && bids.length === 0 && (
+          <div className="text-center py-10 text-muted-foreground text-sm">
+            No bids yet. Be the first to offer!
           </div>
-        ) : (
-          bids.map((bid: Bid) => (
-            <BidCard
-              key={bid.id}
-              bid={bid}
-              isHirer={isHirer}
-              requestStatus={request.status}
-              currentUserId={user?.id ?? -1}
-              requestId={requestId}
-            />
-          ))
         )}
+
+        {bids.map((bid: Bid) => (
+          <BidCard
+            key={bid.id}
+            bid={bid}
+            isHirer={isHirer}
+            requestStatus={request.status}
+            currentUserId={user?.id ?? -1}
+            requestId={requestId}
+          />
+        ))}
       </div>
     </div>
   );

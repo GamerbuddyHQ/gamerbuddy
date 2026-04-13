@@ -5,6 +5,8 @@ import walletsRouter from "./wallets";
 import requestsRouter from "./requests";
 import dashboardRouter from "./dashboard";
 import messagesRouter from "./messages";
+import reportsRouter from "./reports";
+import usersRouter from "./users";
 
 const router: IRouter = Router();
 
@@ -14,5 +16,7 @@ router.use(walletsRouter);
 router.use(requestsRouter);
 router.use(dashboardRouter);
 router.use(messagesRouter);
+router.use(reportsRouter);
+router.use(usersRouter);
 
 export default router;

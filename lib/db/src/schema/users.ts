@@ -11,6 +11,8 @@ export const usersTable = pgTable("users", {
   officialIdPath: text("official_id_path"),
   idVerified: boolean("id_verified").notNull().default(false),
   points: integer("points").notNull().default(0),
+  bio: text("bio"),
+  trustFactor: integer("trust_factor").notNull().default(100),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

@@ -2,7 +2,7 @@ import React from "react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/lib/auth";
 import { useLogout } from "@workspace/api-client-react";
-import { Gamepad2, Compass, LayoutDashboard, Wallet, User as UserIcon, LogOut, FileText } from "lucide-react";
+import { Gamepad2, Compass, LayoutDashboard, Wallet, User as UserIcon, LogOut, FileText, Key } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export function Layout({ children }: { children: React.ReactNode }) {
@@ -21,6 +21,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
   const navItems = [
     { href: "/browse", label: "Browse Requests", icon: Compass },
+    { href: "/shop", label: "Shop", icon: Key },
     ...(user
       ? [
           { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },

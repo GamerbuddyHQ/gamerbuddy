@@ -9,6 +9,7 @@ export const bidsTable = pgTable("bids", {
   price: numeric("price", { precision: 10, scale: 2 }).notNull(),
   message: text("message").notNull(),
   status: text("status").notNull().default("pending"),
+  discordUsername: text("discord_username"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

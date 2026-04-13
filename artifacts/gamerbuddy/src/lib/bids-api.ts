@@ -10,6 +10,7 @@ export type Bid = {
   price: number;
   message: string;
   status: string;
+  discordUsername?: string | null;
   createdAt: string;
 };
 
@@ -20,6 +21,32 @@ export type ChatMessage = {
   senderName: string;
   content: string;
   createdAt: string;
+};
+
+export type Review = {
+  id: number;
+  requestId: number;
+  reviewerId: number;
+  revieweeId: number;
+  rating: number;
+  comment: string | null;
+  reviewerName?: string;
+  createdAt: string;
+};
+
+export type UserProfile = {
+  id: number;
+  name: string;
+  bio: string | null;
+  trustFactor: number;
+  points: number;
+  idVerified: boolean;
+  createdAt: string;
+  avgRating: number | null;
+  reviewCount: number;
+  reviews: Review[];
+  sessionsAsHirer: { id: number; gameName: string; createdAt: string }[];
+  sessionsAsGamer: { requestId: number; gameName: string | null; createdAt: string | null }[];
 };
 
 async function apiFetch<T = any>(url: string, opts?: RequestInit): Promise<T> {
@@ -36,6 +63,8 @@ async function apiFetch<T = any>(url: string, opts?: RequestInit): Promise<T> {
 export const bidKeys = {
   list: (requestId: number) => ["bids", requestId] as const,
   messages: (bidId: number) => ["messages", bidId] as const,
+  reviews: (requestId: number) => ["reviews", requestId] as const,
+  userProfile: (userId: number) => ["user-profile", userId] as const,
 };
 
 export function useRequestBids(requestId: number) {
@@ -62,9 +91,12 @@ export function usePlaceBid() {
 
 export function useAcceptBid() {
   const qc = useQueryClient();
-  return useMutation<any, any, { requestId: number; bidId: number }>({
-    mutationFn: ({ requestId, bidId }) =>
-      apiFetch(`${BASE}/requests/${requestId}/bids/${bidId}/accept`, { method: "POST" }),
+  return useMutation<any, any, { requestId: number; bidId: number; discordUsername?: string }>({
+    mutationFn: ({ requestId, bidId, discordUsername }) =>
+      apiFetch(`${BASE}/requests/${requestId}/bids/${bidId}/accept`, {
+        method: "POST",
+        body: JSON.stringify({ discordUsername }),
+      }),
     onSuccess: (_, vars) => {
       qc.invalidateQueries({ queryKey: bidKeys.list(vars.requestId) });
       qc.invalidateQueries({ queryKey: ["request", vars.requestId] });
@@ -125,5 +157,73 @@ export function useRequest(requestId: number) {
     queryKey: ["request", requestId],
     queryFn: () => apiFetch(`${BASE}/requests/${requestId}`),
     enabled: requestId > 0,
+  });
+}
+
+export function useRequestReviews(requestId: number) {
+  return useQuery<Review[]>({
+    queryKey: bidKeys.reviews(requestId),
+    queryFn: () => apiFetch(`${BASE}/requests/${requestId}/reviews`),
+    enabled: requestId > 0,
+  });
+}
+
+export function useSubmitReview() {
+  const qc = useQueryClient();
+  return useMutation<Review, any, { requestId: number; rating: number; comment?: string }>({
+    mutationFn: ({ requestId, rating, comment }) =>
+      apiFetch(`${BASE}/requests/${requestId}/reviews`, {
+        method: "POST",
+        body: JSON.stringify({ rating, comment }),
+      }),
+    onSuccess: (_, vars) => {
+      qc.invalidateQueries({ queryKey: bidKeys.reviews(vars.requestId) });
+    },
+  });
+}
+
+export function useSendGift() {
+  const qc = useQueryClient();
+  return useMutation<any, any, { requestId: number; amount: number }>({
+    mutationFn: ({ requestId, amount }) =>
+      apiFetch(`${BASE}/requests/${requestId}/gift`, {
+        method: "POST",
+        body: JSON.stringify({ amount }),
+      }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["wallets"] });
+    },
+  });
+}
+
+export function useReportUser() {
+  return useMutation<any, any, { reportedUserId: number; reason: string; description?: string }>({
+    mutationFn: ({ reportedUserId, reason, description }) =>
+      apiFetch(`${BASE}/reports`, {
+        method: "POST",
+        body: JSON.stringify({ reportedUserId, reason, description }),
+      }),
+  });
+}
+
+export function useUserProfile(userId: number | null) {
+  return useQuery<UserProfile>({
+    queryKey: userId ? bidKeys.userProfile(userId) : ["user-profile", null],
+    queryFn: () => apiFetch(`${BASE}/users/${userId}`),
+    enabled: !!userId,
+  });
+}
+
+export function useUpdateBio() {
+  const qc = useQueryClient();
+  return useMutation<any, any, { bio: string }>({
+    mutationFn: ({ bio }) =>
+      apiFetch(`${BASE}/profile`, {
+        method: "PATCH",
+        body: JSON.stringify({ bio }),
+      }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["auth-me"] });
+    },
   });
 }
