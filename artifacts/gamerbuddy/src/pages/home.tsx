@@ -325,7 +325,7 @@ export default function Home() {
           <div className="text-center mb-12 px-2">
             <div className="inline-flex items-center gap-3 text-[11px] font-bold uppercase tracking-[0.2em] text-purple-400/80 mb-5">
               <div className="h-px w-10 bg-gradient-to-r from-transparent to-purple-500/60" />
-              Why Gamers Love Gamerbuddy
+              Platform Features
               <div className="h-px w-10 bg-gradient-to-l from-transparent to-purple-500/60" />
             </div>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-white leading-tight mb-4">
@@ -388,7 +388,13 @@ export default function Home() {
             style={{ background: "radial-gradient(circle, rgba(168,85,247,0.12) 0%, transparent 70%)" }}
           />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 relative">
+          <div className="relative grid grid-cols-1 md:grid-cols-2 gap-10">
+            {/* centre divider — absolute so it doesn't consume a grid cell */}
+            <div
+              className="hidden md:block absolute left-1/2 top-0 bottom-0 w-px -translate-x-1/2 pointer-events-none"
+              style={{ background: "linear-gradient(to bottom, transparent, rgba(168,85,247,0.4), transparent)" }}
+            />
+
             {/* left — hire side */}
             <div className="space-y-6">
               <div>
@@ -413,16 +419,8 @@ export default function Home() {
               </div>
             </div>
 
-            {/* divider */}
-            <div className="hidden md:flex items-center justify-center">
-              <div
-                className="w-px h-full"
-                style={{ background: "linear-gradient(to bottom, transparent, rgba(168,85,247,0.4), transparent)" }}
-              />
-            </div>
-
             {/* right — earn side */}
-            <div className="space-y-6 md:-ml-8">
+            <div className="space-y-6">
               <div>
                 <div
                   className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest px-3 py-1.5 rounded-full mb-3"
