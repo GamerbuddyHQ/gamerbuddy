@@ -347,10 +347,12 @@ export default function UserProfilePage() {
               {profile.name.charAt(0)}
             </div>
             <div className="pb-1 min-w-0">
+              {/* Name + verified */}
               <div className="flex items-center gap-2 flex-wrap">
                 <h1 className="text-xl sm:text-2xl font-black text-white truncate">{profile.name}</h1>
                 <VerifiedBadge idVerified={profile.idVerified} variant="compact" />
               </div>
+              {/* Rank + rating */}
               <div className="flex items-center gap-2 mt-1 flex-wrap">
                 <span className={`text-xs font-bold ${currentRank.color} flex items-center gap-1`}>
                   {currentRank.emoji} {currentRank.label}
@@ -363,6 +365,37 @@ export default function UserProfilePage() {
                   </span>
                 )}
               </div>
+              {/* Nation + Gender badges — inline under name */}
+              {(profile.country && profile.country !== "any") || (profile.gender && profile.gender !== "any") ? (
+                <div className="flex items-center gap-1.5 mt-2 flex-wrap">
+                  {profile.country && profile.country !== "any" && COUNTRY_MAP[profile.country] && (
+                    <span
+                      className="inline-flex items-center gap-1 text-[11px] font-semibold rounded-full px-2 py-0.5"
+                      style={{
+                        background: "rgba(251,191,36,0.10)",
+                        border: "1px solid rgba(251,191,36,0.25)",
+                        color: "rgba(251,191,36,0.85)",
+                      }}
+                    >
+                      <span className="text-[13px] leading-none">{COUNTRY_MAP[profile.country].flag}</span>
+                      <span>{COUNTRY_MAP[profile.country].label}</span>
+                    </span>
+                  )}
+                  {profile.gender && profile.gender !== "any" && GENDER_MAP[profile.gender] && (
+                    <span
+                      className="inline-flex items-center gap-1 text-[11px] font-semibold rounded-full px-2 py-0.5"
+                      style={{
+                        background: "rgba(236,72,153,0.10)",
+                        border: "1px solid rgba(236,72,153,0.25)",
+                        color: "rgba(236,72,153,0.80)",
+                      }}
+                    >
+                      <span className="text-[13px] leading-none">{GENDER_MAP[profile.gender].icon}</span>
+                      <span>{GENDER_MAP[profile.gender].label}</span>
+                    </span>
+                  )}
+                </div>
+              ) : null}
             </div>
           </div>
 
@@ -387,45 +420,6 @@ export default function UserProfilePage() {
               </div>
             </div>
 
-            {/* Country + Gender identity row */}
-            {(profile.country || profile.gender) && (
-              <div className="flex items-center gap-2 flex-wrap pt-1">
-                {profile.country && profile.country !== "any" && (() => {
-                  const c = COUNTRY_MAP[profile.country];
-                  return c ? (
-                    <span
-                      className="inline-flex items-center gap-1.5 text-[11px] font-semibold rounded-full px-2.5 py-1"
-                      style={{
-                        background: "rgba(251,191,36,0.08)",
-                        border: "1px solid rgba(251,191,36,0.20)",
-                        color: "rgba(251,191,36,0.80)",
-                      }}
-                    >
-                      <Globe className="h-3 w-3 shrink-0" />
-                      <span>{c.flag}</span>
-                      <span>{c.label}</span>
-                    </span>
-                  ) : null;
-                })()}
-                {profile.gender && profile.gender !== "any" && (() => {
-                  const g = GENDER_MAP[profile.gender];
-                  return g ? (
-                    <span
-                      className="inline-flex items-center gap-1.5 text-[11px] font-semibold rounded-full px-2.5 py-1"
-                      style={{
-                        background: "rgba(236,72,153,0.08)",
-                        border: "1px solid rgba(236,72,153,0.20)",
-                        color: "rgba(236,72,153,0.75)",
-                      }}
-                    >
-                      <UserRound className="h-3 w-3 shrink-0" />
-                      <span>{g.icon}</span>
-                      <span>{g.label}</span>
-                    </span>
-                  ) : null;
-                })()}
-              </div>
-            )}
           </div>
         </div>
       </div>
@@ -495,6 +489,48 @@ export default function UserProfilePage() {
                 <FileText className="h-4 w-4" style={{ color: "rgba(168,85,247,0.45)" }} />
               </div>
               <p className="text-sm text-white/30 italic">This gamer hasn't added a bio yet.</p>
+            </div>
+          )}
+
+          {/* Identity footer — Nation + Gender */}
+          {((profile.country && profile.country !== "any") || (profile.gender && profile.gender !== "any")) && (
+            <div
+              className="mt-4 pt-4 flex items-center gap-3 flex-wrap"
+              style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}
+            >
+              <span className="text-[10px] font-bold uppercase tracking-widest text-white/20">Identity</span>
+              {profile.country && profile.country !== "any" && COUNTRY_MAP[profile.country] && (
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] text-white/30 uppercase tracking-widest">Nation</span>
+                  <span
+                    className="inline-flex items-center gap-1.5 text-[11px] font-semibold rounded-full px-2.5 py-1"
+                    style={{
+                      background: "rgba(251,191,36,0.08)",
+                      border: "1px solid rgba(251,191,36,0.20)",
+                      color: "rgba(251,191,36,0.85)",
+                    }}
+                  >
+                    <span className="text-[14px] leading-none">{COUNTRY_MAP[profile.country].flag}</span>
+                    <span>{COUNTRY_MAP[profile.country].label}</span>
+                  </span>
+                </div>
+              )}
+              {profile.gender && profile.gender !== "any" && GENDER_MAP[profile.gender] && (
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] text-white/30 uppercase tracking-widest">Gender</span>
+                  <span
+                    className="inline-flex items-center gap-1.5 text-[11px] font-semibold rounded-full px-2.5 py-1"
+                    style={{
+                      background: "rgba(236,72,153,0.08)",
+                      border: "1px solid rgba(236,72,153,0.22)",
+                      color: "rgba(236,72,153,0.80)",
+                    }}
+                  >
+                    <span className="text-[14px] leading-none">{GENDER_MAP[profile.gender].icon}</span>
+                    <span>{GENDER_MAP[profile.gender].label}</span>
+                  </span>
+                </div>
+              )}
             </div>
           )}
         </div>
