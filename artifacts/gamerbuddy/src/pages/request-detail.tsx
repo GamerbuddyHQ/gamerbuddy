@@ -578,6 +578,169 @@ function BidderStreamingBadges({ bidderId, compact = false }: { bidderId: number
   );
 }
 
+function BulkProgressCard({
+  acceptedBidsCount,
+  bulkSlotsNeeded,
+  escrowAmount,
+  pendingBids,
+}: {
+  acceptedBidsCount: number;
+  bulkSlotsNeeded: number;
+  escrowAmount: number;
+  pendingBids: Bid[];
+}) {
+  const pct = Math.min(100, (acceptedBidsCount / Math.max(bulkSlotsNeeded, 1)) * 100);
+  const remaining = bulkSlotsNeeded - acceptedBidsCount;
+  const avgPendingBid = pendingBids.length > 0
+    ? pendingBids.reduce((s, b) => s + b.price, 0) / pendingBids.length
+    : 0;
+  const estimatedRemaining = remaining > 0 && avgPendingBid > 0 ? remaining * avgPendingBid : 0;
+
+  return (
+    <div
+      className="rounded-2xl border border-purple-500/30 p-5 space-y-4"
+      style={{ background: "linear-gradient(135deg, rgba(88,28,135,0.12) 0%, rgba(10,0,20,0.5) 100%)" }}
+    >
+      <div className="flex items-center justify-between flex-wrap gap-2">
+        <div className="flex items-center gap-2 text-purple-400 font-bold text-xs uppercase tracking-widest">
+          <Users className="h-4 w-4" />
+          Roster Progress
+        </div>
+        <div className="flex items-baseline gap-1">
+          <span className="text-3xl font-black text-purple-400 tabular-nums">{acceptedBidsCount}</span>
+          <span className="text-xl font-black text-white/30">/</span>
+          <span className="text-3xl font-black text-white tabular-nums">{bulkSlotsNeeded}</span>
+          <span className="text-xs text-muted-foreground ml-1.5">slots filled</span>
+        </div>
+      </div>
+
+      {/* Glow progress bar */}
+      <div className="relative h-4 bg-white/5 rounded-full overflow-hidden border border-white/5">
+        <div
+          className="h-full rounded-full transition-all duration-700"
+          style={{
+            width: `${pct}%`,
+            background: "linear-gradient(90deg, #7c3aed 0%, #a855f7 60%, #c084fc 100%)",
+            boxShadow: pct > 0 ? "0 0 16px rgba(168,85,247,0.6), 0 0 40px rgba(168,85,247,0.2)" : "none",
+          }}
+        />
+        {pct > 5 && pct < 96 && (
+          <div
+            className="absolute top-0 bottom-0 flex items-center text-[10px] font-black text-white/80 pr-1 tabular-nums pointer-events-none"
+            style={{ left: `${pct}%`, transform: "translateX(-100%)" }}
+          >
+            {Math.round(pct)}%
+          </div>
+        )}
+      </div>
+
+      {/* Stats chips */}
+      <div className="flex flex-wrap gap-2 text-xs">
+        <div className="flex items-center gap-1.5 rounded-lg border border-white/8 bg-white/4 px-3 py-1.5">
+          <span className="text-muted-foreground">Escrow held</span>
+          <span className="font-black text-white">${escrowAmount.toFixed(2)}</span>
+        </div>
+        <div className="flex items-center gap-1.5 rounded-lg border border-purple-500/20 bg-purple-500/8 px-3 py-1.5">
+          <span className="text-muted-foreground">Remaining</span>
+          <span className="font-black text-purple-300">{remaining} slot{remaining !== 1 ? "s" : ""}</span>
+        </div>
+        {estimatedRemaining > 0 && (
+          <div className="flex items-center gap-1.5 rounded-lg border border-amber-500/20 bg-amber-500/6 px-3 py-1.5">
+            <span className="text-muted-foreground">Est. remaining cost</span>
+            <span className="font-black text-amber-300">~${estimatedRemaining.toFixed(2)}</span>
+          </div>
+        )}
+        {acceptedBidsCount >= bulkSlotsNeeded && (
+          <div className="flex items-center gap-1.5 rounded-lg border border-green-500/30 bg-green-500/8 px-3 py-1.5">
+            <CheckCircle2 className="h-3 w-3 text-green-400" />
+            <span className="font-black text-green-400">Roster Full!</span>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function BulkSelectionBar({
+  count,
+  totalCost,
+  remainingSlots,
+  isPending,
+  onAccept,
+  onClear,
+}: {
+  count: number;
+  totalCost: number;
+  remainingSlots: number;
+  isPending: boolean;
+  onAccept: () => void;
+  onClear: () => void;
+}) {
+  if (count === 0) return null;
+  const wouldExceed = count > remainingSlots;
+  return (
+    <div className="fixed bottom-0 left-0 right-0 z-50 flex justify-center p-4 pointer-events-none">
+      <div
+        className="flex items-center gap-3 md:gap-5 rounded-2xl border border-purple-500/50 px-4 md:px-7 py-3 md:py-4 shadow-2xl pointer-events-auto animate-in slide-in-from-bottom-4 duration-300 flex-wrap justify-center md:justify-start"
+        style={{
+          background: "linear-gradient(135deg, rgba(76,0,130,0.97) 0%, rgba(12,0,26,0.98) 100%)",
+          backdropFilter: "blur(24px)",
+          boxShadow: "0 0 50px rgba(168,85,247,0.3), 0 25px 60px rgba(0,0,0,0.6)",
+        }}
+      >
+        <div className="flex items-center gap-2 text-sm">
+          <div className="h-7 w-7 rounded-full bg-purple-500/20 border border-purple-500/40 flex items-center justify-center">
+            <Users className="h-3.5 w-3.5 text-purple-400" />
+          </div>
+          <span className="font-black text-white">{count}</span>
+          <span className="text-purple-300/80">gamer{count !== 1 ? "s" : ""} selected</span>
+          <span className="text-purple-600 mx-0.5">·</span>
+          <span className="font-black text-white">${totalCost.toFixed(2)}</span>
+          <span className="text-purple-300/60 text-xs">from wallet</span>
+          {wouldExceed && (
+            <span className="ml-1 text-amber-400 text-xs font-bold flex items-center gap-1">
+              <AlertTriangle className="h-3 w-3" /> exceeds slots
+            </span>
+          )}
+        </div>
+        <div className="flex gap-2">
+          <Button
+            size="sm"
+            variant="ghost"
+            className="text-purple-400/50 hover:text-purple-300 text-xs h-8 px-3"
+            onClick={onClear}
+            disabled={isPending}
+          >
+            Clear
+          </Button>
+          <Button
+            size="sm"
+            className="text-white font-black uppercase text-xs h-8 px-5"
+            style={{
+              background: "linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)",
+              boxShadow: "0 0 20px rgba(168,85,247,0.5)",
+            }}
+            onClick={onAccept}
+            disabled={isPending}
+          >
+            {isPending ? (
+              <span className="flex items-center gap-2">
+                <div className="h-3.5 w-3.5 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                Accepting…
+              </span>
+            ) : (
+              <span className="flex items-center gap-2">
+                <CheckCircle2 className="h-3.5 w-3.5" />
+                Accept {count} Gamer{count !== 1 ? "s" : ""}
+              </span>
+            )}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function BidCard({
   bid,
   isHirer,
@@ -585,6 +748,9 @@ function BidCard({
   currentUserId,
   requestId,
   gameName,
+  isBulkMode,
+  isSelected,
+  onToggleSelect,
 }: {
   bid: Bid;
   isHirer: boolean;
@@ -592,6 +758,9 @@ function BidCard({
   currentUserId: number;
   requestId: number;
   gameName: string;
+  isBulkMode?: boolean;
+  isSelected?: boolean;
+  onToggleSelect?: () => void;
 }) {
   const [chatOpen, setChatOpen] = useState(false);
   const [showAcceptModal, setShowAcceptModal] = useState(false);
@@ -602,6 +771,7 @@ function BidCard({
   const isAccepted = bid.status === "accepted";
   const isRejected = bid.status === "rejected";
   const canChat = (isHirer || isMe) && (isAccepted || isMe);
+  const showCheckbox = isBulkMode && isHirer && bid.status === "pending" && !!onToggleSelect;
 
   return (
     <>
@@ -612,14 +782,30 @@ function BidCard({
         <ReportModal reportedUserId={bid.bidderId} reportedName={bid.bidderName} onClose={() => setShowReport(false)} />
       )}
 
-      <div className={`rounded-xl border p-4 space-y-3 transition-all ${
-        isAccepted ? "border-green-500/40 bg-green-500/5" :
-        isRejected ? "border-border/30 bg-card/20 opacity-50" :
-        isMe ? "border-secondary/40 bg-secondary/5" :
-        "border-border bg-card/40"
-      }`}>
+      <div
+        className={`rounded-xl border p-4 space-y-3 transition-all duration-200 ${
+          isAccepted ? "border-green-500/40 bg-green-500/5" :
+          isRejected ? "border-border/30 bg-card/20 opacity-50" :
+          isSelected ? "border-purple-500/60 bg-purple-500/8 shadow-[0_0_20px_rgba(168,85,247,0.12)]" :
+          isMe ? "border-secondary/40 bg-secondary/5" :
+          "border-border bg-card/40"
+        }`}
+      >
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-2.5">
+            {showCheckbox && (
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); onToggleSelect!(); }}
+                className={`h-5 w-5 rounded-[5px] border-2 flex-shrink-0 flex items-center justify-center transition-all mt-2 ${
+                  isSelected
+                    ? "bg-purple-500 border-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.6)]"
+                    : "bg-transparent border-white/20 hover:border-purple-400/60"
+                }`}
+              >
+                {isSelected && <CheckCircle2 className="h-3 w-3 text-white" />}
+              </button>
+            )}
             <div className="h-9 w-9 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center">
               <User className="h-4 w-4 text-primary" />
             </div>
@@ -1052,6 +1238,10 @@ export default function RequestDetail() {
   const startSession = useStartSession();
   const completeRequest = useCompleteRequest();
   const lockSession = useLockBulkSession();
+  const acceptBid = useAcceptBid();
+
+  const [selectedBidIds, setSelectedBidIds] = useState<Set<number>>(new Set());
+  const [bulkAccepting, setBulkAccepting] = useState(false);
 
   const isBulkRequest = request?.isBulkHiring ?? false;
   const bulkSlotsNeeded = request?.bulkGamersNeeded ?? 0;
@@ -1075,6 +1265,35 @@ export default function RequestDetail() {
         toast({ title: "Error", description: err?.error || "Failed to lock roster.", variant: "destructive" });
       },
     });
+  };
+
+  const handleToggleSelect = (bidId: number) => {
+    setSelectedBidIds(prev => {
+      const next = new Set(prev);
+      if (next.has(bidId)) next.delete(bidId);
+      else next.add(bidId);
+      return next;
+    });
+  };
+
+  const handleBulkAcceptSelected = async () => {
+    const ids = Array.from(selectedBidIds);
+    setBulkAccepting(true);
+    let accepted = 0;
+    for (const bidId of ids) {
+      try {
+        await acceptBid.mutateAsync({ requestId, bidId });
+        accepted++;
+      } catch (e: any) {
+        toast({ title: "Stopped", description: e?.error || "An error occurred — some bids may not have been accepted.", variant: "destructive" });
+        break;
+      }
+    }
+    setBulkAccepting(false);
+    setSelectedBidIds(new Set());
+    if (accepted > 0) {
+      toast({ title: `${accepted} Gamer${accepted !== 1 ? "s" : ""} Added!`, description: `${accepted} bid${accepted !== 1 ? "s" : ""} accepted and held in escrow.` });
+    }
   };
 
   const handlePlaceBid = () => {
@@ -1499,33 +1718,83 @@ export default function RequestDetail() {
         </div>
       )}
 
+      {/* Bulk progress card — shown above bids when this is a bulk request */}
+      {isBulkRequest && request.status === "open" && (
+        <BulkProgressCard
+          acceptedBidsCount={acceptedBidsCount}
+          bulkSlotsNeeded={bulkSlotsNeeded}
+          escrowAmount={request.escrowAmount ?? 0}
+          pendingBids={bids.filter((b: Bid) => b.status === "pending")}
+        />
+      )}
+
       {/* Bids list */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-            <Gavel className="h-4 w-4 text-secondary" />
-            {loadingBids ? "Loading bids…" : `${bids.length} Bid${bids.length !== 1 ? "s" : ""}`}
-          </h2>
-        </div>
+      {(() => {
+        const pendingBids = bids.filter((b: Bid) => b.status === "pending");
+        const selectableBidIds = pendingBids.map((b: Bid) => b.id);
+        const allSelected = selectableBidIds.length > 0 && selectableBidIds.every((id: number) => selectedBidIds.has(id));
+        const selectedTotal = bids
+          .filter((b: Bid) => selectedBidIds.has(b.id))
+          .reduce((s: number, b: Bid) => s + b.price, 0);
+        const remainingSlots = bulkSlotsNeeded - acceptedBidsCount;
 
-        {!loadingBids && bids.length === 0 && (
-          <div className="text-center py-10 text-muted-foreground text-sm">
-            No bids yet. Be the first to offer!
+        return (
+          <div className="space-y-3">
+            <div className="flex items-center justify-between gap-2">
+              <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+                <Gavel className="h-4 w-4 text-secondary" />
+                {loadingBids ? "Loading bids…" : `${bids.length} Bid${bids.length !== 1 ? "s" : ""}`}
+              </h2>
+              {isBulkRequest && isHirer && request.status === "open" && selectableBidIds.length > 0 && (
+                <button
+                  type="button"
+                  className="text-xs font-bold text-purple-400 hover:text-purple-300 transition-colors flex items-center gap-1.5 border border-purple-500/30 rounded-lg px-2.5 py-1 hover:border-purple-500/60"
+                  onClick={() => {
+                    if (allSelected) setSelectedBidIds(new Set());
+                    else setSelectedBidIds(new Set(selectableBidIds));
+                  }}
+                >
+                  {allSelected ? (
+                    <><X className="h-3 w-3" /> Deselect All</>
+                  ) : (
+                    <><CheckCircle2 className="h-3 w-3" /> Select All ({selectableBidIds.length})</>
+                  )}
+                </button>
+              )}
+            </div>
+
+            {!loadingBids && bids.length === 0 && (
+              <div className="text-center py-10 text-muted-foreground text-sm">
+                No bids yet. Be the first to offer!
+              </div>
+            )}
+
+            {bids.map((bid: Bid) => (
+              <BidCard
+                key={bid.id}
+                bid={bid}
+                isHirer={isHirer}
+                requestStatus={request.status}
+                currentUserId={user?.id ?? -1}
+                requestId={requestId}
+                gameName={request.gameName}
+                isBulkMode={isBulkRequest}
+                isSelected={selectedBidIds.has(bid.id)}
+                onToggleSelect={() => handleToggleSelect(bid.id)}
+              />
+            ))}
+
+            <BulkSelectionBar
+              count={selectedBidIds.size}
+              totalCost={selectedTotal}
+              remainingSlots={remainingSlots}
+              isPending={bulkAccepting}
+              onAccept={handleBulkAcceptSelected}
+              onClear={() => setSelectedBidIds(new Set())}
+            />
           </div>
-        )}
-
-        {bids.map((bid: Bid) => (
-          <BidCard
-            key={bid.id}
-            bid={bid}
-            isHirer={isHirer}
-            requestStatus={request.status}
-            currentUserId={user?.id ?? -1}
-            requestId={requestId}
-            gameName={request.gameName}
-          />
-        ))}
-      </div>
+        );
+      })()}
     </div>
   );
 }
