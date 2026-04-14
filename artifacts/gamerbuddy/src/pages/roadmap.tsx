@@ -220,28 +220,27 @@ export default function Roadmap() {
 
       {/* ── Phase 1 Context Banner ── */}
       <div
-        className="rounded-2xl border p-6 space-y-3"
+        className="rounded-2xl border p-6 space-y-4"
         style={{
-          background: "linear-gradient(135deg, rgba(34,197,94,0.07) 0%, rgba(168,85,247,0.05) 100%)",
-          borderColor: "rgba(34,197,94,0.22)",
-          boxShadow: "0 0 32px rgba(34,197,94,0.08)",
+          background: "linear-gradient(135deg, rgba(34,197,94,0.06) 0%, rgba(168,85,247,0.04) 100%)",
+          borderColor: "rgba(34,197,94,0.18)",
+          boxShadow: "0 0 40px rgba(34,197,94,0.06)",
         }}
       >
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2.5">
           <span
-            className="h-2.5 w-2.5 rounded-full shrink-0"
+            className="h-2 w-2 rounded-full shrink-0"
             style={{ background: "#22c55e", boxShadow: "0 0 7px rgba(34,197,94,0.7)", animation: "pulse 1.5s infinite" }}
           />
-          <span className="text-xs font-black uppercase tracking-widest text-green-400">
-            Currently Active — Phase 1
+          <span className="text-[11px] font-black uppercase tracking-[0.14em] text-green-400/90">
+            Phase 1 is Live
           </span>
         </div>
-        <p className="text-sm sm:text-base text-foreground/85 leading-relaxed">
-          We are currently in <strong className="text-foreground">Phase 1</strong> — focused on core hiring and safe co-op sessions.
-          We are rolling out features gradually to ensure everything works smoothly and securely.
+        <p className="text-sm sm:text-[15px] text-foreground/80 leading-[1.75]">
+          <strong className="text-foreground font-bold">The foundation is set.</strong> Phase 1 gives you everything you need to start hiring and playing today — post requests, receive bids, use escrow, and leave honest reviews.
         </p>
-        <p className="text-sm text-muted-foreground leading-relaxed">
-          Thank you for your patience as we build the best gaming buddy experience. Each phase unlocks new capabilities based on your feedback and our readiness to deliver them reliably.
+        <p className="text-sm text-muted-foreground/60 leading-[1.75]">
+          Every phase that follows is deliberate: we ship when it's tested, trusted, and genuinely better than what's already here. Your experience in Phase 1 directly shapes what we build next — and when we build it.
         </p>
       </div>
 
