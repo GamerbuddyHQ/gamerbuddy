@@ -1,11 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { formatDistanceToNow } from "date-fns";
 import {
   Trophy, Swords, Users, Crown, Plus, X, Zap, ChevronDown, ChevronUp,
   Gamepad2, Loader2, DollarSign, Info, AlertTriangle, CheckCircle2,
-  Flame, Clock, Filter, Star, Shield, Lock, Globe,
+  Flame, Clock, Filter, Star, Shield, Lock, Globe, HelpCircle, Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -85,6 +85,115 @@ const fetchTournaments = async (): Promise<Tournament[]> => {
   if (!r.ok) throw new Error("Failed to load tournaments");
   return r.json();
 };
+
+/* ── Tooltip ── */
+function Tip({ text, wide }: { text: string; wide?: boolean }) {
+  return (
+    <span className="relative group inline-flex items-center ml-1.5 align-middle cursor-help">
+      <HelpCircle className="h-3 w-3 text-muted-foreground/30 group-hover:text-purple-400/60 transition-colors" />
+      <span
+        className={`pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 rounded-xl text-[11px] font-medium leading-snug opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-[200] text-center ${wide ? "w-64" : "w-48"}`}
+        style={{
+          background: "rgba(15,8,35,0.98)",
+          border: "1px solid rgba(168,85,247,0.35)",
+          color: "rgba(255,255,255,0.78)",
+          boxShadow: "0 8px 24px rgba(0,0,0,0.6), 0 0 0 1px rgba(168,85,247,0.10)",
+        }}
+      >
+        {text}
+        <span
+          className="absolute top-full left-1/2 -translate-x-1/2 -mt-px border-4 border-transparent"
+          style={{ borderTopColor: "rgba(168,85,247,0.35)" }}
+        />
+      </span>
+    </span>
+  );
+}
+
+/* ── Quick-chip row ── */
+function ChipRow({
+  chips, active, onSelect, color = "purple",
+}: {
+  chips: { label: string; value: number | string }[];
+  active: number | string;
+  onSelect: (v: number | string) => void;
+  color?: "purple" | "gold";
+}) {
+  const activeStyle = color === "gold"
+    ? { background: "rgba(251,191,36,0.22)", border: "1px solid rgba(251,191,36,0.55)", color: "#fbbf24" }
+    : { background: "rgba(168,85,247,0.22)", border: "1px solid rgba(168,85,247,0.55)", color: "#c084fc" };
+  const inactiveStyle = { background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.09)", color: "rgba(255,255,255,0.38)" };
+  return (
+    <div className="flex flex-wrap gap-1.5 mt-2">
+      {chips.map(({ label, value }) => (
+        <button
+          key={String(value)}
+          type="button"
+          onClick={() => onSelect(value)}
+          className="px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all duration-120 active:scale-95"
+          style={active === value ? activeStyle : inactiveStyle}
+        >
+          {label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/* ── Visual distribution bar ── */
+function DistBar({ first, second, third, net }: { first: number; second: number; third: number; net: number }) {
+  const rest = Math.max(0, 100 - first - second - third);
+  const fmt = (pct: number) => net > 0 ? `$${Math.round(net * pct / 100).toLocaleString()}` : `${pct}%`;
+  return (
+    <div className="mt-3 space-y-1.5">
+      {/* bar */}
+      <div className="flex h-5 rounded-lg overflow-hidden w-full gap-px">
+        {first > 0 && (
+          <div className="flex items-center justify-center text-[9px] font-extrabold text-black/80 transition-all duration-300"
+            style={{ width: `${first}%`, background: "linear-gradient(90deg,#fbbf24,#f59e0b)", minWidth: first > 5 ? 0 : undefined }}>
+            {first > 8 ? "🥇" : ""}
+          </div>
+        )}
+        {second > 0 && (
+          <div className="flex items-center justify-center text-[9px] font-extrabold text-black/70 transition-all duration-300"
+            style={{ width: `${second}%`, background: "linear-gradient(90deg,#94a3b8,#64748b)" }}>
+            {second > 8 ? "🥈" : ""}
+          </div>
+        )}
+        {third > 0 && (
+          <div className="flex items-center justify-center text-[9px] font-extrabold text-black/70 transition-all duration-300"
+            style={{ width: `${third}%`, background: "linear-gradient(90deg,#c2813a,#a16207)" }}>
+            {third > 8 ? "🥉" : ""}
+          </div>
+        )}
+        {rest > 0 && (
+          <div className="transition-all duration-300" style={{ width: `${rest}%`, background: "rgba(255,255,255,0.06)" }} />
+        )}
+      </div>
+      {/* labels */}
+      <div className="flex gap-3 flex-wrap">
+        {first > 0 && (
+          <span className="text-[11px] font-bold flex items-center gap-1" style={{ color: "#fbbf24" }}>
+            🥇 {fmt(first)}
+          </span>
+        )}
+        {second > 0 && (
+          <span className="text-[11px] font-bold flex items-center gap-1" style={{ color: "#94a3b8" }}>
+            🥈 {fmt(second)}
+          </span>
+        )}
+        {third > 0 && (
+          <span className="text-[11px] font-bold flex items-center gap-1" style={{ color: "#c2813a" }}>
+            🥉 {fmt(third)}
+          </span>
+        )}
+        {net > 0 && rest === 0 && (
+          <span className="text-[10px] text-muted-foreground/35 ml-auto">after 10% platform fee</span>
+        )}
+      </div>
+    </div>
+  );
+}
 
 /* ── Reusable Avatar ── */
 function Avatar({ name, size = 32 }: { name: string; size?: number }) {
@@ -607,8 +716,9 @@ function CreateTournamentForm({ onClose, onSuccess }: { onClose: () => void; onS
 
           {/* ── Player Slots ── */}
           <section>
-            <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40 block mb-2">
-              Number of Slots (min {MIN_PLAYERS} – max {MAX_PLAYERS})
+            <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40 mb-2 flex items-center">
+              Number of Slots
+              <Tip text={`Min ${MIN_PLAYERS} players, max ${MAX_PLAYERS}. The tournament auto-starts when all slots are filled. You can set any number regardless of type.`} wide />
             </label>
             <input
               type="number"
@@ -623,24 +733,33 @@ function CreateTournamentForm({ onClose, onSuccess }: { onClose: () => void; onS
                 playersError ? "border-red-500/60 focus:border-red-500" : "border-border/60 focus:border-primary/60"
               }`}
             />
+            <ChipRow
+              chips={[
+                { label: "2", value: 2 }, { label: "4", value: 4 }, { label: "8", value: 8 },
+                { label: "16", value: 16 }, { label: "32", value: 32 }, { label: "64", value: 64 }, { label: "100", value: 100 },
+              ]}
+              active={maxPlayers}
+              onSelect={(v) => setMaxPlayers(Number(v))}
+            />
             {playersError ? (
               <p className="flex items-center gap-1.5 text-[11px] font-semibold text-red-400 mt-1.5">
                 <AlertTriangle className="h-3 w-3 shrink-0" />{playersError}
               </p>
             ) : (
-              <p className="text-[10px] text-muted-foreground/40 mt-1">
-                Set how many players can join — from {MIN_PLAYERS} to {MAX_PLAYERS} slots
+              <p className="text-[10px] text-muted-foreground/35 mt-1.5">
+                Currently set to <span className="text-white/60 font-semibold">{maxPlayers} player{maxPlayers !== 1 ? "s" : ""}</span>
               </p>
             )}
           </section>
 
           {/* ── Prize Pool ── */}
           <section>
-            <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40 block mb-2">
-              Prize Pool ($100 – $10,000)
+            <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40 mb-2 flex items-center">
+              Prize Pool
+              <Tip text="Your prize pool is held in escrow immediately. 10% platform fee is deducted when you declare winners. Cancel anytime before the tournament fills to get a full refund." wide />
             </label>
             <div className="relative">
-              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/60 font-bold">$</span>
+              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/60 font-bold text-[13px]">$</span>
               <input
                 type="number"
                 min={MIN_PRIZE}
@@ -653,88 +772,183 @@ function CreateTournamentForm({ onClose, onSuccess }: { onClose: () => void; onS
                 }`}
               />
             </div>
+            <ChipRow
+              chips={[
+                { label: "$100", value: 100 }, { label: "$250", value: 250 }, { label: "$500", value: 500 },
+                { label: "$1,000", value: 1000 }, { label: "$2,500", value: 2500 }, { label: "$5,000", value: 5000 }, { label: "$10,000", value: 10000 },
+              ]}
+              active={prize}
+              onSelect={(v) => setPrizePool(String(v))}
+              color="gold"
+            />
             {prizeError ? (
               <p className="flex items-center gap-1.5 text-[11px] font-semibold text-red-400 mt-1.5">
                 <AlertTriangle className="h-3 w-3 shrink-0" />{prizeError}
               </p>
             ) : prize >= MIN_PRIZE ? (
-              <div className="mt-2 flex items-center gap-3 text-[11px] text-muted-foreground/50">
-                <span>Platform fee (10%): <span className="text-red-400/70 font-semibold">−${platformFeeEst.toFixed(2)}</span></span>
-                <span className="text-muted-foreground/30">·</span>
-                <span>Net prize pool: <span className="text-emerald-400/80 font-bold">${netPrizeEst.toFixed(2)}</span></span>
+              <div
+                className="mt-2.5 flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-xl text-[11px]"
+                style={{ background: "rgba(251,191,36,0.06)", border: "1px solid rgba(251,191,36,0.18)" }}
+              >
+                <span className="text-muted-foreground/50">
+                  Platform fee (10%): <span className="text-red-400/80 font-semibold">−${platformFeeEst.toFixed(2)}</span>
+                </span>
+                <span className="font-extrabold text-emerald-400 text-[13px]">Net: ${netPrizeEst.toFixed(2)}</span>
               </div>
-            ) : null}
+            ) : (
+              <p className="text-[10px] text-muted-foreground/35 mt-1.5">Min $100 · Max $10,000 USD</p>
+            )}
           </section>
 
           {/* ── Entry Fee ── */}
           <section>
-            <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40 block mb-2">Entry Fee per Player (0 = free)</label>
-            <div className="relative">
-              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/60 font-bold">$</span>
-              <input
-                type="number"
-                min={0}
-                value={entryFee}
-                onChange={(e) => setEntryFee(e.target.value)}
-                placeholder="0"
-                className="w-full rounded-xl pl-7 pr-3.5 py-2.5 text-[13px] outline-none bg-background/60 border border-border/60 text-foreground focus:border-primary/60 transition-all"
-              />
+            <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40 mb-2 flex items-center">
+              Entry Fee per Player
+              <Tip text="Players pay this to join. Entry fees are pooled with your prize pool and distributed to winners after the 10% platform fee. Set 0 for free entry." wide />
+            </label>
+            {/* Free / Paid toggle */}
+            <div className="flex gap-2 mb-2.5">
+              {[{ label: "🎁 Free Entry", val: "free" }, { label: "💰 Paid Entry", val: "paid" }].map(({ label, val }) => {
+                const active = val === "paid" ? parseFloat(entryFee) > 0 : parseFloat(entryFee) === 0;
+                return (
+                  <button
+                    key={val}
+                    type="button"
+                    onClick={() => setEntryFee(val === "free" ? "0" : "5")}
+                    className="flex-1 py-2 rounded-xl text-[12px] font-bold transition-all duration-150 active:scale-95"
+                    style={active ? {
+                      background: "rgba(168,85,247,0.18)", border: "1.5px solid rgba(168,85,247,0.50)", color: "#c084fc",
+                    } : {
+                      background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.35)",
+                    }}
+                  >
+                    {label}
+                  </button>
+                );
+              })}
             </div>
-            <p className="text-[10px] text-muted-foreground/40 mt-1.5">Entry fees are added to the prize pool when distributed.</p>
+            {parseFloat(entryFee) > 0 && (
+              <div className="relative">
+                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/60 font-bold text-[13px]">$</span>
+                <input
+                  type="number"
+                  min={1}
+                  value={entryFee}
+                  onChange={(e) => setEntryFee(e.target.value)}
+                  placeholder="5"
+                  className="w-full rounded-xl pl-7 pr-3.5 py-2.5 text-[13px] outline-none bg-background/60 border border-border/60 text-foreground focus:border-primary/60 transition-all"
+                />
+              </div>
+            )}
+            <p className="text-[10px] text-muted-foreground/35 mt-1.5">
+              {parseFloat(entryFee) > 0
+                ? `$${parseFloat(entryFee).toFixed(2)} per player · pooled with prize fund at distribution`
+                : "No cost to join — great for community events"}
+            </p>
           </section>
 
           {/* ── Prize Distribution ── */}
           <section>
-            <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40 block mb-2">Prize Distribution</label>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
-              {DIST_PRESETS.map((p) => (
-                <button
-                  key={p.key}
-                  onClick={() => setDistPreset(p.key)}
-                  className="py-2 px-3 rounded-lg text-[11px] font-bold transition-all duration-150 active:scale-95"
-                  style={distPreset === p.key ? {
-                    background: "rgba(168,85,247,0.20)",
-                    border: "1px solid rgba(168,85,247,0.50)",
-                    color: "#c084fc",
-                  } : {
-                    background: "rgba(255,255,255,0.03)",
-                    border: "1px solid rgba(255,255,255,0.08)",
-                    color: "rgba(255,255,255,0.40)",
-                  }}
-                >
-                  {p.label}
-                </button>
-              ))}
+            <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40 mb-2 flex items-center">
+              Prize Distribution
+              <Tip text="How net prizes are split among top finishers. Percentages must add up to exactly 100%. Dollar amounts shown update live based on your prize pool." wide />
+            </label>
+
+            {/* Preset cards */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              {DIST_PRESETS.map((p) => {
+                const active = distPreset === p.key;
+                const pctNet = netPrizeEst > 0;
+                return (
+                  <button
+                    key={p.key}
+                    type="button"
+                    onClick={() => setDistPreset(p.key)}
+                    className="py-3 px-2 rounded-xl text-center transition-all duration-150 active:scale-95 space-y-1.5"
+                    style={active ? {
+                      background: "rgba(168,85,247,0.16)", border: "1.5px solid rgba(168,85,247,0.55)",
+                    } : {
+                      background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.07)",
+                    }}
+                  >
+                    <p className="text-[11px] font-extrabold" style={{ color: active ? "#c084fc" : "rgba(255,255,255,0.45)" }}>{p.label}</p>
+                    {p.key !== "custom" && (
+                      <div className="flex gap-px h-2 rounded-sm overflow-hidden mx-2">
+                        {p.first > 0 && <div style={{ width: `${p.first}%`, background: "#fbbf24" }} />}
+                        {p.second > 0 && <div style={{ width: `${p.second}%`, background: "#94a3b8" }} />}
+                        {p.third > 0 && <div style={{ width: `${p.third}%`, background: "#c2813a" }} />}
+                      </div>
+                    )}
+                    {p.key !== "custom" && (
+                      <p className="text-[9px]" style={{ color: active ? "rgba(192,132,252,0.65)" : "rgba(255,255,255,0.22)" }}>
+                        {[p.first > 0 && `🥇${p.first}%`, p.second > 0 && `🥈${p.second}%`, p.third > 0 && `🥉${p.third}%`].filter(Boolean).join(" ")}
+                      </p>
+                    )}
+                    {p.key === "custom" && (
+                      <p className="text-[9px]" style={{ color: active ? "rgba(192,132,252,0.65)" : "rgba(255,255,255,0.22)" }}>set your own %</p>
+                    )}
+                  </button>
+                );
+              })}
             </div>
 
-            {distPreset === "custom" ? (
-              <div className="space-y-2">
+            {/* Visual preview bar — always shown */}
+            <DistBar first={dist.first} second={dist.second} third={dist.third} net={netPrizeEst} />
+
+            {/* Custom sliders */}
+            {distPreset === "custom" && (
+              <div
+                className="mt-3 p-4 rounded-xl space-y-3"
+                style={{ background: "rgba(168,85,247,0.05)", border: "1px solid rgba(168,85,247,0.15)" }}
+              >
                 {[
-                  { label: "🥇 1st Place %", val: customFirst, set: setCustomFirst },
-                  { label: "🥈 2nd Place %", val: customSecond, set: setCustomSecond },
-                  { label: "🥉 3rd Place %", val: customThird, set: setCustomThird },
-                ].map(({ label, val, set }) => (
-                  <div key={label} className="flex items-center gap-3">
-                    <span className="text-[12px] w-28 shrink-0 text-muted-foreground/60">{label}</span>
+                  { emoji: "🥇", label: "1st Place", val: customFirst, set: setCustomFirst, color: "#fbbf24" },
+                  { emoji: "🥈", label: "2nd Place", val: customSecond, set: setCustomSecond, color: "#94a3b8" },
+                  { emoji: "🥉", label: "3rd Place", val: customThird, set: setCustomThird, color: "#c2813a" },
+                ].map(({ emoji, label, val, set, color }) => (
+                  <div key={label}>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-[11px] font-bold" style={{ color }}>
+                        {emoji} {label}
+                      </span>
+                      <div className="flex items-center gap-2">
+                        {netPrizeEst > 0 && (
+                          <span className="text-[11px] font-extrabold" style={{ color }}>
+                            ${Math.round(netPrizeEst * val / 100).toLocaleString()}
+                          </span>
+                        )}
+                        <span className="text-[12px] font-bold text-white/60 w-9 text-right">{val}%</span>
+                      </div>
+                    </div>
                     <input
-                      type="number"
-                      min={0} max={100}
+                      type="range"
+                      min={0} max={100} step={1}
                       value={val}
-                      onChange={(e) => set(Math.max(0, Math.min(100, parseInt(e.target.value) || 0)))}
-                      className="flex-1 rounded-lg px-3 py-1.5 text-[13px] outline-none bg-background/60 border border-border/60 text-foreground focus:border-primary/60 transition-all"
+                      onChange={(e) => set(Number(e.target.value))}
+                      className="w-full h-2 rounded-full appearance-none cursor-pointer"
+                      style={{ accentColor: color }}
                     />
-                    <span className="text-[12px] text-muted-foreground/50 w-4">%</span>
                   </div>
                 ))}
-                <div className={`text-[11px] font-bold ${Math.abs(distTotal - 100) > 0.5 ? "text-red-400" : "text-emerald-400"}`}>
-                  Total: {distTotal}% {Math.abs(distTotal - 100) > 0.5 ? "(must equal 100%)" : "✓"}
+                {/* Total indicator */}
+                <div className="flex items-center justify-between pt-1">
+                  <div className="h-1.5 flex-1 rounded-full overflow-hidden mr-3" style={{ background: "rgba(255,255,255,0.06)" }}>
+                    <div
+                      className="h-full rounded-full transition-all duration-200"
+                      style={{
+                        width: `${Math.min(distTotal, 100)}%`,
+                        background: Math.abs(distTotal - 100) <= 0.5
+                          ? "linear-gradient(90deg,#4ade80,#22c55e)"
+                          : distTotal > 100
+                          ? "linear-gradient(90deg,#f87171,#ef4444)"
+                          : "linear-gradient(90deg,#fbbf24,#f59e0b)",
+                      }}
+                    />
+                  </div>
+                  <span className={`text-[11px] font-extrabold shrink-0 ${Math.abs(distTotal - 100) <= 0.5 ? "text-emerald-400" : distTotal > 100 ? "text-red-400" : "text-yellow-400"}`}>
+                    {distTotal}% {Math.abs(distTotal - 100) <= 0.5 ? "✓" : distTotal > 100 ? "over" : "remaining"}
+                  </span>
                 </div>
-              </div>
-            ) : (
-              <div className="flex items-center gap-2 flex-wrap">
-                {dist.first > 0 && <span className="text-[11px] font-bold px-2.5 py-1 rounded-md" style={{ background: "rgba(251,191,36,0.10)", border: "1px solid rgba(251,191,36,0.28)", color: "#fbbf24" }}>🥇 {dist.first}%</span>}
-                {dist.second > 0 && <span className="text-[11px] font-bold px-2.5 py-1 rounded-md" style={{ background: "rgba(148,163,184,0.10)", border: "1px solid rgba(148,163,184,0.25)", color: "#94a3b8" }}>🥈 {dist.second}%</span>}
-                {dist.third > 0 && <span className="text-[11px] font-bold px-2.5 py-1 rounded-md" style={{ background: "rgba(180,83,9,0.10)", border: "1px solid rgba(180,83,9,0.28)", color: "#c2813a" }}>🥉 {dist.third}%</span>}
               </div>
             )}
           </section>
