@@ -1226,54 +1226,127 @@ export default function Profile() {
       {/* ── VERIFICATION CARD ── */}
       <VerificationSection idVerified={user.idVerified} />
 
-      {/* BIO */}
-      <Card className="border-border bg-card/40">
-        <CardContent className="pt-5 space-y-3">
-          <div className="flex items-center justify-between">
-            <div className="text-xs uppercase tracking-widest text-muted-foreground font-bold flex items-center gap-1.5">
-              <User className="h-3.5 w-3.5" /> About Me
-            </div>
-            {!editingBio && (
-              <button
-                onClick={() => { setDraftBio(profile?.bio ?? ""); setEditingBio(true); }}
-                className="flex items-center gap-1.5 text-xs text-primary hover:text-white transition-colors"
+      {/* ── BIO / ABOUT ME ── */}
+      <div
+        className="rounded-2xl overflow-hidden border"
+        style={{
+          borderColor: editingBio ? "rgba(168,85,247,0.35)" : "rgba(255,255,255,0.07)",
+          background: "rgba(8,6,18,0.65)",
+          boxShadow: editingBio ? "0 0 0 1px rgba(168,85,247,0.12), 0 4px 24px rgba(168,85,247,0.08)" : "none",
+          transition: "border-color 0.2s, box-shadow 0.2s",
+        }}
+      >
+        {/* Header */}
+        <div
+          className="flex items-center justify-between px-5 py-3.5 border-b"
+          style={{
+            borderColor: "rgba(255,255,255,0.06)",
+            background: editingBio ? "rgba(168,85,247,0.07)" : "rgba(255,255,255,0.02)",
+            transition: "background 0.2s",
+          }}
+        >
+          <div className="flex items-center gap-2.5">
+            <User
+              className="h-4 w-4"
+              style={{ color: editingBio ? "#a855f7" : "rgba(255,255,255,0.4)" }}
+            />
+            <span className="text-[11px] font-extrabold uppercase tracking-widest text-white/70">
+              About Me
+            </span>
+            {profile?.bio && !editingBio && (
+              <span
+                className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full"
+                style={{
+                  background: "rgba(168,85,247,0.12)",
+                  border: "1px solid rgba(168,85,247,0.25)",
+                  color: "#c084fc",
+                }}
               >
-                <Edit3 className="h-3.5 w-3.5" /> Edit
-              </button>
+                {profile.bio.length}/300
+              </span>
             )}
           </div>
-          {editingBio ? (
-            <div className="space-y-2">
-              <Textarea
-                value={draftBio}
-                onChange={(e) => setDraftBio(e.target.value)}
-                placeholder="Tell others about yourself — your playstyle, favourite games, availability…"
-                className="resize-none h-24 bg-background text-sm"
-                maxLength={300}
-              />
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-muted-foreground">{draftBio.length}/300</span>
-                <div className="flex gap-2">
-                  <Button size="sm"
-                    className="bg-primary/20 border border-primary/40 text-primary hover:bg-primary hover:text-white font-bold text-xs uppercase"
-                    onClick={handleSaveBio} disabled={updateProfile.isPending}>
-                    <Check className="h-3.5 w-3.5 mr-1" />{updateProfile.isPending ? "Saving…" : "Save"}
-                  </Button>
-                  <Button size="sm" variant="outline" className="text-xs font-bold uppercase" onClick={() => setEditingBio(false)}>
-                    <X className="h-3.5 w-3.5 mr-1" /> Cancel
-                  </Button>
-                </div>
-              </div>
-            </div>
+          {!editingBio ? (
+            <button
+              onClick={() => { setDraftBio(profile?.bio ?? ""); setEditingBio(true); }}
+              className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg transition-all duration-150 hover:brightness-110 hover:scale-[1.02]"
+              style={{
+                background: "rgba(168,85,247,0.10)",
+                border: "1px solid rgba(168,85,247,0.25)",
+                color: "#c084fc",
+              }}
+            >
+              <Edit3 className="h-3 w-3" />
+              {profile?.bio ? "Edit" : "Add Bio"}
+            </button>
           ) : (
-            <p className="text-sm text-foreground/70 leading-relaxed min-h-[2.5rem]">
-              {profile?.bio
-                ? profile.bio
-                : <span className="text-muted-foreground/40 italic">No bio yet — click Edit to write something about yourself.</span>}
-            </p>
+            <div className="flex items-center gap-2">
+              <span
+                className="text-[10px] font-bold tabular-nums"
+                style={{ color: draftBio.length >= 280 ? "#f87171" : draftBio.length >= 250 ? "#fbbf24" : "rgba(255,255,255,0.35)" }}
+              >
+                {draftBio.length}/300
+              </span>
+              <button
+                onClick={() => setEditingBio(false)}
+                className="flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider px-2.5 py-1.5 rounded-lg transition-all duration-150 hover:brightness-110"
+                style={{
+                  background: "rgba(255,255,255,0.06)",
+                  border: "1px solid rgba(255,255,255,0.12)",
+                  color: "rgba(255,255,255,0.5)",
+                }}
+              >
+                <X className="h-3 w-3" /> Cancel
+              </button>
+              <button
+                onClick={handleSaveBio}
+                disabled={updateProfile.isPending}
+                className="flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg transition-all duration-150 hover:brightness-110 disabled:opacity-50"
+                style={{
+                  background: "linear-gradient(135deg, rgba(168,85,247,0.25), rgba(168,85,247,0.12))",
+                  border: "1px solid rgba(168,85,247,0.45)",
+                  color: "#c084fc",
+                }}
+              >
+                <Check className="h-3 w-3" />
+                {updateProfile.isPending ? "Saving…" : "Save"}
+              </button>
+            </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+
+        {/* Body */}
+        <div className="px-5 py-4">
+          {editingBio ? (
+            <Textarea
+              value={draftBio}
+              onChange={(e) => setDraftBio(e.target.value)}
+              placeholder="Write a short bio about yourself, your playstyle, favorite games, or what kind of sessions you enjoy..."
+              className="resize-none bg-transparent border-0 focus-visible:ring-0 focus-visible:ring-offset-0 p-0 text-sm text-white/80 placeholder:text-white/25 leading-relaxed w-full min-h-[100px]"
+              maxLength={300}
+              autoFocus
+            />
+          ) : profile?.bio ? (
+            <p className="text-sm text-white/75 leading-relaxed whitespace-pre-wrap">{profile.bio}</p>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-4 gap-2 text-center">
+              <div
+                className="h-10 w-10 rounded-full flex items-center justify-center mb-1"
+                style={{
+                  background: "rgba(168,85,247,0.08)",
+                  border: "1px dashed rgba(168,85,247,0.25)",
+                }}
+              >
+                <User className="h-4 w-4 text-primary/40" />
+              </div>
+              <p className="text-sm text-white/25 italic">No bio added yet.</p>
+              <p className="text-[11px] text-white/15">
+                Tell others about your playstyle and favourite games.
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
 
       {/* MY QUEST */}
       <QuestSection />

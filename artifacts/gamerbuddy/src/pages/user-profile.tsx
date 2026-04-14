@@ -12,7 +12,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
-import { ArrowLeft, Star, Swords, Gamepad2, Target, Zap } from "lucide-react";
+import { ArrowLeft, Star, Swords, Gamepad2, Target, Zap, FileText } from "lucide-react";
 
 /* ── Rank badges (mirrored from profile.tsx) ─────────────────────── */
 const RANK_BADGES = [
@@ -395,15 +395,65 @@ export default function UserProfilePage() {
       {/* Vote panel */}
       {user && <VotePanel profileId={profileId} />}
 
-      {/* Bio */}
-      {profile.bio && (
-        <Card className="border-border bg-card/40">
-          <CardContent className="pt-5">
-            <div className="text-xs uppercase tracking-widest text-muted-foreground font-bold mb-2">About</div>
-            <p className="text-sm text-muted-foreground/90 leading-relaxed">{profile.bio}</p>
-          </CardContent>
-        </Card>
-      )}
+      {/* ── Bio / About ── */}
+      <div
+        className="rounded-2xl overflow-hidden border"
+        style={{
+          borderColor: profile.bio ? "rgba(168,85,247,0.2)" : "rgba(255,255,255,0.06)",
+          background: "rgba(8,6,18,0.65)",
+        }}
+      >
+        {/* Header */}
+        <div
+          className="flex items-center gap-2.5 px-5 py-3.5 border-b"
+          style={{
+            borderColor: "rgba(255,255,255,0.06)",
+            background: profile.bio ? "rgba(168,85,247,0.05)" : "rgba(255,255,255,0.015)",
+          }}
+        >
+          <FileText
+            className="h-4 w-4 shrink-0"
+            style={{ color: profile.bio ? "#a855f7" : "rgba(255,255,255,0.3)" }}
+          />
+          <span className="text-[11px] font-extrabold uppercase tracking-widest text-white/70">
+            About
+          </span>
+          {profile.bio && (
+            <span
+              className="ml-auto text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full"
+              style={{
+                background: "rgba(168,85,247,0.10)",
+                border: "1px solid rgba(168,85,247,0.22)",
+                color: "#c084fc",
+              }}
+            >
+              {profile.bio.length} chars
+            </span>
+          )}
+        </div>
+
+        {/* Body */}
+        <div className="px-5 py-4">
+          {profile.bio ? (
+            <p className="text-sm text-white/75 leading-relaxed whitespace-pre-wrap">
+              {profile.bio}
+            </p>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-5 gap-2 text-center">
+              <div
+                className="h-10 w-10 rounded-full flex items-center justify-center mb-1"
+                style={{
+                  background: "rgba(255,255,255,0.04)",
+                  border: "1px dashed rgba(255,255,255,0.12)",
+                }}
+              >
+                <FileText className="h-4 w-4 text-white/20" />
+              </div>
+              <p className="text-sm text-white/25 italic">No bio added yet.</p>
+            </div>
+          )}
+        </div>
+      </div>
 
       {/* Reviews */}
       {profile.reviews.length > 0 && (
