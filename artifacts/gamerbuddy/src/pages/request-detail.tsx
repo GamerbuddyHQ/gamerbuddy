@@ -1014,6 +1014,8 @@ function BidCard({
   currentGroupTotal,
   isSelected,
   onToggleSelect,
+  preferredCountry,
+  preferredGender,
 }: {
   bid: Bid;
   isHirer: boolean;
@@ -1025,6 +1027,8 @@ function BidCard({
   currentGroupTotal?: number;
   isSelected?: boolean;
   onToggleSelect?: () => void;
+  preferredCountry?: string | null;
+  preferredGender?: string | null;
 }) {
   const [chatOpen, setChatOpen] = useState(false);
   const [showAcceptModal, setShowAcceptModal] = useState(false);
@@ -1036,6 +1040,15 @@ function BidCard({
   const isRejected = bid.status === "rejected";
   const canChat = (isHirer || isMe) && (isAccepted || isMe);
   const showCheckbox = isBulkMode && isHirer && bid.status === "pending" && !!onToggleSelect;
+
+  /* ── Preference match logic ── */
+  const hasNationPref = !!preferredCountry && preferredCountry !== "any";
+  const hasGenderPref = !!preferredGender  && preferredGender  !== "any";
+  const hasAnyPref    = hasNationPref || hasGenderPref;
+  const matchesNation = !hasNationPref || bid.bidderCountry === preferredCountry;
+  const matchesGender = !hasGenderPref || bid.bidderGender  === preferredGender;
+  const fullyMatches  = hasAnyPref && matchesNation && matchesGender;
+  const partialMatch  = hasAnyPref && !fullyMatches && (matchesNation || matchesGender);
 
   return (
     <>
@@ -1054,17 +1067,19 @@ function BidCard({
 
       <div
         className={`group rounded-2xl border overflow-hidden transition-all duration-300 ${
-          isAccepted ? "border-green-500/45 shadow-[0_0_28px_rgba(34,197,94,0.10)]" :
-          isRejected ? "border-border/25 opacity-45" :
-          isSelected ? "border-purple-500/65 shadow-[0_0_32px_rgba(168,85,247,0.18)]" :
+          isAccepted  ? "border-green-500/45 shadow-[0_0_28px_rgba(34,197,94,0.10)]" :
+          isRejected  ? "border-border/25 opacity-45" :
+          isSelected  ? "border-purple-500/65 shadow-[0_0_32px_rgba(168,85,247,0.18)]" :
+          fullyMatches && isHirer ? "border-emerald-500/50 shadow-[0_0_28px_rgba(16,185,129,0.12)]" :
           isMe        ? "border-secondary/40" :
           "border-border/60 hover:border-primary/30 hover:shadow-[0_0_24px_rgba(168,85,247,0.08)]"
         }`}
         style={{
-          background: isAccepted ? "linear-gradient(135deg,rgba(34,197,94,0.05) 0%,rgba(0,0,0,0.55) 100%)" :
-                      isSelected  ? "linear-gradient(135deg,rgba(168,85,247,0.07) 0%,rgba(0,0,0,0.55) 100%)" :
-                      isMe        ? "linear-gradient(135deg,rgba(6,182,212,0.05) 0%,rgba(0,0,0,0.55) 100%)" :
-                                    "linear-gradient(135deg,rgba(255,255,255,0.025) 0%,rgba(0,0,0,0.50) 100%)",
+          background: isAccepted   ? "linear-gradient(135deg,rgba(34,197,94,0.05) 0%,rgba(0,0,0,0.55) 100%)" :
+                      isSelected   ? "linear-gradient(135deg,rgba(168,85,247,0.07) 0%,rgba(0,0,0,0.55) 100%)" :
+                      fullyMatches && isHirer ? "linear-gradient(135deg,rgba(16,185,129,0.06) 0%,rgba(0,0,0,0.55) 100%)" :
+                      isMe         ? "linear-gradient(135deg,rgba(6,182,212,0.05) 0%,rgba(0,0,0,0.55) 100%)" :
+                                     "linear-gradient(135deg,rgba(255,255,255,0.025) 0%,rgba(0,0,0,0.50) 100%)",
         }}
       >
         {/* ── Top accent line ── */}
@@ -1073,6 +1088,8 @@ function BidCard({
           style={{
             background: isAccepted
               ? "linear-gradient(90deg,transparent 0%,#22c55e 40%,#22c55e 60%,transparent 100%)"
+              : fullyMatches && isHirer
+              ? "linear-gradient(90deg,transparent 0%,#10b981 40%,#10b981 60%,transparent 100%)"
               : isMe
               ? "linear-gradient(90deg,transparent 0%,#22d3ee 40%,#22d3ee 60%,transparent 100%)"
               : "linear-gradient(90deg,transparent 0%,#a855f7 40%,#a855f7 60%,transparent 100%)",
@@ -1150,21 +1167,30 @@ function BidCard({
                   }).filter((b) => b.id !== "verified")}
                 />
                 <BidderStreamingBadges bidderId={bid.bidderId} compact />
-                {(bid.bidderGender && bid.bidderGender !== "any") && (
-                  <>
-                    <span className="text-white/15 text-xs select-none">·</span>
-                    <span className="text-[11px] text-muted-foreground/55 flex items-center gap-1">
-                      <span className="leading-none">{GENDER_MAP[bid.bidderGender]?.icon}</span>
-                      <span>{GENDER_MAP[bid.bidderGender]?.label ?? bid.bidderGender}</span>
-                    </span>
-                  </>
-                )}
-                {(bid.bidderCountry && bid.bidderCountry !== "any") && (
+                {bid.bidderCountry && bid.bidderCountry !== "any" && COUNTRY_MAP[bid.bidderCountry] && (
                   <span
-                    className="text-[11px] text-muted-foreground/55"
-                    title={COUNTRY_MAP[bid.bidderCountry]?.label}
+                    className="inline-flex items-center gap-1 text-[10px] font-semibold rounded-full px-1.5 py-0.5"
+                    style={{
+                      background: "rgba(251,191,36,0.10)",
+                      border: "1px solid rgba(251,191,36,0.22)",
+                      color: "rgba(251,191,36,0.85)",
+                    }}
                   >
-                    {COUNTRY_MAP[bid.bidderCountry]?.label ?? bid.bidderCountry}
+                    <span className="text-[12px] leading-none">{COUNTRY_MAP[bid.bidderCountry].flag}</span>
+                    <span>{COUNTRY_MAP[bid.bidderCountry].label}</span>
+                  </span>
+                )}
+                {bid.bidderGender && bid.bidderGender !== "any" && GENDER_MAP[bid.bidderGender] && (
+                  <span
+                    className="inline-flex items-center gap-1 text-[10px] font-semibold rounded-full px-1.5 py-0.5"
+                    style={{
+                      background: "rgba(236,72,153,0.10)",
+                      border: "1px solid rgba(236,72,153,0.22)",
+                      color: "rgba(236,72,153,0.80)",
+                    }}
+                  >
+                    <span className="text-[12px] leading-none">{GENDER_MAP[bid.bidderGender].icon}</span>
+                    <span>{GENDER_MAP[bid.bidderGender].label}</span>
                   </span>
                 )}
               </div>
@@ -1198,6 +1224,60 @@ function BidCard({
             </div>
           </div>
 
+          {/* ── Preference Match Badge ── */}
+          {isHirer && hasAnyPref && (fullyMatches || partialMatch) && (
+            <div
+              className="flex items-center gap-2 px-3 py-2 rounded-xl flex-wrap"
+              style={{
+                background: fullyMatches
+                  ? "linear-gradient(90deg,rgba(16,185,129,0.10) 0%,rgba(16,185,129,0.04) 100%)"
+                  : "linear-gradient(90deg,rgba(245,158,11,0.08) 0%,rgba(245,158,11,0.02) 100%)",
+                border: fullyMatches
+                  ? "1px solid rgba(16,185,129,0.30)"
+                  : "1px solid rgba(245,158,11,0.25)",
+              }}
+            >
+              <Sparkles
+                className="h-3.5 w-3.5 shrink-0"
+                style={{ color: fullyMatches ? "#10b981" : "#f59e0b" }}
+              />
+              <span
+                className="text-[11px] font-extrabold uppercase tracking-widest"
+                style={{ color: fullyMatches ? "#10b981" : "#f59e0b" }}
+              >
+                {fullyMatches ? "Matches Your Preferences" : "Partial Match"}
+              </span>
+              <div className="flex items-center gap-1.5 ml-auto">
+                {hasNationPref && (
+                  <span
+                    className="inline-flex items-center gap-1 text-[10px] font-bold rounded-full px-1.5 py-0.5"
+                    style={
+                      matchesNation
+                        ? { background: "rgba(16,185,129,0.15)", border: "1px solid rgba(16,185,129,0.35)", color: "#34d399" }
+                        : { background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.30)" }
+                    }
+                  >
+                    {matchesNation ? "✓" : "✗"}
+                    {COUNTRY_MAP[preferredCountry!]?.flag ?? "🌍"}
+                  </span>
+                )}
+                {hasGenderPref && (
+                  <span
+                    className="inline-flex items-center gap-1 text-[10px] font-bold rounded-full px-1.5 py-0.5"
+                    style={
+                      matchesGender
+                        ? { background: "rgba(16,185,129,0.15)", border: "1px solid rgba(16,185,129,0.35)", color: "#34d399" }
+                        : { background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.30)" }
+                    }
+                  >
+                    {matchesGender ? "✓" : "✗"}
+                    {GENDER_MAP[preferredGender!]?.icon ?? "?"}
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* ── Pitch / message ── */}
           <div
             className="rounded-xl px-4 py-3"
@@ -1229,8 +1309,8 @@ function BidCard({
                   About this gamer
                 </span>
                 <p className="text-[13px] leading-relaxed" style={{ color: "rgba(255,255,255,0.70)", fontStyle: "italic" }}>
-                  &ldquo;{bid.bidderBio.length > 120
-                    ? bid.bidderBio.slice(0, 120).trimEnd() + "…"
+                  &ldquo;{bid.bidderBio.length > 90
+                    ? bid.bidderBio.slice(0, 90).trimEnd() + "…"
                     : bid.bidderBio}&rdquo;
                 </p>
               </div>
@@ -1628,7 +1708,7 @@ export default function RequestDetail() {
   const [selectedBidIds, setSelectedBidIds] = useState<Set<number>>(new Set());
   const [bulkAccepting, setBulkAccepting] = useState(false);
 
-  type BidSortKey = "newest" | "price_high" | "price_low" | "trust_high" | "rating_high";
+  type BidSortKey = "newest" | "price_high" | "price_low" | "trust_high" | "rating_high" | "best_match";
   type ExpFilter = "all" | "beginner" | "decent" | "best" | "expert";
   const [bidSort, setBidSort] = useState<BidSortKey>("newest");
   const [bidExpFilter, setBidExpFilter] = useState<ExpFilter>("all");
@@ -2192,22 +2272,45 @@ export default function RequestDetail() {
             return true;
           });
         }
+        /* Helper: match score for a bid given request prefs */
+        const prefHasNation = !!request.preferredCountry && request.preferredCountry !== "any";
+        const prefHasGender = !!request.preferredGender  && request.preferredGender  !== "any";
+        const bidMatchScore = (b: Bid) => {
+          if (!prefHasNation && !prefHasGender) return 0;
+          let score = 0;
+          if (prefHasNation && b.bidderCountry === request.preferredCountry) score += 2;
+          if (prefHasGender && b.bidderGender  === request.preferredGender)  score += 2;
+          return score;
+        };
+
         filteredBids.sort((a, b) => {
+          if (bidSort === "best_match") {
+            const diff = bidMatchScore(b) - bidMatchScore(a);
+            if (diff !== 0) return diff;
+            return (b.bidderTrustFactor ?? 50) - (a.bidderTrustFactor ?? 50);
+          }
           if (bidSort === "price_high")  return b.price - a.price;
           if (bidSort === "price_low")   return a.price - b.price;
           if (bidSort === "trust_high")  return (b.bidderTrustFactor ?? 50) - (a.bidderTrustFactor ?? 50);
           if (bidSort === "rating_high") return (b.bidderAvgRating ?? 0) - (a.bidderAvgRating ?? 0);
+          /* default: newest — but boost preference matches to top when hirer has prefs */
+          if (isHirer && (prefHasNation || prefHasGender)) {
+            const mDiff = bidMatchScore(b) - bidMatchScore(a);
+            if (mDiff !== 0) return mDiff;
+          }
           return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
         });
 
         /* ── UI data ── */
         const anyHasQuest = bids.some((b: Bid) => b.bidderHasQuestForGame);
+        const hasPrefSort = isHirer && (prefHasNation || prefHasGender);
         const sortOptions: { key: typeof bidSort; label: string; Icon: React.ElementType }[] = [
-          { key: "newest",      label: "Newest First",    Icon: ArrowUpDown },
-          { key: "price_high",  label: "Price: High → Low", Icon: ArrowDown },
-          { key: "price_low",   label: "Price: Low → High", Icon: ArrowUp },
-          { key: "trust_high",  label: "Top Trust Factor",  Icon: ShieldCheck },
-          { key: "rating_high", label: "Top Rated",         Icon: Star },
+          ...(hasPrefSort ? [{ key: "best_match" as const, label: "Best Match",         Icon: Sparkles }] : []),
+          { key: "newest",      label: "Newest First",       Icon: ArrowUpDown },
+          { key: "price_high",  label: "Price: High → Low",  Icon: ArrowDown },
+          { key: "price_low",   label: "Price: Low → High",  Icon: ArrowUp },
+          { key: "trust_high",  label: "Top Trust Factor",   Icon: ShieldCheck },
+          { key: "rating_high", label: "Top Rated",          Icon: Star },
         ];
 
         const expOptions: { key: typeof bidExpFilter; label: string; dot: string }[] = [
@@ -2571,6 +2674,8 @@ export default function RequestDetail() {
                   currentGroupTotal={currentGroupTotal}
                   isSelected={selectedBidIds.has(bid.id)}
                   onToggleSelect={() => handleToggleSelect(bid.id)}
+                  preferredCountry={request.preferredCountry}
+                  preferredGender={request.preferredGender}
                 />
               ))}
             </div>
