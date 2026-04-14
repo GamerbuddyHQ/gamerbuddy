@@ -397,10 +397,10 @@ function AdminToolbar({ suggestion }: { suggestion: Suggestion }) {
     },
     onSuccess: (_data, action) => {
       qc.invalidateQueries({ queryKey: ["suggestions"] });
-      const labels: Record<string, string> = { approve: "Approved", hide: "Hidden", spam: "Marked as spam" };
+      const labels: Record<string, string> = { approve: "Approved — now visible to everyone", hide: "Hidden from public feed", spam: "Flagged as spam" };
       toast({ title: labels[action] ?? "Status updated" });
     },
-    onError: (e: Error) => toast({ title: "Error", description: e.message, variant: "destructive" }),
+    onError: (e: Error) => toast({ title: "Moderation failed", description: e.message, variant: "destructive" }),
   });
 
   const deleteMutation = useMutation({
@@ -418,144 +418,174 @@ function AdminToolbar({ suggestion }: { suggestion: Suggestion }) {
       toast({ title: "Suggestion permanently deleted" });
       setDeleteOpen(false);
     },
-    onError: (e: Error) => toast({ title: "Error", description: e.message, variant: "destructive" }),
+    onError: (e: Error) => toast({ title: "Delete failed", description: e.message, variant: "destructive" }),
   });
 
   const busy = moderateMutation.isPending || deleteMutation.isPending;
+  const cur = suggestion.status;
+
+  type StatusOption = { action: "approve" | "hide" | "spam"; status: SuggestionStatus; label: string; desc: string; Icon: React.FC<{ className?: string }>; activeBg: string; activeBorder: string; activeColor: string; activeGlow: string };
+  const STATUS_OPTIONS: StatusOption[] = [
+    {
+      action: "approve", status: "visible",
+      label: "Approve",  desc: "Publish to all users",
+      Icon: CheckCircle2,
+      activeBg: "rgba(34,197,94,0.16)", activeBorder: "rgba(34,197,94,0.55)", activeColor: "#4ade80", activeGlow: "0 0 14px rgba(34,197,94,0.20)",
+    },
+    {
+      action: "hide", status: "hidden",
+      label: "Hide",     desc: "Remove from public feed",
+      Icon: EyeOff,
+      activeBg: "rgba(234,179,8,0.14)", activeBorder: "rgba(234,179,8,0.50)", activeColor: "#fbbf24", activeGlow: "0 0 14px rgba(234,179,8,0.18)",
+    },
+    {
+      action: "spam", status: "spam",
+      label: "Flag Spam", desc: "Mark as spam & hide",
+      Icon: AlertOctagon,
+      activeBg: "rgba(239,68,68,0.14)", activeBorder: "rgba(239,68,68,0.50)", activeColor: "#f87171", activeGlow: "0 0 14px rgba(239,68,68,0.18)",
+    },
+  ];
 
   return (
-    <>
-      {/* Admin status bar */}
+    <div
+      className="border-t"
+      style={{ borderColor: "rgba(168,85,247,0.14)", background: "rgba(8,3,18,0.70)" }}
+    >
+      {/* ── Header strip ── */}
       <div
-        className="border-t px-4 py-3 space-y-3"
-        style={{ borderColor: "rgba(168,85,247,0.15)", background: "rgba(10,5,20,0.60)" }}
+        className="flex items-center justify-between gap-3 px-4 py-2.5 border-b"
+        style={{ borderColor: "rgba(168,85,247,0.10)", background: "rgba(168,85,247,0.05)" }}
       >
-        {/* Header row: label + current status */}
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <div
-              className="h-6 w-6 rounded-md flex items-center justify-center shrink-0"
-              style={{ background: "rgba(168,85,247,0.18)", border: "1px solid rgba(168,85,247,0.40)" }}
-            >
-              <Shield className="h-3.5 w-3.5 text-primary" />
-            </div>
-            <span className="text-[11px] font-black uppercase tracking-[0.14em] text-primary/70">
-              Moderation
-            </span>
-          </div>
-
-          {/* Current status pill */}
-          <div className="flex items-center gap-2">
-            <span className="text-[10px] text-muted-foreground/40 font-medium">Status:</span>
-            <AdminStatusPill status={suggestion.status} />
-          </div>
+        <div className="flex items-center gap-2">
+          <Shield className="h-3.5 w-3.5 text-primary/70 shrink-0" />
+          <span className="text-[10px] font-black uppercase tracking-[0.16em] text-primary/60">Admin Actions</span>
         </div>
-
-        {/* Action buttons */}
-        <div className="flex flex-wrap items-center gap-2">
-          {/* Approve */}
-          <button
-            onClick={() => moderateMutation.mutate("approve")}
-            disabled={busy || suggestion.status === "visible"}
-            className="flex items-center gap-1.5 text-[12px] font-semibold px-3 py-1.5 rounded-lg transition-all duration-150 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
-            style={suggestion.status === "visible"
-              ? { background: "rgba(34,197,94,0.08)", border: "1px solid rgba(34,197,94,0.20)", color: "rgba(74,222,128,0.45)" }
-              : { background: "rgba(34,197,94,0.14)", border: "1px solid rgba(34,197,94,0.45)", color: "#4ade80", boxShadow: "0 0 12px rgba(34,197,94,0.12)" }
-            }
-            title={suggestion.status === "visible" ? "Already approved" : "Make visible to everyone"}
-          >
-            {moderateMutation.isPending && moderateMutation.variables === "approve"
-              ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
-              : <CheckCircle2 className="h-3.5 w-3.5" />
-            }
-            Approve
-          </button>
-
-          {/* Hide */}
-          <button
-            onClick={() => moderateMutation.mutate("hide")}
-            disabled={busy || suggestion.status === "hidden"}
-            className="flex items-center gap-1.5 text-[12px] font-semibold px-3 py-1.5 rounded-lg transition-all duration-150 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
-            style={suggestion.status === "hidden"
-              ? { background: "rgba(234,179,8,0.07)", border: "1px solid rgba(234,179,8,0.18)", color: "rgba(251,191,36,0.40)" }
-              : { background: "rgba(234,179,8,0.12)", border: "1px solid rgba(234,179,8,0.40)", color: "#fbbf24", boxShadow: "0 0 12px rgba(234,179,8,0.10)" }
-            }
-            title={suggestion.status === "hidden" ? "Already hidden" : "Hide from public view"}
-          >
-            {moderateMutation.isPending && moderateMutation.variables === "hide"
-              ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
-              : <EyeOff className="h-3.5 w-3.5" />
-            }
-            Hide
-          </button>
-
-          {/* Flag Spam */}
-          <button
-            onClick={() => moderateMutation.mutate("spam")}
-            disabled={busy || suggestion.status === "spam"}
-            className="flex items-center gap-1.5 text-[12px] font-semibold px-3 py-1.5 rounded-lg transition-all duration-150 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
-            style={suggestion.status === "spam"
-              ? { background: "rgba(239,68,68,0.07)", border: "1px solid rgba(239,68,68,0.18)", color: "rgba(248,113,113,0.40)" }
-              : { background: "rgba(239,68,68,0.12)", border: "1px solid rgba(239,68,68,0.38)", color: "#f87171", boxShadow: "0 0 12px rgba(239,68,68,0.10)" }
-            }
-            title={suggestion.status === "spam" ? "Already marked as spam" : "Flag as spam — hides from public"}
-          >
-            {moderateMutation.isPending && moderateMutation.variables === "spam"
-              ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
-              : <AlertOctagon className="h-3.5 w-3.5" />
-            }
-            Flag Spam
-          </button>
-
-          {/* Delete — danger, separated to the right */}
-          <div className="ml-auto">
-            <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
-              <AlertDialogTrigger asChild>
-                <button
-                  disabled={busy}
-                  className="flex items-center gap-1.5 text-[12px] font-semibold px-3 py-1.5 rounded-lg transition-all duration-150 active:scale-95 disabled:opacity-40"
-                  style={{ background: "rgba(239,68,68,0.14)", border: "1px solid rgba(239,68,68,0.45)", color: "#f87171" }}
-                  title="Permanently delete this suggestion"
-                >
-                  <Trash2 className="h-3.5 w-3.5" /> Delete
-                </button>
-              </AlertDialogTrigger>
-              <AlertDialogContent className="border-red-500/30" style={{ background: "rgba(15,7,26,0.98)", boxShadow: "0 0 40px rgba(239,68,68,0.15)" }}>
-                <AlertDialogHeader>
-                  <div className="flex items-center gap-3 mb-1">
-                    <div className="h-10 w-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: "rgba(239,68,68,0.15)", border: "1px solid rgba(239,68,68,0.40)" }}>
-                      <Trash2 className="h-5 w-5 text-red-400" />
-                    </div>
-                    <AlertDialogTitle className="text-white text-lg">Delete Suggestion</AlertDialogTitle>
-                  </div>
-                  <AlertDialogDescription className="text-muted-foreground leading-relaxed">
-                    This will permanently delete{" "}
-                    <span className="font-semibold text-white/80">"{suggestion.title}"</span>{" "}
-                    and all of its comments. This action cannot be undone.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter className="gap-2 sm:gap-2">
-                  <AlertDialogCancel className="border-border/50 text-muted-foreground hover:text-white">
-                    Cancel
-                  </AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={(e) => { e.preventDefault(); deleteMutation.mutate(); }}
-                    disabled={deleteMutation.isPending}
-                    className="font-bold border-0 text-white"
-                    style={{ background: "linear-gradient(135deg,#dc2626,#b91c1c)", boxShadow: "0 0 16px rgba(239,68,68,0.30)" }}
-                  >
-                    {deleteMutation.isPending
-                      ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Deleting…</>
-                      : <><Trash2 className="h-4 w-4 mr-2" />Yes, Delete Permanently</>
-                    }
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          </div>
+        <div className="flex items-center gap-1.5">
+          <span className="text-[10px] text-muted-foreground/35">Current:</span>
+          <AdminStatusPill status={cur} />
         </div>
       </div>
-    </>
+
+      {/* ── Status selector ── */}
+      <div className="px-4 pt-3 pb-2.5">
+        <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/35 mb-2">
+          Set Status
+        </p>
+        <div className="grid grid-cols-3 gap-2">
+          {STATUS_OPTIONS.map(({ action, status, label, desc, Icon, activeBg, activeBorder, activeColor, activeGlow }) => {
+            const isCurrent = cur === status;
+            const isLoading = moderateMutation.isPending && moderateMutation.variables === action;
+            return (
+              <button
+                key={action}
+                onClick={() => !isCurrent && moderateMutation.mutate(action)}
+                disabled={busy || isCurrent}
+                className="relative flex flex-col items-center gap-1.5 rounded-xl py-3 px-2 transition-all duration-150 active:scale-95 disabled:cursor-default"
+                style={isCurrent ? {
+                  background: activeBg,
+                  border: `1.5px solid ${activeBorder}`,
+                  color: activeColor,
+                  boxShadow: activeGlow,
+                } : {
+                  background: "rgba(255,255,255,0.03)",
+                  border: "1px solid rgba(255,255,255,0.07)",
+                  color: "rgba(255,255,255,0.35)",
+                }}
+                title={isCurrent ? `Currently: ${label}` : desc}
+              >
+                {isCurrent && (
+                  <span
+                    className="absolute top-1.5 right-1.5 h-1.5 w-1.5 rounded-full"
+                    style={{ background: activeColor, boxShadow: `0 0 4px ${activeColor}` }}
+                  />
+                )}
+                {isLoading
+                  ? <Loader2 className="h-4 w-4 animate-spin" />
+                  : <Icon className="h-4 w-4" />
+                }
+                <span className="text-[11px] font-bold leading-none">{label}</span>
+                <span className="text-[9px] leading-tight text-center opacity-60 font-medium">{desc}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* ── Danger zone ── */}
+      <div
+        className="mx-4 mb-3 rounded-xl border px-3.5 py-2.5 flex items-center justify-between gap-3"
+        style={{ borderColor: "rgba(239,68,68,0.18)", background: "rgba(239,68,68,0.04)" }}
+      >
+        <div>
+          <p className="text-[10px] font-black uppercase tracking-widest text-red-400/60">Danger Zone</p>
+          <p className="text-[11px] text-muted-foreground/45 mt-0.5">Permanently removes this suggestion and all comments.</p>
+        </div>
+        <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+          <AlertDialogTrigger asChild>
+            <button
+              disabled={busy}
+              className="flex items-center gap-1.5 text-[12px] font-bold px-3.5 py-2 rounded-lg shrink-0 transition-all duration-150 active:scale-95 disabled:opacity-40"
+              style={{ background: "rgba(239,68,68,0.18)", border: "1px solid rgba(239,68,68,0.45)", color: "#f87171", boxShadow: "0 0 10px rgba(239,68,68,0.12)" }}
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+              Delete
+            </button>
+          </AlertDialogTrigger>
+          <AlertDialogContent className="border-red-500/30 max-w-md" style={{ background: "rgba(12,5,22,0.99)", boxShadow: "0 0 50px rgba(239,68,68,0.18)" }}>
+            <AlertDialogHeader>
+              <div className="flex items-center gap-3 mb-2">
+                <div
+                  className="h-12 w-12 rounded-2xl flex items-center justify-center shrink-0"
+                  style={{ background: "rgba(239,68,68,0.15)", border: "1px solid rgba(239,68,68,0.40)" }}
+                >
+                  <Trash2 className="h-6 w-6 text-red-400" />
+                </div>
+                <div>
+                  <AlertDialogTitle className="text-white text-[17px] font-extrabold">Delete Permanently?</AlertDialogTitle>
+                  <p className="text-[11px] text-red-400/70 font-semibold mt-0.5">This cannot be undone</p>
+                </div>
+              </div>
+              <AlertDialogDescription asChild>
+                <div className="space-y-3">
+                  <p className="text-[13px] text-muted-foreground/80 leading-relaxed">
+                    You are about to permanently delete{" "}
+                    <span className="font-semibold text-white/90">"{suggestion.title}"</span>
+                    {" "}along with all of its votes and comments.
+                  </p>
+                  <div
+                    className="flex items-start gap-2.5 rounded-lg px-3 py-2.5"
+                    style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.22)" }}
+                  >
+                    <AlertTriangle className="h-4 w-4 text-red-400 shrink-0 mt-0.5" />
+                    <p className="text-[11px] text-red-300/80 leading-relaxed">
+                      If you only want to hide this from the public,{" "}
+                      <span className="font-bold text-red-200">use Hide or Flag Spam instead</span>{" "}
+                      — those are reversible.
+                    </p>
+                  </div>
+                </div>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="gap-2 sm:gap-2 mt-1">
+              <AlertDialogCancel className="border-border/50 text-muted-foreground hover:text-white flex-1 sm:flex-none">
+                Cancel — Keep It
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={(e) => { e.preventDefault(); deleteMutation.mutate(); }}
+                disabled={deleteMutation.isPending}
+                className="font-bold border-0 text-white flex-1 sm:flex-none"
+                style={{ background: "linear-gradient(135deg,#dc2626,#991b1b)", boxShadow: "0 0 20px rgba(239,68,68,0.30)" }}
+              >
+                {deleteMutation.isPending
+                  ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Deleting…</>
+                  : <><Trash2 className="h-4 w-4 mr-2" />Yes, Delete Forever</>
+                }
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </div>
+    </div>
   );
 }
 
@@ -865,22 +895,40 @@ type Sort = typeof SORTS[number]["value"];
 /* ── Admin moderation queue ── */
 function AdminQueue({ suggestions, isAdmin }: { suggestions: Suggestion[]; isAdmin: boolean }) {
   const [open, setOpen] = useState(true);
-  const [tab, setTab] = useState<"all" | "hidden" | "spam">("all");
+  const [tab, setTab] = useState<"pending" | "hidden" | "spam">("pending");
 
   if (!isAdmin) return null;
 
   const hidden  = suggestions.filter((s) => s.status === "hidden");
   const spam    = suggestions.filter((s) => s.status === "spam");
-  const all     = suggestions.filter((s) => s.status !== "visible");
+  const pending = suggestions.filter((s) => s.status !== "visible");
   const visible = suggestions.filter((s) => s.status === "visible");
+  const totalPending = pending.length;
 
-  const tabItems = tab === "hidden" ? hidden : tab === "spam" ? spam : all;
-  const totalNonVisible = all.length;
+  const tabItems = tab === "hidden" ? hidden : tab === "spam" ? spam : pending;
+
+  const STATS = [
+    { label: "Live",    count: visible.length, cfg: STATUS_CONFIG.visible, desc: "visible to all users" },
+    { label: "Hidden",  count: hidden.length,  cfg: STATUS_CONFIG.hidden,  desc: "removed from feed"   },
+    { label: "Spam",    count: spam.length,     cfg: STATUS_CONFIG.spam,    desc: "flagged & hidden"    },
+  ];
+
+  const TABS: { value: "pending" | "hidden" | "spam"; label: string; count: number; dotColor: string }[] = [
+    { value: "pending", label: "All Pending", count: totalPending, dotColor: "#a855f7" },
+    { value: "hidden",  label: "Hidden",      count: hidden.length, dotColor: "#fbbf24" },
+    { value: "spam",    label: "Spam",         count: spam.length,   dotColor: "#f87171" },
+  ];
 
   return (
     <div
       className="rounded-2xl border overflow-hidden"
-      style={{ borderColor: "rgba(168,85,247,0.40)", background: "rgba(8,4,18,0.80)", boxShadow: "0 0 32px rgba(168,85,247,0.08), inset 0 1px 0 rgba(168,85,247,0.10)" }}
+      style={{
+        borderColor: totalPending > 0 ? "rgba(168,85,247,0.50)" : "rgba(168,85,247,0.28)",
+        background: "rgba(6,3,15,0.90)",
+        boxShadow: totalPending > 0
+          ? "0 0 40px rgba(168,85,247,0.12), inset 0 1px 0 rgba(168,85,247,0.12)"
+          : "0 0 24px rgba(0,0,0,0.40)",
+      }}
     >
       {/* ── Collapsible header ── */}
       <button
@@ -889,97 +937,137 @@ function AdminQueue({ suggestions, isAdmin }: { suggestions: Suggestion[]; isAdm
       >
         <div className="flex items-center gap-3">
           <div
-            className="h-9 w-9 rounded-xl flex items-center justify-center shrink-0"
-            style={{ background: "linear-gradient(135deg,rgba(168,85,247,0.25),rgba(168,85,247,0.10))", border: "1px solid rgba(168,85,247,0.50)" }}
+            className="h-10 w-10 rounded-xl flex items-center justify-center shrink-0"
+            style={{ background: "linear-gradient(135deg,rgba(168,85,247,0.28),rgba(168,85,247,0.10))", border: "1px solid rgba(168,85,247,0.55)" }}
           >
-            <Shield className="h-4.5 w-4.5 text-primary" />
+            <ShieldAlert className="h-5 w-5 text-primary" />
           </div>
           <div className="text-left">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-[13px] font-extrabold text-white">Admin Moderation Panel</span>
-              {totalNonVisible > 0 && (
+              <span className="text-[14px] font-extrabold text-white tracking-tight">Moderation Queue</span>
+              {totalPending > 0 ? (
                 <span
-                  className="text-[10px] font-black px-2 py-0.5 rounded-full animate-pulse"
-                  style={{ background: "rgba(239,68,68,0.20)", border: "1px solid rgba(239,68,68,0.45)", color: "#f87171" }}
+                  className="text-[10px] font-black px-2.5 py-0.5 rounded-full animate-pulse"
+                  style={{ background: "rgba(239,68,68,0.22)", border: "1px solid rgba(239,68,68,0.50)", color: "#f87171" }}
                 >
-                  {totalNonVisible} need review
+                  {totalPending} need{totalPending === 1 ? "s" : ""} review
+                </span>
+              ) : (
+                <span
+                  className="text-[10px] font-semibold px-2.5 py-0.5 rounded-full"
+                  style={{ background: "rgba(34,197,94,0.12)", border: "1px solid rgba(34,197,94,0.30)", color: "#4ade80" }}
+                >
+                  All clear
                 </span>
               )}
             </div>
-            <div className="text-[11px] text-muted-foreground/50 mt-0.5">Visible only to you — platform owner</div>
+            <div className="text-[11px] text-muted-foreground/45 mt-0.5">
+              Admin-only panel · {suggestions.length} total suggestion{suggestions.length !== 1 ? "s" : ""}
+            </div>
           </div>
         </div>
         {open
-          ? <ChevronUp className="h-4 w-4 text-primary/50 shrink-0" />
-          : <ChevronDown className="h-4 w-4 text-primary/50 shrink-0" />
+          ? <ChevronUp className="h-4 w-4 text-primary/45 shrink-0" />
+          : <ChevronDown className="h-4 w-4 text-primary/45 shrink-0" />
         }
       </button>
 
       {open && (
-        <div className="border-t" style={{ borderColor: "rgba(168,85,247,0.15)" }}>
+        <div className="border-t" style={{ borderColor: "rgba(168,85,247,0.14)" }}>
+
           {/* ── Stats row ── */}
-          <div className="grid grid-cols-3 divide-x" style={{ divideColor: "rgba(168,85,247,0.12)", borderBottom: "1px solid rgba(168,85,247,0.12)" }}>
-            {[
-              { label: "Approved", count: visible.length, cfg: STATUS_CONFIG.visible },
-              { label: "Hidden",   count: hidden.length,  cfg: STATUS_CONFIG.hidden  },
-              { label: "Spam",     count: spam.length,    cfg: STATUS_CONFIG.spam    },
-            ].map(({ label, count, cfg }) => (
-              <div key={label} className="flex flex-col items-center py-3 gap-1" style={{ borderRight: "1px solid rgba(168,85,247,0.10)" }}>
-                <span className="text-xl font-black tabular-nums" style={{ color: cfg.color }}>{count}</span>
-                <div className="flex items-center gap-1">
-                  <cfg.Icon className="h-3 w-3" style={{ color: cfg.color }} />
-                  <span className="text-[10px] font-semibold text-muted-foreground/55">{label}</span>
+          <div
+            className="grid grid-cols-3"
+            style={{ borderBottom: "1px solid rgba(168,85,247,0.12)" }}
+          >
+            {STATS.map(({ label, count, cfg, desc }, i) => (
+              <div
+                key={label}
+                className="flex flex-col items-center py-4 gap-1.5"
+                style={{ borderRight: i < 2 ? "1px solid rgba(168,85,247,0.10)" : "none" }}
+              >
+                <div className="flex items-center gap-1.5">
+                  <span className="text-2xl font-black tabular-nums" style={{ color: cfg.color }}>{count}</span>
                 </div>
+                <div className="flex items-center gap-1">
+                  <cfg.Icon className="h-3 w-3 shrink-0" style={{ color: cfg.color }} />
+                  <span className="text-[11px] font-bold" style={{ color: cfg.color }}>{label}</span>
+                </div>
+                <span className="text-[9px] text-muted-foreground/35 font-medium text-center leading-tight px-2">{desc}</span>
               </div>
             ))}
           </div>
 
-          {/* ── Tab bar (only if there's non-visible content) ── */}
-          {totalNonVisible > 0 && (
-            <div className="flex items-center gap-1.5 px-4 pt-4">
-              {(["all", "hidden", "spam"] as const).map((t) => {
-                const counts = { all: totalNonVisible, hidden: hidden.length, spam: spam.length };
-                const labels = { all: "All Pending", hidden: "Hidden", spam: "Spam" };
-                const active = tab === t;
-                return (
-                  <button
-                    key={t}
-                    onClick={() => setTab(t)}
-                    className="flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1.5 rounded-lg transition-all"
-                    style={active
-                      ? { background: "rgba(168,85,247,0.20)", border: "1px solid rgba(168,85,247,0.45)", color: "#c084fc" }
-                      : { background: "transparent", border: "1px solid rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.40)" }
-                    }
-                  >
-                    {labels[t]}
+          {/* ── Tab bar ── */}
+          <div
+            className="flex items-center gap-2 px-4 py-3"
+            style={{ borderBottom: "1px solid rgba(168,85,247,0.10)", background: "rgba(0,0,0,0.20)" }}
+          >
+            <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/35 mr-1 shrink-0">
+              Filter:
+            </span>
+            {TABS.map(({ value, label, count, dotColor }) => {
+              const active = tab === value;
+              return (
+                <button
+                  key={value}
+                  onClick={() => setTab(value)}
+                  className="flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1.5 rounded-lg transition-all duration-150 active:scale-95"
+                  style={active ? {
+                    background: "rgba(168,85,247,0.18)",
+                    border: "1px solid rgba(168,85,247,0.45)",
+                    color: "#c084fc",
+                  } : {
+                    background: "rgba(255,255,255,0.03)",
+                    border: "1px solid rgba(255,255,255,0.07)",
+                    color: "rgba(255,255,255,0.38)",
+                  }}
+                >
+                  {label}
+                  {count > 0 && (
                     <span
-                      className="text-[9px] font-black min-w-[14px] text-center"
-                      style={{ color: active ? "#c084fc" : "rgba(255,255,255,0.30)" }}
+                      className="inline-flex items-center justify-center h-4 min-w-[16px] px-1 rounded-full text-[9px] font-black"
+                      style={active
+                        ? { background: "rgba(168,85,247,0.30)", color: "#e9d5ff" }
+                        : { background: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.40)" }
+                      }
                     >
-                      {counts[t]}
+                      {count}
                     </span>
-                  </button>
-                );
-              })}
-            </div>
-          )}
+                  )}
+                </button>
+              );
+            })}
+          </div>
 
           {/* ── Content ── */}
-          <div className="px-4 py-4 space-y-3">
-            {totalNonVisible === 0 ? (
-              <div className="flex flex-col items-center gap-3 py-6 text-center">
-                <div className="h-10 w-10 rounded-full flex items-center justify-center" style={{ background: "rgba(34,197,94,0.12)", border: "1px solid rgba(34,197,94,0.30)" }}>
-                  <CheckCircle2 className="h-5 w-5 text-green-400" />
+          <div className="p-4 space-y-3">
+            {totalPending === 0 ? (
+              <div className="flex flex-col items-center gap-3 py-8 text-center">
+                <div
+                  className="h-14 w-14 rounded-2xl flex items-center justify-center"
+                  style={{ background: "rgba(34,197,94,0.10)", border: "1px solid rgba(34,197,94,0.28)" }}
+                >
+                  <CheckCircle2 className="h-7 w-7 text-green-400" strokeWidth={1.5} />
                 </div>
                 <div>
-                  <div className="text-sm font-bold text-white/70">All clear!</div>
-                  <div className="text-[11px] text-muted-foreground/45 mt-0.5">No suggestions need moderation right now.</div>
+                  <div className="text-[15px] font-extrabold text-white/75">Queue is empty!</div>
+                  <div className="text-[12px] text-muted-foreground/40 mt-1 max-w-[220px] leading-relaxed">
+                    All {visible.length} suggestion{visible.length !== 1 ? "s" : ""} are live. Nothing needs moderation right now.
+                  </div>
                 </div>
               </div>
             ) : tabItems.length === 0 ? (
-              <p className="text-[12px] text-muted-foreground/40 text-center py-4">No {tab} items.</p>
+              <div className="text-center py-6">
+                <p className="text-[12px] text-muted-foreground/40">No <span className="font-semibold">{tab}</span> items at the moment.</p>
+              </div>
             ) : (
-              tabItems.map((s) => <SuggestionCard key={s.id} suggestion={s} isAdmin={isAdmin} />)
+              <div className="space-y-3">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/35 px-1">
+                  {tabItems.length} item{tabItems.length !== 1 ? "s" : ""} — click a card to expand and take action
+                </p>
+                {tabItems.map((s) => <SuggestionCard key={s.id} suggestion={s} isAdmin={isAdmin} />)}
+              </div>
             )}
           </div>
         </div>
