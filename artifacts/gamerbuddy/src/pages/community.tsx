@@ -230,21 +230,21 @@ function AdminStatusPill({ status }: { status: SuggestionStatus }) {
 /* ── Emoji data ─────────────────────────────────────────────────────────── */
 const EMOJI_CATEGORIES = [
   {
-    label: "Gaming", emojis: [
+    label: "🎮 Gaming", emojis: [
       "🎮","🕹️","🎯","🏆","⚔️","🛡️","🎲","👾","🤖","💀","🔥","⚡","💥","🚀","🎪",
-      "🎭","🏅","🥇","💣","🗡️","🪄","🧙","🧌","🐉","👑",
+      "🎭","🏅","🥇","💣","🗡️","🪄","🧙","🐉","👑","🎁",
     ],
   },
   {
-    label: "Reactions", emojis: [
+    label: "😂 Reactions", emojis: [
       "😂","😅","🤣","😎","😤","🤩","😱","🤯","🥶","😍","🤬","😭","😏","🥲","😆",
-      "🤔","😤","🥵","😤","🫡","🤡","💩","👻","🙈","🙉",
+      "🤔","🥵","🫡","🤡","💩","👻","🙈","🙉","😈","🤌",
     ],
   },
   {
-    label: "Hype", emojis: [
+    label: "💪 Hype", emojis: [
       "👍","👎","🤝","🙌","👏","💪","✌️","👋","🫶","❤️","💔","💯","🎉","🥳","🫠",
-      "⭐","💫","✨","🌟","💎","🍀","🎊","🎁","🪩","🫰",
+      "⭐","💫","✨","💎","🍀","🎊","🚀","🔝","💥","🫰",
     ],
   },
 ];
@@ -252,7 +252,9 @@ const EMOJI_CATEGORIES = [
 /* ── Emoji Picker ────────────────────────────────────────────────────────── */
 function EmojiPicker({ onPick, onClose }: { onPick: (e: string) => void; onClose: () => void }) {
   const [tab, setTab] = useState(0);
+  const [search, setSearch] = useState("");
   const ref = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
@@ -262,32 +264,60 @@ function EmojiPicker({ onPick, onClose }: { onPick: (e: string) => void; onClose
     return () => document.removeEventListener("mousedown", handleClick);
   }, [onClose]);
 
+  useEffect(() => { inputRef.current?.focus(); }, []);
+
+  const allEmojis = EMOJI_CATEGORIES.flatMap((c) => c.emojis);
+  const displayed = search.trim()
+    ? allEmojis.filter((em) => em.includes(search))
+    : EMOJI_CATEGORIES[tab].emojis;
+
   return (
     <div
       ref={ref}
-      className="absolute bottom-full mb-1 left-0 z-50 rounded-2xl border shadow-2xl overflow-hidden"
-      style={{ width: 288, background: "hsl(var(--card))", border: "1px solid rgba(168,85,247,0.30)" }}
+      className="absolute bottom-full mb-2 left-0 z-50 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-150"
+      style={{ width: 296, background: "hsl(var(--card))", border: "1px solid rgba(168,85,247,0.35)", boxShadow: "0 8px 40px rgba(168,85,247,0.18), 0 2px 12px rgba(0,0,0,0.5)" }}
     >
-      {/* Tabs */}
-      <div className="flex border-b" style={{ borderColor: "rgba(168,85,247,0.15)" }}>
-        {EMOJI_CATEGORIES.map((cat, i) => (
-          <button
-            key={cat.label}
-            onClick={() => setTab(i)}
-            className="flex-1 py-2 text-[11px] font-bold transition-colors"
-            style={{ color: tab === i ? "#a855f7" : "rgba(148,163,184,0.6)", borderBottom: tab === i ? "2px solid #a855f7" : "2px solid transparent" }}
-          >
-            {cat.label}
-          </button>
-        ))}
+      {/* Search bar */}
+      <div className="px-2 pt-2 pb-1">
+        <input
+          ref={inputRef}
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search emojis…"
+          className="w-full rounded-lg px-3 py-1.5 text-xs bg-background/70 border outline-none transition-colors text-foreground placeholder:text-muted-foreground/40"
+          style={{ borderColor: "rgba(168,85,247,0.30)" }}
+        />
       </div>
-      {/* Grid */}
-      <div className="grid grid-cols-8 gap-0.5 p-2 max-h-40 overflow-y-auto">
-        {EMOJI_CATEGORIES[tab].emojis.map((em) => (
+
+      {/* Tabs (hidden while searching) */}
+      {!search.trim() && (
+        <div className="flex px-1 gap-0.5">
+          {EMOJI_CATEGORIES.map((cat, i) => (
+            <button
+              key={cat.label}
+              onClick={() => setTab(i)}
+              className="flex-1 py-1.5 text-[10px] font-bold rounded-lg transition-all"
+              style={{
+                color: tab === i ? "#a855f7" : "rgba(148,163,184,0.5)",
+                background: tab === i ? "rgba(168,85,247,0.12)" : "transparent",
+              }}
+            >
+              {cat.label}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Emoji grid */}
+      <div className="grid grid-cols-8 gap-0 p-1.5 overflow-y-auto" style={{ maxHeight: 152 }}>
+        {displayed.length === 0 && (
+          <p className="col-span-8 text-center text-[11px] text-muted-foreground/40 py-4">No match</p>
+        )}
+        {displayed.map((em, i) => (
           <button
-            key={em}
-            onClick={() => onPick(em)}
-            className="h-8 w-8 flex items-center justify-center rounded-lg text-lg hover:bg-primary/15 transition-colors"
+            key={`${em}-${i}`}
+            onClick={() => { onPick(em); setSearch(""); }}
+            className="h-9 w-9 flex items-center justify-center rounded-xl text-xl transition-all hover:bg-primary/20 hover:scale-110 active:scale-95"
           >
             {em}
           </button>
@@ -299,12 +329,14 @@ function EmojiPicker({ onPick, onClose }: { onPick: (e: string) => void; onClose
 
 /* ── GIF Picker ─────────────────────────────────────────────────────────── */
 const TENOR_KEY = "LIVDSRZULELA";
-const DEFAULT_GIF_QUERY = "gaming";
 
 type TenorGif = { id: string; url: string; preview: string; title: string };
 
+const GIF_QUICK_TAGS = ["GG", "EZ", "Let's Go", "Win", "Rage", "Clutch", "LOL", "Hype"];
+
 function GifPicker({ onPick, onClose }: { onPick: (gif: TenorGif) => void; onClose: () => void }) {
   const [query, setQuery] = useState("");
+  const [activeTag, setActiveTag] = useState<string | null>(null);
   const [gifs, setGifs] = useState<TenorGif[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
@@ -314,15 +346,21 @@ function GifPicker({ onPick, onClose }: { onPick: (gif: TenorGif) => void; onClo
   const search = useCallback(async (q: string) => {
     setLoading(true); setError(false);
     try {
-      const term = encodeURIComponent(q || DEFAULT_GIF_QUERY);
-      const r = await fetch(`https://api.tenor.com/v1/search?q=${term}&key=${TENOR_KEY}&limit=24&media_filter=minimal`);
+      const term = encodeURIComponent(q.trim() || "gaming");
+      const r = await fetch(
+        `https://api.tenor.com/v1/search?q=${term}&key=${TENOR_KEY}&limit=18&media_filter=minimal&contentfilter=low`
+      );
+      if (!r.ok) throw new Error("fetch failed");
       const data = await r.json();
-      const results: TenorGif[] = (data.results ?? []).map((item: any) => ({
-        id: item.id,
-        url: item.media?.[0]?.gif?.url ?? item.media?.[0]?.tinygif?.url ?? "",
-        preview: item.media?.[0]?.tinygif?.url ?? item.media?.[0]?.gif?.url ?? "",
-        title: item.title ?? "",
-      }));
+      const results: TenorGif[] = (data.results ?? []).map((item: any) => {
+        const media = item.media?.[0] ?? {};
+        return {
+          id: item.id,
+          url: media.tinygif?.url ?? media.gif?.url ?? "",
+          preview: media.nanogif?.url ?? media.tinygif?.url ?? media.gif?.url ?? "",
+          title: item.title ?? "",
+        };
+      });
       setGifs(results);
     } catch {
       setError(true);
@@ -331,13 +369,14 @@ function GifPicker({ onPick, onClose }: { onPick: (gif: TenorGif) => void; onClo
     }
   }, []);
 
-  useEffect(() => { search(""); }, [search]);
+  useEffect(() => { search("gaming"); }, [search]);
 
   useEffect(() => {
     if (timerRef.current) clearTimeout(timerRef.current);
-    timerRef.current = setTimeout(() => search(query), 400);
+    const q = activeTag ? `gaming ${activeTag}` : query;
+    timerRef.current = setTimeout(() => search(q), 350);
     return () => { if (timerRef.current) clearTimeout(timerRef.current); };
-  }, [query, search]);
+  }, [query, activeTag, search]);
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
@@ -347,44 +386,84 @@ function GifPicker({ onPick, onClose }: { onPick: (gif: TenorGif) => void; onClo
     return () => document.removeEventListener("mousedown", handleClick);
   }, [onClose]);
 
+  const handleTagClick = (tag: string) => {
+    setActiveTag((prev) => (prev === tag ? null : tag));
+    setQuery("");
+  };
+
   return (
     <div
       ref={ref}
-      className="absolute bottom-full mb-1 left-0 z-50 rounded-2xl border shadow-2xl overflow-hidden"
-      style={{ width: 320, background: "hsl(var(--card))", border: "1px solid rgba(34,211,238,0.30)" }}
+      className="absolute bottom-full mb-2 left-0 z-50 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-150"
+      style={{ width: 316, background: "hsl(var(--card))", border: "1px solid rgba(34,211,238,0.35)", boxShadow: "0 8px 40px rgba(34,211,238,0.15), 0 2px 12px rgba(0,0,0,0.5)" }}
     >
-      <div className="p-2 border-b" style={{ borderColor: "rgba(34,211,238,0.15)" }}>
+      {/* Search bar */}
+      <div className="p-2 pb-1">
         <div className="relative">
-          <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground/50 text-xs font-bold">🔍</span>
+          <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[13px]">🔍</span>
           <input
             autoFocus
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search GIFs (e.g. 'gg', 'rage', 'win')…"
-            className="w-full rounded-lg pl-7 pr-3 py-1.5 text-xs bg-background/60 border border-border/50 outline-none focus:border-cyan-500/50 text-foreground placeholder:text-muted-foreground/40"
+            onChange={(e) => { setQuery(e.target.value); setActiveTag(null); }}
+            placeholder="Search GIFs…"
+            className="w-full rounded-xl pl-8 pr-3 py-1.5 text-xs outline-none transition-colors text-foreground placeholder:text-muted-foreground/40 bg-background/70"
+            style={{ border: "1px solid rgba(34,211,238,0.30)" }}
           />
         </div>
       </div>
-      <div className="p-1.5 overflow-y-auto" style={{ maxHeight: 220 }}>
-        {loading && <p className="text-center text-xs text-muted-foreground/50 py-6 animate-pulse">Loading GIFs…</p>}
-        {error && <p className="text-center text-xs text-red-400/70 py-6">Couldn't load GIFs. Check your connection.</p>}
-        {!loading && !error && gifs.length === 0 && <p className="text-center text-xs text-muted-foreground/50 py-6">No GIFs found.</p>}
+
+      {/* Quick tags */}
+      <div className="flex gap-1 px-2 pb-1.5 flex-wrap">
+        {GIF_QUICK_TAGS.map((tag) => (
+          <button
+            key={tag}
+            onClick={() => handleTagClick(tag)}
+            className="px-2 py-0.5 rounded-full text-[10px] font-bold transition-all"
+            style={{
+              background: activeTag === tag ? "rgba(34,211,238,0.22)" : "rgba(34,211,238,0.07)",
+              border: `1px solid ${activeTag === tag ? "rgba(34,211,238,0.55)" : "rgba(34,211,238,0.20)"}`,
+              color: activeTag === tag ? "#22d3ee" : "rgba(148,163,184,0.65)",
+            }}
+          >
+            {tag}
+          </button>
+        ))}
+      </div>
+
+      {/* GIF grid */}
+      <div className="px-1.5 pb-1.5 overflow-y-auto" style={{ maxHeight: 198 }}>
+        {loading && (
+          <div className="grid grid-cols-3 gap-1">
+            {Array.from({ length: 9 }).map((_, i) => (
+              <div key={i} className="aspect-square rounded-lg animate-pulse" style={{ background: "rgba(255,255,255,0.05)" }} />
+            ))}
+          </div>
+        )}
+        {!loading && error && (
+          <p className="text-center text-[11px] text-red-400/70 py-6">Couldn't load GIFs — check your connection.</p>
+        )}
+        {!loading && !error && gifs.length === 0 && (
+          <p className="text-center text-[11px] text-muted-foreground/40 py-6">No GIFs found for "{query || activeTag}"</p>
+        )}
         {!loading && !error && gifs.length > 0 && (
           <div className="grid grid-cols-3 gap-1">
             {gifs.map((g) => (
               <button
                 key={g.id}
                 onClick={() => onPick(g)}
-                className="rounded-lg overflow-hidden aspect-square hover:opacity-80 hover:scale-95 transition-all focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
+                className="rounded-xl overflow-hidden aspect-square transition-all hover:opacity-90 hover:scale-[0.97] active:scale-95 focus:outline-none focus:ring-2"
+                style={{ focusRingColor: "rgba(34,211,238,0.5)" }}
               >
-                <img src={g.preview} alt={g.title} className="w-full h-full object-cover" loading="lazy" />
+                <img src={g.preview} alt={g.title} className="w-full h-full object-cover" loading="lazy" decoding="async" />
               </button>
             ))}
           </div>
         )}
       </div>
-      <div className="px-2 py-1 text-center border-t" style={{ borderColor: "rgba(34,211,238,0.10)" }}>
-        <span className="text-[9px] text-muted-foreground/30">Powered by Tenor</span>
+
+      {/* Footer */}
+      <div className="px-2 py-1 border-t flex items-center justify-end" style={{ borderColor: "rgba(34,211,238,0.10)" }}>
+        <span className="text-[9px] text-muted-foreground/25 font-medium tracking-wide">Powered by Tenor</span>
       </div>
     </div>
   );
@@ -394,33 +473,45 @@ function GifPicker({ onPick, onClose }: { onPick: (gif: TenorGif) => void; onClo
 const GIF_MARKER_RE = /\[gif:(https?:\/\/[^\]]+)\]/g;
 
 function CommentBody({ body }: { body: string }) {
-  const parts: React.ReactNode[] = [];
+  const segments: React.ReactNode[] = [];
   let last = 0;
   let match: RegExpExecArray | null;
   GIF_MARKER_RE.lastIndex = 0;
   while ((match = GIF_MARKER_RE.exec(body)) !== null) {
-    if (match.index > last) {
-      parts.push(<span key={last}>{body.slice(last, match.index)}</span>);
+    const textBefore = body.slice(last, match.index).trim();
+    if (textBefore) {
+      segments.push(
+        <p key={`text-${last}`} className="text-[12px] text-muted-foreground/75 leading-relaxed whitespace-pre-wrap break-words">
+          {textBefore}
+        </p>
+      );
     }
-    parts.push(
-      <div key={match.index} className="mt-2 inline-block">
+    segments.push(
+      <div key={`gif-${match.index}`} className="mt-1.5">
         <img
           src={match[1]}
           alt="GIF"
-          className="rounded-xl max-w-full"
-          style={{ maxHeight: 200, display: "block" }}
+          className="rounded-xl"
+          style={{ maxHeight: 180, maxWidth: "100%", display: "block", border: "1px solid rgba(255,255,255,0.06)" }}
           loading="lazy"
+          decoding="async"
         />
       </div>
     );
     last = match.index + match[0].length;
   }
-  if (last < body.length) parts.push(<span key={last}>{body.slice(last)}</span>);
-  return (
-    <p className="text-[12px] text-muted-foreground/75 leading-relaxed mt-1 whitespace-pre-wrap break-words">
-      {parts.length > 0 ? parts : body}
-    </p>
-  );
+  const textAfter = body.slice(last).trim();
+  if (textAfter) {
+    segments.push(
+      <p key={`text-${last}`} className="text-[12px] text-muted-foreground/75 leading-relaxed whitespace-pre-wrap break-words">
+        {textAfter}
+      </p>
+    );
+  }
+  if (segments.length === 0) {
+    return <p className="text-[12px] text-muted-foreground/75 leading-relaxed mt-1 whitespace-pre-wrap break-words">{body}</p>;
+  }
+  return <div className="mt-1 space-y-0.5">{segments}</div>;
 }
 
 /* ── Shared comment/reply input box ─────────────────────────────────────── */
@@ -495,32 +586,47 @@ function CommentInputBox({
 
         {/* Selected GIF preview */}
         {selectedGif && (
-          <div className="px-3 pb-2 relative inline-block">
-            <img
-              src={selectedGif.preview}
-              alt="Selected GIF"
-              className="rounded-lg"
-              style={{ maxHeight: 120, maxWidth: 180, display: "block" }}
-            />
-            {onGifClear && (
-              <button
-                onClick={onGifClear}
-                className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-red-500 text-white flex items-center justify-center text-[10px] font-bold hover:bg-red-400 transition-colors"
-              >×</button>
-            )}
+          <div className="px-3 pb-2">
+            <div className="relative inline-block group">
+              <img
+                src={selectedGif.preview}
+                alt="Selected GIF"
+                className="rounded-xl"
+                style={{ maxHeight: 110, maxWidth: 200, display: "block", border: "1px solid rgba(34,211,238,0.25)" }}
+                loading="lazy"
+              />
+              {onGifClear && (
+                <button
+                  onClick={onGifClear}
+                  className="absolute top-1 right-1 w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-bold transition-all opacity-80 hover:opacity-100 hover:scale-110"
+                  style={{ background: "rgba(0,0,0,0.75)", color: "#f87171", border: "1px solid rgba(239,68,68,0.4)" }}
+                  title="Remove GIF"
+                >×</button>
+              )}
+              <div
+                className="absolute bottom-1 left-1 px-1.5 py-0.5 rounded text-[8px] font-bold"
+                style={{ background: "rgba(0,0,0,0.7)", color: "rgba(34,211,238,0.9)" }}
+              >GIF</div>
+            </div>
           </div>
         )}
 
         {/* Toolbar row */}
-        <div className="flex items-center gap-1 px-2 pb-2 border-t border-border/10 pt-1.5">
+        <div
+          className="flex items-center gap-1 px-2 py-1.5"
+          style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}
+        >
           {/* Emoji button */}
           <div className="relative">
             <button
               type="button"
               onClick={() => { setShowEmoji((v) => !v); setShowGif(false); }}
-              className="h-7 w-7 flex items-center justify-center rounded-lg text-base hover:bg-primary/15 transition-colors"
-              title="Insert emoji"
-              style={{ color: showEmoji ? "#a855f7" : "rgba(148,163,184,0.55)" }}
+              className="h-7 w-7 flex items-center justify-center rounded-lg text-[17px] transition-all hover:scale-110 active:scale-95"
+              title="Add emoji"
+              style={{
+                background: showEmoji ? "rgba(168,85,247,0.18)" : "transparent",
+                filter: showEmoji ? "none" : "grayscale(30%)",
+              }}
             >😀</button>
             {showEmoji && <EmojiPicker onPick={insertEmoji} onClose={() => setShowEmoji(false)} />}
           </div>
@@ -531,16 +637,24 @@ function CommentInputBox({
               <button
                 type="button"
                 onClick={() => { setShowGif((v) => !v); setShowEmoji(false); }}
-                className="h-7 px-2 flex items-center justify-center rounded-lg text-[11px] font-extrabold hover:bg-cyan-500/10 transition-colors"
-                title="Insert GIF"
-                style={{ color: showGif ? "#22d3ee" : "rgba(148,163,184,0.55)", letterSpacing: "0.05em" }}
+                className="h-6 px-2 flex items-center justify-center rounded-md text-[10px] font-black transition-all hover:scale-105 active:scale-95"
+                title="Add GIF"
+                style={{
+                  background: showGif ? "rgba(34,211,238,0.18)" : "rgba(34,211,238,0.07)",
+                  border: `1px solid ${showGif ? "rgba(34,211,238,0.5)" : "rgba(34,211,238,0.22)"}`,
+                  color: showGif ? "#22d3ee" : "rgba(34,211,238,0.65)",
+                  letterSpacing: "0.08em",
+                }}
               >GIF</button>
               {showGif && <GifPicker onPick={(g) => { onGifSelect(g); setShowGif(false); }} onClose={() => setShowGif(false)} />}
             </div>
           )}
 
           {/* Char count */}
-          <span className="ml-auto text-[10px] text-muted-foreground/30">{value.length}/500</span>
+          <span
+            className="ml-auto text-[10px] tabular-nums"
+            style={{ color: value.length > 450 ? (value.length > 490 ? "#f87171" : "#fbbf24") : "rgba(148,163,184,0.28)" }}
+          >{value.length}/500</span>
         </div>
       </div>
 
