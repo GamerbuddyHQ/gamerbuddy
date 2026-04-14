@@ -727,19 +727,19 @@ export default function Browse() {
     });
 
   /* ── Active tags ── */
-  type FilterTag = { id: string; label: string; onRemove: () => void; rgb: string };
+  type FilterTag = { id: string; label: string; onRemove: () => void; rgb: string; Icon: React.ElementType };
   const activeTags: FilterTag[] = [];
-  if (search.trim())         activeTags.push({ id: "search",    label: `"${search.slice(0,18)}${search.length>18?"…":""}"`,  onRemove: () => setSearch(""),                 rgb: "255,255,255" });
-  if (platform !== "all")    activeTags.push({ id: "platform",  label: platform,                         onRemove: () => setPlatform("all"),            rgb: "34,211,238" });
-  if (sort !== "newest")     activeTags.push({ id: "sort",      label: `Sort: ${SORT_OPTIONS.find(o=>o.value===sort)?.label}`, onRemove: () => setSort("newest"),  rgb: "168,85,247" });
-  if (levelFilter !== "all") activeTags.push({ id: "level",     label: `Level: ${LEVEL_OPTIONS.find(o=>o.value===levelFilter)?.label}`, onRemove: () => setLevelFilter("all"), rgb: "96,165,250" });
-  if (verifiedPosterOnly)    activeTags.push({ id: "verified",  label: "Verified Poster",                onRemove: () => setVerifiedPosterOnly(false),  rgb: "34,197,94" });
-  if (bulkOnly)              activeTags.push({ id: "bulk",      label: "Bulk Hiring",                    onRemove: () => setBulkOnly(false),            rgb: "168,85,247" });
-  if (noBidsOnly)            activeTags.push({ id: "nobids",    label: "Easy Wins",                      onRemove: () => setNoBidsOnly(false),          rgb: "34,211,238" });
-  if (hasStreamingFilter)    activeTags.push({ id: "streaming", label: "Has Streaming",                  onRemove: () => setHasStreamingFilter(false),  rgb: "145,70,255" });
-  if (hasQuestFilter)        activeTags.push({ id: "quest",     label: "Quest Bids",                     onRemove: () => setHasQuestFilter(false),      rgb: "251,191,36" });
-  if (countryFilter !== "any") activeTags.push({ id: "country", label: `${COUNTRY_MAP[countryFilter]?.flag ?? "🌍"} ${COUNTRY_MAP[countryFilter]?.label ?? countryFilter}`, onRemove: () => setCountryFilter("any"), rgb: "252,211,77" });
-  if (genderFilter !== "any")  activeTags.push({ id: "gender",  label: `${GENDER_MAP[genderFilter]?.icon ?? ""} ${GENDER_MAP[genderFilter]?.label ?? genderFilter}`,         onRemove: () => setGenderFilter("any"),  rgb: "236,72,153" });
+  if (search.trim())           activeTags.push({ id: "search",    label: `"${search.slice(0,20)}${search.length>20?"…":""}"`,                                                              onRemove: () => setSearch(""),                rgb: "255,255,255", Icon: Search       });
+  if (platform !== "all")      activeTags.push({ id: "platform",  label: platform,                                                                                                           onRemove: () => setPlatform("all"),           rgb: "34,211,238",  Icon: Monitor      });
+  if (sort !== "newest")       activeTags.push({ id: "sort",      label: SORT_OPTIONS.find(o=>o.value===sort)?.label ?? sort,                                                                onRemove: () => setSort("newest"),            rgb: "168,85,247",  Icon: ArrowDownUp  });
+  if (levelFilter !== "all")   activeTags.push({ id: "level",     label: LEVEL_OPTIONS.find(o=>o.value===levelFilter)?.label ?? levelFilter,                                                 onRemove: () => setLevelFilter("all"),        rgb: "96,165,250",  Icon: Layers       });
+  if (verifiedPosterOnly)      activeTags.push({ id: "verified",  label: "Verified Poster",                                                                                                  onRemove: () => setVerifiedPosterOnly(false), rgb: "34,197,94",   Icon: Shield       });
+  if (bulkOnly)                activeTags.push({ id: "bulk",      label: "Bulk Hiring",                                                                                                      onRemove: () => setBulkOnly(false),           rgb: "168,85,247",  Icon: Users        });
+  if (noBidsOnly)              activeTags.push({ id: "nobids",    label: "Easy Wins",                                                                                                        onRemove: () => setNoBidsOnly(false),         rgb: "34,211,238",  Icon: Flame        });
+  if (hasStreamingFilter)      activeTags.push({ id: "streaming", label: "Has Streaming",                                                                                                    onRemove: () => setHasStreamingFilter(false), rgb: "145,70,255",  Icon: Tv           });
+  if (hasQuestFilter)          activeTags.push({ id: "quest",     label: "Quest Bids",                                                                                                       onRemove: () => setHasQuestFilter(false),     rgb: "251,191,36",  Icon: Sparkles     });
+  if (countryFilter !== "any") activeTags.push({ id: "country",   label: `${COUNTRY_MAP[countryFilter]?.flag ?? "🌍"} ${COUNTRY_MAP[countryFilter]?.label ?? countryFilter}`,              onRemove: () => setCountryFilter("any"),      rgb: "252,211,77",  Icon: Globe        });
+  if (genderFilter !== "any")  activeTags.push({ id: "gender",    label: `${GENDER_MAP[genderFilter]?.icon ?? ""} ${GENDER_MAP[genderFilter]?.label ?? genderFilter}`.trim(),              onRemove: () => setGenderFilter("any"),       rgb: "236,72,153",  Icon: UserRound    });
 
   const hasFilters = activeTags.length > 0;
   const clearFilters = () => {
@@ -1067,49 +1067,78 @@ export default function Browse() {
           </div>
         </div>
 
-        {/* ── Active tags + result count — always visible when filters active ── */}
+        {/* ── Active tags ── */}
         {hasFilters && (
           <div
             className="border-t"
-            style={{ borderColor: "rgba(168,85,247,0.15)", background: "rgba(168,85,247,0.04)" }}
+            style={{
+              borderColor: "rgba(168,85,247,0.18)",
+              background: "linear-gradient(180deg,rgba(168,85,247,0.06) 0%,rgba(168,85,247,0.02) 100%)",
+            }}
           >
-            {/* Tag row */}
-            <div className="flex items-center gap-2 px-4 pt-3 pb-2 flex-wrap">
-              <span className="text-[9px] font-extrabold uppercase tracking-widest shrink-0" style={{ color: "rgba(168,85,247,0.60)" }}>
-                Active:
+            {/* Section header: label + count + result summary */}
+            <div className="flex items-center gap-2 px-4 pt-3 pb-2">
+              <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse shrink-0" />
+              <span
+                className="text-[10px] font-extrabold uppercase tracking-[0.14em] shrink-0"
+                style={{ color: "rgba(168,85,247,0.75)" }}
+              >
+                Active Filters
               </span>
+              <span
+                className="text-[9px] font-black px-1.5 py-0.5 rounded-full shrink-0"
+                style={{ background: "rgba(168,85,247,0.22)", color: "#c084fc", border: "1px solid rgba(168,85,247,0.38)" }}
+              >
+                {activeTags.length}
+              </span>
+              {/* Divider line */}
+              <span className="flex-1 h-px mx-1" style={{ background: "rgba(168,85,247,0.12)" }} />
+              {/* Result count */}
+              <span className="text-[10px] font-semibold shrink-0 tabular-nums" style={{ color: "rgba(255,255,255,0.35)" }}>
+                {requests?.length === allRequests?.length
+                  ? `${allRequests?.length ?? 0} open`
+                  : (
+                    <>
+                      <span style={{ color: "rgba(168,85,247,0.80)" }}>{requests?.length ?? 0}</span>
+                      <span style={{ color: "rgba(255,255,255,0.25)" }}> / {allRequests?.length ?? 0} match</span>
+                    </>
+                  )}
+              </span>
+            </div>
+
+            {/* Tag chips */}
+            <div className="flex flex-wrap gap-1.5 px-4 pb-3.5">
               {activeTags.map((tag, idx) => (
                 <button
                   key={tag.id}
                   onClick={tag.onRemove}
-                  className="filter-tag-animate group flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold transition-all duration-200 hover:brightness-125 active:scale-95"
+                  title={`Remove: ${tag.label}`}
+                  className="filter-tag-animate group flex items-center gap-1.5 rounded-xl text-[11px] font-bold transition-all duration-200 hover:brightness-115 active:scale-95 overflow-hidden"
                   style={{
-                    background: `rgba(${tag.rgb},0.14)`,
-                    border: `1px solid rgba(${tag.rgb},0.38)`,
+                    background: `rgba(${tag.rgb},0.10)`,
+                    border: `1px solid rgba(${tag.rgb},0.35)`,
                     color: `rgb(${tag.rgb})`,
-                    animationDelay: `${idx * 35}ms`,
+                    animationDelay: `${idx * 40}ms`,
                   }}
                 >
-                  {tag.label}
-                  <X className="h-3 w-3 opacity-55 group-hover:opacity-100 transition-opacity shrink-0" />
+                  {/* Icon segment */}
+                  <span
+                    className="flex items-center justify-center h-full px-2 py-1.5 shrink-0"
+                    style={{ background: `rgba(${tag.rgb},0.14)`, borderRight: `1px solid rgba(${tag.rgb},0.20)` }}
+                  >
+                    <tag.Icon className="h-3 w-3" />
+                  </span>
+                  {/* Label */}
+                  <span className="py-1.5 max-w-[130px] truncate leading-none">{tag.label}</span>
+                  {/* Remove button */}
+                  <span
+                    className="flex items-center justify-center h-5 w-5 rounded-full mr-1.5 transition-colors shrink-0 group-hover:bg-red-500/25"
+                    style={{ background: `rgba(${tag.rgb},0.08)` }}
+                  >
+                    <X className="h-2.5 w-2.5 group-hover:text-red-400 transition-colors" />
+                  </span>
                 </button>
               ))}
-            </div>
-            {/* Result count bar */}
-            <div
-              className="flex items-center justify-between px-4 pb-2.5"
-            >
-              <span className="text-[10px] text-muted-foreground/40 font-medium">
-                {requests?.length === allRequests?.length
-                  ? `Showing all ${allRequests?.length ?? 0} open requests`
-                  : `${requests?.length ?? 0} of ${allRequests?.length ?? 0} requests match`}
-              </span>
-              <button
-                onClick={clearFilters}
-                className="text-[10px] font-bold text-primary/60 hover:text-primary underline-offset-2 hover:underline transition-colors"
-              >
-                Reset
-              </button>
             </div>
           </div>
         )}
