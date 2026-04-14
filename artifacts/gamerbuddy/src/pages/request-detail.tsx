@@ -1081,7 +1081,7 @@ function BidCard({
 
         <div className="p-5 space-y-4">
           {/* ── Header row: avatar + info + price ── */}
-          <div className="flex items-start gap-4">
+          <div className="flex items-start gap-3 sm:gap-4">
             {/* Bulk select checkbox */}
             {showCheckbox && (
               <button
@@ -1099,7 +1099,7 @@ function BidCard({
 
             {/* Avatar */}
             <div
-              className="h-12 w-12 rounded-2xl shrink-0 flex items-center justify-center text-lg font-black select-none"
+              className="h-10 w-10 sm:h-12 sm:w-12 rounded-2xl shrink-0 flex items-center justify-center text-base sm:text-lg font-black select-none"
               style={{
                 background: isAccepted ? "rgba(34,197,94,0.15)" : isMe ? "rgba(34,211,238,0.15)" : "rgba(168,85,247,0.15)",
                 border: `1.5px solid ${isAccepted ? "rgba(34,197,94,0.35)" : isMe ? "rgba(34,211,238,0.35)" : "rgba(168,85,247,0.35)"}`,
@@ -1150,7 +1150,7 @@ function BidCard({
             {/* Price + status — right column */}
             <div className="shrink-0 text-right flex flex-col items-end gap-1.5">
               <div
-                className="text-2xl font-black tabular-nums leading-none"
+                className="text-xl sm:text-2xl font-black tabular-nums leading-none"
                 style={{
                   color: isAccepted ? "#4ade80" : "#ffffff",
                   textShadow: isAccepted ? "0 0 16px rgba(34,197,94,0.4)" : "0 0 16px rgba(255,255,255,0.1)",

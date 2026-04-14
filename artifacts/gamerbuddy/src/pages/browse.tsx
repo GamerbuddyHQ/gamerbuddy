@@ -858,10 +858,10 @@ export default function Browse() {
 
         {/* ── Sort row ── */}
         <div
-          className="flex items-start gap-3 px-4 py-3 border-b flex-wrap sm:flex-nowrap"
+          className="flex flex-col sm:flex-row sm:items-start gap-2 sm:gap-3 px-4 py-3 border-b"
           style={{ borderColor: "rgba(255,255,255,0.05)", background: "rgba(0,0,0,0.15)" }}
         >
-          <span className="text-[10px] font-extrabold uppercase tracking-widest pt-1.5 shrink-0 w-14" style={{ color: "rgba(255,255,255,0.30)" }}>
+          <span className="text-[10px] font-extrabold uppercase tracking-widest sm:pt-1.5 sm:shrink-0 sm:w-14" style={{ color: "rgba(255,255,255,0.30)" }}>
             Sort by
           </span>
           <div className="flex flex-wrap gap-1.5">
@@ -893,10 +893,10 @@ export default function Browse() {
 
         {/* ── Experience level row ── */}
         <div
-          className="flex items-start gap-3 px-4 py-3 border-b flex-wrap sm:flex-nowrap"
+          className="flex flex-col sm:flex-row sm:items-start gap-2 sm:gap-3 px-4 py-3 border-b"
           style={{ borderColor: "rgba(255,255,255,0.05)", background: "rgba(0,0,0,0.10)" }}
         >
-          <span className="text-[10px] font-extrabold uppercase tracking-widest pt-1.5 shrink-0 w-14" style={{ color: "rgba(255,255,255,0.30)" }}>
+          <span className="text-[10px] font-extrabold uppercase tracking-widest sm:pt-1.5 sm:shrink-0 sm:w-14" style={{ color: "rgba(255,255,255,0.30)" }}>
             Level
           </span>
           <div className="flex flex-wrap gap-1.5">
@@ -931,10 +931,10 @@ export default function Browse() {
 
         {/* ── Toggle filters row ── */}
         <div
-          className="flex items-start gap-3 px-4 py-3 flex-wrap sm:flex-nowrap"
+          className="flex flex-col sm:flex-row sm:items-start gap-2 sm:gap-3 px-4 py-3"
           style={{ background: "rgba(0,0,0,0.10)" }}
         >
-          <span className="text-[10px] font-extrabold uppercase tracking-widest shrink-0 w-14 pt-1.5" style={{ color: "rgba(255,255,255,0.30)" }}>
+          <span className="text-[10px] font-extrabold uppercase tracking-widest sm:shrink-0 sm:w-14 sm:pt-1.5" style={{ color: "rgba(255,255,255,0.30)" }}>
             Only
           </span>
           <div className="flex flex-wrap gap-1.5">
@@ -970,44 +970,50 @@ export default function Browse() {
           </div>
         </div>
 
-        {/* ── Active tags + result count ── */}
+        {/* ── Active tags + result count — always visible when filters active ── */}
         {hasFilters && (
           <div
-            className="flex items-center gap-2 px-4 py-2.5 flex-wrap border-t"
+            className="border-t"
             style={{ borderColor: "rgba(168,85,247,0.15)", background: "rgba(168,85,247,0.04)" }}
           >
-            <span className="text-[9px] font-extrabold uppercase tracking-widest shrink-0" style={{ color: "rgba(168,85,247,0.60)" }}>
-              Active:
-            </span>
-            {activeTags.map((tag, idx) => (
-              <button
-                key={tag.id}
-                onClick={tag.onRemove}
-                className="filter-tag-animate flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold transition-all duration-200 hover:brightness-125 active:scale-95 group"
-                style={{
-                  background: `rgba(${tag.rgb},0.16)`,
-                  border: `1px solid rgba(${tag.rgb},0.40)`,
-                  color: `rgb(${tag.rgb})`,
-                  filter: "brightness(1.25)",
-                  animationDelay: `${idx * 35}ms`,
-                }}
-              >
-                {tag.label}
-                <X className="h-2.5 w-2.5 opacity-60 group-hover:opacity-100 transition-opacity" />
-              </button>
-            ))}
-            <span
-              key={requests?.length}
-              className="text-[10px] ml-auto tabular-nums font-semibold"
-              style={{
-                color: (requests?.length ?? 0) < (allRequests?.length ?? 0) ? "rgba(168,85,247,0.75)" : "rgba(255,255,255,0.28)",
-                animation: "count-up 0.18s ease-out both",
-              }}
+            {/* Tag row */}
+            <div className="flex items-center gap-2 px-4 pt-3 pb-2 flex-wrap">
+              <span className="text-[9px] font-extrabold uppercase tracking-widest shrink-0" style={{ color: "rgba(168,85,247,0.60)" }}>
+                Active:
+              </span>
+              {activeTags.map((tag, idx) => (
+                <button
+                  key={tag.id}
+                  onClick={tag.onRemove}
+                  className="filter-tag-animate group flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold transition-all duration-200 hover:brightness-125 active:scale-95"
+                  style={{
+                    background: `rgba(${tag.rgb},0.14)`,
+                    border: `1px solid rgba(${tag.rgb},0.38)`,
+                    color: `rgb(${tag.rgb})`,
+                    animationDelay: `${idx * 35}ms`,
+                  }}
+                >
+                  {tag.label}
+                  <X className="h-3 w-3 opacity-55 group-hover:opacity-100 transition-opacity shrink-0" />
+                </button>
+              ))}
+            </div>
+            {/* Result count bar */}
+            <div
+              className="flex items-center justify-between px-4 pb-2.5"
             >
-              {requests?.length === allRequests?.length
-                ? `All ${allRequests?.length ?? 0} requests`
-                : `${requests?.length ?? 0} of ${allRequests?.length ?? 0} match`}
-            </span>
+              <span className="text-[10px] text-muted-foreground/40 font-medium">
+                {requests?.length === allRequests?.length
+                  ? `Showing all ${allRequests?.length ?? 0} open requests`
+                  : `${requests?.length ?? 0} of ${allRequests?.length ?? 0} requests match`}
+              </span>
+              <button
+                onClick={clearFilters}
+                className="text-[10px] font-bold text-primary/60 hover:text-primary underline-offset-2 hover:underline transition-colors"
+              >
+                Reset
+              </button>
+            </div>
           </div>
         )}
       </div>
