@@ -19,6 +19,7 @@ import Profile from "@/pages/profile";
 import RequestDetail from "@/pages/request-detail";
 import Notifications from "@/pages/notifications";
 import UserProfilePage from "@/pages/user-profile";
+import About from "@/pages/about";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -61,7 +62,8 @@ function Router() {
         <Route path="/requests/:id" component={RequestDetail} />
         <Route path="/users/:id" component={UserProfilePage} />
         <Route path="/notifications"><ProtectedRoute component={Notifications} /></Route>
-        
+        <Route path="/about" component={About} />
+
         <Route component={NotFound} />
       </Switch>
     </Layout>

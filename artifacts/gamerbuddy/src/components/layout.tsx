@@ -7,7 +7,7 @@ import {
   Gamepad2, Compass, LayoutDashboard, Wallet, User as UserIcon,
   LogOut, FileText, Bell, CheckCheck, X, Swords, Star,
   Trophy, MessageSquare, Zap, CircleDollarSign, ChevronRight, Menu,
-  ArrowLeft,
+  ArrowLeft, Info, Shield,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -202,6 +202,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           { href: "/profile", label: "Profile", icon: UserIcon },
         ]
       : []),
+    { href: "/about", label: "About", icon: Info },
   ];
 
   return (
@@ -326,6 +327,45 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <main className="flex-1 container py-6 md:py-8">
         {children}
       </main>
+
+      {/* ── Footer ── */}
+      <footer className="border-t border-border/40 bg-background/60 mt-auto">
+        <div className="h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
+        <div className="container py-6 md:py-8">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            {/* Branding */}
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Gamepad2 className="h-5 w-5 text-primary/60" />
+              <span className="font-bold text-sm tracking-tight uppercase text-white/40">GAMERBUDDY</span>
+              <span className="text-white/15 text-xs">·</span>
+              <span className="text-xs text-muted-foreground/50">Global Gaming Marketplace</span>
+            </div>
+
+            {/* Footer links */}
+            <div className="flex items-center gap-5 text-xs text-muted-foreground/60">
+              <Link
+                href="/browse"
+                className="hover:text-primary transition-colors flex items-center gap-1.5 font-medium"
+              >
+                <Compass className="h-3 w-3" /> Browse
+              </Link>
+              <Link
+                href="/about"
+                className={`hover:text-primary transition-colors flex items-center gap-1.5 font-medium ${
+                  location === "/about" ? "text-primary" : ""
+                }`}
+              >
+                <Shield className="h-3 w-3" /> About &amp; Disclaimer
+              </Link>
+            </div>
+
+            {/* Copyright */}
+            <div className="text-xs text-muted-foreground/40 text-center md:text-right">
+              © {new Date().getFullYear()} Gamerbuddy. Early development phase.
+            </div>
+          </div>
+        </div>
+      </footer>
 
       {/* Floating AI chat support */}
       <AIChatWidget />
