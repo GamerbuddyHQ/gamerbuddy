@@ -376,15 +376,15 @@ function RequestCard({ req }: { req: GameRequest }) {
 
   return (
     <div
-      className={`group rounded-2xl border overflow-hidden transition-all duration-300 ${
+      className={`group rounded-2xl border overflow-hidden transition-all duration-300 will-change-transform ${
         expanded
-          ? "border-primary/50 shadow-[0_0_56px_rgba(168,85,247,0.18)]"
-          : "border-border/35 hover:border-primary/30 hover:shadow-[0_0_36px_rgba(168,85,247,0.10)]"
+          ? "border-primary/50 shadow-[0_8px_48px_rgba(168,85,247,0.22)] translate-y-0"
+          : "border-border/35 hover:border-primary/35 hover:-translate-y-[3px] hover:shadow-[0_8px_40px_rgba(168,85,247,0.16)]"
       }`}
       style={{
         background: expanded
           ? `linear-gradient(145deg, ${skill.bar}0e 0%, rgba(0,0,0,0.72) 100%)`
-          : `linear-gradient(145deg, rgba(255,255,255,0.020) 0%, rgba(0,0,0,0.52) 100%)`,
+          : `linear-gradient(145deg, rgba(255,255,255,0.022) 0%, rgba(0,0,0,0.52) 100%)`,
       }}
     >
       {/* Top skill-color accent line */}
@@ -395,19 +395,30 @@ function RequestCard({ req }: { req: GameRequest }) {
         <div className="w-[3px] shrink-0" style={{ background: `linear-gradient(180deg, ${skill.bar} 0%, ${skill.bar}28 100%)` }} />
 
         {/* Card body */}
-        <div className="flex-1 px-6 py-7 md:px-8 md:py-8">
-          <div className="flex flex-col sm:flex-row sm:items-start gap-6">
+        <div className="flex-1 px-4 py-5 sm:px-6 sm:py-7 md:px-8 md:py-8">
+          <div className="flex flex-col sm:flex-row sm:items-start gap-5 sm:gap-6">
 
-            {/* Game avatar */}
+            {/* Game avatar — desktop only */}
             <div className="hidden sm:block shrink-0">
               <GameAvatar name={req.gameName} bar={skill.bar} />
             </div>
 
             {/* ── Center column ── */}
-            <div className="flex-1 min-w-0 space-y-4">
+            <div className="flex-1 min-w-0 space-y-3.5 sm:space-y-4">
 
-              {/* Row 1: Primary identity badges */}
+              {/* Row 1: Badges — on mobile, avatar sits inline with badges */}
               <div className="flex flex-wrap items-center gap-2">
+                {/* Mobile-only avatar (small) */}
+                <div
+                  className="sm:hidden w-8 h-8 rounded-xl flex items-center justify-center text-sm font-black shrink-0 select-none mr-0.5"
+                  style={{
+                    background: `linear-gradient(135deg, ${skill.bar}22 0%, ${skill.bar}44 100%)`,
+                    border: `1.5px solid ${skill.bar}55`,
+                    color: skill.bar,
+                  }}
+                >
+                  {req.gameName.trim()[0]?.toUpperCase() ?? "G"}
+                </div>
                 <span className="inline-flex items-center gap-1.5 text-xs border border-border/40 rounded-full px-3 py-1 font-semibold text-muted-foreground/75 bg-white/[0.025]">
                   <span className="text-sm leading-none">{PLATFORM_ICON[req.platform] ?? "🎮"}</span>
                   {req.platform}
@@ -420,13 +431,13 @@ function RequestCard({ req }: { req: GameRequest }) {
               {/* Row 2: Game title + poster */}
               <div>
                 <h3
-                  className="text-[1.65rem] md:text-[1.9rem] font-extrabold text-white leading-none cursor-pointer tracking-tight transition-colors duration-200 group-hover:text-primary/90"
+                  className="text-[1.5rem] sm:text-[1.65rem] md:text-[1.9rem] font-extrabold text-white leading-tight cursor-pointer tracking-tight transition-colors duration-200 group-hover:text-primary/90"
                   style={{ letterSpacing: "-0.03em" }}
                   onClick={() => setLocation(`/requests/${req.id}`)}
                 >
                   {req.gameName}
                 </h3>
-                <div className="flex items-center gap-2 mt-2.5 flex-wrap">
+                <div className="flex items-center gap-2 mt-2 flex-wrap">
                   <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground/65">
                     <User className="h-3 w-3 shrink-0" />
                     <span className="text-primary/85 font-semibold">{req.userName}</span>
@@ -443,7 +454,7 @@ function RequestCard({ req }: { req: GameRequest }) {
 
               {/* Row 3: Objectives */}
               <p
-                className="text-sm text-foreground/55 leading-relaxed line-clamp-2 pl-3.5"
+                className="text-[0.875rem] text-foreground/55 leading-[1.7] line-clamp-2 pl-3.5"
                 style={{ borderLeft: `2px solid ${skill.bar}55` }}
               >
                 {req.objectives}
@@ -520,7 +531,7 @@ function RequestCard({ req }: { req: GameRequest }) {
             </div>
 
             {/* ── Right CTA column ── */}
-            <div className="flex sm:flex-col items-center sm:items-stretch gap-3 shrink-0 sm:min-w-[156px]">
+            <div className="flex flex-col items-stretch gap-3 shrink-0 sm:min-w-[156px]">
               {/* PLACE BID */}
               <div className="relative">
                 {!expanded && (
