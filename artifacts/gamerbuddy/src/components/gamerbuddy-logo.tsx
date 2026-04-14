@@ -1,8 +1,9 @@
 import React from "react";
 
 /**
- * Gamerbuddy logo icon — four platform arms converging on a globe,
- * symbolizing cross-platform unity. Purple (PC/PS) + cyan (Switch/Mobile).
+ * Gamerbuddy icon — four platform arms converging on a globe node.
+ * Purple (top/bottom = PC/PS) + cyan (left/right = Switch/Mobile).
+ * Scales cleanly from 16 px favicon to 48 px+ hero use.
  */
 export function GamerbuddyIcon({
   size = 28,
@@ -22,33 +23,66 @@ export function GamerbuddyIcon({
       aria-hidden="true"
     >
       <defs>
-        <radialGradient id="gbIconBg" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="#1e0a3c" />
-          <stop offset="100%" stopColor="#09050f" />
+        {/* Dark interior */}
+        <radialGradient id="gbBg" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#200d3a" />
+          <stop offset="100%" stopColor="#0b0614" />
         </radialGradient>
-        <radialGradient id="gbIconCenter" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="#f0abfc" />
-          <stop offset="45%" stopColor="#a855f7" />
+
+        {/* Center node */}
+        <radialGradient id="gbNode" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#ffffff" />
+          <stop offset="30%" stopColor="#e879f9" />
+          <stop offset="70%" stopColor="#a855f7" />
           <stop offset="100%" stopColor="#a855f7" stopOpacity="0" />
         </radialGradient>
-        <radialGradient id="gbIconHalo" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="#a855f7" stopOpacity="0.55" />
+
+        {/* Outer ambient halo */}
+        <radialGradient id="gbHalo" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#a855f7" stopOpacity="0.45" />
+          <stop offset="70%" stopColor="#22d3ee" stopOpacity="0.12" />
           <stop offset="100%" stopColor="#a855f7" stopOpacity="0" />
         </radialGradient>
-        <linearGradient id="gbIconRing" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#a855f7" />
-          <stop offset="50%" stopColor="#22d3ee" />
+
+        {/* Ring gradient — purple → cyan → purple */}
+        <linearGradient id="gbRing" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#c084fc" />
+          <stop offset="40%" stopColor="#22d3ee" />
+          <stop offset="100%" stopColor="#c084fc" />
+        </linearGradient>
+
+        {/* Cyan arm gradient */}
+        <linearGradient id="gbArmC" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stopColor="#22d3ee" stopOpacity="0.4" />
+          <stop offset="100%" stopColor="#22d3ee" />
+        </linearGradient>
+        <linearGradient id="gbArmCr" x1="100%" y1="0%" x2="0%" y2="0%">
+          <stop offset="0%" stopColor="#22d3ee" stopOpacity="0.4" />
+          <stop offset="100%" stopColor="#22d3ee" />
+        </linearGradient>
+
+        {/* Purple arm gradient */}
+        <linearGradient id="gbArmPt" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stopColor="#a855f7" stopOpacity="0.4" />
           <stop offset="100%" stopColor="#a855f7" />
         </linearGradient>
-        <filter id="gbIconGlow" x="-60%" y="-60%" width="220%" height="220%">
-          <feGaussianBlur stdDeviation="1.8" result="blur" />
+        <linearGradient id="gbArmPb" x1="0%" y1="100%" x2="0%" y2="0%">
+          <stop offset="0%" stopColor="#a855f7" stopOpacity="0.4" />
+          <stop offset="100%" stopColor="#a855f7" />
+        </linearGradient>
+
+        {/* Soft glow for center node */}
+        <filter id="gbNodeGlow" x="-80%" y="-80%" width="260%" height="260%">
+          <feGaussianBlur stdDeviation="2.2" result="blur" />
           <feMerge>
             <feMergeNode in="blur" />
             <feMergeNode in="SourceGraphic" />
           </feMerge>
         </filter>
-        <filter id="gbArmGlow" x="-40%" y="-40%" width="180%" height="180%">
-          <feGaussianBlur stdDeviation="0.8" result="blur" />
+
+        {/* Subtle arm edge glow */}
+        <filter id="gbArmGlow" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="0.9" result="blur" />
           <feMerge>
             <feMergeNode in="blur" />
             <feMergeNode in="SourceGraphic" />
@@ -56,109 +90,128 @@ export function GamerbuddyIcon({
         </filter>
       </defs>
 
-      {/* Outer halo glow */}
-      <circle cx="16" cy="16" r="14" fill="url(#gbIconHalo)" />
+      {/* ── Ambient halo (behind everything) ── */}
+      <circle cx="16" cy="16" r="15" fill="url(#gbHalo)" />
 
-      {/* Dark background disc */}
-      <circle cx="16" cy="16" r="14.5" fill="url(#gbIconBg)" />
+      {/* ── Main disc ── */}
+      <circle cx="16" cy="16" r="14.5" fill="url(#gbBg)" />
 
-      {/* Gradient ring border */}
+      {/* ── Ring border — thicker + more opaque ── */}
       <circle
         cx="16"
         cy="16"
         r="14.5"
-        stroke="url(#gbIconRing)"
-        strokeWidth="1.1"
-        opacity="0.85"
+        stroke="url(#gbRing)"
+        strokeWidth="1.6"
+        opacity="0.9"
       />
 
-      {/* Globe — equator ellipse */}
+      {/* ── Globe wireframe (visible at 20 px+, decorative at smaller) ── */}
+      {/* Equator */}
       <ellipse
         cx="16"
         cy="16"
-        rx="9"
-        ry="3.2"
+        rx="8.5"
+        ry="3"
         stroke="#22d3ee"
-        strokeWidth="0.75"
-        opacity="0.50"
+        strokeWidth="0.8"
+        opacity="0.45"
       />
-      {/* Globe — vertical meridian ellipse */}
+      {/* Vertical meridian */}
       <ellipse
         cx="16"
         cy="16"
-        rx="3.2"
-        ry="9"
+        rx="3"
+        ry="8.5"
         stroke="#22d3ee"
-        strokeWidth="0.75"
-        opacity="0.40"
+        strokeWidth="0.8"
+        opacity="0.35"
       />
-      {/* Globe — cross lines */}
+
+      {/* ── Four platform arms — wider paths, gradient fill ── */}
+
+      {/* TOP arm (PC) — purple, tapers from tip to center */}
+      <path
+        d="M14.5 4.5 L16 3 L17.5 4.5 L17.5 13.5 L16 14.8 L14.5 13.5 Z"
+        fill="url(#gbArmPt)"
+        filter="url(#gbArmGlow)"
+      />
+      {/* Edge highlight stripe on top arm */}
       <line
-        x1="7"
-        y1="16"
-        x2="25"
-        y2="16"
-        stroke="#22d3ee"
-        strokeWidth="0.5"
-        opacity="0.20"
+        x1="16"
+        y1="3.2"
+        x2="16"
+        y2="13"
+        stroke="#c084fc"
+        strokeWidth="0.6"
+        opacity="0.6"
+      />
+
+      {/* BOTTOM arm (PS) — purple */}
+      <path
+        d="M14.5 27.5 L16 29 L17.5 27.5 L17.5 18.5 L16 17.2 L14.5 18.5 Z"
+        fill="url(#gbArmPb)"
+        filter="url(#gbArmGlow)"
       />
       <line
         x1="16"
-        y1="7"
+        y1="28.8"
         x2="16"
-        y2="25"
-        stroke="#22d3ee"
-        strokeWidth="0.5"
-        opacity="0.20"
+        y2="19"
+        stroke="#c084fc"
+        strokeWidth="0.6"
+        opacity="0.6"
       />
 
-      {/* ── Four platform arms ── */}
-      {/* TOP arm — PC keyboard (purple) */}
+      {/* LEFT arm (Switch) — cyan */}
       <path
-        d="M15 5 L16 4 L17 5 L17 13 L16 14.2 L15 13 Z"
-        fill="#a855f7"
-        opacity="0.92"
+        d="M4.5 14.5 L3 16 L4.5 17.5 L13.5 17.5 L14.8 16 L13.5 14.5 Z"
+        fill="url(#gbArmCr)"
         filter="url(#gbArmGlow)"
       />
-      {/* BOTTOM arm — PlayStation controller (purple) */}
-      <path
-        d="M15 27 L16 28 L17 27 L17 19 L16 17.8 L15 19 Z"
-        fill="#a855f7"
-        opacity="0.92"
-        filter="url(#gbArmGlow)"
-      />
-      {/* LEFT arm — Nintendo Switch (cyan) */}
-      <path
-        d="M5 15 L4 16 L5 17 L13 17 L14.2 16 L13 15 Z"
-        fill="#22d3ee"
-        opacity="0.92"
-        filter="url(#gbArmGlow)"
-      />
-      {/* RIGHT arm — Mobile phone (cyan) */}
-      <path
-        d="M27 15 L28 16 L27 17 L19 17 L17.8 16 L19 15 Z"
-        fill="#22d3ee"
-        opacity="0.92"
-        filter="url(#gbArmGlow)"
+      <line
+        x1="3.2"
+        y1="16"
+        x2="13"
+        y2="16"
+        stroke="#67e8f9"
+        strokeWidth="0.6"
+        opacity="0.6"
       />
 
-      {/* Center glowing node where all arms meet */}
+      {/* RIGHT arm (Mobile) — cyan */}
+      <path
+        d="M27.5 14.5 L29 16 L27.5 17.5 L18.5 17.5 L17.2 16 L18.5 14.5 Z"
+        fill="url(#gbArmC)"
+        filter="url(#gbArmGlow)"
+      />
+      <line
+        x1="28.8"
+        y1="16"
+        x2="19"
+        y2="16"
+        stroke="#67e8f9"
+        strokeWidth="0.6"
+        opacity="0.6"
+      />
+
+      {/* ── Center glowing node ── */}
       <circle
         cx="16"
         cy="16"
-        r="3.8"
-        fill="url(#gbIconCenter)"
-        filter="url(#gbIconGlow)"
+        r="4"
+        fill="url(#gbNode)"
+        filter="url(#gbNodeGlow)"
       />
-      {/* Bright center dot */}
-      <circle cx="16" cy="16" r="1.6" fill="white" opacity="0.96" />
+      {/* Bright inner dot */}
+      <circle cx="16" cy="16" r="1.8" fill="white" opacity="0.98" />
     </svg>
   );
 }
 
 /**
- * Full Gamerbuddy wordmark: icon + "Gamer" (purple) + "buddy" (cyan).
- * Use `iconOnly` on very small viewports.
+ * Full Gamerbuddy wordmark: icon + "Gamer" (purple) "buddy" (cyan).
+ * textSize controls the type scale. iconOnly hides the text.
  */
 export function GamerbuddyLogo({
   iconSize = 26,
@@ -167,16 +220,17 @@ export function GamerbuddyLogo({
   className,
 }: {
   iconSize?: number;
-  textSize?: "lg" | "xl" | "2xl";
+  textSize?: "sm" | "base" | "lg" | "xl" | "2xl";
   iconOnly?: boolean;
   className?: string;
 }) {
-  const sizeClass =
-    textSize === "2xl"
-      ? "text-2xl"
-      : textSize === "lg"
-      ? "text-lg"
-      : "text-xl";
+  const sizeClass: Record<string, string> = {
+    sm:   "text-sm",
+    base: "text-base",
+    lg:   "text-lg",
+    xl:   "text-xl",
+    "2xl":"text-2xl",
+  };
 
   return (
     <span
@@ -186,10 +240,10 @@ export function GamerbuddyLogo({
       <GamerbuddyIcon size={iconSize} />
       {!iconOnly && (
         <span
-          className={`font-extrabold tracking-tight uppercase leading-none ${sizeClass}`}
-          style={{ letterSpacing: "-0.01em" }}
+          className={`font-extrabold leading-none select-none ${sizeClass[textSize] ?? "text-xl"}`}
+          style={{ letterSpacing: "0.01em" }}
         >
-          <span style={{ color: "#a855f7" }}>Gamer</span>
+          <span style={{ color: "#c084fc" }}>Gamer</span>
           <span style={{ color: "#22d3ee" }}>buddy</span>
         </span>
       )}

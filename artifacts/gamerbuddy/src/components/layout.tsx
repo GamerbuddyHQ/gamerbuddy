@@ -222,11 +222,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
               </button>
             )}
             <Link href="/" className="flex items-center">
+              {/* Mobile: smaller full wordmark */}
+              <span className="sm:hidden">
+                <GamerbuddyLogo iconSize={22} textSize="base" />
+              </span>
+              {/* Desktop: standard full wordmark */}
               <span className="hidden sm:flex">
                 <GamerbuddyLogo iconSize={26} textSize="xl" />
-              </span>
-              <span className="sm:hidden">
-                <GamerbuddyIcon size={26} />
               </span>
             </Link>
           </div>
