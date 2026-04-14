@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { Link } from "wouter";
 import { Gamepad2, Users, Coins, Zap, Shield, Star, Trophy } from "lucide-react";
+import { useI18n } from "@/lib/i18n";
 
 /* ── floating particles canvas ─────────────────────────────── */
 function ParticleCanvas() {
@@ -166,6 +167,8 @@ function Step({ n, title, desc }: { n: number; title: string; desc: string }) {
 
 /* ── main ───────────────────────────────────────────────────── */
 export default function Home() {
+  const { t } = useI18n();
+
   return (
     <div className="overflow-x-hidden">
       {/* ═══════════════════ HERO ═══════════════════ */}
@@ -216,17 +219,17 @@ export default function Home() {
               }}
             >
               <Gamepad2 className="h-3.5 w-3.5" />
-              The Co-op Gaming Marketplace
+              {t.home.badge}
             </div>
           </div>
 
-          {/* headline — solid colors, no background-clip (avoids purple block bug) */}
+          {/* headline */}
           <h1 className="font-black tracking-tight leading-tight mb-5">
             <span
               className="block text-white text-4xl sm:text-6xl md:text-7xl"
               style={{ textShadow: "0 2px 20px rgba(255,255,255,0.08)" }}
             >
-              Find Your Perfect
+              {t.home.headline1}
             </span>
             <span
               className="block text-4xl sm:text-6xl md:text-7xl"
@@ -235,7 +238,7 @@ export default function Home() {
                 textShadow: "0 0 40px rgba(168,85,247,0.55), 0 2px 12px rgba(168,85,247,0.3)",
               }}
             >
-              Gaming Partner
+              {t.home.headline2}
             </span>
           </h1>
 
@@ -243,11 +246,7 @@ export default function Home() {
           <p className="text-base sm:text-lg leading-relaxed mb-8 mx-auto max-w-2xl"
             style={{ color: "rgba(255,255,255,0.6)" }}
           >
-            Hire skilled &amp; friendly gamers for co-op and multiplayer sessions worldwide.
-            No more toxic randoms.{" "}
-            <span style={{ color: "rgba(255,255,255,0.85)", fontWeight: 600 }}>
-              Real teammates. Real fun.
-            </span>
+            {t.home.subheadline}
           </p>
 
           {/* CTA buttons */}
@@ -262,7 +261,7 @@ export default function Home() {
               >
                 <span className="flex items-center justify-center gap-2">
                   <Users className="h-4 w-4" />
-                  Find a Teammate
+                  {t.home.cta1}
                 </span>
               </button>
             </Link>
@@ -278,7 +277,7 @@ export default function Home() {
               >
                 <span className="flex items-center justify-center gap-2">
                   <Gamepad2 className="h-4 w-4" />
-                  Browse Requests
+                  {t.home.cta2}
                 </span>
               </button>
             </Link>
@@ -343,9 +342,9 @@ export default function Home() {
                 <Trophy className="h-7 w-7 text-yellow-400" />
               </div>
               <div className="text-left">
-                <p className="text-[15px] font-extrabold text-white">Host a Tournament — Crown the Champion!</p>
+                <p className="text-[15px] font-extrabold text-white">{t.home.cta3} — Crown the Champion!</p>
                 <p className="text-[12px] mt-0.5" style={{ color: "rgba(255,255,255,0.50)" }}>
-                  2–100 players · Prize pools $100–$10,000 · 10% platform fee · Free entry supported
+                  2–100 players · Prize pools $100–$10,000 · 10% platform fee · {t.tournaments.free}
                 </p>
               </div>
             </div>
@@ -353,7 +352,7 @@ export default function Home() {
               className="shrink-0 px-5 py-2.5 rounded-xl font-extrabold text-[13px] transition-all duration-150 group-hover:brightness-110 active:scale-95"
               style={{ background: "linear-gradient(135deg,#fbbf24,#f59e0b)", color: "#000", boxShadow: "0 0 20px rgba(251,191,36,0.30)" }}
             >
-              View Tournaments
+              {t.nav.tournaments}
             </div>
           </div>
         </Link>
@@ -543,7 +542,7 @@ export default function Home() {
 
           <div className="relative space-y-5">
             <div className="text-xs font-black uppercase tracking-widest text-primary mb-1">
-              Ready to play?
+              {t.home.finalCta}
             </div>
             <h2 className="text-3xl sm:text-4xl font-black text-white uppercase tracking-tight leading-tight">
               Your Next Session<br />Starts Here
@@ -562,7 +561,7 @@ export default function Home() {
                 >
                   <span className="flex items-center justify-center gap-2">
                     <Gamepad2 className="h-4 w-4" />
-                    Create Free Account
+                    {t.home.finalCtaBtn}
                   </span>
                   <div
                     className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 pointer-events-none"
@@ -578,7 +577,7 @@ export default function Home() {
                     background: "rgba(255,255,255,0.04)",
                   }}
                 >
-                  Browse Without Account
+                  {t.home.cta2}
                 </button>
               </Link>
             </div>

@@ -3,11 +3,12 @@ import { Link, useLocation } from "wouter";
 import { useAuth } from "@/lib/auth";
 import { useLogout } from "@workspace/api-client-react";
 import { AIChatWidget } from "@/components/ai-chat-widget";
+import { useI18n, LANGUAGES, type LangCode } from "@/lib/i18n";
 import {
   Gamepad2, Compass, LayoutDashboard, Wallet, User as UserIcon,
   LogOut, FileText, Bell, CheckCheck, X, Swords, Star,
   Trophy, MessageSquare, Zap, CircleDollarSign, ChevronRight, Menu,
-  ArrowLeft, Info, Shield, Users,
+  ArrowLeft, Info, Shield, Users, Globe,
 } from "lucide-react";
 import { GamerbuddyLogo, GamerbuddyIcon } from "@/components/gamerbuddy-logo";
 import { Button } from "@/components/ui/button";
@@ -79,6 +80,7 @@ function NotifItem({ notif, onClick }: { notif: AppNotification; onClick: () => 
 
 function NotificationBell() {
   const { user } = useAuthInner();
+  const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const [, setLocation] = useLocation();
@@ -127,7 +129,7 @@ function NotificationBell() {
           <div className="flex items-center justify-between px-4 py-3 border-b border-border/40">
             <div className="flex items-center gap-2">
               <Bell className="h-4 w-4 text-primary" />
-              <span className="text-sm font-bold uppercase tracking-wider text-white">Notifications</span>
+              <span className="text-sm font-bold uppercase tracking-wider text-white">{t.nav.notifications}</span>
               {unread > 0 && (
                 <span className="text-[10px] font-black bg-primary/20 text-primary border border-primary/30 rounded-full px-1.5 py-0.5">
                   {unread} new
@@ -140,7 +142,7 @@ function NotificationBell() {
                   onClick={() => markAllRead.mutate()}
                   className="text-[10px] text-primary hover:text-white transition-colors flex items-center gap-1 font-semibold"
                 >
-                  <CheckCheck className="h-3 w-3" /> All read
+                  <CheckCheck className="h-3 w-3" /> {t.nav.markAllRead}
                 </button>
               )}
               <button onClick={() => setOpen(false)} className="text-muted-foreground hover:text-white transition-colors p-0.5">
@@ -153,7 +155,7 @@ function NotificationBell() {
             {recent.length === 0 ? (
               <div className="text-center py-8 space-y-2">
                 <Bell className="h-8 w-8 mx-auto text-muted-foreground/20" />
-                <div className="text-xs text-muted-foreground/50">No notifications yet</div>
+                <div className="text-xs text-muted-foreground/50">{t.nav.noNotifications}</div>
               </div>
             ) : (
               recent.map((n) => <NotifItem key={n.id} notif={n} onClick={() => setOpen(false)} />)
@@ -166,7 +168,7 @@ function NotificationBell() {
                 onClick={() => { setOpen(false); setLocation("/notifications"); }}
                 className="w-full text-center text-xs text-primary hover:text-white transition-colors py-2 font-semibold flex items-center justify-center gap-1.5"
               >
-                View all notifications <ChevronRight className="h-3.5 w-3.5" />
+                {t.nav.viewAll} <ChevronRight className="h-3.5 w-3.5" />
               </button>
             </div>
           )}
@@ -176,11 +178,115 @@ function NotificationBell() {
   );
 }
 
+/* ── Language Selector ── */
+function LangSelector() {
+  const { lang, setLang, t } = useI18n();
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  const current = LANGUAGES.find((l) => l.code === lang) ?? LANGUAGES[0];
+
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  return (
+    <div className="relative" ref={ref}>
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="h-9 flex items-center gap-1.5 px-2.5 rounded-xl border border-border/60 bg-background/60 hover:border-primary/50 hover:bg-primary/10 transition-all"
+        title={t.nav.selectLanguage}
+        aria-label={t.nav.selectLanguage}
+      >
+        <span className="text-base leading-none">{current.flag}</span>
+        <span className="hidden sm:block text-[11px] font-bold text-muted-foreground/70">{current.code.toUpperCase()}</span>
+        <Globe className="h-3.5 w-3.5 text-muted-foreground/50 hidden sm:block" />
+      </button>
+
+      {open && (
+        <div
+          className="absolute right-0 top-11 rounded-2xl border border-border bg-card shadow-2xl z-[200] overflow-hidden py-1.5"
+          style={{
+            width: "min(220px, calc(100vw - 24px))",
+            boxShadow: "0 20px 60px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.05)",
+          }}
+        >
+          <div className="h-0.5 bg-gradient-to-r from-transparent via-primary to-transparent mb-1" />
+          <div className="px-3 pb-1">
+            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">{t.nav.selectLanguage}</p>
+          </div>
+          <div className="max-h-72 overflow-y-auto">
+            {LANGUAGES.map((l) => {
+              const isActive = l.code === lang;
+              return (
+                <button
+                  key={l.code}
+                  onClick={() => { setLang(l.code); setOpen(false); }}
+                  className="w-full flex items-center gap-3 px-3 py-2 text-left transition-colors hover:bg-primary/10"
+                  style={isActive ? { color: "#c084fc" } : { color: "rgba(255,255,255,0.70)" }}
+                >
+                  <span className="text-lg w-6 text-center leading-none">{l.flag}</span>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-[12px] font-bold leading-tight">{l.nativeLabel}</div>
+                    <div className="text-[10px] text-muted-foreground/50">{l.label}</div>
+                  </div>
+                  {isActive && (
+                    <span className="h-1.5 w-1.5 rounded-full bg-primary shrink-0" />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ── Mobile Language Picker (standalone so hooks aren't inside a map) ── */
+function MobileLangPicker({ onPick }: { onPick: () => void }) {
+  const { lang, setLang, t } = useI18n();
+  return (
+    <div className="pt-3">
+      <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40 px-1 mb-2">{t.nav.selectLanguage}</p>
+      <div className="grid grid-cols-2 gap-2">
+        {LANGUAGES.map((l) => {
+          const isActive = l.code === lang;
+          return (
+            <button
+              key={l.code}
+              onClick={() => { setLang(l.code); onPick(); }}
+              className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl border text-left transition-colors"
+              style={isActive ? {
+                background: "rgba(168,85,247,0.15)",
+                borderColor: "rgba(168,85,247,0.40)",
+                color: "#c084fc",
+              } : {
+                background: "rgba(255,255,255,0.03)",
+                borderColor: "rgba(255,255,255,0.08)",
+                color: "rgba(255,255,255,0.55)",
+              }}
+            >
+              <span className="text-xl leading-none">{l.flag}</span>
+              <span className="text-[12px] font-bold truncate">{l.nativeLabel}</span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 export function Layout({ children }: { children: React.ReactNode }) {
   const { user, logout: clearAuth } = useAuth();
   const [location, setLocation] = useLocation();
   const logoutMutation = useLogout();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { t } = useI18n();
 
   useEffect(() => { setMobileOpen(false); }, [location]);
 
@@ -194,19 +300,19 @@ export function Layout({ children }: { children: React.ReactNode }) {
   };
 
   const navItems = [
-    { href: "/browse",      label: "Browse Requests", icon: Compass   },
-    { href: "/tournaments", label: "Tournaments",      icon: Trophy    },
-    { href: "/community",   label: "Community",        icon: Users     },
+    { href: "/browse",      label: t.nav.browseRequests, icon: Compass   },
+    { href: "/tournaments", label: t.nav.tournaments,    icon: Trophy    },
+    { href: "/community",   label: t.nav.community,      icon: Users     },
     ...(user
       ? [
-          { href: "/dashboard",      label: "Dashboard",      icon: LayoutDashboard },
-          { href: "/my-requests",    label: "My Requests",    icon: FileText        },
-          { href: "/my-tournaments", label: "My Tournaments", icon: Swords          },
-          { href: "/wallets",        label: "Wallets",        icon: Wallet          },
-          { href: "/profile",        label: "Profile",        icon: UserIcon        },
+          { href: "/dashboard",      label: t.nav.dashboard,      icon: LayoutDashboard },
+          { href: "/my-requests",    label: t.nav.myRequests,     icon: FileText        },
+          { href: "/my-tournaments", label: t.nav.myTournaments,  icon: Swords          },
+          { href: "/wallets",        label: t.nav.wallets,        icon: Wallet          },
+          { href: "/profile",        label: t.nav.profile,        icon: UserIcon        },
         ]
       : []),
-    { href: "/about", label: "About", icon: Info },
+    { href: "/about", label: t.nav.about, icon: Info },
   ];
 
   return (
@@ -218,18 +324,16 @@ export function Layout({ children }: { children: React.ReactNode }) {
               <button
                 onClick={() => window.history.back()}
                 className="flex items-center gap-1.5 h-9 px-2.5 rounded-xl border border-border/60 bg-background/60 hover:border-primary/50 hover:bg-primary/10 hover:text-primary text-muted-foreground transition-all text-sm font-semibold"
-                aria-label="Go back"
+                aria-label={t.nav.back}
               >
                 <ArrowLeft className="h-4 w-4 shrink-0" />
-                <span className="hidden sm:inline">Back</span>
+                <span className="hidden sm:inline">{t.nav.back}</span>
               </button>
             )}
             <Link href="/" className="flex items-center">
-              {/* Mobile: smaller full wordmark */}
               <span className="sm:hidden">
                 <GamerbuddyLogo iconSize={22} textSize="base" />
               </span>
-              {/* Desktop: standard full wordmark */}
               <span className="hidden sm:flex">
                 <GamerbuddyLogo iconSize={26} textSize="xl" />
               </span>
@@ -281,21 +385,22 @@ export function Layout({ children }: { children: React.ReactNode }) {
           </nav>
 
           <div className="flex items-center gap-2 shrink-0">
+            <LangSelector />
             <NotificationBell />
 
             {/* Desktop auth */}
             {user ? (
               <Button variant="ghost" size="sm" onClick={handleLogout} className="hidden md:flex text-muted-foreground hover:text-destructive">
                 <LogOut className="h-4 w-4 mr-2" />
-                Sign Out
+                {t.nav.signOut}
               </Button>
             ) : (
               <div className="hidden md:flex items-center gap-2">
                 <Button variant="ghost" asChild>
-                  <Link href="/login">Log In</Link>
+                  <Link href="/login">{t.nav.logIn}</Link>
                 </Button>
                 <Button asChild className="bg-primary text-primary-foreground hover:bg-primary/90">
-                  <Link href="/signup">Sign Up</Link>
+                  <Link href="/signup">{t.nav.signUp}</Link>
                 </Button>
               </div>
             )}
@@ -359,6 +464,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
               );
             })}
 
+            {/* Mobile language picker */}
+            <MobileLangPicker onPick={() => setMobileOpen(false)} />
+
             <div className="pt-4 border-t border-border/40 mt-2">
               {user ? (
                 <button
@@ -366,15 +474,15 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   className="flex items-center gap-3 w-full px-4 py-3.5 rounded-xl border border-destructive/30 text-destructive bg-destructive/5 font-semibold text-base transition-all hover:bg-destructive/10"
                 >
                   <LogOut className="h-5 w-5 shrink-0" />
-                  Sign Out
+                  {t.nav.signOut}
                 </button>
               ) : (
                 <div className="flex flex-col gap-3">
                   <Button asChild size="lg" className="w-full bg-primary text-primary-foreground font-bold text-base">
-                    <Link href="/signup">Sign Up</Link>
+                    <Link href="/signup">{t.nav.signUp}</Link>
                   </Button>
                   <Button asChild size="lg" variant="outline" className="w-full font-bold text-base">
-                    <Link href="/login">Log In</Link>
+                    <Link href="/login">{t.nav.logIn}</Link>
                   </Button>
                 </div>
               )}
@@ -392,20 +500,18 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <div className="h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
         <div className="container py-6 md:py-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            {/* Branding */}
             <div className="flex items-center gap-3 opacity-60">
               <GamerbuddyLogo iconSize={20} textSize="lg" />
               <span className="text-white/20 text-xs">·</span>
-              <span className="text-xs text-muted-foreground/50">Global Gaming Marketplace</span>
+              <span className="text-xs text-muted-foreground/50">{t.footer.tagline}</span>
             </div>
 
-            {/* Footer links */}
             <div className="flex items-center gap-5 text-xs text-muted-foreground/60">
               <Link
                 href="/browse"
                 className="hover:text-primary transition-colors flex items-center gap-1.5 font-medium"
               >
-                <Compass className="h-3 w-3" /> Browse
+                <Compass className="h-3 w-3" /> {t.footer.browse}
               </Link>
               <Link
                 href="/about"
@@ -413,19 +519,17 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   location === "/about" ? "text-primary" : ""
                 }`}
               >
-                <Shield className="h-3 w-3" /> About &amp; Disclaimer
+                <Shield className="h-3 w-3" /> {t.footer.aboutDisclaimer}
               </Link>
             </div>
 
-            {/* Copyright */}
             <div className="text-xs text-muted-foreground/40 text-center md:text-right">
-              © {new Date().getFullYear()} Gamerbuddy. Early development phase.
+              {t.footer.copyright} {t.footer.earlyDev}
             </div>
           </div>
         </div>
       </footer>
 
-      {/* Floating AI chat support */}
       <AIChatWidget />
     </div>
   );

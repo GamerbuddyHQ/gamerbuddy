@@ -45,6 +45,7 @@ A full-stack gaming marketplace web app where users can hire other gamers to pla
 11. **Reports**: report users with reason + description
 12. **Gift/Tip**: send tips to gamers after sessions
 13. **Safety Banner**: platform safety warnings on request pages
+14. **Multi-Language Support**: 10 languages (EN/HI/ES/FR/DE/PT/AR/JA/KO/ZH), persisted via localStorage, auto-detected from browser, RTL support for Arabic, language selector in navbar
 
 ## Database Schema
 
