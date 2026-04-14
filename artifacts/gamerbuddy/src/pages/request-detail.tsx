@@ -1229,19 +1229,21 @@ function BidCard({
                 <div className="flex flex-col items-end gap-1 mt-0.5">
                   {/* Main label chip */}
                   <div
-                    className={`flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-extrabold uppercase tracking-wider ${dualPrefMatch ? "match-pulse" : ""}`}
+                    className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-extrabold uppercase tracking-wider whitespace-nowrap ${
+                      dualPrefMatch ? "match-perfect" :
+                      fullyMatches  ? "matches-glow"  : ""
+                    }`}
                     style={
                       dualPrefMatch
                         ? {
-                            background: "linear-gradient(135deg,rgba(16,185,129,0.22) 0%,rgba(52,211,153,0.12) 100%)",
-                            border: "1px solid rgba(52,211,153,0.55)",
+                            background: "linear-gradient(135deg,rgba(16,185,129,0.24) 0%,rgba(52,211,153,0.14) 100%)",
+                            border: "1px solid rgba(52,211,153,0.60)",
                             color: "#34d399",
-                            boxShadow: "0 0 14px rgba(16,185,129,0.30), 0 0 4px rgba(52,211,153,0.20)",
                           }
                         : fullyMatches
                         ? {
                             background: "rgba(16,185,129,0.14)",
-                            border: "1px solid rgba(16,185,129,0.38)",
+                            border: "1px solid rgba(16,185,129,0.42)",
                             color: "#10b981",
                           }
                         : {
@@ -1252,7 +1254,7 @@ function BidCard({
                     }
                   >
                     {dualPrefMatch ? (
-                      <span className="text-[11px] leading-none">✦</span>
+                      <span className="text-[12px] leading-none shrink-0">✦</span>
                     ) : fullyMatches ? (
                       <CheckCircle2 className="h-2.5 w-2.5 shrink-0" />
                     ) : (
