@@ -6,7 +6,7 @@ import {
   Send, Plus, X, Lightbulb, Users, AlertTriangle, ArrowUpDown,
   Flame, Clock, CornerDownRight, Shield, EyeOff, Trash2,
   CheckCircle2, AlertOctagon, Eye, ShieldAlert, Sparkles,
-  CircleDashed, Loader2,
+  CircleDashed, Loader2, Zap, Bug, Palette, HelpCircle, ChevronDown as ChevDown,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
@@ -45,11 +45,34 @@ function stripLinks(text: string): { clean: string; stripped: boolean } {
 /* ── Types ── */
 type SuggestionStatus = "visible" | "hidden" | "spam";
 
+type SuggestionCategory = "feature" | "bug" | "ui" | "other";
+
+const CATEGORY_CONFIG: Record<SuggestionCategory, {
+  label: string;
+  Icon: React.FC<{ className?: string }>;
+  bg: string;
+  border: string;
+  color: string;
+}> = {
+  feature: { label: "Feature Request", Icon: Zap,         bg: "rgba(168,85,247,0.12)",  border: "rgba(168,85,247,0.40)", color: "#c084fc" },
+  bug:     { label: "Bug Report",      Icon: Bug,         bg: "rgba(239,68,68,0.10)",   border: "rgba(239,68,68,0.38)",  color: "#f87171" },
+  ui:      { label: "UI Improvement",  Icon: Palette,     bg: "rgba(34,211,238,0.10)",  border: "rgba(34,211,238,0.38)", color: "#22d3ee" },
+  other:   { label: "Other",           Icon: HelpCircle,  bg: "rgba(100,116,139,0.12)", border: "rgba(100,116,139,0.35)",color: "#94a3b8" },
+};
+
+const CATEGORY_OPTIONS: { value: SuggestionCategory; label: string }[] = [
+  { value: "feature", label: "Feature Request" },
+  { value: "bug",     label: "Bug Report"      },
+  { value: "ui",      label: "UI Improvement"  },
+  { value: "other",   label: "Other"           },
+];
+
 type Suggestion = {
   id: number;
   title: string;
   body: string;
   status: SuggestionStatus;
+  category: SuggestionCategory;
   createdAt: string;
   userId: number;
   authorName: string;
@@ -121,6 +144,20 @@ function StatusBadge({ status }: { status: SuggestionStatus }) {
   return (
     <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: "rgba(239,68,68,0.15)", border: "1px solid rgba(239,68,68,0.35)", color: "#f87171" }}>
       <AlertOctagon className="h-2.5 w-2.5" /> Spam
+    </span>
+  );
+}
+
+/* ── Category badge ── */
+function CategoryBadge({ category }: { category: SuggestionCategory }) {
+  const cfg = CATEGORY_CONFIG[category] ?? CATEGORY_CONFIG.other;
+  return (
+    <span
+      className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0"
+      style={{ background: cfg.bg, border: `1px solid ${cfg.border}`, color: cfg.color }}
+    >
+      <cfg.Icon className="h-2.5 w-2.5" />
+      {cfg.label}
     </span>
   );
 }
@@ -615,16 +652,19 @@ function SuggestionCard({ suggestion, isAdmin }: { suggestion: Suggestion; isAdm
         {/* Content */}
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-3">
-            <div className="flex items-center gap-2 flex-wrap">
-              <h3 className="text-[15px] font-bold text-white leading-snug">{suggestion.title}</h3>
-              <StatusBadge status={suggestion.status} />
-            </div>
+            <h3 className="text-[15px] font-bold text-white leading-snug flex-1 min-w-0">{suggestion.title}</h3>
             <span className="text-[10px] text-muted-foreground/35 tabular-nums shrink-0">
               {suggestion.likes}↑ {suggestion.dislikes}↓
             </span>
           </div>
 
-          <p className="text-[13px] text-muted-foreground/70 leading-relaxed mt-2 whitespace-pre-wrap break-words">
+          {/* Category + status badges */}
+          <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+            <CategoryBadge category={suggestion.category ?? "other"} />
+            <StatusBadge status={suggestion.status} />
+          </div>
+
+          <p className="text-[13px] text-muted-foreground/70 leading-relaxed mt-2.5 whitespace-pre-wrap break-words">
             {suggestion.body}
           </p>
 
@@ -661,6 +701,7 @@ function SubmitForm({ onSuccess }: { onSuccess: () => void }) {
   const qc = useQueryClient();
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
+  const [category, setCategory] = useState<SuggestionCategory>("other");
   const [titleStripped, setTitleStripped] = useState(false);
   const [bodyStripped, setBodyStripped] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -671,7 +712,7 @@ function SubmitForm({ onSuccess }: { onSuccess: () => void }) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ title: title.trim(), body: body.trim() }),
+        body: JSON.stringify({ title: title.trim(), body: body.trim(), category }),
       });
       const data = await r.json();
       if (!r.ok) throw new Error(data.error ?? "Failed to post suggestion");
@@ -681,6 +722,7 @@ function SubmitForm({ onSuccess }: { onSuccess: () => void }) {
       qc.invalidateQueries({ queryKey: ["suggestions"] });
       setTitle("");
       setBody("");
+      setCategory("other");
       setSubmitted(true);
     },
     onError: (e: Error) => toast({ title: "Error", description: e.message, variant: "destructive" }),
@@ -747,6 +789,38 @@ function SubmitForm({ onSuccess }: { onSuccess: () => void }) {
           />
           <div className="flex justify-end mt-1 px-1">
             <span className="text-[10px] text-muted-foreground/30">{title.length}/120</span>
+          </div>
+        </div>
+
+        {/* Category pill picker */}
+        <div className="space-y-1.5">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50">Category</span>
+          <div className="flex flex-wrap gap-1.5">
+            {CATEGORY_OPTIONS.map(({ value, label }) => {
+              const cfg = CATEGORY_CONFIG[value];
+              const active = category === value;
+              return (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => setCategory(value)}
+                  className="inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1.5 rounded-lg transition-all duration-150 active:scale-95"
+                  style={active ? {
+                    background: cfg.bg,
+                    border: `1px solid ${cfg.border}`,
+                    color: cfg.color,
+                    boxShadow: `0 0 10px ${cfg.bg}`,
+                  } : {
+                    background: "rgba(255,255,255,0.03)",
+                    border: "1px solid rgba(255,255,255,0.08)",
+                    color: "rgba(255,255,255,0.40)",
+                  }}
+                >
+                  <cfg.Icon className="h-3 w-3" />
+                  {label}
+                </button>
+              );
+            })}
           </div>
         </div>
 

@@ -41,6 +41,7 @@ router.get("/community/suggestions", loadUser, async (req, res): Promise<void> =
       title: suggestionsTable.title,
       body: suggestionsTable.body,
       status: suggestionsTable.status,
+      category: suggestionsTable.category,
       createdAt: suggestionsTable.createdAt,
       userId: suggestionsTable.userId,
       authorName: usersTable.name,
@@ -95,7 +96,7 @@ router.get("/community/suggestions", loadUser, async (req, res): Promise<void> =
 ────────────────────────────────────────────────────────────── */
 router.post("/community/suggestions", requireAuth, async (req, res): Promise<void> => {
   const user = req.user!;
-  const { title, body } = req.body as { title?: string; body?: string };
+  const { title, body, category } = req.body as { title?: string; body?: string; category?: string };
 
   if (!title?.trim() || !body?.trim()) {
     res.status(400).json({ error: "Title and body are required" });
@@ -114,9 +115,12 @@ router.post("/community/suggestions", requireAuth, async (req, res): Promise<voi
     return;
   }
 
+  const VALID_CATEGORIES = ["feature", "bug", "ui", "other"];
+  const safeCategory = category && VALID_CATEGORIES.includes(category) ? category : "other";
+
   const [suggestion] = await db
     .insert(suggestionsTable)
-    .values({ userId: user.id, title: cleanTitle, body: cleanBody, status: "visible" })
+    .values({ userId: user.id, title: cleanTitle, body: cleanBody, status: "visible", category: safeCategory })
     .returning();
 
   res.status(201).json({ ...suggestion, authorName: user.name, likes: 0, dislikes: 0, commentCount: 0, myVote: null });

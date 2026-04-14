@@ -7,6 +7,7 @@ export const suggestionsTable = pgTable("suggestions", {
   title: text("title").notNull(),
   body: text("body").notNull(),
   status: text("status").notNull().default("visible"),
+  category: text("category").notNull().default("other"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
