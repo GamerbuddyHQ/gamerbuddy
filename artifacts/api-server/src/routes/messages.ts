@@ -3,6 +3,8 @@ import { db, bidsTable, messagesTable, usersTable, gameRequestsTable } from "@wo
 import { eq, asc } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
 import { emitNewMessage } from "../socket-server";
+import { validate, sanitize, PostMessageSchema } from "../lib/validate";
+import { messageLimiter } from "../lib/rate-limit";
 
 const router: IRouter = Router();
 
@@ -58,7 +60,7 @@ router.get("/bids/:bidId/messages", requireAuth, async (req, res): Promise<void>
   })));
 });
 
-router.post("/bids/:bidId/messages", requireAuth, async (req, res): Promise<void> => {
+router.post("/bids/:bidId/messages", requireAuth, messageLimiter, validate(PostMessageSchema), async (req, res): Promise<void> => {
   const user = req.user!;
   const bidId = parseInt(req.params.bidId);
   if (isNaN(bidId)) { res.status(400).json({ error: "Invalid bid ID" }); return; }
@@ -66,19 +68,13 @@ router.post("/bids/:bidId/messages", requireAuth, async (req, res): Promise<void
   const access = await getBidAccess(bidId, user.id);
   if (!access) { res.status(403).json({ error: "Access denied" }); return; }
 
-  const { content } = req.body as { content?: string };
-  if (!content || content.trim().length < 1) {
-    res.status(400).json({ error: "Message cannot be empty" });
-    return;
-  }
-  if (content.trim().length > 1000) {
-    res.status(400).json({ error: "Message too long (max 1000 chars)" });
-    return;
-  }
+  const { content } = req.body as { content: string };
+  const safeContent = sanitize(content);
+  if (!safeContent) { res.status(400).json({ error: "Message cannot be empty" }); return; }
 
   const [msg] = await db
     .insert(messagesTable)
-    .values({ bidId, senderId: user.id, content: content.trim() })
+    .values({ bidId, senderId: user.id, content: safeContent })
     .returning();
 
   const payload = {

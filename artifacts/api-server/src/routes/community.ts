@@ -8,6 +8,8 @@ import {
 } from "@workspace/db";
 import { eq, sql, and, inArray } from "drizzle-orm";
 import { requireAuth, loadUser } from "../middlewares/auth";
+import { validate, sanitizeComment, sanitizeSuggestionText, PostSuggestionSchema, PostCommentSchema } from "../lib/validate";
+import { suggestionLimiter, commentLimiter } from "../lib/rate-limit";
 
 const router: IRouter = Router();
 
@@ -94,33 +96,19 @@ router.get("/community/suggestions", loadUser, async (req, res): Promise<void> =
 /* ──────────────────────────────────────────────────────────────
    POST /community/suggestions
 ────────────────────────────────────────────────────────────── */
-router.post("/community/suggestions", requireAuth, async (req, res): Promise<void> => {
+router.post("/community/suggestions", requireAuth, suggestionLimiter, validate(PostSuggestionSchema), async (req, res): Promise<void> => {
   const user = req.user!;
-  const { title, body, category } = req.body as { title?: string; body?: string; category?: string };
+  const { title, body, category } = req.body as { title: string; body: string; category: string };
 
-  if (!title?.trim() || !body?.trim()) {
-    res.status(400).json({ error: "Title and body are required" });
-    return;
-  }
-  const cleanTitle = stripLinks(title.trim());
-  const cleanBody  = stripLinks(body.trim());
-  if (!cleanTitle) { res.status(400).json({ error: "Title is required" }); return; }
-  if (!cleanBody)  { res.status(400).json({ error: "Body is required" });  return; }
-  if (cleanTitle.length > 120) {
-    res.status(400).json({ error: "Title must be 120 characters or less" });
-    return;
-  }
-  if (cleanBody.length > 1000) {
-    res.status(400).json({ error: "Body must be 1000 characters or less" });
-    return;
-  }
+  const cleanTitle = sanitizeSuggestionText(title);
+  const cleanBody  = sanitizeSuggestionText(body);
 
-  const VALID_CATEGORIES = ["feature", "bug", "ui", "other"];
-  const safeCategory = category && VALID_CATEGORIES.includes(category) ? category : "other";
+  if (!cleanTitle) { res.status(400).json({ error: "Title cannot be empty after sanitization" }); return; }
+  if (!cleanBody)  { res.status(400).json({ error: "Body cannot be empty after sanitization" });  return; }
 
   const [suggestion] = await db
     .insert(suggestionsTable)
-    .values({ userId: user.id, title: cleanTitle, body: cleanBody, status: "visible", category: safeCategory })
+    .values({ userId: user.id, title: cleanTitle, body: cleanBody, status: "visible", category })
     .returning();
 
   res.status(201).json({ ...suggestion, authorName: user.name, likes: 0, dislikes: 0, commentCount: 0, myVote: null });
@@ -255,15 +243,13 @@ router.get("/community/suggestions/:id/comments", async (req, res): Promise<void
 /* ──────────────────────────────────────────────────────────────
    POST /community/suggestions/:id/comments  { body, parentId? }
 ────────────────────────────────────────────────────────────── */
-router.post("/community/suggestions/:id/comments", requireAuth, async (req, res): Promise<void> => {
+router.post("/community/suggestions/:id/comments", requireAuth, commentLimiter, validate(PostCommentSchema), async (req, res): Promise<void> => {
   const user = req.user!;
   const suggestionId = parseInt(req.params.id, 10);
-  const { body, parentId } = req.body as { body?: string; parentId?: number | null };
+  const { body, parentId } = req.body as { body: string; parentId?: number | null };
 
-  if (!body?.trim()) { res.status(400).json({ error: "Comment body is required" }); return; }
-  const cleanBody = stripLinks(body.trim());
-  if (!cleanBody) { res.status(400).json({ error: "Comment body is required" }); return; }
-  if (cleanBody.length > 500) { res.status(400).json({ error: "Comment must be 500 characters or less" }); return; }
+  const cleanBody = sanitizeComment(body);
+  if (!cleanBody) { res.status(400).json({ error: "Comment body cannot be empty after sanitization" }); return; }
 
   const [suggestion] = await db.select().from(suggestionsTable).where(eq(suggestionsTable.id, suggestionId));
   if (!suggestion) { res.status(404).json({ error: "Suggestion not found" }); return; }

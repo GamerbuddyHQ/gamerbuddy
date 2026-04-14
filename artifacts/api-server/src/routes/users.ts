@@ -4,6 +4,7 @@ import { db, usersTable, reviewsTable, gameRequestsTable, bidsTable, profilePurc
 import { eq, desc, and, sql, or } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
 import { recalculateTrustFactor } from "../trust-factor";
+import { validate, sanitize, UpdateProfileSchema, PostQuestSchema } from "../lib/validate";
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -147,14 +148,9 @@ router.get("/quest", requireAuth, async (req, res): Promise<void> => {
   res.json(entries.map((q) => ({ ...q, createdAt: q.createdAt.toISOString() })));
 });
 
-router.post("/quest", requireAuth, async (req, res): Promise<void> => {
+router.post("/quest", requireAuth, validate(PostQuestSchema), async (req, res): Promise<void> => {
   const user = req.user!;
-  const { gameName, helpType, playstyle } = req.body as { gameName?: string; helpType?: string; playstyle?: string };
-
-  if (!gameName?.trim() || !helpType?.trim() || !playstyle?.trim()) {
-    res.status(400).json({ error: "gameName, helpType, and playstyle are required" });
-    return;
-  }
+  const { gameName, helpType, playstyle } = req.body as { gameName: string; helpType: string; playstyle: string };
 
   const existing = await db.select().from(questEntriesTable).where(eq(questEntriesTable.userId, user.id));
   if (existing.length >= 10) {
@@ -164,9 +160,9 @@ router.post("/quest", requireAuth, async (req, res): Promise<void> => {
 
   const [entry] = await db.insert(questEntriesTable).values({
     userId: user.id,
-    gameName: gameName.trim().slice(0, 60),
-    helpType: helpType.trim().slice(0, 100),
-    playstyle: playstyle.trim().slice(0, 60),
+    gameName:  sanitize(gameName),
+    helpType:  sanitize(helpType),
+    playstyle: sanitize(playstyle),
   }).returning();
 
   res.status(201).json({ ...entry, createdAt: entry.createdAt.toISOString() });
@@ -184,10 +180,10 @@ router.delete("/quest/:id", requireAuth, async (req, res): Promise<void> => {
   res.json({ success: true });
 });
 
-router.patch("/profile", requireAuth, async (req, res): Promise<void> => {
+router.patch("/profile", requireAuth, validate(UpdateProfileSchema), async (req, res): Promise<void> => {
   const user = req.user!;
   const { bio, profileBackground, profileTitle, country, gender } = req.body as {
-    bio?: string;
+    bio?: string | null;
     profileBackground?: string | null;
     profileTitle?: string | null;
     country?: string | null;
@@ -196,8 +192,8 @@ router.patch("/profile", requireAuth, async (req, res): Promise<void> => {
 
   const updates: Partial<typeof usersTable.$inferInsert> = {};
 
-  if (typeof bio === "string") {
-    updates.bio = bio.trim().slice(0, 300) || null;
+  if (bio !== undefined) {
+    updates.bio = bio ? sanitize(bio).slice(0, 500) || null : null;
   }
   if (profileBackground !== undefined) {
     updates.profileBackground = profileBackground || null;

@@ -13,7 +13,9 @@ A full-stack gaming marketplace web app where users can hire other gamers to pla
 - **Backend**: Express 5 (TypeScript)
 - **Database**: PostgreSQL + Drizzle ORM
 - **Authentication**: Custom session-based (cookie + bcryptjs)
-- **Validation**: Zod (`zod/v4`), `drizzle-zod`
+- **Validation**: Zod (per-route schemas in `api-server/src/lib/validate.ts`)
+- **Rate limiting**: `express-rate-limit` (login/signup: 5/min, bids: 5/min, comments: 10/min, messages: 30/min, tournaments: 3/min)
+- **Sanitization**: HTML entity escaping on all user text; GIF markers validated to Tenor-only URLs; bare links stripped from community posts
 - **API codegen**: Orval (from OpenAPI spec)
 - **Build**: esbuild (CJS bundle for API), Vite (frontend)
 - **File uploads**: multer (for official ID during signup)

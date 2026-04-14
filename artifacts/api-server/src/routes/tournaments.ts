@@ -9,6 +9,8 @@ import {
 } from "@workspace/db/schema";
 import { eq, and, desc, inArray } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
+import { validate, sanitize, PostTournamentSchema } from "../lib/validate";
+import { tournamentLimiter } from "../lib/rate-limit";
 
 const router = Router();
 
@@ -222,38 +224,15 @@ router.get("/tournaments/:id", async (req, res): Promise<void> => {
 });
 
 /* ── POST /tournaments ── create */
-router.post("/tournaments", requireAuth, async (req, res): Promise<void> => {
+router.post("/tournaments", requireAuth, tournamentLimiter, validate(PostTournamentSchema), async (req, res): Promise<void> => {
   const user = req.user!;
-  const { title, gameName, platform, tournamentType, maxPlayers, prizePool, rules, prizeDistribution, country, region, genderPreference } = req.body;
+  const { title, gameName, platform, tournamentType, maxPlayers, prizePool, rules, prizeDistribution, country, region, genderPreference } = req.body as {
+    title: string; gameName: string; platform: string; tournamentType: "h2h" | "squad" | "ffa";
+    maxPlayers: number; prizePool: number; rules: string; prizeDistribution?: string;
+    country: string; region: string; genderPreference: string;
+  };
 
-  if (!title?.trim() || !gameName?.trim() || !platform?.trim()) {
-    res.status(400).json({ error: "Title, game name, and platform are required" }); return;
-  }
-  if (!VALID_TYPES.includes(tournamentType as TournamentType)) {
-    res.status(400).json({ error: "Invalid tournament type" }); return;
-  }
-
-  if (!country?.trim() || !region?.trim() || !genderPreference?.trim()) {
-    res.status(400).json({ error: "Country, Region, and Gender preference are required" }); return;
-  }
-  if (!VALID_REGIONS.includes(region as typeof VALID_REGIONS[number])) {
-    res.status(400).json({ error: "Invalid region" }); return;
-  }
-  if (!VALID_GENDERS.includes(genderPreference as typeof VALID_GENDERS[number])) {
-    res.status(400).json({ error: "Invalid gender preference" }); return;
-  }
-
-  const prize = round2(parseFloat(prizePool));
-  if (isNaN(prize) || prize < MIN_PRIZE_POOL || prize > MAX_PRIZE_POOL) {
-    res.status(400).json({ error: `Prize pool must be between $${MIN_PRIZE_POOL} and $${MAX_PRIZE_POOL}` }); return;
-  }
-
-  const players = parseInt(maxPlayers);
-  if (isNaN(players) || players < MIN_PLAYERS || players > MAX_PLAYERS) {
-    res.status(400).json({ error: `Number of slots must be between ${MIN_PLAYERS} and ${MAX_PLAYERS}` }); return;
-  }
-
-  if (!rules?.trim()) { res.status(400).json({ error: "Rules / objectives are required" }); return; }
+  const prize = round2(prizePool);
 
   let distObj = { first: 100, second: 0, third: 0, custom: false };
   try { if (prizeDistribution) distObj = { ...distObj, ...JSON.parse(prizeDistribution) }; }
@@ -279,23 +258,23 @@ router.post("/tournaments", requireAuth, async (req, res): Promise<void> => {
     .insert(tournamentsTable)
     .values({
       hostId: user.id,
-      title: title.trim(),
-      gameName: gameName.trim(),
-      platform: platform.trim(),
+      title:          sanitize(title),
+      gameName:       sanitize(gameName),
+      platform:       sanitize(platform),
       tournamentType,
-      maxPlayers: players,
-      prizePool: String(prize),
-      entryFee: "0",
-      rules: rules.trim(),
+      maxPlayers,
+      prizePool:      String(prize),
+      entryFee:       "0",
+      rules:          sanitize(rules),
       prizeDistribution: JSON.stringify(distObj),
       status: "open",
-      country: country.trim(),
-      region: region.trim(),
-      genderPreference: genderPreference.trim(),
+      country:          country || "any",
+      region:           region  || "any",
+      genderPreference: genderPreference || "any",
     })
     .returning();
 
-  await recordTx(user.id, "hiring", "tournament_escrow", prize, `Prize pool escrowed for tournament: ${title.trim()}`);
+  await recordTx(user.id, "hiring", "tournament_escrow", prize, `Prize pool escrowed for tournament: ${title}`);
   req.log.info({ userId: user.id, tournamentId: tournament.id, prize }, "Tournament created");
   res.status(201).json(formatTournament(tournament, user.name, []));
 });

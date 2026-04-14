@@ -4,6 +4,8 @@ import { eq, desc, and, sql, inArray } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
 import { createNotification, sendEmailNotification } from "../notifications-helper";
 import { recalculateTrustFactor } from "../trust-factor";
+import { validate, sanitize, PostRequestSchema, PlaceBidSchema } from "../lib/validate";
+import { bidLimiter } from "../lib/rate-limit";
 
 const router: IRouter = Router();
 
@@ -182,7 +184,7 @@ router.get("/requests/:id", async (req, res): Promise<void> => {
   res.json(formatRequest(result, result.userName ?? "Unknown"));
 });
 
-router.post("/requests", requireAuth, async (req, res): Promise<void> => {
+router.post("/requests", requireAuth, validate(PostRequestSchema), async (req, res): Promise<void> => {
   const user = req.user!;
 
   const [wallet] = await db
@@ -198,52 +200,24 @@ router.post("/requests", requireAuth, async (req, res): Promise<void> => {
   }
 
   const { gameName, platform, skillLevel, objectives, isBulkHiring, bulkGamersNeeded, preferredCountry, preferredGender } = req.body as {
-    gameName?: string;
-    platform?: string;
-    skillLevel?: string;
-    objectives?: string;
-    isBulkHiring?: boolean;
-    bulkGamersNeeded?: number;
-    preferredCountry?: string;
-    preferredGender?: string;
+    gameName: string; platform: string; skillLevel: string; objectives: string;
+    isBulkHiring: boolean; bulkGamersNeeded?: number;
+    preferredCountry: string; preferredGender: string;
   };
-
-  if (!gameName || !platform || !skillLevel || !objectives) {
-    res.status(400).json({ error: "All fields are required" });
-    return;
-  }
-
-  if (!VALID_PLATFORMS.includes(platform)) {
-    res.status(400).json({ error: "Invalid platform" });
-    return;
-  }
-
-  if (!VALID_SKILL_LEVELS.includes(skillLevel)) {
-    res.status(400).json({ error: "Invalid skill level" });
-    return;
-  }
-
-  if (isBulkHiring) {
-    const n = Number(bulkGamersNeeded);
-    if (!Number.isInteger(n) || n < 3 || n > 100) {
-      res.status(400).json({ error: "Bulk hiring requires between 3 and 100 gamers" });
-      return;
-    }
-  }
 
   const [gameRequest] = await db
     .insert(gameRequestsTable)
     .values({
       userId: user.id,
-      gameName,
+      gameName:     sanitize(gameName),
       platform,
       skillLevel,
-      objectives,
+      objectives:   sanitize(objectives),
       status: "open",
       isBulkHiring: Boolean(isBulkHiring),
       bulkGamersNeeded: isBulkHiring ? Number(bulkGamersNeeded) : null,
       preferredCountry: preferredCountry || "any",
-      preferredGender: preferredGender || "any",
+      preferredGender:  preferredGender  || "any",
     })
     .returning();
 
@@ -404,7 +378,7 @@ router.get("/requests/:id/bids", async (req, res): Promise<void> => {
   );
 });
 
-router.post("/requests/:id/bids", requireAuth, async (req, res): Promise<void> => {
+router.post("/requests/:id/bids", requireAuth, bidLimiter, validate(PlaceBidSchema), async (req, res): Promise<void> => {
   const user = req.user!;
   const requestId = parseInt(req.params.id);
   if (isNaN(requestId)) {
@@ -432,17 +406,7 @@ router.post("/requests/:id/bids", requireAuth, async (req, res): Promise<void> =
     return;
   }
 
-  const { price, message } = req.body as { price?: number; message?: string };
-
-  if (!price || typeof price !== "number" || price <= 0) {
-    res.status(400).json({ error: "Price must be a positive number" });
-    return;
-  }
-
-  if (!message || message.trim().length < 5) {
-    res.status(400).json({ error: "Message must be at least 5 characters" });
-    return;
-  }
+  const { price, message } = req.body as { price: number; message: string };
 
   const [existing] = await db
     .select()
@@ -459,8 +423,8 @@ router.post("/requests/:id/bids", requireAuth, async (req, res): Promise<void> =
     .values({
       requestId,
       bidderId: user.id,
-      price: String(price),
-      message: message.trim(),
+      price: String(round2(price)),
+      message: sanitize(message),
       status: "pending",
     })
     .returning();

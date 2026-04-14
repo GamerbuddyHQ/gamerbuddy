@@ -5,6 +5,8 @@ import crypto from "crypto";
 import { db, usersTable, walletsTable, sessionsTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { logger } from "../lib/logger";
+import { SignupSchema, LoginSchema, sanitize, validate } from "../lib/validate";
+import { loginLimiter, signupLimiter } from "../lib/rate-limit";
 
 const router: IRouter = Router();
 const upload = multer({ storage: multer.memoryStorage() });
@@ -43,24 +45,17 @@ function formatUser(user: {
 
 router.post(
   "/auth/signup",
+  signupLimiter,
   upload.single("officialId"),
   async (req, res): Promise<void> => {
-    const { name, email, password, phone } = req.body as {
-      name?: string;
-      email?: string;
-      password?: string;
-      phone?: string;
-    };
-
-    if (!name || !email || !password || !phone) {
-      res.status(400).json({ error: "Missing required fields: name, email, password, phone" });
+    // Validate with Zod after multer has parsed multipart body
+    const parsed = SignupSchema.safeParse(req.body);
+    if (!parsed.success) {
+      const errors = parsed.error.errors.map((e) => e.message).join("; ");
+      res.status(400).json({ error: errors });
       return;
     }
-
-    if (password.length < 6) {
-      res.status(400).json({ error: "Password must be at least 6 characters" });
-      return;
-    }
+    const { name, email, password, phone } = parsed.data;
 
     const [existing] = await db
       .select({ id: usersTable.id })
@@ -78,10 +73,10 @@ router.post(
     const [user] = await db
       .insert(usersTable)
       .values({
-        name,
+        name: sanitize(name),
         email,
         passwordHash,
-        phone,
+        phone: sanitize(phone),
         officialIdPath,
         idVerified: false,
       })
@@ -112,13 +107,8 @@ router.post(
   },
 );
 
-router.post("/auth/login", async (req, res): Promise<void> => {
-  const { email, password } = req.body as { email?: string; password?: string };
-
-  if (!email || !password) {
-    res.status(400).json({ error: "Email and password required" });
-    return;
-  }
+router.post("/auth/login", loginLimiter, validate(LoginSchema), async (req, res): Promise<void> => {
+  const { email, password } = req.body as { email: string; password: string };
 
   const [user] = await db
     .select()
