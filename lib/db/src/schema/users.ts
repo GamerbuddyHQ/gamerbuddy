@@ -15,6 +15,8 @@ export const usersTable = pgTable("users", {
   trustFactor: integer("trust_factor").notNull().default(50),
   profileBackground: text("profile_background"),
   profileTitle: text("profile_title"),
+  country: text("country"),
+  gender: text("gender"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

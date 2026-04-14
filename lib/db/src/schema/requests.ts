@@ -17,6 +17,8 @@ export const gameRequestsTable = pgTable("game_requests", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   isBulkHiring: boolean("is_bulk_hiring").notNull().default(false),
   bulkGamersNeeded: integer("bulk_gamers_needed"),
+  preferredCountry: text("preferred_country").default("any"),
+  preferredGender: text("preferred_gender").default("any"),
 });
 
 export const insertGameRequestSchema = createInsertSchema(gameRequestsTable).omit({

@@ -5,6 +5,7 @@ import {
   useBrowseRequests, usePlaceBid,
   type GameRequest,
 } from "@/lib/bids-api";
+import { COUNTRIES, GENDERS, countryLabel, COUNTRY_MAP, GENDER_MAP } from "@/lib/geo-options";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -18,7 +19,7 @@ import {
   CheckCircle2, AlertCircle, User, Clock, TrendingDown, TrendingUp,
   Zap, ExternalLink, LogIn, Trophy, Shield, Star,
   Flame, Target, Users, X, SlidersHorizontal, Tv, Sparkles,
-  ArrowDownUp, ArrowUp, ArrowDown,
+  ArrowDownUp, ArrowUp, ArrowDown, Globe, UserRound,
 } from "lucide-react";
 import { SafetyBanner } from "@/components/safety-banner";
 import { useToast } from "@/hooks/use-toast";
@@ -386,6 +387,18 @@ function RequestCard({ req }: { req: GameRequest }) {
                     <Users className="h-3 w-3" /> Bulk Hiring · {req.bulkGamersNeeded} slots
                   </span>
                 )}
+                {req.preferredCountry && req.preferredCountry !== "any" && (
+                  <span className="inline-flex items-center gap-1 text-[10px] bg-amber-500/12 border border-amber-500/30 text-amber-300 rounded-full px-2.5 py-1 font-semibold">
+                    <Globe className="h-3 w-3" />
+                    {COUNTRY_MAP[req.preferredCountry]?.flag} {COUNTRY_MAP[req.preferredCountry]?.label ?? req.preferredCountry}
+                  </span>
+                )}
+                {req.preferredGender && req.preferredGender !== "any" && (
+                  <span className="inline-flex items-center gap-1 text-[10px] bg-pink-500/12 border border-pink-500/30 text-pink-300 rounded-full px-2.5 py-1 font-semibold">
+                    <UserRound className="h-3 w-3" />
+                    {GENDER_MAP[req.preferredGender]?.label ?? req.preferredGender}
+                  </span>
+                )}
                 {isZeroBids && !req.isBulkHiring && (
                   <span className="inline-flex items-center gap-1 text-[10px] bg-green-500/15 border border-green-500/35 text-green-400 rounded-full px-2.5 py-1 font-black uppercase tracking-wider">
                     <Flame className="h-3 w-3" /> First bid!
@@ -670,6 +683,8 @@ export default function Browse() {
   const [noBidsOnly, setNoBidsOnly]           = useState(false);
   const [hasStreamingFilter, setHasStreamingFilter] = useState(false);
   const [hasQuestFilter, setHasQuestFilter]   = useState(false);
+  const [countryFilter, setCountryFilter]     = useState("any");
+  const [genderFilter, setGenderFilter]       = useState("any");
 
   const { data: allRequests, isLoading, isError } = useBrowseRequests({ status: "open" });
 
@@ -688,6 +703,8 @@ export default function Browse() {
       if (noBidsOnly && r.bidCount > 0) return false;
       if (hasStreamingFilter && !r.hasStreamingBidder) return false;
       if (hasQuestFilter && !r.hasQuestBidder) return false;
+      if (countryFilter !== "any" && r.preferredCountry !== "any" && r.preferredCountry !== countryFilter) return false;
+      if (genderFilter !== "any" && r.preferredGender !== "any" && r.preferredGender !== genderFilter) return false;
       return true;
     })
     ?.sort((a, b) => {
@@ -720,14 +737,17 @@ export default function Browse() {
   if (noBidsOnly)            activeTags.push({ id: "nobids",    label: "Easy Wins",                      onRemove: () => setNoBidsOnly(false),          rgb: "34,211,238" });
   if (hasStreamingFilter)    activeTags.push({ id: "streaming", label: "Has Streaming",                  onRemove: () => setHasStreamingFilter(false),  rgb: "145,70,255" });
   if (hasQuestFilter)        activeTags.push({ id: "quest",     label: "Quest Bids",                     onRemove: () => setHasQuestFilter(false),      rgb: "251,191,36" });
+  if (countryFilter !== "any") activeTags.push({ id: "country", label: `${COUNTRY_MAP[countryFilter]?.flag ?? "🌍"} ${COUNTRY_MAP[countryFilter]?.label ?? countryFilter}`, onRemove: () => setCountryFilter("any"), rgb: "252,211,77" });
+  if (genderFilter !== "any")  activeTags.push({ id: "gender",  label: `${GENDER_MAP[genderFilter]?.icon ?? ""} ${GENDER_MAP[genderFilter]?.label ?? genderFilter}`,         onRemove: () => setGenderFilter("any"),  rgb: "236,72,153" });
 
   const hasFilters = activeTags.length > 0;
   const clearFilters = () => {
     setSearch(""); setPlatform("all"); setSort("newest"); setLevelFilter("all");
     setVerifiedPosterOnly(false); setBulkOnly(false); setNoBidsOnly(false);
     setHasStreamingFilter(false); setHasQuestFilter(false);
+    setCountryFilter("any"); setGenderFilter("any");
   };
-  const filterKey = `${sort}|${levelFilter}|${platform}|${+verifiedPosterOnly}|${+bulkOnly}|${+noBidsOnly}|${+hasStreamingFilter}|${+hasQuestFilter}|${search}`;
+  const filterKey = `${sort}|${levelFilter}|${platform}|${+verifiedPosterOnly}|${+bulkOnly}|${+noBidsOnly}|${+hasStreamingFilter}|${+hasQuestFilter}|${countryFilter}|${genderFilter}|${search}`;
   const showFiller = !isLoading && !isError && requests && requests.length > 0 && requests.length <= 3;
 
   return (
@@ -926,6 +946,43 @@ export default function Browse() {
                 </button>
               );
             })}
+          </div>
+        </div>
+
+        {/* ── Nation + Gender row ── */}
+        <div
+          className="grid grid-cols-1 sm:grid-cols-2 gap-3 px-4 py-3 border-b"
+          style={{ borderColor: "rgba(255,255,255,0.05)", background: "rgba(0,0,0,0.12)" }}
+        >
+          <div className="space-y-1.5">
+            <span className="flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.30)" }}>
+              <Globe className="h-3 w-3" /> Nation
+            </span>
+            <Select value={countryFilter} onValueChange={setCountryFilter}>
+              <SelectTrigger className="bg-background/60 border-border/60 h-9 text-xs">
+                <SelectValue placeholder="Any / Worldwide" />
+              </SelectTrigger>
+              <SelectContent>
+                {COUNTRIES.map((c) => (
+                  <SelectItem key={c.value} value={c.value}>{c.flag} {c.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-1.5">
+            <span className="flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.30)" }}>
+              <UserRound className="h-3 w-3" /> Gender
+            </span>
+            <Select value={genderFilter} onValueChange={setGenderFilter}>
+              <SelectTrigger className="bg-background/60 border-border/60 h-9 text-xs">
+                <SelectValue placeholder="Any / No preference" />
+              </SelectTrigger>
+              <SelectContent>
+                {GENDERS.map((g) => (
+                  <SelectItem key={g.value} value={g.value}>{g.icon} {g.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
 

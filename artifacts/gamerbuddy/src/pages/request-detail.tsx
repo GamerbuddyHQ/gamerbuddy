@@ -21,6 +21,7 @@ import {
   type Bid,
   type ChatMessage,
 } from "@/lib/bids-api";
+import { COUNTRY_MAP, GENDER_MAP } from "@/lib/geo-options";
 import { getSocket } from "@/lib/socket";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -1142,6 +1143,20 @@ function BidCard({
                 <BidderStreamingBadges bidderId={bid.bidderId} compact />
               </div>
 
+              {(bid.bidderCountry || bid.bidderGender) && (
+                <div className="flex items-center gap-2 flex-wrap">
+                  {bid.bidderCountry && bid.bidderCountry !== "any" && (
+                    <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-amber-300/80 bg-amber-500/8 border border-amber-500/20 rounded-full px-2 py-0.5">
+                      {COUNTRY_MAP[bid.bidderCountry]?.flag} {COUNTRY_MAP[bid.bidderCountry]?.label ?? bid.bidderCountry}
+                    </span>
+                  )}
+                  {bid.bidderGender && bid.bidderGender !== "any" && (
+                    <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-pink-300/80 bg-pink-500/8 border border-pink-500/20 rounded-full px-2 py-0.5">
+                      {GENDER_MAP[bid.bidderGender]?.icon} {GENDER_MAP[bid.bidderGender]?.label ?? bid.bidderGender}
+                    </span>
+                  )}
+                </div>
+              )}
               <div className="flex items-center gap-1.5 text-xs text-muted-foreground/60">
                 <span>{format(new Date(bid.createdAt), "MMM d, h:mm a")}</span>
               </div>

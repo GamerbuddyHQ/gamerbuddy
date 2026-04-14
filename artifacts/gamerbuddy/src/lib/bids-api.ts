@@ -14,6 +14,8 @@ export type Bid = {
   bidderAvgRating?: number | null;
   bidderHasStreaming?: boolean;
   bidderHasQuestForGame?: boolean;
+  bidderCountry?: string | null;
+  bidderGender?: string | null;
   price: number;
   message: string;
   status: string;
@@ -78,6 +80,8 @@ export type UserProfile = {
   id: number;
   name: string;
   bio: string | null;
+  country: string | null;
+  gender: string | null;
   trustFactor: number;
   points: number;
   idVerified: boolean;
@@ -118,6 +122,8 @@ export type GameRequest = {
   skillLevel: string;
   objectives: string;
   status: string;
+  preferredCountry?: string | null;
+  preferredGender?: string | null;
   escrowAmount: number | null;
   startedAt: string | null;
   createdAt: string;
@@ -245,7 +251,7 @@ export function usePostRequest() {
   return useMutation<
     any,
     any,
-    { gameName: string; platform: string; skillLevel: string; objectives: string; isBulkHiring?: boolean; bulkGamersNeeded?: number }
+    { gameName: string; platform: string; skillLevel: string; objectives: string; isBulkHiring?: boolean; bulkGamersNeeded?: number; preferredCountry?: string; preferredGender?: string }
   >({
     mutationFn: (body) =>
       apiFetch(`${BASE}/requests`, { method: "POST", body: JSON.stringify(body) }),
@@ -417,7 +423,7 @@ export function useUpdateBio() {
 
 export function useUpdateProfile() {
   const qc = useQueryClient();
-  return useMutation<any, any, { bio?: string; profileBackground?: string | null; profileTitle?: string | null }>({
+  return useMutation<any, any, { bio?: string; profileBackground?: string | null; profileTitle?: string | null; country?: string | null; gender?: string | null }>({
     mutationFn: (updates) =>
       apiFetch(`${BASE}/profile`, {
         method: "PATCH",

@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { useAuth } from "@/lib/auth";
+import { COUNTRIES, GENDERS, COUNTRY_MAP, GENDER_MAP } from "@/lib/geo-options";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   useUserProfile, useUpdateProfile, useShopItems, usePurchaseItem,
   useMyQuestEntries, useAddQuestEntry, useDeleteQuestEntry, useVerifyId,
@@ -21,7 +23,7 @@ import {
   User, Mail, Phone, Calendar, ShieldCheck, ShieldAlert, Clock,
   Star, Trophy, Swords, Edit3, Check, X, Palette, Tag,
   Sparkles, Lock, CheckCircle2, Plus, Trash2, Gamepad2,
-  Zap, Target, ChevronDown, ChevronUp, Users,
+  Zap, Target, ChevronDown, ChevronUp, Users, Globe, UserRound,
 } from "lucide-react";
 import { TrustMeter, ReputationBadges, computeBadges } from "@/components/reputation-badges";
 import { StreamingAccountsDisplay } from "@/components/streaming-accounts-display";
@@ -1457,6 +1459,81 @@ export default function Profile() {
           </div>
         );
       })()}
+
+      {/* ── LOCATION & IDENTITY ── */}
+      <div
+        className="rounded-2xl overflow-hidden border"
+        style={{ borderColor: "rgba(255,255,255,0.07)", background: "rgba(8,6,18,0.65)" }}
+      >
+        <div
+          className="flex items-center gap-2 px-4 sm:px-5 py-3 border-b"
+          style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.02)" }}
+        >
+          <Globe className="h-3.5 w-3.5 shrink-0" style={{ color: "rgba(168,85,247,0.55)" }} />
+          <span className="text-[11px] font-extrabold uppercase tracking-widest text-white/65">Location &amp; Identity</span>
+          <span className="text-[9px] text-muted-foreground/40 ml-1">(shown on your profile &amp; bids)</span>
+        </div>
+        <div className="px-4 sm:px-5 py-5 grid grid-cols-1 sm:grid-cols-2 gap-5">
+          <div className="space-y-2">
+            <label className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+              <Globe className="h-3 w-3 text-amber-400" /> Your Nation
+            </label>
+            <Select
+              value={profile?.country ?? "any"}
+              onValueChange={(val) =>
+                updateProfile.mutate(
+                  { country: val === "any" ? null : val },
+                  { onSuccess: () => toast({ title: "Country updated!" }),
+                    onError: (err: any) => toast({ title: "Failed", description: err?.error || "Error", variant: "destructive" }) }
+                )
+              }
+            >
+              <SelectTrigger className="bg-background/60 border-border/60 text-sm">
+                <SelectValue placeholder="Any / Worldwide" />
+              </SelectTrigger>
+              <SelectContent>
+                {COUNTRIES.map((c) => (
+                  <SelectItem key={c.value} value={c.value}>{c.flag} {c.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {profile?.country && profile.country !== "any" && (
+              <p className="text-[10px] text-muted-foreground/50">
+                Currently: {COUNTRY_MAP[profile.country]?.flag} {COUNTRY_MAP[profile.country]?.label}
+              </p>
+            )}
+          </div>
+          <div className="space-y-2">
+            <label className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+              <UserRound className="h-3 w-3 text-pink-400" /> Your Gender
+            </label>
+            <Select
+              value={profile?.gender ?? "any"}
+              onValueChange={(val) =>
+                updateProfile.mutate(
+                  { gender: val === "any" ? null : val },
+                  { onSuccess: () => toast({ title: "Gender updated!" }),
+                    onError: (err: any) => toast({ title: "Failed", description: err?.error || "Error", variant: "destructive" }) }
+                )
+              }
+            >
+              <SelectTrigger className="bg-background/60 border-border/60 text-sm">
+                <SelectValue placeholder="Prefer not to say" />
+              </SelectTrigger>
+              <SelectContent>
+                {GENDERS.map((g) => (
+                  <SelectItem key={g.value} value={g.value}>{g.icon} {g.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {profile?.gender && profile.gender !== "any" && (
+              <p className="text-[10px] text-muted-foreground/50">
+                Currently: {GENDER_MAP[profile.gender]?.icon} {GENDER_MAP[profile.gender]?.label}
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
 
       {/* CONNECTED STREAMING PLATFORMS */}
       <StreamingAccountsSection />

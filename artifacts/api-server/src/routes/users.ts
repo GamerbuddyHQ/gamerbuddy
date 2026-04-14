@@ -34,6 +34,8 @@ router.get("/users/:id", async (req, res): Promise<void> => {
     id: usersTable.id,
     name: usersTable.name,
     bio: usersTable.bio,
+    country: usersTable.country,
+    gender: usersTable.gender,
     trustFactor: usersTable.trustFactor,
     points: usersTable.points,
     idVerified: usersTable.idVerified,
@@ -184,10 +186,12 @@ router.delete("/quest/:id", requireAuth, async (req, res): Promise<void> => {
 
 router.patch("/profile", requireAuth, async (req, res): Promise<void> => {
   const user = req.user!;
-  const { bio, profileBackground, profileTitle } = req.body as {
+  const { bio, profileBackground, profileTitle, country, gender } = req.body as {
     bio?: string;
     profileBackground?: string | null;
     profileTitle?: string | null;
+    country?: string | null;
+    gender?: string | null;
   };
 
   const updates: Partial<typeof usersTable.$inferInsert> = {};
@@ -200,6 +204,12 @@ router.patch("/profile", requireAuth, async (req, res): Promise<void> => {
   }
   if (profileTitle !== undefined) {
     updates.profileTitle = profileTitle || null;
+  }
+  if (country !== undefined) {
+    updates.country = country || null;
+  }
+  if (gender !== undefined) {
+    updates.gender = gender || null;
   }
 
   if (Object.keys(updates).length === 0) {

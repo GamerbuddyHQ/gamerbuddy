@@ -52,6 +52,8 @@ function formatRequest(
     avgBidderRating?: string | null;
     hasStreamingBidder?: boolean | null;
     hasQuestBidder?: boolean | null;
+    preferredCountry?: string | null;
+    preferredGender?: string | null;
   },
   userName?: string,
   userIdVerified?: boolean,
@@ -78,6 +80,8 @@ function formatRequest(
     avgBidderRating: req.avgBidderRating ? parseFloat(String(req.avgBidderRating)) : null,
     hasStreamingBidder: req.hasStreamingBidder ?? false,
     hasQuestBidder: req.hasQuestBidder ?? false,
+    preferredCountry: req.preferredCountry ?? "any",
+    preferredGender: req.preferredGender ?? "any",
   };
 }
 
@@ -100,6 +104,8 @@ router.get("/requests", async (req, res): Promise<void> => {
       createdAt: gameRequestsTable.createdAt,
       isBulkHiring: gameRequestsTable.isBulkHiring,
       bulkGamersNeeded: gameRequestsTable.bulkGamersNeeded,
+      preferredCountry: gameRequestsTable.preferredCountry,
+      preferredGender: gameRequestsTable.preferredGender,
       userName: usersTable.name,
       userIdVerified: usersTable.idVerified,
       bidCount: sql<number>`(SELECT COUNT(*) FROM bids WHERE bids.request_id = ${gameRequestsTable.id})`.mapWith(Number),
@@ -159,6 +165,8 @@ router.get("/requests/:id", async (req, res): Promise<void> => {
       createdAt: gameRequestsTable.createdAt,
       isBulkHiring: gameRequestsTable.isBulkHiring,
       bulkGamersNeeded: gameRequestsTable.bulkGamersNeeded,
+      preferredCountry: gameRequestsTable.preferredCountry,
+      preferredGender: gameRequestsTable.preferredGender,
       userName: usersTable.name,
       acceptedBidsCount: sql<number>`(SELECT COUNT(*) FROM bids WHERE bids.request_id = ${gameRequestsTable.id} AND bids.status = 'accepted')`.mapWith(Number),
     })
@@ -189,13 +197,15 @@ router.post("/requests", requireAuth, async (req, res): Promise<void> => {
     return;
   }
 
-  const { gameName, platform, skillLevel, objectives, isBulkHiring, bulkGamersNeeded } = req.body as {
+  const { gameName, platform, skillLevel, objectives, isBulkHiring, bulkGamersNeeded, preferredCountry, preferredGender } = req.body as {
     gameName?: string;
     platform?: string;
     skillLevel?: string;
     objectives?: string;
     isBulkHiring?: boolean;
     bulkGamersNeeded?: number;
+    preferredCountry?: string;
+    preferredGender?: string;
   };
 
   if (!gameName || !platform || !skillLevel || !objectives) {
@@ -232,6 +242,8 @@ router.post("/requests", requireAuth, async (req, res): Promise<void> => {
       status: "open",
       isBulkHiring: Boolean(isBulkHiring),
       bulkGamersNeeded: isBulkHiring ? Number(bulkGamersNeeded) : null,
+      preferredCountry: preferredCountry || "any",
+      preferredGender: preferredGender || "any",
     })
     .returning();
 
@@ -266,6 +278,8 @@ function formatBid(
   bidderAvgRating?: number | null,
   bidderHasStreaming?: boolean,
   bidderHasQuestForGame?: boolean,
+  bidderCountry?: string | null,
+  bidderGender?: string | null,
 ) {
   return {
     id: bid.id,
@@ -279,6 +293,8 @@ function formatBid(
     bidderAvgRating: bidderAvgRating ?? null,
     bidderHasStreaming: bidderHasStreaming ?? false,
     bidderHasQuestForGame: bidderHasQuestForGame ?? false,
+    bidderCountry: bidderCountry ?? null,
+    bidderGender: bidderGender ?? null,
     price: parseFloat(bid.price),
     message: bid.message,
     status: bid.status,
@@ -316,6 +332,8 @@ router.get("/requests/:id/bids", async (req, res): Promise<void> => {
       bidderIdVerified: usersTable.idVerified,
       bidderTrustFactor: usersTable.trustFactor,
       bidderBio: usersTable.bio,
+      bidderCountry: usersTable.country,
+      bidderGender: usersTable.gender,
     })
     .from(bidsTable)
     .leftJoin(usersTable, eq(bidsTable.bidderId, usersTable.id))
@@ -379,6 +397,8 @@ router.get("/requests/:id/bids", async (req, res): Promise<void> => {
         ratingMap[r.bidderId] ?? null,
         streamingSet.has(r.bidderId),
         questSet.has(r.bidderId),
+        r.bidderCountry ?? null,
+        r.bidderGender ?? null,
       ),
     ),
   );

@@ -3,6 +3,8 @@ import { Link, useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { COUNTRIES, GENDERS } from "@/lib/geo-options";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   useGetWallets,
   getGetWalletsQueryKey,
@@ -34,6 +36,8 @@ import {
   Layers,
   Star,
   Users,
+  Globe,
+  UserRound,
 } from "lucide-react";
 import { SafetyBanner } from "@/components/safety-banner";
 import { usePostRequest } from "@/lib/bids-api";
@@ -103,6 +107,8 @@ export default function PostRequest() {
   const [isBulkHiring, setIsBulkHiring] = useState(false);
   const [bulkGamersNeeded, setBulkGamersNeeded] = useState(3);
   const [bulkError, setBulkError] = useState("");
+  const [preferredCountry, setPreferredCountry] = useState("any");
+  const [preferredGender, setPreferredGender] = useState("any");
 
   const { data: wallets, isLoading: isLoadingWallets } = useGetWallets({
     query: { queryKey: getGetWalletsQueryKey() },
@@ -145,6 +151,8 @@ export default function PostRequest() {
         ...values,
         isBulkHiring,
         bulkGamersNeeded: isBulkHiring ? bulkGamersNeeded : undefined,
+        preferredCountry,
+        preferredGender,
       },
       {
         onSuccess: () => {
@@ -403,6 +411,47 @@ export default function PostRequest() {
                   </FormItem>
                 )}
               />
+
+              {/* Nation & Gender Preferences */}
+              <div className="rounded-xl border border-border/50 bg-background/30 p-5 space-y-4">
+                <div className="flex items-center gap-2 mb-1">
+                  <Globe className="h-4 w-4 text-primary/70" />
+                  <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Gamer Preferences</span>
+                  <span className="text-[10px] text-muted-foreground/50">(optional)</span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground flex items-center gap-1.5">
+                      <Globe className="h-3 w-3 text-amber-400" /> Preferred Nation
+                    </label>
+                    <Select value={preferredCountry} onValueChange={setPreferredCountry} disabled={!canPost}>
+                      <SelectTrigger className="bg-background border-border focus:border-primary text-sm">
+                        <SelectValue placeholder="Any / Worldwide" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {COUNTRIES.map((c) => (
+                          <SelectItem key={c.value} value={c.value}>{c.flag} {c.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground flex items-center gap-1.5">
+                      <UserRound className="h-3 w-3 text-pink-400" /> Preferred Gender
+                    </label>
+                    <Select value={preferredGender} onValueChange={setPreferredGender} disabled={!canPost}>
+                      <SelectTrigger className="bg-background border-border focus:border-primary text-sm">
+                        <SelectValue placeholder="Any / No preference" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {GENDERS.map((g) => (
+                          <SelectItem key={g.value} value={g.value}>{g.icon} {g.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </div>
 
               {/* Bulk Hiring Toggle */}
               <div className={`rounded-xl border p-5 space-y-4 transition-colors ${isBulkHiring ? "border-purple-500/50 bg-purple-500/8" : "border-purple-500/30 bg-purple-500/5"}`}>
