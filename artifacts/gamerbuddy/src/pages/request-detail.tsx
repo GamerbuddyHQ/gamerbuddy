@@ -378,20 +378,31 @@ function ReportModal({ reportedUserId, reportedName, onClose }: { reportedUserId
 function AcceptModal({
   bid,
   requestId,
+  isBulkMode,
+  currentGroupTotal,
   onClose,
 }: {
   bid: Bid;
   requestId: number;
+  isBulkMode?: boolean;
+  currentGroupTotal?: number;
   onClose: () => void;
 }) {
   const [discord, setDiscord] = useState("");
   const acceptBid = useAcceptBid();
   const { toast } = useToast();
 
+  const newGroupTotal = Math.round(((currentGroupTotal ?? 0) + bid.price) * 100) / 100;
+
   const handleAccept = () => {
     acceptBid.mutate({ requestId, bidId: bid.id, discordUsername: discord.trim() || undefined }, {
-      onSuccess: () => {
-        toast({ title: "Bid Accepted!", description: "Funds moved to escrow. Session is now in progress." });
+      onSuccess: (data: any) => {
+        toast({
+          title: isBulkMode ? "Slot Reserved!" : "Bid Accepted!",
+          description: isBulkMode
+            ? data?.message ?? "Slot reserved. Payment will be collected when you lock the roster."
+            : "Funds moved to escrow. Session is now in progress.",
+        });
         onClose();
       },
       onError: (err: any) => toast({ title: "Error", description: err?.error || "Failed", variant: "destructive" }),
@@ -402,20 +413,21 @@ function AcceptModal({
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-card border border-border rounded-2xl w-full max-w-md p-6 space-y-5 shadow-2xl">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 text-green-400 font-bold">
-            <CheckCircle2 className="h-5 w-5" />
-            Accept Bid from {bid.bidderName}
+          <div className={`flex items-center gap-2 font-bold ${isBulkMode ? "text-purple-400" : "text-green-400"}`}>
+            {isBulkMode ? <Users className="h-5 w-5" /> : <CheckCircle2 className="h-5 w-5" />}
+            {isBulkMode ? `Reserve Slot — ${bid.bidderName}` : `Accept Bid from ${bid.bidderName}`}
           </div>
           <button onClick={onClose} className="text-muted-foreground hover:text-white"><X className="h-5 w-5" /></button>
         </div>
 
-        <div className="rounded-xl border border-green-500/30 bg-green-500/5 p-4 space-y-3">
+        <div className={`rounded-xl border p-4 space-y-3 ${isBulkMode ? "border-purple-500/30 bg-purple-500/5" : "border-green-500/30 bg-green-500/5"}`}>
           <div className="text-xs font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1.5">
-            <ShieldCheck className="h-3.5 w-3.5 text-green-400" /> Payment Breakdown
+            <ShieldCheck className={`h-3.5 w-3.5 ${isBulkMode ? "text-purple-400" : "text-green-400"}`} />
+            {isBulkMode ? "This Gamer's Bid" : "Payment Breakdown"}
           </div>
           <div className="space-y-2">
             <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">Session Amount</span>
+              <span className="text-muted-foreground">{isBulkMode ? "Bid Rate" : "Session Amount"}</span>
               <span className="font-bold text-white">${bid.price.toFixed(2)}</span>
             </div>
             <div className="flex items-center justify-between text-sm">
@@ -424,16 +436,35 @@ function AcceptModal({
               </span>
               <span className="font-bold text-amber-400">−${(bid.price * 0.1).toFixed(2)}</span>
             </div>
-            <div className="h-px bg-green-500/20" />
+            <div className={`h-px ${isBulkMode ? "bg-purple-500/20" : "bg-green-500/20"}`} />
             <div className="flex items-center justify-between">
               <span className="text-sm font-extrabold text-white">Gamer Receives</span>
-              <span className="text-xl font-black text-green-400">${(bid.price * 0.9).toFixed(2)}</span>
+              <span className={`text-xl font-black ${isBulkMode ? "text-purple-400" : "text-green-400"}`}>${(bid.price * 0.9).toFixed(2)}</span>
             </div>
           </div>
-          <div className="flex items-start gap-2 rounded-lg bg-amber-500/8 border border-amber-500/20 px-2.5 py-2 text-[11px] text-amber-300/80">
-            <AlertTriangle className="h-3.5 w-3.5 text-amber-400 shrink-0 mt-0.5" />
-            10% platform fee is deducted from every completed Quest/Job. Funds are held in escrow until the session is approved.
-          </div>
+
+          {isBulkMode ? (
+            <div className="mt-3 pt-3 border-t border-purple-500/20 space-y-1.5">
+              <div className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Running Group Total</div>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">New group total</span>
+                <span className="font-bold text-white">${newGroupTotal.toFixed(2)}</span>
+              </div>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Gamers receive (90%)</span>
+                <span className="font-bold text-purple-300">${(newGroupTotal * 0.9).toFixed(2)}</span>
+              </div>
+              <div className="flex items-start gap-2 rounded-lg bg-purple-500/8 border border-purple-500/20 px-2.5 py-2 text-[11px] text-purple-300/80 mt-2">
+                <AlertTriangle className="h-3.5 w-3.5 text-purple-400 shrink-0 mt-0.5" />
+                No charge now — the full group total is collected from your wallet when you lock the roster.
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-start gap-2 rounded-lg bg-amber-500/8 border border-amber-500/20 px-2.5 py-2 text-[11px] text-amber-300/80">
+              <AlertTriangle className="h-3.5 w-3.5 text-amber-400 shrink-0 mt-0.5" />
+              10% platform fee is deducted from every completed Quest/Job. Funds are held in escrow until the session is approved.
+            </div>
+          )}
         </div>
 
         <div className="space-y-1.5">
@@ -451,12 +482,20 @@ function AcceptModal({
         </div>
 
         <Button
-          className="w-full bg-green-500/20 border border-green-500/40 text-green-400 hover:bg-green-500 hover:text-white font-bold uppercase py-5"
+          className={`w-full font-bold uppercase py-5 ${
+            isBulkMode
+              ? "bg-purple-500/20 border border-purple-500/40 text-purple-400 hover:bg-purple-500 hover:text-white"
+              : "bg-green-500/20 border border-green-500/40 text-green-400 hover:bg-green-500 hover:text-white"
+          }`}
           onClick={handleAccept}
           disabled={acceptBid.isPending}
         >
-          <CheckCircle2 className="h-4 w-4 mr-2" />
-          {acceptBid.isPending ? "Accepting…" : "Confirm & Lock Escrow"}
+          {isBulkMode ? <Users className="h-4 w-4 mr-2" /> : <CheckCircle2 className="h-4 w-4 mr-2" />}
+          {acceptBid.isPending
+            ? "Processing…"
+            : isBulkMode
+              ? "Reserve Slot"
+              : "Confirm & Lock Escrow"}
         </Button>
       </div>
     </div>
@@ -581,20 +620,23 @@ function BidderStreamingBadges({ bidderId, compact = false }: { bidderId: number
 function BulkProgressCard({
   acceptedBidsCount,
   bulkSlotsNeeded,
-  escrowAmount,
+  acceptedBids,
   pendingBids,
 }: {
   acceptedBidsCount: number;
   bulkSlotsNeeded: number;
-  escrowAmount: number;
+  acceptedBids: Bid[];
   pendingBids: Bid[];
 }) {
   const pct = Math.min(100, (acceptedBidsCount / Math.max(bulkSlotsNeeded, 1)) * 100);
   const remaining = bulkSlotsNeeded - acceptedBidsCount;
+  const groupTotal = Math.round(acceptedBids.reduce((s, b) => s + b.price, 0) * 100) / 100;
+  const platformFee = Math.round(groupTotal * 10) / 100;
+  const gamersReceive = Math.round(groupTotal * 90) / 100;
   const avgPendingBid = pendingBids.length > 0
     ? pendingBids.reduce((s, b) => s + b.price, 0) / pendingBids.length
     : 0;
-  const estimatedRemaining = remaining > 0 && avgPendingBid > 0 ? remaining * avgPendingBid : 0;
+  const estimatedRemaining = remaining > 0 && avgPendingBid > 0 ? Math.round(remaining * avgPendingBid * 100) / 100 : 0;
 
   return (
     <div
@@ -636,17 +678,34 @@ function BulkProgressCard({
 
       {/* Stats chips */}
       <div className="flex flex-wrap gap-2 text-xs">
-        <div className="flex items-center gap-1.5 rounded-lg border border-white/8 bg-white/4 px-3 py-1.5">
-          <span className="text-muted-foreground">Escrow held</span>
-          <span className="font-black text-white">${escrowAmount.toFixed(2)}</span>
-        </div>
+        {groupTotal > 0 ? (
+          <>
+            <div className="flex items-center gap-1.5 rounded-lg border border-purple-500/30 bg-purple-500/8 px-3 py-1.5">
+              <span className="text-muted-foreground">Group total at lock</span>
+              <span className="font-black text-purple-300">${groupTotal.toFixed(2)}</span>
+            </div>
+            <div className="flex items-center gap-1.5 rounded-lg border border-green-500/20 bg-green-500/6 px-3 py-1.5">
+              <span className="text-muted-foreground">Gamers receive (90%)</span>
+              <span className="font-black text-green-400">${gamersReceive.toFixed(2)}</span>
+            </div>
+            <div className="flex items-center gap-1.5 rounded-lg border border-amber-500/20 bg-amber-500/6 px-3 py-1.5">
+              <span className="text-muted-foreground">Platform fee (10%)</span>
+              <span className="font-black text-amber-300">${platformFee.toFixed(2)}</span>
+            </div>
+          </>
+        ) : (
+          <div className="flex items-center gap-1.5 rounded-lg border border-white/8 bg-white/4 px-3 py-1.5">
+            <span className="text-muted-foreground">No slots reserved yet</span>
+            <span className="font-black text-white/50">—</span>
+          </div>
+        )}
         <div className="flex items-center gap-1.5 rounded-lg border border-purple-500/20 bg-purple-500/8 px-3 py-1.5">
           <span className="text-muted-foreground">Remaining</span>
           <span className="font-black text-purple-300">{remaining} slot{remaining !== 1 ? "s" : ""}</span>
         </div>
         {estimatedRemaining > 0 && (
           <div className="flex items-center gap-1.5 rounded-lg border border-amber-500/20 bg-amber-500/6 px-3 py-1.5">
-            <span className="text-muted-foreground">Est. remaining cost</span>
+            <span className="text-muted-foreground">Est. additional cost</span>
             <span className="font-black text-amber-300">~${estimatedRemaining.toFixed(2)}</span>
           </div>
         )}
@@ -657,6 +716,13 @@ function BulkProgressCard({
           </div>
         )}
       </div>
+
+      {groupTotal > 0 && remaining > 0 && (
+        <div className="rounded-lg border border-purple-500/20 bg-purple-500/6 px-3 py-2 text-[11px] text-purple-300/70 flex items-center gap-2">
+          <AlertTriangle className="h-3.5 w-3.5 text-purple-400 shrink-0" />
+          Slots are reserved at no charge. Your wallet is only debited when you lock the roster.
+        </div>
+      )}
     </div>
   );
 }
@@ -749,6 +815,7 @@ function BidCard({
   requestId,
   gameName,
   isBulkMode,
+  currentGroupTotal,
   isSelected,
   onToggleSelect,
 }: {
@@ -759,6 +826,7 @@ function BidCard({
   requestId: number;
   gameName: string;
   isBulkMode?: boolean;
+  currentGroupTotal?: number;
   isSelected?: boolean;
   onToggleSelect?: () => void;
 }) {
@@ -776,7 +844,13 @@ function BidCard({
   return (
     <>
       {showAcceptModal && (
-        <AcceptModal bid={bid} requestId={requestId} onClose={() => setShowAcceptModal(false)} />
+        <AcceptModal
+          bid={bid}
+          requestId={requestId}
+          isBulkMode={isBulkMode}
+          currentGroupTotal={currentGroupTotal}
+          onClose={() => setShowAcceptModal(false)}
+        />
       )}
       {showReport && (
         <ReportModal reportedUserId={bid.bidderId} reportedName={bid.bidderName} onClose={() => setShowReport(false)} />
@@ -1246,6 +1320,11 @@ export default function RequestDetail() {
   const isBulkRequest = request?.isBulkHiring ?? false;
   const bulkSlotsNeeded = request?.bulkGamersNeeded ?? 0;
   const acceptedBidsCount = request?.acceptedBidsCount ?? 0;
+  const lockGroupTotal = Math.round(
+    bids.filter((b: Bid) => b.status === "accepted").reduce((s: number, b: Bid) => s + b.price, 0) * 100,
+  ) / 100;
+  const lockPlatformFee = Math.round(lockGroupTotal * 10) / 100;
+  const lockGamersTotal = Math.round(lockGroupTotal * 90) / 100;
 
   const isHirer = user?.id === request?.userId;
   const myBid = bids.find((b: Bid) => b.bidderId === user?.id);
@@ -1259,7 +1338,11 @@ export default function RequestDetail() {
   const handleLockRoster = () => {
     lockSession.mutate(requestId, {
       onSuccess: (data: any) => {
-        toast({ title: "Roster Locked!", description: data?.message ?? "Session is now in progress." });
+        toast({
+          title: "Roster Locked!",
+          description: data?.message ?? `$${(data?.groupTotal ?? 0).toFixed(2)} collected — session is now in progress.`,
+          duration: 6000,
+        });
       },
       onError: (err: any) => {
         toast({ title: "Error", description: err?.error || "Failed to lock roster.", variant: "destructive" });
@@ -1465,24 +1548,55 @@ export default function RequestDetail() {
 
           {/* Hirer: Lock Roster button (bulk only, when open and has at least 1 accepted bid) */}
           {isHirer && isBulkRequest && request.status === "open" && acceptedBidsCount > 0 && (
-            <div className="rounded-xl border border-purple-500/40 bg-purple-500/5 p-4 space-y-3">
+            <div className="rounded-xl border border-purple-500/40 bg-purple-500/5 p-4 space-y-4">
               <div className="flex items-center gap-2 text-purple-400 font-bold text-sm">
                 <Lock className="h-4 w-4" />
-                Ready to Start?
+                Lock Roster &amp; Collect Payment
               </div>
               <p className="text-xs text-muted-foreground">
-                You've accepted <strong className="text-white">{acceptedBidsCount}</strong> gamer{acceptedBidsCount !== 1 ? "s" : ""} so far.{" "}
                 {acceptedBidsCount < bulkSlotsNeeded
-                  ? `You can keep accepting bids (${bulkSlotsNeeded - acceptedBidsCount} slot${bulkSlotsNeeded - acceptedBidsCount !== 1 ? "s" : ""} remaining), or lock the roster now to begin the session.`
-                  : "All slots are filled — lock the roster to begin the session."}
+                  ? `${bulkSlotsNeeded - acceptedBidsCount} slot${bulkSlotsNeeded - acceptedBidsCount !== 1 ? "s" : ""} still open — you can keep adding gamers or lock now to start the session.`
+                  : "All slots are filled. Lock the roster to collect payment and start the session."}
               </p>
+              {/* Payment preview */}
+              {lockGroupTotal > 0 && (
+                <div className="rounded-lg border border-purple-500/20 bg-purple-500/8 p-3 space-y-2 text-xs">
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Group total ({acceptedBidsCount} gamers)</span>
+                    <span className="font-black text-white">${lockGroupTotal.toFixed(2)}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground flex items-center gap-1">
+                      <span className="text-amber-400 font-bold">10%</span> Platform fee
+                    </span>
+                    <span className="font-bold text-amber-400">−${lockPlatformFee.toFixed(2)}</span>
+                  </div>
+                  <div className="h-px bg-purple-500/20" />
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-white">Gamers receive (90%)</span>
+                    <span className="font-black text-purple-300">${lockGamersTotal.toFixed(2)}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 pt-1 text-purple-300/60">
+                    <AlertTriangle className="h-3 w-3 shrink-0" />
+                    <span>${lockGroupTotal.toFixed(2)} will be deducted from your Hiring Wallet at lock.</span>
+                  </div>
+                </div>
+              )}
               <Button
-                className="bg-purple-500/20 border border-purple-500/40 text-purple-300 hover:bg-purple-500 hover:text-white font-bold uppercase text-sm"
+                className="w-full font-bold uppercase text-sm py-5"
+                style={{
+                  background: "linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)",
+                  boxShadow: "0 0 20px rgba(168,85,247,0.4)",
+                }}
                 onClick={handleLockRoster}
                 disabled={lockSession.isPending}
               >
                 <Lock className="h-4 w-4 mr-2" />
-                {lockSession.isPending ? "Locking…" : `Lock Roster · ${acceptedBidsCount} Gamer${acceptedBidsCount !== 1 ? "s" : ""}`}
+                {lockSession.isPending
+                  ? "Collecting payment…"
+                  : lockGroupTotal > 0
+                    ? `Lock & Pay $${lockGroupTotal.toFixed(2)} · ${acceptedBidsCount} Gamer${acceptedBidsCount !== 1 ? "s" : ""}`
+                    : `Lock Roster · ${acceptedBidsCount} Gamer${acceptedBidsCount !== 1 ? "s" : ""}`}
               </Button>
             </div>
           )}
@@ -1723,7 +1837,7 @@ export default function RequestDetail() {
         <BulkProgressCard
           acceptedBidsCount={acceptedBidsCount}
           bulkSlotsNeeded={bulkSlotsNeeded}
-          escrowAmount={request.escrowAmount ?? 0}
+          acceptedBids={bids.filter((b: Bid) => b.status === "accepted")}
           pendingBids={bids.filter((b: Bid) => b.status === "pending")}
         />
       )}
@@ -1731,6 +1845,8 @@ export default function RequestDetail() {
       {/* Bids list */}
       {(() => {
         const pendingBids = bids.filter((b: Bid) => b.status === "pending");
+        const acceptedBidsList = bids.filter((b: Bid) => b.status === "accepted");
+        const currentGroupTotal = Math.round(acceptedBidsList.reduce((s: number, b: Bid) => s + b.price, 0) * 100) / 100;
         const selectableBidIds = pendingBids.map((b: Bid) => b.id);
         const allSelected = selectableBidIds.length > 0 && selectableBidIds.every((id: number) => selectedBidIds.has(id));
         const selectedTotal = bids
@@ -1779,6 +1895,7 @@ export default function RequestDetail() {
                 requestId={requestId}
                 gameName={request.gameName}
                 isBulkMode={isBulkRequest}
+                currentGroupTotal={currentGroupTotal}
                 isSelected={selectedBidIds.has(bid.id)}
                 onToggleSelect={() => handleToggleSelect(bid.id)}
               />

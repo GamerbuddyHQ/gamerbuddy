@@ -431,12 +431,12 @@ router.post("/requests/:id/bids/:bidId/accept", requireAuth, async (req, res): P
   const { discordUsername } = req.body as { discordUsername?: string };
 
   if (gameRequest.isBulkHiring) {
-    // ── BULK MODE: accept multiple gamers, request stays open until all slots filled or locked ──
-    const [countRow] = await db
-      .select({ count: sql<string>`COUNT(*)` })
+    // ── BULK MODE: reserve slot — payment is collected in full at roster lock ──
+    const acceptedBidsRows = await db
+      .select({ price: bidsTable.price })
       .from(bidsTable)
       .where(and(eq(bidsTable.requestId, requestId), eq(bidsTable.status, "accepted")));
-    const acceptedCount = parseInt(String(countRow?.count ?? "0"), 10);
+    const acceptedCount = acceptedBidsRows.length;
     const slotsNeeded = gameRequest.bulkGamersNeeded ?? 0;
 
     if (acceptedCount >= slotsNeeded) {
@@ -444,46 +444,64 @@ router.post("/requests/:id/bids/:bidId/accept", requireAuth, async (req, res): P
       return;
     }
 
-    // Deduct this bid's amount from hiring wallet
-    const newHiringBalance = round2(wallet.hiringBalance - bidPrice);
-    await db.update(walletsTable).set({ hiringBalance: newHiringBalance }).where(eq(walletsTable.userId, user.id));
+    // Soft balance check: hirer's wallet must cover all accepted bids + this new bid
+    const currentAcceptedTotal = round2(acceptedBidsRows.reduce((s, r) => s + parseFloat(String(r.price)), 0));
+    const projectedTotal = round2(currentAcceptedTotal + bidPrice);
+    if (!wallet || wallet.hiringBalance < projectedTotal) {
+      res.status(400).json({
+        error: `Insufficient hiring balance. Accepting this gamer would bring your total to $${projectedTotal.toFixed(2)}, but your wallet only has $${wallet?.hiringBalance?.toFixed(2) ?? "0.00"}.`,
+      });
+      return;
+    }
 
-    // Accept this bid (don't reject others)
-    await db.update(bidsTable).set({ status: "accepted", discordUsername: discordUsername?.trim() || null }).where(eq(bidsTable.id, bidId));
+    // Reserve the slot — no wallet deduction yet; payment is collected at lock
+    await db.update(bidsTable)
+      .set({ status: "accepted", discordUsername: discordUsername?.trim() || null })
+      .where(eq(bidsTable.id, bidId));
 
-    // Accumulate escrow
-    const currentEscrow = round2(parseFloat(String(gameRequest.escrowAmount ?? "0")));
-    const newEscrow = round2(currentEscrow + bidPrice);
     const newAcceptedCount = acceptedCount + 1;
     const slotsFilled = newAcceptedCount >= slotsNeeded;
 
-    await db.update(gameRequestsTable)
-      .set({
-        escrowAmount: String(newEscrow),
-        ...(slotsFilled ? { status: "in_progress", startedAt: new Date() } : {}),
-      })
-      .where(eq(gameRequestsTable.id, requestId));
-
-    await recordTx(user.id, "hiring", "escrow_held", bidPrice, `Bulk escrow for ${gameRequest.gameName} (gamer ${bid.bidderId})`);
+    // If all slots auto-filled, collect the full group payment immediately
+    if (slotsFilled) {
+      const allAcceptedBids = await db
+        .select({ price: bidsTable.price })
+        .from(bidsTable)
+        .where(and(eq(bidsTable.requestId, requestId), eq(bidsTable.status, "accepted")));
+      const groupTotal = round2(allAcceptedBids.reduce((s, r) => s + parseFloat(String(r.price)), 0));
+      const newHiringBalance = round2(wallet.hiringBalance - groupTotal);
+      await db.update(walletsTable).set({ hiringBalance: newHiringBalance }).where(eq(walletsTable.userId, user.id));
+      await db.update(gameRequestsTable)
+        .set({ status: "in_progress", startedAt: new Date(), escrowAmount: String(groupTotal) })
+        .where(eq(gameRequestsTable.id, requestId));
+      await recordTx(user.id, "hiring", "escrow_held", groupTotal,
+        `Group escrow for ${gameRequest.gameName} — ${newAcceptedCount} gamers ($${groupTotal.toFixed(2)} total)`);
+    } else {
+      // Keep request open, escrow stays 0 until lock
+      await db.update(gameRequestsTable)
+        .set({ escrowAmount: "0" })
+        .where(eq(gameRequestsTable.id, requestId));
+    }
 
     void createNotification({
       userId: bid.bidderId,
       type: "bid_accepted",
-      title: "Your Bid Was Accepted! 🎮",
-      message: `${user.name} added you to their bulk ${gameRequest.gameName} session for $${bidPrice.toFixed(2)}.`,
+      title: "Your Slot is Reserved! 🎮",
+      message: `${user.name} reserved your slot in the bulk ${gameRequest.gameName} session for $${bidPrice.toFixed(2)}. Payment processes when the roster is locked.`,
       link: `/requests/${requestId}`,
     });
 
     const remainingSlots = slotsNeeded - newAcceptedCount;
-    req.log.info({ userId: user.id, requestId, bidId, escrow: bidPrice, acceptedCount: newAcceptedCount, slotsNeeded }, "Bulk bid accepted");
+    req.log.info({ userId: user.id, requestId, bidId, acceptedCount: newAcceptedCount, slotsNeeded, projectedTotal }, "Bulk bid accepted (slot reserved)");
     res.json({
       success: true,
       slotsFilled,
       acceptedCount: newAcceptedCount,
       remainingSlots,
+      projectedTotal,
       message: slotsFilled
-        ? `All ${slotsNeeded} slots filled! Roster locked and session is now in progress.`
-        : `Gamer added. ${remainingSlots} slot${remainingSlots !== 1 ? "s" : ""} remaining.`,
+        ? `All ${slotsNeeded} slots filled! Group payment of $${projectedTotal.toFixed(2)} collected and session is now in progress.`
+        : `Slot reserved. ${remainingSlots} slot${remainingSlots !== 1 ? "s" : ""} remaining. Total will be $${projectedTotal.toFixed(2)} at lock.`,
     });
   } else {
     // ── SINGLE-GAMER MODE (original flow) ──
@@ -522,23 +540,56 @@ router.post("/requests/:id/lock", requireAuth, async (req, res): Promise<void> =
   if (gameRequest.userId !== user.id) { res.status(403).json({ error: "Only the hirer can lock the roster" }); return; }
   if (gameRequest.status !== "open") { res.status(400).json({ error: "Request is not open" }); return; }
 
-  const [countRow] = await db
-    .select({ count: sql<string>`COUNT(*)` })
+  // Fetch all accepted bids to compute group total
+  const acceptedBids = await db
+    .select({ id: bidsTable.id, price: bidsTable.price, bidderId: bidsTable.bidderId })
     .from(bidsTable)
     .where(and(eq(bidsTable.requestId, requestId), eq(bidsTable.status, "accepted")));
-  const acceptedCount = parseInt(String(countRow?.count ?? "0"), 10);
+  const acceptedCount = acceptedBids.length;
 
   if (acceptedCount < 1) {
     res.status(400).json({ error: "Accept at least 1 gamer before locking the roster" });
     return;
   }
 
+  // ── Group payment: total = sum of all accepted bid prices ──
+  const groupTotal = round2(acceptedBids.reduce((s, b) => s + parseFloat(String(b.price)), 0));
+  const platformFee = round2(groupTotal * 0.1);
+  const gamersTotal = round2(groupTotal - platformFee);  // 90% shared across gamers
+
+  // Verify hirer has enough balance
+  const [wallet] = await db.select().from(walletsTable).where(eq(walletsTable.userId, user.id));
+  if (!wallet || wallet.hiringBalance < groupTotal) {
+    res.status(400).json({
+      error: `Insufficient hiring balance. Group total is $${groupTotal.toFixed(2)} but your wallet has $${(wallet?.hiringBalance ?? 0).toFixed(2)}.`,
+    });
+    return;
+  }
+
+  // Deduct group total from hiring wallet
+  const newHiringBalance = round2(wallet.hiringBalance - groupTotal);
+  await db.update(walletsTable).set({ hiringBalance: newHiringBalance }).where(eq(walletsTable.userId, user.id));
+
+  // Set group escrow and transition to in_progress
   await db.update(gameRequestsTable)
-    .set({ status: "in_progress", startedAt: new Date() })
+    .set({ status: "in_progress", startedAt: new Date(), escrowAmount: String(groupTotal) })
     .where(eq(gameRequestsTable.id, requestId));
 
-  req.log.info({ userId: user.id, requestId, acceptedCount }, "Bulk roster locked");
-  res.json({ success: true, acceptedCount, message: `Roster locked with ${acceptedCount} gamer${acceptedCount !== 1 ? "s" : ""}. Session is in progress!` });
+  // Record single group transaction
+  await recordTx(
+    user.id, "hiring", "escrow_held", groupTotal,
+    `Group escrow for ${gameRequest.gameName} — ${acceptedCount} gamer${acceptedCount !== 1 ? "s" : ""} ($${groupTotal.toFixed(2)} total, 10% fee = $${platformFee.toFixed(2)})`,
+  );
+
+  req.log.info({ userId: user.id, requestId, acceptedCount, groupTotal, platformFee, gamersTotal }, "Bulk roster locked — group escrow collected");
+  res.json({
+    success: true,
+    acceptedCount,
+    groupTotal,
+    platformFee,
+    gamersTotal,
+    message: `Roster locked with ${acceptedCount} gamer${acceptedCount !== 1 ? "s" : ""}! $${groupTotal.toFixed(2)} collected — gamers will receive $${gamersTotal.toFixed(2)} total on completion.`,
+  });
 });
 
 router.post("/requests/:id/start", requireAuth, async (req, res): Promise<void> => {
@@ -585,13 +636,17 @@ router.post("/requests/:id/complete", requireAuth, async (req, res): Promise<voi
   if (!gameRequest.startedAt) { res.status(400).json({ error: "The session must be started before you can approve payment" }); return; }
 
   if (gameRequest.isBulkHiring) {
-    // ── BULK MODE: pay all accepted gamers 90% of their individual bid ──
+    // ── BULK MODE: distribute 90% of group escrow to each gamer proportionally ──
     const acceptedBids = await db.select().from(bidsTable)
       .where(and(eq(bidsTable.requestId, requestId), eq(bidsTable.status, "accepted")));
+
+    const groupTotal = round2(acceptedBids.reduce((s, b) => s + parseFloat(String(b.price)), 0));
+    const platformFee = round2(groupTotal * 0.1);
 
     let totalPaid = 0;
     for (const bid of acceptedBids) {
       const bidPrice = round2(parseFloat(String(bid.price)));
+      // Each gamer receives 90% of their individual bid price
       const gamerPayout = round2(bidPrice * 0.9);
       totalPaid = round2(totalPaid + gamerPayout);
 
@@ -600,25 +655,28 @@ router.post("/requests/:id/complete", requireAuth, async (req, res): Promise<voi
         await db.update(walletsTable)
           .set({ earningsBalance: round2(gamerWallet.earningsBalance + gamerPayout) })
           .where(eq(walletsTable.userId, bid.bidderId));
-        await recordTx(bid.bidderId, "earnings", "session_payout", gamerPayout, `Bulk session payout: ${gameRequest.gameName}`);
+        await recordTx(bid.bidderId, "earnings", "session_payout", gamerPayout,
+          `Bulk session payout: ${gameRequest.gameName} (90% of $${bidPrice.toFixed(2)} bid)`);
       }
 
       void createNotification({
         userId: bid.bidderId,
         type: "payment_released",
         title: "Bulk Session Payout! 💸",
-        message: `$${gamerPayout.toFixed(2)} has been released to your Earnings wallet for the bulk ${gameRequest.gameName} session.`,
+        message: `$${gamerPayout.toFixed(2)} has been released to your Earnings wallet for the bulk ${gameRequest.gameName} session. (90% of your $${bidPrice.toFixed(2)} bid)`,
         link: `/requests/${requestId}`,
       });
     }
 
     await db.update(gameRequestsTable).set({ status: "completed" }).where(eq(gameRequestsTable.id, requestId));
 
-    req.log.info({ userId: user.id, requestId, gamerCount: acceptedBids.length, totalPaid }, "Bulk session completed — all gamers paid");
+    req.log.info({ userId: user.id, requestId, gamerCount: acceptedBids.length, groupTotal, platformFee, totalPaid }, "Bulk session completed — group payout distributed");
     res.json({
       success: true,
-      message: `Bulk session completed! ${acceptedBids.length} gamer${acceptedBids.length !== 1 ? "s" : ""} paid.`,
+      message: `Bulk session completed! ${acceptedBids.length} gamer${acceptedBids.length !== 1 ? "s" : ""} paid $${totalPaid.toFixed(2)} total. Platform fee: $${platformFee.toFixed(2)}.`,
       gamerCount: acceptedBids.length,
+      groupTotal,
+      platformFee,
       totalPaid,
     });
     return;
