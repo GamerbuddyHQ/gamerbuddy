@@ -12,7 +12,7 @@ import { loadStripe, type Stripe, type StripeCardElement } from "@stripe/stripe-
 import {
   ArrowLeft, CreditCard, Lock, CheckCircle2, Zap, ShieldCheck,
   Smartphone, AlertCircle, RefreshCw, Wifi, BadgeCheck, Globe,
-  IndianRupee, Loader2,
+  Wallet, Loader2,
 } from "lucide-react";
 import { apiFetch } from "@/lib/bids-api";
 
@@ -134,7 +134,7 @@ function SuccessScreen({
   const dateStr = now.toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" });
   const timeStr = now.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
 
-  const methodLabel = payMethod === "razorpay" ? "Razorpay (UPI / Indian Card)" : "Stripe (International Card)";
+  const methodLabel = payMethod === "razorpay" ? "Razorpay (UPI / Mobile Wallet)" : "Stripe (Visa / Mastercard / PayPal)";
 
   return (
     <div className={`max-w-md mx-auto transition-all duration-700 ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}>
@@ -261,8 +261,6 @@ function RazorpayPanel({
   onProcessing: (v: boolean) => void;
 }) {
   const [loading, setLoading] = useState(false);
-  // INR amount shown for user reference (backend calculates actual rate)
-  const inrPreview = Math.round(amount * 84);
 
   const handlePay = async () => {
     setLoading(true);
@@ -336,9 +334,9 @@ function RazorpayPanel({
 
   return (
     <div className="space-y-5">
-      {/* UPI app icons */}
+      {/* Payment apps */}
       <div>
-        <div className="text-xs text-muted-foreground uppercase tracking-widest font-bold mb-3">Supported UPI Apps</div>
+        <div className="text-xs text-muted-foreground uppercase tracking-widest font-bold mb-3">Supported Payment Apps</div>
         <div className="flex items-center gap-3 flex-wrap">
           {UPI_APPS.map((a) => (
             <div key={a.name} className="flex flex-col items-center gap-1">
@@ -363,10 +361,7 @@ function RazorpayPanel({
         <div>
           <div className="text-xs text-muted-foreground uppercase tracking-widest mb-1">You pay</div>
           <div className="text-3xl font-black text-white">${amount.toFixed(2)}</div>
-          <div className="flex items-center gap-1 text-xs text-muted-foreground mt-0.5">
-            <IndianRupee className="h-3 w-3" />
-            <span>≈ ₹{inrPreview.toLocaleString("en-IN")} (rate applied at checkout)</span>
-          </div>
+          <div className="text-xs text-muted-foreground mt-0.5">Currency conversion applied at checkout</div>
         </div>
         <div className="text-right">
           <div className="text-xs text-muted-foreground uppercase tracking-widest mb-1">Wallet credit</div>
@@ -379,8 +374,8 @@ function RazorpayPanel({
       <div className="space-y-2.5">
         <div className="text-xs text-muted-foreground uppercase tracking-widest font-bold">How it works</div>
         {[
-          { icon: <Smartphone className="h-4 w-4 text-primary" />, text: "Click Pay — Razorpay checkout opens" },
-          { icon: <IndianRupee className="h-4 w-4 text-primary" />, text: "Select UPI / Debit Card / Net Banking" },
+          { icon: <Smartphone className="h-4 w-4 text-primary" />, text: "Click Pay — secure checkout opens" },
+          { icon: <Wallet className="h-4 w-4 text-primary" />, text: "Choose your payment method" },
           { icon: <CheckCircle2 className="h-4 w-4 text-green-400" />, text: "Complete payment — wallet is credited instantly" },
         ].map(({ icon, text }, i) => (
           <div key={i} className="flex items-center gap-3">
@@ -402,7 +397,7 @@ function RazorpayPanel({
       >
         <div className="flex items-center justify-center gap-2.5">
           {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Smartphone className="h-5 w-5" />}
-          {loading ? "Opening Razorpay…" : `Pay ₹${inrPreview.toLocaleString("en-IN")} · $${amount.toFixed(2)}`}
+          {loading ? "Opening Razorpay…" : `Pay $${amount.toFixed(2)} via UPI / Wallet`}
         </div>
         {!loading && (
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full animate-[shimmer_2.5s_infinite]" />
@@ -753,9 +748,9 @@ export default function AddFunds() {
             }`}
           >
             <Smartphone className="h-4 w-4" />
-            <span className="text-xs">UPI & Indian Cards</span>
+            <span className="text-xs">UPI & Wallets</span>
             {payMethod === "razorpay" && (
-              <span className="text-[9px] bg-white/20 rounded px-1.5 py-0.5 uppercase tracking-wider font-black">⭐ Recommended</span>
+              <span className="text-[9px] bg-white/20 rounded px-1.5 py-0.5 uppercase tracking-wider font-black">Razorpay</span>
             )}
           </button>
           <button
@@ -767,7 +762,7 @@ export default function AddFunds() {
             }`}
           >
             <Globe className="h-4 w-4" />
-            <span className="text-xs">International Card</span>
+            <span className="text-xs">Visa / Mastercard / PayPal</span>
             {payMethod === "stripe" && (
               <span className="text-[9px] bg-white/20 rounded px-1.5 py-0.5 uppercase tracking-wider font-black">Stripe</span>
             )}
@@ -893,10 +888,8 @@ export default function AddFunds() {
             <Smartphone className="h-5 w-5 text-primary" />
           </div>
           <div>
-            <div className="text-sm font-bold text-white flex items-center gap-1.5">
-              UPI & Indian Cards <span className="text-[9px] bg-primary/30 text-primary rounded px-1.5 py-0.5 font-black">★ India</span>
-            </div>
-            <div className="text-[10px] text-muted-foreground">GPay · PhonePe · Paytm · Debit Card</div>
+            <div className="text-sm font-bold text-white">UPI & Wallets</div>
+            <div className="text-[10px] text-muted-foreground">GPay · PhonePe · Paytm · More</div>
           </div>
         </div>
         <div className="rounded-xl border border-cyan-500/20 bg-cyan-500/5 p-3.5 flex items-center gap-3">
@@ -904,8 +897,8 @@ export default function AddFunds() {
             <Globe className="h-5 w-5 text-cyan-400" />
           </div>
           <div>
-            <div className="text-sm font-bold text-white">International</div>
-            <div className="text-[10px] text-muted-foreground">Visa · Mastercard · Amex</div>
+            <div className="text-sm font-bold text-white">Visa / Mastercard</div>
+            <div className="text-[10px] text-muted-foreground">PayPal · Amex · All major cards</div>
           </div>
         </div>
       </div>

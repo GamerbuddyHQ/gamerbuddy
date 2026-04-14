@@ -243,7 +243,7 @@ export default function Home() {
           <p className="text-base sm:text-lg leading-relaxed mb-8 mx-auto max-w-2xl"
             style={{ color: "rgba(255,255,255,0.6)" }}
           >
-            Hire skilled &amp; friendly gamers for co-op and multiplayer.
+            Hire skilled &amp; friendly gamers for co-op and multiplayer sessions worldwide.
             No more toxic randoms.{" "}
             <span style={{ color: "rgba(255,255,255,0.85)", fontWeight: 600 }}>
               Real teammates. Real fun.
@@ -293,12 +293,13 @@ export default function Home() {
                 ))}
               </div>
               <span className="text-sm" style={{ color: "rgba(255,255,255,0.5)" }}>
-                <span style={{ color: "rgba(255,255,255,0.75)", fontWeight: 600 }}>2,450+ gamers</span>
-                {" "}already found their squad
+                Join gamers worldwide •{" "}
+                <span style={{ color: "rgba(255,255,255,0.75)", fontWeight: 600 }}>2,450+ sessions</span>
+                {" "}and counting
               </span>
             </div>
             <div className="flex items-center justify-center gap-2 flex-wrap" style={{ color: "rgba(255,255,255,0.3)" }}>
-              {["PC", "PlayStation", "Xbox", "Switch", "Mobile"].map((p, i, arr) => (
+              {["PC", "PlayStation", "Xbox", "Switch", "Steam Deck", "Mobile"].map((p, i, arr) => (
                 <React.Fragment key={p}>
                   <span className="text-xs">{p}</span>
                   {i < arr.length - 1 && <span className="text-xs" style={{ color: "rgba(255,255,255,0.12)" }}>·</span>}
@@ -336,8 +337,8 @@ export default function Home() {
               Gamerbuddy
             </h2>
             <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-              The safest and most fun way to find real teammates for co-op and multiplayer games.{" "}
-              <span className="text-white/80 font-medium">No more toxic randoms or waiting for friends.</span>
+              The safest and most fun way to find real teammates for co-op and multiplayer games — anywhere in the world.{" "}
+              <span className="text-white/80 font-medium">Verified players, escrow-secured payments, real fun.</span>
             </p>
           </div>
 
@@ -508,7 +509,7 @@ export default function Home() {
               Your Next Session<br />Starts Here
             </h2>
             <p className="text-muted-foreground text-base max-w-md mx-auto leading-relaxed">
-              Join 2,450+ gamers already hiring and earning on Gamerbuddy. Free to sign up.
+              Join thousands of gamers worldwide already hiring and earning on Gamerbuddy. Free to sign up.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
               <Link href="/signup">

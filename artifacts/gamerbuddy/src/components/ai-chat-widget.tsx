@@ -19,7 +19,7 @@ const RESPONSES: Array<{ patterns: RegExp; reply: string }> = [
   },
   {
     patterns: /wallet|payment|deposit|withdraw|add.*fund|money|pay/i,
-    reply: `Gamerbuddy has **two separate wallets**:\n\n🔵 **Hiring Wallet** — deposit money here to pay gamers\n• Min deposit: $10.75 | Max: $1,000\n• Payment via UPI or Visa card\n\n🟢 **Earnings Wallet** — gamers receive payments here\n• Withdrawals available when balance ≥ $100\n\nWhen a bid is accepted, funds are held in **escrow** until the session is complete — protecting both parties. 🛡️`,
+    reply: `Gamerbuddy has **two separate wallets**:\n\n🔵 **Hiring Wallet** — deposit money here to pay gamers\n• Min deposit: $10.75 | Max: $1,000\n• Payment via UPI, Visa, Mastercard, PayPal & more\n\n🟢 **Earnings Wallet** — gamers receive payments here\n• Withdrawals available when balance ≥ $100\n\nWhen a bid is accepted, funds are held in **escrow** until the session is complete — protecting both parties. 🛡️`,
   },
   {
     patterns: /password|account.*shar|login.*shar|never.*share|safe|security|scam|fraud/i,
