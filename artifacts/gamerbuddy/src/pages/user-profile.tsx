@@ -3,11 +3,11 @@ import { useParams, Link, useLocation } from "wouter";
 import { useAuth } from "@/lib/auth";
 import {
   useUserProfile, useProfileVotes, useVoteOnProfile,
-  STREAMING_PLATFORM_META,
 } from "@/lib/bids-api";
 import { useToast } from "@/hooks/use-toast";
 import { VerifiedBadge } from "@/components/verified-badge";
 import { TrustMeter, ReputationBadges, computeBadges } from "@/components/reputation-badges";
+import { StreamingAccountsDisplay } from "@/components/streaming-accounts-display";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -334,28 +334,7 @@ export default function UserProfilePage() {
         style={{ boxShadow: "0 0 40px rgba(168,85,247,0.06)" }}
       >
         {/* Header strip */}
-        <div className="h-20 sm:h-24 bg-gradient-to-r from-primary/20 via-secondary/15 to-transparent relative">
-          <div className="absolute bottom-0 right-4 flex items-center gap-1.5 pb-2">
-            {streamingAccounts.map((sa) => {
-              const meta = STREAMING_PLATFORM_META[sa.platform];
-              if (!meta) return null;
-              return (
-                <a
-                  key={sa.platform}
-                  href={meta.urlTemplate.replace("{username}", sa.username)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full"
-                  style={{ background: meta.bg, border: `1px solid ${meta.border}`, color: meta.color }}
-                  title={`${meta.label}: @${sa.username}`}
-                >
-                  <span>{meta.emoji}</span>
-                  <span>@{sa.username}</span>
-                </a>
-              );
-            })}
-          </div>
-        </div>
+        <div className="h-20 sm:h-24 bg-gradient-to-r from-primary/20 via-secondary/15 to-transparent" />
 
         <div className="px-4 sm:px-6 pb-6">
           {/* Avatar row */}
@@ -409,6 +388,9 @@ export default function UserProfilePage() {
           </div>
         </div>
       </div>
+
+      {/* Streaming accounts */}
+      <StreamingAccountsDisplay accounts={streamingAccounts} />
 
       {/* Vote panel */}
       {user && <VotePanel profileId={profileId} />}

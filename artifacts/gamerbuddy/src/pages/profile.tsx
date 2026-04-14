@@ -24,6 +24,7 @@ import {
   Zap, Target, ChevronDown, ChevronUp,
 } from "lucide-react";
 import { TrustMeter, ReputationBadges, computeBadges } from "@/components/reputation-badges";
+import { StreamingAccountsDisplay } from "@/components/streaming-accounts-display";
 
 /* ── GAMER RULES CARD ───────────────────────────────────────── */
 const GAMER_RULES = [
@@ -1095,22 +1096,6 @@ export default function Profile() {
                     {profile.avgRating.toFixed(1)}/10 ({profile.reviewCount})
                   </span>
                 )}
-                {/* Streaming platform micro-badges */}
-                {(profile?.streamingAccounts ?? []).map((sa) => {
-                  const meta = STREAMING_PLATFORM_META[sa.platform];
-                  if (!meta) return null;
-                  return (
-                    <span
-                      key={sa.platform}
-                      className="inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full"
-                      style={{ background: meta.bg, border: `1px solid ${meta.border}`, color: meta.color }}
-                      title={`${meta.label}: @${sa.username}`}
-                    >
-                      <span>{meta.emoji}</span>
-                      <span className="hidden sm:inline">@{sa.username}</span>
-                    </span>
-                  );
-                })}
               </div>
             </div>
           </div>
@@ -1156,6 +1141,9 @@ export default function Profile() {
           </div>
         </div>
       </div>
+
+      {/* STREAMING ACCOUNTS DISPLAY */}
+      <StreamingAccountsDisplay accounts={profile?.streamingAccounts ?? []} />
 
       {/* VERIFICATION CARD */}
       <VerificationSection idVerified={user.idVerified} />
