@@ -1,0 +1,66 @@
+Create a dedicated "About" or "Disclaimer" page in Gamerbuddy and add the following full disclaimer content to it.
+
+Page Title: About Gamerbuddy / Disclaimer
+
+Content to add (use this exact text):
+
+---
+
+**About Gamerbuddy**
+
+Gamerbuddy is a global marketplace designed to connect players who want to hire skilled and friendly gamers with those offering their services for co-op and multiplayer gaming sessions across Steam, Epic Games, PlayStation, Xbox, Nintendo Switch, Steam Deck, iOS, and Android.
+
+We believe gaming is better when you play with the right people. Our platform helps you find real teammates — without the frustration of toxic randoms or unreliable friends.
+
+The platform is currently in its early development phase. We are actively improving features, security, and user experience based on community feedback.
+
+---
+
+**Disclaimer**
+
+**Last Updated: April 2026**
+
+This Disclaimer constitutes an integral and binding part of the Terms of Service governing the access and use of the Gamerbuddy platform (hereinafter referred to as the “Platform”, “Gamerbuddy”, “we”, “us”, or “our”). By accessing, registering an account, posting requests, placing bids, engaging in sessions, or otherwise using any services provided by the Platform, you expressly acknowledge that you have read, fully understood, and unconditionally agreed to be bound by all terms and conditions set forth in this Disclaimer. If you do not agree with any provision contained herein, you must immediately cease all use of the Platform.
+
+Gamerbuddy operates solely as an online intermediary marketplace that facilitates connections between individuals seeking to hire gamers (“Hirers”) and individuals offering gaming services (“Gamers”) for cooperative and multiplayer gaming sessions across various platforms, including Steam, Epic Games, PlayStation, Xbox, Nintendo Switch, Steam Deck, iOS, and Android.
+
+**1. Early Development Phase**  
+The Platform is currently in its early developmental stage. Features, functionality, security measures, and overall performance may be limited, subject to modification, or still under refinement. We make no representations or warranties regarding the completeness, reliability, or uninterrupted availability of the Platform. Users acknowledge and accept that technical issues, delays, or incomplete features may occur.
+
+**2. No Guarantee of Service Quality**  
+Gamerbuddy does not provide, supervise, endorse, or guarantee any gaming services. We act solely as a facilitator and bear no responsibility for the skill, competence, reliability, punctuality, behavior, or performance of any Gamer. All interactions, agreements, and sessions occur directly between the Hirer and the Gamer. Hirers are solely responsible for conducting their own due diligence, including reviewing profiles, Quest details, ratings, Trust Factor, and session history prior to engaging any Gamer.
+
+**3. Session Recording**  
+The Platform does not record any gaming sessions, including gameplay footage or voice communications. The responsibility for recording sessions lies entirely with the users. In the event of any dispute, complaint, or allegation arising from a session, if no recording has been made by the users, Gamerbuddy shall not be obligated or able to investigate, verify claims, mediate, or provide any form of resolution. Users are strongly advised to record their sessions using their own tools for evidentiary purposes.
+
+**4. Platform Fee**  
+A platform fee of ten percent (10%) shall be automatically deducted from the total amount of every successfully completed Quest or Job. The remaining ninety percent (90%) shall be credited to the Earnings Wallet of the hired Gamer. This fee is non-negotiable and supports the operation, maintenance, development, and security of the Platform.
+
+**5. Password and Account Security**  
+Users are strictly prohibited from sharing their Steam, Epic Games, PlayStation, Xbox, Nintendo Switch, or any other gaming account passwords or login credentials with any other user on the Platform, irrespective of any offers or assurances provided. Gamerbuddy will never request such credentials under any circumstances. Any solicitation of passwords or login details constitutes a serious violation and will result in immediate account suspension.
+
+**6. Voice Communication**  
+Gamers must obtain explicit consent from the Hirer before initiating any form of voice communication, whether through Discord or in-game VoIP. Voice chat is never mandatory. Hirers retain absolute discretion to decline voice interaction or prefer text-only communication.
+
+**7. Account Verification**  
+Following submission of identification documents, phone number, and email address, the verification process may require between seven (7) and fifteen (15) days for completion. During this period, certain Platform features, including the ability to post requests or engage in hiring activities, may remain restricted until full verification is approved. We reserve the sole right to approve, request additional documentation, or reject verification applications.
+
+**8. Bulk Hiring**  
+Bulk Hiring requests are permitted with a minimum of three (3) and a maximum of one hundred (100) gamers per session. All rules, fees, responsibilities, and safety protocols apply individually to each participant.
+
+**9. Promoted Games and Rewards**  
+Participation in sessions involving Promoted or Spotlight Games may qualify users for additional rewards, including bonus points, free game keys, or complimentary session credits, subject to successful completion and Platform verification.
+
+**10. Limitation of Liability**  
+To the maximum extent permitted by applicable law, Gamerbuddy, its owners, operators, affiliates, and representatives shall not be liable for any direct, indirect, incidental, consequential, special, or punitive damages arising from the use of the Platform, including but not limited to disputes between users, in-game losses, account penalties, technical failures, or any actions or omissions by individual users.
+
+**11. Platform Rights and Enforcement**  
+In any and all scenarios, Gamerbuddy reserves the absolute and unrestricted right to act as it deems necessary to protect the integrity, safety, security, and quality of the Platform. This includes, without limitation, the right to review reports, suspend or permanently terminate accounts, remove content, withhold funds, impose restrictions, or take any other measures we consider appropriate. We will strictly enforce our rules and policies without exception.
+
+By using Gamerbuddy, you expressly agree to this Disclaimer and the Terms of Service. We reserve the right to modify this Disclaimer at any time, with or without prior notice. Your continued use of the Platform following any modifications constitutes your acceptance of the revised terms.
+
+---
+
+Please create a dedicated page (e.g., /about or /disclaimer) and display this full content.  
+Add a link to this page in the footer and in the navigation menu as "About" or "Disclaimer".  
+Make the page clean, readable, and consistent with the dark gamer theme. Use proper headings and spacing.

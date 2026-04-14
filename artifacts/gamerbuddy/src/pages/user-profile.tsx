@@ -44,19 +44,20 @@ function VotePanel({ profileId }: { profileId: number }) {
   if (!user || isLoading) return null;
 
   const handleVote = (voteType: "like" | "dislike") => {
-    if (!votes?.canVote) return;
+    if (!votes?.canVote || votes?.myVote !== null) return;
     voteMutation.mutate(voteType, {
       onError: (err: any) =>
         toast({ title: "Couldn't vote", description: err?.error ?? "Something went wrong", variant: "destructive" }),
     });
   };
 
-  const likes    = votes?.likes    ?? 0;
-  const dislikes = votes?.dislikes ?? 0;
-  const myVote   = votes?.myVote   ?? null;
-  const canVote  = votes?.canVote  ?? false;
-  const isSelf   = user.id === profileId;
-  const pending  = voteMutation.isPending;
+  const likes         = votes?.likes    ?? 0;
+  const dislikes      = votes?.dislikes ?? 0;
+  const myVote        = votes?.myVote   ?? null;
+  const canVote       = votes?.canVote  ?? false;
+  const isSelf        = user.id === profileId;
+  const pending       = voteMutation.isPending;
+  const alreadyVoted  = myVote !== null;
 
   return (
     <div
@@ -83,7 +84,8 @@ function VotePanel({ profileId }: { profileId: number }) {
                 label="Like"
                 count={likes}
                 active={myVote === "like"}
-                disabled={pending}
+                locked={alreadyVoted && myVote !== "like"}
+                disabled={pending || alreadyVoted}
                 activeStyle={{
                   bg: "rgba(34,197,94,0.18)",
                   border: "rgba(74,222,128,0.60)",
@@ -108,7 +110,8 @@ function VotePanel({ profileId }: { profileId: number }) {
                 label="Dislike"
                 count={dislikes}
                 active={myVote === "dislike"}
-                disabled={pending}
+                locked={alreadyVoted && myVote !== "dislike"}
+                disabled={pending || alreadyVoted}
                 activeStyle={{
                   bg: "rgba(239,68,68,0.18)",
                   border: "rgba(248,113,113,0.60)",
@@ -128,11 +131,11 @@ function VotePanel({ profileId }: { profileId: number }) {
                 onClick={() => handleVote("dislike")}
               />
             </div>
-            {myVote && (
-              <p className="text-center text-[10px] text-muted-foreground/40">
-                Click your vote again to remove it
-              </p>
-            )}
+            <p className="text-center text-[10px] text-muted-foreground/40">
+              {alreadyVoted
+                ? `✓ Vote recorded · Only one vote per profile`
+                : "Only one vote allowed per profile"}
+            </p>
           </>
         ) : (
           <p className="text-center text-xs text-muted-foreground/50 py-1 italic">
@@ -155,12 +158,13 @@ type VoteButtonInactiveStyle = {
 };
 
 function VoteButton({
-  emoji, label, count, active, disabled, activeStyle, inactiveStyle, onClick,
+  emoji, label, count, active, locked, disabled, activeStyle, inactiveStyle, onClick,
 }: {
   emoji: string;
   label: string;
   count: number;
   active: boolean;
+  locked: boolean;
   disabled: boolean;
   activeStyle: VoteButtonStyle;
   inactiveStyle: VoteButtonInactiveStyle;
@@ -168,12 +172,22 @@ function VoteButton({
 }) {
   const [hovered, setHovered] = React.useState(false);
 
-  const bg      = active ? activeStyle.bg      : hovered ? inactiveStyle.hoverBg     : inactiveStyle.bg;
-  const border  = active ? activeStyle.border  : hovered ? inactiveStyle.hoverBorder : inactiveStyle.border;
-  const text    = active ? activeStyle.text    : hovered ? inactiveStyle.hoverText   : inactiveStyle.text;
-  const cColor  = active ? activeStyle.countColor : inactiveStyle.countColor;
-  const shadow  = active ? activeStyle.glow : "none";
-  const scale   = hovered && !disabled ? "scale(1.03)" : "scale(1)";
+  // locked = other vote was chosen; active = this vote was chosen
+  const canHover = !disabled && !locked && !active;
+
+  const bg     = locked ? "rgba(255,255,255,0.02)"
+               : active ? activeStyle.bg
+               : hovered ? inactiveStyle.hoverBg : inactiveStyle.bg;
+  const border = locked ? "rgba(255,255,255,0.06)"
+               : active ? activeStyle.border
+               : hovered ? inactiveStyle.hoverBorder : inactiveStyle.border;
+  const text   = locked ? "rgba(255,255,255,0.2)"
+               : active ? activeStyle.text
+               : hovered ? inactiveStyle.hoverText : inactiveStyle.text;
+  const cColor = locked ? "rgba(255,255,255,0.15)"
+               : active ? activeStyle.countColor : inactiveStyle.countColor;
+  const shadow = active ? activeStyle.glow : "none";
+  const scale  = canHover && hovered ? "scale(1.03)" : "scale(1)";
 
   return (
     <button
@@ -196,8 +210,9 @@ function VoteButton({
         color: text,
         transform: scale,
         transition: "all 0.18s ease",
-        cursor: disabled ? "not-allowed" : "pointer",
-        opacity: disabled ? 0.7 : 1,
+        cursor: locked || active ? "default" : disabled ? "not-allowed" : "pointer",
+        opacity: locked ? 0.35 : 1,
+        filter: locked ? "grayscale(0.6)" : "none",
       }}
     >
       {/* Emoji */}
@@ -222,7 +237,7 @@ function VoteButton({
         color: text,
         transition: "color 0.18s ease",
       }}>
-        {active ? `${label}d ✓` : label}
+        {active ? `${label}d ✓` : locked ? "—" : label}
       </span>
     </button>
   );

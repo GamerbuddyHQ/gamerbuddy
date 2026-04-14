@@ -406,10 +406,8 @@ router.post("/users/:id/vote", requireAuth, async (req, res): Promise<void> => {
       res.json({ success: true, action: "removed", myVote: null });
       return;
     }
-    // Changing vote (like → dislike or vice versa)
-    await db.update(profileVotesTable).set({ voteType }).where(eq(profileVotesTable.id, existing.id));
-    await recalculateTrustFactor(profileId);
-    res.json({ success: true, action: "changed", myVote: voteType });
+    // Changing vote is not allowed — one vote per profile, final
+    res.status(409).json({ error: "You have already voted on this profile. Only one vote is allowed." });
     return;
   }
 
