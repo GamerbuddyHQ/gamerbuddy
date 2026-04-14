@@ -37,9 +37,10 @@ const PLATFORM_ORDER = ["twitch", "youtube", "kick", "facebook", "tiktok"] as co
 interface Props {
   accounts: StreamingAccount[];
   className?: string;
+  onConnect?: () => void;
 }
 
-export function StreamingAccountsDisplay({ accounts, className = "" }: Props) {
+export function StreamingAccountsDisplay({ accounts, className = "", onConnect }: Props) {
   const connectedMap = Object.fromEntries(accounts.map((a) => [a.platform, a.username]));
   const connectedCount = accounts.length;
 
@@ -206,6 +207,27 @@ export function StreamingAccountsDisplay({ accounts, className = "" }: Props) {
             );
           })}
         </div>
+
+        {/* ── CTA: prompt own-profile owner to connect ── */}
+        {onConnect && connectedCount === 0 && (
+          <div className="mt-3 pt-3 border-t border-border/30 flex items-center justify-between gap-3">
+            <p className="text-[11px] text-muted-foreground/50 italic">
+              Show hirers where to find you live
+            </p>
+            <button
+              onClick={onConnect}
+              className="shrink-0 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg transition-all hover:brightness-110"
+              style={{
+                background: "rgba(168,85,247,0.12)",
+                border: "1px solid rgba(168,85,247,0.3)",
+                color: "#c084fc",
+              }}
+            >
+              <Radio className="h-3 w-3" />
+              Connect Accounts
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
