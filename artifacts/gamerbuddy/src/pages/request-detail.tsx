@@ -1202,7 +1202,7 @@ function BidCard({
               </div>
             </div>
 
-            {/* Price + status — right column */}
+            {/* Price + status + match badge — right column */}
             <div className="shrink-0 text-right flex flex-col items-end gap-1.5">
               <div
                 className="text-xl sm:text-2xl font-black tabular-nums leading-none"
@@ -1223,79 +1223,80 @@ function BidCard({
               >
                 {bid.status}
               </div>
+
+              {/* ── Match badge — top-right, compact ── */}
+              {isHirer && hasAnyPref && (dualPrefMatch || fullyMatches || partialMatch) && (
+                <div className="flex flex-col items-end gap-1 mt-0.5">
+                  {/* Main label chip */}
+                  <div
+                    className={`flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-extrabold uppercase tracking-wider ${dualPrefMatch ? "match-pulse" : ""}`}
+                    style={
+                      dualPrefMatch
+                        ? {
+                            background: "linear-gradient(135deg,rgba(16,185,129,0.22) 0%,rgba(52,211,153,0.12) 100%)",
+                            border: "1px solid rgba(52,211,153,0.55)",
+                            color: "#34d399",
+                            boxShadow: "0 0 14px rgba(16,185,129,0.30), 0 0 4px rgba(52,211,153,0.20)",
+                          }
+                        : fullyMatches
+                        ? {
+                            background: "rgba(16,185,129,0.14)",
+                            border: "1px solid rgba(16,185,129,0.38)",
+                            color: "#10b981",
+                          }
+                        : {
+                            background: "rgba(245,158,11,0.10)",
+                            border: "1px solid rgba(245,158,11,0.30)",
+                            color: "#f59e0b",
+                          }
+                    }
+                  >
+                    {dualPrefMatch ? (
+                      <span className="text-[11px] leading-none">✦</span>
+                    ) : fullyMatches ? (
+                      <CheckCircle2 className="h-2.5 w-2.5 shrink-0" />
+                    ) : (
+                      <Sparkles className="h-2.5 w-2.5 shrink-0" />
+                    )}
+                    <span>
+                      {dualPrefMatch ? "Perfect Match" : fullyMatches ? "Matches Prefs" : "Partial Match"}
+                    </span>
+                  </div>
+                  {/* Criterion pills */}
+                  {(hasNationPref || hasGenderPref) && (
+                    <div className="flex items-center gap-1">
+                      {hasNationPref && (
+                        <span
+                          className="inline-flex items-center gap-0.5 text-[9px] font-bold rounded-full px-1.5 py-0.5"
+                          style={
+                            matchesNation
+                              ? { background: "rgba(16,185,129,0.12)", border: "1px solid rgba(16,185,129,0.32)", color: "#34d399" }
+                              : { background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.10)", color: "rgba(255,255,255,0.28)" }
+                          }
+                        >
+                          <span>{matchesNation ? "✓" : "✗"}</span>
+                          <span>{COUNTRY_MAP[preferredCountry!]?.flag ?? "🌍"}</span>
+                        </span>
+                      )}
+                      {hasGenderPref && (
+                        <span
+                          className="inline-flex items-center gap-0.5 text-[9px] font-bold rounded-full px-1.5 py-0.5"
+                          style={
+                            matchesGender
+                              ? { background: "rgba(16,185,129,0.12)", border: "1px solid rgba(16,185,129,0.32)", color: "#34d399" }
+                              : { background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.10)", color: "rgba(255,255,255,0.28)" }
+                          }
+                        >
+                          <span>{matchesGender ? "✓" : "✗"}</span>
+                          <span>{GENDER_MAP[preferredGender!]?.icon ?? "?"}</span>
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
-
-          {/* ── Preference Match Badge ── */}
-          {isHirer && hasAnyPref && (fullyMatches || partialMatch) && (
-            <div
-              className="flex items-center gap-2 px-3 py-2 rounded-xl flex-wrap"
-              style={
-                dualPrefMatch
-                  ? {
-                      background: "linear-gradient(90deg,rgba(16,185,129,0.16) 0%,rgba(52,211,153,0.08) 60%,rgba(16,185,129,0.04) 100%)",
-                      border: "1px solid rgba(52,211,153,0.45)",
-                      boxShadow: "0 0 16px rgba(16,185,129,0.15)",
-                    }
-                  : fullyMatches
-                  ? {
-                      background: "linear-gradient(90deg,rgba(16,185,129,0.10) 0%,rgba(16,185,129,0.04) 100%)",
-                      border: "1px solid rgba(16,185,129,0.30)",
-                    }
-                  : {
-                      background: "linear-gradient(90deg,rgba(245,158,11,0.08) 0%,rgba(245,158,11,0.02) 100%)",
-                      border: "1px solid rgba(245,158,11,0.25)",
-                    }
-              }
-            >
-              {dualPrefMatch ? (
-                <span className="text-base leading-none shrink-0">✦</span>
-              ) : (
-                <Sparkles
-                  className="h-3.5 w-3.5 shrink-0"
-                  style={{ color: fullyMatches ? "#10b981" : "#f59e0b" }}
-                />
-              )}
-              <span
-                className="text-[11px] font-extrabold uppercase tracking-widest"
-                style={
-                  dualPrefMatch
-                    ? { color: "#34d399", letterSpacing: "0.14em" }
-                    : { color: fullyMatches ? "#10b981" : "#f59e0b" }
-                }
-              >
-                {dualPrefMatch ? "✦ Perfect Match" : fullyMatches ? "Matches Your Preferences" : "Partial Match"}
-              </span>
-              <div className="flex items-center gap-1.5 ml-auto">
-                {hasNationPref && (
-                  <span
-                    className="inline-flex items-center gap-1 text-[10px] font-bold rounded-full px-1.5 py-0.5"
-                    style={
-                      matchesNation
-                        ? { background: "rgba(16,185,129,0.15)", border: "1px solid rgba(16,185,129,0.35)", color: "#34d399" }
-                        : { background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.30)" }
-                    }
-                  >
-                    {matchesNation ? "✓" : "✗"}
-                    {COUNTRY_MAP[preferredCountry!]?.flag ?? "🌍"}
-                  </span>
-                )}
-                {hasGenderPref && (
-                  <span
-                    className="inline-flex items-center gap-1 text-[10px] font-bold rounded-full px-1.5 py-0.5"
-                    style={
-                      matchesGender
-                        ? { background: "rgba(16,185,129,0.15)", border: "1px solid rgba(16,185,129,0.35)", color: "#34d399" }
-                        : { background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.30)" }
-                    }
-                  >
-                    {matchesGender ? "✓" : "✗"}
-                    {GENDER_MAP[preferredGender!]?.icon ?? "?"}
-                  </span>
-                )}
-              </div>
-            </div>
-          )}
 
           {/* ── Pitch / message ── */}
           <div

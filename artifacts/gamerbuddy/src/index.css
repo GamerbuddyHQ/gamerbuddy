@@ -297,6 +297,16 @@
   animation: filter-panel-in 0.18s ease-out both;
 }
 
+/* ── Perfect Match badge pulse ── */
+@keyframes match-glow-pulse {
+  0%, 100% { box-shadow: 0 0 10px rgba(16,185,129,0.28), 0 0 3px rgba(52,211,153,0.18); }
+  50%       { box-shadow: 0 0 20px rgba(16,185,129,0.50), 0 0 8px rgba(52,211,153,0.35); }
+}
+
+.match-pulse {
+  animation: match-glow-pulse 2.2s ease-in-out infinite;
+}
+
 .bid-list-animate {
   animation: bid-list-refresh 0.18s ease-out both;
 }

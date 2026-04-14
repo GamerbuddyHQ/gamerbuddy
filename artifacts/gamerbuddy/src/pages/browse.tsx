@@ -805,15 +805,15 @@ export default function Browse() {
 
       {/* ── Filter panel ── */}
       <div
-        className="rounded-2xl border overflow-hidden filter-panel-animate"
+        className="rounded-2xl border overflow-hidden filter-panel-animate sm:sticky sm:top-16 sm:z-40"
         style={{
           borderColor: hasFilters ? "rgba(168,85,247,0.40)" : "rgba(255,255,255,0.08)",
-          background: "rgba(7,5,16,0.94)",
-          backdropFilter: "blur(20px)",
-          WebkitBackdropFilter: "blur(20px)",
+          background: "rgba(7,5,16,0.96)",
+          backdropFilter: "blur(24px)",
+          WebkitBackdropFilter: "blur(24px)",
           boxShadow: hasFilters
-            ? "0 6px 32px rgba(0,0,0,0.50), 0 0 0 1px rgba(168,85,247,0.10)"
-            : "0 4px 24px rgba(0,0,0,0.38)",
+            ? "0 6px 32px rgba(0,0,0,0.60), 0 0 0 1px rgba(168,85,247,0.10)"
+            : "0 4px 24px rgba(0,0,0,0.50)",
           transition: "border-color 0.3s, box-shadow 0.3s",
         }}
       >
@@ -843,10 +843,15 @@ export default function Browse() {
           {hasFilters && (
             <button
               onClick={clearFilters}
-              className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider rounded-lg px-2.5 py-1 transition-all duration-200 hover:brightness-110 active:scale-95"
-              style={{ background: "rgba(239,68,68,0.12)", border: "1px solid rgba(239,68,68,0.30)", color: "#f87171" }}
+              className="flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-wider rounded-lg px-3 py-1.5 transition-all duration-200 hover:brightness-115 active:scale-95"
+              style={{
+                background: "linear-gradient(135deg,rgba(239,68,68,0.18) 0%,rgba(239,68,68,0.08) 100%)",
+                border: "1px solid rgba(239,68,68,0.40)",
+                color: "#f87171",
+                boxShadow: "0 0 12px rgba(239,68,68,0.12)",
+              }}
             >
-              <X className="h-2.5 w-2.5" /> Clear All
+              <X className="h-3 w-3" /> Clear All
             </button>
           )}
         </div>
@@ -951,31 +956,75 @@ export default function Browse() {
         </div>
 
         {/* ── Nation + Gender row ── */}
-        <div
-          className="flex flex-col sm:flex-row sm:items-start gap-2 sm:gap-3 px-4 py-3 border-b"
-          style={{ borderColor: "rgba(255,255,255,0.05)", background: "rgba(0,0,0,0.12)" }}
-        >
-          <span
-            className="text-[10px] font-extrabold uppercase tracking-widest sm:shrink-0 sm:w-14 sm:pt-1"
-            style={{ color: "rgba(255,255,255,0.30)" }}
-          >
-            Match
-          </span>
-          <div className="grid grid-cols-2 gap-2.5 flex-1">
-            <div className="space-y-1.5">
-              <span className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.30)" }}>
-                <Globe className="h-3 w-3" /> Nation
-              </span>
-              <CountryCombobox value={countryFilter} onValueChange={setCountryFilter} />
+        {(() => {
+          const nationActive = countryFilter !== "any";
+          const genderActive = genderFilter !== "any";
+          const geoActive = nationActive || genderActive;
+          return (
+            <div
+              className="flex flex-col sm:flex-row sm:items-start gap-2 sm:gap-3 px-4 py-3 border-b transition-colors duration-200"
+              style={{
+                borderColor: "rgba(255,255,255,0.05)",
+                background: geoActive ? "rgba(251,191,36,0.05)" : "rgba(0,0,0,0.12)",
+              }}
+            >
+              <div className="sm:shrink-0 sm:w-14 sm:pt-1 flex items-center gap-1.5">
+                <span
+                  className="text-[10px] font-extrabold uppercase tracking-widest"
+                  style={{ color: geoActive ? "rgba(251,191,36,0.75)" : "rgba(255,255,255,0.30)" }}
+                >
+                  Match
+                </span>
+                {geoActive && (
+                  <span
+                    className="text-[8px] font-black px-1 py-0.5 rounded-full"
+                    style={{ background: "rgba(251,191,36,0.20)", color: "#fbbf24", border: "1px solid rgba(251,191,36,0.35)" }}
+                  >
+                    {[nationActive, genderActive].filter(Boolean).length}
+                  </span>
+                )}
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 flex-1">
+                <div className="space-y-1.5">
+                  <span
+                    className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest"
+                    style={{ color: nationActive ? "rgba(251,191,36,0.70)" : "rgba(255,255,255,0.30)" }}
+                  >
+                    <Globe className="h-3 w-3" /> Nation
+                    {nationActive && (
+                      <button
+                        onClick={() => setCountryFilter("any")}
+                        className="ml-auto"
+                        title="Clear nation filter"
+                      >
+                        <X className="h-2.5 w-2.5 text-amber-400/60 hover:text-amber-400 transition-colors" />
+                      </button>
+                    )}
+                  </span>
+                  <CountryCombobox value={countryFilter} onValueChange={setCountryFilter} />
+                </div>
+                <div className="space-y-1.5">
+                  <span
+                    className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest"
+                    style={{ color: genderActive ? "rgba(236,72,153,0.70)" : "rgba(255,255,255,0.30)" }}
+                  >
+                    <UserRound className="h-3 w-3" /> Gender
+                    {genderActive && (
+                      <button
+                        onClick={() => setGenderFilter("any")}
+                        className="ml-auto"
+                        title="Clear gender filter"
+                      >
+                        <X className="h-2.5 w-2.5 text-pink-400/60 hover:text-pink-400 transition-colors" />
+                      </button>
+                    )}
+                  </span>
+                  <GenderSelect value={genderFilter} onValueChange={setGenderFilter} />
+                </div>
+              </div>
             </div>
-            <div className="space-y-1.5">
-              <span className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.30)" }}>
-                <UserRound className="h-3 w-3" /> Gender
-              </span>
-              <GenderSelect value={genderFilter} onValueChange={setGenderFilter} />
-            </div>
-          </div>
-        </div>
+          );
+        })()}
 
         {/* ── Toggle filters row ── */}
         <div
