@@ -7,7 +7,7 @@ import {
   Gamepad2, Compass, LayoutDashboard, Wallet, User as UserIcon,
   LogOut, FileText, Bell, CheckCheck, X, Swords, Star,
   Trophy, MessageSquare, Zap, CircleDollarSign, ChevronRight, Menu,
-  ArrowLeft, Info, Shield,
+  ArrowLeft, Info, Shield, Users,
 } from "lucide-react";
 import { GamerbuddyLogo, GamerbuddyIcon } from "@/components/gamerbuddy-logo";
 import { Button } from "@/components/ui/button";
@@ -194,13 +194,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
   };
 
   const navItems = [
-    { href: "/browse", label: "Browse Requests", icon: Compass },
+    { href: "/browse",    label: "Browse Requests", icon: Compass   },
+    { href: "/community", label: "Community",        icon: Users     },
     ...(user
       ? [
-          { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-          { href: "/my-requests", label: "My Requests", icon: FileText },
-          { href: "/wallets", label: "Wallets", icon: Wallet },
-          { href: "/profile", label: "Profile", icon: UserIcon },
+          { href: "/dashboard",   label: "Dashboard",   icon: LayoutDashboard },
+          { href: "/my-requests", label: "My Requests", icon: FileText        },
+          { href: "/wallets",     label: "Wallets",     icon: Wallet          },
+          { href: "/profile",     label: "Profile",     icon: UserIcon        },
         ]
       : []),
     { href: "/about", label: "About", icon: Info },

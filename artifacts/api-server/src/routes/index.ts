@@ -9,6 +9,7 @@ import messagesRouter from "./messages";
 import reportsRouter from "./reports";
 import usersRouter from "./users";
 import notificationsRouter from "./notifications";
+import communityRouter from "./community";
 
 const router: IRouter = Router();
 
@@ -22,5 +23,6 @@ router.use(messagesRouter);
 router.use(reportsRouter);
 router.use(usersRouter);
 router.use(notificationsRouter);
+router.use(communityRouter);
 
 export default router;
