@@ -630,97 +630,226 @@ function BulkProgressCard({
 }) {
   const pct = Math.min(100, (acceptedBidsCount / Math.max(bulkSlotsNeeded, 1)) * 100);
   const remaining = bulkSlotsNeeded - acceptedBidsCount;
+  const isFull = acceptedBidsCount >= bulkSlotsNeeded;
+  const isEmpty = acceptedBidsCount === 0;
+
   const groupTotal = Math.round(acceptedBids.reduce((s, b) => s + b.price, 0) * 100) / 100;
   const platformFee = Math.round(groupTotal * 10) / 100;
   const gamersReceive = Math.round(groupTotal * 90) / 100;
+
   const avgPendingBid = pendingBids.length > 0
     ? pendingBids.reduce((s, b) => s + b.price, 0) / pendingBids.length
     : 0;
-  const estimatedRemaining = remaining > 0 && avgPendingBid > 0 ? Math.round(remaining * avgPendingBid * 100) / 100 : 0;
+  const estimatedTotal = remaining > 0 && avgPendingBid > 0
+    ? Math.round((groupTotal + remaining * avgPendingBid) * 100) / 100
+    : 0;
+
+  // Phase label
+  const phase = isFull
+    ? { label: "Roster Full — Ready to Lock", color: "text-green-400", bg: "bg-green-500/10 border-green-500/30" }
+    : isEmpty
+    ? { label: "Recruiting Gamers", color: "text-purple-400", bg: "bg-purple-500/10 border-purple-500/30" }
+    : pct >= 50
+    ? { label: "Almost There!", color: "text-cyan-400", bg: "bg-cyan-500/10 border-cyan-500/30" }
+    : { label: "In Progress", color: "text-purple-300", bg: "bg-purple-500/8 border-purple-500/25" };
+
+  // Bar color shifts by fill %
+  const barGradient = isFull
+    ? "linear-gradient(90deg, #16a34a 0%, #22c55e 60%, #4ade80 100%)"
+    : pct >= 50
+    ? "linear-gradient(90deg, #7c3aed 0%, #a855f7 40%, #22d3ee 100%)"
+    : "linear-gradient(90deg, #7c3aed 0%, #a855f7 70%, #c084fc 100%)";
+
+  const barGlow = isFull
+    ? "0 0 20px rgba(34,197,94,0.55), 0 0 50px rgba(34,197,94,0.15)"
+    : pct >= 50
+    ? "0 0 20px rgba(168,85,247,0.5), 0 0 40px rgba(34,211,238,0.18)"
+    : "0 0 16px rgba(168,85,247,0.55), 0 0 40px rgba(168,85,247,0.12)";
+
+  // Use segmented blocks when ≤ 30 slots, otherwise smooth bar with ticks
+  const useSegments = bulkSlotsNeeded <= 30;
 
   return (
     <div
-      className="rounded-2xl border border-purple-500/30 p-5 space-y-4"
-      style={{ background: "linear-gradient(135deg, rgba(88,28,135,0.12) 0%, rgba(10,0,20,0.5) 100%)" }}
+      className="rounded-2xl border border-purple-500/30 p-5 space-y-5"
+      style={{ background: "linear-gradient(135deg, rgba(88,28,135,0.14) 0%, rgba(10,0,20,0.55) 100%)" }}
     >
-      <div className="flex items-center justify-between flex-wrap gap-2">
-        <div className="flex items-center gap-2 text-purple-400 font-bold text-xs uppercase tracking-widest">
-          <Users className="h-4 w-4" />
-          Roster Progress
+      {/* Header row */}
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <div className="flex items-center gap-2">
+          <div className="h-8 w-8 rounded-lg bg-purple-500/15 border border-purple-500/30 flex items-center justify-center">
+            <Users className="h-4 w-4 text-purple-400" />
+          </div>
+          <div>
+            <div className="text-xs font-bold text-purple-400 uppercase tracking-widest">Roster Progress</div>
+            <div className={`text-[10px] font-bold ${phase.color} uppercase tracking-wide`}>{phase.label}</div>
+          </div>
         </div>
-        <div className="flex items-baseline gap-1">
-          <span className="text-3xl font-black text-purple-400 tabular-nums">{acceptedBidsCount}</span>
-          <span className="text-xl font-black text-white/30">/</span>
-          <span className="text-3xl font-black text-white tabular-nums">{bulkSlotsNeeded}</span>
-          <span className="text-xs text-muted-foreground ml-1.5">slots filled</span>
-        </div>
-      </div>
 
-      {/* Glow progress bar */}
-      <div className="relative h-4 bg-white/5 rounded-full overflow-hidden border border-white/5">
-        <div
-          className="h-full rounded-full transition-all duration-700"
-          style={{
-            width: `${pct}%`,
-            background: "linear-gradient(90deg, #7c3aed 0%, #a855f7 60%, #c084fc 100%)",
-            boxShadow: pct > 0 ? "0 0 16px rgba(168,85,247,0.6), 0 0 40px rgba(168,85,247,0.2)" : "none",
-          }}
-        />
-        {pct > 5 && pct < 96 && (
-          <div
-            className="absolute top-0 bottom-0 flex items-center text-[10px] font-black text-white/80 pr-1 tabular-nums pointer-events-none"
-            style={{ left: `${pct}%`, transform: "translateX(-100%)" }}
+        {/* Big slot counter */}
+        <div className="flex items-baseline gap-1.5">
+          <span
+            className="text-4xl font-black tabular-nums"
+            style={{ color: isFull ? "#4ade80" : pct >= 50 ? "#22d3ee" : "#c084fc" }}
           >
-            {Math.round(pct)}%
+            {acceptedBidsCount}
+          </span>
+          <span className="text-2xl font-black text-white/20">/</span>
+          <span className="text-4xl font-black text-white tabular-nums">{bulkSlotsNeeded}</span>
+          <div className="flex flex-col ml-1">
+            <span className="text-[10px] text-muted-foreground leading-none">slots</span>
+            <span className="text-[10px] text-muted-foreground leading-none">filled</span>
           </div>
-        )}
+        </div>
       </div>
 
-      {/* Stats chips */}
-      <div className="flex flex-wrap gap-2 text-xs">
-        {groupTotal > 0 ? (
-          <>
-            <div className="flex items-center gap-1.5 rounded-lg border border-purple-500/30 bg-purple-500/8 px-3 py-1.5">
-              <span className="text-muted-foreground">Group total at lock</span>
-              <span className="font-black text-purple-300">${groupTotal.toFixed(2)}</span>
-            </div>
-            <div className="flex items-center gap-1.5 rounded-lg border border-green-500/20 bg-green-500/6 px-3 py-1.5">
-              <span className="text-muted-foreground">Gamers receive (90%)</span>
-              <span className="font-black text-green-400">${gamersReceive.toFixed(2)}</span>
-            </div>
-            <div className="flex items-center gap-1.5 rounded-lg border border-amber-500/20 bg-amber-500/6 px-3 py-1.5">
-              <span className="text-muted-foreground">Platform fee (10%)</span>
-              <span className="font-black text-amber-300">${platformFee.toFixed(2)}</span>
-            </div>
-          </>
-        ) : (
-          <div className="flex items-center gap-1.5 rounded-lg border border-white/8 bg-white/4 px-3 py-1.5">
-            <span className="text-muted-foreground">No slots reserved yet</span>
-            <span className="font-black text-white/50">—</span>
+      {/* Progress bar section */}
+      {useSegments ? (
+        /* Segmented blocks — 1 block per slot */
+        <div className="space-y-1.5">
+          <div className="flex gap-[3px] flex-wrap">
+            {Array.from({ length: bulkSlotsNeeded }).map((_, i) => {
+              const filled = i < acceptedBidsCount;
+              return (
+                <div
+                  key={i}
+                  className="h-4 rounded-sm transition-all duration-500 flex-1 min-w-[6px]"
+                  style={{
+                    background: filled
+                      ? isFull
+                        ? "linear-gradient(180deg, #4ade80, #16a34a)"
+                        : i / bulkSlotsNeeded >= 0.5
+                        ? "linear-gradient(180deg, #22d3ee, #a855f7)"
+                        : "linear-gradient(180deg, #c084fc, #7c3aed)"
+                      : "rgba(255,255,255,0.05)",
+                    boxShadow: filled ? (isFull ? "0 0 6px rgba(74,222,128,0.5)" : "0 0 6px rgba(168,85,247,0.4)") : "none",
+                    border: filled ? "none" : "1px solid rgba(255,255,255,0.05)",
+                  }}
+                />
+              );
+            })}
           </div>
-        )}
-        <div className="flex items-center gap-1.5 rounded-lg border border-purple-500/20 bg-purple-500/8 px-3 py-1.5">
-          <span className="text-muted-foreground">Remaining</span>
-          <span className="font-black text-purple-300">{remaining} slot{remaining !== 1 ? "s" : ""}</span>
+          <div className="flex justify-between text-[10px] text-muted-foreground/50 font-bold tabular-nums px-0.5">
+            <span>0</span>
+            {bulkSlotsNeeded > 6 && <span>{Math.round(bulkSlotsNeeded / 2)}</span>}
+            <span>{bulkSlotsNeeded}</span>
+          </div>
         </div>
-        {estimatedRemaining > 0 && (
-          <div className="flex items-center gap-1.5 rounded-lg border border-amber-500/20 bg-amber-500/6 px-3 py-1.5">
-            <span className="text-muted-foreground">Est. additional cost</span>
-            <span className="font-black text-amber-300">~${estimatedRemaining.toFixed(2)}</span>
+      ) : (
+        /* Smooth gradient bar with milestone ticks */
+        <div className="space-y-1.5">
+          <div className="relative h-5 bg-white/5 rounded-full overflow-hidden border border-white/5">
+            {/* Fill */}
+            <div
+              className="h-full rounded-full transition-all duration-700"
+              style={{
+                width: `${pct}%`,
+                background: barGradient,
+                boxShadow: pct > 0 ? barGlow : "none",
+              }}
+            />
+            {/* Shimmer on leading edge */}
+            {pct > 0 && pct < 98 && (
+              <div
+                className="absolute top-0 bottom-0 w-6 pointer-events-none"
+                style={{
+                  left: `calc(${pct}% - 12px)`,
+                  background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.25) 50%, transparent 100%)",
+                  animation: "pulse 2s ease-in-out infinite",
+                }}
+              />
+            )}
+            {/* Percentage label inside bar */}
+            {pct > 8 && (
+              <div
+                className="absolute inset-0 flex items-center justify-start text-[11px] font-black text-white/90 pl-3 tabular-nums pointer-events-none"
+              >
+                {Math.round(pct)}%
+              </div>
+            )}
+            {/* Milestone tick marks */}
+            {[25, 50, 75].map((m) => (
+              <div
+                key={m}
+                className="absolute top-0 bottom-0 w-px bg-white/10 pointer-events-none"
+                style={{ left: `${m}%` }}
+              />
+            ))}
+          </div>
+          {/* Milestone labels */}
+          <div className="relative text-[9px] text-muted-foreground/40 font-bold">
+            <span className="absolute" style={{ left: "0%" }}>0</span>
+            <span className="absolute -translate-x-1/2" style={{ left: "25%" }}>{Math.round(bulkSlotsNeeded * 0.25)}</span>
+            <span className="absolute -translate-x-1/2" style={{ left: "50%" }}>{Math.round(bulkSlotsNeeded * 0.5)}</span>
+            <span className="absolute -translate-x-1/2" style={{ left: "75%" }}>{Math.round(bulkSlotsNeeded * 0.75)}</span>
+            <span className="absolute -translate-x-full" style={{ left: "100%" }}>{bulkSlotsNeeded}</span>
+          </div>
+          {/* Spacer for label row */}
+          <div className="h-3" />
+        </div>
+      )}
+
+      {/* Payment breakdown grid */}
+      {groupTotal > 0 ? (
+        <div className="grid grid-cols-3 gap-2 text-xs">
+          <div className="rounded-xl border border-purple-500/25 bg-purple-500/8 px-3 py-2.5 flex flex-col gap-0.5">
+            <span className="text-muted-foreground text-[10px] uppercase tracking-wide">Session Amount</span>
+            <span className="font-black text-purple-300 text-base tabular-nums">${groupTotal.toFixed(2)}</span>
+            <span className="text-[9px] text-muted-foreground/50">at lock</span>
+          </div>
+          <div className="rounded-xl border border-amber-500/25 bg-amber-500/6 px-3 py-2.5 flex flex-col gap-0.5">
+            <span className="text-muted-foreground text-[10px] uppercase tracking-wide">Platform Fee</span>
+            <span className="font-black text-amber-300 text-base tabular-nums">${platformFee.toFixed(2)}</span>
+            <span className="text-[9px] text-muted-foreground/50">10%</span>
+          </div>
+          <div className="rounded-xl border border-green-500/25 bg-green-500/6 px-3 py-2.5 flex flex-col gap-0.5">
+            <span className="text-muted-foreground text-[10px] uppercase tracking-wide">Gamers Receive</span>
+            <span className="font-black text-green-400 text-base tabular-nums">${gamersReceive.toFixed(2)}</span>
+            <span className="text-[9px] text-muted-foreground/50">90%</span>
+          </div>
+        </div>
+      ) : (
+        <div className="rounded-xl border border-white/6 bg-white/3 px-4 py-3 flex items-center gap-3 text-xs">
+          <div className="h-8 w-8 rounded-lg bg-purple-500/10 border border-purple-500/20 flex items-center justify-center shrink-0">
+            <Users className="h-4 w-4 text-purple-400/50" />
+          </div>
+          <div>
+            <div className="text-white/40 font-bold">Awaiting first reservation</div>
+            <div className="text-muted-foreground/50 text-[10px] mt-0.5">Accept bids below to fill slots. Payment is collected only when you lock the roster.</div>
+          </div>
+        </div>
+      )}
+
+      {/* Bottom row: remaining + estimated + deferred note */}
+      <div className="flex flex-wrap gap-2 items-center text-xs">
+        {!isFull && (
+          <div className={`flex items-center gap-1.5 rounded-lg border px-3 py-1.5 ${phase.bg}`}>
+            <span className="text-muted-foreground">Remaining</span>
+            <span className={`font-black ${phase.color} tabular-nums`}>{remaining} slot{remaining !== 1 ? "s" : ""}</span>
           </div>
         )}
-        {acceptedBidsCount >= bulkSlotsNeeded && (
+        {estimatedTotal > 0 && !isFull && (
+          <div className="flex items-center gap-1.5 rounded-lg border border-amber-500/20 bg-amber-500/6 px-3 py-1.5">
+            <span className="text-muted-foreground">Est. total at lock</span>
+            <span className="font-black text-amber-300 tabular-nums">~${estimatedTotal.toFixed(2)}</span>
+          </div>
+        )}
+        {isFull && (
           <div className="flex items-center gap-1.5 rounded-lg border border-green-500/30 bg-green-500/8 px-3 py-1.5">
             <CheckCircle2 className="h-3 w-3 text-green-400" />
-            <span className="font-black text-green-400">Roster Full!</span>
+            <span className="font-black text-green-400">Roster Full — Lock to begin!</span>
           </div>
         )}
+        <div className="flex items-center gap-1.5 rounded-lg border border-purple-500/15 bg-purple-500/5 px-3 py-1.5 ml-auto">
+          <span className="text-[10px] text-purple-300/50 font-medium">Min 3 · Max 100 gamers</span>
+        </div>
       </div>
 
-      {groupTotal > 0 && remaining > 0 && (
+      {/* Deferred payment note */}
+      {!isFull && groupTotal > 0 && (
         <div className="rounded-lg border border-purple-500/20 bg-purple-500/6 px-3 py-2 text-[11px] text-purple-300/70 flex items-center gap-2">
           <AlertTriangle className="h-3.5 w-3.5 text-purple-400 shrink-0" />
-          Slots are reserved at no charge. Your wallet is only debited when you lock the roster.
+          Slots reserved at <strong className="text-purple-300">no charge</strong>. Your wallet is debited only when you lock the full roster.
         </div>
       )}
     </div>

@@ -495,21 +495,52 @@ export default function PostRequest() {
                       </div>
                     )}
 
-                    {/* Live cost preview strip */}
-                    <div className="flex flex-wrap gap-2 text-xs pt-1">
-                      <div className="flex items-center gap-1.5 rounded-lg border border-purple-500/20 bg-purple-500/8 px-3 py-1.5">
-                        <Users className="h-3 w-3 text-purple-400" />
-                        <span className="text-muted-foreground">Slots needed</span>
-                        <span className="font-black text-purple-300">{bulkGamersNeeded}</span>
+                    {/* Zone indicator — updates live with slider */}
+                    {(() => {
+                      const n = bulkGamersNeeded;
+                      const zone =
+                        n <= 9  ? { label: "Small Squad", desc: "Perfect for co-op or small team runs", color: "text-purple-300", border: "border-purple-500/30", bg: "bg-purple-500/8", icon: "⚔️" }
+                        : n <= 24 ? { label: "Team Raid", desc: "Great for guild raids and coordinated events", color: "text-cyan-300", border: "border-cyan-500/30", bg: "bg-cyan-500/8", icon: "🛡️" }
+                        : n <= 50 ? { label: "Guild Event", desc: "Large-scale event or competitive session", color: "text-amber-300", border: "border-amber-500/30", bg: "bg-amber-500/8", icon: "👑" }
+                        : { label: "Massive Event", desc: "Huge raid, tournament or content creation army", color: "text-red-300", border: "border-red-500/30", bg: "bg-red-500/8", icon: "🔥" };
+                      return (
+                        <div className={`rounded-xl border ${zone.border} ${zone.bg} px-4 py-3 flex items-center gap-3`}>
+                          <span className="text-2xl">{zone.icon}</span>
+                          <div>
+                            <div className={`text-sm font-black ${zone.color}`}>{zone.label}</div>
+                            <div className="text-[11px] text-muted-foreground">{zone.desc}</div>
+                          </div>
+                          <div className="ml-auto flex flex-col items-end">
+                            <span className={`text-2xl font-black tabular-nums ${zone.color}`}>{n}</span>
+                            <span className="text-[10px] text-muted-foreground">gamers</span>
+                          </div>
+                        </div>
+                      );
+                    })()}
+
+                    {/* Range reference strip */}
+                    <div className="relative text-[9px] text-muted-foreground/50 font-bold pt-1">
+                      <div className="flex justify-between px-0.5 mb-1">
+                        <span className="text-purple-400/60">3 min</span>
+                        <span>25</span>
+                        <span>50</span>
+                        <span>75</span>
+                        <span className="text-purple-400/60">100 max</span>
                       </div>
-                      <div className="flex items-center gap-1.5 rounded-lg border border-white/8 bg-white/4 px-3 py-1.5">
-                        <span className="text-muted-foreground">Payment collected at roster lock (10% fee applies)</span>
+                      <div className="h-1 rounded-full bg-white/5 overflow-hidden">
+                        <div
+                          className="h-full rounded-full transition-all duration-300"
+                          style={{
+                            width: `${((bulkGamersNeeded - 3) / 97) * 100}%`,
+                            background: "linear-gradient(90deg, #7c3aed, #a855f7, #22d3ee)",
+                          }}
+                        />
                       </div>
                     </div>
 
                     <p className="text-xs text-muted-foreground">
-                      Bids remain open until you've reserved {bulkGamersNeeded} gamers or manually lock the roster.
-                      The full group payment is collected from your wallet when you lock — not per-bid.
+                      Bids stay open until you've reserved <strong className="text-white/70">{bulkGamersNeeded} gamers</strong> or manually lock the roster.
+                      Full group payment is collected from your wallet at lock — <strong className="text-white/70">not per-bid</strong>. 10% platform fee applies.
                     </p>
                   </div>
                 )}
