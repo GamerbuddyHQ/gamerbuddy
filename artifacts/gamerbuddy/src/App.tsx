@@ -27,6 +27,7 @@ import Tournaments from "@/pages/tournaments";
 import TournamentDetail from "@/pages/tournament-detail";
 import MyTournaments from "@/pages/my-tournaments";
 import Socials from "@/pages/socials";
+import Roadmap from "@/pages/roadmap";
 import AdminSecurity from "@/pages/admin-security";
 
 const queryClient = new QueryClient({
@@ -86,6 +87,8 @@ function Router() {
         <Route path="/tournaments" component={Tournaments} />
         <Route path="/my-tournaments" component={MyTournaments} />
         <Route path="/tournaments/:id" component={TournamentDetail} />
+
+        <Route path="/roadmap" component={Roadmap} />
 
         <Route path="/admin/security"><AdminRoute component={AdminSecurity} /></Route>
 

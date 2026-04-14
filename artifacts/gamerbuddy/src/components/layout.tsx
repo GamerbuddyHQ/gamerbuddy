@@ -8,7 +8,7 @@ import {
   Gamepad2, Compass, LayoutDashboard, Wallet, User as UserIcon,
   LogOut, FileText, Bell, CheckCheck, X, Swords, Star,
   Trophy, MessageSquare, Zap, CircleDollarSign, ChevronRight, Menu,
-  ArrowLeft, Info, Shield, Users, Globe, Sun, Moon, Sparkles,
+  ArrowLeft, Info, Shield, Users, Globe, Sun, Moon, Sparkles, Map,
 } from "lucide-react";
 import { useTheme } from "@/lib/theme";
 import { RegionalClock } from "@/components/regional-clock";
@@ -315,6 +315,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           { href: "/profile",        label: t.nav.profile,        icon: UserIcon        },
         ]
       : []),
+    { href: "/roadmap", label: "Roadmap", icon: Map },
     { href: "/socials", label: "Follow Us", icon: Sparkles },
     { href: "/about", label: t.nav.about, icon: Info },
   ];
@@ -575,6 +576,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   { href: "/browse",      label: t.footer.browse,         icon: Compass  },
                   { href: "/tournaments", label: t.nav.tournaments,        icon: Trophy   },
                   { href: "/community",   label: t.nav.community,          icon: Users    },
+                  { href: "/roadmap",     label: "Roadmap",                icon: Map      },
                   { href: "/socials",     label: "Follow Us",              icon: Sparkles },
                   { href: "/about",       label: t.footer.aboutDisclaimer, icon: Shield   },
                 ].map(({ href, label, icon: Icon }) => (
