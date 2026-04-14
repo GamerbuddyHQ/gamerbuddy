@@ -2106,38 +2106,37 @@ export default function RequestDetail() {
           return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
         });
 
-        const isFiltered = bidVerifiedOnly || bidExpFilter !== "all" || bidSort !== "newest";
-        const hasActiveFilters = bidVerifiedOnly || bidExpFilter !== "all";
-
-        /* ── Sort / filter button helpers ── */
-        const sortBtn = (key: typeof bidSort, label: string, Icon: React.ElementType) => (
-          <button
-            key={key}
-            onClick={() => setBidSort(key)}
-            className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-wider transition-all duration-150"
-            style={bidSort === key ? {
-              background: "rgba(168,85,247,0.20)",
-              border: "1px solid rgba(168,85,247,0.50)",
-              color: "#c084fc",
-              boxShadow: "0 0 8px rgba(168,85,247,0.18)",
-            } : {
-              background: "rgba(255,255,255,0.04)",
-              border: "1px solid rgba(255,255,255,0.09)",
-              color: "rgba(255,255,255,0.45)",
-            }}
-          >
-            <Icon className="h-3 w-3" />
-            {label}
-          </button>
-        );
-
-        const expOptions: { key: typeof bidExpFilter; label: string; color: string }[] = [
-          { key: "all",      label: "All Levels",  color: "rgba(255,255,255,0.45)" },
-          { key: "beginner", label: "Beginner",    color: "#60a5fa" },
-          { key: "decent",   label: "Decent",      color: "#4ade80" },
-          { key: "best",     label: "Best",        color: "#f59e0b" },
-          { key: "expert",   label: "Expert",      color: "#f87171" },
+        /* ── UI data ── */
+        const sortOptions: { key: typeof bidSort; label: string; Icon: React.ElementType }[] = [
+          { key: "newest",     label: "Newest First",    Icon: ArrowUpDown },
+          { key: "price_high", label: "Price: High → Low", Icon: ArrowDown },
+          { key: "price_low",  label: "Price: Low → High", Icon: ArrowUp },
+          { key: "trust_high", label: "Top Trust Factor",  Icon: ShieldCheck },
         ];
+
+        const expOptions: { key: typeof bidExpFilter; label: string; dot: string }[] = [
+          { key: "all",      label: "All Levels", dot: "rgba(255,255,255,0.35)" },
+          { key: "beginner", label: "Beginner",   dot: "#60a5fa" },
+          { key: "decent",   label: "Decent",     dot: "#4ade80" },
+          { key: "best",     label: "Best",       dot: "#f59e0b" },
+          { key: "expert",   label: "Expert",     dot: "#f87171" },
+        ];
+
+        /* Active filter tags */
+        const activeTags: { id: string; label: string; onRemove: () => void }[] = [];
+        if (bidExpFilter !== "all") {
+          const opt = expOptions.find((o) => o.key === bidExpFilter)!;
+          activeTags.push({ id: "exp", label: `Level: ${opt.label}`, onRemove: () => setBidExpFilter("all") });
+        }
+        if (bidVerifiedOnly) {
+          activeTags.push({ id: "verified", label: "Verified Only", onRemove: () => setBidVerifiedOnly(false) });
+        }
+        if (bidSort !== "newest") {
+          const s = sortOptions.find((o) => o.key === bidSort)!;
+          activeTags.push({ id: "sort", label: `Sort: ${s.label}`, onRemove: () => setBidSort("newest") });
+        }
+
+        const clearAll = () => { setBidSort("newest"); setBidExpFilter("all"); setBidVerifiedOnly(false); };
 
         return (
           <div className="space-y-3">
@@ -2147,23 +2146,15 @@ export default function RequestDetail() {
                 <Gavel className="h-4 w-4 text-secondary" />
                 {loadingBids ? "Loading bids…" : (
                   <>
-                    <span style={{ color: "rgba(255,255,255,0.75)" }}>{filteredBids.length}</span>
-                    {isFiltered && filteredBids.length !== bids.length && (
-                      <span className="text-muted-foreground">of {bids.length}</span>
+                    <span style={{ color: "rgba(255,255,255,0.82)" }}>{filteredBids.length}</span>
+                    {activeTags.length > 0 && filteredBids.length !== bids.length && (
+                      <span className="text-muted-foreground font-normal">of {bids.length}</span>
                     )}
-                    <span>{" "}Bid{filteredBids.length !== 1 ? "s" : ""}</span>
+                    <span className="text-muted-foreground">Bid{filteredBids.length !== 1 ? "s" : ""}</span>
                   </>
                 )}
               </h2>
               <div className="flex items-center gap-2">
-                {isFiltered && (
-                  <button
-                    onClick={() => { setBidSort("newest"); setBidExpFilter("all"); setBidVerifiedOnly(false); }}
-                    className="text-[10px] font-bold uppercase tracking-wider text-purple-400 hover:text-purple-300 transition-colors flex items-center gap-1 border border-purple-500/25 rounded-lg px-2 py-1 hover:border-purple-500/50"
-                  >
-                    <X className="h-2.5 w-2.5" /> Reset
-                  </button>
-                )}
                 {isBulkRequest && isHirer && request.status === "open" && selectableBidIds.length > 0 && (
                   <button
                     type="button"
@@ -2183,93 +2174,199 @@ export default function RequestDetail() {
               </div>
             </div>
 
-            {/* ── Filter bar (only show when there are bids) ── */}
+            {/* ── Filter panel ── */}
             {!loadingBids && bids.length > 1 && (
               <div
-                className="rounded-xl border p-3 space-y-2.5"
+                className="rounded-2xl border overflow-hidden"
                 style={{
-                  borderColor: hasActiveFilters ? "rgba(168,85,247,0.30)" : "rgba(255,255,255,0.07)",
-                  background: hasActiveFilters ? "rgba(168,85,247,0.04)" : "rgba(255,255,255,0.02)",
-                  transition: "border-color 0.2s, background 0.2s",
+                  borderColor: activeTags.length > 0 ? "rgba(168,85,247,0.35)" : "rgba(255,255,255,0.08)",
+                  transition: "border-color 0.25s",
                 }}
               >
-                {/* Row 1: Sort label + sort buttons */}
-                <div className="flex items-center gap-2 flex-wrap">
-                  <div className="flex items-center gap-1.5 shrink-0">
-                    <SlidersHorizontal className="h-3 w-3" style={{ color: "rgba(168,85,247,0.70)" }} />
-                    <span className="text-[10px] font-extrabold uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.35)" }}>
-                      Sort
+                {/* Panel header */}
+                <div
+                  className="flex items-center justify-between px-4 py-2.5 border-b"
+                  style={{
+                    borderColor: "rgba(255,255,255,0.06)",
+                    background: activeTags.length > 0 ? "rgba(168,85,247,0.06)" : "rgba(255,255,255,0.02)",
+                    transition: "background 0.25s",
+                  }}
+                >
+                  <div className="flex items-center gap-2">
+                    <SlidersHorizontal className="h-3.5 w-3.5" style={{ color: activeTags.length > 0 ? "#a855f7" : "rgba(255,255,255,0.35)" }} />
+                    <span className="text-[11px] font-extrabold uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.55)" }}>
+                      Sort &amp; Filter
                     </span>
+                    {activeTags.length > 0 && (
+                      <span
+                        className="text-[9px] font-black px-1.5 py-0.5 rounded-full"
+                        style={{ background: "rgba(168,85,247,0.25)", color: "#c084fc", border: "1px solid rgba(168,85,247,0.40)" }}
+                      >
+                        {activeTags.length} active
+                      </span>
+                    )}
                   </div>
-                  <div className="flex items-center gap-1.5 flex-wrap">
-                    {sortBtn("newest",     "Newest",    ArrowUpDown)}
-                    {sortBtn("price_high", "Price ↓",   ArrowDown)}
-                    {sortBtn("price_low",  "Price ↑",   ArrowUp)}
-                    {sortBtn("trust_high", "Trust ↓",   ShieldCheck)}
+                  {activeTags.length > 0 && (
+                    <button
+                      onClick={clearAll}
+                      className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider rounded-lg px-2.5 py-1 transition-all duration-150 hover:brightness-110"
+                      style={{
+                        background: "rgba(239,68,68,0.12)",
+                        border: "1px solid rgba(239,68,68,0.30)",
+                        color: "#f87171",
+                      }}
+                    >
+                      <X className="h-2.5 w-2.5" />
+                      Clear Filters
+                    </button>
+                  )}
+                </div>
+
+                {/* Sort row */}
+                <div
+                  className="flex items-start gap-3 px-4 py-3 border-b flex-wrap sm:flex-nowrap"
+                  style={{ borderColor: "rgba(255,255,255,0.05)", background: "rgba(0,0,0,0.15)" }}
+                >
+                  <span
+                    className="text-[10px] font-extrabold uppercase tracking-widest pt-1.5 shrink-0 w-14"
+                    style={{ color: "rgba(255,255,255,0.30)" }}
+                  >
+                    Sort by
+                  </span>
+                  <div className="flex flex-wrap gap-1.5">
+                    {sortOptions.map(({ key, label, Icon }) => {
+                      const active = bidSort === key;
+                      return (
+                        <button
+                          key={key}
+                          onClick={() => setBidSort(key)}
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all duration-150"
+                          style={active ? {
+                            background: "rgba(168,85,247,0.22)",
+                            border: "1px solid rgba(168,85,247,0.55)",
+                            color: "#c084fc",
+                            boxShadow: "0 0 10px rgba(168,85,247,0.20)",
+                          } : {
+                            background: "rgba(255,255,255,0.04)",
+                            border: "1px solid rgba(255,255,255,0.08)",
+                            color: "rgba(255,255,255,0.45)",
+                          }}
+                        >
+                          {active && <CheckCircle2 className="h-3 w-3 shrink-0" />}
+                          {!active && <Icon className="h-3 w-3 shrink-0 opacity-50" />}
+                          {label}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
 
-                {/* Row 2: Experience filter + Verified toggle */}
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-[10px] font-extrabold uppercase tracking-widest shrink-0" style={{ color: "rgba(255,255,255,0.35)" }}>
-                    Filter
+                {/* Level filter row */}
+                <div
+                  className="flex items-start gap-3 px-4 py-3 border-b flex-wrap sm:flex-nowrap"
+                  style={{ borderColor: "rgba(255,255,255,0.05)", background: "rgba(0,0,0,0.10)" }}
+                >
+                  <span
+                    className="text-[10px] font-extrabold uppercase tracking-widest pt-1.5 shrink-0 w-14"
+                    style={{ color: "rgba(255,255,255,0.30)" }}
+                  >
+                    Level
                   </span>
-
-                  {/* Experience filter pills */}
-                  <div className="flex items-center gap-1.5 flex-wrap">
-                    {expOptions.map(({ key, label, color }) => (
-                      <button
-                        key={key}
-                        onClick={() => setBidExpFilter(key)}
-                        className="px-2.5 py-1 rounded-lg text-[11px] font-bold uppercase tracking-wide transition-all duration-150"
-                        style={bidExpFilter === key ? {
-                          background: "rgba(168,85,247,0.20)",
-                          border: "1px solid rgba(168,85,247,0.50)",
-                          color: "#c084fc",
-                          boxShadow: "0 0 8px rgba(168,85,247,0.18)",
-                        } : {
-                          background: "rgba(255,255,255,0.04)",
-                          border: "1px solid rgba(255,255,255,0.09)",
-                          color,
-                          opacity: 0.65,
-                        }}
-                      >
-                        {label}
-                      </button>
-                    ))}
+                  <div className="flex flex-wrap gap-1.5">
+                    {expOptions.map(({ key, label, dot }) => {
+                      const active = bidExpFilter === key;
+                      return (
+                        <button
+                          key={key}
+                          onClick={() => setBidExpFilter(key)}
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all duration-150"
+                          style={active ? {
+                            background: "rgba(168,85,247,0.22)",
+                            border: "1px solid rgba(168,85,247,0.55)",
+                            color: "#c084fc",
+                            boxShadow: "0 0 10px rgba(168,85,247,0.20)",
+                          } : {
+                            background: "rgba(255,255,255,0.04)",
+                            border: "1px solid rgba(255,255,255,0.08)",
+                            color: "rgba(255,255,255,0.50)",
+                          }}
+                        >
+                          {active ? (
+                            <CheckCircle2 className="h-3 w-3 shrink-0" />
+                          ) : (
+                            <div className="h-2 w-2 rounded-full shrink-0" style={{ background: dot, opacity: 0.7 }} />
+                          )}
+                          {label}
+                        </button>
+                      );
+                    })}
                   </div>
+                </div>
 
-                  {/* Divider */}
-                  <div className="w-px h-4 bg-white/10 hidden sm:block" />
-
-                  {/* Verified toggle */}
+                {/* Badges row */}
+                <div
+                  className="flex items-center gap-3 px-4 py-3 flex-wrap"
+                  style={{ background: "rgba(0,0,0,0.10)" }}
+                >
+                  <span
+                    className="text-[10px] font-extrabold uppercase tracking-widest shrink-0 w-14"
+                    style={{ color: "rgba(255,255,255,0.30)" }}
+                  >
+                    Badges
+                  </span>
                   <button
                     onClick={() => setBidVerifiedOnly((v) => !v)}
-                    className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold uppercase tracking-wide transition-all duration-150"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all duration-150"
                     style={bidVerifiedOnly ? {
                       background: "rgba(34,197,94,0.18)",
-                      border: "1px solid rgba(34,197,94,0.45)",
+                      border: "1px solid rgba(34,197,94,0.50)",
                       color: "#4ade80",
-                      boxShadow: "0 0 8px rgba(34,197,94,0.15)",
+                      boxShadow: "0 0 10px rgba(34,197,94,0.15)",
                     } : {
                       background: "rgba(255,255,255,0.04)",
-                      border: "1px solid rgba(255,255,255,0.09)",
-                      color: "rgba(255,255,255,0.40)",
+                      border: "1px solid rgba(255,255,255,0.08)",
+                      color: "rgba(255,255,255,0.45)",
                     }}
                   >
-                    <ShieldCheck className="h-3 w-3" />
+                    {bidVerifiedOnly
+                      ? <CheckCircle2 className="h-3 w-3 shrink-0" style={{ color: "#4ade80" }} />
+                      : <ShieldCheck className="h-3 w-3 shrink-0 opacity-50" />
+                    }
                     Verified Only
                   </button>
                 </div>
 
-                {/* Active filter summary */}
-                {hasActiveFilters && (
-                  <div className="flex items-center gap-1.5 pt-0.5">
-                    <div className="h-1.5 w-1.5 rounded-full bg-purple-400 animate-pulse" />
-                    <span className="text-[10px]" style={{ color: "rgba(168,85,247,0.80)" }}>
+                {/* Active filter tags row */}
+                {activeTags.length > 0 && (
+                  <div
+                    className="flex items-center gap-2 px-4 py-2.5 flex-wrap border-t"
+                    style={{
+                      borderColor: "rgba(168,85,247,0.15)",
+                      background: "rgba(168,85,247,0.04)",
+                    }}
+                  >
+                    <span className="text-[9px] font-extrabold uppercase tracking-widest shrink-0" style={{ color: "rgba(168,85,247,0.60)" }}>
+                      Active:
+                    </span>
+                    {activeTags.map((tag) => (
+                      <button
+                        key={tag.id}
+                        onClick={tag.onRemove}
+                        className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold transition-all duration-150 hover:brightness-125 group"
+                        style={{
+                          background: "rgba(168,85,247,0.18)",
+                          border: "1px solid rgba(168,85,247,0.38)",
+                          color: "#c084fc",
+                        }}
+                      >
+                        {tag.label}
+                        <X className="h-2.5 w-2.5 opacity-70 group-hover:opacity-100 transition-opacity" />
+                      </button>
+                    ))}
+                    <span className="text-[10px] ml-auto" style={{ color: "rgba(255,255,255,0.30)" }}>
                       {filteredBids.length === bids.length
-                        ? `Showing all ${bids.length} bids`
-                        : `Showing ${filteredBids.length} of ${bids.length} bids`}
+                        ? `All ${bids.length} bids shown`
+                        : `${filteredBids.length} of ${bids.length} bids match`}
                     </span>
                   </div>
                 )}
