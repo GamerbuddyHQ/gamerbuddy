@@ -5,7 +5,7 @@ import { formatDistanceToNow } from "date-fns";
 import {
   Trophy, Swords, Users, Crown, Plus, X, Zap, ChevronRight,
   Gamepad2, Loader2, AlertTriangle, CheckCircle2,
-  Shield, Lock, Globe, HelpCircle, Flame,
+  Shield, Lock, Globe, HelpCircle, Flame, Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -237,6 +237,29 @@ function StatusPill({ status }: { status: TournamentStatus }) {
   );
 }
 
+/* ── Promoted threshold ── */
+const PROMOTED_PRIZE = 1000;
+
+/* ── Mini prize-split bar (used inside card) ── */
+function MiniDistBar({ first, second, third, net }: { first: number; second: number; third: number; net: number }) {
+  const fmt = (pct: number) => `$${Math.round(net * pct / 100).toLocaleString()}`;
+  return (
+    <div className="space-y-1.5">
+      <div className="flex h-1.5 rounded-full overflow-hidden w-full gap-px">
+        {first  > 0 && <div style={{ width: `${first}%`,  background: "linear-gradient(90deg,#fbbf24,#f59e0b)" }} />}
+        {second > 0 && <div style={{ width: `${second}%`, background: "linear-gradient(90deg,#94a3b8,#64748b)" }} />}
+        {third  > 0 && <div style={{ width: `${third}%`,  background: "linear-gradient(90deg,#c2813a,#a16207)" }} />}
+      </div>
+      <div className="flex gap-2.5 flex-wrap">
+        {first  > 0 && <span className="text-[10px] font-extrabold" style={{ color: "#fbbf24" }}>🥇 {fmt(first)}</span>}
+        {second > 0 && <span className="text-[10px] font-extrabold" style={{ color: "#94a3b8" }}>🥈 {fmt(second)}</span>}
+        {third  > 0 && <span className="text-[10px] font-extrabold" style={{ color: "#c2813a" }}>🥉 {fmt(third)}</span>}
+        <span className="text-[9px] text-muted-foreground/35 self-center">after 10% fee</span>
+      </div>
+    </div>
+  );
+}
+
 /* ── Tournament card ── */
 function TournamentCard({ tournament, currentUserId }: { tournament: Tournament; currentUserId?: number }) {
   const { toast } = useToast();
@@ -244,9 +267,13 @@ function TournamentCard({ tournament, currentUserId }: { tournament: Tournament;
   const tcfg = TYPE_CONFIG[tournament.tournamentType];
   const TypeIcon = tcfg.icon;
 
-  const isHost = currentUserId === tournament.hostId;
+  const isHost       = currentUserId === tournament.hostId;
   const isRegistered = tournament.registrations.some((r) => r.userId === currentUserId);
-  const pct = Math.min(100, (tournament.currentPlayers / tournament.maxPlayers) * 100);
+  const isFull       = tournament.currentPlayers >= tournament.maxPlayers;
+  const pct          = Math.min(100, (tournament.currentPlayers / tournament.maxPlayers) * 100);
+  const isPromoted   = tournament.prizePool >= PROMOTED_PRIZE;
+  const isOngoing    = tournament.status === "ongoing";
+  const isOpen       = tournament.status === "open";
 
   const joinMutation = useMutation({
     mutationFn: async () => {
@@ -270,210 +297,251 @@ function TournamentCard({ tournament, currentUserId }: { tournament: Tournament;
     onError: (e: Error) => toast({ title: "Error", description: e.message, variant: "destructive" }),
   });
 
-  const netPrize = tournament.netPrize;
   const dist = tournament.prizeDistribution;
 
   return (
     <div
-      className="rounded-2xl border overflow-hidden transition-all duration-200 hover:border-white/[0.12]"
+      className="group rounded-3xl border overflow-hidden transition-all duration-200 hover:-translate-y-0.5"
       style={{
-        background: "rgba(10,5,20,0.94)",
-        borderColor: tournament.status === "open" ? "rgba(168,85,247,0.30)" : "rgba(255,255,255,0.07)",
-        boxShadow: tournament.status === "open" ? "0 0 30px rgba(168,85,247,0.08), 0 4px 20px rgba(0,0,0,0.4)" : "0 4px 20px rgba(0,0,0,0.4)",
-        borderLeft: `3px solid ${tcfg.color}55`,
+        background: "rgba(10,5,22,0.96)",
+        borderColor: isOpen
+          ? `${tcfg.color}50`
+          : isOngoing
+          ? "rgba(251,191,36,0.35)"
+          : "rgba(255,255,255,0.07)",
+        boxShadow: isOpen
+          ? `0 0 0 1px ${tcfg.color}20, 0 8px 32px rgba(0,0,0,0.5), 0 0 40px ${tcfg.color}08`
+          : isOngoing
+          ? "0 0 0 1px rgba(251,191,36,0.15), 0 8px 32px rgba(0,0,0,0.5)"
+          : "0 4px 20px rgba(0,0,0,0.4)",
       }}
     >
-      {/* ── Prize header bar ── */}
-      <div
-        className="px-5 py-3 flex items-center justify-between gap-3"
-        style={{ background: "linear-gradient(135deg,rgba(251,191,36,0.07) 0%,rgba(0,0,0,0.3) 100%)", borderBottom: "1px solid rgba(251,191,36,0.12)" }}
-      >
-        <PrizeTag amount={tournament.prizePool} />
-        <div className="flex items-center gap-2">
-          <StatusPill status={tournament.status} />
-          {tournament.entryFee > 0 && (
-            <span
-              className="text-[10px] font-bold px-2 py-0.5 rounded-full"
-              style={{ background: "rgba(168,85,247,0.14)", border: "1px solid rgba(168,85,247,0.35)", color: "#c084fc" }}
+      {/* ── Hero band ── */}
+      <Link href={`/tournaments/${tournament.id}`}>
+        <div
+          className="relative px-5 pt-5 pb-4 cursor-pointer"
+          style={{
+            background: `linear-gradient(135deg, ${tcfg.color}14 0%, rgba(251,191,36,0.06) 50%, transparent 100%)`,
+            borderBottom: `1px solid ${tcfg.color}20`,
+          }}
+        >
+          {/* Promoted ribbon */}
+          {isPromoted && (
+            <div
+              className="absolute top-0 right-0 flex items-center gap-1 px-3 py-1 text-[10px] font-black uppercase tracking-wider rounded-bl-2xl"
+              style={{
+                background: "linear-gradient(135deg,rgba(251,191,36,0.22),rgba(251,191,36,0.10))",
+                border: "1px solid rgba(251,191,36,0.40)",
+                borderTop: "none", borderRight: "none",
+                color: "#fbbf24",
+              }}
             >
-              ${tournament.entryFee} entry
-            </span>
+              <Sparkles className="h-2.5 w-2.5" /> Promoted
+            </div>
           )}
-          {tournament.entryFee === 0 && (
-            <span
-              className="text-[10px] font-bold px-2 py-0.5 rounded-full"
-              style={{ background: "rgba(34,197,94,0.10)", border: "1px solid rgba(34,197,94,0.28)", color: "#4ade80" }}
+
+          {/* Live pulse for ongoing */}
+          {isOngoing && (
+            <div className="absolute top-3 left-3 flex items-center gap-1.5">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-60" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-yellow-400" />
+              </span>
+              <span className="text-[9px] font-black uppercase tracking-widest text-yellow-400/80">Live</span>
+            </div>
+          )}
+
+          <div className="flex items-start gap-3">
+            {/* Type icon */}
+            <div
+              className="h-11 w-11 rounded-2xl flex items-center justify-center shrink-0 mt-0.5"
+              style={{
+                background: `linear-gradient(135deg, ${tcfg.color}22, ${tcfg.color}0C)`,
+                border: `1.5px solid ${tcfg.color}50`,
+                boxShadow: `0 0 16px ${tcfg.color}18`,
+              }}
             >
-              Free Entry
-            </span>
-          )}
+              <TypeIcon className="h-5 w-5" style={{ color: tcfg.color }} />
+            </div>
+
+            <div className="flex-1 min-w-0">
+              {/* Title */}
+              <h3 className="text-[16px] sm:text-[17px] font-extrabold text-white leading-snug group-hover:text-primary/90 transition-colors line-clamp-2">
+                {tournament.title}
+              </h3>
+              {/* Subtitle chips */}
+              <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+                <span
+                  className="text-[10px] font-bold px-2 py-0.5 rounded-md"
+                  style={{ background: `${tcfg.color}18`, color: tcfg.color, border: `1px solid ${tcfg.color}35` }}
+                >
+                  {tcfg.label}
+                </span>
+                <span
+                  className="text-[10px] font-semibold px-2 py-0.5 rounded-md text-primary/80"
+                  style={{ background: "rgba(168,85,247,0.10)", border: "1px solid rgba(168,85,247,0.22)" }}
+                >
+                  {tournament.gameName}
+                </span>
+                <span className="text-[10px] text-muted-foreground/45 flex items-center gap-1">
+                  <Gamepad2 className="h-2.5 w-2.5" />{tournament.platform}
+                </span>
+              </div>
+            </div>
+
+            {/* Prize + status stack — top right */}
+            <div className="shrink-0 text-right">
+              <p className="text-[22px] sm:text-[24px] font-black text-yellow-400 leading-none">
+                ${tournament.prizePool.toLocaleString()}
+              </p>
+              <p className="text-[9px] text-muted-foreground/40 mt-0.5">prize pool</p>
+            </div>
+          </div>
+
+          {/* Status + entry fee row */}
+          <div className="flex items-center gap-2 mt-3 flex-wrap">
+            <StatusPill status={tournament.status} />
+            {tournament.entryFee > 0 ? (
+              <span
+                className="text-[10px] font-bold px-2 py-0.5 rounded-full"
+                style={{ background: "rgba(168,85,247,0.14)", border: "1px solid rgba(168,85,247,0.35)", color: "#c084fc" }}
+              >
+                ${tournament.entryFee} entry
+              </span>
+            ) : (
+              <span
+                className="text-[10px] font-bold px-2 py-0.5 rounded-full"
+                style={{ background: "rgba(34,197,94,0.10)", border: "1px solid rgba(34,197,94,0.28)", color: "#4ade80" }}
+              >
+                🎁 Free Entry
+              </span>
+            )}
+          </div>
         </div>
-      </div>
+      </Link>
 
-      {/* ── Card body ── */}
-      <div className="p-5">
-        <div className="flex items-start gap-4">
-          {/* Type icon */}
-          <div
-            className="h-12 w-12 rounded-2xl flex items-center justify-center shrink-0"
-            style={{ background: `${tcfg.color}18`, border: `1px solid ${tcfg.color}45` }}
-          >
-            <TypeIcon className="h-6 w-6" style={{ color: tcfg.color }} />
-          </div>
-
-          <div className="flex-1 min-w-0">
-            <div className="flex items-start justify-between gap-2">
-              <div>
-                <Link href={`/tournaments/${tournament.id}`}>
-                  <h3 className="text-[16px] font-extrabold text-white leading-tight hover:text-primary/90 transition-colors cursor-pointer">{tournament.title}</h3>
-                </Link>
-                <div className="flex items-center gap-2 mt-1 flex-wrap">
-                  <span className="text-[12px] font-semibold text-primary/80">{tournament.gameName}</span>
-                  <span className="text-muted-foreground/30">·</span>
-                  <span className="text-[11px] text-muted-foreground/55 flex items-center gap-1">
-                    <Gamepad2 className="h-3 w-3" />{tournament.platform}
-                  </span>
-                  <span className="text-muted-foreground/30">·</span>
-                  <span className="text-[11px] font-semibold" style={{ color: tcfg.color }}>{tcfg.label}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Slots progress bar */}
-            <div className="mt-3.5">
-              <div className="flex items-center justify-between mb-1.5">
-                <span className="text-[11px] text-muted-foreground/50 font-medium flex items-center gap-1">
-                  <Users className="h-3 w-3" /> Slots
-                </span>
-                <span className="text-[12px] font-extrabold" style={{
-                  color: pct >= 100 ? "#f87171" : pct > 60 ? "#fbbf24" : "#a855f7"
-                }}>
-                  {tournament.currentPlayers} / {tournament.maxPlayers}
-                </span>
-              </div>
-              <div className="h-2 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.07)" }}>
-                <div
-                  className="h-full rounded-full transition-all duration-500"
-                  style={{
-                    width: `${pct}%`,
-                    background: pct >= 100
-                      ? "linear-gradient(90deg,#f87171,#ef4444)"
-                      : pct > 60
-                      ? "linear-gradient(90deg,#fbbf24,#f59e0b)"
-                      : "linear-gradient(90deg,#a855f7,#7c3aed)",
-                  }}
-                />
-              </div>
-              <div className="flex items-center justify-between mt-1">
-                {tournament.status === "open" && tournament.slotsLeft > 0 ? (
-                  <p className="text-[10px] text-muted-foreground/40">
-                    {tournament.slotsLeft} slot{tournament.slotsLeft !== 1 ? "s" : ""} remaining
-                  </p>
-                ) : pct >= 100 ? (
-                  <p className="text-[10px] font-bold text-red-400/70">Full</p>
-                ) : <span />}
-                <p className="text-[10px] text-muted-foreground/30">max {tournament.maxPlayers}</p>
-              </div>
-            </div>
-
-            {/* Prize distribution */}
-            <div className="mt-3 flex items-center gap-2 flex-wrap">
-              {dist.first > 0 && (
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-md flex items-center gap-1" style={{ background: "rgba(251,191,36,0.10)", border: "1px solid rgba(251,191,36,0.28)", color: "#fbbf24" }}>
-                  <Crown className="h-2.5 w-2.5" />1st — ${(netPrize * dist.first / 100).toFixed(0)}
-                </span>
-              )}
-              {dist.second > 0 && (
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-md" style={{ background: "rgba(148,163,184,0.10)", border: "1px solid rgba(148,163,184,0.25)", color: "#94a3b8" }}>
-                  2nd — ${(netPrize * dist.second / 100).toFixed(0)}
-                </span>
-              )}
-              {dist.third > 0 && (
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-md" style={{ background: "rgba(180,83,9,0.10)", border: "1px solid rgba(180,83,9,0.28)", color: "#c2813a" }}>
-                  3rd — ${(netPrize * dist.third / 100).toFixed(0)}
-                </span>
-              )}
-              <span className="text-[9px] text-muted-foreground/35">
-                (after 10% platform fee)
+      {/* ── Body ── */}
+      <div className="px-5 py-4 space-y-4">
+        {/* Slot bar */}
+        <div>
+          <div className="flex items-center justify-between mb-1.5">
+            <span className="text-[11px] text-muted-foreground/50 font-medium flex items-center gap-1.5">
+              <Users className="h-3 w-3" />
+              <span>
+                {isOpen && !isFull
+                  ? <><span className="font-extrabold" style={{ color: pct > 60 ? "#fbbf24" : "#a855f7" }}>{tournament.slotsLeft}</span> slots left</>
+                  : isFull
+                  ? <span className="font-bold text-red-400/80">All slots filled</span>
+                  : "Participants"}
               </span>
-            </div>
-
-            {/* Meta row */}
-            <div className="flex items-center gap-3 mt-3 flex-wrap">
-              <div className="flex items-center gap-1.5">
-                <Avatar name={tournament.hostName} size={18} />
-                <span className="text-[11px] text-muted-foreground/55">by <span className="font-semibold text-white/65">{tournament.hostName}</span></span>
-              </div>
-              <span className="text-[10px] text-muted-foreground/35">
-                {formatDistanceToNow(new Date(tournament.createdAt), { addSuffix: true })}
-              </span>
-            </div>
+            </span>
+            <span
+              className="text-[12px] font-extrabold tabular-nums"
+              style={{ color: pct >= 100 ? "#f87171" : pct > 60 ? "#fbbf24" : "#a855f7" }}
+            >
+              {tournament.currentPlayers}/{tournament.maxPlayers}
+            </span>
           </div>
+          <div className="h-2.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
+            <div
+              className="h-full rounded-full transition-all duration-700"
+              style={{
+                width: `${pct}%`,
+                background: pct >= 100
+                  ? "linear-gradient(90deg,#f87171,#ef4444)"
+                  : pct > 75
+                  ? "linear-gradient(90deg,#f97316,#ea580c)"
+                  : pct > 40
+                  ? "linear-gradient(90deg,#fbbf24,#f59e0b)"
+                  : "linear-gradient(90deg,#a855f7,#7c3aed)",
+              }}
+            />
+          </div>
+        </div>
+
+        {/* Prize distribution mini bar */}
+        <MiniDistBar
+          first={dist.first} second={dist.second} third={dist.third}
+          net={tournament.netPrize}
+        />
+
+        {/* Meta row */}
+        <div className="flex items-center gap-2 text-[11px] text-muted-foreground/45 flex-wrap">
+          <Avatar name={tournament.hostName} size={16} />
+          <span>by <span className="font-semibold text-white/55">{tournament.hostName}</span></span>
+          <span className="text-muted-foreground/25">·</span>
+          <span>{formatDistanceToNow(new Date(tournament.createdAt), { addSuffix: true })}</span>
         </div>
 
         {/* ── Action row ── */}
-        <div className="mt-4 flex items-center gap-2 flex-wrap">
-          {tournament.status === "open" && !isHost && !isRegistered && currentUserId && (
+        <div className="flex gap-2 flex-wrap pt-0.5">
+          {/* Join — full-width primary CTA */}
+          {isOpen && !isHost && !isRegistered && currentUserId && (
             <Button
               onClick={() => joinMutation.mutate()}
-              disabled={joinMutation.isPending}
-              className="font-bold"
-              style={{ background: "linear-gradient(135deg,#a855f7,#7c3aed)", boxShadow: "0 0 16px rgba(168,85,247,0.28)" }}
+              disabled={joinMutation.isPending || isFull}
+              className="flex-1 font-extrabold text-[13px] py-2.5 h-auto"
+              style={{
+                background: "linear-gradient(135deg,#a855f7,#7c3aed)",
+                boxShadow: "0 0 20px rgba(168,85,247,0.30)",
+              }}
             >
               {joinMutation.isPending
                 ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Joining…</>
-                : <><Zap className="h-4 w-4 mr-1.5" />Join Tournament{tournament.entryFee > 0 ? ` — $${tournament.entryFee}` : " (Free)"}</>
+                : isFull
+                ? <><Lock className="h-4 w-4 mr-1.5" />Full</>
+                : <><Zap className="h-4 w-4 mr-1.5" />Join{tournament.entryFee > 0 ? ` — $${tournament.entryFee}` : " Free"}</>
               }
             </Button>
           )}
 
-          {isRegistered && (
-            <span className="text-[12px] font-bold flex items-center gap-1.5 px-3 py-2 rounded-xl" style={{ background: "rgba(34,197,94,0.12)", border: "1px solid rgba(34,197,94,0.30)", color: "#4ade80" }}>
-              <CheckCircle2 className="h-4 w-4" /> You're In!
-            </span>
-          )}
-
-          {isHost && tournament.status !== "completed" && tournament.status !== "cancelled" && (
-            <Link href={`/tournaments/${tournament.id}/manage`}>
-              <Button variant="outline" size="sm" className="font-semibold border-primary/40 text-primary hover:bg-primary/10">
-                <Shield className="h-3.5 w-3.5 mr-1.5" /> Manage
-              </Button>
-            </Link>
-          )}
-
-          {isHost && tournament.status === "open" && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => cancelMutation.mutate()}
-              disabled={cancelMutation.isPending}
-              className="font-semibold border-red-500/30 text-red-400 hover:bg-red-500/10"
-            >
-              {cancelMutation.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <X className="h-3.5 w-3.5 mr-1" />}
-              Cancel
+          {!currentUserId && isOpen && (
+            <Button asChild className="flex-1 font-bold py-2.5 h-auto" style={{ background: "linear-gradient(135deg,#a855f7,#7c3aed)" }}>
+              <Link href="/login"><Zap className="h-4 w-4 mr-1.5" />Log in to Join</Link>
             </Button>
           )}
 
-          {!currentUserId && tournament.status === "open" && (
-            <Link href="/login">
-              <Button variant="outline" className="font-semibold border-primary/40 text-primary hover:bg-primary/10">
-                Log in to join
-              </Button>
-            </Link>
+          {isRegistered && (
+            <div
+              className="flex-1 flex items-center justify-center gap-1.5 rounded-xl py-2.5 text-[13px] font-bold"
+              style={{ background: "rgba(34,197,94,0.10)", border: "1.5px solid rgba(34,197,94,0.30)", color: "#4ade80" }}
+            >
+              <CheckCircle2 className="h-4 w-4" /> You're Registered
+            </div>
           )}
 
-          {/* View details link */}
+          {isHost && (
+            <span
+              className="flex items-center gap-1.5 px-3 py-2.5 rounded-xl text-[12px] font-bold"
+              style={{ background: "rgba(168,85,247,0.10)", border: "1px solid rgba(168,85,247,0.28)", color: "#c084fc" }}
+            >
+              <Shield className="h-3.5 w-3.5" /> Your Tournament
+            </span>
+          )}
+
+          {/* View details — always present */}
           <Link
             href={`/tournaments/${tournament.id}`}
-            className="ml-auto flex items-center gap-1.5 text-[11px] font-bold transition-all duration-150 active:scale-95 rounded-lg px-2.5 py-1.5"
-            style={{ background: "rgba(168,85,247,0.10)", border: "1px solid rgba(168,85,247,0.28)", color: "#c084fc" }}
+            className="flex items-center gap-1 text-[12px] font-bold px-3.5 py-2.5 rounded-xl transition-all active:scale-95"
+            style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.09)", color: "rgba(255,255,255,0.50)" }}
           >
-            View Details
-            <ChevronRight className="h-3.5 w-3.5" />
+            Details <ChevronRight className="h-3.5 w-3.5" />
           </Link>
+
+          {/* Host cancel */}
+          {isHost && isOpen && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => { if (confirm("Cancel this tournament and refund all funds?")) cancelMutation.mutate(); }}
+              disabled={cancelMutation.isPending}
+              className="text-red-400/60 hover:text-red-400 hover:bg-red-500/10 font-semibold px-2"
+            >
+              {cancelMutation.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <X className="h-3.5 w-3.5" />}
+            </Button>
+          )}
         </div>
       </div>
-
     </div>
   );
 }
