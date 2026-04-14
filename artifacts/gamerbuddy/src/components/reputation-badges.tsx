@@ -111,36 +111,41 @@ export function ReputationBadges({
   );
 }
 
+function tfColor(v: number): string {
+  return v >= 75 ? "#4ade80" : v >= 55 ? "#fbbf24" : v >= 35 ? "#f97316" : "#f87171";
+}
+function tfLabel(v: number): string {
+  return v >= 80 ? "Excellent" : v >= 65 ? "Good" : v >= 45 ? "Fair" : v >= 30 ? "Poor" : "Risky";
+}
+function tfGradient(v: number): string {
+  return v >= 75
+    ? "from-green-500 to-emerald-400"
+    : v >= 55
+    ? "from-yellow-500 to-amber-400"
+    : v >= 35
+    ? "from-orange-500 to-amber-500"
+    : "from-red-500 to-rose-400";
+}
+
 export function TrustChip({ value }: { value: number }) {
   const capped = Math.min(100, Math.max(0, value));
-  const color =
-    capped >= 80 ? "#4ade80" : capped >= 65 ? "#fbbf24" : capped >= 45 ? "#f97316" : "#f87171";
+  const color = tfColor(capped);
   return (
     <span
       className="inline-flex items-center gap-1 text-[10px] font-black tabular-nums rounded-full px-1.5 py-0.5"
-      style={{
-        background: `${color}18`,
-        border: `1px solid ${color}40`,
-        color,
-      }}
-      title={`Trust Factor: ${capped}/100`}
+      style={{ background: `${color}18`, border: `1px solid ${color}40`, color }}
+      title={`Trust Factor: ${capped}/100 — ${tfLabel(capped)}`}
     >
       <ShieldCheck className="h-2.5 w-2.5" />
-      {capped}/100
+      {capped}
     </span>
   );
 }
 
 export function TrustMeter({ value }: { value: number }) {
   const capped = Math.min(100, Math.max(0, value));
-  const pct = capped;
-  const color =
-    pct >= 80 ? "from-green-500 to-emerald-400" :
-    pct >= 60 ? "from-yellow-500 to-amber-400" :
-    pct >= 40 ? "from-orange-500 to-amber-500" :
-    "from-red-500 to-rose-400";
-  const label =
-    pct >= 85 ? "Excellent" : pct >= 70 ? "Good" : pct >= 50 ? "Neutral" : pct >= 30 ? "Poor" : "Risky";
+  const label = tfLabel(capped);
+  const color = tfColor(capped);
 
   return (
     <div className="space-y-2">
@@ -149,7 +154,7 @@ export function TrustMeter({ value }: { value: number }) {
           <ShieldCheck className="h-3.5 w-3.5" /> Trust Factor
         </span>
         <div className="flex items-center gap-2">
-          <span className="text-xs text-muted-foreground">{label}</span>
+          <span className="text-xs font-semibold" style={{ color }}>{label}</span>
           <span className="font-black text-white text-sm">
             {capped}
             <span className="text-muted-foreground font-normal text-xs">/100</span>
@@ -158,13 +163,20 @@ export function TrustMeter({ value }: { value: number }) {
       </div>
       <div className="h-3 rounded-full bg-background border border-border/60 overflow-hidden">
         <div
-          className={`h-full rounded-full bg-gradient-to-r ${color} transition-all duration-700 shadow-sm`}
-          style={{ width: `${pct}%` }}
+          className={`h-full rounded-full bg-gradient-to-r ${tfGradient(capped)} transition-all duration-700 shadow-sm`}
+          style={{ width: `${capped}%` }}
         />
       </div>
-      <div className="flex justify-between text-[10px] text-muted-foreground/50">
-        <span>Risky</span><span>Neutral</span><span>Excellent</span>
+      <div className="flex justify-between text-[10px] text-muted-foreground/40">
+        <span>Risky &lt;35</span>
+        <span>Fair 45–64</span>
+        <span>Excellent 80+</span>
       </div>
+      <p className="text-[10px] text-muted-foreground/50 leading-relaxed">
+        Earned from <span className="text-muted-foreground">rating quality</span> (60 pts),
+        {" "}<span className="text-muted-foreground">session experience</span> (30 pts) and
+        {" "}<span className="text-muted-foreground">review volume</span> (10 pts).
+      </p>
     </div>
   );
 }

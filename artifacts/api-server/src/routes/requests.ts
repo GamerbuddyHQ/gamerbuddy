@@ -629,6 +629,7 @@ router.post("/requests/:id/reviews", requireAuth, async (req, res): Promise<void
   const [tfRow] = await db
     .select({
       avg: sql<string>`AVG(${reviewsTable.rating})`,
+      count: sql<string>`COUNT(*)::int`,
     })
     .from(reviewsTable)
     .where(eq(reviewsTable.revieweeId, revieweeId));
@@ -652,10 +653,29 @@ router.post("/requests/:id/reviews", requireAuth, async (req, res): Promise<void
       and(eq(gameRequestsTable.userId, revieweeId), eq(gameRequestsTable.status, "completed")),
     );
 
-  const avgR = parseFloat(tfRow?.avg ?? "5");
+  const reviewCount = parseInt(String(tfRow?.count ?? 0));
+  const rawAvg = parseFloat(tfRow?.avg ?? "5");
   const totalSess =
     parseInt(String(gamerRow?.count ?? 0)) + parseInt(String(hirerRow?.count ?? 0));
-  const newTF = Math.min(100, Math.round(avgR * 10) + Math.min(totalSess * 2, 20));
+
+  // Bayesian-weighted average: blend actual rating with neutral prior (7.5/10, weight 3)
+  // Prevents a single outlier review from dominating the score
+  const priorMean = 7.5;
+  const priorWeight = 3;
+  const bayesianAvg =
+    (rawAvg * reviewCount + priorMean * priorWeight) / (reviewCount + priorWeight);
+
+  // Component 1: Rating quality (0–60 pts)
+  const ratingPts = Math.round((bayesianAvg / 10) * 60);
+
+  // Component 2: Session experience (0–30 pts, sqrt scale caps at 50 sessions)
+  // sqrt gives more value to early sessions — going from 0→5 is bigger than 45→50
+  const sessionPts = Math.round(Math.min(Math.sqrt(totalSess / 50), 1) * 30);
+
+  // Component 3: Review volume (0–10 pts, linear, caps at 10 reviews)
+  const volumePts = Math.min(reviewCount, 10);
+
+  const newTF = Math.min(100, ratingPts + sessionPts + volumePts);
 
   await db.update(usersTable).set({ trustFactor: newTF }).where(eq(usersTable.id, revieweeId));
 
