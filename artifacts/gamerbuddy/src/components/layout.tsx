@@ -531,6 +531,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <footer className="border-t border-border/40 bg-background/60 mt-auto">
         <div className="h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
         <div className="container py-6 md:py-8">
+          {/* Top row: logo + links + short copyright */}
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-3 opacity-60">
               <GamerbuddyLogo iconSize={20} textSize="lg" />
@@ -555,10 +556,21 @@ export function Layout({ children }: { children: React.ReactNode }) {
               </Link>
             </div>
 
-            <div className="text-xs text-muted-foreground/40 text-center md:text-right">
-              {t.footer.copyright} {t.footer.earlyDev}
+            {/* Short copyright — right side */}
+            <div className="text-xs text-muted-foreground/50 text-center md:text-right font-medium">
+              © 2026 Gamerbuddy&nbsp;|&nbsp;All Rights Reserved
             </div>
           </div>
+
+          {/* Divider */}
+          <div className="mt-5 mb-4 h-px bg-border/25" />
+
+          {/* Full legal notice */}
+          <p className="text-[11px] leading-relaxed text-muted-foreground/35 text-center max-w-3xl mx-auto">
+            © 2026 Gamerbuddy. All Rights Reserved. This website and all its content, design,
+            features, and code are protected under copyright law. Unauthorized copying,
+            reproduction, or distribution is strictly prohibited.
+          </p>
         </div>
       </footer>
 
