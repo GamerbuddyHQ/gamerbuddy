@@ -43,7 +43,17 @@ router.get("/users/:id", async (req, res): Promise<void> => {
 
   if (!user) { res.status(404).json({ error: "User not found" }); return; }
 
-  const [reviews, completedAsHirer, completedAsGamer, purchases, questEntries, streamingAccounts] = await Promise.all([
+  const [
+    reviews,
+    completedAsHirer,
+    completedAsGamer,
+    purchases,
+    questEntries,
+    streamingAccounts,
+    gamerSessionsTotal,
+    hirerSessionsTotal,
+    beginnerReviews,
+  ] = await Promise.all([
     db.select({
       id: reviewsTable.id,
       rating: reviewsTable.rating,
@@ -82,11 +92,34 @@ router.get("/users/:id", async (req, res): Promise<void> => {
     db.select({ platform: streamingAccountsTable.platform, username: streamingAccountsTable.username })
     .from(streamingAccountsTable)
     .where(eq(streamingAccountsTable.userId, userId)),
+
+    // Total completed sessions as gamer (untruncated count)
+    db.select({ count: sql<string>`COUNT(*)::int` })
+    .from(bidsTable)
+    .leftJoin(gameRequestsTable, eq(bidsTable.requestId, gameRequestsTable.id))
+    .where(and(eq(bidsTable.bidderId, userId), eq(bidsTable.status, "accepted"), eq(gameRequestsTable.status, "completed"))),
+
+    // Total completed sessions as hirer (untruncated count)
+    db.select({ count: sql<string>`COUNT(*)::int` })
+    .from(gameRequestsTable)
+    .where(and(eq(gameRequestsTable.userId, userId), eq(gameRequestsTable.status, "completed"))),
+
+    // Reviews on beginner-level sessions for Beginner-Friendly badge
+    db.select({ rating: reviewsTable.rating })
+    .from(reviewsTable)
+    .leftJoin(gameRequestsTable, eq(reviewsTable.requestId, gameRequestsTable.id))
+    .where(and(eq(reviewsTable.revieweeId, userId), eq(gameRequestsTable.skillLevel, "Beginner"))),
   ]);
 
   const avgRating = reviews.length > 0
     ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
     : null;
+
+  const sessionsAsGamerCount = parseInt(String(gamerSessionsTotal[0]?.count ?? 0));
+  const sessionsAsHirerCount = parseInt(String(hirerSessionsTotal[0]?.count ?? 0));
+  const beginnerFriendly =
+    beginnerReviews.length >= 3 &&
+    beginnerReviews.reduce((s, r) => s + r.rating, 0) / beginnerReviews.length >= 7.5;
 
   res.json({
     ...user,
@@ -96,6 +129,9 @@ router.get("/users/:id", async (req, res): Promise<void> => {
     reviews: reviews.map((r) => ({ ...r, createdAt: r.createdAt.toISOString() })),
     sessionsAsHirer: completedAsHirer.map((s) => ({ ...s, createdAt: s.createdAt.toISOString() })),
     sessionsAsGamer: completedAsGamer.map((s) => ({ ...s, createdAt: s.createdAt?.toISOString() })),
+    sessionsAsGamerCount,
+    sessionsAsHirerCount,
+    beginnerFriendly,
     purchasedItems: purchases.map((p) => p.itemId),
     questEntries: questEntries.map((q) => ({ ...q, createdAt: q.createdAt.toISOString() })),
     streamingAccounts,

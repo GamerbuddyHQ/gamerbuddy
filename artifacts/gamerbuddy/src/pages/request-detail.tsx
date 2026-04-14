@@ -35,6 +35,7 @@ import {
 } from "lucide-react";
 import { SafetyBanner } from "@/components/safety-banner";
 import { VerifiedBadge } from "@/components/verified-badge";
+import { TrustChip, ReputationBadges, computeBadges } from "@/components/reputation-badges";
 
 const PLATFORM_ICON: Record<string, string> = {
   PC: "🖥️", PlayStation: "🎮", Xbox: "🟩", "Nintendo Switch": "🕹️",
@@ -625,6 +626,7 @@ function BidCard({
               <div className="font-bold text-white text-sm flex items-center gap-2 flex-wrap">
                 {bid.bidderName}
                 <VerifiedBadge idVerified={bid.bidderIdVerified ?? false} variant="compact" />
+                <TrustChip value={bid.bidderTrustFactor ?? 50} />
                 {isMe && <span className="text-xs text-secondary font-normal">(You)</span>}
                 {isAccepted && bid.discordUsername && (
                   <span className="text-xs text-indigo-400 font-normal flex items-center gap-1">
@@ -633,7 +635,19 @@ function BidCard({
                 )}
                 <BidderStreamingBadges bidderId={bid.bidderId} compact />
               </div>
-              <div className="text-xs text-muted-foreground">{format(new Date(bid.createdAt), "MMM d, h:mm a")}</div>
+              <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                <span className="text-xs text-muted-foreground">{format(new Date(bid.createdAt), "MMM d, h:mm a")}</span>
+                <ReputationBadges
+                  compact
+                  badges={computeBadges({
+                    trustFactor: bid.bidderTrustFactor ?? 50,
+                    idVerified: bid.bidderIdVerified ?? false,
+                    sessionsAsGamerCount: bid.bidderSessionsAsGamerCount ?? 0,
+                    sessionsAsHirerCount: 0,
+                    beginnerFriendly: false,
+                  }).filter((b) => b.id !== "verified")}
+                />
+              </div>
             </div>
           </div>
           <div className="text-right shrink-0">

@@ -22,6 +22,7 @@ import {
   Sparkles, Lock, CheckCircle2, Plus, Trash2, Gamepad2,
   Zap, Target, ChevronDown, ChevronUp,
 } from "lucide-react";
+import { TrustMeter, ReputationBadges, computeBadges } from "@/components/reputation-badges";
 
 /* ── GAMER RULES CARD ───────────────────────────────────────── */
 const GAMER_RULES = [
@@ -503,35 +504,6 @@ const GAME_COLORS = [
   "border-indigo-500/40 bg-indigo-500/5",
 ];
 
-function TrustMeter({ value }: { value: number }) {
-  const pct = Math.min(100, Math.max(0, (value / 1000) * 100));
-  const color =
-    pct >= 70 ? "from-green-500 to-emerald-400" :
-    pct >= 40 ? "from-yellow-500 to-amber-400" :
-    "from-red-500 to-rose-400";
-  const label =
-    pct >= 80 ? "Excellent" : pct >= 60 ? "Good" : pct >= 40 ? "Neutral" : pct >= 20 ? "Poor" : "Risky";
-
-  return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between text-xs">
-        <span className="uppercase tracking-widest text-muted-foreground font-bold flex items-center gap-1.5">
-          <ShieldCheck className="h-3.5 w-3.5" /> Trust Factor
-        </span>
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-muted-foreground">{label}</span>
-          <span className="font-black text-white text-sm">{value}<span className="text-muted-foreground font-normal text-xs">/1000</span></span>
-        </div>
-      </div>
-      <div className="h-3 rounded-full bg-background border border-border/60 overflow-hidden">
-        <div className={`h-full rounded-full bg-gradient-to-r ${color} transition-all duration-700 shadow-sm`} style={{ width: `${pct}%` }} />
-      </div>
-      <div className="flex justify-between text-[10px] text-muted-foreground/50">
-        <span>Risky</span><span>Neutral</span><span>Excellent</span>
-      </div>
-    </div>
-  );
-}
 
 function ScoreBadge({ rating }: { rating: number }) {
   const color =
@@ -1041,7 +1013,14 @@ export default function Profile() {
   );
 
   const points = profile?.points ?? user.points ?? 0;
-  const trustFactor = profile?.trustFactor ?? 100;
+  const trustFactor = Math.min(100, profile?.trustFactor ?? 50);
+  const repBadges = computeBadges({
+    trustFactor,
+    idVerified: user.idVerified,
+    sessionsAsGamerCount: profile?.sessionsAsGamerCount ?? 0,
+    sessionsAsHirerCount: profile?.sessionsAsHirerCount ?? 0,
+    beginnerFriendly: profile?.beginnerFriendly ?? false,
+  });
   const bgId = profile?.profileBackground;
   const titleId = profile?.profileTitle;
   const bgGrad = bgId ? (BG_STYLES[bgId] ?? "from-primary/20 to-secondary/10") : "from-primary/15 via-secondary/10 to-background";
@@ -1135,6 +1114,9 @@ export default function Profile() {
           </div>
 
           <div className="-mt-4 sm:-mt-6 space-y-4">
+            {repBadges.length > 0 && (
+              <ReputationBadges badges={repBadges} />
+            )}
             <TrustMeter value={trustFactor} />
             <div className="grid grid-cols-3 gap-2 sm:gap-3">
               <div className="p-2.5 sm:p-3 bg-background/50 rounded-xl border border-border text-center space-y-1">

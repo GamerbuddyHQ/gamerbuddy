@@ -8,6 +8,8 @@ export type Bid = {
   bidderId: number;
   bidderName: string;
   bidderIdVerified?: boolean;
+  bidderTrustFactor?: number;
+  bidderSessionsAsGamerCount?: number;
   price: number;
   message: string;
   status: string;
@@ -83,6 +85,9 @@ export type UserProfile = {
   reviews: Review[];
   sessionsAsHirer: { id: number; gameName: string; platform?: string; createdAt: string }[];
   sessionsAsGamer: { requestId: number; gameName: string | null; platform?: string | null; createdAt: string | null }[];
+  sessionsAsGamerCount: number;
+  sessionsAsHirerCount: number;
+  beginnerFriendly: boolean;
   purchasedItems: string[];
   questEntries: QuestEntry[];
   streamingAccounts?: StreamingAccount[];

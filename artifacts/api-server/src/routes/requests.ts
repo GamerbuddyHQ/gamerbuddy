@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { db, gameRequestsTable, walletsTable, usersTable, bidsTable, reviewsTable, walletTransactionsTable } from "@workspace/db";
-import { eq, desc, and, sql } from "drizzle-orm";
+import { eq, desc, and, sql, inArray } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
 import { createNotification, sendEmailNotification } from "../notifications-helper";
 
@@ -210,22 +210,30 @@ router.post("/requests", requireAuth, async (req, res): Promise<void> => {
   res.status(201).json(formatRequest(gameRequest, user.name));
 });
 
-function formatBid(bid: {
-  id: number;
-  requestId: number;
-  bidderId: number;
-  price: string;
-  message: string;
-  status: string;
-  discordUsername?: string | null;
-  createdAt: Date;
-}, bidderName?: string, bidderIdVerified?: boolean) {
+function formatBid(
+  bid: {
+    id: number;
+    requestId: number;
+    bidderId: number;
+    price: string;
+    message: string;
+    status: string;
+    discordUsername?: string | null;
+    createdAt: Date;
+  },
+  bidderName?: string,
+  bidderIdVerified?: boolean,
+  bidderTrustFactor?: number,
+  bidderSessionsAsGamerCount?: number,
+) {
   return {
     id: bid.id,
     requestId: bid.requestId,
     bidderId: bid.bidderId,
     bidderName: bidderName ?? "Unknown",
     bidderIdVerified: bidderIdVerified ?? false,
+    bidderTrustFactor: bidderTrustFactor ?? 50,
+    bidderSessionsAsGamerCount: bidderSessionsAsGamerCount ?? 0,
     price: parseFloat(bid.price),
     message: bid.message,
     status: bid.status,
@@ -253,13 +261,48 @@ router.get("/requests/:id/bids", async (req, res): Promise<void> => {
       createdAt: bidsTable.createdAt,
       bidderName: usersTable.name,
       bidderIdVerified: usersTable.idVerified,
+      bidderTrustFactor: usersTable.trustFactor,
     })
     .from(bidsTable)
     .leftJoin(usersTable, eq(bidsTable.bidderId, usersTable.id))
     .where(eq(bidsTable.requestId, requestId))
     .orderBy(desc(bidsTable.createdAt));
 
-  res.json(rows.map((r) => formatBid(r, r.bidderName ?? "Unknown", r.bidderIdVerified ?? false)));
+  // Get completed session counts for each unique bidder (2-query, no N+1)
+  const bidderIds = [...new Set(rows.map((r) => r.bidderId).filter(Boolean))];
+  const sessionCounts =
+    bidderIds.length > 0
+      ? await db
+          .select({
+            bidderId: bidsTable.bidderId,
+            count: sql<string>`COUNT(*)::int`,
+          })
+          .from(bidsTable)
+          .leftJoin(gameRequestsTable, eq(bidsTable.requestId, gameRequestsTable.id))
+          .where(
+            and(
+              inArray(bidsTable.bidderId, bidderIds),
+              eq(bidsTable.status, "accepted"),
+              eq(gameRequestsTable.status, "completed"),
+            ),
+          )
+          .groupBy(bidsTable.bidderId)
+      : [];
+
+  const sessMap: Record<number, number> = {};
+  for (const s of sessionCounts) sessMap[s.bidderId] = parseInt(String(s.count));
+
+  res.json(
+    rows.map((r) =>
+      formatBid(
+        r,
+        r.bidderName ?? "Unknown",
+        r.bidderIdVerified ?? false,
+        r.bidderTrustFactor ?? 50,
+        sessMap[r.bidderId] ?? 0,
+      ),
+    ),
+  );
 });
 
 router.post("/requests/:id/bids", requireAuth, async (req, res): Promise<void> => {
@@ -582,11 +625,39 @@ router.post("/requests/:id/reviews", requireAuth, async (req, res): Promise<void
     comment: comment?.trim() || null,
   }).returning();
 
-  // Adjust reviewee's trust factor
-  const trustDelta = Math.round((rating - 5) * 2);
-  await db.update(usersTable)
-    .set({ trustFactor: sql`LEAST(GREATEST(${usersTable.trustFactor} + ${trustDelta}, 0), 1000)` })
-    .where(eq(usersTable.id, revieweeId));
+  // Recalculate trust factor from scratch using full history
+  const [tfRow] = await db
+    .select({
+      avg: sql<string>`AVG(${reviewsTable.rating})`,
+    })
+    .from(reviewsTable)
+    .where(eq(reviewsTable.revieweeId, revieweeId));
+
+  const [gamerRow] = await db
+    .select({ count: sql<string>`COUNT(*)::int` })
+    .from(bidsTable)
+    .leftJoin(gameRequestsTable, eq(bidsTable.requestId, gameRequestsTable.id))
+    .where(
+      and(
+        eq(bidsTable.bidderId, revieweeId),
+        eq(bidsTable.status, "accepted"),
+        eq(gameRequestsTable.status, "completed"),
+      ),
+    );
+
+  const [hirerRow] = await db
+    .select({ count: sql<string>`COUNT(*)::int` })
+    .from(gameRequestsTable)
+    .where(
+      and(eq(gameRequestsTable.userId, revieweeId), eq(gameRequestsTable.status, "completed")),
+    );
+
+  const avgR = parseFloat(tfRow?.avg ?? "5");
+  const totalSess =
+    parseInt(String(gamerRow?.count ?? 0)) + parseInt(String(hirerRow?.count ?? 0));
+  const newTF = Math.min(100, Math.round(avgR * 10) + Math.min(totalSess * 2, 20));
+
+  await db.update(usersTable).set({ trustFactor: newTF }).where(eq(usersTable.id, revieweeId));
 
   // Notify the reviewee about the new review
   void createNotification({

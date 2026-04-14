@@ -12,7 +12,7 @@ export const usersTable = pgTable("users", {
   idVerified: boolean("id_verified").notNull().default(false),
   points: integer("points").notNull().default(0),
   bio: text("bio"),
-  trustFactor: integer("trust_factor").notNull().default(100),
+  trustFactor: integer("trust_factor").notNull().default(50),
   profileBackground: text("profile_background"),
   profileTitle: text("profile_title"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
