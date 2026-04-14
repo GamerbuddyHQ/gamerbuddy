@@ -1,18 +1,20 @@
 import { useState, useEffect, useRef } from "react";
-import { Clock, ChevronDown, X, Pin, PinOff } from "lucide-react";
+import { Clock, ChevronDown, X, Pin } from "lucide-react";
 
 /* ── Region catalogue ─────────────────────────────────────── */
-export const CLOCK_REGIONS: { id: string; label: string; shortLabel: string; flag: string; tz: string }[] = [
-  { id: "local",    label: "My Local Time", shortLabel: "Local",    flag: "🌐", tz: "" },
-  { id: "india",    label: "India",         shortLabel: "India",    flag: "🇮🇳", tz: "Asia/Kolkata"        },
-  { id: "usa_east", label: "USA East",      shortLabel: "USA E",    flag: "🇺🇸", tz: "America/New_York"    },
-  { id: "usa_west", label: "USA West",      shortLabel: "USA W",    flag: "🇺🇸", tz: "America/Los_Angeles" },
-  { id: "europe",   label: "Europe",        shortLabel: "Europe",   flag: "🇪🇺", tz: "Europe/Berlin"       },
-  { id: "uk",       label: "UK",            shortLabel: "UK",       flag: "🇬🇧", tz: "Europe/London"       },
-  { id: "japan",    label: "Japan",         shortLabel: "Japan",    flag: "🇯🇵", tz: "Asia/Tokyo"          },
-  { id: "korea",    label: "South Korea",   shortLabel: "Korea",    flag: "🇰🇷", tz: "Asia/Seoul"          },
-  { id: "brazil",   label: "Brazil",        shortLabel: "Brazil",   flag: "🇧🇷", tz: "America/Sao_Paulo"   },
-  { id: "australia",label: "Australia",     shortLabel: "Aus",      flag: "🇦🇺", tz: "Australia/Sydney"    },
+export const CLOCK_REGIONS: {
+  id: string; label: string; flag: string; tz: string;
+}[] = [
+  { id: "local",     label: "My Local Time", flag: "🌐", tz: ""                      },
+  { id: "india",     label: "India",         flag: "🇮🇳", tz: "Asia/Kolkata"          },
+  { id: "usa_east",  label: "USA East",      flag: "🇺🇸", tz: "America/New_York"      },
+  { id: "usa_west",  label: "USA West",      flag: "🇺🇸", tz: "America/Los_Angeles"   },
+  { id: "europe",    label: "Europe",        flag: "🇪🇺", tz: "Europe/Berlin"         },
+  { id: "uk",        label: "UK",            flag: "🇬🇧", tz: "Europe/London"         },
+  { id: "japan",     label: "Japan",         flag: "🇯🇵", tz: "Asia/Tokyo"            },
+  { id: "korea",     label: "South Korea",   flag: "🇰🇷", tz: "Asia/Seoul"            },
+  { id: "brazil",    label: "Brazil",        flag: "🇧🇷", tz: "America/Sao_Paulo"     },
+  { id: "australia", label: "Australia",     flag: "🇦🇺", tz: "Australia/Sydney"      },
 ];
 
 const LS_KEY = "gb_clock_primary";
@@ -20,7 +22,10 @@ const LS_KEY = "gb_clock_primary";
 /* ── Helpers ──────────────────────────────────────────────── */
 function tzAbbr(tz: string, date: Date): string {
   return (
-    new Intl.DateTimeFormat("en", { timeZoneName: "short", timeZone: tz || undefined })
+    new Intl.DateTimeFormat("en", {
+      timeZoneName: "short",
+      timeZone: tz || undefined,
+    })
       .formatToParts(date)
       .find((p) => p.type === "timeZoneName")?.value ?? ""
   );
@@ -35,113 +40,123 @@ function formatTime(tz: string, date: Date): string {
   }).format(date);
 }
 
+/* ── Accurate per-minute timer — syncs to the clock boundary ── */
 function useNow() {
   const [now, setNow] = useState(() => new Date());
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
   useEffect(() => {
     const tick = () => setNow(new Date());
-    tick();
-    const ms = 60000 - (Date.now() % 60000);
-    const first = setTimeout(() => {
+
+    // Align to the next whole minute, then tick every 60 s
+    const msUntilNextMinute = 60000 - (Date.now() % 60000);
+    const timeout = setTimeout(() => {
       tick();
-      const interval = setInterval(tick, 60000);
-      return () => clearInterval(interval);
-    }, ms);
-    return () => clearTimeout(first);
+      intervalRef.current = setInterval(tick, 60000);
+    }, msUntilNextMinute);
+
+    return () => {
+      clearTimeout(timeout);
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
   }, []);
+
   return now;
 }
 
 function readPrimary(): string {
   try { return localStorage.getItem(LS_KEY) ?? "local"; } catch { return "local"; }
 }
-function writePrimary(id: string) {
+function savePrimary(id: string) {
   try { localStorage.setItem(LS_KEY, id); } catch {}
 }
 
 /* ── Component ────────────────────────────────────────────── */
 export function RegionalClock() {
   const now = useNow();
-  const [open, setOpen]       = useState(false);
+  const [open, setOpen]         = useState(false);
   const [primaryId, setPrimaryId] = useState<string>(readPrimary);
   const ref = useRef<HTMLDivElement>(null);
 
-  /* Local timezone */
   const localTz   = Intl.DateTimeFormat().resolvedOptions().timeZone;
   const localTime = formatTime(localTz, now);
   const localAbbr = tzAbbr(localTz, now);
 
-  /* Primary region */
-  const primaryRegion = CLOCK_REGIONS.find((r) => r.id === primaryId) ?? CLOCK_REGIONS[0];
-  const primaryTz     = primaryRegion.tz || localTz;
-  const primaryTime   = formatTime(primaryTz, now);
-  const primaryAbbr   = tzAbbr(primaryTz, now);
-  const primaryIsLocal = primaryId === "local" || primaryTz === localTz || primaryAbbr === localAbbr;
+  const primaryRegion  = CLOCK_REGIONS.find((r) => r.id === primaryId) ?? CLOCK_REGIONS[0];
+  const primaryTz      = primaryRegion.tz || localTz;
+  const primaryTime    = formatTime(primaryTz, now);
+  const primaryAbbr    = tzAbbr(primaryTz, now);
+  const primaryIsLocal = primaryId === "local" || primaryAbbr === localAbbr;
 
   function selectPrimary(id: string) {
     setPrimaryId(id);
-    writePrimary(id);
+    savePrimary(id);
   }
 
-  /* Close on outside click */
   useEffect(() => {
     if (!open) return;
-    const close = (e: MouseEvent) => {
+    const handler = (e: MouseEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
     };
-    document.addEventListener("mousedown", close);
-    return () => document.removeEventListener("mousedown", close);
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
   }, [open]);
 
   return (
     <div ref={ref} className="relative">
 
-      {/* ── Navbar pill ──────────────────────────────────── */}
+      {/* ── Navbar pill ──────────────────────────────────────── */}
       <button
         onClick={() => setOpen((o) => !o)}
         aria-label="Show world clock"
         title="Helps you coordinate session times across different regions."
-        className={`
-          h-9 flex items-center gap-1.5 px-2.5 rounded-xl border transition-all duration-200
-          bg-background/60 hover:bg-primary/10 active:scale-95 select-none
-          ${open
+        className={[
+          "h-9 flex items-center gap-1.5 px-2.5 rounded-xl border",
+          "transition-all duration-200 active:scale-95 select-none",
+          open
             ? "border-primary/60 bg-primary/10 text-primary"
-            : "border-border/60 hover:border-primary/50 text-foreground/70"
-          }
-        `}
+            : "border-border/60 bg-background/60 text-foreground/70 hover:border-primary/50 hover:bg-primary/[0.06]",
+        ].join(" ")}
       >
-        {/* Flag of primary region */}
-        <span className="text-[14px] leading-none shrink-0">{primaryRegion.flag}</span>
+        <span className="text-[15px] leading-none shrink-0">{primaryRegion.flag}</span>
 
-        {/* Primary time (hidden on very small screens) */}
-        <span className="text-[12px] font-black tabular-nums leading-none hidden sm:inline" style={{ letterSpacing: "-0.02em" }}>
+        <span
+          className="text-[13px] font-black tabular-nums leading-none hidden sm:inline"
+          style={{ letterSpacing: "-0.025em" }}
+        >
           {primaryTime}
         </span>
 
-        {/* Abbr label */}
-        <span className="text-[10px] font-semibold opacity-55 leading-none hidden sm:inline">
+        <span className="text-[10px] font-semibold opacity-50 leading-none hidden sm:inline">
           {primaryAbbr}
         </span>
 
-        {/* Local time secondary — only when primary ≠ local */}
+        {/* Secondary local time — only on large screens when primary ≠ local */}
         {!primaryIsLocal && (
-          <span className="text-[9px] font-medium opacity-40 leading-none hidden lg:inline border-l border-border/40 pl-1.5 ml-0.5">
+          <span className="hidden lg:inline text-[9px] font-medium opacity-35 border-l border-border/50 pl-1.5 ml-0.5 tabular-nums">
             {localTime}
           </span>
         )}
 
         <ChevronDown
-          className={`h-3 w-3 shrink-0 opacity-60 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+          className={[
+            "h-3 w-3 shrink-0 opacity-50 transition-transform duration-200",
+            open ? "rotate-180" : "",
+          ].join(" ")}
         />
       </button>
 
-      {/* ── Dropdown panel ───────────────────────────────── */}
+      {/* ── Dropdown ─────────────────────────────────────────── */}
       {open && (
         <div
-          className="absolute right-0 top-full mt-2 w-[260px] rounded-2xl border border-border/70 bg-popover overflow-hidden z-[200]"
-          style={{ boxShadow: "0 12px 40px rgba(0,0,0,0.28), 0 0 0 1px rgba(168,85,247,0.10)" }}
+          className="absolute right-0 top-full mt-2 w-[268px] rounded-2xl border border-border/70 bg-popover z-[200] overflow-hidden flex flex-col"
+          style={{
+            boxShadow: "0 16px 48px rgba(0,0,0,0.32), 0 0 0 1px rgba(168,85,247,0.12)",
+            maxHeight: "min(520px, 85dvh)",
+          }}
         >
-          {/* ── Header ── */}
-          <div className="flex items-center justify-between px-3.5 py-2.5 border-b border-border/60 bg-primary/5">
+          {/* Header — fixed */}
+          <div className="flex items-center justify-between px-3.5 py-2.5 border-b border-border/60 bg-primary/5 shrink-0">
             <div className="flex items-center gap-2">
               <Clock className="h-3.5 w-3.5 text-primary" />
               <span className="text-[11px] font-black uppercase tracking-widest text-primary">
@@ -156,95 +171,131 @@ export function RegionalClock() {
             </button>
           </div>
 
-          {/* ── Primary region hero ── */}
-          <div className="px-3.5 pt-3 pb-2.5 border-b border-border/40 bg-primary/[0.04]">
-            <p className="text-[9px] font-black uppercase tracking-widest text-primary/55 mb-1.5 flex items-center gap-1">
-              <Pin className="h-2.5 w-2.5" /> Primary Region
+          {/* Primary hero — fixed */}
+          <div className="px-4 pt-3.5 pb-3 border-b border-border/40 shrink-0"
+            style={{ background: "linear-gradient(135deg, rgba(168,85,247,0.08) 0%, rgba(168,85,247,0.02) 100%)" }}
+          >
+            <p className="text-[9px] font-black uppercase tracking-widest text-primary/50 mb-2 flex items-center gap-1">
+              <Pin className="h-2.5 w-2.5 fill-primary/40" /> Pinned Region
             </p>
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2 min-w-0">
-                <span className="text-[20px] leading-none shrink-0">{primaryRegion.flag}</span>
+
+            <div className="flex items-center justify-between gap-3">
+              {/* Flag + time block */}
+              <div className="flex items-center gap-3 min-w-0">
+                <span
+                  className="text-[32px] leading-none shrink-0 drop-shadow-sm"
+                  style={{ filter: "drop-shadow(0 0 8px rgba(168,85,247,0.4))" }}
+                >
+                  {primaryRegion.flag}
+                </span>
                 <div className="min-w-0">
                   <div
-                    className="text-[24px] font-black tabular-nums leading-none"
-                    style={{ color: "hsl(var(--primary))", letterSpacing: "-0.03em" }}
+                    className="font-black tabular-nums leading-none"
+                    style={{
+                      fontSize: "38px",
+                      letterSpacing: "-0.04em",
+                      color: "hsl(var(--primary))",
+                      textShadow: "0 0 24px rgba(168,85,247,0.5)",
+                    }}
                   >
                     {primaryTime}
                   </div>
-                  <div className="text-[10px] text-primary/60 font-bold mt-0.5 truncate">
+                  <div className="text-[11px] text-primary/55 font-bold mt-1 truncate">
                     {primaryRegion.label} · {primaryAbbr}
                   </div>
                 </div>
               </div>
-              {/* Local time — shown only when primary ≠ local */}
+
+              {/* Your local — only when different */}
               {!primaryIsLocal && (
-                <div className="text-right shrink-0">
-                  <div className="text-[10px] font-black tabular-nums text-foreground/60" style={{ letterSpacing: "-0.02em" }}>
+                <div className="text-right shrink-0 border-l border-border/40 pl-3">
+                  <div
+                    className="text-[16px] font-black tabular-nums text-foreground/50"
+                    style={{ letterSpacing: "-0.03em" }}
+                  >
                     {localTime}
                   </div>
-                  <div className="text-[9px] text-muted-foreground font-medium">Your time</div>
+                  <div className="text-[9px] text-muted-foreground/60 font-semibold uppercase tracking-wider mt-0.5">
+                    Your time
+                  </div>
                 </div>
               )}
             </div>
           </div>
 
-          {/* ── Region list — tap to set primary ── */}
-          <div className="py-1">
-            <p className="px-3.5 pt-2 pb-1 text-[9px] font-black uppercase tracking-widest text-muted-foreground/50">
+          {/* Scrollable region list */}
+          <div className="overflow-y-auto overscroll-contain">
+            <p className="px-3.5 pt-2.5 pb-1 text-[9px] font-black uppercase tracking-widest text-muted-foreground/40">
               Tap a region to pin it
             </p>
+
             {CLOCK_REGIONS.map((r, i) => {
-              const tz      = r.tz || localTz;
-              const time    = formatTime(tz, now);
-              const abbr    = tzAbbr(tz, now);
+              const tz       = r.tz || localTz;
+              const time     = formatTime(tz, now);
+              const abbr     = tzAbbr(tz, now);
               const isActive = r.id === primaryId;
-              const isSameAsLocal = r.tz && (r.tz === localTz || abbr === localAbbr);
+              const sameAsLocal = r.tz && abbr === localAbbr;
 
               return (
                 <button
                   key={r.id}
                   onClick={() => selectPrimary(r.id)}
-                  className={`
-                    w-full flex items-center justify-between px-3.5 py-2 transition-all duration-150 text-left
-                    ${i < CLOCK_REGIONS.length - 1 ? "border-b border-border/10" : ""}
-                    ${isActive
-                      ? "bg-primary/10"
-                      : "hover:bg-muted/40"
-                    }
-                    ${isSameAsLocal && !isActive ? "opacity-45" : ""}
-                  `}
+                  className={[
+                    "w-full flex items-center justify-between px-3.5 py-2.5",
+                    "transition-all duration-150 text-left active:scale-[0.98]",
+                    i < CLOCK_REGIONS.length - 1 ? "border-b border-border/10" : "",
+                    isActive ? "bg-primary/10" : "hover:bg-muted/35",
+                    sameAsLocal && !isActive ? "opacity-40" : "",
+                  ].join(" ")}
+                  style={isActive ? { boxShadow: "inset 3px 0 0 hsl(var(--primary))" } : {}}
                 >
-                  <div className="flex items-center gap-2 min-w-0">
-                    <span className="text-[15px] leading-none shrink-0">{r.flag}</span>
-                    <span className={`text-[12px] font-semibold truncate ${isActive ? "text-primary" : "text-foreground/75"}`}>
+                  {/* Left: flag + label */}
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <span className="text-[17px] leading-none shrink-0">{r.flag}</span>
+                    <span className={[
+                      "text-[12px] font-semibold truncate",
+                      isActive ? "text-primary" : "text-foreground/75",
+                    ].join(" ")}>
                       {r.label}
                     </span>
                   </div>
+
+                  {/* Right: time + abbr + pin */}
                   <div className="flex items-center gap-2 shrink-0 ml-2">
                     <div className="text-right">
                       <span
-                        className={`text-[13px] font-black tabular-nums leading-none ${isActive ? "text-primary" : "text-foreground"}`}
-                        style={{ letterSpacing: "-0.02em" }}
+                        className={[
+                          "tabular-nums font-black leading-none",
+                          isActive ? "text-primary" : "text-foreground/85",
+                        ].join(" ")}
+                        style={{ fontSize: "14px", letterSpacing: "-0.025em" }}
                       >
                         {time}
                       </span>
-                      <span className="text-[9px] font-bold text-muted-foreground ml-1">{abbr}</span>
+                      <span className="text-[9px] font-bold text-muted-foreground/60 ml-1">
+                        {abbr}
+                      </span>
                     </div>
-                    {isActive ? (
-                      <Pin className="h-3 w-3 text-primary fill-primary shrink-0" />
-                    ) : (
-                      <PinOff className="h-3 w-3 text-muted-foreground/30 shrink-0 opacity-0 group-hover:opacity-100" />
-                    )}
+                    <div className={[
+                      "h-4 w-4 rounded-full flex items-center justify-center shrink-0 transition-colors",
+                      isActive
+                        ? "bg-primary/20 border border-primary/40"
+                        : "bg-transparent border border-border/20",
+                    ].join(" ")}>
+                      {isActive && <Pin className="h-2.5 w-2.5 text-primary fill-primary" />}
+                    </div>
                   </div>
                 </button>
               );
             })}
-          </div>
 
-          {/* ── Footer ── */}
-          <div className="px-3.5 py-2 border-t border-border/40 bg-muted/20 flex items-center gap-1.5">
-            <div className="h-1.5 w-1.5 rounded-full bg-green-400 animate-pulse shrink-0" />
-            <span className="text-[9px] text-muted-foreground font-medium">Live · updates every minute</span>
+            {/* Footer */}
+            <div className="px-3.5 py-2 border-t border-border/30 bg-muted/10 flex items-center gap-1.5">
+              <div className="h-1.5 w-1.5 rounded-full bg-green-400 animate-pulse shrink-0" />
+              <span className="text-[9px] text-muted-foreground/60 font-medium">
+                Live · synced to the minute
+              </span>
+            </div>
           </div>
         </div>
       )}
