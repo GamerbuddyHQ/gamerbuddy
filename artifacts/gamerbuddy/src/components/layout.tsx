@@ -528,49 +528,83 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </main>
 
       {/* ── Footer ── */}
-      <footer className="border-t border-border/40 bg-background/60 mt-auto">
-        <div className="h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
-        <div className="container py-6 md:py-8">
-          {/* Top row: logo + links + short copyright */}
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-3 opacity-60">
-              <GamerbuddyLogo iconSize={20} textSize="lg" />
-              <span className="text-white/20 text-xs">·</span>
-              <span className="text-xs text-muted-foreground/50">{t.footer.tagline}</span>
+      <footer className="border-t border-border bg-muted/10 mt-auto">
+        <div className="h-[2px] bg-gradient-to-r from-transparent via-primary/35 to-transparent" />
+
+        {/* ── Main section: brand + site links ── */}
+        <div className="container pt-8 pb-6">
+          <div className="flex flex-col sm:flex-row items-start justify-between gap-6">
+
+            {/* Brand */}
+            <div className="space-y-2 min-w-0">
+              <GamerbuddyLogo iconSize={22} textSize="xl" />
+              <p className="text-xs text-muted-foreground/55 leading-relaxed max-w-[220px]">
+                {t.footer.tagline}
+              </p>
             </div>
 
-            <div className="flex items-center gap-5 text-xs text-muted-foreground/60">
-              <Link
-                href="/browse"
-                className="hover:text-primary transition-colors flex items-center gap-1.5 font-medium"
-              >
-                <Compass className="h-3 w-3" /> {t.footer.browse}
-              </Link>
-              <Link
-                href="/about"
-                className={`hover:text-primary transition-colors flex items-center gap-1.5 font-medium ${
-                  location === "/about" ? "text-primary" : ""
-                }`}
-              >
-                <Shield className="h-3 w-3" /> {t.footer.aboutDisclaimer}
-              </Link>
-            </div>
-
-            {/* Short copyright — right side */}
-            <div className="text-xs text-muted-foreground/50 text-center md:text-right font-medium">
-              © 2026 Gamerbuddy&nbsp;|&nbsp;All Rights Reserved
+            {/* Site navigation links */}
+            <div className="flex flex-wrap gap-x-6 gap-y-2">
+              {[
+                { href: "/browse",      label: t.footer.browse,         icon: Compass },
+                { href: "/tournaments", label: t.nav.tournaments,        icon: Trophy  },
+                { href: "/community",   label: t.nav.community,          icon: Users   },
+                { href: "/about",       label: t.footer.aboutDisclaimer, icon: Shield  },
+              ].map(({ href, label, icon: Icon }) => (
+                <Link
+                  key={href}
+                  href={href}
+                  className={`flex items-center gap-1.5 text-sm font-medium transition-colors hover:text-primary ${
+                    location.startsWith(href) ? "text-primary" : "text-muted-foreground/65"
+                  }`}
+                >
+                  <Icon className="h-3.5 w-3.5 shrink-0" />
+                  {label}
+                </Link>
+              ))}
             </div>
           </div>
+        </div>
 
-          {/* Divider */}
-          <div className="mt-5 mb-4 h-px bg-border/25" />
+        {/* ── Legal strip ── */}
+        <div className="border-t border-border/40">
+          <div className="container py-4 space-y-3">
 
-          {/* Full legal notice */}
-          <p className="text-[11px] leading-relaxed text-muted-foreground/35 text-center max-w-3xl mx-auto">
-            © 2026 Gamerbuddy. All Rights Reserved. This website and all its content, design,
-            features, and code are protected under copyright law. Unauthorized copying,
-            reproduction, or distribution is strictly prohibited.
-          </p>
+            {/* Policy links + short copyright on same row */}
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-x-4 gap-y-1 text-xs text-muted-foreground/50">
+                {[
+                  { href: "/about",            label: "About"      },
+                  { href: "/about#disclaimer", label: "Disclaimer" },
+                  { href: "/about",            label: "Terms"      },
+                  { href: "/about",            label: "Privacy"    },
+                ].map(({ href, label }, i, arr) => (
+                  <span key={label} className="flex items-center gap-4">
+                    <Link
+                      href={href}
+                      className="hover:text-primary transition-colors font-medium"
+                    >
+                      {label}
+                    </Link>
+                    {i < arr.length - 1 && (
+                      <span className="text-border/80 select-none">·</span>
+                    )}
+                  </span>
+                ))}
+              </div>
+
+              <p className="text-xs text-muted-foreground/45 font-medium whitespace-nowrap">
+                © 2026 Gamerbuddy&nbsp;&nbsp;|&nbsp;&nbsp;All Rights Reserved
+              </p>
+            </div>
+
+            {/* Full copyright notice */}
+            <p className="text-[11px] leading-relaxed text-muted-foreground/30 text-center max-w-2xl mx-auto">
+              © 2026 Gamerbuddy. All Rights Reserved. This website and all its content, design,
+              features, and code are protected under copyright law. Unauthorized copying,
+              reproduction, or distribution is strictly prohibited.
+            </p>
+          </div>
         </div>
       </footer>
 
