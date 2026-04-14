@@ -26,6 +26,7 @@ import Community from "@/pages/community";
 import Tournaments from "@/pages/tournaments";
 import TournamentDetail from "@/pages/tournament-detail";
 import MyTournaments from "@/pages/my-tournaments";
+import Socials from "@/pages/socials";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -69,6 +70,7 @@ function Router() {
         <Route path="/users/:id" component={UserProfilePage} />
         <Route path="/notifications"><ProtectedRoute component={Notifications} /></Route>
         <Route path="/about" component={About} />
+        <Route path="/socials" component={Socials} />
         <Route path="/community" component={Community} />
         <Route path="/tournaments" component={Tournaments} />
         <Route path="/my-tournaments" component={MyTournaments} />

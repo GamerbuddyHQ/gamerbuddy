@@ -157,6 +157,12 @@ const RESPONSES: Array<{ patterns: RegExp; reply: string }> = [
     reply: `You **cannot hire yourself** on Gamerbuddy. 🚫\n\nThe platform prevents you from placing a bid on your own gaming request. This is a built-in safeguard to ensure fair competition and genuine transactions between different users.`,
   },
 
+  /* ── SOCIAL MEDIA / FOLLOW ── */
+  {
+    patterns: /social|follow.*us|where.*find.*you|youtube|instagram|twitter|facebook|gamejolt|x\.com|our.*channel|official.*channel/i,
+    reply: `We're on all the major platforms — come hang with us! 🎮\n\nCheck out our **[Socials page](/socials)** for the full rundown and direct links:\n\n• 🔴 **YouTube** → youtube.com/@gamerbuddy — streams, highlights & tournament replays\n• 🐦 **X (Twitter)** → x.com/gamerbuddy — live updates, giveaways & gaming takes\n• 📸 **Instagram** → instagram.com/gamerbuddy — community highlights & epic screenshots\n• 🟢 **GameJolt** → gamejolt.com/@gamerbuddy — game pages, dev logs & achievements\n• 🔵 **Facebook** → facebook.com/gamerbuddy — events, groups & announcements\n\nHit that follow button so you never miss a tournament, giveaway, or platform update. See you there! 🚀`,
+  },
+
   /* ── REPORT / MODERATION ── */
   {
     patterns: /report|flag|toxic|ban|suspend|abuse|fake.*profile|fraud/i,
