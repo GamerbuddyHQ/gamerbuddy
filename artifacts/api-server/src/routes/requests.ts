@@ -48,6 +48,10 @@ function formatRequest(
     isBulkHiring?: boolean | null;
     bulkGamersNeeded?: number | null;
     acceptedBidsCount?: number | null;
+    avgBidderTrustFactor?: string | null;
+    avgBidderRating?: string | null;
+    hasStreamingBidder?: boolean | null;
+    hasQuestBidder?: boolean | null;
   },
   userName?: string,
   userIdVerified?: boolean,
@@ -70,6 +74,10 @@ function formatRequest(
     isBulkHiring: req.isBulkHiring ?? false,
     bulkGamersNeeded: req.bulkGamersNeeded ?? null,
     acceptedBidsCount: req.acceptedBidsCount ?? 0,
+    avgBidderTrustFactor: req.avgBidderTrustFactor ? parseFloat(String(req.avgBidderTrustFactor)) : null,
+    avgBidderRating: req.avgBidderRating ? parseFloat(String(req.avgBidderRating)) : null,
+    hasStreamingBidder: req.hasStreamingBidder ?? false,
+    hasQuestBidder: req.hasQuestBidder ?? false,
   };
 }
 
@@ -97,6 +105,10 @@ router.get("/requests", async (req, res): Promise<void> => {
       bidCount: sql<number>`(SELECT COUNT(*) FROM bids WHERE bids.request_id = ${gameRequestsTable.id})`.mapWith(Number),
       lowestBid: sql<string | null>`(SELECT MIN(price) FROM bids WHERE bids.request_id = ${gameRequestsTable.id} AND bids.status = 'pending')`,
       acceptedBidsCount: sql<number>`(SELECT COUNT(*) FROM bids WHERE bids.request_id = ${gameRequestsTable.id} AND bids.status = 'accepted')`.mapWith(Number),
+      avgBidderTrustFactor: sql<string | null>`(SELECT AVG(u.trust_factor) FROM bids b JOIN users u ON u.id = b.bidder_id WHERE b.request_id = ${gameRequestsTable.id} AND b.status != 'rejected')`,
+      avgBidderRating: sql<string | null>`(SELECT AVG(r.rating) FROM bids b JOIN reviews r ON r.reviewee_id = b.bidder_id WHERE b.request_id = ${gameRequestsTable.id} AND b.status != 'rejected')`,
+      hasStreamingBidder: sql<boolean>`(EXISTS(SELECT 1 FROM bids b JOIN streaming_accounts sa ON sa.user_id = b.bidder_id WHERE b.request_id = ${gameRequestsTable.id} AND b.status != 'rejected'))`,
+      hasQuestBidder: sql<boolean>`(EXISTS(SELECT 1 FROM bids b JOIN quest_entries qe ON qe.user_id = b.bidder_id WHERE b.request_id = ${gameRequestsTable.id} AND b.status != 'rejected'))`,
     })
     .from(gameRequestsTable)
     .leftJoin(usersTable, eq(gameRequestsTable.userId, usersTable.id))

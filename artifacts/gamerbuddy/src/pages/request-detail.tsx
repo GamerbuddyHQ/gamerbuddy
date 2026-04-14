@@ -1052,21 +1052,42 @@ function BidCard({
       )}
 
       <div
-        className={`rounded-xl border p-4 space-y-3 transition-all duration-200 ${
-          isAccepted ? "border-green-500/40 bg-green-500/5" :
-          isRejected ? "border-border/30 bg-card/20 opacity-50" :
-          isSelected ? "border-purple-500/60 bg-purple-500/8 shadow-[0_0_20px_rgba(168,85,247,0.12)]" :
-          isMe ? "border-secondary/40 bg-secondary/5" :
-          "border-border bg-card/40"
+        className={`group rounded-2xl border overflow-hidden transition-all duration-300 ${
+          isAccepted ? "border-green-500/45 shadow-[0_0_28px_rgba(34,197,94,0.10)]" :
+          isRejected ? "border-border/25 opacity-45" :
+          isSelected ? "border-purple-500/65 shadow-[0_0_32px_rgba(168,85,247,0.18)]" :
+          isMe        ? "border-secondary/40" :
+          "border-border/60 hover:border-primary/30 hover:shadow-[0_0_24px_rgba(168,85,247,0.08)]"
         }`}
+        style={{
+          background: isAccepted ? "linear-gradient(135deg,rgba(34,197,94,0.05) 0%,rgba(0,0,0,0.55) 100%)" :
+                      isSelected  ? "linear-gradient(135deg,rgba(168,85,247,0.07) 0%,rgba(0,0,0,0.55) 100%)" :
+                      isMe        ? "linear-gradient(135deg,rgba(6,182,212,0.05) 0%,rgba(0,0,0,0.55) 100%)" :
+                                    "linear-gradient(135deg,rgba(255,255,255,0.025) 0%,rgba(0,0,0,0.50) 100%)",
+        }}
       >
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex items-center gap-2.5">
+        {/* ── Top accent line ── */}
+        <div
+          className="h-[2px] w-full"
+          style={{
+            background: isAccepted
+              ? "linear-gradient(90deg,transparent 0%,#22c55e 40%,#22c55e 60%,transparent 100%)"
+              : isMe
+              ? "linear-gradient(90deg,transparent 0%,#22d3ee 40%,#22d3ee 60%,transparent 100%)"
+              : "linear-gradient(90deg,transparent 0%,#a855f7 40%,#a855f7 60%,transparent 100%)",
+            opacity: isRejected ? 0.2 : 0.7,
+          }}
+        />
+
+        <div className="p-5 space-y-4">
+          {/* ── Header row: avatar + info + price ── */}
+          <div className="flex items-start gap-4">
+            {/* Bulk select checkbox */}
             {showCheckbox && (
               <button
                 type="button"
                 onClick={(e) => { e.stopPropagation(); onToggleSelect!(); }}
-                className={`h-5 w-5 rounded-[5px] border-2 flex-shrink-0 flex items-center justify-center transition-all mt-2 ${
+                className={`h-5 w-5 rounded-[5px] border-2 flex-shrink-0 flex items-center justify-center transition-all mt-3 ${
                   isSelected
                     ? "bg-purple-500 border-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.6)]"
                     : "bg-transparent border-white/20 hover:border-purple-400/60"
@@ -1075,26 +1096,39 @@ function BidCard({
                 {isSelected && <CheckCircle2 className="h-3 w-3 text-white" />}
               </button>
             )}
-            <div className="h-9 w-9 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center">
-              <User className="h-4 w-4 text-primary" />
+
+            {/* Avatar */}
+            <div
+              className="h-12 w-12 rounded-2xl shrink-0 flex items-center justify-center text-lg font-black select-none"
+              style={{
+                background: isAccepted ? "rgba(34,197,94,0.15)" : isMe ? "rgba(34,211,238,0.15)" : "rgba(168,85,247,0.15)",
+                border: `1.5px solid ${isAccepted ? "rgba(34,197,94,0.35)" : isMe ? "rgba(34,211,238,0.35)" : "rgba(168,85,247,0.35)"}`,
+                color: isAccepted ? "#4ade80" : isMe ? "#22d3ee" : "#c084fc",
+              }}
+            >
+              {bid.bidderName.trim()[0]?.toUpperCase() ?? "G"}
             </div>
-            <div>
-              <div className="font-bold text-white text-sm flex items-center gap-2 flex-wrap">
+
+            {/* Name + badges block */}
+            <div className="flex-1 min-w-0 space-y-1.5">
+              <div className="flex items-center gap-2 flex-wrap">
                 <Link href={`/users/${bid.bidderId}`}>
-                  <a className="hover:text-primary transition-colors">{bid.bidderName}</a>
+                  <a className="font-extrabold text-white text-base leading-none hover:text-primary transition-colors">
+                    {bid.bidderName}
+                  </a>
                 </Link>
                 <VerifiedBadge idVerified={bid.bidderIdVerified ?? false} variant="compact" />
-                <TrustChip value={bid.bidderTrustFactor ?? 50} />
-                {isMe && <span className="text-xs text-secondary font-normal">(You)</span>}
+                {isMe && <span className="text-xs text-secondary font-semibold">(You)</span>}
                 {isAccepted && bid.discordUsername && (
-                  <span className="text-xs text-indigo-400 font-normal flex items-center gap-1">
+                  <span className="text-xs text-indigo-400 font-semibold flex items-center gap-1">
                     <MessageCircle className="h-3 w-3" />{bid.discordUsername}
                   </span>
                 )}
-                <BidderStreamingBadges bidderId={bid.bidderId} compact />
               </div>
-              <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                <span className="text-xs text-muted-foreground">{format(new Date(bid.createdAt), "MMM d, h:mm a")}</span>
+
+              {/* Trust Factor + Reputation Badges row */}
+              <div className="flex items-center gap-2 flex-wrap">
+                <TrustChip value={bid.bidderTrustFactor ?? 50} />
                 <ReputationBadges
                   compact
                   badges={computeBadges({
@@ -1105,95 +1139,123 @@ function BidCard({
                     beginnerFriendly: false,
                   }).filter((b) => b.id !== "verified")}
                 />
+                <BidderStreamingBadges bidderId={bid.bidderId} compact />
+              </div>
+
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground/60">
+                <span>{format(new Date(bid.createdAt), "MMM d, h:mm a")}</span>
+              </div>
+            </div>
+
+            {/* Price + status — right column */}
+            <div className="shrink-0 text-right flex flex-col items-end gap-1.5">
+              <div
+                className="text-2xl font-black tabular-nums leading-none"
+                style={{
+                  color: isAccepted ? "#4ade80" : "#ffffff",
+                  textShadow: isAccepted ? "0 0 16px rgba(34,197,94,0.4)" : "0 0 16px rgba(255,255,255,0.1)",
+                }}
+              >
+                ${bid.price.toFixed(2)}
+              </div>
+              <div
+                className="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-full border"
+                style={
+                  isAccepted ? { background: "rgba(34,197,94,0.15)", border: "1px solid rgba(34,197,94,0.40)", color: "#4ade80" } :
+                  isRejected ? { background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.35)" } :
+                               { background: "rgba(251,191,36,0.12)", border: "1px solid rgba(251,191,36,0.35)", color: "#fbbf24" }
+                }
+              >
+                {bid.status}
               </div>
             </div>
           </div>
-          <div className="text-right shrink-0">
-            <div className="text-lg font-black text-white">${bid.price.toFixed(2)}</div>
-            <div className={`text-xs font-semibold uppercase px-2 py-0.5 rounded-full border mt-1 inline-block ${
-              isAccepted ? "border-green-500/40 text-green-400 bg-green-500/10" :
-              isRejected ? "border-border text-muted-foreground" :
-              "border-amber-500/40 text-amber-400 bg-amber-500/10"
-            }`}>
-              {bid.status}
-            </div>
-          </div>
-        </div>
 
-        <p className="text-sm text-foreground/80 leading-relaxed border-l-2 border-primary/30 pl-3">
-          {bid.message}
-        </p>
-
-        {/* Streaming platform links */}
-        <BidderStreamingBadges bidderId={bid.bidderId} />
-
-        {!isMe && <BidderQuestSummary bidderId={bid.bidderId} gameName={gameName} />}
-
-        {bid.bidderBio && (
+          {/* ── Pitch / message ── */}
           <div
-            className="rounded-xl overflow-hidden"
+            className="rounded-xl px-4 py-3"
             style={{
-              borderLeft: "3px solid rgba(168,85,247,0.40)",
-              background: "linear-gradient(135deg, rgba(168,85,247,0.05) 0%, rgba(6,182,212,0.02) 100%)",
+              borderLeft: "3px solid rgba(168,85,247,0.35)",
+              background: "linear-gradient(135deg,rgba(168,85,247,0.04) 0%,rgba(0,0,0,0.15) 100%)",
             }}
           >
-            <div className="px-4 py-3 space-y-1.5">
-              <span
-                className="block text-[9px] font-extrabold uppercase tracking-[0.12em]"
-                style={{ color: "rgba(168,85,247,0.65)" }}
-              >
-                About this gamer
-              </span>
-              <p
-                className="text-[13px] leading-relaxed"
-                style={{ color: "rgba(255,255,255,0.70)", fontStyle: "italic" }}
-              >
-                &ldquo;{bid.bidderBio.length > 100
-                  ? bid.bidderBio.slice(0, 100).trimEnd() + "…"
-                  : bid.bidderBio}&rdquo;
-              </p>
-            </div>
+            <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.78)" }}>
+              {bid.message}
+            </p>
           </div>
-        )}
 
-        <div className="flex gap-2 flex-wrap">
-          {isHirer && bid.status === "pending" && requestStatus === "open" && (
-            <Button
-              size="sm"
-              className="bg-green-500/20 border border-green-500/40 text-green-400 hover:bg-green-500 hover:text-white text-xs font-bold uppercase"
-              onClick={() => setShowAcceptModal(true)}
+          {/* ── Streaming + Quest ── */}
+          <BidderStreamingBadges bidderId={bid.bidderId} />
+          {!isMe && <BidderQuestSummary bidderId={bid.bidderId} gameName={gameName} />}
+
+          {/* ── Bio quote ── */}
+          {bid.bidderBio && (
+            <div
+              className="rounded-xl overflow-hidden"
+              style={{
+                borderLeft: "3px solid rgba(168,85,247,0.40)",
+                background: "linear-gradient(135deg,rgba(168,85,247,0.05) 0%,rgba(6,182,212,0.02) 100%)",
+              }}
             >
-              <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" />
-              Accept Bid
-            </Button>
+              <div className="px-4 py-3 space-y-1.5">
+                <span className="block text-[9px] font-extrabold uppercase tracking-[0.12em]" style={{ color: "rgba(168,85,247,0.65)" }}>
+                  About this gamer
+                </span>
+                <p className="text-[13px] leading-relaxed" style={{ color: "rgba(255,255,255,0.70)", fontStyle: "italic" }}>
+                  &ldquo;{bid.bidderBio.length > 120
+                    ? bid.bidderBio.slice(0, 120).trimEnd() + "…"
+                    : bid.bidderBio}&rdquo;
+                </p>
+              </div>
+            </div>
           )}
-          {canChat && (
-            <Button
-              size="sm"
-              variant="outline"
-              className={`text-xs font-bold uppercase border-secondary/40 text-secondary hover:bg-secondary hover:text-black ${chatOpen ? "bg-secondary/10" : ""}`}
-              onClick={() => setChatOpen((v) => !v)}
-            >
-              <MessageSquare className="h-3.5 w-3.5 mr-1.5" />
-              {chatOpen ? "Close Chat" : "Open Chat"}
-            </Button>
-          )}
-          {!isMe && (
-            <Button
-              size="sm"
-              variant="outline"
-              className="text-xs font-bold uppercase border-destructive/30 text-destructive/60 hover:border-destructive/60 hover:text-destructive hover:bg-destructive/10"
-              onClick={() => setShowReport(true)}
-            >
-              <Flag className="h-3.5 w-3.5 mr-1.5" />
-              Report
-            </Button>
+
+          {/* ── Actions ── */}
+          <div className="flex gap-2.5 flex-wrap pt-1">
+            {isHirer && bid.status === "pending" && requestStatus === "open" && (
+              <div className="relative">
+                <div
+                  className="absolute -inset-[2px] rounded-xl opacity-50"
+                  style={{ background: "linear-gradient(135deg,#22c55e,#16a34a)", filter: "blur(6px)" }}
+                />
+                <Button
+                  size="sm"
+                  className="relative bg-green-500 hover:bg-green-400 text-white font-extrabold uppercase tracking-wider text-xs px-5 h-9 shadow-[0_0_20px_rgba(34,197,94,0.40)] border-0"
+                  onClick={() => setShowAcceptModal(true)}
+                >
+                  <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" />
+                  Accept Bid
+                </Button>
+              </div>
+            )}
+            {canChat && (
+              <Button
+                size="sm"
+                variant="outline"
+                className={`text-xs font-bold uppercase tracking-wider border-secondary/40 text-secondary hover:bg-secondary/15 h-9 ${chatOpen ? "bg-secondary/10" : ""}`}
+                onClick={() => setChatOpen((v) => !v)}
+              >
+                <MessageSquare className="h-3.5 w-3.5 mr-1.5" />
+                {chatOpen ? "Hide Chat" : "Open Chat"}
+              </Button>
+            )}
+            {!isMe && (
+              <Button
+                size="sm"
+                variant="outline"
+                className="text-xs font-bold uppercase tracking-wider border-destructive/25 text-destructive/50 hover:border-destructive/55 hover:text-destructive hover:bg-destructive/8 h-9 ml-auto"
+                onClick={() => setShowReport(true)}
+              >
+                <Flag className="h-3 w-3 mr-1.5" />
+                Report
+              </Button>
+            )}
+          </div>
+
+          {chatOpen && canChat && (
+            <ChatPanel bidId={bid.id} currentUserId={currentUserId} discordUsername={bid.discordUsername} />
           )}
         </div>
-
-        {chatOpen && canChat && (
-          <ChatPanel bidId={bid.id} currentUserId={currentUserId} discordUsername={bid.discordUsername} />
-        )}
       </div>
     </>
   );

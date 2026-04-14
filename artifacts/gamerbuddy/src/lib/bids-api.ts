@@ -126,6 +126,10 @@ export type GameRequest = {
   isBulkHiring: boolean;
   bulkGamersNeeded: number | null;
   acceptedBidsCount: number;
+  avgBidderTrustFactor?: number | null;
+  avgBidderRating?: number | null;
+  hasStreamingBidder?: boolean;
+  hasQuestBidder?: boolean;
 };
 
 export const bidKeys = {

@@ -15,9 +15,10 @@ import { format } from "date-fns";
 import {
   Search, Swords, Monitor, Layers, Gavel, ArrowRight,
   ChevronDown, ChevronUp, DollarSign, MessageSquare,
-  CheckCircle2, AlertCircle, User, Clock, TrendingDown,
+  CheckCircle2, AlertCircle, User, Clock, TrendingDown, TrendingUp,
   Zap, ExternalLink, LogIn, Trophy, Shield, Star,
-  Flame, Target, Users, X,
+  Flame, Target, Users, X, SlidersHorizontal, Tv, Sparkles,
+  ArrowDownUp, ArrowUp, ArrowDown,
 } from "lucide-react";
 import { SafetyBanner } from "@/components/safety-banner";
 import { useToast } from "@/hooks/use-toast";
@@ -634,51 +635,99 @@ function FillerSection() {
   );
 }
 
+/* ── Sort / filter types ─────────────────────────────────────────────────── */
+type BrowseSortKey =
+  | "newest" | "bid_low" | "bid_high"
+  | "trust_high" | "rating_high"
+  | "fewest_bids" | "most_bids";
+
+const SORT_OPTIONS: { value: BrowseSortKey; label: string; Icon: React.ElementType }[] = [
+  { value: "newest",      label: "Newest",        Icon: Clock },
+  { value: "bid_low",     label: "Bid ↓ Low",     Icon: TrendingDown },
+  { value: "bid_high",    label: "Bid ↑ High",    Icon: TrendingUp },
+  { value: "trust_high",  label: "Trust High",    Icon: Shield },
+  { value: "rating_high", label: "Rating High",   Icon: Star },
+  { value: "fewest_bids", label: "Fewest Bids",   Icon: ArrowDown },
+  { value: "most_bids",   label: "Most Bids",     Icon: ArrowUp },
+];
+
+const LEVEL_OPTIONS = [
+  { value: "all",          label: "All Levels",        dot: "rgba(255,255,255,0.25)" },
+  { value: "Beginner",     label: "Beginner-Friendly", dot: "#22c55e" },
+  { value: "Intermediate", label: "Decent",            dot: "#eab308" },
+  { value: "Expert",       label: "Best / Expert",     dot: "#a855f7" },
+  { value: "Chill",        label: "Chill",             dot: "#22d3ee" },
+];
+
 /* ── MAIN PAGE ───────────────────────────────────────────────────────────── */
 export default function Browse() {
-  const [platform, setPlatform] = useState("all");
-  const [skillLevel, setSkillLevel] = useState("all");
-  const [search, setSearch] = useState("");
-  const [sort, setSort] = useState<"newest" | "fewest_bids" | "most_bids" | "lowest_bid">("newest");
+  const [search, setSearch]                   = useState("");
+  const [platform, setPlatform]               = useState("all");
+  const [sort, setSort]                       = useState<BrowseSortKey>("newest");
+  const [levelFilter, setLevelFilter]         = useState("all");
   const [verifiedPosterOnly, setVerifiedPosterOnly] = useState(false);
-  const [bulkOnly, setBulkOnly] = useState(false);
-  const [noBidsOnly, setNoBidsOnly] = useState(false);
+  const [bulkOnly, setBulkOnly]               = useState(false);
+  const [noBidsOnly, setNoBidsOnly]           = useState(false);
+  const [hasStreamingFilter, setHasStreamingFilter] = useState(false);
+  const [hasQuestFilter, setHasQuestFilter]   = useState(false);
 
-  const { data: allRequests, isLoading, isError } = useBrowseRequests({
-    ...(platform !== "all" && { platform }),
-    ...(skillLevel !== "all" && { skillLevel }),
-    status: "open",
-  });
+  const { data: allRequests, isLoading, isError } = useBrowseRequests({ status: "open" });
 
+  /* ── Client-side filter + sort ── */
   const requests = allRequests
     ?.filter((r) => {
-      if (search.trim() !== "" && !(
+      if (search.trim() && !(
         r.gameName.toLowerCase().includes(search.toLowerCase()) ||
         r.objectives.toLowerCase().includes(search.toLowerCase()) ||
         r.userName.toLowerCase().includes(search.toLowerCase())
       )) return false;
+      if (platform !== "all" && r.platform !== platform) return false;
+      if (levelFilter !== "all" && r.skillLevel !== levelFilter) return false;
       if (verifiedPosterOnly && !r.userIdVerified) return false;
       if (bulkOnly && !r.isBulkHiring) return false;
       if (noBidsOnly && r.bidCount > 0) return false;
+      if (hasStreamingFilter && !r.hasStreamingBidder) return false;
+      if (hasQuestFilter && !r.hasQuestBidder) return false;
       return true;
     })
     ?.sort((a, b) => {
-      if (sort === "fewest_bids") return a.bidCount - b.bidCount;
-      if (sort === "most_bids")   return b.bidCount - a.bidCount;
-      if (sort === "lowest_bid") {
-        const aB = a.lowestBid ?? Infinity;
-        const bB = b.lowestBid ?? Infinity;
-        return aB - bB;
+      switch (sort) {
+        case "bid_low": {
+          const aB = a.lowestBid ?? Infinity; const bB = b.lowestBid ?? Infinity;
+          return aB - bB;
+        }
+        case "bid_high": {
+          const aB = a.lowestBid ?? -Infinity; const bB = b.lowestBid ?? -Infinity;
+          return bB - aB;
+        }
+        case "trust_high":  return (b.avgBidderTrustFactor ?? 0) - (a.avgBidderTrustFactor ?? 0);
+        case "rating_high": return (b.avgBidderRating ?? 0) - (a.avgBidderRating ?? 0);
+        case "fewest_bids": return a.bidCount - b.bidCount;
+        case "most_bids":   return b.bidCount - a.bidCount;
+        default: return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
       }
-      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     });
 
-  const hasFilters = platform !== "all" || skillLevel !== "all" || search.trim() !== "" || verifiedPosterOnly || bulkOnly || noBidsOnly;
+  /* ── Active tags ── */
+  type FilterTag = { id: string; label: string; onRemove: () => void; rgb: string };
+  const activeTags: FilterTag[] = [];
+  if (search.trim())         activeTags.push({ id: "search",    label: `"${search.slice(0,18)}${search.length>18?"…":""}"`,  onRemove: () => setSearch(""),                 rgb: "255,255,255" });
+  if (platform !== "all")    activeTags.push({ id: "platform",  label: platform,                         onRemove: () => setPlatform("all"),            rgb: "34,211,238" });
+  if (sort !== "newest")     activeTags.push({ id: "sort",      label: `Sort: ${SORT_OPTIONS.find(o=>o.value===sort)?.label}`, onRemove: () => setSort("newest"),  rgb: "168,85,247" });
+  if (levelFilter !== "all") activeTags.push({ id: "level",     label: `Level: ${LEVEL_OPTIONS.find(o=>o.value===levelFilter)?.label}`, onRemove: () => setLevelFilter("all"), rgb: "96,165,250" });
+  if (verifiedPosterOnly)    activeTags.push({ id: "verified",  label: "Verified Poster",                onRemove: () => setVerifiedPosterOnly(false),  rgb: "34,197,94" });
+  if (bulkOnly)              activeTags.push({ id: "bulk",      label: "Bulk Hiring",                    onRemove: () => setBulkOnly(false),            rgb: "168,85,247" });
+  if (noBidsOnly)            activeTags.push({ id: "nobids",    label: "Easy Wins",                      onRemove: () => setNoBidsOnly(false),          rgb: "34,211,238" });
+  if (hasStreamingFilter)    activeTags.push({ id: "streaming", label: "Has Streaming",                  onRemove: () => setHasStreamingFilter(false),  rgb: "145,70,255" });
+  if (hasQuestFilter)        activeTags.push({ id: "quest",     label: "Quest Bids",                     onRemove: () => setHasQuestFilter(false),      rgb: "251,191,36" });
+
+  const hasFilters = activeTags.length > 0;
   const clearFilters = () => {
-    setPlatform("all"); setSkillLevel("all"); setSearch("");
+    setSearch(""); setPlatform("all"); setSort("newest"); setLevelFilter("all");
     setVerifiedPosterOnly(false); setBulkOnly(false); setNoBidsOnly(false);
-    setSort("newest");
+    setHasStreamingFilter(false); setHasQuestFilter(false);
   };
+  const filterKey = `${sort}|${levelFilter}|${platform}|${+verifiedPosterOnly}|${+bulkOnly}|${+noBidsOnly}|${+hasStreamingFilter}|${+hasQuestFilter}|${search}`;
   const showFiller = !isLoading && !isError && requests && requests.length > 0 && requests.length <= 3;
 
   return (
@@ -714,13 +763,17 @@ export default function Browse() {
         {!isLoading && requests !== undefined && (
           <div className="flex items-center gap-2 shrink-0 self-start sm:self-auto">
             <div
+              key={requests.length}
               className="flex items-center gap-2.5 rounded-xl border border-primary/30 px-4 py-2.5"
-              style={{ background: "linear-gradient(135deg, rgba(168,85,247,0.1) 0%, rgba(0,0,0,0.3) 100%)" }}
+              style={{
+                background: "linear-gradient(135deg, rgba(168,85,247,0.1) 0%, rgba(0,0,0,0.3) 100%)",
+                animation: "count-up 0.18s ease-out both",
+              }}
             >
               <div className="h-2 w-2 rounded-full bg-green-400 animate-pulse shadow-[0_0_6px_rgba(74,222,128,0.6)]" />
-              <span className="text-sm font-extrabold text-white">{requests.length}</span>
+              <span className="text-sm font-extrabold text-white tabular-nums">{requests.length}</span>
               <span className="text-xs text-muted-foreground uppercase tracking-widest font-semibold">
-                {requests.length === 1 ? "Request" : "Requests"} Open
+                {requests.length === 1 ? "Request" : "Requests"}
               </span>
             </div>
           </div>
@@ -729,17 +782,59 @@ export default function Browse() {
 
       <SafetyBanner showSelfHire={false} storageKey="gb_safety_browse" />
 
-      {/* ── Filters ── */}
+      {/* ── Filter panel ── */}
       <div
-        className="rounded-2xl border overflow-hidden"
+        className="rounded-2xl border overflow-hidden filter-panel-animate"
         style={{
-          borderColor: hasFilters ? "rgba(168,85,247,0.35)" : "rgba(255,255,255,0.08)",
-          background: "rgba(7,5,16,0.85)",
-          transition: "border-color 0.25s",
+          borderColor: hasFilters ? "rgba(168,85,247,0.40)" : "rgba(255,255,255,0.08)",
+          background: "rgba(7,5,16,0.94)",
+          backdropFilter: "blur(20px)",
+          WebkitBackdropFilter: "blur(20px)",
+          boxShadow: hasFilters
+            ? "0 6px 32px rgba(0,0,0,0.50), 0 0 0 1px rgba(168,85,247,0.10)"
+            : "0 4px 24px rgba(0,0,0,0.38)",
+          transition: "border-color 0.3s, box-shadow 0.3s",
         }}
       >
-        {/* Search + dropdowns */}
-        <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 p-4 border-b" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
+        {/* ── Panel header ── */}
+        <div
+          className="flex items-center justify-between px-4 py-2.5 border-b"
+          style={{
+            borderColor: "rgba(255,255,255,0.06)",
+            background: hasFilters ? "rgba(168,85,247,0.06)" : "rgba(255,255,255,0.02)",
+            transition: "background 0.3s",
+          }}
+        >
+          <div className="flex items-center gap-2">
+            <SlidersHorizontal className="h-3.5 w-3.5" style={{ color: hasFilters ? "#a855f7" : "rgba(255,255,255,0.35)" }} />
+            <span className="text-[11px] font-extrabold uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.55)" }}>
+              Sort &amp; Filter
+            </span>
+            {hasFilters && (
+              <span
+                className="text-[9px] font-black px-1.5 py-0.5 rounded-full"
+                style={{ background: "rgba(168,85,247,0.25)", color: "#c084fc", border: "1px solid rgba(168,85,247,0.40)" }}
+              >
+                {activeTags.length} active
+              </span>
+            )}
+          </div>
+          {hasFilters && (
+            <button
+              onClick={clearFilters}
+              className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider rounded-lg px-2.5 py-1 transition-all duration-200 hover:brightness-110 active:scale-95"
+              style={{ background: "rgba(239,68,68,0.12)", border: "1px solid rgba(239,68,68,0.30)", color: "#f87171" }}
+            >
+              <X className="h-2.5 w-2.5" /> Clear All
+            </button>
+          )}
+        </div>
+
+        {/* ── Search + platform row ── */}
+        <div
+          className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 border-b"
+          style={{ borderColor: "rgba(255,255,255,0.05)", background: "rgba(0,0,0,0.12)" }}
+        >
           <div className="relative sm:col-span-2">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
@@ -749,7 +844,6 @@ export default function Browse() {
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
-
           <Select value={platform} onValueChange={setPlatform}>
             <SelectTrigger className="bg-background/60 border-border/60">
               <Monitor className="h-4 w-4 mr-2 text-muted-foreground shrink-0" />
@@ -760,98 +854,160 @@ export default function Browse() {
               {PLATFORMS.map((p) => <SelectItem key={p} value={p}>{PLATFORM_ICON[p]} {p}</SelectItem>)}
             </SelectContent>
           </Select>
-
-          <Select value={skillLevel} onValueChange={setSkillLevel}>
-            <SelectTrigger className="bg-background/60 border-border/60">
-              <Layers className="h-4 w-4 mr-2 text-muted-foreground shrink-0" />
-              <SelectValue placeholder="Skill Level" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Skill Levels</SelectItem>
-              {SKILLS.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-            </SelectContent>
-          </Select>
         </div>
 
-        {/* Sort + toggle row */}
-        <div className="flex flex-wrap items-center gap-3 px-4 py-3" style={{ background: "rgba(0,0,0,0.15)" }}>
-          <span className="text-[10px] font-extrabold uppercase tracking-widest shrink-0" style={{ color: "rgba(255,255,255,0.30)" }}>Sort</span>
+        {/* ── Sort row ── */}
+        <div
+          className="flex items-start gap-3 px-4 py-3 border-b flex-wrap sm:flex-nowrap"
+          style={{ borderColor: "rgba(255,255,255,0.05)", background: "rgba(0,0,0,0.15)" }}
+        >
+          <span className="text-[10px] font-extrabold uppercase tracking-widest pt-1.5 shrink-0 w-14" style={{ color: "rgba(255,255,255,0.30)" }}>
+            Sort by
+          </span>
           <div className="flex flex-wrap gap-1.5">
-            {([
-              { value: "newest",      label: "Newest" },
-              { value: "fewest_bids", label: "Fewest Bids" },
-              { value: "most_bids",   label: "Most Bids" },
-              { value: "lowest_bid",  label: "Lowest Bid" },
-            ] as const).map((opt) => {
-              const active = sort === opt.value;
+            {SORT_OPTIONS.map(({ value, label, Icon }) => {
+              const active = sort === value;
               return (
                 <button
-                  key={opt.value}
-                  onClick={() => setSort(opt.value)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all duration-150"
+                  key={value}
+                  onClick={() => setSort(value)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all duration-200 active:scale-95"
                   style={active ? {
                     background: "rgba(168,85,247,0.22)",
                     border: "1px solid rgba(168,85,247,0.55)",
                     color: "#c084fc",
-                    boxShadow: "0 0 10px rgba(168,85,247,0.20)",
+                    boxShadow: "0 0 12px rgba(168,85,247,0.22)",
                   } : {
                     background: "rgba(255,255,255,0.04)",
                     border: "1px solid rgba(255,255,255,0.08)",
                     color: "rgba(255,255,255,0.45)",
                   }}
                 >
-                  {active && <CheckCircle2 className="h-3 w-3 shrink-0" />}
-                  {opt.label}
+                  {active ? <CheckCircle2 className="h-3 w-3 shrink-0" /> : <Icon className="h-3 w-3 shrink-0 opacity-50" />}
+                  {label}
                 </button>
               );
             })}
           </div>
+        </div>
 
-          <div className="flex-1 h-px mx-1" style={{ background: "rgba(255,255,255,0.06)" }} />
-
-          {/* Toggle filters */}
+        {/* ── Experience level row ── */}
+        <div
+          className="flex items-start gap-3 px-4 py-3 border-b flex-wrap sm:flex-nowrap"
+          style={{ borderColor: "rgba(255,255,255,0.05)", background: "rgba(0,0,0,0.10)" }}
+        >
+          <span className="text-[10px] font-extrabold uppercase tracking-widest pt-1.5 shrink-0 w-14" style={{ color: "rgba(255,255,255,0.30)" }}>
+            Level
+          </span>
           <div className="flex flex-wrap gap-1.5">
-            {[
-              { label: "Verified Poster", icon: <Shield className="h-3 w-3 shrink-0" />, value: verifiedPosterOnly, set: setVerifiedPosterOnly, color: "34,197,94" },
-              { label: "Bulk Hiring",     icon: <Users className="h-3 w-3 shrink-0" />,  value: bulkOnly,           set: setBulkOnly,           color: "168,85,247" },
-              { label: "Easy Wins",       icon: <Flame className="h-3 w-3 shrink-0" />,  value: noBidsOnly,         set: setNoBidsOnly,         color: "34,211,238" },
-            ].map(({ label, icon, value, set, color }) => (
+            {LEVEL_OPTIONS.map(({ value, label, dot }) => {
+              const active = levelFilter === value;
+              return (
+                <button
+                  key={value}
+                  onClick={() => setLevelFilter(value)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all duration-200 active:scale-95"
+                  style={active ? {
+                    background: "rgba(96,165,250,0.18)",
+                    border: "1px solid rgba(96,165,250,0.50)",
+                    color: "#93c5fd",
+                    boxShadow: "0 0 12px rgba(96,165,250,0.18)",
+                  } : {
+                    background: "rgba(255,255,255,0.04)",
+                    border: "1px solid rgba(255,255,255,0.08)",
+                    color: "rgba(255,255,255,0.50)",
+                  }}
+                >
+                  {active
+                    ? <CheckCircle2 className="h-3 w-3 shrink-0" style={{ color: "#93c5fd" }} />
+                    : <div className="h-2 w-2 rounded-full shrink-0" style={{ background: dot }} />
+                  }
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* ── Toggle filters row ── */}
+        <div
+          className="flex items-start gap-3 px-4 py-3 flex-wrap sm:flex-nowrap"
+          style={{ background: "rgba(0,0,0,0.10)" }}
+        >
+          <span className="text-[10px] font-extrabold uppercase tracking-widest shrink-0 w-14 pt-1.5" style={{ color: "rgba(255,255,255,0.30)" }}>
+            Only
+          </span>
+          <div className="flex flex-wrap gap-1.5">
+            {([
+              { label: "Verified Poster", Icon: Shield,   on: verifiedPosterOnly, set: () => setVerifiedPosterOnly(v => !v), activeStyle: { bg: "rgba(34,197,94,0.18)",   border: "rgba(34,197,94,0.50)",   color: "#4ade80",   glow: "rgba(34,197,94,0.18)"   } },
+              { label: "Bulk Hiring",     Icon: Users,    on: bulkOnly,           set: () => setBulkOnly(v => !v),           activeStyle: { bg: "rgba(168,85,247,0.18)", border: "rgba(168,85,247,0.50)", color: "#c084fc",   glow: "rgba(168,85,247,0.18)" } },
+              { label: "Easy Wins",       Icon: Flame,    on: noBidsOnly,         set: () => setNoBidsOnly(v => !v),         activeStyle: { bg: "rgba(34,211,238,0.15)", border: "rgba(34,211,238,0.45)", color: "#22d3ee",   glow: "rgba(34,211,238,0.15)" } },
+              { label: "Has Streaming",   Icon: Tv,       on: hasStreamingFilter, set: () => setHasStreamingFilter(v => !v), activeStyle: { bg: "rgba(145,70,255,0.18)", border: "rgba(145,70,255,0.50)", color: "#c084fc",   glow: "rgba(145,70,255,0.18)" } },
+              { label: "Quest Bids",      Icon: Sparkles, on: hasQuestFilter,     set: () => setHasQuestFilter(v => !v),     activeStyle: { bg: "rgba(251,191,36,0.16)", border: "rgba(251,191,36,0.45)", color: "#fbbf24",   glow: "rgba(251,191,36,0.15)" } },
+            ] as const).map(({ label, Icon, on, set, activeStyle }) => (
               <button
                 key={label}
-                onClick={() => set((v) => !v)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all duration-150"
-                style={value ? {
-                  background: `rgba(${color},0.18)`,
-                  border: `1px solid rgba(${color},0.50)`,
-                  color: `rgb(${color})`,
-                  boxShadow: `0 0 10px rgba(${color},0.15)`,
+                onClick={set}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all duration-200 active:scale-95"
+                style={on ? {
+                  background: activeStyle.bg,
+                  border: `1px solid ${activeStyle.border}`,
+                  color: activeStyle.color,
+                  boxShadow: `0 0 12px ${activeStyle.glow}`,
                 } : {
                   background: "rgba(255,255,255,0.04)",
                   border: "1px solid rgba(255,255,255,0.08)",
                   color: "rgba(255,255,255,0.45)",
                 }}
               >
-                {value ? <CheckCircle2 className="h-3 w-3 shrink-0" /> : icon}
+                {on
+                  ? <CheckCircle2 className="h-3 w-3 shrink-0" style={{ color: activeStyle.color }} />
+                  : <Icon className="h-3 w-3 shrink-0 opacity-50" />
+                }
                 {label}
               </button>
             ))}
           </div>
         </div>
 
-        {/* Active filters + result count */}
+        {/* ── Active tags + result count ── */}
         {hasFilters && (
-          <div className="flex items-center justify-between gap-3 px-4 py-2 border-t" style={{ borderColor: "rgba(168,85,247,0.15)", background: "rgba(168,85,247,0.04)" }}>
-            <span className="text-[10px] text-muted-foreground/60">
-              Showing <span className="font-bold text-white">{requests?.length ?? 0}</span> of{" "}
-              <span className="font-bold">{allRequests?.length ?? 0}</span> requests
+          <div
+            className="flex items-center gap-2 px-4 py-2.5 flex-wrap border-t"
+            style={{ borderColor: "rgba(168,85,247,0.15)", background: "rgba(168,85,247,0.04)" }}
+          >
+            <span className="text-[9px] font-extrabold uppercase tracking-widest shrink-0" style={{ color: "rgba(168,85,247,0.60)" }}>
+              Active:
             </span>
-            <button
-              onClick={clearFilters}
-              className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider rounded-lg px-2.5 py-1 transition-all duration-150 hover:brightness-110"
-              style={{ background: "rgba(239,68,68,0.12)", border: "1px solid rgba(239,68,68,0.30)", color: "#f87171" }}
+            {activeTags.map((tag, idx) => (
+              <button
+                key={tag.id}
+                onClick={tag.onRemove}
+                className="filter-tag-animate flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold transition-all duration-200 hover:brightness-125 active:scale-95 group"
+                style={{
+                  background: `rgba(${tag.rgb},0.16)`,
+                  border: `1px solid rgba(${tag.rgb},0.40)`,
+                  color: `rgb(${tag.rgb})`,
+                  filter: "brightness(1.25)",
+                  animationDelay: `${idx * 35}ms`,
+                }}
+              >
+                {tag.label}
+                <X className="h-2.5 w-2.5 opacity-60 group-hover:opacity-100 transition-opacity" />
+              </button>
+            ))}
+            <span
+              key={requests?.length}
+              className="text-[10px] ml-auto tabular-nums font-semibold"
+              style={{
+                color: (requests?.length ?? 0) < (allRequests?.length ?? 0) ? "rgba(168,85,247,0.75)" : "rgba(255,255,255,0.28)",
+                animation: "count-up 0.18s ease-out both",
+              }}
             >
-              <X className="h-2.5 w-2.5" /> Clear All
-            </button>
+              {requests?.length === allRequests?.length
+                ? `All ${allRequests?.length ?? 0} requests`
+                : `${requests?.length ?? 0} of ${allRequests?.length ?? 0} match`}
+            </span>
           </div>
         )}
       </div>
@@ -872,7 +1028,7 @@ export default function Browse() {
       ) : !requests || requests.length === 0 ? (
         <EmptyState hasFilters={hasFilters} onClear={clearFilters} />
       ) : (
-        <div className="space-y-4">
+        <div key={filterKey} className="bid-list-animate space-y-4">
           {requests.map((req) => <RequestCard key={req.id} req={req} />)}
         </div>
       )}
