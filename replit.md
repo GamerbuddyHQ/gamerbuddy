@@ -17,6 +17,7 @@ A full-stack gaming marketplace web app where users can hire other gamers to pla
 - **Rate limiting**: `express-rate-limit` (login/signup: 5/min, bids: 5/min, comments: 10/min, messages: 30/min, tournaments: 3/min)
 - **Sanitization**: HTML entity escaping on all user text; GIF markers validated to Tenor-only URLs; bare links stripped from community posts
 - **Payment security**: Secret keys server-only; HMAC-SHA256 Razorpay signature verification; Stripe PaymentIntent server-side retrieval + user ownership + amount check; idempotency via `referenceId` unique partial index (prevents double-credit replay); anomaly WARN logs for deposits/bids > $500; atomic wallet operations via SQL-level increments with balance guards in WHERE clause
+- **Security headers** (`artifacts/api-server/src/lib/security-headers.ts`): `helmet` v8 middleware applied as first Express middleware; CSP allows only Stripe, Razorpay, Tenor, Google Fonts explicitly; X-Frame-Options: SAMEORIGIN; X-Content-Type-Options: nosniff; Referrer-Policy: strict-origin-when-cross-origin; HSTS (1 year + preload) enabled in production only; COEP disabled to allow Stripe card element iframes; COOP: same-origin-allow-popups for Razorpay popup flow
 - **API codegen**: Orval (from OpenAPI spec)
 - **Build**: esbuild (CJS bundle for API), Vite (frontend)
 - **File uploads**: multer (for official ID during signup)

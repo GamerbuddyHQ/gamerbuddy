@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser";
 import pinoHttp from "pino-http";
 import router from "./routes";
 import { logger } from "./lib/logger";
+import { securityHeaders } from "./lib/security-headers";
 
 const app: Express = express();
 
@@ -12,6 +13,9 @@ const app: Express = express();
 // req.ip resolves to the real client IP, and express-rate-limit
 // works correctly for IP-based limiting.
 app.set("trust proxy", 1);
+
+// ── Security headers — must be first so every response is covered ───────────
+app.use(securityHeaders);
 
 app.use(
   pinoHttp({
