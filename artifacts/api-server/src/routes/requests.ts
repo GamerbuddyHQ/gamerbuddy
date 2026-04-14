@@ -3,6 +3,7 @@ import { db, gameRequestsTable, walletsTable, usersTable, bidsTable, reviewsTabl
 import { eq, desc, and, sql, inArray } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
 import { createNotification, sendEmailNotification } from "../notifications-helper";
+import { recalculateTrustFactor } from "../trust-factor";
 
 const router: IRouter = Router();
 
@@ -625,59 +626,9 @@ router.post("/requests/:id/reviews", requireAuth, async (req, res): Promise<void
     comment: comment?.trim() || null,
   }).returning();
 
-  // Recalculate trust factor from scratch using full history
-  const [tfRow] = await db
-    .select({
-      avg: sql<string>`AVG(${reviewsTable.rating})`,
-      count: sql<string>`COUNT(*)::int`,
-    })
-    .from(reviewsTable)
-    .where(eq(reviewsTable.revieweeId, revieweeId));
-
-  const [gamerRow] = await db
-    .select({ count: sql<string>`COUNT(*)::int` })
-    .from(bidsTable)
-    .leftJoin(gameRequestsTable, eq(bidsTable.requestId, gameRequestsTable.id))
-    .where(
-      and(
-        eq(bidsTable.bidderId, revieweeId),
-        eq(bidsTable.status, "accepted"),
-        eq(gameRequestsTable.status, "completed"),
-      ),
-    );
-
-  const [hirerRow] = await db
-    .select({ count: sql<string>`COUNT(*)::int` })
-    .from(gameRequestsTable)
-    .where(
-      and(eq(gameRequestsTable.userId, revieweeId), eq(gameRequestsTable.status, "completed")),
-    );
-
-  const reviewCount = parseInt(String(tfRow?.count ?? 0));
-  const rawAvg = parseFloat(tfRow?.avg ?? "5");
-  const totalSess =
-    parseInt(String(gamerRow?.count ?? 0)) + parseInt(String(hirerRow?.count ?? 0));
-
-  // Bayesian-weighted average: blend actual rating with neutral prior (7.5/10, weight 3)
-  // Prevents a single outlier review from dominating the score
-  const priorMean = 7.5;
-  const priorWeight = 3;
-  const bayesianAvg =
-    (rawAvg * reviewCount + priorMean * priorWeight) / (reviewCount + priorWeight);
-
-  // Component 1: Rating quality (0–60 pts)
-  const ratingPts = Math.round((bayesianAvg / 10) * 60);
-
-  // Component 2: Session experience (0–30 pts, sqrt scale caps at 50 sessions)
-  // sqrt gives more value to early sessions — going from 0→5 is bigger than 45→50
-  const sessionPts = Math.round(Math.min(Math.sqrt(totalSess / 50), 1) * 30);
-
-  // Component 3: Review volume (0–10 pts, linear, caps at 10 reviews)
-  const volumePts = Math.min(reviewCount, 10);
-
-  const newTF = Math.min(100, ratingPts + sessionPts + volumePts);
-
-  await db.update(usersTable).set({ trustFactor: newTF }).where(eq(usersTable.id, revieweeId));
+  // Recalculate trust factor from scratch (rating quality + session experience +
+  // review volume + vote sentiment) — votes are now a permanent formula component
+  await recalculateTrustFactor(revieweeId);
 
   // Notify the reviewee about the new review
   void createNotification({

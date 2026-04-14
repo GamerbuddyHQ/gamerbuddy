@@ -3,6 +3,7 @@ import multer from "multer";
 import { db, usersTable, reviewsTable, gameRequestsTable, bidsTable, profilePurchasesTable, questEntriesTable, streamingAccountsTable, profileVotesTable, STREAMING_PLATFORMS } from "@workspace/db";
 import { eq, desc, and, sql, or } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
+import { recalculateTrustFactor } from "../trust-factor";
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -401,31 +402,20 @@ router.post("/users/:id/vote", requireAuth, async (req, res): Promise<void> => {
     if (existing.voteType === voteType) {
       // Clicking the same button again — remove the vote
       await db.delete(profileVotesTable).where(eq(profileVotesTable.id, existing.id));
-      // Reverse old TF adjustment
-      if (voteType === "like") {
-        await db.update(usersTable).set({ trustFactor: sql`GREATEST(${usersTable.trustFactor} - 1, 0)` }).where(eq(usersTable.id, profileId));
-      } else {
-        await db.update(usersTable).set({ trustFactor: sql`LEAST(${usersTable.trustFactor} + 1, 100)` }).where(eq(usersTable.id, profileId));
-      }
+      await recalculateTrustFactor(profileId);
       res.json({ success: true, action: "removed", myVote: null });
       return;
     }
     // Changing vote (like → dislike or vice versa)
     await db.update(profileVotesTable).set({ voteType }).where(eq(profileVotesTable.id, existing.id));
-    const tfDelta = voteType === "like" ? 2 : -2;
-    await db.update(usersTable)
-      .set({ trustFactor: sql`LEAST(GREATEST(${usersTable.trustFactor} + ${tfDelta}, 0), 100)` })
-      .where(eq(usersTable.id, profileId));
+    await recalculateTrustFactor(profileId);
     res.json({ success: true, action: "changed", myVote: voteType });
     return;
   }
 
   // New vote
   await db.insert(profileVotesTable).values({ userId: profileId, voterId: voter.id, voteType });
-  const tfDelta = voteType === "like" ? 1 : -1;
-  await db.update(usersTable)
-    .set({ trustFactor: sql`LEAST(GREATEST(${usersTable.trustFactor} + ${tfDelta}, 0), 100)` })
-    .where(eq(usersTable.id, profileId));
+  await recalculateTrustFactor(profileId);
 
   res.json({ success: true, action: "added", myVote: voteType });
 });
