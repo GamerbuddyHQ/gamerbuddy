@@ -13,3 +13,4 @@ export * from "./notifications";
 export * from "./streaming_accounts";
 export * from "./profile_votes";
 export * from "./suggestions";
+export * from "./tournaments";

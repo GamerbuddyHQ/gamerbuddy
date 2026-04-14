@@ -21,6 +21,7 @@ import Notifications from "@/pages/notifications";
 import UserProfilePage from "@/pages/user-profile";
 import About from "@/pages/about";
 import Community from "@/pages/community";
+import Tournaments from "@/pages/tournaments";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -65,6 +66,7 @@ function Router() {
         <Route path="/notifications"><ProtectedRoute component={Notifications} /></Route>
         <Route path="/about" component={About} />
         <Route path="/community" component={Community} />
+        <Route path="/tournaments" component={Tournaments} />
 
         <Route component={NotFound} />
       </Switch>

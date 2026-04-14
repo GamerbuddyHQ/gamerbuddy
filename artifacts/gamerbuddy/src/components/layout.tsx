@@ -194,8 +194,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
   };
 
   const navItems = [
-    { href: "/browse",    label: "Browse Requests", icon: Compass   },
-    { href: "/community", label: "Community",        icon: Users     },
+    { href: "/browse",      label: "Browse Requests", icon: Compass   },
+    { href: "/tournaments", label: "Tournaments",      icon: Trophy    },
+    { href: "/community",   label: "Community",        icon: Users     },
     ...(user
       ? [
           { href: "/dashboard",   label: "Dashboard",   icon: LayoutDashboard },
