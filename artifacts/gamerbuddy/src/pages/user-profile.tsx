@@ -46,6 +46,13 @@ function VotePanel({ profileId }: { profileId: number }) {
   const handleVote = (voteType: "like" | "dislike") => {
     if (!votes?.canVote || votes?.myVote !== null) return;
     voteMutation.mutate(voteType, {
+      onSuccess: () =>
+        toast({
+          title: "Thank you for your feedback!",
+          description: voteType === "like"
+            ? "Your like has been recorded and helps the community."
+            : "Your dislike has been recorded and helps the community.",
+        }),
       onError: (err: any) =>
         toast({ title: "Couldn't vote", description: err?.error ?? "Something went wrong", variant: "destructive" }),
     });
@@ -131,11 +138,28 @@ function VotePanel({ profileId }: { profileId: number }) {
                 onClick={() => handleVote("dislike")}
               />
             </div>
-            <p className="text-center text-[10px] text-muted-foreground/40">
-              {alreadyVoted
-                ? `✓ Vote recorded · Only one vote per profile`
-                : "Only one vote allowed per profile"}
-            </p>
+            {alreadyVoted ? (
+              <div
+                className="rounded-xl px-4 py-3 text-center space-y-0.5"
+                style={{
+                  background: myVote === "like"
+                    ? "rgba(34,197,94,0.08)"
+                    : "rgba(239,68,68,0.08)",
+                  border: `1px solid ${myVote === "like" ? "rgba(74,222,128,0.25)" : "rgba(248,113,113,0.25)"}`,
+                }}
+              >
+                <p className="text-sm font-bold" style={{ color: myVote === "like" ? "#4ade80" : "#f87171" }}>
+                  Thank you for your feedback!
+                </p>
+                <p className="text-[10px] text-muted-foreground/50">
+                  Only one vote per profile · Your vote helps the community.
+                </p>
+              </div>
+            ) : (
+              <p className="text-center text-[10px] text-muted-foreground/40">
+                Only one vote allowed per profile
+              </p>
+            )}
           </>
         ) : (
           <p className="text-center text-xs text-muted-foreground/50 py-1 italic">
