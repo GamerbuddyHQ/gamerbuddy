@@ -182,9 +182,9 @@ export default function Home() {
           className="h-2 w-2 rounded-full shrink-0"
           style={{ background: "#22c55e", boxShadow: "0 0 6px rgba(34,197,94,0.6)", animation: "pulse 1.5s infinite" }}
         />
-        <span style={{ color: "rgba(255,255,255,0.75)" }}>
+        <span style={{ color: "var(--text-on-surface)", opacity: 0.82 }}>
           Gamerbuddy is currently in Phase 1. More exciting features are coming soon!{" "}
-          <Link href="/roadmap" className="font-semibold hover:underline" style={{ color: "rgba(192,132,252,0.85)" }}>
+          <Link href="/roadmap" className="font-semibold hover:underline" style={{ color: "hsl(var(--primary))" }}>
             View Roadmap →
           </Link>
         </span>
@@ -379,7 +379,7 @@ export default function Home() {
         <div className="max-w-5xl mx-auto">
           {/* section label */}
           <div className="text-center mb-12 px-2">
-            <div className="inline-flex items-center gap-3 text-[11px] font-bold uppercase tracking-[0.2em] text-purple-400/80 mb-5">
+            <div className="inline-flex items-center gap-3 text-[11px] font-bold uppercase tracking-[0.2em] text-primary/70 mb-5">
               <div className="h-px w-10 bg-gradient-to-r from-transparent to-purple-500/60" />
               Platform Features
               <div className="h-px w-10 bg-gradient-to-l from-transparent to-purple-500/60" />

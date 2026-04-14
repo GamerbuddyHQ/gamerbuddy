@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useLocation, Link } from "wouter";
 import { useAuth } from "@/lib/auth";
+import { useTheme } from "@/lib/theme";
 import {
   useBrowseRequests, usePlaceBid,
   type GameRequest,
@@ -366,6 +367,7 @@ function GameAvatar({ name, bar }: { name: string; bar: string }) {
 function RequestCard({ req }: { req: GameRequest }) {
   const [expanded, setExpanded] = useState(false);
   const [, setLocation] = useLocation();
+  const { isDark } = useTheme();
 
   const skill = SKILL_CONFIG[req.skillLevel] ?? DEFAULT_SKILL;
   const isZeroBids = req.bidCount === 0;
@@ -381,9 +383,13 @@ function RequestCard({ req }: { req: GameRequest }) {
           : "border-border/35 hover:border-primary/40 hover:-translate-y-[3px] hover:shadow-[0_10px_44px_rgba(168,85,247,0.18)]"
       }`}
       style={{
-        background: expanded
-          ? `linear-gradient(145deg, ${skill.bar}0e 0%, rgba(0,0,0,0.72) 100%)`
-          : `linear-gradient(145deg, rgba(255,255,255,0.022) 0%, rgba(0,0,0,0.52) 100%)`,
+        background: isDark
+          ? expanded
+            ? `linear-gradient(145deg, ${skill.bar}0e 0%, rgba(0,0,0,0.72) 100%)`
+            : `linear-gradient(145deg, rgba(255,255,255,0.022) 0%, rgba(0,0,0,0.52) 100%)`
+          : expanded
+            ? `linear-gradient(145deg, ${skill.bar}14 0%, hsl(var(--card)) 100%)`
+            : "hsl(var(--card))",
         transitionTimingFunction: "cubic-bezier(0.25, 0.46, 0.45, 0.94)",
       }}
     >
@@ -419,7 +425,7 @@ function RequestCard({ req }: { req: GameRequest }) {
                 >
                   {req.gameName.trim()[0]?.toUpperCase() ?? "G"}
                 </div>
-                <span className="inline-flex items-center gap-1.5 text-xs border border-border/40 rounded-full px-3 py-1 font-semibold text-muted-foreground/70 bg-white/[0.025]">
+                <span className="inline-flex items-center gap-1.5 text-xs border border-border/40 rounded-full px-3 py-1 font-semibold text-muted-foreground/70 bg-muted/30">
                   <span className="text-sm leading-none">{PLATFORM_ICON[req.platform] ?? "🎮"}</span>
                   {req.platform}
                 </span>
@@ -431,7 +437,7 @@ function RequestCard({ req }: { req: GameRequest }) {
               {/* Row 2: Game title + poster */}
               <div>
                 <h3
-                  className="text-[1.5rem] sm:text-[1.65rem] md:text-[1.9rem] font-black text-white cursor-pointer tracking-tight transition-colors duration-200 group-hover:text-primary/90"
+                  className="text-[1.5rem] sm:text-[1.65rem] md:text-[1.9rem] font-black text-foreground cursor-pointer tracking-tight transition-colors duration-200 group-hover:text-primary/90"
                   style={{ letterSpacing: "-0.035em", lineHeight: 1.15 }}
                   onClick={() => setLocation(`/requests/${req.id}`)}
                 >
@@ -472,9 +478,9 @@ function RequestCard({ req }: { req: GameRequest }) {
                     <span
                       className="inline-flex items-center gap-1 text-[10px] rounded-full px-2.5 py-1 font-bold uppercase tracking-wider"
                       style={{
-                        background: "rgba(252,211,77,0.10)",
-                        border: "1px solid rgba(252,211,77,0.28)",
-                        color: "rgba(252,211,77,0.80)",
+                        background: "rgba(252,211,77,0.12)",
+                        border: "1px solid rgba(180,140,0,0.35)",
+                        color: "var(--text-on-surface)" === "rgba(255,255,255,1)" ? "rgba(252,211,77,0.85)" : "hsl(38 80% 35%)",
                       }}
                     >
                       <Globe className="h-2.5 w-2.5 shrink-0" />
@@ -500,11 +506,10 @@ function RequestCard({ req }: { req: GameRequest }) {
               {/* Row 5: Bid stats (compact pills) */}
               <div className="flex flex-wrap items-center gap-2">
                 <div
-                  className="inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs"
-                  style={{ borderColor: "rgba(255,255,255,0.07)", background: "rgba(255,255,255,0.025)" }}
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-border/30 px-3 py-1.5 text-xs bg-muted/20"
                 >
                   <Gavel className="h-3 w-3 text-muted-foreground/40 shrink-0" />
-                  <span className="font-semibold text-white/70">
+                  <span className="font-semibold text-foreground/70">
                     {isZeroBids ? "No bids yet" : `${req.bidCount} bid${req.bidCount === 1 ? "" : "s"}`}
                   </span>
                   {isZeroBids && <span className="text-muted-foreground/35">— be first!</span>}
@@ -517,7 +522,7 @@ function RequestCard({ req }: { req: GameRequest }) {
                   >
                     <TrendingDown className="h-3 w-3 text-cyan-400/55 shrink-0" />
                     <span className="text-muted-foreground/55">
-                      Lowest <span className="font-bold text-white/70">${req.lowestBid.toFixed(2)}</span>
+                      Lowest <span className="font-bold text-foreground/70">${req.lowestBid.toFixed(2)}</span>
                     </span>
                   </div>
                 )}

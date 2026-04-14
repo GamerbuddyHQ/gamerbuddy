@@ -65,7 +65,7 @@ function NotifItem({ notif, onClick }: { notif: AppNotification; onClick: () => 
       </div>
       <div className="flex-1 min-w-0 text-left">
         <div className="flex items-start justify-between gap-2">
-          <span className={`text-xs font-bold leading-tight ${notif.isRead ? "text-foreground/60" : "text-white"}`}>
+          <span className={`text-xs font-bold leading-tight ${notif.isRead ? "text-foreground/60" : "text-foreground"}`}>
             {notif.title}
           </span>
           {!notif.isRead && <span className="shrink-0 h-2 w-2 rounded-full bg-primary mt-0.5" />}
@@ -412,6 +412,16 @@ export function Layout({ children }: { children: React.ReactNode }) {
           <div className="flex items-center gap-2 shrink-0">
             <NotificationBell />
 
+            {/* Theme toggle */}
+            <button
+              onClick={toggleTheme}
+              className="h-9 w-9 flex items-center justify-center rounded-xl border border-border/60 bg-background/60 hover:border-primary/50 hover:text-primary transition-all text-muted-foreground"
+              aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+              title={isDark ? "Light mode" : "Dark mode"}
+            >
+              {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            </button>
+
             {/* Desktop auth */}
             {user ? (
               <Button variant="ghost" size="sm" onClick={handleLogout} className="hidden md:flex text-muted-foreground hover:text-destructive">
@@ -479,7 +489,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   className={`flex items-center gap-3 px-4 py-3.5 rounded-xl border font-semibold text-base transition-all ${
                     isActive
                       ? "border-primary/40 bg-primary/10 text-primary"
-                      : "border-border/40 text-muted-foreground hover:border-primary/30 hover:text-white hover:bg-card/60"
+                      : "border-border/40 text-muted-foreground hover:border-primary/30 hover:text-primary hover:bg-card/60"
                   }`}
                 >
                   <item.icon className="h-5 w-5 shrink-0" />

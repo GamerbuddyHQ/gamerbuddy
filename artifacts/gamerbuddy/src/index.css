@@ -336,6 +336,42 @@
   }
 }
 
+/* ─────────────────────────────────────────────────────────
+   Light-mode overrides: gaming accent text colors that are
+   designed for dark backgrounds look too pale on white.
+   These selectors have higher specificity than Tailwind
+   utility layers, so they win without !important.
+   ───────────────────────────────────────────────────────── */
+:root:not(.dark) .text-amber-300,
+:root:not(.dark) .text-amber-300\/90,
+:root:not(.dark) .text-amber-300\/80,
+:root:not(.dark) .text-amber-300\/70 {
+  color: hsl(30 80% 32%);
+}
+:root:not(.dark) .text-red-300,
+:root:not(.dark) .text-red-300\/80 {
+  color: hsl(0 65% 40%);
+}
+:root:not(.dark) .text-cyan-400,
+:root:not(.dark) .text-cyan-400\/55 {
+  color: hsl(191 72% 32%);
+}
+:root:not(.dark) .text-green-400,
+:root:not(.dark) .text-green-400\/90 {
+  color: hsl(142 68% 28%);
+}
+:root:not(.dark) .text-purple-400,
+:root:not(.dark) .text-purple-400\/80 {
+  color: hsl(272 72% 42%);
+}
+/* bg-amber-500/5 + bg-red-500/5 on white are nearly invisible — give them more tint */
+:root:not(.dark) .bg-amber-500\/5  { background-color: hsl(38 92% 50% / 0.10); }
+:root:not(.dark) .bg-red-500\/5    { background-color: hsl(0 84% 60% / 0.10); }
+:root:not(.dark) .bg-red-500\/6    { background-color: hsl(0 84% 60% / 0.10); }
+:root:not(.dark) .bg-red-500\/8    { background-color: hsl(0 84% 60% / 0.10); }
+:root:not(.dark) .bg-cyan-500\/5   { background-color: hsl(191 91% 36% / 0.10); }
+:root:not(.dark) .bg-green-500\/5  { background-color: hsl(142 76% 36% / 0.10); }
+
 @keyframes shimmer {
   0% { transform: translateX(-100%); }
   60% { transform: translateX(100%); }
