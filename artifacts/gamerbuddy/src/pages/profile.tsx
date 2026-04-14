@@ -17,7 +17,7 @@ import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
 import {
-  User, Mail, Phone, Calendar, ShieldCheck, ShieldAlert,
+  User, Mail, Phone, Calendar, ShieldCheck, ShieldAlert, Clock,
   Star, Trophy, Swords, Edit3, Check, X, Palette, Tag,
   Sparkles, Lock, CheckCircle2, Plus, Trash2, Gamepad2,
   Zap, Target, ChevronDown, ChevronUp,
@@ -968,15 +968,17 @@ function VerificationSection({ idVerified }: { idVerified: boolean }) {
   }
 
   return (
-    <Card className="border-border/40 bg-card/60">
-      <CardContent className="pt-5 pb-5">
+    <Card className="border-amber-500/25 bg-card/60 overflow-hidden">
+      <div className="h-0.5 w-full" style={{ background: "linear-gradient(90deg, #f59e0b, #a855f7, #22d3ee)" }} />
+      <CardContent className="pt-5 pb-5 space-y-4">
+        {/* Top row */}
         <div className="flex items-center justify-between gap-4 flex-wrap">
           <div className="flex items-center gap-3.5">
             <div className="h-10 w-10 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center shrink-0">
               <ShieldAlert className="h-5 w-5 text-amber-400" />
             </div>
             <div>
-              <div className="text-sm font-bold text-white mb-0.5">Verify Your Identity</div>
+              <div className="text-sm font-bold text-white mb-0.5">Verification In Progress</div>
               <p className="text-xs text-muted-foreground/70">
                 Earn the <span className="text-emerald-400 font-semibold">Verified</span> badge — trusted by more hirers, more bids accepted.
               </p>
@@ -997,9 +999,22 @@ function VerificationSection({ idVerified }: { idVerified: boolean }) {
             {verifyId.isPending ? (
               <><div className="h-3 w-3 rounded-full border-2 border-white/30 border-t-white animate-spin mr-1.5" />Verifying…</>
             ) : (
-              <><ShieldCheck className="h-3.5 w-3.5 mr-1.5" />Verify ID</>
+              <><ShieldCheck className="h-3.5 w-3.5 mr-1.5" />Submit for Review</>
             )}
           </Button>
+        </div>
+        {/* Timeline info */}
+        <div
+          className="flex items-start gap-2.5 rounded-lg px-3 py-2.5"
+          style={{ background: "rgba(168,85,247,0.07)", border: "1px solid rgba(168,85,247,0.18)" }}
+        >
+          <Clock className="h-3.5 w-3.5 text-primary shrink-0 mt-0.5" />
+          <div>
+            <span className="text-[11px] font-semibold text-white">Expected review time: 7–15 days</span>
+            <p className="text-[10px] text-muted-foreground leading-relaxed mt-0.5">
+              We're reviewing your ID and phone number carefully to keep the community safe. You can browse and bid freely — posting requests and hiring unlock once verified.
+            </p>
+          </div>
         </div>
       </CardContent>
     </Card>

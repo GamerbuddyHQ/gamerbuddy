@@ -15,6 +15,8 @@ import {
   AlertTriangle,
   ArrowRight,
   Zap,
+  Clock,
+  ShieldAlert,
 } from "lucide-react";
 
 const WITHDRAWAL_THRESHOLD = 100;
@@ -51,6 +53,36 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-8">
+      {/* Verification status banner — shown while pending */}
+      {!user.idVerified && (
+        <div
+          className="flex items-start gap-3 rounded-2xl px-5 py-4"
+          style={{
+            background: "linear-gradient(135deg, rgba(245,158,11,0.08), rgba(168,85,247,0.06))",
+            border: "1px solid rgba(245,158,11,0.22)",
+          }}
+        >
+          <div className="h-9 w-9 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center shrink-0 mt-0.5">
+            <Clock className="h-4 w-4 text-amber-400" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap mb-1">
+              <span className="text-sm font-extrabold text-white uppercase tracking-wide">Verification In Progress</span>
+              <span
+                className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full"
+                style={{ background: "rgba(245,158,11,0.15)", color: "#f59e0b", border: "1px solid rgba(245,158,11,0.3)" }}
+              >
+                Expected: 7–15 days
+              </span>
+            </div>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              We're carefully reviewing your ID and phone number to keep the Gamerbuddy community safe. You can browse and bid on requests freely — posting your own requests and hiring gamers will unlock once your verification is complete.
+            </p>
+          </div>
+          <ShieldAlert className="h-4 w-4 text-amber-400/60 shrink-0 mt-1 hidden sm:block" />
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>

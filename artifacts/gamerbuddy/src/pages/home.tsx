@@ -284,6 +284,11 @@ export default function Home() {
             </Link>
           </div>
 
+          {/* verification note */}
+          <p className="text-center text-[11px]" style={{ color: "rgba(255,255,255,0.32)" }}>
+            Account verification (ID + phone + email) takes 7–15 days after signup
+          </p>
+
           {/* trust bar */}
           <div className="space-y-2">
             <div className="flex items-center justify-center gap-2">

@@ -46,8 +46,8 @@ const RESPONSES: Array<{ patterns: RegExp; reply: string }> = [
     reply: `To report a user:\n\n1. Click the **🚩 Flag** icon next to any username (in Browse or on their profile)\n2. Choose the reason (fraud, toxicity, fake profile, etc.)\n3. Add any extra details and submit\n\nOur safety team reviews all reports. Confirmed violations result in account suspension and loss of earnings. Your report is confidential.`,
   },
   {
-    patterns: /verif|badge|trust|id|official/i,
-    reply: `**Verified Badge** ✅\n\nGet verified to boost your trust score and get accepted for more sessions!\n\n• Go to your **Profile page**\n• Click **"Verify ID"** in the verification card\n• Instant verification — you'll get the green ✅ badge immediately\n\nVerified gamers appear more trustworthy to hirers and typically win more bids.`,
+    patterns: /verif|badge|trust|id|official|how long|7.*day|15.*day/i,
+    reply: `**Verification & Verified Badge** ✅\n\nOnce you create an account, our team carefully reviews your ID and phone number to keep the community safe.\n\n⏱️ **Timeline: 7–15 days** after submitting your details\n\nWhile waiting:\n• You can **browse requests** freely\n• You can **place bids** on sessions\n• Posting your own requests and hiring gamers unlock **after verification**\n\nOnce verified, you'll receive the green ✅ badge on your profile, bids, and listings — trusted by more hirers and winning more sessions!`,
   },
   {
     patterns: /hello|hi|hey|help|support|what.*can.*you|who.*are.*you/i,
@@ -98,7 +98,7 @@ const QUICK_PROMPTS = [
   "How do I post a request?",
   "How do I get hired?",
   "Wallet & payment help",
-  "Safety & password rules",
+  "How long does verification take?",
 ];
 
 let msgIdCounter = 1;

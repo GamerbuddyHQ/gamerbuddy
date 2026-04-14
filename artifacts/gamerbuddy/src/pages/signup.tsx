@@ -17,7 +17,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Gamepad2, ShieldCheck, Upload } from "lucide-react";
+import { Gamepad2, ShieldCheck, Upload, Clock, Info } from "lucide-react";
 
 const signupSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -205,6 +205,23 @@ export default function Signup() {
                   />
                 </label>
                 <p className="text-[11px] text-muted-foreground">We need this to verify you are a real gamer. Your ID is stored securely.</p>
+              </div>
+
+              {/* Verification timeline notice */}
+              <div
+                className="flex items-start gap-3 rounded-xl px-4 py-3"
+                style={{
+                  background: "rgba(168,85,247,0.07)",
+                  border: "1px solid rgba(168,85,247,0.2)",
+                }}
+              >
+                <Clock className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                <div>
+                  <p className="text-xs font-semibold text-white mb-0.5">Verification takes 7–15 days</p>
+                  <p className="text-[11px] text-muted-foreground leading-relaxed">
+                    After submitting your ID and phone number, our team carefully reviews your details to keep the community safe. You can browse requests right away — posting and hiring unlock after verification.
+                  </p>
+                </div>
               </div>
 
               <Button
