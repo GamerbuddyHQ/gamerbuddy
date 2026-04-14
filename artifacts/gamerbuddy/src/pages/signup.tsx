@@ -217,9 +217,9 @@ export default function Signup() {
               >
                 <Clock className="h-4 w-4 text-primary mt-0.5 shrink-0" />
                 <div>
-                  <p className="text-xs font-semibold text-white mb-0.5">Verification takes 7–15 days</p>
+                  <p className="text-xs font-semibold text-white mb-0.5">Verification helps keep Gamerbuddy safe</p>
                   <p className="text-[11px] text-muted-foreground leading-relaxed">
-                    After submitting your ID and phone number, our team carefully reviews your details to keep the community safe. You can browse requests right away — posting and hiring unlock after verification.
+                    It usually takes 7–15 days. You can browse requests right away — posting and hiring unlock once you're verified.
                   </p>
                 </div>
               </div>

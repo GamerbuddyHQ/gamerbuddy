@@ -47,7 +47,7 @@ const RESPONSES: Array<{ patterns: RegExp; reply: string }> = [
   },
   {
     patterns: /verif|badge|trust|id|official|how long|7.*day|15.*day/i,
-    reply: `**Verification & Verified Badge** ✅\n\nOnce you create an account, our team carefully reviews your ID and phone number to keep the community safe.\n\n⏱️ **Timeline: 7–15 days** after submitting your details\n\nWhile waiting:\n• You can **browse requests** freely\n• You can **place bids** on sessions\n• Posting your own requests and hiring gamers unlock **after verification**\n\nOnce verified, you'll receive the green ✅ badge on your profile, bids, and listings — trusted by more hirers and winning more sessions!`,
+    reply: `**Verification & Verified Badge** ✅\n\nVerification helps keep Gamerbuddy safe — it usually takes **7–15 days**.\n\nWhile you wait:\n• You can **browse requests** freely\n• You can **place bids** on sessions\n• Posting requests and hiring unlock once you're verified ✔️\n\nOnce verified, you'll earn the green ✅ badge on your profile, bids, and listings — trusted by more hirers and winning more sessions!`,
   },
   {
     patterns: /hello|hi|hey|help|support|what.*can.*you|who.*are.*you/i,

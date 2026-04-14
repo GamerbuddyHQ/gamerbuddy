@@ -76,7 +76,7 @@ export default function Dashboard() {
               </span>
             </div>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              We're carefully reviewing your ID and phone number to keep the Gamerbuddy community safe. You can browse and bid on requests freely — posting your own requests and hiring gamers will unlock once your verification is complete.
+              Verification helps keep Gamerbuddy safe — it usually takes 7–15 days. You can browse and bid freely while we review your details. Posting requests and hiring unlock once you're verified.
             </p>
           </div>
           <ShieldAlert className="h-4 w-4 text-amber-400/60 shrink-0 mt-1 hidden sm:block" />

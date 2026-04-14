@@ -1010,9 +1010,9 @@ function VerificationSection({ idVerified }: { idVerified: boolean }) {
         >
           <Clock className="h-3.5 w-3.5 text-primary shrink-0 mt-0.5" />
           <div>
-            <span className="text-[11px] font-semibold text-white">Expected review time: 7–15 days</span>
+            <span className="text-[11px] font-semibold text-white">Verification helps keep Gamerbuddy safe</span>
             <p className="text-[10px] text-muted-foreground leading-relaxed mt-0.5">
-              We're reviewing your ID and phone number carefully to keep the community safe. You can browse and bid freely — posting requests and hiring unlock once verified.
+              It usually takes 7–15 days. You can browse and bid freely in the meantime — posting requests and hiring unlock once you're verified.
             </p>
           </div>
         </div>

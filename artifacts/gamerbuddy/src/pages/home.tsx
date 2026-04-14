@@ -286,7 +286,7 @@ export default function Home() {
 
           {/* verification note */}
           <p className="text-center text-[11px]" style={{ color: "rgba(255,255,255,0.32)" }}>
-            Account verification (ID + phone + email) takes 7–15 days after signup
+            Verification helps keep Gamerbuddy safe — it usually takes 7–15 days
           </p>
 
           {/* trust bar */}
