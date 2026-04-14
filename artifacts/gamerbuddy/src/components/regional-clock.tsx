@@ -63,6 +63,7 @@ export function RegionalClock() {
       <button
         onClick={() => setOpen((o) => !o)}
         aria-label="Show world clock"
+        title="Helps you coordinate session times across different regions."
         className={`
           h-9 flex items-center gap-1.5 px-2.5 rounded-xl border transition-all duration-200
           bg-background/60 hover:bg-primary/10 active:scale-95
