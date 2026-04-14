@@ -2199,9 +2199,9 @@ export default function RequestDetail() {
                 <ShieldAlert className="h-5 w-5 text-amber-400" />
               </div>
               <div className="flex-1 text-center sm:text-left">
-                <p className="font-bold text-amber-300 text-sm">Verification required to place bids</p>
+                <p className="font-bold text-amber-300 text-sm">Almost verified — hang tight! 🎮</p>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  You must complete verification (7–15 days) before you can place bids. Almost there — once approved you'll be able to squad up with skilled gamers!
+                  Verification is almost complete! Once you're verified (usually 7–15 days), you'll be able to place bids and squad up with skilled gamers.
                 </p>
               </div>
               <Button size="sm" variant="outline" asChild className="border-amber-500/40 text-amber-300 hover:bg-amber-500/10 shrink-0 text-xs">

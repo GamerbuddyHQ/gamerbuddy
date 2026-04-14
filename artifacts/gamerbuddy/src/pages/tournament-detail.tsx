@@ -687,10 +687,10 @@ export default function TournamentDetailPage() {
               <div className="flex-1 rounded-2xl px-4 py-3.5"
                 style={{ background: "rgba(245,158,11,0.07)", border: "1.5px solid rgba(245,158,11,0.28)" }}>
                 <p className="text-[13px] font-extrabold text-amber-400 flex items-center gap-2 mb-1">
-                  <ShieldAlert className="h-4 w-4 shrink-0" /> Verification required to join
+                  <ShieldAlert className="h-4 w-4 shrink-0" /> Almost verified — hang tight! 🎮
                 </p>
                 <p className="text-[12px] text-amber-400/70 leading-relaxed">
-                  Almost there! Finish verification (7–15 days) and you'll be able to compete in tournaments.
+                  Verification is almost complete! Once you're verified (usually 7–15 days), you'll be able to join tournaments and compete for prizes.
                 </p>
                 <Link href="/profile" className="inline-block text-[11px] font-bold text-amber-400 underline mt-1.5">
                   Check verification status →

@@ -77,7 +77,7 @@ export default function Dashboard() {
               </span>
             </div>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              Verification helps keep Gamerbuddy safe — it usually takes 7–15 days. <span className="text-amber-400/90 font-semibold">Placing bids and joining tournaments require verification.</span> You can browse all open requests freely while we review your details. Posting requests and hiring also unlock once you're verified.
+              Verification is almost complete — usually takes 7–15 days. <span className="text-amber-400/90 font-semibold">Once verified, you'll be able to place bids, join tournaments, post requests, and hire gamers.</span> In the meantime, browse all open requests and get your strategy ready!
             </p>
           </div>
           <ShieldAlert className="h-4 w-4 text-amber-400/60 shrink-0 mt-1 hidden sm:block" />
