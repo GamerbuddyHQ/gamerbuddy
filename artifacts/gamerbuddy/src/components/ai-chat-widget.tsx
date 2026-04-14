@@ -22,7 +22,7 @@ const RESPONSES: Array<{ patterns: RegExp; reply: string }> = [
   /* ── POST / CREATE REQUEST ── */
   {
     patterns: /post|create.*request|new.*request|how.*request|hire.*someone|find.*gamer/i,
-    reply: `Let's get you some skilled players! Here's how to post a request 🎮\n\n1. **Log in** → hit your Dashboard\n2. Click **"Post Request"**\n3. Fill in your game, platform, skill level, and — super important — a **Clear Objective** (e.g. "Carry me to Diamond in Apex", "Chill co-op vibes, no toxic randoms")\n4. Optionally set a **Preferred Nation** and **Preferred Gender** for a better squad match\n5. Submit and watch the bids roll in! 💥\n\n💡 **Pro tip:** The more specific your objective, the more legit gamers you attract. Vague posts get vague bids.`,
+    reply: `Easy! Here's how to post a request and get skilled gamers knocking on your door 🎮\n\n1. Head to **Browse Requests** or your **Dashboard**\n2. Click **"Post Request"**\n3. Fill in:\n   • **Game** — what you're playing\n   • **Platform** — PC, PS5, Xbox, etc.\n   • **Skill Level** — beginner-friendly, intermediate, expert...\n   • **Objectives** — be specific! (e.g. "Carry me to Diamond in Apex Legends")\n4. Optionally set a **Preferred Nation** and **Preferred Gender** for a better match\n5. Hit submit — gamers will start bidding right away! 💥\n\n💡 **Pro tip:** Clear objectives = better bids. The more detail you put in, the better players you attract!`,
   },
 
   /* ── BIDDING / GETTING HIRED ── */
@@ -34,7 +34,7 @@ const RESPONSES: Array<{ patterns: RegExp; reply: string }> = [
   /* ── BULK HIRING ── */
   {
     patterns: /bulk|multiple.*gamer|hire.*team|squad|group.*hire/i,
-    reply: `Need a full squad? **Bulk Hiring** has got you! 🎯\n\n• **Min:** 2 gamers &nbsp;|&nbsp; **Max:** 100 gamers\n• Each gamer bids individually — no forced package deals\n• You review and approve each slot separately, so you stay in full control\n• Every accepted gamer gets their own session and payout\n• Entry is **free** for participants — they only earn when accepted\n\nPerfect for raid teams, tournament squads, or when you just want zero toxic randoms and full control over who's in. 🔥`,
+    reply: `Need a full squad? **Bulk Hiring** is exactly what you need! 🎯\n\nHere's how it works:\n\n• Set the **number of slots** you want to fill (min **2**, max **100** gamers)\n• Write your **objectives** — same clear goals apply\n• Gamers bid for the slots individually\n• **You approve each participant** one by one — full control, no unwanted randos\n• Each accepted gamer gets their own session and payout\n\nPerfect for raid teams, tournament practice squads, or any time you need a whole crew. You pick who makes the cut! 🔥`,
   },
 
   /* ── TOURNAMENTS ── */
@@ -52,7 +52,7 @@ const RESPONSES: Array<{ patterns: RegExp; reply: string }> = [
   /* ── PLATFORM FEE ── */
   {
     patterns: /fee|commission|percent|10%|platform.*cut|how much.*charge/i,
-    reply: `Here's the deal on the **Platform Fee** 💰\n\nGamerbuddy charges a flat **10% fee** on every completed session and tournament — no hidden charges, no surprises.\n\n• Gamer bids **$10** → hirer pays $10 → gamer pockets **$9** ✅\n• Tournaments → 10% comes off the prize pool at payout\n\nThat 10% keeps the platform running — escrow protection, payment processing, dispute resolution, the whole thing. It applies to every transaction, no exceptions.`,
+    reply: `Totally fair question! Here's how the fee works 💰\n\nWe take a **10% platform fee** on every completed Quest or Job — that's what keeps the platform running, payments protected, and support available.\n\n• **You pay the full bid amount** as the hirer\n• **90% goes directly to the gamer** 💸\n• The remaining 10% goes to Gamerbuddy\n\n**Example:** Gamer bids $20 → you pay $20 → gamer gets **$18** ✅\n\nNo hidden charges, no surprises — just a flat 10% every time a session completes. Same applies to tournament prize pools.`,
   },
 
   /* ── ESCROW ── */
@@ -166,7 +166,7 @@ const RESPONSES: Array<{ patterns: RegExp; reply: string }> = [
   /* ── VERIFICATION / BADGE ── */
   {
     patterns: /verif|badge|trust.*factor|id.*check|how.*long.*verify|7.*day|15.*day|green.*tick/i,
-    reply: `**Verification & Verified Badge** ✅\n\nVerification keeps the platform clean and legit. It usually takes **7–15 days** — worth the wait!\n\nWhile you're pending you can:\n• Browse all requests and scout the competition\n• Place bids and start building your reputation\n\nOnce you're verified you unlock the full game:\n• Post your own requests\n• Hire gamers\n• The green **✅ Verified badge** on your profile, bids, and listings\n\nHirers filter specifically for verified players — unverified bids often get skipped. Get verified, get hired. 🚀`,
+    reply: `Great question! Here's the full scoop on verification ✅\n\nVerification usually takes **7 to 15 days** after you submit your:\n• 📧 **Email** confirmation\n• 📱 **Phone number** verification\n• 🪪 **ID check** (standard platform safety stuff)\n\nWhile you're waiting, you're **not locked out**!\n• ✅ Browse all open requests freely\n• ✅ Scout the competition and prep your strategy\n• ✅ Place bids on sessions\n\nOnce approved, you unlock the full experience:\n• Post your own requests\n• Hire gamers directly\n• The green **✅ Verified badge** on your profile, bids, and listings\n\nThat badge is a big deal — hirers specifically filter for verified players. Get it and watch those bid acceptances go up! 🚀`,
   },
 
   /* ── TRUST FACTOR ── */
