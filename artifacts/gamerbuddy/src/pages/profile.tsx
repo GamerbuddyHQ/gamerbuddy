@@ -1259,9 +1259,9 @@ export default function Profile() {
             >
               {/* Left: icon + label */}
               <div className="flex items-center gap-2 min-w-0">
-                <User
-                  className="h-4 w-4 shrink-0"
-                  style={{ color: editingBio ? "#a855f7" : "rgba(255,255,255,0.38)" }}
+                <Sparkles
+                  className="h-3.5 w-3.5 shrink-0"
+                  style={{ color: editingBio ? "#a855f7" : "rgba(168,85,247,0.55)" }}
                 />
                 <span className="text-[11px] font-extrabold uppercase tracking-widest text-white/65 truncate">
                   About Me
@@ -1333,7 +1333,7 @@ export default function Profile() {
             </div>
 
             {/* ── Body ── */}
-            <div className="px-4 sm:px-5 py-4">
+            <div className="px-4 sm:px-5 py-5">
               {editingBio ? (
                 <div className="space-y-3">
                   <Textarea
@@ -1400,17 +1400,25 @@ export default function Profile() {
                 </div>
               ) : profile?.bio ? (
                 /* ── Bio display ── */
-                <p
-                  className="whitespace-pre-wrap"
+                <div
+                  className="rounded-xl px-4 py-4"
                   style={{
-                    fontSize: "15px",
-                    lineHeight: "1.85",
-                    color: "rgba(255,255,255,0.78)",
-                    letterSpacing: "0.01em",
+                    background: "linear-gradient(135deg, rgba(168,85,247,0.04) 0%, rgba(168,85,247,0.01) 100%)",
+                    borderLeft: "3px solid rgba(168,85,247,0.35)",
                   }}
                 >
-                  {profile.bio}
-                </p>
+                  <p
+                    className="whitespace-pre-wrap"
+                    style={{
+                      fontSize: "15px",
+                      lineHeight: "1.9",
+                      color: "rgba(255,255,255,0.82)",
+                      letterSpacing: "0.012em",
+                    }}
+                  >
+                    {profile.bio}
+                  </p>
+                </div>
               ) : (
                 /* ── Empty state ── */
                 <div className="flex flex-col items-center justify-center py-6 gap-3 text-center">

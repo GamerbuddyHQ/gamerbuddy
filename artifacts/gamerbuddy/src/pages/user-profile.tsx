@@ -412,44 +412,48 @@ export default function UserProfilePage() {
           }}
         >
           <FileText
-            className="h-4 w-4 shrink-0"
-            style={{ color: profile.bio ? "#a855f7" : "rgba(255,255,255,0.3)" }}
+            className="h-3.5 w-3.5 shrink-0"
+            style={{ color: profile.bio ? "rgba(168,85,247,0.75)" : "rgba(255,255,255,0.25)" }}
           />
           <span className="text-[11px] font-extrabold uppercase tracking-widest text-white/70">
             About
           </span>
-          {profile.bio && (
-            <span
-              className="ml-auto text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full"
-              style={{
-                background: "rgba(168,85,247,0.10)",
-                border: "1px solid rgba(168,85,247,0.22)",
-                color: "#c084fc",
-              }}
-            >
-              {profile.bio.length} chars
-            </span>
-          )}
         </div>
 
         {/* Body */}
-        <div className="px-5 py-4">
+        <div className="px-5 py-5">
           {profile.bio ? (
-            <p className="text-sm text-white/75 leading-relaxed whitespace-pre-wrap">
-              {profile.bio}
-            </p>
-          ) : (
-            <div className="flex flex-col items-center justify-center py-5 gap-2 text-center">
-              <div
-                className="h-10 w-10 rounded-full flex items-center justify-center mb-1"
+            <div
+              className="rounded-xl px-4 py-4"
+              style={{
+                background: "linear-gradient(135deg, rgba(168,85,247,0.04) 0%, rgba(168,85,247,0.01) 100%)",
+                borderLeft: "3px solid rgba(168,85,247,0.35)",
+              }}
+            >
+              <p
+                className="whitespace-pre-wrap"
                 style={{
-                  background: "rgba(255,255,255,0.04)",
-                  border: "1px dashed rgba(255,255,255,0.12)",
+                  fontSize: "15px",
+                  lineHeight: "1.9",
+                  color: "rgba(255,255,255,0.82)",
+                  letterSpacing: "0.012em",
                 }}
               >
-                <FileText className="h-4 w-4 text-white/20" />
+                {profile.bio}
+              </p>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-6 gap-2 text-center">
+              <div
+                className="h-10 w-10 rounded-2xl flex items-center justify-center"
+                style={{
+                  background: "rgba(168,85,247,0.06)",
+                  border: "1.5px dashed rgba(168,85,247,0.22)",
+                }}
+              >
+                <FileText className="h-4 w-4" style={{ color: "rgba(168,85,247,0.45)" }} />
               </div>
-              <p className="text-sm text-white/25 italic">No bio added yet.</p>
+              <p className="text-sm text-white/30 italic">This gamer hasn't added a bio yet.</p>
             </div>
           )}
         </div>

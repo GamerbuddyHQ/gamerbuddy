@@ -1129,13 +1129,29 @@ function BidCard({
         {!isMe && <BidderQuestSummary bidderId={bid.bidderId} gameName={gameName} />}
 
         {bid.bidderBio && (
-          <div className="flex items-start gap-2 px-3 py-2 rounded-lg border border-white/[0.05] bg-white/[0.02]">
-            <User className="h-3 w-3 mt-0.5 shrink-0 text-primary/50" />
-            <p className="text-xs text-foreground/55 leading-relaxed italic">
-              {bid.bidderBio.length > 100
-                ? bid.bidderBio.slice(0, 100).trimEnd() + "…"
-                : bid.bidderBio}
-            </p>
+          <div
+            className="rounded-xl overflow-hidden"
+            style={{
+              borderLeft: "3px solid rgba(168,85,247,0.40)",
+              background: "linear-gradient(135deg, rgba(168,85,247,0.05) 0%, rgba(6,182,212,0.02) 100%)",
+            }}
+          >
+            <div className="px-4 py-3 space-y-1.5">
+              <span
+                className="block text-[9px] font-extrabold uppercase tracking-[0.12em]"
+                style={{ color: "rgba(168,85,247,0.65)" }}
+              >
+                About this gamer
+              </span>
+              <p
+                className="text-[13px] leading-relaxed"
+                style={{ color: "rgba(255,255,255,0.70)", fontStyle: "italic" }}
+              >
+                &ldquo;{bid.bidderBio.length > 100
+                  ? bid.bidderBio.slice(0, 100).trimEnd() + "…"
+                  : bid.bidderBio}&rdquo;
+              </p>
+            </div>
           </div>
         )}
 
