@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useAuth } from "@/lib/auth";
-import { COUNTRIES, GENDERS, COUNTRY_MAP, GENDER_MAP } from "@/lib/geo-options";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { COUNTRY_MAP, GENDER_MAP } from "@/lib/geo-options";
+import { CountryCombobox, GenderSelect } from "@/components/country-combobox";
 import {
   useUserProfile, useUpdateProfile, useShopItems, usePurchaseItem,
   useMyQuestEntries, useAddQuestEntry, useDeleteQuestEntry, useVerifyId,
@@ -1478,25 +1478,18 @@ export default function Profile() {
             <label className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
               <Globe className="h-3 w-3 text-amber-400" /> Your Nation
             </label>
-            <Select
+            <CountryCombobox
               value={profile?.country ?? "any"}
               onValueChange={(val) =>
                 updateProfile.mutate(
                   { country: val === "any" ? null : val },
-                  { onSuccess: () => toast({ title: "Country updated!" }),
-                    onError: (err: any) => toast({ title: "Failed", description: err?.error || "Error", variant: "destructive" }) }
+                  {
+                    onSuccess: () => toast({ title: "Country updated!" }),
+                    onError: (err: any) => toast({ title: "Failed", description: err?.error || "Error", variant: "destructive" }),
+                  }
                 )
               }
-            >
-              <SelectTrigger className="bg-background/60 border-border/60 text-sm">
-                <SelectValue placeholder="Any / Worldwide" />
-              </SelectTrigger>
-              <SelectContent>
-                {COUNTRIES.map((c) => (
-                  <SelectItem key={c.value} value={c.value}>{c.flag} {c.label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            />
             {profile?.country && profile.country !== "any" && (
               <p className="text-[10px] text-muted-foreground/50">
                 Currently: {COUNTRY_MAP[profile.country]?.flag} {COUNTRY_MAP[profile.country]?.label}
@@ -1507,25 +1500,18 @@ export default function Profile() {
             <label className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
               <UserRound className="h-3 w-3 text-pink-400" /> Your Gender
             </label>
-            <Select
+            <GenderSelect
               value={profile?.gender ?? "any"}
               onValueChange={(val) =>
                 updateProfile.mutate(
                   { gender: val === "any" ? null : val },
-                  { onSuccess: () => toast({ title: "Gender updated!" }),
-                    onError: (err: any) => toast({ title: "Failed", description: err?.error || "Error", variant: "destructive" }) }
+                  {
+                    onSuccess: () => toast({ title: "Gender updated!" }),
+                    onError: (err: any) => toast({ title: "Failed", description: err?.error || "Error", variant: "destructive" }),
+                  }
                 )
               }
-            >
-              <SelectTrigger className="bg-background/60 border-border/60 text-sm">
-                <SelectValue placeholder="Prefer not to say" />
-              </SelectTrigger>
-              <SelectContent>
-                {GENDERS.map((g) => (
-                  <SelectItem key={g.value} value={g.value}>{g.icon} {g.label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            />
             {profile?.gender && profile.gender !== "any" && (
               <p className="text-[10px] text-muted-foreground/50">
                 Currently: {GENDER_MAP[profile.gender]?.icon} {GENDER_MAP[profile.gender]?.label}

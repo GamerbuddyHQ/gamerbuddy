@@ -3,8 +3,7 @@ import { Link, useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { COUNTRIES, GENDERS } from "@/lib/geo-options";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { CountryCombobox, GenderSelect } from "@/components/country-combobox";
 import {
   useGetWallets,
   getGetWalletsQueryKey,
@@ -424,31 +423,21 @@ export default function PostRequest() {
                     <label className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground flex items-center gap-1.5">
                       <Globe className="h-3 w-3 text-amber-400" /> Preferred Nation
                     </label>
-                    <Select value={preferredCountry} onValueChange={setPreferredCountry} disabled={!canPost}>
-                      <SelectTrigger className="bg-background border-border focus:border-primary text-sm">
-                        <SelectValue placeholder="Any / Worldwide" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {COUNTRIES.map((c) => (
-                          <SelectItem key={c.value} value={c.value}>{c.flag} {c.label}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <CountryCombobox
+                      value={preferredCountry}
+                      onValueChange={setPreferredCountry}
+                      disabled={!canPost}
+                    />
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground flex items-center gap-1.5">
                       <UserRound className="h-3 w-3 text-pink-400" /> Preferred Gender
                     </label>
-                    <Select value={preferredGender} onValueChange={setPreferredGender} disabled={!canPost}>
-                      <SelectTrigger className="bg-background border-border focus:border-primary text-sm">
-                        <SelectValue placeholder="Any / No preference" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {GENDERS.map((g) => (
-                          <SelectItem key={g.value} value={g.value}>{g.icon} {g.label}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <GenderSelect
+                      value={preferredGender}
+                      onValueChange={setPreferredGender}
+                      disabled={!canPost}
+                    />
                   </div>
                 </div>
               </div>

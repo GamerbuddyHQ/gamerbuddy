@@ -5,7 +5,8 @@ import {
   useBrowseRequests, usePlaceBid,
   type GameRequest,
 } from "@/lib/bids-api";
-import { COUNTRIES, GENDERS, countryLabel, COUNTRY_MAP, GENDER_MAP } from "@/lib/geo-options";
+import { countryLabel, COUNTRY_MAP, GENDER_MAP } from "@/lib/geo-options";
+import { CountryCombobox, GenderSelect } from "@/components/country-combobox";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -958,31 +959,13 @@ export default function Browse() {
             <span className="flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.30)" }}>
               <Globe className="h-3 w-3" /> Nation
             </span>
-            <Select value={countryFilter} onValueChange={setCountryFilter}>
-              <SelectTrigger className="bg-background/60 border-border/60 h-9 text-xs">
-                <SelectValue placeholder="Any / Worldwide" />
-              </SelectTrigger>
-              <SelectContent>
-                {COUNTRIES.map((c) => (
-                  <SelectItem key={c.value} value={c.value}>{c.flag} {c.label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <CountryCombobox value={countryFilter} onValueChange={setCountryFilter} />
           </div>
           <div className="space-y-1.5">
             <span className="flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.30)" }}>
               <UserRound className="h-3 w-3" /> Gender
             </span>
-            <Select value={genderFilter} onValueChange={setGenderFilter}>
-              <SelectTrigger className="bg-background/60 border-border/60 h-9 text-xs">
-                <SelectValue placeholder="Any / No preference" />
-              </SelectTrigger>
-              <SelectContent>
-                {GENDERS.map((g) => (
-                  <SelectItem key={g.value} value={g.value}>{g.icon} {g.label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <GenderSelect value={genderFilter} onValueChange={setGenderFilter} />
           </div>
         </div>
 
