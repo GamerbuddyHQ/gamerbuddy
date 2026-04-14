@@ -16,55 +16,43 @@ const RESPONSES: Array<{ patterns: RegExp; reply: string }> = [
   /* ── GREETING / INTRO ── */
   {
     patterns: /^(hello|hi+|hey|yo|sup|howdy)\b|what can you (do|help)|who are you|what are you/i,
-    reply: `Hey there! 👋 I'm **Buddy**, your Gamerbuddy AI assistant — always online to help!
-
-Here's what I can answer:
-• 📋 Posting requests & bidding
-• 💰 Wallets, payments & escrow
-• 🏆 Tournaments & Bulk Hiring
-• ⭐ Points, rewards & profile shop
-• 🔴 Streaming connections
-• 🌍 Nation & gender filters
-• 🔒 Safety rules & reporting
-• 💬 Community & suggestions
-
-What would you like to know?`,
+    reply: `Yo! 👾 I'm **Buddy** — your in-game support homie, always online and always got your back!\n\nHit me up about anything:\n• 📋 Posting requests & bidding\n• 💰 Wallets, payments & escrow\n• 🏆 Tournaments & Bulk Hiring\n• ⭐ Points, ranks & profile shop\n• 🔴 Streaming connections\n• 🌍 Nation & gender filters\n• 🔒 Safety rules & who to report\n• 💬 Community suggestions\n\nLet's get you that W — what do you need? 🎮`,
   },
 
   /* ── POST / CREATE REQUEST ── */
   {
     patterns: /post|create.*request|new.*request|how.*request|hire.*someone|find.*gamer/i,
-    reply: `To post a gaming request:\n\n1. **Log in** → go to your Dashboard\n2. Click **"Post Request"**\n3. Enter your game, platform, skill level, and — importantly — a **Clear Objective** (e.g. "Carry me to Diamond in Apex Legends")\n4. Optionally set your **Preferred Nation** and **Preferred Gender** for a better match\n5. Submit — gamers will start bidding right away! 🎮\n\n💡 Specific, well-written objectives attract the best bids. The more detail you give, the better your results.`,
+    reply: `Let's get you some skilled players! Here's how to post a request 🎮\n\n1. **Log in** → hit your Dashboard\n2. Click **"Post Request"**\n3. Fill in your game, platform, skill level, and — super important — a **Clear Objective** (e.g. "Carry me to Diamond in Apex", "Chill co-op vibes, no toxic randoms")\n4. Optionally set a **Preferred Nation** and **Preferred Gender** for a better squad match\n5. Submit and watch the bids roll in! 💥\n\n💡 **Pro tip:** The more specific your objective, the more legit gamers you attract. Vague posts get vague bids.`,
   },
 
   /* ── BIDDING / GETTING HIRED ── */
   {
     patterns: /bid|apply.*request|get hired|become.*gamer|earn.*money|hired|place.*bid/i,
-    reply: `To bid on a request and get hired:\n\n1. Browse open requests on the **Browse Requests** page\n2. Click **"Place Bid"** — enter your price and a pitch message\n3. If the hirer accepts, you'll connect and coordinate the session\n4. Complete the session, both parties leave a review\n5. Payment releases to your **Earnings Wallet** ✅\n\n💡 You keep **90%** of your bid — Gamerbuddy charges a 10% platform fee. Competitive bids + a strong pitch win sessions!`,
+    reply: `Time to squad up and secure that bag! 💰 Here's how to get hired:\n\n1. Head to **Browse Requests** and find sessions you can dominate\n2. Click **"Place Bid"** — drop your price and a hype pitch about why you're the one\n3. Hirer accepts → you coordinate and play\n4. Finish the session, drop a review each\n5. Profit lands in your **Earnings Wallet** ✅\n\n💡 You pocket **90%** of your bid — we take 10%. Low bids + a killer pitch = more wins. Go get it!`,
   },
 
   /* ── BULK HIRING ── */
   {
     patterns: /bulk|multiple.*gamer|hire.*team|squad|group.*hire/i,
-    reply: `**Bulk Hiring** lets you recruit a full squad in one request! 🎯\n\n• Minimum: **2 gamers**\n• Maximum: **100 gamers**\n• Each gamer submits their own individual bid\n• The hirer reviews and approves each slot separately\n• Each accepted gamer gets their own session and payment\n\nPerfect for tournament prep, raid teams, or any scenario where you need multiple skilled players at once.`,
+    reply: `Need a full squad? **Bulk Hiring** has got you! 🎯\n\n• **Min:** 2 gamers &nbsp;|&nbsp; **Max:** 100 gamers\n• Each gamer bids individually — no forced package deals\n• You review and approve each slot separately, so you stay in full control\n• Every accepted gamer gets their own session and payout\n• Entry is **free** for participants — they only earn when accepted\n\nPerfect for raid teams, tournament squads, or when you just want zero toxic randoms and full control over who's in. 🔥`,
   },
 
   /* ── TOURNAMENTS ── */
   {
     patterns: /tournament|host.*tourney|prize.*pool|compete|championship/i,
-    reply: `**Tournaments on Gamerbuddy** 🏆\n\nAnyone can host a tournament:\n• **Min players:** 2 &nbsp;|&nbsp; **Max players:** 100\n• **Prize pool:** $100 – $10,000\n• **Entry:** Free for participants\n• **Platform fee:** 10% of the prize pool\n\nHow it works:\n1. Hirer creates a tournament with game, rules, prize & schedule\n2. Players apply to join\n3. **Hirer approves participants** before it begins\n4. Winner is confirmed and prize is paid out via the platform\n\nYou can also set **Nation** or **Gender** preferences for your tournament!`,
+    reply: `Crown the champion! 🏆 Here's the full breakdown on **Gamerbuddy Tournaments**:\n\n• **Min players:** 2 &nbsp;|&nbsp; **Max players:** 100\n• **Prize pool:** $100 – $10,000\n• **Entry:** 100% free for participants\n• **Platform fee:** 10% of the prize pool (taken at payout)\n\nHow to host one:\n1. Go to **Tournaments** → create yours with game, rules, prize & schedule\n2. Players apply — joining is free\n3. **You approve every participant** before the tournament kicks off — no randos unless you say so\n4. Play it out, confirm the winner, prize pays out via the platform 🏅\n\nYou can also filter by **Nation** or **Gender** to make it a regional showdown!`,
   },
 
   /* ── WALLETS ── */
   {
     patterns: /wallet|deposit|withdraw|add.*fund|fund|money|pay(?:ment)?|transfer|balance/i,
-    reply: `Gamerbuddy has **two separate wallets**:\n\n🔵 **Hiring Wallet** — top this up to pay gamers\n• Min deposit: $10.75 &nbsp;|&nbsp; Max: $1,000\n• Accepts Razorpay, Stripe (Visa, Mastercard, UPI, etc.)\n\n🟢 **Earnings Wallet** — receives your gamer payments\n• Withdrawals available when balance ≥ $100\n\nWhen a bid is accepted, funds move to **escrow** immediately — protecting both parties until the session is complete. 🛡️`,
+    reply: `Gamerbuddy runs on **two separate wallets** — here's the breakdown 💸\n\n🔵 **Hiring Wallet** — load this up to pay your gamers\n• Min deposit: $10.75 &nbsp;|&nbsp; Max: $1,000\n• Pay via Razorpay or Stripe (Visa, Mastercard, UPI, and more)\n\n🟢 **Earnings Wallet** — this is where your gamer income lands\n• Withdraw once your balance hits **$100 or more**\n\nThe moment a bid is accepted, your funds lock into **escrow** — totally safe, can't be touched by either side until the session is done. 🛡️`,
   },
 
   /* ── PLATFORM FEE ── */
   {
     patterns: /fee|commission|percent|10%|platform.*cut|how much.*charge/i,
-    reply: `**Platform Fee:**\n\nGamerbuddy charges a **10% fee** on every completed session and tournament.\n\n• If a gamer bids **$10**, the hirer pays $10 and the gamer receives **$9**\n• For tournaments, 10% is deducted from the prize pool\n\nThis fee covers payment processing, escrow protection, dispute handling, and platform maintenance. It is non-negotiable and applies to all transactions.`,
+    reply: `Here's the deal on the **Platform Fee** 💰\n\nGamerbuddy charges a flat **10% fee** on every completed session and tournament — no hidden charges, no surprises.\n\n• Gamer bids **$10** → hirer pays $10 → gamer pockets **$9** ✅\n• Tournaments → 10% comes off the prize pool at payout\n\nThat 10% keeps the platform running — escrow protection, payment processing, dispute resolution, the whole thing. It applies to every transaction, no exceptions.`,
   },
 
   /* ── ESCROW ── */
@@ -76,13 +64,13 @@ What would you like to know?`,
   /* ── SESSION FLOW ── */
   {
     patterns: /session|start.*play|how.*work|flow|process|what happen|in.*progress|approv.*session/i,
-    reply: `**Session Flow** step by step:\n\n1. Hirer posts a request with clear objectives\n2. Gamers browse and place bids\n3. Hirer accepts the best bid\n4. Gamer clicks **"Start Session"**\n5. Hirer **approves** the session start\n6. Status moves to **In Progress** 🎮\n7. Both play and complete the objectives\n8. Both leave a **review** (mandatory to unlock payment + points)\n9. Payment releases to gamer's Earnings Wallet ✅`,
+    reply: `Here's the full session run from start to finish 🎮\n\n1. Hirer drops a request with clear objectives\n2. Gamers roll in and place their bids\n3. Hirer picks the best bid — that's you 💪\n4. Gamer clicks **"Start Session"**\n5. Hirer **approves** the start — both sides locked in\n6. Status flips to **In Progress** 🔴\n7. Both of you play it out and complete the objectives\n8. Both drop a **review** — mandatory, this unlocks payment AND your 50 points\n9. Payment drops into the gamer's **Earnings Wallet** ✅\n\nEasy W. Repeat.`,
   },
 
   /* ── POINTS & REWARDS ── */
   {
     patterns: /point|pts|reward|rank|level|title|badge.*earn|how.*earn.*point/i,
-    reply: `**Gamerbuddy Points System** 🏆\n\nYou earn **50 points** for every session you complete + receive a review.\n\nPoints increase your **Rank** — higher ranks get more visibility in search results and attract better hirers.\n\nSpend points in the **Points Shop** on:\n• Profile backgrounds & colour themes\n• Custom titles displayed on your profile card\n• Cosmetic badges (Steam-style customisation)\n\nCheck your points balance and rank on your **Profile page**.`,
+    reply: `Gamerbuddy has its own XP system and it's 🔥\n\n**+50 points** every time you complete a session and get a review. Stack sessions, stack points.\n\nPoints level up your **Rank** — higher rank = better visibility = more hirers picking YOU over the competition.\n\nSpend points in the **Points Shop** (Steam-style) on:\n• 🎨 Profile backgrounds & colour themes\n• 🏷️ Custom titles (e.g. "Elite Carry", "Chill Coach")\n• 🏅 Cosmetic badges — flex your grind\n\nCheck your balance and rank on your **Profile page**. Let's level up! 💪`,
   },
 
   /* ── PROFILE SHOP / CUSTOMISATION ── */
@@ -160,7 +148,7 @@ What would you like to know?`,
   /* ── SAFETY / PASSWORDS ── */
   {
     patterns: /password|account.*shar|never.*share|security|scam|phish|login.*detail/i,
-    reply: `🔒 **Critical Safety Rule:**\n\n**NEVER share your account password** — not for Steam, Epic Games, PlayStation, Xbox, Nintendo, or any other platform.\n\nLegitimate Gamerbuddy gamers will **never** ask for your login details. If someone asks:\n1. Refuse immediately\n2. Report them using the 🚩 **Flag button** on their profile or bid\n\nAll payments happen inside Gamerbuddy — never send money or gift cards outside the platform. Doing so removes all buyer protection.`,
+    reply: `🚨 **Hard stop — this is the #1 safety rule:**\n\n**NEVER share your account password.** Not for Steam, Epic, PlayStation, Xbox, Nintendo — literally nothing.\n\nReal Gamerbuddy gamers will **never** ask for your login. If someone does:\n1. Say no immediately\n2. Hit the 🚩 **Flag button** on their profile or bid and report them\n\nAll payments stay inside Gamerbuddy. If someone tries to move money outside the platform — gift cards, PayPal, anything — that's a scam. You'd lose all your buyer protection. Don't do it. Stay safe out there! 🛡️`,
   },
 
   /* ── YOU CANNOT HIRE YOURSELF ── */
@@ -178,7 +166,7 @@ What would you like to know?`,
   /* ── VERIFICATION / BADGE ── */
   {
     patterns: /verif|badge|trust.*factor|id.*check|how.*long.*verify|7.*day|15.*day|green.*tick/i,
-    reply: `**Verification & Verified Badge** ✅\n\nVerification keeps Gamerbuddy safe and usually takes **7–15 days**.\n\nWhile unverified you can:\n• Browse all requests freely\n• Place bids on sessions\n\nOnce verified you unlock:\n• Posting your own requests\n• Hiring gamers\n• The green ✅ badge on your profile, bids, and listings\n\nVerified profiles win significantly more bids — hirers filter for them!`,
+    reply: `**Verification & Verified Badge** ✅\n\nVerification keeps the platform clean and legit. It usually takes **7–15 days** — worth the wait!\n\nWhile you're pending you can:\n• Browse all requests and scout the competition\n• Place bids and start building your reputation\n\nOnce you're verified you unlock the full game:\n• Post your own requests\n• Hire gamers\n• The green **✅ Verified badge** on your profile, bids, and listings\n\nHirers filter specifically for verified players — unverified bids often get skipped. Get verified, get hired. 🚀`,
   },
 
   /* ── TRUST FACTOR ── */
@@ -195,9 +183,9 @@ What would you like to know?`,
 ];
 
 const FALLBACK_RESPONSES = [
-  "I'm not sure I caught that — could you rephrase? I can help with posting requests, bidding, wallets, tournaments, bulk hiring, streaming, points, safety, and more! 🎮",
-  "Hmm, I don't have a specific answer for that. Try asking about things like: how bidding works, wallet deposits, the 10% platform fee, tournament hosting, or verification.",
-  "That one's tricky for me! For complex issues, our support team can help. Meanwhile I can assist with: sessions, wallets, points, bulk hiring, tournaments, community suggestions, and safety rules.",
+  "Hmm, didn't quite catch that one — mind rephrasing? I'm best with: posting requests, bidding, wallets, bulk hiring, tournaments, verification, streaming, points, and safety! 🎮",
+  "That one's got me stumped! Try asking something like: 'How does bidding work?', 'What's the platform fee?', 'How do I host a tournament?', or 'How does verification work?' — I'll have the full answer ready! 👾",
+  "I might need a lil' more context on that! For tricky issues our support team's got you. But for features, rules, wallets, sessions, points, tournaments, bulk hiring — I'm your guy. What else can I help with? 🎯",
 ];
 
 let fallbackIndex = 0;
@@ -229,13 +217,10 @@ function renderMarkdown(text: string) {
 
 const QUICK_PROMPTS = [
   "How do I post a request?",
-  "How do I get hired?",
+  "What is the platform fee?",
   "How does Bulk Hiring work?",
-  "How does the points system work?",
-  "Tell me about tournaments",
-  "Wallet & payment help",
-  "Is my account safe?",
-  "How long does verification take?",
+  "What is the verification time?",
+  "How do I host a tournament?",
 ];
 
 let msgIdCounter = 1;
@@ -247,7 +232,7 @@ export function AIChatWidget() {
     {
       id: 0,
       role: "assistant",
-      text: "Hey! 👋 I'm **Buddy**, your Gamerbuddy AI assistant.\n\nI know everything about how the platform works — requests, bidding, wallets, tournaments, bulk hiring, streaming connections, points, safety rules, and more.\n\nWhat can I help you with today?",
+      text: "Yo! 👾 I'm **Buddy** — your Gamerbuddy support homie, always online.\n\nI know this platform inside and out — requests, bidding, wallets, bulk hiring, tournaments, points, streaming, safety rules, and everything in between.\n\nTap a quick question below or just ask me anything. Let's get you that W! 🎮",
     },
   ]);
   const [input, setInput]   = useState("");
@@ -338,7 +323,7 @@ export function AIChatWidget() {
                 </div>
                 <div className="flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-green-400 inline-block" />
-                  <span className="text-[10px] text-green-400 font-medium">Online · Knows all platform features</span>
+                  <span className="text-[10px] text-green-400 font-medium">Online · always got your back 🎮</span>
                 </div>
               </div>
             </div>
