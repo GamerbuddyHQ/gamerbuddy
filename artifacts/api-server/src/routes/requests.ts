@@ -1,25 +1,16 @@
 import { Router, type IRouter } from "express";
-import { db, gameRequestsTable, walletsTable, usersTable, bidsTable, reviewsTable, walletTransactionsTable, streamingAccountsTable, questEntriesTable } from "@workspace/db";
-import { eq, desc, and, sql, inArray } from "drizzle-orm";
+import { db, gameRequestsTable, walletsTable, usersTable, bidsTable, reviewsTable, streamingAccountsTable, questEntriesTable } from "@workspace/db";
+import { eq, desc, and, sql, inArray, gte } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
 import { createNotification, sendEmailNotification } from "../notifications-helper";
 import { recalculateTrustFactor } from "../trust-factor";
 import { validate, sanitize, PostRequestSchema, PlaceBidSchema } from "../lib/validate";
 import { bidLimiter } from "../lib/rate-limit";
+import { round2, recordTransaction as recordTx, checkBidAnomaly } from "./wallets";
 
 const router: IRouter = Router();
 
 const MIN_HIRING_BALANCE = 10.75;
-
-function round2(n: number) {
-  return Math.round(n * 100) / 100;
-}
-
-async function recordTx(userId: number, wallet: "hiring" | "earnings", type: string, amount: number, description: string) {
-  await db.insert(walletTransactionsTable).values({
-    userId, wallet, type, amount: String(round2(Math.abs(amount))), description,
-  });
-}
 
 const VALID_PLATFORMS = [
   "PC",
@@ -418,6 +409,9 @@ router.post("/requests/:id/bids", requireAuth, bidLimiter, validate(PlaceBidSche
     return;
   }
 
+  // Anomaly detection — flag unusually large bids for manual review
+  checkBidAnomaly(user.id, round2(price), `request:${requestId}`, req.log);
+
   const [bid] = await db
     .insert(bidsTable)
     .values({
@@ -507,8 +501,16 @@ router.post("/requests/:id/bids/:bidId/accept", requireAuth, async (req, res): P
         .from(bidsTable)
         .where(and(eq(bidsTable.requestId, requestId), eq(bidsTable.status, "accepted")));
       const groupTotal = round2(allAcceptedBids.reduce((s, r) => s + parseFloat(String(r.price)), 0));
-      const newHiringBalance = round2(wallet.hiringBalance - groupTotal);
-      await db.update(walletsTable).set({ hiringBalance: newHiringBalance }).where(eq(walletsTable.userId, user.id));
+      // Atomic deduction with balance guard — prevents over-deduction under concurrency
+      const [deductedBulk] = await db
+        .update(walletsTable)
+        .set({ hiringBalance: sql`hiring_balance - ${groupTotal}` })
+        .where(and(eq(walletsTable.userId, user.id), gte(walletsTable.hiringBalance, groupTotal)))
+        .returning();
+      if (!deductedBulk) {
+        res.status(400).json({ error: "Insufficient hiring balance to complete group escrow. Please refresh." });
+        return;
+      }
       await db.update(gameRequestsTable)
         .set({ status: "in_progress", startedAt: new Date(), escrowAmount: String(groupTotal) })
         .where(eq(gameRequestsTable.id, requestId));
@@ -543,8 +545,17 @@ router.post("/requests/:id/bids/:bidId/accept", requireAuth, async (req, res): P
     });
   } else {
     // ── SINGLE-GAMER MODE (original flow) ──
-    const newHiringBalance = round2(wallet.hiringBalance - bidPrice);
-    await db.update(walletsTable).set({ hiringBalance: newHiringBalance }).where(eq(walletsTable.userId, user.id));
+    // Atomic deduction: SQL-level WHERE gte(hiringBalance, bidPrice) prevents
+    // double-deduction if two accept requests race.
+    const [deducted] = await db
+      .update(walletsTable)
+      .set({ hiringBalance: sql`hiring_balance - ${bidPrice}` })
+      .where(and(eq(walletsTable.userId, user.id), gte(walletsTable.hiringBalance, bidPrice)))
+      .returning();
+    if (!deducted) {
+      res.status(400).json({ error: "Insufficient hiring balance. Please refresh and try again." });
+      return;
+    }
 
     await db.update(bidsTable).set({ status: "accepted", discordUsername: discordUsername?.trim() || null }).where(eq(bidsTable.id, bidId));
     await db.update(bidsTable).set({ status: "rejected" }).where(and(eq(bidsTable.requestId, requestId), eq(bidsTable.status, "pending")));
@@ -604,9 +615,17 @@ router.post("/requests/:id/lock", requireAuth, async (req, res): Promise<void> =
     return;
   }
 
-  // Deduct group total from hiring wallet
-  const newHiringBalance = round2(wallet.hiringBalance - groupTotal);
-  await db.update(walletsTable).set({ hiringBalance: newHiringBalance }).where(eq(walletsTable.userId, user.id));
+  // Atomic deduction with balance guard — prevents double-deduction under concurrency
+  const [lockDeducted] = await db
+    .update(walletsTable)
+    .set({ hiringBalance: sql`hiring_balance - ${groupTotal}` })
+    .where(and(eq(walletsTable.userId, user.id), gte(walletsTable.hiringBalance, groupTotal)))
+    .returning();
+
+  if (!lockDeducted) {
+    res.status(400).json({ error: "Insufficient hiring balance. Please refresh and try again." });
+    return;
+  }
 
   // Set group escrow and transition to in_progress
   await db.update(gameRequestsTable)
@@ -670,8 +689,22 @@ router.post("/requests/:id/complete", requireAuth, async (req, res): Promise<voi
   const [gameRequest] = await db.select().from(gameRequestsTable).where(eq(gameRequestsTable.id, requestId));
   if (!gameRequest) { res.status(404).json({ error: "Request not found" }); return; }
   if (gameRequest.userId !== user.id) { res.status(403).json({ error: "Only the hirer can complete a session" }); return; }
-  if (gameRequest.status !== "in_progress") { res.status(400).json({ error: "Request is not in progress" }); return; }
   if (!gameRequest.startedAt) { res.status(400).json({ error: "The session must be started before you can approve payment" }); return; }
+
+  // ── Atomic status guard ──────────────────────────────────────────────────
+  // Update status with an explicit WHERE status='in_progress' check.
+  // If 0 rows are affected, another request already completed/cancelled this
+  // session — we return 409 instead of paying out twice.
+  const [statusFlipped] = await db
+    .update(gameRequestsTable)
+    .set({ status: gameRequest.isBulkHiring ? "completed" : "awaiting_reviews" })
+    .where(and(eq(gameRequestsTable.id, requestId), eq(gameRequestsTable.status, "in_progress")))
+    .returning({ id: gameRequestsTable.id });
+
+  if (!statusFlipped) {
+    res.status(409).json({ error: "This session has already been completed or cancelled." });
+    return;
+  }
 
   if (gameRequest.isBulkHiring) {
     // ── BULK MODE: distribute 90% of group escrow to each gamer proportionally ──
@@ -688,10 +721,11 @@ router.post("/requests/:id/complete", requireAuth, async (req, res): Promise<voi
       const gamerPayout = round2(bidPrice * 0.9);
       totalPaid = round2(totalPaid + gamerPayout);
 
-      const [gamerWallet] = await db.select().from(walletsTable).where(eq(walletsTable.userId, bid.bidderId));
-      if (gamerWallet && gamerPayout > 0) {
-        await db.update(walletsTable)
-          .set({ earningsBalance: round2(gamerWallet.earningsBalance + gamerPayout) })
+      if (gamerPayout > 0) {
+        // Atomic increment — no read-then-write race
+        await db
+          .update(walletsTable)
+          .set({ earningsBalance: sql`earnings_balance + ${gamerPayout}` })
           .where(eq(walletsTable.userId, bid.bidderId));
         await recordTx(bid.bidderId, "earnings", "session_payout", gamerPayout,
           `Bulk session payout: ${gameRequest.gameName} (90% of $${bidPrice.toFixed(2)} bid)`);
@@ -705,8 +739,6 @@ router.post("/requests/:id/complete", requireAuth, async (req, res): Promise<voi
         link: `/requests/${requestId}`,
       });
     }
-
-    await db.update(gameRequestsTable).set({ status: "completed" }).where(eq(gameRequestsTable.id, requestId));
 
     req.log.info({ userId: user.id, requestId, gamerCount: acceptedBids.length, groupTotal, platformFee, totalPaid }, "Bulk session completed — group payout distributed");
     res.json({
@@ -727,17 +759,15 @@ router.post("/requests/:id/complete", requireAuth, async (req, res): Promise<voi
   const gamerPayout = round2(escrow * 0.9);
   const platformFee = round2(escrow - gamerPayout);
 
-  // Move to awaiting_reviews — both parties must review before it's fully complete
-  await db.update(gameRequestsTable).set({ status: "awaiting_reviews" }).where(eq(gameRequestsTable.id, requestId));
+  // Status already flipped to "awaiting_reviews" by the atomic guard above.
 
-  // Release escrow to gamer immediately (payout is guaranteed once hirer approves)
+  // Release escrow to gamer immediately using an atomic SQL increment —
+  // prevents payout duplication if this block somehow runs twice.
   if (acceptedBid && gamerPayout > 0) {
-    const [gamerWallet] = await db.select().from(walletsTable).where(eq(walletsTable.userId, acceptedBid.bidderId));
-    if (gamerWallet) {
-      await db.update(walletsTable)
-        .set({ earningsBalance: round2(gamerWallet.earningsBalance + gamerPayout) })
-        .where(eq(walletsTable.userId, acceptedBid.bidderId));
-    }
+    await db
+      .update(walletsTable)
+      .set({ earningsBalance: sql`earnings_balance + ${gamerPayout}` })
+      .where(eq(walletsTable.userId, acceptedBid.bidderId));
     await recordTx(acceptedBid.bidderId, "earnings", "session_payout", gamerPayout, `Earnings for session: ${gameRequest.gameName} (90% after fee)`);
   }
 

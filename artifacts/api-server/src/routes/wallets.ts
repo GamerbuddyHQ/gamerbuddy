@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { db, walletsTable, walletTransactionsTable } from "@workspace/db";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, sql, and, gte } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
 
 const router: IRouter = Router();
@@ -8,6 +8,11 @@ const router: IRouter = Router();
 export const MIN_DEPOSIT = 10.75;
 export const MAX_DEPOSIT = 1000;
 export const MIN_WITHDRAWAL_BALANCE = 100;
+
+// Deposits/withdrawals above this threshold are flagged in server logs for
+// manual review. This does NOT block the transaction — it creates an audit trail.
+const ANOMALY_DEPOSIT_THRESHOLD = 500;
+const ANOMALY_BID_THRESHOLD = 500;
 
 export function round2(n: number) {
   return Math.round(n * 100) / 100;
@@ -25,22 +30,89 @@ export function formatWallets(wallet: {
   };
 }
 
+/**
+ * Record a wallet transaction in the audit log.
+ *
+ * @param referenceId  Optional external payment ID (Razorpay paymentId or
+ *                     Stripe paymentIntentId). When provided, the DB's partial
+ *                     unique index prevents the same external payment from ever
+ *                     being recorded twice, even on retried requests.
+ */
 export async function recordTransaction(
   userId: number,
   wallet: "hiring" | "earnings",
   type: string,
   amount: number,
   description: string,
-) {
+  referenceId?: string,
+): Promise<void> {
   await db.insert(walletTransactionsTable).values({
     userId,
     wallet,
     type,
     amount: String(round2(Math.abs(amount))),
     description,
+    referenceId: referenceId ?? null,
   });
 }
 
+/**
+ * Anomaly check — logs a WARN when an amount exceeds threshold.
+ * Does NOT block the operation; provides an audit trail for manual review.
+ */
+export function checkDepositAnomaly(
+  userId: number,
+  amount: number,
+  context: string,
+  log: { warn: (obj: object, msg: string) => void },
+): void {
+  if (amount > ANOMALY_DEPOSIT_THRESHOLD) {
+    log.warn(
+      { userId, amount, context, threshold: ANOMALY_DEPOSIT_THRESHOLD },
+      `ANOMALY: Large deposit detected ($${amount.toFixed(2)}) — flagged for review`,
+    );
+  }
+}
+
+export function checkBidAnomaly(
+  userId: number,
+  amount: number,
+  context: string,
+  log: { warn: (obj: object, msg: string) => void },
+): void {
+  if (amount > ANOMALY_BID_THRESHOLD) {
+    log.warn(
+      { userId, amount, context, threshold: ANOMALY_BID_THRESHOLD },
+      `ANOMALY: Unusually large bid ($${amount.toFixed(2)}) — flagged for review`,
+    );
+  }
+}
+
+/**
+ * Atomically deduct `amount` from hiringBalance using a SQL-level WHERE guard.
+ * Returns the updated wallet row, or null if the balance was insufficient
+ * (race-condition-safe: the WHERE clause prevents over-deduction even under
+ * concurrent requests).
+ */
+export async function deductHiringBalance(
+  userId: number,
+  amount: number,
+): Promise<{ hiringBalance: number; earningsBalance: number } | null> {
+  const rounded = round2(amount);
+  const [updated] = await db
+    .update(walletsTable)
+    .set({ hiringBalance: sql`hiring_balance - ${rounded}` })
+    .where(
+      and(
+        eq(walletsTable.userId, userId),
+        gte(walletsTable.hiringBalance, rounded),
+      ),
+    )
+    .returning();
+  return updated ?? null;
+}
+
+// ── GET /wallets ────────────────────────────────────────────────────────────
 router.get("/wallets", requireAuth, async (req, res): Promise<void> => {
   const user = req.user!;
   const [wallet] = await db
@@ -56,6 +128,7 @@ router.get("/wallets", requireAuth, async (req, res): Promise<void> => {
   res.json(formatWallets(wallet));
 });
 
+// ── GET /wallets/transactions ───────────────────────────────────────────────
 router.get("/wallets/transactions", requireAuth, async (req, res): Promise<void> => {
   const user = req.user!;
   const txns = await db
@@ -72,6 +145,7 @@ router.get("/wallets/transactions", requireAuth, async (req, res): Promise<void>
   })));
 });
 
+// ── POST /wallets/deposit (dev/test only — real deposits go via /payments/*) ─
 router.post("/wallets/deposit", requireAuth, async (req, res): Promise<void> => {
   const user = req.user!;
   const { amount } = req.body as { amount?: number };
@@ -89,6 +163,8 @@ router.post("/wallets/deposit", requireAuth, async (req, res): Promise<void> => 
     });
     return;
   }
+
+  checkDepositAnomaly(user.id, rounded, "manual-deposit", req.log);
 
   const [wallet] = await db
     .select()
@@ -112,6 +188,7 @@ router.post("/wallets/deposit", requireAuth, async (req, res): Promise<void> => 
   res.json(formatWallets(updated));
 });
 
+// ── POST /wallets/withdraw ──────────────────────────────────────────────────
 router.post("/wallets/withdraw", requireAuth, async (req, res): Promise<void> => {
   const user = req.user!;
   const { amount } = req.body as { amount?: number };
@@ -128,6 +205,8 @@ router.post("/wallets/withdraw", requireAuth, async (req, res): Promise<void> =>
     return;
   }
 
+  // Atomic deduction: WHERE earnings_balance >= rounded prevents negative balance
+  // even if two withdraw requests arrive simultaneously.
   const [wallet] = await db
     .select()
     .from(walletsTable)
@@ -150,11 +229,22 @@ router.post("/wallets/withdraw", requireAuth, async (req, res): Promise<void> =>
     return;
   }
 
+  // Atomic deduction with balance guard in WHERE clause
   const [updated] = await db
     .update(walletsTable)
-    .set({ earningsBalance: round2(wallet.earningsBalance - rounded) })
-    .where(eq(walletsTable.userId, user.id))
+    .set({ earningsBalance: sql`earnings_balance - ${rounded}` })
+    .where(
+      and(
+        eq(walletsTable.userId, user.id),
+        gte(walletsTable.earningsBalance, rounded),
+      ),
+    )
     .returning();
+
+  if (!updated) {
+    res.status(400).json({ error: "Insufficient earnings balance. Please refresh and try again." });
+    return;
+  }
 
   await recordTransaction(user.id, "earnings", "withdrawal", rounded, `Withdrew $${rounded.toFixed(2)} from Earnings Wallet`);
 

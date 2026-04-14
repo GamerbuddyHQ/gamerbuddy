@@ -1,9 +1,9 @@
 import { Router, type IRouter } from "express";
 import { createHmac } from "crypto";
-import { db, walletsTable } from "@workspace/db";
-import { eq } from "drizzle-orm";
+import { db, walletsTable, walletTransactionsTable } from "@workspace/db";
+import { eq, sql } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
-import { round2, recordTransaction, formatWallets } from "./wallets";
+import { round2, recordTransaction, formatWallets, checkDepositAnomaly } from "./wallets";
 
 // ─────────────────────────────────────────────────────────────
 // PAYMENT KEYS — all sourced from environment variables.
@@ -18,6 +18,12 @@ import { round2, recordTransaction, formatWallets } from "./wallets";
 //
 // EXCHANGE RATE:
 //   INR_PER_USD — default 84 (update periodically or use a live rate API)
+//
+// SECURITY NOTES:
+//   - Secret keys NEVER leave this file; only the publishable key is sent to clients
+//   - Every incoming payment is verified server-side before any wallet is credited
+//   - The referenceId (paymentId / paymentIntentId) is stored with a partial unique
+//     index so replaying the same payment ID cannot double-credit the wallet
 // ─────────────────────────────────────────────────────────────
 
 const RAZORPAY_KEY_ID = process.env.RAZORPAY_KEY_ID ?? "";
@@ -31,20 +37,30 @@ const MAX_AMOUNT = 1000;
 
 const router: IRouter = Router();
 
-// ── Payment Config (public key only — no secret exposed) ───────────────────
-// Used by the frontend to initialise Stripe.js before creating a PaymentIntent.
+// ── Idempotency guard ───────────────────────────────────────────────────────
+// Returns true if this external payment reference has already been recorded.
+// The partial unique index on wallet_transactions.reference_id enforces this
+// at the DB level too, but we check explicitly to return a clean 409 response.
+async function isAlreadyProcessed(referenceId: string): Promise<boolean> {
+  const [existing] = await db
+    .select({ id: walletTransactionsTable.id })
+    .from(walletTransactionsTable)
+    .where(eq(walletTransactionsTable.referenceId, referenceId))
+    .limit(1);
+  return !!existing;
+}
+
+// ── Payment Config (public key only — secret key never sent to client) ──────
 router.get("/payments/config", requireAuth, async (_req, res): Promise<void> => {
   res.json({
     razorpayEnabled: !!(RAZORPAY_KEY_ID && RAZORPAY_KEY_SECRET),
     stripeEnabled: !!(STRIPE_SECRET_KEY && STRIPE_PUBLISHABLE_KEY),
-    // publishableKey is safe to expose — it is NOT the secret key
+    // publishableKey is safe to expose — it is the pk_test_ / pk_live_ key, NOT the secret
     stripePublishableKey: STRIPE_PUBLISHABLE_KEY || null,
   });
 });
 
 // ── Razorpay: Create Order ──────────────────────────────────────────────────
-// Returns an order to be opened in the Razorpay Checkout modal on the frontend.
-// Amount is in USD; we convert to INR paise for Razorpay's API.
 router.post("/payments/razorpay/create-order", requireAuth, async (req, res): Promise<void> => {
   const { amount } = req.body as { amount?: number };
 
@@ -60,11 +76,13 @@ router.post("/payments/razorpay/create-order", requireAuth, async (req, res): Pr
     return;
   }
 
+  // Anomaly: flag unusually large deposit attempts
+  checkDepositAnomaly(req.user!.id, amount, "razorpay-create-order", req.log);
+
   try {
     const Razorpay = (await import("razorpay")).default;
     const rzp = new Razorpay({ key_id: RAZORPAY_KEY_ID, key_secret: RAZORPAY_KEY_SECRET });
 
-    // Convert USD → INR paise (Razorpay requires integer paise)
     const amountPaise = Math.round(amount * INR_PER_USD * 100);
     const amountInr = amountPaise / 100;
 
@@ -75,7 +93,6 @@ router.post("/payments/razorpay/create-order", requireAuth, async (req, res): Pr
       notes: {
         usd_amount: String(amount),
         user_id: String(req.user!.id),
-        // Notes are visible in the Razorpay dashboard
       },
     });
 
@@ -86,8 +103,7 @@ router.post("/payments/razorpay/create-order", requireAuth, async (req, res): Pr
       amountInr,
       amountUsd: amount,
       currency: "INR",
-      // keyId returned here so frontend doesn't need a separate env var
-      // The key_id (not key_secret) is safe to expose to the browser
+      // keyId is the PUBLIC key — safe to send to the browser
       keyId: RAZORPAY_KEY_ID,
     });
   } catch (err: any) {
@@ -96,9 +112,13 @@ router.post("/payments/razorpay/create-order", requireAuth, async (req, res): Pr
   }
 });
 
-// ── Razorpay: Verify Payment & Credit Wallet ───────────────────────────────
-// Called after the Razorpay modal reports success. We verify the HMAC
-// signature before crediting the wallet to prevent replay attacks.
+// ── Razorpay: Verify Payment & Credit Wallet ────────────────────────────────
+// Security flow:
+//   1. Validate required fields are present
+//   2. Verify HMAC-SHA256 signature (proves Razorpay actually processed this)
+//   3. Check idempotency — reject if paymentId was already credited (replay attack)
+//   4. Credit the wallet atomically
+//   5. Record transaction with referenceId for future idempotency checks
 router.post("/payments/razorpay/verify", requireAuth, async (req, res): Promise<void> => {
   const { orderId, paymentId, signature, amountUsd } = req.body as {
     orderId?: string;
@@ -112,43 +132,66 @@ router.post("/payments/razorpay/verify", requireAuth, async (req, res): Promise<
     return;
   }
 
+  if (typeof amountUsd !== "number" || amountUsd < MIN_AMOUNT || amountUsd > MAX_AMOUNT) {
+    res.status(400).json({ error: `Amount must be between $${MIN_AMOUNT} and $${MAX_AMOUNT}` });
+    return;
+  }
+
   if (!RAZORPAY_KEY_SECRET) {
     res.status(503).json({ error: "Razorpay is not configured" });
     return;
   }
 
-  // Verify the HMAC-SHA256 signature using the order_id|payment_id body
+  // 1. Verify the HMAC-SHA256 signature — prevents fabricated payment claims
   const expectedSig = createHmac("sha256", RAZORPAY_KEY_SECRET)
     .update(`${orderId}|${paymentId}`)
     .digest("hex");
 
   if (expectedSig !== signature) {
-    req.log.warn({ orderId, paymentId }, "Razorpay signature mismatch — possible fraud attempt");
+    req.log.warn(
+      { userId: req.user!.id, orderId, paymentId },
+      "SECURITY: Razorpay signature mismatch — possible replay/fraud attempt",
+    );
     res.status(400).json({ error: "Payment signature verification failed. Do not retry this payment." });
     return;
   }
 
+  // 2. Idempotency check — reject if this paymentId was already credited
+  if (await isAlreadyProcessed(paymentId)) {
+    req.log.warn(
+      { userId: req.user!.id, paymentId },
+      "SECURITY: Duplicate Razorpay paymentId — possible double-credit attempt",
+    );
+    res.status(409).json({ error: "This payment has already been processed." });
+    return;
+  }
+
+  // 3. Anomaly check
+  checkDepositAnomaly(req.user!.id, amountUsd, "razorpay-verify", req.log);
+
   const user = req.user!;
   const rounded = round2(amountUsd);
 
-  const [wallet] = await db.select().from(walletsTable).where(eq(walletsTable.userId, user.id));
-  if (!wallet) {
+  // 4. Atomic wallet credit via SQL increment (avoids read-then-write race)
+  const [updated] = await db
+    .update(walletsTable)
+    .set({ hiringBalance: sql`hiring_balance + ${rounded}` })
+    .where(eq(walletsTable.userId, user.id))
+    .returning();
+
+  if (!updated) {
     res.status(404).json({ error: "Wallet not found" });
     return;
   }
 
-  const [updated] = await db
-    .update(walletsTable)
-    .set({ hiringBalance: round2(wallet.hiringBalance + rounded) })
-    .where(eq(walletsTable.userId, user.id))
-    .returning();
-
+  // 5. Record transaction with external referenceId for idempotency
   await recordTransaction(
     user.id,
     "hiring",
     "deposit",
     rounded,
     `Deposited $${rounded.toFixed(2)} via Razorpay UPI/Card (${paymentId})`,
+    paymentId,
   );
 
   req.log.info({ userId: user.id, amount: rounded, paymentId }, "Razorpay deposit credited to hiring wallet");
@@ -156,9 +199,8 @@ router.post("/payments/razorpay/verify", requireAuth, async (req, res): Promise<
 });
 
 // ── Stripe: Create PaymentIntent ────────────────────────────────────────────
-// Creates a Stripe PaymentIntent. The client_secret is returned to the
-// frontend where it's used with Stripe.js to confirm the payment.
-// Amount is in USD cents (USD × 100).
+// The STRIPE_SECRET_KEY is used only server-side. The frontend receives only
+// the client_secret (which allows completing the payment, not reading it).
 router.post("/payments/stripe/create-intent", requireAuth, async (req, res): Promise<void> => {
   const { amount } = req.body as { amount?: number };
 
@@ -174,9 +216,11 @@ router.post("/payments/stripe/create-intent", requireAuth, async (req, res): Pro
     return;
   }
 
+  // Anomaly: flag large deposits before creating the intent
+  checkDepositAnomaly(req.user!.id, amount, "stripe-create-intent", req.log);
+
   try {
     const Stripe = (await import("stripe")).default;
-    // To switch to live: replace sk_test_... with sk_live_... in STRIPE_SECRET_KEY
     const stripe = new Stripe(STRIPE_SECRET_KEY);
 
     const amountCents = Math.round(amount * 100);
@@ -196,7 +240,7 @@ router.post("/payments/stripe/create-intent", requireAuth, async (req, res): Pro
     res.json({
       clientSecret: intent.client_secret,
       intentId: intent.id,
-      // publishableKey is safe to expose (it's the pk_test_ / pk_live_ key)
+      // publishableKey is the public pk_test_/pk_live_ key — safe for the browser
       publishableKey: STRIPE_PUBLISHABLE_KEY,
     });
   } catch (err: any) {
@@ -206,8 +250,13 @@ router.post("/payments/stripe/create-intent", requireAuth, async (req, res): Pro
 });
 
 // ── Stripe: Confirm & Credit Wallet ────────────────────────────────────────
-// After Stripe.js confirms the card payment on the frontend, call this
-// to retrieve + verify the PaymentIntent server-side before crediting.
+// Security flow:
+//   1. Retrieve the PaymentIntent from Stripe (server-to-server — cannot be faked)
+//   2. Assert status === "succeeded"
+//   3. Assert user_id metadata matches the authenticated user
+//   4. Assert amount matches within ±1 cent tolerance
+//   5. Check idempotency — reject if this intentId was already credited
+//   6. Credit wallet atomically; record with referenceId
 router.post("/payments/stripe/confirm", requireAuth, async (req, res): Promise<void> => {
   const { paymentIntentId, amountUsd } = req.body as {
     paymentIntentId?: string;
@@ -216,6 +265,11 @@ router.post("/payments/stripe/confirm", requireAuth, async (req, res): Promise<v
 
   if (!paymentIntentId || !amountUsd) {
     res.status(400).json({ error: "Missing paymentIntentId or amountUsd" });
+    return;
+  }
+
+  if (typeof amountUsd !== "number" || amountUsd < MIN_AMOUNT || amountUsd > MAX_AMOUNT) {
+    res.status(400).json({ error: `Amount must be between $${MIN_AMOUNT} and $${MAX_AMOUNT}` });
     return;
   }
 
@@ -228,9 +282,10 @@ router.post("/payments/stripe/confirm", requireAuth, async (req, res): Promise<v
     const Stripe = (await import("stripe")).default;
     const stripe = new Stripe(STRIPE_SECRET_KEY);
 
-    // Retrieve the intent from Stripe — never trust the frontend alone
+    // 1. Retrieve from Stripe servers — never trust the frontend alone
     const intent = await stripe.paymentIntents.retrieve(paymentIntentId);
 
+    // 2. Payment must have succeeded
     if (intent.status !== "succeeded") {
       res.status(400).json({
         error: `Payment not completed. Status: ${intent.status}. Please contact support if funds were debited.`,
@@ -238,42 +293,63 @@ router.post("/payments/stripe/confirm", requireAuth, async (req, res): Promise<v
       return;
     }
 
-    // Guard: intent must belong to this user
+    // 3. Intent must belong to the authenticated user
     if (intent.metadata.user_id && intent.metadata.user_id !== String(req.user!.id)) {
-      req.log.warn({ paymentIntentId, userId: req.user!.id }, "Stripe PaymentIntent user_id mismatch");
+      req.log.warn(
+        { paymentIntentId, userId: req.user!.id, intentUserId: intent.metadata.user_id },
+        "SECURITY: Stripe PaymentIntent user_id mismatch — possible account hijack attempt",
+      );
       res.status(403).json({ error: "Payment does not belong to this account" });
       return;
     }
 
-    // Guard: amount tolerance ±1 cent (to handle floating-point rounding)
+    // 4. Amount tolerance ±1 cent (floating-point rounding guard)
     const expectedCents = Math.round(amountUsd * 100);
     if (Math.abs(intent.amount - expectedCents) > 1) {
-      req.log.warn({ paymentIntentId, intentAmount: intent.amount, expectedCents }, "Stripe amount mismatch");
+      req.log.warn(
+        { paymentIntentId, intentAmount: intent.amount, expectedCents, userId: req.user!.id },
+        "SECURITY: Stripe amount mismatch — possible tampering",
+      );
       res.status(400).json({ error: "Payment amount mismatch. Please contact support." });
       return;
     }
 
+    // 5. Idempotency check — reject if already credited
+    if (await isAlreadyProcessed(paymentIntentId)) {
+      req.log.warn(
+        { userId: req.user!.id, paymentIntentId },
+        "SECURITY: Duplicate Stripe paymentIntentId — possible double-credit attempt",
+      );
+      res.status(409).json({ error: "This payment has already been processed." });
+      return;
+    }
+
+    // Anomaly check
+    checkDepositAnomaly(req.user!.id, amountUsd, "stripe-confirm", req.log);
+
     const user = req.user!;
     const rounded = round2(amountUsd);
 
-    const [wallet] = await db.select().from(walletsTable).where(eq(walletsTable.userId, user.id));
-    if (!wallet) {
+    // 6. Atomic wallet credit via SQL increment
+    const [updated] = await db
+      .update(walletsTable)
+      .set({ hiringBalance: sql`hiring_balance + ${rounded}` })
+      .where(eq(walletsTable.userId, user.id))
+      .returning();
+
+    if (!updated) {
       res.status(404).json({ error: "Wallet not found" });
       return;
     }
 
-    const [updated] = await db
-      .update(walletsTable)
-      .set({ hiringBalance: round2(wallet.hiringBalance + rounded) })
-      .where(eq(walletsTable.userId, user.id))
-      .returning();
-
+    // Record transaction with external referenceId for idempotency
     await recordTransaction(
       user.id,
       "hiring",
       "deposit",
       rounded,
       `Deposited $${rounded.toFixed(2)} via Stripe Card (${paymentIntentId})`,
+      paymentIntentId,
     );
 
     req.log.info({ userId: user.id, amount: rounded, paymentIntentId }, "Stripe deposit credited to hiring wallet");

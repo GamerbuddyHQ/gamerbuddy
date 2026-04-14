@@ -16,6 +16,7 @@ A full-stack gaming marketplace web app where users can hire other gamers to pla
 - **Validation**: Zod (per-route schemas in `api-server/src/lib/validate.ts`)
 - **Rate limiting**: `express-rate-limit` (login/signup: 5/min, bids: 5/min, comments: 10/min, messages: 30/min, tournaments: 3/min)
 - **Sanitization**: HTML entity escaping on all user text; GIF markers validated to Tenor-only URLs; bare links stripped from community posts
+- **Payment security**: Secret keys server-only; HMAC-SHA256 Razorpay signature verification; Stripe PaymentIntent server-side retrieval + user ownership + amount check; idempotency via `referenceId` unique partial index (prevents double-credit replay); anomaly WARN logs for deposits/bids > $500; atomic wallet operations via SQL-level increments with balance guards in WHERE clause
 - **API codegen**: Orval (from OpenAPI spec)
 - **Build**: esbuild (CJS bundle for API), Vite (frontend)
 - **File uploads**: multer (for official ID during signup)
