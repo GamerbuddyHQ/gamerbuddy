@@ -119,6 +119,9 @@ export type GameRequest = {
   createdAt: string;
   bidCount: number;
   lowestBid: number | null;
+  isBulkHiring: boolean;
+  bulkGamersNeeded: number | null;
+  acceptedBidsCount: number;
 };
 
 export const bidKeys = {
@@ -212,6 +215,35 @@ export function useCancelRequest() {
       apiFetch(`${BASE}/requests/${requestId}/cancel`, { method: "POST" }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["my-requests"] });
+    },
+  });
+}
+
+export function useLockBulkSession() {
+  const qc = useQueryClient();
+  return useMutation<any, any, number>({
+    mutationFn: (requestId) =>
+      apiFetch(`${BASE}/requests/${requestId}/lock`, { method: "POST" }),
+    onSuccess: (_, requestId) => {
+      qc.invalidateQueries({ queryKey: ["request", requestId] });
+      qc.invalidateQueries({ queryKey: bidKeys.list(requestId) });
+      qc.invalidateQueries({ queryKey: ["my-requests"] });
+    },
+  });
+}
+
+export function usePostRequest() {
+  const qc = useQueryClient();
+  return useMutation<
+    any,
+    any,
+    { gameName: string; platform: string; skillLevel: string; objectives: string; isBulkHiring?: boolean; bulkGamersNeeded?: number }
+  >({
+    mutationFn: (body) =>
+      apiFetch(`${BASE}/requests`, { method: "POST", body: JSON.stringify(body) }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["my-requests"] });
+      qc.invalidateQueries({ queryKey: ["browse-requests"] });
     },
   });
 }

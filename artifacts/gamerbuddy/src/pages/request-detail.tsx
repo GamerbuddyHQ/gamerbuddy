@@ -9,6 +9,7 @@ import {
   useAcceptBid,
   useStartSession,
   useCompleteRequest,
+  useLockBulkSession,
   useBidMessages,
   useSendMessage,
   useRequestReviews,
@@ -31,7 +32,7 @@ import {
   ArrowLeft, Swords, Monitor, Layers, Gavel, MessageSquare,
   CheckCircle2, Send, Star, Trophy, AlertTriangle, User, Gift,
   Flag, X, MessageCircle, Gamepad2, Target, Zap, ChevronDown, ChevronUp,
-  Phone, PhoneOff, Wifi, WifiOff, Volume2, ShieldCheck,
+  Phone, PhoneOff, Wifi, WifiOff, Volume2, ShieldCheck, Users, Lock,
 } from "lucide-react";
 import { SafetyBanner } from "@/components/safety-banner";
 import { VerifiedBadge } from "@/components/verified-badge";
@@ -1050,6 +1051,11 @@ export default function RequestDetail() {
   const placeBid = usePlaceBid();
   const startSession = useStartSession();
   const completeRequest = useCompleteRequest();
+  const lockSession = useLockBulkSession();
+
+  const isBulkRequest = request?.isBulkHiring ?? false;
+  const bulkSlotsNeeded = request?.bulkGamersNeeded ?? 0;
+  const acceptedBidsCount = request?.acceptedBidsCount ?? 0;
 
   const isHirer = user?.id === request?.userId;
   const myBid = bids.find((b: Bid) => b.bidderId === user?.id);
@@ -1059,6 +1065,17 @@ export default function RequestDetail() {
   const canBid = user && !isHirer && !myBid && request?.status === "open";
   const canReview = user && (request?.status === "completed" || request?.status === "awaiting_reviews") && (isHirer || isGamer);
   const mustReview = user && request?.status === "awaiting_reviews" && (isHirer || isGamer);
+
+  const handleLockRoster = () => {
+    lockSession.mutate(requestId, {
+      onSuccess: (data: any) => {
+        toast({ title: "Roster Locked!", description: data?.message ?? "Session is now in progress." });
+      },
+      onError: (err: any) => {
+        toast({ title: "Error", description: err?.error || "Failed to lock roster.", variant: "destructive" });
+      },
+    });
+  };
 
   const handlePlaceBid = () => {
     const price = parseFloat(bidPrice);
@@ -1188,8 +1205,36 @@ export default function RequestDetail() {
             <p className="text-sm text-foreground/90 leading-relaxed">{request.objectives}</p>
           </div>
 
+          {/* Bulk hiring info banner */}
+          {isBulkRequest && (
+            <div className="rounded-xl border border-purple-500/30 bg-purple-500/5 p-4 space-y-3">
+              <div className="flex items-center justify-between gap-3 flex-wrap">
+                <div className="flex items-center gap-2 text-purple-400 font-bold text-sm">
+                  <Users className="h-4 w-4" />
+                  Bulk Hiring Session
+                </div>
+                <div className="text-xs font-black text-purple-300">
+                  {acceptedBidsCount} / {bulkSlotsNeeded} slots filled
+                </div>
+              </div>
+              <div className="w-full h-2 bg-white/5 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-gradient-to-r from-purple-600 to-purple-400 rounded-full transition-all duration-500"
+                  style={{ width: `${Math.min(100, (acceptedBidsCount / Math.max(bulkSlotsNeeded, 1)) * 100)}%` }}
+                />
+              </div>
+              {request.status === "open" && isHirer && acceptedBidsCount > 0 && (
+                <p className="text-xs text-purple-300/80">
+                  {acceptedBidsCount < bulkSlotsNeeded
+                    ? `${bulkSlotsNeeded - acceptedBidsCount} more slot${bulkSlotsNeeded - acceptedBidsCount !== 1 ? "s" : ""} remaining. Accept more bids or lock the roster to start.`
+                    : "All slots are filled — roster locked automatically!"}
+                </p>
+              )}
+            </div>
+          )}
+
           {/* Accepted bid discord info (shown to hirer) */}
-          {isHirer && request.status === "in_progress" && acceptedBid?.discordUsername && (
+          {isHirer && !isBulkRequest && request.status === "in_progress" && acceptedBid?.discordUsername && (
             <div className="flex items-center gap-3 rounded-xl border border-indigo-500/30 bg-indigo-500/5 px-4 py-3 text-sm">
               <MessageCircle className="h-4 w-4 text-indigo-400 shrink-0" />
               <div>
@@ -1199,8 +1244,32 @@ export default function RequestDetail() {
             </div>
           )}
 
-          {/* Gamer: Start Session button */}
-          {isGamer && request.status === "in_progress" && !sessionStarted && (
+          {/* Hirer: Lock Roster button (bulk only, when open and has at least 1 accepted bid) */}
+          {isHirer && isBulkRequest && request.status === "open" && acceptedBidsCount > 0 && (
+            <div className="rounded-xl border border-purple-500/40 bg-purple-500/5 p-4 space-y-3">
+              <div className="flex items-center gap-2 text-purple-400 font-bold text-sm">
+                <Lock className="h-4 w-4" />
+                Ready to Start?
+              </div>
+              <p className="text-xs text-muted-foreground">
+                You've accepted <strong className="text-white">{acceptedBidsCount}</strong> gamer{acceptedBidsCount !== 1 ? "s" : ""} so far.{" "}
+                {acceptedBidsCount < bulkSlotsNeeded
+                  ? `You can keep accepting bids (${bulkSlotsNeeded - acceptedBidsCount} slot${bulkSlotsNeeded - acceptedBidsCount !== 1 ? "s" : ""} remaining), or lock the roster now to begin the session.`
+                  : "All slots are filled — lock the roster to begin the session."}
+              </p>
+              <Button
+                className="bg-purple-500/20 border border-purple-500/40 text-purple-300 hover:bg-purple-500 hover:text-white font-bold uppercase text-sm"
+                onClick={handleLockRoster}
+                disabled={lockSession.isPending}
+              >
+                <Lock className="h-4 w-4 mr-2" />
+                {lockSession.isPending ? "Locking…" : `Lock Roster · ${acceptedBidsCount} Gamer${acceptedBidsCount !== 1 ? "s" : ""}`}
+              </Button>
+            </div>
+          )}
+
+          {/* Gamer: Start Session button (single-gamer only) */}
+          {isGamer && !isBulkRequest && request.status === "in_progress" && !sessionStarted && (
             <div className="rounded-xl border border-primary/40 bg-primary/5 p-4 space-y-3">
               <div className="flex items-center gap-2 text-primary font-bold text-sm">
                 <Swords className="h-4 w-4" />
@@ -1221,18 +1290,22 @@ export default function RequestDetail() {
           )}
 
           {/* Gamer: session active */}
-          {isGamer && request.status === "in_progress" && sessionStarted && (
+          {isGamer && request.status === "in_progress" && (sessionStarted || isBulkRequest) && (
             <div className="rounded-xl border border-green-500/30 bg-green-500/5 p-4 flex items-center gap-3">
               <div className="h-2.5 w-2.5 rounded-full bg-green-400 animate-pulse shrink-0" />
               <div>
-                <div className="text-green-400 font-bold text-sm">Session Active</div>
-                <div className="text-xs text-muted-foreground mt-0.5">Play hard! The hirer will approve payment when you've completed the objectives.</div>
+                <div className="text-green-400 font-bold text-sm">Session Active{isBulkRequest ? " — Bulk Session" : ""}</div>
+                <div className="text-xs text-muted-foreground mt-0.5">
+                  {isBulkRequest
+                    ? `You're part of a bulk session with ${bulkSlotsNeeded} gamers. Payment will be released when the hirer approves completion.`
+                    : "Play hard! The hirer will approve payment when you've completed the objectives."}
+                </div>
               </div>
             </div>
           )}
 
-          {/* Hirer: waiting for gamer to start */}
-          {isHirer && request.status === "in_progress" && !sessionStarted && (
+          {/* Hirer: waiting for gamer to start (single-gamer only) */}
+          {isHirer && !isBulkRequest && request.status === "in_progress" && !sessionStarted && (
             <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-4 space-y-2">
               <div className="flex items-center gap-2 text-amber-400 font-bold text-sm">
                 <AlertTriangle className="h-4 w-4" />
@@ -1250,37 +1323,50 @@ export default function RequestDetail() {
               <div className="flex items-center justify-between gap-3 flex-wrap">
                 <div className="flex items-center gap-2 text-green-400 font-bold text-sm">
                   <Trophy className="h-4 w-4" />
-                  Session Active — Approve when objectives are met
+                  {isBulkRequest ? `Bulk Session Active — ${acceptedBidsCount} Gamer${acceptedBidsCount !== 1 ? "s" : ""}` : "Session Active — Approve when objectives are met"}
                 </div>
                 <div className="flex items-center gap-1.5 text-xs text-green-400/60">
                   <div className="h-2 w-2 rounded-full bg-green-400 animate-pulse" />
                   Live
                 </div>
               </div>
-              <p className="text-xs text-muted-foreground">
-                Approving releases <strong className="text-white">90%</strong> of escrow to the gamer (10% platform fee). Both players earn <strong className="text-white">50 points</strong> when they leave a review.
-              </p>
-              <div className="flex items-center gap-2 text-xs text-muted-foreground bg-background/60 rounded-lg border border-border/40 px-3 py-2">
-                <span className="text-white font-bold">
-                  ${((request as any).escrowAmount ?? 0).toFixed(2)}
-                </span>
-                in escrow →
-                <span className="text-green-400 font-bold">
-                  ${(((request as any).escrowAmount ?? 0) * 0.9).toFixed(2)}
-                </span>
-                to gamer +
-                <span className="text-amber-400 font-bold">
-                  ${(((request as any).escrowAmount ?? 0) * 0.1).toFixed(2)}
-                </span>
-                platform fee
-              </div>
+              {isBulkRequest ? (
+                <p className="text-xs text-muted-foreground">
+                  Approving releases <strong className="text-white">90%</strong> of each gamer's bid to their Earnings wallet (10% platform fee per gamer).
+                  Total escrow: <strong className="text-white">${((request as any).escrowAmount ?? 0).toFixed(2)}</strong>
+                </p>
+              ) : (
+                <p className="text-xs text-muted-foreground">
+                  Approving releases <strong className="text-white">90%</strong> of escrow to the gamer (10% platform fee). Both players earn <strong className="text-white">50 points</strong> when they leave a review.
+                </p>
+              )}
+              {!isBulkRequest && (
+                <div className="flex items-center gap-2 text-xs text-muted-foreground bg-background/60 rounded-lg border border-border/40 px-3 py-2">
+                  <span className="text-white font-bold">
+                    ${((request as any).escrowAmount ?? 0).toFixed(2)}
+                  </span>
+                  in escrow →
+                  <span className="text-green-400 font-bold">
+                    ${(((request as any).escrowAmount ?? 0) * 0.9).toFixed(2)}
+                  </span>
+                  to gamer +
+                  <span className="text-amber-400 font-bold">
+                    ${(((request as any).escrowAmount ?? 0) * 0.1).toFixed(2)}
+                  </span>
+                  platform fee
+                </div>
+              )}
               <Button
                 className="w-full bg-green-500/20 border border-green-500/40 text-green-400 hover:bg-green-500 hover:text-white font-bold uppercase text-sm py-5"
                 onClick={handleComplete}
                 disabled={completeRequest.isPending}
               >
                 <Trophy className="h-4 w-4 mr-2" />
-                {completeRequest.isPending ? "Approving…" : "Approve Payment & Complete Session"}
+                {completeRequest.isPending
+                  ? "Approving…"
+                  : isBulkRequest
+                  ? `Complete Bulk Session · Pay ${acceptedBidsCount} Gamer${acceptedBidsCount !== 1 ? "s" : ""}`
+                  : "Approve Payment & Complete Session"}
               </Button>
             </div>
           )}
@@ -1311,8 +1397,12 @@ export default function RequestDetail() {
           {request.status === "completed" && (
             <div className="rounded-xl border border-secondary/30 bg-secondary/5 p-4 text-center">
               <CheckCircle2 className="h-8 w-8 mx-auto text-secondary mb-2" />
-              <div className="font-bold text-white">Session Fully Complete!</div>
-              <div className="text-xs text-muted-foreground mt-1">Both reviews received · 50 points awarded to each player.</div>
+              <div className="font-bold text-white">{isBulkRequest ? "Bulk Session Complete!" : "Session Fully Complete!"}</div>
+              <div className="text-xs text-muted-foreground mt-1">
+                {isBulkRequest
+                  ? `All ${acceptedBidsCount} gamer${acceptedBidsCount !== 1 ? "s" : ""} paid their 90% cut.`
+                  : "Both reviews received · 50 points awarded to each player."}
+              </div>
             </div>
           )}
         </CardContent>

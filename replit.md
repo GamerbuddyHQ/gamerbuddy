@@ -35,10 +35,11 @@ A full-stack gaming marketplace web app where users can hire other gamers to pla
    - Earnings Wallet: withdraw only when balance >= $100
 3. **Game Requests + Bidding**: Post requests → gamers bid → hirer accepts (escrow) → gamer starts → hirer approves → payout (90%/10% fee)
 4. **Session Flow**: open → bid accepted (Discord + escrow) → in_progress → gamer "Start Session" → hirer approves → completed → both review
-5. **Reviews + Reputation**: 1–10 score system; trust factor fully recalculated after each review: `min(100, round(avgRating×10) + min(totalSessions×2, 20))`; +50 pts to reviewer
-6. **Private Chat**: per-bid chat polling every 4s
-7. **Wallet Transactions**: full history with type filtering
-8. **Points Shop**: buy backgrounds (200–500 pts) and titles (100–200 pts), equip to customize profile
+5. **Bulk Hiring**: Post a request for 5–100 gamers at once; request stays `open` while hirer accepts multiple bids (each held in escrow individually); hirer locks roster (or auto-locks when all slots filled) → `in_progress`; on completion all accepted gamers paid 90% of their individual bid; purple badge + slot progress bar in browse/detail views
+6. **Reviews + Reputation**: 1–10 score system; trust factor fully recalculated after each review: `min(100, round(avgRating×10) + min(totalSessions×2, 20))`; +50 pts to reviewer
+7. **Private Chat**: per-bid chat polling every 4s
+8. **Wallet Transactions**: full history with type filtering
+9. **Points Shop**: buy backgrounds (200–500 pts) and titles (100–200 pts), equip to customize profile
 9. **Steam-Style Profile**: animated banner (equipped background), rank badges, bio editing, session history, reviews received
 10. **Game Key Shop**: browse and purchase game keys with Earnings Wallet
 11. **Reports**: report users with reason + description

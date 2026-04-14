@@ -1,4 +1,4 @@
-import { pgTable, serial, integer, text, timestamp, numeric } from "drizzle-orm/pg-core";
+import { pgTable, serial, integer, text, timestamp, numeric, boolean } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 import { usersTable } from "./users";
@@ -15,6 +15,8 @@ export const gameRequestsTable = pgTable("game_requests", {
   acceptedBidId: integer("accepted_bid_id"),
   startedAt: timestamp("started_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  isBulkHiring: boolean("is_bulk_hiring").notNull().default(false),
+  bulkGamersNeeded: integer("bulk_gamers_needed"),
 });
 
 export const insertGameRequestSchema = createInsertSchema(gameRequestsTable).omit({

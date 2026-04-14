@@ -4,7 +4,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import {
-  useCreateRequest,
   useGetWallets,
   getGetWalletsQueryKey,
   getGetDashboardSummaryQueryKey,
@@ -34,8 +33,10 @@ import {
   CheckCircle2,
   Layers,
   Star,
+  Users,
 } from "lucide-react";
 import { SafetyBanner } from "@/components/safety-banner";
+import { usePostRequest } from "@/lib/bids-api";
 
 const requestSchema = z.object({
   gameName: z.string().min(1, "Game name is required"),
@@ -98,7 +99,9 @@ export default function PostRequest() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const createMutation = useCreateRequest();
+  const postRequest = usePostRequest();
+  const [isBulkHiring, setIsBulkHiring] = useState(false);
+  const [bulkGamersNeeded, setBulkGamersNeeded] = useState(5);
 
   const { data: wallets, isLoading: isLoadingWallets } = useGetWallets({
     query: { queryKey: getGetWalletsQueryKey() },
@@ -126,14 +129,20 @@ export default function PostRequest() {
       return;
     }
 
-    createMutation.mutate(
-      { data: values },
+    postRequest.mutate(
+      {
+        ...values,
+        isBulkHiring,
+        bulkGamersNeeded: isBulkHiring ? bulkGamersNeeded : undefined,
+      },
       {
         onSuccess: () => {
           queryClient.invalidateQueries({ queryKey: getGetDashboardSummaryQueryKey() });
           toast({
-            title: "Mission Posted!",
-            description: "Your game request is now live. Gamers will reach out.",
+            title: isBulkHiring ? "Bulk Mission Posted!" : "Mission Posted!",
+            description: isBulkHiring
+              ? `Your bulk request for ${bulkGamersNeeded} gamers is live!`
+              : "Your game request is now live. Gamers will reach out.",
           });
           setLocation("/my-requests");
         },
@@ -384,6 +393,61 @@ export default function PostRequest() {
                 )}
               />
 
+              {/* Bulk Hiring Toggle */}
+              <div className="rounded-xl border border-purple-500/30 bg-purple-500/5 p-5 space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className="h-8 w-8 rounded-lg bg-purple-500/15 border border-purple-500/30 flex items-center justify-center">
+                      <Users className="h-4 w-4 text-purple-400" />
+                    </div>
+                    <div>
+                      <div className="text-sm font-bold text-white">Bulk Hiring</div>
+                      <div className="text-xs text-muted-foreground">Hire 5–100 gamers for one session</div>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setIsBulkHiring((v) => !v)}
+                    className={`relative h-6 w-11 rounded-full transition-colors duration-200 focus:outline-none ${
+                      isBulkHiring ? "bg-purple-500" : "bg-white/10 border border-white/20"
+                    }`}
+                  >
+                    <span
+                      className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform duration-200 ${
+                        isBulkHiring ? "translate-x-5" : "translate-x-0"
+                      }`}
+                    />
+                  </button>
+                </div>
+
+                {isBulkHiring && (
+                  <div className="space-y-3 pt-2 border-t border-purple-500/20">
+                    <label className="text-xs uppercase tracking-widest text-purple-400 font-bold flex items-center gap-1.5">
+                      <Users className="h-3 w-3" />
+                      Gamers Needed <span className="text-destructive">*</span>
+                    </label>
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="range"
+                        min={5}
+                        max={100}
+                        step={1}
+                        value={bulkGamersNeeded}
+                        onChange={(e) => setBulkGamersNeeded(Number(e.target.value))}
+                        className="flex-1 accent-purple-500"
+                      />
+                      <div className="min-w-[56px] text-center rounded-lg border border-purple-500/30 bg-purple-500/10 px-3 py-1.5 text-sm font-black text-purple-300">
+                        {bulkGamersNeeded}
+                      </div>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Bids will remain open until you've accepted {bulkGamersNeeded} gamers or manually lock the roster.
+                      Each gamer's bid is held in escrow individually.
+                    </p>
+                  </div>
+                )}
+              </div>
+
               {/* Preview summary */}
               {selectedPlatform && selectedSkill && form.watch("gameName") && (
                 <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 space-y-2">
@@ -419,9 +483,9 @@ export default function PostRequest() {
                 <Button
                   type="submit"
                   className="w-full bg-primary hover:bg-primary/90 text-white font-extrabold uppercase tracking-widest text-base py-6 shadow-[0_0_20px_rgba(168,85,247,0.3)] hover:shadow-[0_0_30px_rgba(168,85,247,0.5)] transition-all disabled:opacity-50 disabled:shadow-none"
-                  disabled={!canPost || createMutation.isPending}
+                  disabled={!canPost || postRequest.isPending}
                 >
-                  {createMutation.isPending ? (
+                  {postRequest.isPending ? (
                     <span className="flex items-center gap-2">
                       <span className="h-4 w-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
                       Deploying Mission…

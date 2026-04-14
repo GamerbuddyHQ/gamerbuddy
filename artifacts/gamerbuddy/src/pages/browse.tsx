@@ -380,7 +380,12 @@ function RequestCard({ req }: { req: GameRequest }) {
                 <span className={`inline-flex items-center text-xs border rounded-full px-3 py-1 font-bold tracking-wide ${skill.border} ${skill.text} ${skill.bg}`}>
                   {req.skillLevel}
                 </span>
-                {isZeroBids && (
+                {req.isBulkHiring && (
+                  <span className="inline-flex items-center gap-1 text-[10px] bg-purple-500/15 border border-purple-500/35 text-purple-300 rounded-full px-2.5 py-1 font-black uppercase tracking-wider">
+                    <Users className="h-3 w-3" /> Bulk · {req.bulkGamersNeeded} slots
+                  </span>
+                )}
+                {isZeroBids && !req.isBulkHiring && (
                   <span className="inline-flex items-center gap-1 text-[10px] bg-green-500/15 border border-green-500/35 text-green-400 rounded-full px-2.5 py-1 font-black uppercase tracking-wider">
                     <Flame className="h-3 w-3" /> First bid!
                   </span>
@@ -431,6 +436,19 @@ function RequestCard({ req }: { req: GameRequest }) {
                   </span>
                   {isZeroBids && <span className="text-muted-foreground/50 ml-0.5">— be first!</span>}
                 </div>
+                {req.isBulkHiring && (
+                  <div
+                    className="inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs"
+                    style={{ borderColor: "rgba(168,85,247,0.2)", background: "rgba(168,85,247,0.06)" }}
+                  >
+                    <Users className="h-3.5 w-3.5 text-purple-400" />
+                    <span className="text-muted-foreground">
+                      <span className="font-bold text-purple-300">{req.acceptedBidsCount}</span>
+                      <span className="text-purple-400/60">/{req.bulkGamersNeeded}</span>
+                      <span className="ml-1">slots filled</span>
+                    </span>
+                  </div>
+                )}
                 {req.lowestBid && (
                   <div
                     className="inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs"
