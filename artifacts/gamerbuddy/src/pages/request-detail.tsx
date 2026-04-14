@@ -1112,12 +1112,21 @@ function BidCard({
 
             {/* Name + badges block */}
             <div className="flex-1 min-w-0 space-y-1.5">
+              {/* Name row */}
               <div className="flex items-center gap-2 flex-wrap">
                 <Link href={`/users/${bid.bidderId}`}>
                   <a className="font-extrabold text-white text-base leading-none hover:text-primary transition-colors">
                     {bid.bidderName}
                   </a>
                 </Link>
+                {bid.bidderCountry && bid.bidderCountry !== "any" && (
+                  <span
+                    className="text-base leading-none shrink-0"
+                    title={COUNTRY_MAP[bid.bidderCountry]?.label ?? bid.bidderCountry}
+                  >
+                    {COUNTRY_MAP[bid.bidderCountry]?.flag}
+                  </span>
+                )}
                 <VerifiedBadge idVerified={bid.bidderIdVerified ?? false} variant="compact" />
                 {isMe && <span className="text-xs text-secondary font-semibold">(You)</span>}
                 {isAccepted && bid.discordUsername && (
@@ -1127,7 +1136,7 @@ function BidCard({
                 )}
               </div>
 
-              {/* Trust Factor + Reputation Badges row */}
+              {/* Trust Factor + Reputation Badges + geo row */}
               <div className="flex items-center gap-2 flex-wrap">
                 <TrustChip value={bid.bidderTrustFactor ?? 50} />
                 <ReputationBadges
@@ -1141,22 +1150,25 @@ function BidCard({
                   }).filter((b) => b.id !== "verified")}
                 />
                 <BidderStreamingBadges bidderId={bid.bidderId} compact />
+                {(bid.bidderGender && bid.bidderGender !== "any") && (
+                  <>
+                    <span className="text-white/15 text-xs select-none">·</span>
+                    <span className="text-[11px] text-muted-foreground/55 flex items-center gap-1">
+                      <span className="leading-none">{GENDER_MAP[bid.bidderGender]?.icon}</span>
+                      <span>{GENDER_MAP[bid.bidderGender]?.label ?? bid.bidderGender}</span>
+                    </span>
+                  </>
+                )}
+                {(bid.bidderCountry && bid.bidderCountry !== "any") && (
+                  <span
+                    className="text-[11px] text-muted-foreground/55"
+                    title={COUNTRY_MAP[bid.bidderCountry]?.label}
+                  >
+                    {COUNTRY_MAP[bid.bidderCountry]?.label ?? bid.bidderCountry}
+                  </span>
+                )}
               </div>
 
-              {(bid.bidderCountry || bid.bidderGender) && (
-                <div className="flex items-center gap-2 flex-wrap">
-                  {bid.bidderCountry && bid.bidderCountry !== "any" && (
-                    <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-amber-300/80 bg-amber-500/8 border border-amber-500/20 rounded-full px-2 py-0.5">
-                      {COUNTRY_MAP[bid.bidderCountry]?.flag} {COUNTRY_MAP[bid.bidderCountry]?.label ?? bid.bidderCountry}
-                    </span>
-                  )}
-                  {bid.bidderGender && bid.bidderGender !== "any" && (
-                    <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-pink-300/80 bg-pink-500/8 border border-pink-500/20 rounded-full px-2 py-0.5">
-                      {GENDER_MAP[bid.bidderGender]?.icon} {GENDER_MAP[bid.bidderGender]?.label ?? bid.bidderGender}
-                    </span>
-                  )}
-                </div>
-              )}
               <div className="flex items-center gap-1.5 text-xs text-muted-foreground/60">
                 <span>{format(new Date(bid.createdAt), "MMM d, h:mm a")}</span>
               </div>
