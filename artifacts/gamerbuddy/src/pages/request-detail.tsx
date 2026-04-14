@@ -2129,24 +2129,27 @@ export default function RequestDetail() {
           { key: "expert",   label: "Expert",     dot: "#f87171" },
         ];
 
-        /* Active filter tags */
-        const activeTags: { id: string; label: string; onRemove: () => void }[] = [];
+        /* Active filter tags — each carries its own accent color */
+        const activeTags: { id: string; label: string; onRemove: () => void; rgb: string }[] = [];
         if (bidExpFilter !== "all") {
           const opt = expOptions.find((o) => o.key === bidExpFilter)!;
-          activeTags.push({ id: "exp", label: `Level: ${opt.label}`, onRemove: () => setBidExpFilter("all") });
+          activeTags.push({ id: "exp", label: `Level: ${opt.label}`, onRemove: () => setBidExpFilter("all"), rgb: "96,165,250" });
         }
-        if (bidVerifiedOnly) activeTags.push({ id: "verified", label: "Verified Only", onRemove: () => setBidVerifiedOnly(false) });
-        if (bidHasStreaming)  activeTags.push({ id: "streaming", label: "Has Streaming", onRemove: () => setBidHasStreaming(false) });
-        if (bidHasQuest)     activeTags.push({ id: "quest", label: "Quest Bid", onRemove: () => setBidHasQuest(false) });
+        if (bidVerifiedOnly) activeTags.push({ id: "verified",  label: "Verified Only",  onRemove: () => setBidVerifiedOnly(false),  rgb: "34,197,94" });
+        if (bidHasStreaming)  activeTags.push({ id: "streaming", label: "Has Streaming",  onRemove: () => setBidHasStreaming(false),   rgb: "168,85,247" });
+        if (bidHasQuest)     activeTags.push({ id: "quest",     label: "Quest Bids",     onRemove: () => setBidHasQuest(false),       rgb: "251,191,36" });
         if (bidSort !== "newest") {
           const s = sortOptions.find((o) => o.key === bidSort)!;
-          activeTags.push({ id: "sort", label: `Sort: ${s.label}`, onRemove: () => setBidSort("newest") });
+          activeTags.push({ id: "sort", label: `Sort: ${s.label}`, onRemove: () => setBidSort("newest"), rgb: "34,211,238" });
         }
 
         const clearAll = () => {
           setBidSort("newest"); setBidExpFilter("all");
           setBidVerifiedOnly(false); setBidHasStreaming(false); setBidHasQuest(false);
         };
+
+        /* Key for animated list re-render when filters change */
+        const filterKey = `${bidSort}|${bidExpFilter}|${+bidVerifiedOnly}|${+bidHasStreaming}|${+bidHasQuest}`;
 
         return (
           <div className="space-y-3">
@@ -2184,20 +2187,20 @@ export default function RequestDetail() {
               </div>
             </div>
 
-            {/* ── Filter panel (sticky) ── */}
+            {/* ── Filter panel (sticky desktop-only) ── */}
             {!loadingBids && bids.length > 1 && (
-              <div className="sticky top-16 z-40">
+              <div className="sm:sticky top-16 z-40 filter-panel-animate">
               <div
                 className="rounded-2xl border overflow-hidden"
                 style={{
                   borderColor: activeTags.length > 0 ? "rgba(168,85,247,0.40)" : "rgba(255,255,255,0.09)",
-                  background: "rgba(7,5,16,0.92)",
-                  backdropFilter: "blur(18px)",
-                  WebkitBackdropFilter: "blur(18px)",
+                  background: "rgba(7,5,16,0.94)",
+                  backdropFilter: "blur(20px)",
+                  WebkitBackdropFilter: "blur(20px)",
                   boxShadow: activeTags.length > 0
-                    ? "0 4px 28px rgba(0,0,0,0.45), 0 0 0 1px rgba(168,85,247,0.08)"
-                    : "0 4px 24px rgba(0,0,0,0.35)",
-                  transition: "border-color 0.25s, box-shadow 0.25s",
+                    ? "0 6px 32px rgba(0,0,0,0.50), 0 0 0 1px rgba(168,85,247,0.10)"
+                    : "0 4px 24px rgba(0,0,0,0.38)",
+                  transition: "border-color 0.3s, box-shadow 0.3s",
                 }}
               >
                 {/* Panel header */}
@@ -2257,12 +2260,12 @@ export default function RequestDetail() {
                         <button
                           key={key}
                           onClick={() => setBidSort(key)}
-                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all duration-150"
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all duration-200 active:scale-95"
                           style={active ? {
                             background: "rgba(168,85,247,0.22)",
                             border: "1px solid rgba(168,85,247,0.55)",
                             color: "#c084fc",
-                            boxShadow: "0 0 10px rgba(168,85,247,0.20)",
+                            boxShadow: "0 0 12px rgba(168,85,247,0.22)",
                           } : {
                             background: "rgba(255,255,255,0.04)",
                             border: "1px solid rgba(255,255,255,0.08)",
@@ -2296,12 +2299,12 @@ export default function RequestDetail() {
                         <button
                           key={key}
                           onClick={() => setBidExpFilter(key)}
-                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all duration-150"
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all duration-200 active:scale-95"
                           style={active ? {
-                            background: "rgba(168,85,247,0.22)",
-                            border: "1px solid rgba(168,85,247,0.55)",
-                            color: "#c084fc",
-                            boxShadow: "0 0 10px rgba(168,85,247,0.20)",
+                            background: "rgba(96,165,250,0.18)",
+                            border: "1px solid rgba(96,165,250,0.50)",
+                            color: "#93c5fd",
+                            boxShadow: "0 0 12px rgba(96,165,250,0.18)",
                           } : {
                             background: "rgba(255,255,255,0.04)",
                             border: "1px solid rgba(255,255,255,0.08)",
@@ -2309,7 +2312,7 @@ export default function RequestDetail() {
                           }}
                         >
                           {active ? (
-                            <CheckCircle2 className="h-3 w-3 shrink-0" />
+                            <CheckCircle2 className="h-3 w-3 shrink-0" style={{ color: "#93c5fd" }} />
                           ) : (
                             <div className="h-2 w-2 rounded-full shrink-0" style={{ background: dot, opacity: 0.7 }} />
                           )}
@@ -2335,12 +2338,12 @@ export default function RequestDetail() {
                     {/* Verified Only */}
                     <button
                       onClick={() => setBidVerifiedOnly((v) => !v)}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all duration-150"
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all duration-200 active:scale-95"
                       style={bidVerifiedOnly ? {
                         background: "rgba(34,197,94,0.18)",
                         border: "1px solid rgba(34,197,94,0.50)",
                         color: "#4ade80",
-                        boxShadow: "0 0 10px rgba(34,197,94,0.15)",
+                        boxShadow: "0 0 12px rgba(34,197,94,0.18)",
                       } : {
                         background: "rgba(255,255,255,0.04)",
                         border: "1px solid rgba(255,255,255,0.08)",
@@ -2356,12 +2359,12 @@ export default function RequestDetail() {
                     {/* Has Streaming */}
                     <button
                       onClick={() => setBidHasStreaming((v) => !v)}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all duration-150"
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all duration-200 active:scale-95"
                       style={bidHasStreaming ? {
-                        background: "rgba(145,70,255,0.20)",
-                        border: "1px solid rgba(145,70,255,0.55)",
+                        background: "rgba(168,85,247,0.20)",
+                        border: "1px solid rgba(168,85,247,0.55)",
                         color: "#c084fc",
-                        boxShadow: "0 0 10px rgba(145,70,255,0.18)",
+                        boxShadow: "0 0 12px rgba(168,85,247,0.20)",
                       } : {
                         background: "rgba(255,255,255,0.04)",
                         border: "1px solid rgba(255,255,255,0.08)",
@@ -2378,12 +2381,12 @@ export default function RequestDetail() {
                     {anyHasQuest && (
                       <button
                         onClick={() => setBidHasQuest((v) => !v)}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all duration-150"
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all duration-200 active:scale-95"
                         style={bidHasQuest ? {
                           background: "rgba(251,191,36,0.18)",
                           border: "1px solid rgba(251,191,36,0.50)",
                           color: "#fbbf24",
-                          boxShadow: "0 0 10px rgba(251,191,36,0.15)",
+                          boxShadow: "0 0 12px rgba(251,191,36,0.18)",
                         } : {
                           background: "rgba(255,255,255,0.04)",
                           border: "1px solid rgba(255,255,255,0.08)",
@@ -2412,25 +2415,35 @@ export default function RequestDetail() {
                     <span className="text-[9px] font-extrabold uppercase tracking-widest shrink-0" style={{ color: "rgba(168,85,247,0.60)" }}>
                       Active:
                     </span>
-                    {activeTags.map((tag) => (
+                    {activeTags.map((tag, idx) => (
                       <button
                         key={tag.id}
                         onClick={tag.onRemove}
-                        className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold transition-all duration-150 hover:brightness-125 group"
+                        className="filter-tag-animate flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold transition-all duration-200 hover:brightness-125 active:scale-95 group"
                         style={{
-                          background: "rgba(168,85,247,0.18)",
-                          border: "1px solid rgba(168,85,247,0.38)",
-                          color: "#c084fc",
+                          background: `rgba(${tag.rgb},0.16)`,
+                          border: `1px solid rgba(${tag.rgb},0.40)`,
+                          color: `rgb(${tag.rgb})`,
+                          animationDelay: `${idx * 35}ms`,
+                          filter: "brightness(1.25)",
                         }}
                       >
                         {tag.label}
-                        <X className="h-2.5 w-2.5 opacity-70 group-hover:opacity-100 transition-opacity" />
+                        <X className="h-2.5 w-2.5 opacity-60 group-hover:opacity-100 transition-opacity" />
                       </button>
                     ))}
-                    <span className="text-[10px] ml-auto" style={{ color: "rgba(255,255,255,0.30)" }}>
+                    <span
+                      key={filteredBids.length}
+                      className="text-[10px] ml-auto tabular-nums"
+                      style={{
+                        color: filteredBids.length < bids.length ? "rgba(168,85,247,0.70)" : "rgba(255,255,255,0.28)",
+                        fontWeight: filteredBids.length < bids.length ? 700 : 400,
+                        animation: "count-up 0.18s ease-out both",
+                      }}
+                    >
                       {filteredBids.length === bids.length
                         ? `All ${bids.length} bids shown`
-                        : `${filteredBids.length} of ${bids.length} bids match`}
+                        : `${filteredBids.length} of ${bids.length} match`}
                     </span>
                   </div>
                 )}
@@ -2455,21 +2468,23 @@ export default function RequestDetail() {
               </div>
             )}
 
-            {filteredBids.map((bid: Bid) => (
-              <BidCard
-                key={bid.id}
-                bid={bid}
-                isHirer={isHirer}
-                requestStatus={request.status}
-                currentUserId={user?.id ?? -1}
-                requestId={requestId}
-                gameName={request.gameName}
-                isBulkMode={isBulkRequest}
-                currentGroupTotal={currentGroupTotal}
-                isSelected={selectedBidIds.has(bid.id)}
-                onToggleSelect={() => handleToggleSelect(bid.id)}
-              />
-            ))}
+            <div key={filterKey} className="bid-list-animate space-y-3">
+              {filteredBids.map((bid: Bid) => (
+                <BidCard
+                  key={bid.id}
+                  bid={bid}
+                  isHirer={isHirer}
+                  requestStatus={request.status}
+                  currentUserId={user?.id ?? -1}
+                  requestId={requestId}
+                  gameName={request.gameName}
+                  isBulkMode={isBulkRequest}
+                  currentGroupTotal={currentGroupTotal}
+                  isSelected={selectedBidIds.has(bid.id)}
+                  onToggleSelect={() => handleToggleSelect(bid.id)}
+                />
+              ))}
+            </div>
 
             <BulkSelectionBar
               count={selectedBidIds.size}
