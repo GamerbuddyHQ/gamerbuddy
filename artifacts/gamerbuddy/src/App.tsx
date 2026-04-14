@@ -27,6 +27,7 @@ import Tournaments from "@/pages/tournaments";
 import TournamentDetail from "@/pages/tournament-detail";
 import MyTournaments from "@/pages/my-tournaments";
 import Socials from "@/pages/socials";
+import AdminSecurity from "@/pages/admin-security";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -48,6 +49,16 @@ function ProtectedRoute({ component: Component }: { component: React.ComponentTy
     return <Redirect to="/login" />;
   }
   
+  return <Component />;
+}
+
+function AdminRoute({ component: Component }: { component: React.ComponentType<any> }) {
+  const { user, isLoading } = useAuth();
+  if (isLoading) {
+    return <div className="min-h-[50vh] flex items-center justify-center"><div className="animate-pulse text-primary font-bold uppercase tracking-widest">Loading...</div></div>;
+  }
+  if (!user) return <Redirect to="/login" />;
+  if (user.id !== 1) return <Redirect to="/dashboard" />;
   return <Component />;
 }
 
@@ -75,6 +86,8 @@ function Router() {
         <Route path="/tournaments" component={Tournaments} />
         <Route path="/my-tournaments" component={MyTournaments} />
         <Route path="/tournaments/:id" component={TournamentDetail} />
+
+        <Route path="/admin/security"><AdminRoute component={AdminSecurity} /></Route>
 
         <Route component={NotFound} />
       </Switch>
