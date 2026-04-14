@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow, format, differenceInDays } from "date-fns";
 import {
   ThumbsUp, ThumbsDown, MessageSquare, ChevronDown, ChevronUp,
   Send, Plus, X, Lightbulb, Users, AlertTriangle, ArrowUpDown,
@@ -12,6 +12,7 @@ import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "wouter";
+import { COUNTRY_MAP } from "@/lib/geo-options";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -90,6 +91,7 @@ type Comment = {
   body: string;
   createdAt: string;
   authorName: string;
+  authorCountry: string | null;
   replies: Comment[];
 };
 
@@ -697,6 +699,52 @@ function ReplyBox({ onSubmit, onCancel, isPending }: { onSubmit: (body: string) 
   );
 }
 
+/* ── Comment author meta line ────────────────────────────────────────────── */
+function CommentMeta({ authorName, authorCountry, createdAt, compact = false }: {
+  authorName: string;
+  authorCountry: string | null;
+  createdAt: string;
+  compact?: boolean;
+}) {
+  const date = new Date(createdAt);
+  const fullDate = format(date, "d MMM yyyy, h:mm a");
+  const isRecent = differenceInDays(new Date(), date) < 7;
+  const relativeTime = formatDistanceToNow(date, { addSuffix: true });
+  const shortDate = format(date, "d MMM yyyy");
+  const flag = authorCountry && authorCountry !== "any" ? COUNTRY_MAP[authorCountry]?.flag : null;
+
+  return (
+    <div className={`flex items-center gap-1.5 flex-wrap ${compact ? "gap-x-1" : ""}`}>
+      {/* Name + flag */}
+      <span
+        className="font-bold text-white leading-none"
+        style={{ fontSize: compact ? 11 : 12 }}
+      >
+        {authorName}
+      </span>
+      {flag && (
+        <span
+          className="leading-none select-none"
+          style={{ fontSize: compact ? 13 : 14 }}
+          title={COUNTRY_MAP[authorCountry!]?.label}
+        >
+          {flag}
+        </span>
+      )}
+      {/* Separator dot */}
+      <span className="text-muted-foreground/25" style={{ fontSize: 10 }}>·</span>
+      {/* Timestamp — relative + absolute on hover */}
+      <span
+        className="text-muted-foreground/45 cursor-default leading-none"
+        style={{ fontSize: compact ? 9 : 10 }}
+        title={fullDate}
+      >
+        {isRecent ? relativeTime : shortDate}
+      </span>
+    </div>
+  );
+}
+
 /* ── Comment thread ── */
 function CommentItem({ comment, suggestionId, depth = 0 }: { comment: Comment; suggestionId: number; depth?: number }) {
   const { user } = useAuth();
@@ -729,12 +777,12 @@ function CommentItem({ comment, suggestionId, depth = 0 }: { comment: Comment; s
       <div className="flex gap-3 py-3">
         <Avatar name={comment.authorName} size={26} />
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-[12px] font-bold text-white">{comment.authorName}</span>
-            <span className="text-[10px] text-muted-foreground/45">
-              {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
-            </span>
-          </div>
+          <CommentMeta
+            authorName={comment.authorName}
+            authorCountry={comment.authorCountry}
+            createdAt={comment.createdAt}
+            compact={depth > 0}
+          />
           <CommentBody body={comment.body} />
           {user && depth === 0 && (
             <button

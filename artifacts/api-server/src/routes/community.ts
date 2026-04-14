@@ -234,6 +234,7 @@ router.get("/community/suggestions/:id/comments", async (req, res): Promise<void
       body: suggestionCommentsTable.body,
       createdAt: suggestionCommentsTable.createdAt,
       authorName: usersTable.name,
+      authorCountry: usersTable.country,
     })
     .from(suggestionCommentsTable)
     .leftJoin(usersTable, eq(suggestionCommentsTable.userId, usersTable.id))
@@ -280,7 +281,7 @@ router.post("/community/suggestions/:id/comments", requireAuth, async (req, res)
     .values({ suggestionId, userId: user.id, parentId: parentId ?? null, body: cleanBody })
     .returning();
 
-  res.status(201).json({ ...comment, authorName: user.name, replies: [] });
+  res.status(201).json({ ...comment, authorName: user.name, authorCountry: user.country ?? null, replies: [] });
 });
 
 export default router;
