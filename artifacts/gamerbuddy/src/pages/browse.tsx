@@ -879,21 +879,21 @@ export default function Browse() {
       >
         {/* ── Panel header ── */}
         <div
-          className="flex items-center justify-between px-4 py-2.5 border-b"
+          className="flex items-center justify-between px-5 py-3.5 border-b"
           style={{
-            borderColor: "rgba(255,255,255,0.06)",
-            background: hasFilters ? "rgba(168,85,247,0.06)" : "rgba(255,255,255,0.02)",
+            borderColor: "rgba(255,255,255,0.07)",
+            background: hasFilters ? "rgba(168,85,247,0.07)" : "rgba(255,255,255,0.025)",
             transition: "background 0.3s",
           }}
         >
-          <div className="flex items-center gap-2">
-            <SlidersHorizontal className="h-3.5 w-3.5" style={{ color: hasFilters ? "#a855f7" : "rgba(255,255,255,0.35)" }} />
-            <span className="text-[11px] font-extrabold uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.55)" }}>
+          <div className="flex items-center gap-2.5">
+            <SlidersHorizontal className="h-4 w-4" style={{ color: hasFilters ? "#a855f7" : "rgba(255,255,255,0.35)" }} />
+            <span className="text-xs font-extrabold uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.55)" }}>
               Sort &amp; Filter
             </span>
             {hasFilters && (
               <span
-                className="text-[9px] font-black px-1.5 py-0.5 rounded-full"
+                className="text-[10px] font-black px-2 py-0.5 rounded-full"
                 style={{ background: "rgba(168,85,247,0.25)", color: "#c084fc", border: "1px solid rgba(168,85,247,0.40)" }}
               >
                 {activeTags.length} active
@@ -903,7 +903,7 @@ export default function Browse() {
           {hasFilters && (
             <button
               onClick={clearFilters}
-              className="flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-wider rounded-lg px-3 py-1.5 transition-all duration-200 hover:brightness-115 active:scale-95"
+              className="flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-wider rounded-lg px-3.5 py-2 transition-all duration-200 hover:brightness-115 active:scale-95"
               style={{
                 background: "linear-gradient(135deg,rgba(239,68,68,0.18) 0%,rgba(239,68,68,0.08) 100%)",
                 border: "1px solid rgba(239,68,68,0.40)",
@@ -911,28 +911,28 @@ export default function Browse() {
                 boxShadow: "0 0 12px rgba(239,68,68,0.12)",
               }}
             >
-              <X className="h-3 w-3" /> Clear All
+              <X className="h-3.5 w-3.5" /> Clear All
             </button>
           )}
         </div>
 
         {/* ── Search + platform row ── */}
         <div
-          className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 border-b"
+          className="grid grid-cols-1 sm:grid-cols-3 gap-3 px-5 py-4 border-b"
           style={{ borderColor: "rgba(255,255,255,0.05)", background: "rgba(0,0,0,0.12)" }}
         >
           <div className="relative sm:col-span-2">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
             <Input
               placeholder="Search game, objectives, or player…"
-              className="pl-9 bg-background/60 border-border/60"
+              className="pl-10 h-10 bg-background/50 border-border/50 text-sm placeholder:text-muted-foreground/40 focus:border-primary/40"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
           <Select value={platform} onValueChange={setPlatform}>
-            <SelectTrigger className="bg-background/60 border-border/60">
-              <Monitor className="h-4 w-4 mr-2 text-muted-foreground shrink-0" />
+            <SelectTrigger className="h-10 bg-background/50 border-border/50 text-sm">
+              <Monitor className="h-4 w-4 mr-2 text-muted-foreground/60 shrink-0" />
               <SelectValue placeholder="Platform" />
             </SelectTrigger>
             <SelectContent>
@@ -944,32 +944,32 @@ export default function Browse() {
 
         {/* ── Sort row ── */}
         <div
-          className="flex flex-col sm:flex-row sm:items-start gap-2 sm:gap-3 px-4 py-3 border-b"
+          className="flex flex-col sm:flex-row sm:items-center gap-3 px-5 py-4 border-b"
           style={{ borderColor: "rgba(255,255,255,0.05)", background: "rgba(0,0,0,0.15)" }}
         >
-          <span className="text-[10px] font-extrabold uppercase tracking-widest sm:pt-1.5 sm:shrink-0 sm:w-14" style={{ color: "rgba(255,255,255,0.30)" }}>
+          <span className="text-[10px] font-extrabold uppercase tracking-widest shrink-0 sm:w-16 text-muted-foreground/35">
             Sort by
           </span>
-          <div className="flex flex-wrap gap-1.5">
+          <div className="flex flex-wrap gap-2">
             {SORT_OPTIONS.map(({ value, label, Icon }) => {
               const active = sort === value;
               return (
                 <button
                   key={value}
                   onClick={() => setSort(value)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all duration-200 active:scale-95"
+                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold transition-all duration-200 active:scale-95"
                   style={active ? {
-                    background: "rgba(168,85,247,0.22)",
-                    border: "1px solid rgba(168,85,247,0.55)",
+                    background: "rgba(168,85,247,0.20)",
+                    border: "1px solid rgba(168,85,247,0.50)",
                     color: "#c084fc",
-                    boxShadow: "0 0 12px rgba(168,85,247,0.22)",
+                    boxShadow: "0 0 14px rgba(168,85,247,0.20)",
                   } : {
                     background: "rgba(255,255,255,0.04)",
-                    border: "1px solid rgba(255,255,255,0.08)",
+                    border: "1px solid rgba(255,255,255,0.09)",
                     color: "rgba(255,255,255,0.45)",
                   }}
                 >
-                  {active ? <CheckCircle2 className="h-3 w-3 shrink-0" /> : <Icon className="h-3 w-3 shrink-0 opacity-50" />}
+                  {active ? <CheckCircle2 className="h-3 w-3 shrink-0 text-purple-400" /> : <Icon className="h-3 w-3 shrink-0 opacity-45" />}
                   {label}
                 </button>
               );
@@ -979,33 +979,33 @@ export default function Browse() {
 
         {/* ── Experience level row ── */}
         <div
-          className="flex flex-col sm:flex-row sm:items-start gap-2 sm:gap-3 px-4 py-3 border-b"
+          className="flex flex-col sm:flex-row sm:items-center gap-3 px-5 py-4 border-b"
           style={{ borderColor: "rgba(255,255,255,0.05)", background: "rgba(0,0,0,0.10)" }}
         >
-          <span className="text-[10px] font-extrabold uppercase tracking-widest sm:pt-1.5 sm:shrink-0 sm:w-14" style={{ color: "rgba(255,255,255,0.30)" }}>
+          <span className="text-[10px] font-extrabold uppercase tracking-widest shrink-0 sm:w-16 text-muted-foreground/35">
             Level
           </span>
-          <div className="flex flex-wrap gap-1.5">
+          <div className="flex flex-wrap gap-2">
             {LEVEL_OPTIONS.map(({ value, label, dot }) => {
               const active = levelFilter === value;
               return (
                 <button
                   key={value}
                   onClick={() => setLevelFilter(value)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all duration-200 active:scale-95"
+                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold transition-all duration-200 active:scale-95"
                   style={active ? {
                     background: "rgba(96,165,250,0.18)",
-                    border: "1px solid rgba(96,165,250,0.50)",
+                    border: "1px solid rgba(96,165,250,0.48)",
                     color: "#93c5fd",
-                    boxShadow: "0 0 12px rgba(96,165,250,0.18)",
+                    boxShadow: "0 0 14px rgba(96,165,250,0.18)",
                   } : {
                     background: "rgba(255,255,255,0.04)",
-                    border: "1px solid rgba(255,255,255,0.08)",
+                    border: "1px solid rgba(255,255,255,0.09)",
                     color: "rgba(255,255,255,0.50)",
                   }}
                 >
                   {active
-                    ? <CheckCircle2 className="h-3 w-3 shrink-0" style={{ color: "#93c5fd" }} />
+                    ? <CheckCircle2 className="h-3 w-3 shrink-0 text-blue-300" />
                     : <div className="h-2 w-2 rounded-full shrink-0" style={{ background: dot }} />
                   }
                   {label}
@@ -1022,13 +1022,13 @@ export default function Browse() {
           const geoActive = nationActive || genderActive;
           return (
             <div
-              className="flex flex-col sm:flex-row sm:items-start gap-2 sm:gap-3 px-4 py-3 border-b transition-colors duration-200"
+              className="flex flex-col sm:flex-row sm:items-start gap-3 px-5 py-4 border-b transition-colors duration-200"
               style={{
                 borderColor: "rgba(255,255,255,0.05)",
-                background: geoActive ? "rgba(251,191,36,0.05)" : "rgba(0,0,0,0.12)",
+                background: geoActive ? "rgba(251,191,36,0.04)" : "rgba(0,0,0,0.12)",
               }}
             >
-              <div className="sm:shrink-0 sm:w-14 sm:pt-1 flex items-center gap-1.5">
+              <div className="sm:shrink-0 sm:w-16 sm:pt-1 flex items-center gap-1.5">
                 <span
                   className="text-[10px] font-extrabold uppercase tracking-widest"
                   style={{ color: geoActive ? "rgba(251,191,36,0.75)" : "rgba(255,255,255,0.30)" }}
@@ -1088,38 +1088,38 @@ export default function Browse() {
 
         {/* ── Toggle filters row ── */}
         <div
-          className="flex flex-col sm:flex-row sm:items-start gap-2 sm:gap-3 px-4 py-3"
+          className="flex flex-col sm:flex-row sm:items-center gap-3 px-5 py-4"
           style={{ background: "rgba(0,0,0,0.10)" }}
         >
-          <span className="text-[10px] font-extrabold uppercase tracking-widest sm:shrink-0 sm:w-14 sm:pt-1.5" style={{ color: "rgba(255,255,255,0.30)" }}>
+          <span className="text-[10px] font-extrabold uppercase tracking-widest shrink-0 sm:w-16 text-muted-foreground/35">
             Only
           </span>
-          <div className="flex flex-wrap gap-1.5">
+          <div className="flex flex-wrap gap-2">
             {([
-              { label: "Verified Poster", Icon: Shield,   on: verifiedPosterOnly, set: () => setVerifiedPosterOnly(v => !v), activeStyle: { bg: "rgba(34,197,94,0.18)",   border: "rgba(34,197,94,0.50)",   color: "#4ade80",   glow: "rgba(34,197,94,0.18)"   } },
-              { label: "Bulk Hiring",     Icon: Users,    on: bulkOnly,           set: () => setBulkOnly(v => !v),           activeStyle: { bg: "rgba(168,85,247,0.18)", border: "rgba(168,85,247,0.50)", color: "#c084fc",   glow: "rgba(168,85,247,0.18)" } },
-              { label: "Easy Wins",       Icon: Flame,    on: noBidsOnly,         set: () => setNoBidsOnly(v => !v),         activeStyle: { bg: "rgba(34,211,238,0.15)", border: "rgba(34,211,238,0.45)", color: "#22d3ee",   glow: "rgba(34,211,238,0.15)" } },
-              { label: "Has Streaming",   Icon: Tv,       on: hasStreamingFilter, set: () => setHasStreamingFilter(v => !v), activeStyle: { bg: "rgba(145,70,255,0.18)", border: "rgba(145,70,255,0.50)", color: "#c084fc",   glow: "rgba(145,70,255,0.18)" } },
-              { label: "Quest Bids",      Icon: Sparkles, on: hasQuestFilter,     set: () => setHasQuestFilter(v => !v),     activeStyle: { bg: "rgba(251,191,36,0.16)", border: "rgba(251,191,36,0.45)", color: "#fbbf24",   glow: "rgba(251,191,36,0.15)" } },
+              { label: "Verified Poster", Icon: Shield,   on: verifiedPosterOnly, set: () => setVerifiedPosterOnly(v => !v), activeStyle: { bg: "rgba(34,197,94,0.18)",   border: "rgba(34,197,94,0.50)",   color: "#4ade80",   glow: "rgba(34,197,94,0.16)"   } },
+              { label: "Bulk Hiring",     Icon: Users,    on: bulkOnly,           set: () => setBulkOnly(v => !v),           activeStyle: { bg: "rgba(168,85,247,0.18)", border: "rgba(168,85,247,0.50)", color: "#c084fc",   glow: "rgba(168,85,247,0.16)" } },
+              { label: "Easy Wins",       Icon: Flame,    on: noBidsOnly,         set: () => setNoBidsOnly(v => !v),         activeStyle: { bg: "rgba(34,211,238,0.15)", border: "rgba(34,211,238,0.45)", color: "#22d3ee",   glow: "rgba(34,211,238,0.14)" } },
+              { label: "Has Streaming",   Icon: Tv,       on: hasStreamingFilter, set: () => setHasStreamingFilter(v => !v), activeStyle: { bg: "rgba(145,70,255,0.18)", border: "rgba(145,70,255,0.50)", color: "#c084fc",   glow: "rgba(145,70,255,0.16)" } },
+              { label: "Quest Bids",      Icon: Sparkles, on: hasQuestFilter,     set: () => setHasQuestFilter(v => !v),     activeStyle: { bg: "rgba(251,191,36,0.16)", border: "rgba(251,191,36,0.45)", color: "#fbbf24",   glow: "rgba(251,191,36,0.14)" } },
             ] as const).map(({ label, Icon, on, set, activeStyle }) => (
               <button
                 key={label}
                 onClick={set}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all duration-200 active:scale-95"
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold transition-all duration-200 active:scale-95"
                 style={on ? {
                   background: activeStyle.bg,
                   border: `1px solid ${activeStyle.border}`,
                   color: activeStyle.color,
-                  boxShadow: `0 0 12px ${activeStyle.glow}`,
+                  boxShadow: `0 0 14px ${activeStyle.glow}`,
                 } : {
                   background: "rgba(255,255,255,0.04)",
-                  border: "1px solid rgba(255,255,255,0.08)",
+                  border: "1px solid rgba(255,255,255,0.09)",
                   color: "rgba(255,255,255,0.45)",
                 }}
               >
                 {on
                   ? <CheckCircle2 className="h-3 w-3 shrink-0" style={{ color: activeStyle.color }} />
-                  : <Icon className="h-3 w-3 shrink-0 opacity-50" />
+                  : <Icon className="h-3 w-3 shrink-0 opacity-45" />
                 }
                 {label}
               </button>
@@ -1137,7 +1137,7 @@ export default function Browse() {
             }}
           >
             {/* Section header: label + count + result summary */}
-            <div className="flex items-center gap-2 px-4 pt-3 pb-2">
+            <div className="flex items-center gap-2 px-5 pt-3.5 pb-2.5">
               <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse shrink-0" />
               <span
                 className="text-[10px] font-extrabold uppercase tracking-[0.14em] shrink-0"
@@ -1167,7 +1167,7 @@ export default function Browse() {
             </div>
 
             {/* Tag chips */}
-            <div className="flex flex-wrap gap-1.5 px-4 pb-3.5">
+            <div className="flex flex-wrap gap-2 px-5 pb-4">
               {activeTags.map((tag, idx) => (
                 <button
                   key={tag.id}
