@@ -420,52 +420,98 @@ function AcceptModal({
           <button onClick={onClose} className="text-muted-foreground hover:text-white"><X className="h-5 w-5" /></button>
         </div>
 
-        <div className={`rounded-xl border p-4 space-y-3 ${isBulkMode ? "border-purple-500/30 bg-purple-500/5" : "border-green-500/30 bg-green-500/5"}`}>
-          <div className="text-xs font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1.5">
-            <ShieldCheck className={`h-3.5 w-3.5 ${isBulkMode ? "text-purple-400" : "text-green-400"}`} />
-            {isBulkMode ? "This Gamer's Bid" : "Payment Breakdown"}
-          </div>
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">{isBulkMode ? "Bid Rate" : "Session Amount"}</span>
-              <span className="font-bold text-white">${bid.price.toFixed(2)}</span>
+        {isBulkMode ? (
+          /* ── Bulk mode: deferred payment breakdown ── */
+          <div className="space-y-3">
+            {/* No-charge-now banner */}
+            <div className="flex items-center gap-2.5 rounded-xl border border-purple-500/40 bg-purple-500/10 px-4 py-2.5">
+              <div className="h-7 w-7 rounded-full bg-purple-500/20 border border-purple-500/30 flex items-center justify-center shrink-0">
+                <ShieldCheck className="h-3.5 w-3.5 text-purple-400" />
+              </div>
+              <div>
+                <div className="text-xs font-black text-purple-300 uppercase tracking-wide">No Charge Now</div>
+                <div className="text-[10px] text-purple-300/60">Your wallet is only debited when you lock the full roster.</div>
+              </div>
             </div>
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground flex items-center gap-1">
-                <span className="text-amber-400 font-bold text-xs">10%</span> Platform Fee
-              </span>
-              <span className="font-bold text-amber-400">−${(bid.price * 0.1).toFixed(2)}</span>
-            </div>
-            <div className={`h-px ${isBulkMode ? "bg-purple-500/20" : "bg-green-500/20"}`} />
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-extrabold text-white">Gamer Receives</span>
-              <span className={`text-xl font-black ${isBulkMode ? "text-purple-400" : "text-green-400"}`}>${(bid.price * 0.9).toFixed(2)}</span>
-            </div>
-          </div>
 
-          {isBulkMode ? (
-            <div className="mt-3 pt-3 border-t border-purple-500/20 space-y-1.5">
-              <div className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Running Group Total</div>
+            {/* Per-gamer cost breakdown */}
+            <div className="rounded-xl border border-white/8 bg-white/3 p-4 space-y-2.5">
+              <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">This Gamer's Contribution to Group</div>
               <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">New group total</span>
-                <span className="font-bold text-white">${newGroupTotal.toFixed(2)}</span>
+                <span className="text-muted-foreground">Session Amount</span>
+                <span className="font-black text-white">${bid.price.toFixed(2)}</span>
               </div>
               <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Gamers receive (90%)</span>
-                <span className="font-bold text-purple-300">${(newGroupTotal * 0.9).toFixed(2)}</span>
+                <span className="text-muted-foreground flex items-center gap-1.5">
+                  <span className="inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-black bg-amber-500/15 border border-amber-500/25 text-amber-300">10%</span>
+                  Platform Fee
+                </span>
+                <span className="font-bold text-amber-400">${(bid.price * 0.1).toFixed(2)}</span>
               </div>
-              <div className="flex items-start gap-2 rounded-lg bg-purple-500/8 border border-purple-500/20 px-2.5 py-2 text-[11px] text-purple-300/80 mt-2">
-                <AlertTriangle className="h-3.5 w-3.5 text-purple-400 shrink-0 mt-0.5" />
-                No charge now — the full group total is collected from your wallet when you lock the roster.
+              <div className="h-px bg-white/6" />
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-bold text-white">Gamer Receives</span>
+                <span className="text-xl font-black text-green-400">${(bid.price * 0.9).toFixed(2)}</span>
               </div>
             </div>
-          ) : (
+
+            {/* Running group total arrow */}
+            <div className="rounded-xl border border-purple-500/25 bg-purple-500/6 p-4 space-y-2.5">
+              <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Group Total Preview</div>
+              <div className="flex items-center gap-3 text-sm">
+                <div className="flex-1 rounded-lg border border-white/8 bg-white/4 px-3 py-2 text-center">
+                  <div className="text-[10px] text-muted-foreground mb-0.5">Before</div>
+                  <div className="font-black text-white tabular-nums">${(currentGroupTotal ?? 0).toFixed(2)}</div>
+                </div>
+                <div className="text-purple-400 font-black text-lg">→</div>
+                <div className="flex-1 rounded-lg border border-purple-500/30 bg-purple-500/10 px-3 py-2 text-center">
+                  <div className="text-[10px] text-purple-400/70 mb-0.5">After This Gamer</div>
+                  <div className="font-black text-purple-300 tabular-nums text-lg">${newGroupTotal.toFixed(2)}</div>
+                </div>
+              </div>
+              {/* Mini breakdown at-lock */}
+              <div className="grid grid-cols-2 gap-2 pt-1 text-[11px]">
+                <div className="flex items-center justify-between rounded-lg border border-amber-500/20 bg-amber-500/5 px-2.5 py-1.5">
+                  <span className="text-muted-foreground">Fee (10%)</span>
+                  <span className="font-black text-amber-300">${(newGroupTotal * 0.1).toFixed(2)}</span>
+                </div>
+                <div className="flex items-center justify-between rounded-lg border border-green-500/20 bg-green-500/5 px-2.5 py-1.5">
+                  <span className="text-muted-foreground">To Gamers (90%)</span>
+                  <span className="font-black text-green-400">${(newGroupTotal * 0.9).toFixed(2)}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          /* ── Single-hire mode: standard escrow breakdown ── */
+          <div className="rounded-xl border border-green-500/30 bg-green-500/5 p-4 space-y-3">
+            <div className="text-xs font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1.5">
+              <ShieldCheck className="h-3.5 w-3.5 text-green-400" />
+              Payment Breakdown
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Session Amount</span>
+                <span className="font-bold text-white">${bid.price.toFixed(2)}</span>
+              </div>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground flex items-center gap-1">
+                  <span className="text-amber-400 font-bold text-xs">10%</span> Platform Fee
+                </span>
+                <span className="font-bold text-amber-400">−${(bid.price * 0.1).toFixed(2)}</span>
+              </div>
+              <div className="h-px bg-green-500/20" />
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-extrabold text-white">Gamer Receives</span>
+                <span className="text-xl font-black text-green-400">${(bid.price * 0.9).toFixed(2)}</span>
+              </div>
+            </div>
             <div className="flex items-start gap-2 rounded-lg bg-amber-500/8 border border-amber-500/20 px-2.5 py-2 text-[11px] text-amber-300/80">
               <AlertTriangle className="h-3.5 w-3.5 text-amber-400 shrink-0 mt-0.5" />
-              10% platform fee is deducted from every completed Quest/Job. Funds are held in escrow until the session is approved.
+              10% platform fee is deducted at completion. Funds are held in escrow until the session is approved.
             </div>
-          )}
-        </div>
+          </div>
+        )}
 
         <div className="space-y-1.5">
           <label className="text-xs uppercase tracking-widest text-muted-foreground">
@@ -883,22 +929,41 @@ function BulkSelectionBar({
           boxShadow: "0 0 50px rgba(168,85,247,0.3), 0 25px 60px rgba(0,0,0,0.6)",
         }}
       >
-        <div className="flex items-center gap-2 text-sm">
-          <div className="h-7 w-7 rounded-full bg-purple-500/20 border border-purple-500/40 flex items-center justify-center">
-            <Users className="h-3.5 w-3.5 text-purple-400" />
+        {/* Left: gamer count + cost breakdown */}
+        <div className="flex items-center gap-3 flex-wrap">
+          <div className="flex items-center gap-2 text-sm">
+            <div className="h-7 w-7 rounded-full bg-purple-500/20 border border-purple-500/40 flex items-center justify-center shrink-0">
+              <Users className="h-3.5 w-3.5 text-purple-400" />
+            </div>
+            <span className="font-black text-white tabular-nums">{count}</span>
+            <span className="text-purple-300/80">gamer{count !== 1 ? "s" : ""} selected</span>
           </div>
-          <span className="font-black text-white">{count}</span>
-          <span className="text-purple-300/80">gamer{count !== 1 ? "s" : ""} selected</span>
-          <span className="text-purple-600 mx-0.5">·</span>
-          <span className="font-black text-white">${totalCost.toFixed(2)}</span>
-          <span className="text-purple-300/60 text-xs">from wallet</span>
+          <div className="h-4 w-px bg-purple-500/30 hidden md:block" />
+          {/* Cost breakdown strip */}
+          <div className="flex items-center gap-2 text-xs flex-wrap">
+            <div className="flex items-center gap-1.5 rounded-lg border border-purple-500/30 bg-purple-500/10 px-2.5 py-1">
+              <span className="text-muted-foreground">Total at lock</span>
+              <span className="font-black text-purple-300 tabular-nums">${totalCost.toFixed(2)}</span>
+            </div>
+            <div className="flex items-center gap-1.5 rounded-lg border border-amber-500/20 bg-amber-500/8 px-2.5 py-1">
+              <span className="text-amber-300 font-bold">10%</span>
+              <span className="text-muted-foreground">fee</span>
+              <span className="font-black text-amber-300 tabular-nums">${(totalCost * 0.1).toFixed(2)}</span>
+            </div>
+            <div className="flex items-center gap-1.5 rounded-lg border border-green-500/20 bg-green-500/8 px-2.5 py-1">
+              <span className="text-muted-foreground">Gamers get</span>
+              <span className="font-black text-green-400 tabular-nums">${(totalCost * 0.9).toFixed(2)}</span>
+            </div>
+          </div>
           {wouldExceed && (
-            <span className="ml-1 text-amber-400 text-xs font-bold flex items-center gap-1">
+            <span className="text-amber-400 text-xs font-bold flex items-center gap-1 ml-1">
               <AlertTriangle className="h-3 w-3" /> exceeds slots
             </span>
           )}
         </div>
-        <div className="flex gap-2">
+
+        {/* Right: action buttons */}
+        <div className="flex gap-2 shrink-0">
           <Button
             size="sm"
             variant="ghost"
@@ -916,17 +981,17 @@ function BulkSelectionBar({
               boxShadow: "0 0 20px rgba(168,85,247,0.5)",
             }}
             onClick={onAccept}
-            disabled={isPending}
+            disabled={isPending || wouldExceed}
           >
             {isPending ? (
               <span className="flex items-center gap-2">
                 <div className="h-3.5 w-3.5 rounded-full border-2 border-white/30 border-t-white animate-spin" />
-                Accepting…
+                Reserving…
               </span>
             ) : (
               <span className="flex items-center gap-2">
                 <CheckCircle2 className="h-3.5 w-3.5" />
-                Accept {count} Gamer{count !== 1 ? "s" : ""}
+                Reserve {count} Slot{count !== 1 ? "s" : ""}
               </span>
             )}
           </Button>
@@ -1687,27 +1752,31 @@ export default function RequestDetail() {
                   ? `${bulkSlotsNeeded - acceptedBidsCount} slot${bulkSlotsNeeded - acceptedBidsCount !== 1 ? "s" : ""} still open — you can keep adding gamers or lock now to start the session.`
                   : "All slots are filled. Lock the roster to collect payment and start the session."}
               </p>
-              {/* Payment preview */}
+              {/* Payment preview grid */}
               {lockGroupTotal > 0 && (
-                <div className="rounded-lg border border-purple-500/20 bg-purple-500/8 p-3 space-y-2 text-xs">
-                  <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">Group total ({acceptedBidsCount} gamers)</span>
-                    <span className="font-black text-white">${lockGroupTotal.toFixed(2)}</span>
+                <div className="space-y-2">
+                  {/* 3-column grid */}
+                  <div className="grid grid-cols-3 gap-2 text-xs">
+                    <div className="rounded-xl border border-purple-500/30 bg-purple-500/10 px-3 py-2.5 flex flex-col gap-0.5">
+                      <span className="text-muted-foreground text-[10px] uppercase tracking-wide">Session Total</span>
+                      <span className="font-black text-purple-300 text-base tabular-nums">${lockGroupTotal.toFixed(2)}</span>
+                      <span className="text-[9px] text-muted-foreground/50">{acceptedBidsCount} gamer{acceptedBidsCount !== 1 ? "s" : ""}</span>
+                    </div>
+                    <div className="rounded-xl border border-amber-500/25 bg-amber-500/8 px-3 py-2.5 flex flex-col gap-0.5">
+                      <span className="text-muted-foreground text-[10px] uppercase tracking-wide">Platform Fee</span>
+                      <span className="font-black text-amber-300 text-base tabular-nums">${lockPlatformFee.toFixed(2)}</span>
+                      <span className="text-[9px] text-muted-foreground/50">10%</span>
+                    </div>
+                    <div className="rounded-xl border border-green-500/25 bg-green-500/8 px-3 py-2.5 flex flex-col gap-0.5">
+                      <span className="text-muted-foreground text-[10px] uppercase tracking-wide">Gamers Receive</span>
+                      <span className="font-black text-green-400 text-base tabular-nums">${lockGamersTotal.toFixed(2)}</span>
+                      <span className="text-[9px] text-muted-foreground/50">90%</span>
+                    </div>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground flex items-center gap-1">
-                      <span className="text-amber-400 font-bold">10%</span> Platform fee
-                    </span>
-                    <span className="font-bold text-amber-400">−${lockPlatformFee.toFixed(2)}</span>
-                  </div>
-                  <div className="h-px bg-purple-500/20" />
-                  <div className="flex items-center justify-between">
-                    <span className="font-bold text-white">Gamers receive (90%)</span>
-                    <span className="font-black text-purple-300">${lockGamersTotal.toFixed(2)}</span>
-                  </div>
-                  <div className="flex items-center gap-1.5 pt-1 text-purple-300/60">
-                    <AlertTriangle className="h-3 w-3 shrink-0" />
-                    <span>${lockGroupTotal.toFixed(2)} will be deducted from your Hiring Wallet at lock.</span>
+                  {/* Wallet debit warning */}
+                  <div className="flex items-center gap-2 rounded-lg border border-amber-500/20 bg-amber-500/6 px-3 py-2 text-[11px] text-amber-300/80">
+                    <AlertTriangle className="h-3.5 w-3.5 text-amber-400 shrink-0" />
+                    <span><strong className="text-amber-300">${lockGroupTotal.toFixed(2)}</strong> will be deducted from your Hiring Wallet when you lock.</span>
                   </div>
                 </div>
               )}
