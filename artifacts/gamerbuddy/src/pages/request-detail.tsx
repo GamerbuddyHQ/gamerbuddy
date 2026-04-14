@@ -1128,22 +1128,14 @@ function BidCard({
             </div>
 
             {/* Name + badges block */}
-            <div className="flex-1 min-w-0 space-y-1.5">
-              {/* Name row */}
+            <div className="flex-1 min-w-0 space-y-1">
+              {/* Row 1: Name + verified */}
               <div className="flex items-center gap-2 flex-wrap">
                 <Link href={`/users/${bid.bidderId}`}>
                   <a className="font-extrabold text-white text-base leading-none hover:text-primary transition-colors">
                     {bid.bidderName}
                   </a>
                 </Link>
-                {bid.bidderCountry && bid.bidderCountry !== "any" && (
-                  <span
-                    className="text-base leading-none shrink-0"
-                    title={COUNTRY_MAP[bid.bidderCountry]?.label ?? bid.bidderCountry}
-                  >
-                    {COUNTRY_MAP[bid.bidderCountry]?.flag}
-                  </span>
-                )}
                 <VerifiedBadge idVerified={bid.bidderIdVerified ?? false} variant="compact" />
                 {isMe && <span className="text-xs text-secondary font-semibold">(You)</span>}
                 {isAccepted && bid.discordUsername && (
@@ -1153,8 +1145,8 @@ function BidCard({
                 )}
               </div>
 
-              {/* Trust Factor + Reputation Badges + geo row */}
-              <div className="flex items-center gap-2 flex-wrap">
+              {/* Row 2: Trust + reputation + compact streaming */}
+              <div className="flex items-center gap-1.5 flex-wrap">
                 <TrustChip value={bid.bidderTrustFactor ?? 50} />
                 <ReputationBadges
                   compact
@@ -1167,11 +1159,15 @@ function BidCard({
                   }).filter((b) => b.id !== "verified")}
                 />
                 <BidderStreamingBadges bidderId={bid.bidderId} compact />
+              </div>
+
+              {/* Row 3: Geo pills + timestamp */}
+              <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
                 {bid.bidderCountry && bid.bidderCountry !== "any" && COUNTRY_MAP[bid.bidderCountry] && (
                   <span
-                    className="inline-flex items-center gap-1 text-[10px] font-semibold rounded-full px-1.5 py-0.5"
+                    className="inline-flex items-center gap-1 text-[10px] font-semibold rounded-full px-2 py-0.5"
                     style={{
-                      background: "rgba(251,191,36,0.10)",
+                      background: "rgba(251,191,36,0.09)",
                       border: "1px solid rgba(251,191,36,0.22)",
                       color: "rgba(251,191,36,0.85)",
                     }}
@@ -1182,9 +1178,9 @@ function BidCard({
                 )}
                 {bid.bidderGender && bid.bidderGender !== "any" && GENDER_MAP[bid.bidderGender] && (
                   <span
-                    className="inline-flex items-center gap-1 text-[10px] font-semibold rounded-full px-1.5 py-0.5"
+                    className="inline-flex items-center gap-1 text-[10px] font-semibold rounded-full px-2 py-0.5"
                     style={{
-                      background: "rgba(236,72,153,0.10)",
+                      background: "rgba(236,72,153,0.09)",
                       border: "1px solid rgba(236,72,153,0.22)",
                       color: "rgba(236,72,153,0.80)",
                     }}
@@ -1193,10 +1189,9 @@ function BidCard({
                     <span>{GENDER_MAP[bid.bidderGender].label}</span>
                   </span>
                 )}
-              </div>
-
-              <div className="flex items-center gap-1.5 text-xs text-muted-foreground/60">
-                <span>{format(new Date(bid.createdAt), "MMM d, h:mm a")}</span>
+                <span className="text-[11px] text-muted-foreground/45 ml-auto tabular-nums">
+                  {format(new Date(bid.createdAt), "MMM d, h:mm a")}
+                </span>
               </div>
             </div>
 
