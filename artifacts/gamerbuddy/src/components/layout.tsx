@@ -387,16 +387,34 @@ export function Layout({ children }: { children: React.ReactNode }) {
           </nav>
 
           <div className="flex items-center gap-2 shrink-0">
-            <button
-              onClick={toggleTheme}
-              aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
-              className="h-9 w-9 flex items-center justify-center rounded-xl border border-border/60 bg-background/60 hover:border-primary/50 hover:bg-primary/10 transition-all duration-200"
-            >
-              {isDark
-                ? <Sun className="h-4 w-4 text-yellow-400" />
-                : <Moon className="h-4 w-4 text-primary" />
-              }
-            </button>
+            {/* Theme toggle with animated icon + tooltip */}
+            <div className="relative group/theme">
+              <button
+                onClick={toggleTheme}
+                aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+                className="relative h-9 w-9 flex items-center justify-center rounded-xl border border-border/60 bg-background/60 hover:border-primary/50 hover:bg-primary/10 active:scale-90 transition-all duration-200 overflow-hidden"
+              >
+                <Sun
+                  className="absolute h-[18px] w-[18px] text-yellow-400 transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+                  style={{
+                    opacity: isDark ? 1 : 0,
+                    transform: isDark ? "rotate(0deg) scale(1)" : "rotate(90deg) scale(0.4)",
+                  }}
+                />
+                <Moon
+                  className="absolute h-[18px] w-[18px] text-primary transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+                  style={{
+                    opacity: isDark ? 0 : 1,
+                    transform: isDark ? "rotate(-90deg) scale(0.4)" : "rotate(0deg) scale(1)",
+                  }}
+                />
+              </button>
+              {/* Tooltip — desktop only */}
+              <div className="pointer-events-none absolute top-full left-1/2 mt-2 -translate-x-1/2 hidden md:flex items-center px-2.5 py-1 rounded-lg text-[11px] font-semibold whitespace-nowrap bg-popover text-popover-foreground border border-border/70 shadow-md opacity-0 group-hover/theme:opacity-100 translate-y-1 group-hover/theme:translate-y-0 transition-all duration-150 z-[200]">
+                Switch Theme
+                <span className="absolute -top-[5px] left-1/2 -translate-x-1/2 w-[9px] h-[9px] rotate-45 bg-popover border-l border-t border-border/70" />
+              </div>
+            </div>
             <LangSelector />
             <NotificationBell />
 
