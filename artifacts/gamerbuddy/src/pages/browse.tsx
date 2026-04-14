@@ -93,26 +93,36 @@ function BidConductReminder() {
 /* ── SKELETON ────────────────────────────────────────────────────────────── */
 function RequestCardSkeleton() {
   return (
-    <div className="rounded-2xl border border-border/30 bg-card/40 overflow-hidden animate-pulse">
+    <div className="rounded-2xl border border-border/25 bg-card/30 overflow-hidden animate-pulse">
+      <div className="h-[2px] w-full bg-primary/10" />
       <div className="flex">
-        <div className="w-1.5 shrink-0 bg-primary/20" />
-        <div className="flex-1 p-5 space-y-4">
-          <div className="flex justify-between items-start gap-4">
-            <div className="space-y-2 flex-1">
+        <div className="w-[3px] shrink-0 bg-primary/15" />
+        <div className="flex-1 px-6 py-7 md:px-8 md:py-8">
+          <div className="flex items-start gap-6">
+            {/* Avatar placeholder */}
+            <Skeleton className="hidden sm:block w-16 h-16 rounded-2xl shrink-0" />
+            {/* Content */}
+            <div className="flex-1 space-y-4 min-w-0">
               <div className="flex gap-2">
-                <Skeleton className="h-4 w-20 rounded-full" />
-                <Skeleton className="h-4 w-20 rounded-full" />
+                <Skeleton className="h-6 w-20 rounded-full" />
+                <Skeleton className="h-6 w-24 rounded-full" />
               </div>
-              <Skeleton className="h-8 w-56" />
-              <Skeleton className="h-4 w-36" />
+              <div className="space-y-2">
+                <Skeleton className="h-9 w-64" />
+                <Skeleton className="h-4 w-40" />
+              </div>
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-3/4" />
+              <div className="flex gap-2">
+                <Skeleton className="h-6 w-24 rounded-lg" />
+                <Skeleton className="h-6 w-28 rounded-lg" />
+              </div>
             </div>
-            <Skeleton className="h-11 w-32 rounded-xl shrink-0" />
-          </div>
-          <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-4 w-3/4" />
-          <div className="flex gap-4">
-            <Skeleton className="h-5 w-20 rounded-full" />
-            <Skeleton className="h-5 w-28 rounded-full" />
+            {/* CTA placeholder */}
+            <div className="shrink-0 sm:min-w-[156px] space-y-3 hidden sm:flex sm:flex-col">
+              <Skeleton className="h-13 w-full rounded-xl" style={{ height: 52 }} />
+              <Skeleton className="h-9 w-full rounded-xl" />
+            </div>
           </div>
         </div>
       </div>
@@ -359,185 +369,191 @@ function RequestCard({ req }: { req: GameRequest }) {
 
   const skill = SKILL_CONFIG[req.skillLevel] ?? DEFAULT_SKILL;
   const isZeroBids = req.bidCount === 0;
+  const hasContextTags = req.isBulkHiring
+    || (req.preferredCountry && req.preferredCountry !== "any")
+    || (req.preferredGender && req.preferredGender !== "any")
+    || isZeroBids;
 
   return (
     <div
       className={`group rounded-2xl border overflow-hidden transition-all duration-300 ${
         expanded
-          ? "border-primary/50 shadow-[0_0_48px_rgba(168,85,247,0.15)]"
-          : "border-border/50 hover:border-primary/35 hover:shadow-[0_0_32px_rgba(168,85,247,0.1)]"
+          ? "border-primary/50 shadow-[0_0_56px_rgba(168,85,247,0.18)]"
+          : "border-border/35 hover:border-primary/30 hover:shadow-[0_0_36px_rgba(168,85,247,0.10)]"
       }`}
       style={{
         background: expanded
-          ? `linear-gradient(135deg, ${skill.bar}0d 0%, rgba(0,0,0,0.65) 100%)`
-          : `linear-gradient(135deg, rgba(255,255,255,0.025) 0%, rgba(0,0,0,0.45) 100%)`,
+          ? `linear-gradient(145deg, ${skill.bar}0e 0%, rgba(0,0,0,0.72) 100%)`
+          : `linear-gradient(145deg, rgba(255,255,255,0.020) 0%, rgba(0,0,0,0.52) 100%)`,
       }}
     >
-      {/* Top gradient accent line — skill-level color */}
-      <div className="h-[2px] w-full" style={{ background: `linear-gradient(90deg, transparent 0%, ${skill.bar} 40%, ${skill.bar} 60%, transparent 100%)` }} />
+      {/* Top skill-color accent line */}
+      <div className="h-[2px] w-full" style={{ background: `linear-gradient(90deg, transparent 0%, ${skill.bar} 35%, ${skill.bar} 65%, transparent 100%)` }} />
 
       <div className="flex">
-        {/* Left skill bar — thicker for visual weight */}
-        <div className="w-[3px] shrink-0" style={{ background: `linear-gradient(180deg, ${skill.bar} 0%, ${skill.bar}44 100%)` }} />
+        {/* Left skill bar */}
+        <div className="w-[3px] shrink-0" style={{ background: `linear-gradient(180deg, ${skill.bar} 0%, ${skill.bar}28 100%)` }} />
 
-        <div className="flex-1 px-5 py-6 md:px-7 md:py-7">
-          {/* Main row */}
-          <div className="flex flex-col sm:flex-row sm:items-start gap-5">
+        {/* Card body */}
+        <div className="flex-1 px-6 py-7 md:px-8 md:py-8">
+          <div className="flex flex-col sm:flex-row sm:items-start gap-6">
 
-            {/* Game avatar — desktop only */}
-            <div className="hidden sm:block">
+            {/* Game avatar */}
+            <div className="hidden sm:block shrink-0">
               <GameAvatar name={req.gameName} bar={skill.bar} />
             </div>
 
-            {/* Center: main info */}
-            <div className="flex-1 space-y-3.5 min-w-0">
-              {/* Badges row */}
-              <div className="flex flex-wrap gap-2 items-center">
-                <span className="inline-flex items-center gap-1.5 text-xs border border-border/50 rounded-full px-3 py-1 font-semibold text-muted-foreground bg-white/[0.03]">
-                  <span className="text-sm">{PLATFORM_ICON[req.platform] ?? "🎮"}</span>
+            {/* ── Center column ── */}
+            <div className="flex-1 min-w-0 space-y-4">
+
+              {/* Row 1: Primary identity badges */}
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="inline-flex items-center gap-1.5 text-xs border border-border/40 rounded-full px-3 py-1 font-semibold text-muted-foreground/75 bg-white/[0.025]">
+                  <span className="text-sm leading-none">{PLATFORM_ICON[req.platform] ?? "🎮"}</span>
                   {req.platform}
                 </span>
                 <span className={`inline-flex items-center text-xs border rounded-full px-3 py-1 font-bold tracking-wide ${skill.border} ${skill.text} ${skill.bg}`}>
                   {req.skillLevel}
                 </span>
-                {req.isBulkHiring && (
-                  <span className="inline-flex items-center gap-1 text-[10px] bg-purple-500/15 border border-purple-500/35 text-purple-300 rounded-full px-2.5 py-1 font-black uppercase tracking-wider">
-                    <Users className="h-3 w-3" /> Bulk Hiring · {req.bulkGamersNeeded} slots
-                  </span>
-                )}
-                {req.preferredCountry && req.preferredCountry !== "any" && (
-                  <span className="inline-flex items-center gap-1 text-[10px] bg-amber-500/12 border border-amber-500/30 text-amber-300 rounded-full px-2.5 py-1 font-semibold">
-                    <Globe className="h-3 w-3" />
-                    {COUNTRY_MAP[req.preferredCountry]?.flag} {COUNTRY_MAP[req.preferredCountry]?.label ?? req.preferredCountry}
-                  </span>
-                )}
-                {req.preferredGender && req.preferredGender !== "any" && (
-                  <span className="inline-flex items-center gap-1 text-[10px] bg-pink-500/12 border border-pink-500/30 text-pink-300 rounded-full px-2.5 py-1 font-semibold">
-                    <UserRound className="h-3 w-3" />
-                    {GENDER_MAP[req.preferredGender]?.label ?? req.preferredGender}
-                  </span>
-                )}
-                {isZeroBids && !req.isBulkHiring && (
-                  <span className="inline-flex items-center gap-1 text-[10px] bg-green-500/15 border border-green-500/35 text-green-400 rounded-full px-2.5 py-1 font-black uppercase tracking-wider">
-                    <Flame className="h-3 w-3" /> First bid!
-                  </span>
-                )}
               </div>
 
-              {/* Game title */}
+              {/* Row 2: Game title + poster */}
               <div>
                 <h3
-                  className="text-2xl md:text-[1.75rem] font-extrabold text-white leading-none cursor-pointer transition-colors tracking-tight group-hover:text-primary/90"
-                  style={{ letterSpacing: "-0.025em" }}
+                  className="text-[1.65rem] md:text-[1.9rem] font-extrabold text-white leading-none cursor-pointer tracking-tight transition-colors duration-200 group-hover:text-primary/90"
+                  style={{ letterSpacing: "-0.03em" }}
                   onClick={() => setLocation(`/requests/${req.id}`)}
                 >
                   {req.gameName}
                 </h3>
-                <div className="flex items-center gap-2 mt-2 flex-wrap">
-                  <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
-                    <User className="h-3 w-3" />
-                    <span className="text-primary font-semibold">{req.userName}</span>
+                <div className="flex items-center gap-2 mt-2.5 flex-wrap">
+                  <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground/65">
+                    <User className="h-3 w-3 shrink-0" />
+                    <span className="text-primary/85 font-semibold">{req.userName}</span>
                     <VerifiedBadge idVerified={req.userIdVerified ?? false} variant="icon" />
                     <ReportButton userId={req.userId} userName={req.userName} variant="icon" />
                   </span>
-                  <span className="text-muted-foreground/25 text-xs">·</span>
-                  <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
-                    <Clock className="h-3 w-3" />
+                  <span className="text-muted-foreground/20 text-xs select-none">·</span>
+                  <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground/45">
+                    <Clock className="h-3 w-3 shrink-0" />
                     {format(new Date(req.createdAt), "MMM d")}
                   </span>
                 </div>
               </div>
 
-              {/* Objectives */}
+              {/* Row 3: Objectives */}
               <p
-                className="text-sm text-foreground/65 leading-relaxed border-l-[2px] pl-3.5 line-clamp-3"
-                style={{ borderColor: skill.bar + "70" }}
+                className="text-sm text-foreground/55 leading-relaxed line-clamp-2 pl-3.5"
+                style={{ borderLeft: `2px solid ${skill.bar}55` }}
               >
                 {req.objectives}
               </p>
 
-              {/* Bid stats chips */}
+              {/* Row 4: Context tags (only when relevant) */}
+              {hasContextTags && (
+                <div className="flex flex-wrap items-center gap-1.5">
+                  {req.isBulkHiring && (
+                    <span className="inline-flex items-center gap-1 text-[10px] bg-purple-500/10 border border-purple-500/28 text-purple-300/90 rounded-full px-2.5 py-0.5 font-bold uppercase tracking-wider">
+                      <Users className="h-2.5 w-2.5" /> Bulk · {req.bulkGamersNeeded} slots
+                    </span>
+                  )}
+                  {req.preferredCountry && req.preferredCountry !== "any" && (
+                    <span className="inline-flex items-center gap-1 text-[10px] bg-amber-500/8 border border-amber-500/22 text-amber-300/80 rounded-full px-2.5 py-0.5 font-semibold">
+                      {COUNTRY_MAP[req.preferredCountry]?.flag} {COUNTRY_MAP[req.preferredCountry]?.label ?? req.preferredCountry}
+                    </span>
+                  )}
+                  {req.preferredGender && req.preferredGender !== "any" && (
+                    <span className="inline-flex items-center gap-1 text-[10px] bg-pink-500/8 border border-pink-500/20 text-pink-300/80 rounded-full px-2.5 py-0.5 font-semibold">
+                      {GENDER_MAP[req.preferredGender]?.label ?? req.preferredGender}
+                    </span>
+                  )}
+                  {isZeroBids && !req.isBulkHiring && (
+                    <span className="inline-flex items-center gap-1 text-[10px] bg-green-500/10 border border-green-500/28 text-green-400/90 rounded-full px-2.5 py-0.5 font-bold uppercase tracking-wider">
+                      <Flame className="h-2.5 w-2.5" /> First bid!
+                    </span>
+                  )}
+                </div>
+              )}
+
+              {/* Row 5: Bid stats (compact pills) */}
               <div className="flex flex-wrap items-center gap-2">
                 <div
-                  className="inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs"
-                  style={{ borderColor: "rgba(255,255,255,0.07)", background: "rgba(255,255,255,0.03)" }}
+                  className="inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-[11px]"
+                  style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.022)" }}
                 >
-                  <Gavel className="h-3.5 w-3.5 text-muted-foreground" />
-                  <span className="font-bold text-white">
+                  <Gavel className="h-3 w-3 text-muted-foreground/45 shrink-0" />
+                  <span className="font-semibold text-white/75">
                     {isZeroBids ? "No bids yet" : `${req.bidCount} bid${req.bidCount === 1 ? "" : "s"}`}
                   </span>
-                  {isZeroBids && <span className="text-muted-foreground/50 ml-0.5">— be first!</span>}
+                  {isZeroBids && <span className="text-muted-foreground/35">— be first!</span>}
                 </div>
                 {req.isBulkHiring && (
                   <div
-                    className="inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs"
-                    style={{ borderColor: "rgba(168,85,247,0.2)", background: "rgba(168,85,247,0.06)" }}
+                    className="inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-[11px]"
+                    style={{ borderColor: "rgba(168,85,247,0.16)", background: "rgba(168,85,247,0.045)" }}
                   >
-                    <Users className="h-3.5 w-3.5 text-purple-400" />
-                    <span className="text-muted-foreground">
-                      <span className="font-bold text-purple-300">{req.acceptedBidsCount}</span>
-                      <span className="text-purple-400/60">/{req.bulkGamersNeeded}</span>
-                      <span className="ml-1 mr-1.5">slots filled</span>
-                      {(req.bulkGamersNeeded ?? 0) - (req.acceptedBidsCount ?? 0) > 0 && (
-                        <span className="text-[10px] text-emerald-400 font-bold">
-                          · {(req.bulkGamersNeeded ?? 0) - (req.acceptedBidsCount ?? 0)} remaining
-                        </span>
-                      )}
+                    <Users className="h-3 w-3 text-purple-400/60 shrink-0" />
+                    <span className="text-purple-300/75">
+                      <span className="font-bold">{req.acceptedBidsCount}</span>
+                      <span className="text-purple-400/45">/{req.bulkGamersNeeded}</span>
+                      <span className="ml-1">filled</span>
                     </span>
+                    {(req.bulkGamersNeeded ?? 0) - (req.acceptedBidsCount ?? 0) > 0 && (
+                      <span className="text-[10px] text-emerald-400/85 font-bold">
+                        · {(req.bulkGamersNeeded ?? 0) - (req.acceptedBidsCount ?? 0)} left
+                      </span>
+                    )}
                   </div>
                 )}
                 {req.lowestBid && (
                   <div
-                    className="inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs"
-                    style={{ borderColor: "rgba(34,211,238,0.15)", background: "rgba(34,211,238,0.04)" }}
+                    className="inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-[11px]"
+                    style={{ borderColor: "rgba(34,211,238,0.12)", background: "rgba(34,211,238,0.028)" }}
                   >
-                    <TrendingDown className="h-3.5 w-3.5 text-cyan-400" />
-                    <span className="text-muted-foreground">
-                      Lowest bid: <span className="font-bold text-white">${req.lowestBid.toFixed(2)}</span>
+                    <TrendingDown className="h-3 w-3 text-cyan-400/60 shrink-0" />
+                    <span className="text-muted-foreground/60">
+                      Lowest <span className="font-bold text-white/75">${req.lowestBid.toFixed(2)}</span>
                     </span>
                   </div>
                 )}
               </div>
             </div>
 
-            {/* Right: CTA column */}
-            <div className="flex sm:flex-col items-center sm:items-stretch gap-2.5 shrink-0 sm:min-w-[148px]">
-              {/* PLACE BID — glowing primary CTA */}
+            {/* ── Right CTA column ── */}
+            <div className="flex sm:flex-col items-center sm:items-stretch gap-3 shrink-0 sm:min-w-[156px]">
+              {/* PLACE BID */}
               <div className="relative">
                 {!expanded && (
                   <div
-                    className="absolute -inset-[3px] rounded-[14px] opacity-60"
-                    style={{
-                      background: `linear-gradient(135deg, #a855f7, #7c3aed)`,
-                      filter: "blur(8px)",
-                    }}
+                    className="absolute -inset-[4px] rounded-[16px] opacity-50"
+                    style={{ background: "linear-gradient(135deg, #a855f7, #7c3aed)", filter: "blur(10px)" }}
                   />
                 )}
                 <button
                   onClick={() => setExpanded(!expanded)}
-                  className={`relative w-full flex items-center justify-center gap-2 rounded-xl font-black text-sm px-5 py-3.5 transition-all duration-200 uppercase tracking-widest whitespace-nowrap ${
+                  className={`relative w-full flex items-center justify-center gap-2 rounded-xl font-black text-sm px-5 py-4 transition-all duration-200 uppercase tracking-widest whitespace-nowrap ${
                     expanded
-                      ? "bg-primary/15 text-primary border border-primary/40"
-                      : "text-white border border-primary/60"
+                      ? "bg-primary/10 text-primary border border-primary/35"
+                      : "text-white border border-primary/50"
                   }`}
                   style={
                     !expanded
-                      ? { background: "linear-gradient(135deg, #a855f7 0%, #7c3aed 100%)", boxShadow: "0 0 24px rgba(168,85,247,0.5), inset 0 1px 0 rgba(255,255,255,0.15)" }
+                      ? { background: "linear-gradient(135deg, #a855f7 0%, #7c3aed 100%)", boxShadow: "0 0 28px rgba(168,85,247,0.52), inset 0 1px 0 rgba(255,255,255,0.12)" }
                       : {}
                   }
                 >
-                  <Gavel className="h-4 w-4" />
+                  <Gavel className="h-4 w-4 shrink-0" />
                   {expanded ? "Cancel" : "Place Bid"}
-                  {expanded ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+                  {expanded ? <ChevronUp className="h-3.5 w-3.5 shrink-0" /> : <ChevronDown className="h-3.5 w-3.5 shrink-0" />}
                 </button>
               </div>
 
-              {/* Full Details — subtle secondary */}
+              {/* Full Details */}
               <button
                 onClick={() => setLocation(`/requests/${req.id}`)}
-                className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors font-semibold whitespace-nowrap px-3 py-2.5 rounded-xl border border-border/35 hover:border-primary/30 hover:bg-primary/5"
+                className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground/55 hover:text-primary/90 transition-colors font-semibold whitespace-nowrap px-3 py-2.5 rounded-xl border border-border/25 hover:border-primary/22 hover:bg-primary/5"
               >
-                Full Details <ArrowRight className="h-3.5 w-3.5" />
+                Full Details <ArrowRight className="h-3.5 w-3.5 shrink-0" />
               </button>
             </div>
           </div>
@@ -584,64 +600,80 @@ function EmptyState({ hasFilters, onClear }: { hasFilters: boolean; onClear: () 
 }
 
 /* ── FILLER SECTION ──────────────────────────────────────────────────────── */
-// Shown below the card list when there are ≤3 requests, to reduce dead space
 function FillerSection() {
   const [, setLocation] = useLocation();
   const { user } = useAuth();
 
   const steps = [
-    { icon: <Search className="h-5 w-5 text-primary" />, title: "Browse Missions", desc: "Find game requests that match your skills and schedule." },
-    { icon: <Gavel className="h-5 w-5 text-cyan-400" />, title: "Place a Bid", desc: "Set your price and pitch yourself — no middleman." },
-    { icon: <Trophy className="h-5 w-5 text-yellow-400" />, title: "Get Paid", desc: "Complete the session, get reviewed, and earn straight away." },
+    { num: "01", icon: <Search className="h-6 w-6" />, color: "#a855f7", title: "Browse Missions", desc: "Find game requests that match your skills, platform, and schedule. Use filters to zero in fast." },
+    { num: "02", icon: <Gavel className="h-6 w-6" />, color: "#22d3ee", title: "Place Your Bid", desc: "Set your price and pitch yourself directly — no middlemen, no agency cuts." },
+    { num: "03", icon: <Trophy className="h-6 w-6" />, color: "#facc15", title: "Play & Get Paid", desc: "Complete the session, collect your review, and withdraw earnings straight to your account." },
   ];
 
   return (
-    <div className="space-y-3 pt-2">
+    <div className="space-y-6 pt-4">
       {/* Divider */}
-      <div className="flex items-center gap-3">
-        <div className="flex-1 h-px bg-border/30" />
-        <span className="text-[10px] text-muted-foreground/35 uppercase tracking-widest font-bold">How it works</span>
-        <div className="flex-1 h-px bg-border/30" />
+      <div className="flex items-center gap-4">
+        <div className="flex-1 h-px" style={{ background: "rgba(168,85,247,0.12)" }} />
+        <span className="text-[10px] text-muted-foreground/30 uppercase tracking-[0.22em] font-black">How it works</span>
+        <div className="flex-1 h-px" style={{ background: "rgba(168,85,247,0.12)" }} />
       </div>
 
       {/* Steps */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {steps.map((s, i) => (
           <div
             key={i}
-            className="rounded-xl border border-border/40 p-4 flex items-start gap-3"
-            style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.02) 0%, rgba(0,0,0,0.3) 100%)" }}
+            className="rounded-2xl border p-6 flex flex-col gap-4"
+            style={{
+              background: "linear-gradient(145deg, rgba(255,255,255,0.018) 0%, rgba(0,0,0,0.45) 100%)",
+              borderColor: "rgba(255,255,255,0.07)",
+            }}
           >
-            <div className="shrink-0 w-10 h-10 rounded-xl bg-background border border-border/60 flex items-center justify-center">
-              {s.icon}
+            <div className="flex items-center gap-3">
+              <div
+                className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0"
+                style={{ background: `${s.color}18`, border: `1px solid ${s.color}35`, color: s.color }}
+              >
+                {s.icon}
+              </div>
+              <span
+                className="font-black tabular-nums leading-none"
+                style={{ fontSize: 28, color: `${s.color}20`, letterSpacing: "-0.04em" }}
+              >
+                {s.num}
+              </span>
             </div>
             <div>
-              <div className="text-sm font-bold text-white">{s.title}</div>
-              <div className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{s.desc}</div>
+              <div className="text-sm font-extrabold text-white tracking-tight mb-1.5">{s.title}</div>
+              <div className="text-xs text-muted-foreground/55 leading-relaxed">{s.desc}</div>
             </div>
           </div>
         ))}
       </div>
 
-      {/* CTA row */}
+      {/* CTA banner */}
       <div
-        className="rounded-2xl border border-primary/20 p-5 flex flex-col sm:flex-row items-center gap-4 justify-between"
-        style={{ background: "linear-gradient(135deg, rgba(168,85,247,0.06) 0%, rgba(0,0,0,0.3) 100%)" }}
+        className="rounded-2xl border p-6 sm:p-7 flex flex-col sm:flex-row items-center gap-5 justify-between"
+        style={{
+          background: "linear-gradient(145deg, rgba(168,85,247,0.07) 0%, rgba(0,0,0,0.4) 100%)",
+          borderColor: "rgba(168,85,247,0.18)",
+        }}
       >
         <div className="text-center sm:text-left">
-          <div className="font-extrabold text-white text-base">Need a skilled teammate?</div>
-          <div className="text-sm text-muted-foreground mt-0.5">Post your game request and receive bids from verified gamers.</div>
+          <div className="font-extrabold text-white text-lg tracking-tight">Need a skilled teammate?</div>
+          <div className="text-sm text-muted-foreground/60 mt-1">Post your game request and get bids from verified gamers within minutes.</div>
         </div>
         <div className="flex items-center gap-3 shrink-0">
           {!user && (
-            <Button variant="outline" size="sm" onClick={() => setLocation("/login")} className="text-xs border-primary/30 text-primary">
+            <Button variant="outline" size="sm" onClick={() => setLocation("/login")} className="text-xs border-primary/30 text-primary/80">
               Log In
             </Button>
           )}
           <Button
             size="sm"
             onClick={() => setLocation(user ? "/post-request" : "/signup")}
-            className="bg-primary text-white font-bold uppercase tracking-wider text-xs px-5 shadow-[0_0_20px_rgba(168,85,247,0.3)] hover:shadow-[0_0_30px_rgba(168,85,247,0.45)]"
+            className="bg-primary text-white font-bold uppercase tracking-wider text-xs px-5 shadow-[0_0_22px_rgba(168,85,247,0.35)] hover:shadow-[0_0_32px_rgba(168,85,247,0.5)] transition-shadow"
           >
             <Zap className="h-3.5 w-3.5 mr-1.5" />
             {user ? "Post a Request" : "Get Started Free"}
@@ -650,14 +682,14 @@ function FillerSection() {
       </div>
 
       {/* Trust strip */}
-      <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-2 py-2">
+      <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-2.5 pb-2">
         {[
-          { icon: <Shield className="h-3.5 w-3.5 text-green-400" />, text: "Verified gamers only" },
-          { icon: <Star className="h-3.5 w-3.5 text-yellow-400" />, text: "Rated after every session" },
+          { icon: <Shield className="h-3.5 w-3.5" style={{ color: "#4ade80" }} />, text: "Verified gamers only" },
+          { icon: <Star className="h-3.5 w-3.5" style={{ color: "#facc15" }} />, text: "Rated after every session" },
           { icon: <Users className="h-3.5 w-3.5 text-primary" />, text: "2,450+ gamers registered" },
-          { icon: <Target className="h-3.5 w-3.5 text-cyan-400" />, text: "Escrow-secured payments" },
+          { icon: <Target className="h-3.5 w-3.5" style={{ color: "#22d3ee" }} />, text: "Escrow-secured payments" },
         ].map((t) => (
-          <div key={t.text} className="flex items-center gap-1.5 text-[11px] text-muted-foreground/50 font-medium">
+          <div key={t.text} className="flex items-center gap-1.5 text-[11px] text-muted-foreground/40 font-medium">
             {t.icon} {t.text}
           </div>
         ))}
@@ -769,7 +801,7 @@ export default function Browse() {
   const showFiller = !isLoading && !isError && requests && requests.length > 0 && requests.length <= 3;
 
   return (
-    <div className="space-y-4 relative">
+    <div className="space-y-6 relative">
       {/* Subtle background glow */}
       <div
         className="pointer-events-none fixed inset-0 -z-10 opacity-30"
@@ -1163,7 +1195,7 @@ export default function Browse() {
 
       {/* ── Content ── */}
       {isLoading ? (
-        <div className="space-y-4">
+        <div className="space-y-5">
           {[1, 2, 3].map((i) => <RequestCardSkeleton key={i} />)}
         </div>
       ) : isError ? (
@@ -1177,7 +1209,7 @@ export default function Browse() {
       ) : !requests || requests.length === 0 ? (
         <EmptyState hasFilters={hasFilters} onClear={clearFilters} />
       ) : (
-        <div key={filterKey} className="bid-list-animate space-y-4">
+        <div key={filterKey} className="bid-list-animate space-y-5">
           {requests.map((req) => <RequestCard key={req.id} req={req} />)}
         </div>
       )}
