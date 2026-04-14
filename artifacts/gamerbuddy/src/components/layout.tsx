@@ -8,8 +8,9 @@ import {
   Gamepad2, Compass, LayoutDashboard, Wallet, User as UserIcon,
   LogOut, FileText, Bell, CheckCheck, X, Swords, Star,
   Trophy, MessageSquare, Zap, CircleDollarSign, ChevronRight, Menu,
-  ArrowLeft, Info, Shield, Users, Globe,
+  ArrowLeft, Info, Shield, Users, Globe, Sun, Moon,
 } from "lucide-react";
+import { useTheme } from "@/lib/theme";
 import { GamerbuddyLogo, GamerbuddyIcon } from "@/components/gamerbuddy-logo";
 import { Button } from "@/components/ui/button";
 import {
@@ -287,6 +288,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const logoutMutation = useLogout();
   const [mobileOpen, setMobileOpen] = useState(false);
   const { t } = useI18n();
+  const { isDark, toggleTheme } = useTheme();
 
   useEffect(() => { setMobileOpen(false); }, [location]);
 
@@ -385,6 +387,16 @@ export function Layout({ children }: { children: React.ReactNode }) {
           </nav>
 
           <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={toggleTheme}
+              aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+              className="h-9 w-9 flex items-center justify-center rounded-xl border border-border/60 bg-background/60 hover:border-primary/50 hover:bg-primary/10 transition-all duration-200"
+            >
+              {isDark
+                ? <Sun className="h-4 w-4 text-yellow-400" />
+                : <Moon className="h-4 w-4 text-primary" />
+              }
+            </button>
             <LangSelector />
             <NotificationBell />
 

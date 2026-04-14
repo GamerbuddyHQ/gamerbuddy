@@ -4,6 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/lib/auth";
 import { I18nProvider } from "@/lib/i18n";
+import { ThemeProvider } from "@/lib/theme";
 import { Layout } from "@/components/layout";
 import NotFound from "@/pages/not-found";
 
@@ -81,6 +82,7 @@ function Router() {
 
 function App() {
   return (
+    <ThemeProvider>
     <I18nProvider>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
@@ -93,6 +95,7 @@ function App() {
         </AuthProvider>
       </QueryClientProvider>
     </I18nProvider>
+    </ThemeProvider>
   );
 }
 

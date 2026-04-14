@@ -66,13 +66,96 @@
   --radius-xl: calc(var(--radius) + 4px);
 }
 
-:root, .dark {
+/* ── LIGHT THEME (default :root) ── */
+:root {
+  --button-outline: rgba(0,0,0, .10);
+  --badge-outline: rgba(0,0,0, .05);
+
+  --opaque-button-border-intensity: -9;
+
+  --elevate-1: rgba(0,0,0, .04);
+  --elevate-2: rgba(0,0,0, .09);
+
+  /* Soft off-white gaming background */
+  --background: 240 15% 96%;
+  --foreground: 240 10% 8%;
+
+  --border: 240 10% 82%;
+
+  --card: 0 0% 100%;
+  --card-foreground: 240 10% 8%;
+  --card-border: 240 10% 85%;
+
+  --sidebar: 0 0% 100%;
+  --sidebar-foreground: 240 10% 8%;
+  --sidebar-border: 240 10% 85%;
+  --sidebar-primary: 275 80% 50%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 240 10% 92%;
+  --sidebar-accent-foreground: 240 10% 8%;
+  --sidebar-ring: 275 80% 50%;
+
+  --popover: 0 0% 100%;
+  --popover-foreground: 240 10% 8%;
+  --popover-border: 240 10% 85%;
+
+  /* Deeper purple for contrast on white */
+  --primary: 275 80% 50%;
+  --primary-foreground: 0 0% 100%;
+
+  /* Deeper cyan for contrast on white */
+  --secondary: 190 100% 34%;
+  --secondary-foreground: 0 0% 100%;
+
+  --muted: 240 10% 91%;
+  --muted-foreground: 240 5% 42%;
+
+  --accent: 240 10% 91%;
+  --accent-foreground: 240 10% 8%;
+
+  --destructive: 0 84% 50%;
+  --destructive-foreground: 0 0% 100%;
+
+  --input: 240 10% 88%;
+  --ring: 275 80% 50%;
+
+  --chart-1: 275 80% 50%;
+  --chart-2: 190 100% 34%;
+  --chart-3: 160 100% 35%;
+  --chart-4: 340 100% 45%;
+  --chart-5: 45 100% 42%;
+
+  --app-font-sans: 'Space Mono', 'Inter', monospace, sans-serif;
+  --app-font-serif: Georgia, serif;
+  --app-font-mono: Menlo, monospace;
+  --radius: .5rem;
+  --shadow-2xs: 0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0.00);
+  --shadow-xs: 0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0.00);
+  --shadow-sm: 0px 2px 4px -1px rgba(0,0,0,0.08);
+  --shadow: 0px 2px 4px -1px rgba(0,0,0,0.10);
+  --shadow-md: 0px 4px 12px -2px rgba(0,0,0,0.12);
+  --shadow-lg: 0px 8px 24px -4px rgba(0,0,0,0.14);
+  --shadow-xl: 0px 16px 40px -6px rgba(0,0,0,0.16);
+  --shadow-2xl: 0px 24px 60px -8px rgba(0,0,0,0.18);
+  --tracking-normal: 0em;
+  --spacing: 0.25rem;
+
+  --sidebar-primary-border: hsl(from hsl(var(--sidebar-primary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
+  --sidebar-accent-border: hsl(from hsl(var(--sidebar-accent)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
+  --primary-border: hsl(from hsl(var(--primary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
+  --secondary-border: hsl(from hsl(var(--secondary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
+  --muted-border: hsl(from hsl(var(--muted)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
+  --accent-border: hsl(from hsl(var(--accent)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
+  --destructive-border: hsl(from hsl(var(--destructive)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
+}
+
+/* ── DARK THEME ── */
+.dark {
   --button-outline: rgba(255,255,255, .10);
   --badge-outline: rgba(255,255,255, .05);
 
-  --opaque-button-border-intensity: 9;  /* In terms of percentages */
+  --opaque-button-border-intensity: 9;
 
-  /* Backgrounds applied on top of other backgrounds when hovered/active */
   --elevate-1: rgba(255,255,255, .04);
   --elevate-2: rgba(255,255,255, .09);
 
@@ -128,7 +211,7 @@
   --app-font-sans: 'Space Mono', 'Inter', monospace, sans-serif;
   --app-font-serif: Georgia, serif;
   --app-font-mono: Menlo, monospace;
-  --radius: .5rem; /* 8px */
+  --radius: .5rem;
   --shadow-2xs: 0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0.00);
   --shadow-xs: 0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0.00);
   --shadow-sm: 0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0.00), 0px 1px 2px -1px hsl(202.8169 89.1213% 53.1373% / 0.00);
