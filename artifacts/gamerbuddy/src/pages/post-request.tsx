@@ -101,7 +101,8 @@ export default function PostRequest() {
   const queryClient = useQueryClient();
   const postRequest = usePostRequest();
   const [isBulkHiring, setIsBulkHiring] = useState(false);
-  const [bulkGamersNeeded, setBulkGamersNeeded] = useState(5);
+  const [bulkGamersNeeded, setBulkGamersNeeded] = useState(3);
+  const [bulkError, setBulkError] = useState("");
 
   const { data: wallets, isLoading: isLoadingWallets } = useGetWallets({
     query: { queryKey: getGetWalletsQueryKey() },
@@ -127,6 +128,16 @@ export default function PostRequest() {
         variant: "destructive",
       });
       return;
+    }
+    if (isBulkHiring) {
+      if (bulkGamersNeeded < 3) {
+        setBulkError("Minimum is 3 gamers");
+        return;
+      }
+      if (bulkGamersNeeded > 100) {
+        setBulkError("Maximum is 100 gamers");
+        return;
+      }
     }
 
     postRequest.mutate(
@@ -394,20 +405,27 @@ export default function PostRequest() {
               />
 
               {/* Bulk Hiring Toggle */}
-              <div className="rounded-xl border border-purple-500/30 bg-purple-500/5 p-5 space-y-4">
+              <div className={`rounded-xl border p-5 space-y-4 transition-colors ${isBulkHiring ? "border-purple-500/50 bg-purple-500/8" : "border-purple-500/30 bg-purple-500/5"}`}>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
                     <div className="h-8 w-8 rounded-lg bg-purple-500/15 border border-purple-500/30 flex items-center justify-center">
                       <Users className="h-4 w-4 text-purple-400" />
                     </div>
                     <div>
-                      <div className="text-sm font-bold text-white">Bulk Hiring</div>
-                      <div className="text-xs text-muted-foreground">Hire 5–100 gamers for one session</div>
+                      <div className="text-sm font-bold text-white flex items-center gap-2">
+                        Bulk Hiring
+                        {isBulkHiring && (
+                          <span className="text-[10px] font-black text-purple-300 bg-purple-500/15 border border-purple-500/30 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                            Active
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-xs text-muted-foreground">Hire 3–100 gamers for raids, events &amp; content creation</div>
                     </div>
                   </div>
                   <button
                     type="button"
-                    onClick={() => setIsBulkHiring((v) => !v)}
+                    onClick={() => { setIsBulkHiring((v) => !v); setBulkError(""); }}
                     className={`relative h-6 w-11 rounded-full transition-colors duration-200 focus:outline-none ${
                       isBulkHiring ? "bg-purple-500" : "bg-white/10 border border-white/20"
                     }`}
@@ -421,28 +439,77 @@ export default function PostRequest() {
                 </div>
 
                 {isBulkHiring && (
-                  <div className="space-y-3 pt-2 border-t border-purple-500/20">
-                    <label className="text-xs uppercase tracking-widest text-purple-400 font-bold flex items-center gap-1.5">
-                      <Users className="h-3 w-3" />
-                      Gamers Needed <span className="text-destructive">*</span>
-                    </label>
+                  <div className="space-y-3 pt-3 border-t border-purple-500/20">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs uppercase tracking-widest text-purple-400 font-bold flex items-center gap-1.5">
+                        <Users className="h-3 w-3" />
+                        Number of Gamers Needed <span className="text-destructive">*</span>
+                      </label>
+                      <span className="text-[10px] text-muted-foreground">Min: 3 · Max: 100</span>
+                    </div>
+
+                    {/* Slider + number input row */}
                     <div className="flex items-center gap-3">
                       <input
                         type="range"
-                        min={5}
+                        min={3}
                         max={100}
                         step={1}
                         value={bulkGamersNeeded}
-                        onChange={(e) => setBulkGamersNeeded(Number(e.target.value))}
+                        onChange={(e) => {
+                          const v = Number(e.target.value);
+                          setBulkGamersNeeded(v);
+                          setBulkError("");
+                        }}
                         className="flex-1 accent-purple-500"
                       />
-                      <div className="min-w-[56px] text-center rounded-lg border border-purple-500/30 bg-purple-500/10 px-3 py-1.5 text-sm font-black text-purple-300">
-                        {bulkGamersNeeded}
+                      <input
+                        type="number"
+                        min={3}
+                        max={100}
+                        value={bulkGamersNeeded}
+                        onChange={(e) => {
+                          const raw = e.target.value;
+                          const v = parseInt(raw, 10);
+                          if (raw === "" || isNaN(v)) { setBulkGamersNeeded(3); return; }
+                          setBulkGamersNeeded(Math.min(100, Math.max(1, v)));
+                          if (v < 3) setBulkError("Minimum is 3 gamers");
+                          else if (v > 100) setBulkError("Maximum is 100 gamers");
+                          else setBulkError("");
+                        }}
+                        onBlur={(e) => {
+                          const v = parseInt(e.target.value, 10);
+                          if (isNaN(v) || v < 3) { setBulkGamersNeeded(3); setBulkError("Minimum is 3 gamers"); }
+                          else if (v > 100) { setBulkGamersNeeded(100); setBulkError(""); }
+                          else setBulkError("");
+                        }}
+                        className="w-16 text-center rounded-lg border border-purple-500/30 bg-purple-500/10 px-2 py-1.5 text-sm font-black text-purple-300 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none focus:outline-none focus:border-purple-500/60"
+                      />
+                    </div>
+
+                    {/* Validation error */}
+                    {bulkError && (
+                      <div className="flex items-center gap-1.5 text-xs text-red-400 font-semibold">
+                        <span className="h-3.5 w-3.5 rounded-full bg-red-500/15 border border-red-500/30 flex items-center justify-center text-[9px] font-black shrink-0">!</span>
+                        {bulkError}
+                      </div>
+                    )}
+
+                    {/* Live cost preview strip */}
+                    <div className="flex flex-wrap gap-2 text-xs pt-1">
+                      <div className="flex items-center gap-1.5 rounded-lg border border-purple-500/20 bg-purple-500/8 px-3 py-1.5">
+                        <Users className="h-3 w-3 text-purple-400" />
+                        <span className="text-muted-foreground">Slots needed</span>
+                        <span className="font-black text-purple-300">{bulkGamersNeeded}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 rounded-lg border border-white/8 bg-white/4 px-3 py-1.5">
+                        <span className="text-muted-foreground">Payment collected at roster lock (10% fee applies)</span>
                       </div>
                     </div>
+
                     <p className="text-xs text-muted-foreground">
-                      Bids will remain open until you've accepted {bulkGamersNeeded} gamers or manually lock the roster.
-                      Each gamer's bid is held in escrow individually.
+                      Bids remain open until you've reserved {bulkGamersNeeded} gamers or manually lock the roster.
+                      The full group payment is collected from your wallet when you lock — not per-bid.
                     </p>
                   </div>
                 )}

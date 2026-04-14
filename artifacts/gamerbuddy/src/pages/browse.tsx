@@ -382,7 +382,7 @@ function RequestCard({ req }: { req: GameRequest }) {
                 </span>
                 {req.isBulkHiring && (
                   <span className="inline-flex items-center gap-1 text-[10px] bg-purple-500/15 border border-purple-500/35 text-purple-300 rounded-full px-2.5 py-1 font-black uppercase tracking-wider">
-                    <Users className="h-3 w-3" /> Bulk · {req.bulkGamersNeeded} slots
+                    <Users className="h-3 w-3" /> Bulk Hiring · {req.bulkGamersNeeded} slots
                   </span>
                 )}
                 {isZeroBids && !req.isBulkHiring && (
@@ -445,7 +445,12 @@ function RequestCard({ req }: { req: GameRequest }) {
                     <span className="text-muted-foreground">
                       <span className="font-bold text-purple-300">{req.acceptedBidsCount}</span>
                       <span className="text-purple-400/60">/{req.bulkGamersNeeded}</span>
-                      <span className="ml-1">slots filled</span>
+                      <span className="ml-1 mr-1.5">slots filled</span>
+                      {(req.bulkGamersNeeded ?? 0) - (req.acceptedBidsCount ?? 0) > 0 && (
+                        <span className="text-[10px] text-emerald-400 font-bold">
+                          · {(req.bulkGamersNeeded ?? 0) - (req.acceptedBidsCount ?? 0)} remaining
+                        </span>
+                      )}
                     </span>
                   </div>
                 )}

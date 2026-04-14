@@ -203,8 +203,8 @@ router.post("/requests", requireAuth, async (req, res): Promise<void> => {
 
   if (isBulkHiring) {
     const n = Number(bulkGamersNeeded);
-    if (!Number.isInteger(n) || n < 5 || n > 100) {
-      res.status(400).json({ error: "Bulk hiring requires between 5 and 100 gamers" });
+    if (!Number.isInteger(n) || n < 3 || n > 100) {
+      res.status(400).json({ error: "Bulk hiring requires between 3 and 100 gamers" });
       return;
     }
   }
