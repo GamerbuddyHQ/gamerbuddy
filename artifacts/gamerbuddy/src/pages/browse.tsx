@@ -952,20 +952,28 @@ export default function Browse() {
 
         {/* ── Nation + Gender row ── */}
         <div
-          className="grid grid-cols-1 sm:grid-cols-2 gap-3 px-4 py-3 border-b"
+          className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 px-4 py-3 border-b"
           style={{ borderColor: "rgba(255,255,255,0.05)", background: "rgba(0,0,0,0.12)" }}
         >
-          <div className="space-y-1.5">
-            <span className="flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.30)" }}>
-              <Globe className="h-3 w-3" /> Nation
-            </span>
-            <CountryCombobox value={countryFilter} onValueChange={setCountryFilter} />
-          </div>
-          <div className="space-y-1.5">
-            <span className="flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.30)" }}>
-              <UserRound className="h-3 w-3" /> Gender
-            </span>
-            <GenderSelect value={genderFilter} onValueChange={setGenderFilter} />
+          <span
+            className="text-[10px] font-extrabold uppercase tracking-widest sm:shrink-0 sm:w-14"
+            style={{ color: "rgba(255,255,255,0.30)" }}
+          >
+            Match
+          </span>
+          <div className="grid grid-cols-2 gap-2 flex-1">
+            <div className="space-y-1">
+              <span className="flex items-center gap-1 text-[9px] font-bold uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.22)" }}>
+                <Globe className="h-2.5 w-2.5" /> Nation
+              </span>
+              <CountryCombobox value={countryFilter} onValueChange={setCountryFilter} />
+            </div>
+            <div className="space-y-1">
+              <span className="flex items-center gap-1 text-[9px] font-bold uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.22)" }}>
+                <UserRound className="h-2.5 w-2.5" /> Gender
+              </span>
+              <GenderSelect value={genderFilter} onValueChange={setGenderFilter} />
+            </div>
           </div>
         </div>
 

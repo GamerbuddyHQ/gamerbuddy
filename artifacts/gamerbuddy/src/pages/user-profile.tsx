@@ -12,7 +12,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
-import { ArrowLeft, Star, Swords, Gamepad2, Target, Zap, FileText } from "lucide-react";
+import { ArrowLeft, Star, Swords, Gamepad2, Target, Zap, FileText, Globe, UserRound } from "lucide-react";
+import { COUNTRY_MAP, GENDER_MAP } from "@/lib/geo-options";
 
 /* ── Rank badges (mirrored from profile.tsx) ─────────────────────── */
 const RANK_BADGES = [
@@ -385,6 +386,46 @@ export default function UserProfilePage() {
                 <div className="text-[10px] text-muted-foreground uppercase tracking-widest">Played</div>
               </div>
             </div>
+
+            {/* Country + Gender identity row */}
+            {(profile.country || profile.gender) && (
+              <div className="flex items-center gap-2 flex-wrap pt-1">
+                {profile.country && profile.country !== "any" && (() => {
+                  const c = COUNTRY_MAP[profile.country];
+                  return c ? (
+                    <span
+                      className="inline-flex items-center gap-1.5 text-[11px] font-semibold rounded-full px-2.5 py-1"
+                      style={{
+                        background: "rgba(251,191,36,0.08)",
+                        border: "1px solid rgba(251,191,36,0.20)",
+                        color: "rgba(251,191,36,0.80)",
+                      }}
+                    >
+                      <Globe className="h-3 w-3 shrink-0" />
+                      <span>{c.flag}</span>
+                      <span>{c.label}</span>
+                    </span>
+                  ) : null;
+                })()}
+                {profile.gender && profile.gender !== "any" && (() => {
+                  const g = GENDER_MAP[profile.gender];
+                  return g ? (
+                    <span
+                      className="inline-flex items-center gap-1.5 text-[11px] font-semibold rounded-full px-2.5 py-1"
+                      style={{
+                        background: "rgba(236,72,153,0.08)",
+                        border: "1px solid rgba(236,72,153,0.20)",
+                        color: "rgba(236,72,153,0.75)",
+                      }}
+                    >
+                      <UserRound className="h-3 w-3 shrink-0" />
+                      <span>{g.icon}</span>
+                      <span>{g.label}</span>
+                    </span>
+                  ) : null;
+                })()}
+              </div>
+            )}
           </div>
         </div>
       </div>
