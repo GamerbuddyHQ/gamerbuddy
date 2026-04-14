@@ -10,7 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/lib/auth";
-import { COUNTRY_MAP, GENDER_MAP, REGION_MAP } from "@/lib/geo-options";
+import { COUNTRY_MAP, GENDER_MAP, REGION_MAP, COUNTRY_TO_REGION } from "@/lib/geo-options";
 
 const BASE = "/api";
 
@@ -534,6 +534,35 @@ export default function TournamentDetailPage() {
   const dist = tournament.prizeDistribution;
   const winners = tournament.winnersData ?? [];
 
+  /* ── Eligibility check ── */
+  const eligibility = (() => {
+    if (!user || isHost || myReg) return { eligible: true as const };
+    const hasCountryReq = tournament.country !== "any";
+    const hasRegionReq  = tournament.region !== "any";
+    const hasGenderReq  = tournament.genderPreference !== "any";
+    if (!hasCountryReq && !hasRegionReq && !hasGenderReq) return { eligible: true as const };
+
+    const userCountry = user.country ?? "";
+    const userGender  = user.gender  ?? "";
+    const userRegion  = COUNTRY_TO_REGION[userCountry] ?? "Other";
+    const reasons: string[] = [];
+
+    if (hasCountryReq && tournament.country !== userCountry) {
+      const flag  = COUNTRY_MAP[tournament.country]?.flag  ?? "";
+      const label = COUNTRY_MAP[tournament.country]?.label ?? tournament.country;
+      reasons.push(`${flag} ${label}`.trim());
+    }
+    if (hasRegionReq && tournament.region !== userRegion) {
+      reasons.push(REGION_MAP[tournament.region]?.label ?? tournament.region);
+    }
+    if (hasGenderReq && tournament.genderPreference !== userGender) {
+      reasons.push(`${GENDER_MAP[tournament.genderPreference]?.label ?? tournament.genderPreference} players`);
+    }
+    return reasons.length === 0
+      ? { eligible: true as const }
+      : { eligible: false as const, reasons };
+  })();
+
   const pendingCount = tournament.registrations.filter((r) => r.status === "pending").length;
   const approvedCount = tournament.registrations.filter((r) => r.status === "registered" || r.status === "winner").length;
 
@@ -653,15 +682,30 @@ export default function TournamentDetailPage() {
 
           {/* ── Action buttons ── */}
           <div className="flex gap-2 flex-wrap">
-            {/* Request to Join */}
+            {/* Request to Join — with eligibility gate */}
             {!isHost && !myReg && user && tournament.status === "open" && (
-              <Button onClick={() => joinMutation.mutate()} disabled={joinMutation.isPending || isFull}
-                className="flex-1 font-extrabold text-[14px] py-3 h-auto"
-                style={{ background: "linear-gradient(135deg,#a855f7,#7c3aed)", boxShadow: "0 0 24px rgba(168,85,247,0.35)" }}>
-                {joinMutation.isPending ? <><Loader2 className="h-5 w-5 mr-2 animate-spin" />Sending Request…</>
-                  : isFull ? <><Lock className="h-5 w-5 mr-2" />Tournament Full</>
-                  : <><UserCheck className="h-5 w-5 mr-2" />Request to Join — Free</>}
-              </Button>
+              eligibility.eligible ? (
+                <Button onClick={() => joinMutation.mutate()} disabled={joinMutation.isPending || isFull}
+                  className="flex-1 font-extrabold text-[14px] py-3 h-auto"
+                  style={{ background: "linear-gradient(135deg,#a855f7,#7c3aed)", boxShadow: "0 0 24px rgba(168,85,247,0.35)" }}>
+                  {joinMutation.isPending ? <><Loader2 className="h-5 w-5 mr-2 animate-spin" />Sending Request…</>
+                    : isFull ? <><Lock className="h-5 w-5 mr-2" />Tournament Full</>
+                    : <><UserCheck className="h-5 w-5 mr-2" />Request to Join — Free</>}
+                </Button>
+              ) : (
+                <div className="flex-1 rounded-2xl px-4 py-3.5"
+                  style={{ background: "rgba(239,68,68,0.07)", border: "1.5px solid rgba(239,68,68,0.25)" }}>
+                  <p className="text-[13px] font-extrabold text-red-400 flex items-center gap-2 mb-1">
+                    <Lock className="h-4 w-4 shrink-0" /> This tournament is restricted
+                  </p>
+                  <p className="text-[12px] text-red-400/70 leading-relaxed">
+                    Requires: <span className="font-bold text-red-400/90">{(eligibility as { eligible: false; reasons: string[] }).reasons.join(" · ")}</span>
+                  </p>
+                  <p className="text-[11px] text-red-400/50 mt-1.5">
+                    Update your profile country and gender to qualify for restricted tournaments.
+                  </p>
+                </div>
+              )
             )}
 
             {!user && tournament.status === "open" && (

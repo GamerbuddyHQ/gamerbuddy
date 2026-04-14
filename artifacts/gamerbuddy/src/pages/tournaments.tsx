@@ -13,7 +13,7 @@ import { useAuth } from "@/lib/auth";
 import { CountryCombobox, GenderSelect } from "@/components/country-combobox";
 import {
   COUNTRIES, GENDERS, REGIONS, COUNTRY_MAP, GENDER_MAP, REGION_MAP,
-  countryLabel, genderLabel, regionLabel,
+  COUNTRY_TO_REGION, countryLabel, genderLabel, regionLabel,
 } from "@/lib/geo-options";
 
 const BASE = "/api";
@@ -211,6 +211,37 @@ function MiniDistBar({ first, second, third, net }: { first: number; second: num
 /* ── Promoted threshold ── */
 const PROMOTED_PRIZE = 1000;
 
+/* ── Eligibility check ── */
+type EligibilityResult = { eligible: true } | { eligible: false; reasons: string[] };
+
+function checkEligibility(
+  tournament: { country: string; region: string; genderPreference: string },
+  user: { country: string | null; gender: string | null } | null,
+): EligibilityResult {
+  const hasCountryReq = tournament.country !== "any";
+  const hasRegionReq  = tournament.region !== "any";
+  const hasGenderReq  = tournament.genderPreference !== "any";
+  if (!hasCountryReq && !hasRegionReq && !hasGenderReq) return { eligible: true };
+
+  const userCountry = user?.country ?? "";
+  const userGender  = user?.gender  ?? "";
+  const userRegion  = COUNTRY_TO_REGION[userCountry] ?? "Other";
+
+  const reasons: string[] = [];
+  if (hasCountryReq && tournament.country !== userCountry) {
+    const flag  = COUNTRY_MAP[tournament.country]?.flag  ?? "";
+    const label = COUNTRY_MAP[tournament.country]?.label ?? tournament.country;
+    reasons.push(`${flag} ${label}`.trim());
+  }
+  if (hasRegionReq && tournament.region !== userRegion) {
+    reasons.push(REGION_MAP[tournament.region]?.label ?? tournament.region);
+  }
+  if (hasGenderReq && tournament.genderPreference !== userGender) {
+    reasons.push(`${GENDER_MAP[tournament.genderPreference]?.label ?? tournament.genderPreference} players`);
+  }
+  return reasons.length === 0 ? { eligible: true } : { eligible: false, reasons };
+}
+
 /* ── Req badge ── */
 function ReqBadge({ country, region, gender }: { country: string; region: string; gender: string }) {
   const hasCountry = country && country !== "any";
@@ -243,12 +274,15 @@ function ReqBadge({ country, region, gender }: { country: string; region: string
 }
 
 /* ── Tournament card ── */
-function TournamentCard({ tournament, currentUserId }: { tournament: Tournament; currentUserId?: number }) {
+type AuthUser = { id: number; country: string | null; gender: string | null } | null | undefined;
+
+function TournamentCard({ tournament, currentUser }: { tournament: Tournament; currentUser?: AuthUser }) {
   const { toast } = useToast();
   const qc = useQueryClient();
   const tcfg = TYPE_CONFIG[tournament.tournamentType];
   const TypeIcon = tcfg.icon;
 
+  const currentUserId = currentUser?.id;
   const isHost      = currentUserId === tournament.hostId;
   const myReg       = tournament.registrations.find((r) => r.userId === currentUserId);
   const isPending   = myReg?.status === "pending";
@@ -260,6 +294,10 @@ function TournamentCard({ tournament, currentUserId }: { tournament: Tournament;
   const isOngoing   = tournament.status === "ongoing";
   const isOpen      = tournament.status === "open";
   const dist        = tournament.prizeDistribution;
+
+  const eligibility = currentUser && !isHost && !myReg
+    ? checkEligibility(tournament, { country: currentUser.country, gender: currentUser.gender })
+    : { eligible: true as const };
 
   const joinMutation = useMutation({
     mutationFn: async () => {
@@ -397,21 +435,34 @@ function TournamentCard({ tournament, currentUserId }: { tournament: Tournament;
 
         {/* ── Action row ── */}
         <div className="flex gap-2 flex-wrap pt-0.5">
-          {/* Request to Join */}
+          {/* Eligibility gate — logged-in, no existing registration, not the host */}
           {isOpen && !isHost && !myReg && currentUserId && (
-            <Button
-              onClick={() => joinMutation.mutate()}
-              disabled={joinMutation.isPending || isFull}
-              className="flex-1 font-extrabold text-[13px] py-2.5 h-auto"
-              style={{ background: "linear-gradient(135deg,#a855f7,#7c3aed)", boxShadow: "0 0 20px rgba(168,85,247,0.30)" }}
-            >
-              {joinMutation.isPending
-                ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Sending…</>
-                : isFull
-                ? <><Lock className="h-4 w-4 mr-1.5" />Full</>
-                : <><UserCheck className="h-4 w-4 mr-1.5" />Request to Join</>
-              }
-            </Button>
+            eligibility.eligible ? (
+              <Button
+                onClick={() => joinMutation.mutate()}
+                disabled={joinMutation.isPending || isFull}
+                className="flex-1 font-extrabold text-[13px] py-2.5 h-auto"
+                style={{ background: "linear-gradient(135deg,#a855f7,#7c3aed)", boxShadow: "0 0 20px rgba(168,85,247,0.30)" }}
+              >
+                {joinMutation.isPending
+                  ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Sending…</>
+                  : isFull
+                  ? <><Lock className="h-4 w-4 mr-1.5" />Full</>
+                  : <><UserCheck className="h-4 w-4 mr-1.5" />Request to Join</>
+                }
+              </Button>
+            ) : (
+              <div className="flex-1 rounded-xl py-2 px-3 text-[11px] leading-snug"
+                style={{ background: "rgba(239,68,68,0.07)", border: "1px solid rgba(239,68,68,0.22)", color: "#f87171" }}>
+                <p className="font-extrabold flex items-center gap-1.5 mb-0.5">
+                  <Lock className="h-3.5 w-3.5 shrink-0" /> Restricted Tournament
+                </p>
+                <p className="text-red-400/70 text-[10px]">
+                  Requires: {(eligibility as { eligible: false; reasons: string[] }).reasons.join(" · ")}
+                </p>
+                <p className="text-red-400/50 text-[10px] mt-0.5">Update your profile to qualify.</p>
+              </div>
+            )
           )}
 
           {!currentUserId && isOpen && (
@@ -959,7 +1010,7 @@ export default function TournamentsPage() {
       ) : (
         <div className="space-y-4">
           {filtered.map((t) => (
-            <TournamentCard key={t.id} tournament={t} currentUserId={user?.id} />
+            <TournamentCard key={t.id} tournament={t} currentUser={user} />
           ))}
         </div>
       )}

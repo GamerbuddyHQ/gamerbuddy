@@ -39,6 +39,8 @@ export interface User {
   email: string;
   phone: string;
   idVerified: boolean;
+  country: string | null;
+  gender: string | null;
   createdAt: string;
 }
 

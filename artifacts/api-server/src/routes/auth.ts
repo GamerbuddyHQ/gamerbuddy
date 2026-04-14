@@ -21,6 +21,8 @@ function formatUser(user: {
   points: number;
   profileBackground?: string | null;
   profileTitle?: string | null;
+  country?: string | null;
+  gender?: string | null;
   createdAt: Date;
 }) {
   return {
@@ -33,6 +35,8 @@ function formatUser(user: {
     points: user.points,
     profileBackground: user.profileBackground ?? null,
     profileTitle: user.profileTitle ?? null,
+    country: user.country ?? null,
+    gender: user.gender ?? null,
     createdAt: user.createdAt.toISOString(),
   };
 }
