@@ -482,6 +482,37 @@ export const REPORT_REASONS = [
   "Other",
 ] as const;
 
+/* ── Profile votes ── */
+export type ProfileVotes = {
+  likes: number;
+  dislikes: number;
+  myVote: "like" | "dislike" | null;
+  canVote: boolean;
+};
+
+export function useProfileVotes(userId: number | null) {
+  return useQuery<ProfileVotes>({
+    queryKey: ["profile-votes", userId],
+    queryFn: () => apiFetch(`${BASE}/users/${userId}/votes`),
+    enabled: !!userId,
+  });
+}
+
+export function useVoteOnProfile(userId: number | null) {
+  const qc = useQueryClient();
+  return useMutation<any, any, "like" | "dislike">({
+    mutationFn: (voteType) =>
+      apiFetch(`${BASE}/users/${userId}/vote`, {
+        method: "POST",
+        body: JSON.stringify({ voteType }),
+      }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["profile-votes", userId] });
+      qc.invalidateQueries({ queryKey: ["user-profile", userId] });
+    },
+  });
+}
+
 export function useVerifyId() {
   const qc = useQueryClient();
   return useMutation<{ success: boolean; idVerified: boolean; message: string }, any, File | null>({

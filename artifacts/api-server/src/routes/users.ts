@@ -1,7 +1,7 @@
 import { Router, type IRouter } from "express";
 import multer from "multer";
-import { db, usersTable, reviewsTable, gameRequestsTable, bidsTable, profilePurchasesTable, questEntriesTable, streamingAccountsTable, STREAMING_PLATFORMS } from "@workspace/db";
-import { eq, desc, and, sql } from "drizzle-orm";
+import { db, usersTable, reviewsTable, gameRequestsTable, bidsTable, profilePurchasesTable, questEntriesTable, streamingAccountsTable, profileVotesTable, STREAMING_PLATFORMS } from "@workspace/db";
+import { eq, desc, and, sql, or } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
 
 const upload = multer({ storage: multer.memoryStorage() });
@@ -323,6 +323,111 @@ router.delete("/streaming-accounts/:platform", requireAuth, async (req, res): Pr
     .where(and(eq(streamingAccountsTable.userId, user.id), eq(streamingAccountsTable.platform, platform)));
 
   res.json({ success: true });
+});
+
+/* ─── Profile votes ──────────────────────────────────────────────── */
+
+async function havePlayedTogether(viewerId: number, profileId: number): Promise<boolean> {
+  const [row] = await db
+    .select({ id: sql<number>`1` })
+    .from(gameRequestsTable)
+    .innerJoin(bidsTable, eq(bidsTable.requestId, gameRequestsTable.id))
+    .where(
+      and(
+        eq(gameRequestsTable.status, "completed"),
+        eq(bidsTable.status, "accepted"),
+        or(
+          and(eq(gameRequestsTable.userId, viewerId), eq(bidsTable.bidderId, profileId)),
+          and(eq(gameRequestsTable.userId, profileId), eq(bidsTable.bidderId, viewerId)),
+        ),
+      ),
+    )
+    .limit(1);
+  return !!row;
+}
+
+router.get("/users/:id/votes", requireAuth, async (req, res): Promise<void> => {
+  const viewer = req.user!;
+  const profileId = parseInt(req.params.id);
+  if (isNaN(profileId)) { res.status(400).json({ error: "Invalid user ID" }); return; }
+
+  const [likesRow, dislikesRow, myVoteRow] = await Promise.all([
+    db.select({ count: sql<string>`COUNT(*)::int` })
+      .from(profileVotesTable)
+      .where(and(eq(profileVotesTable.userId, profileId), eq(profileVotesTable.voteType, "like"))),
+    db.select({ count: sql<string>`COUNT(*)::int` })
+      .from(profileVotesTable)
+      .where(and(eq(profileVotesTable.userId, profileId), eq(profileVotesTable.voteType, "dislike"))),
+    db.select({ voteType: profileVotesTable.voteType })
+      .from(profileVotesTable)
+      .where(and(eq(profileVotesTable.userId, profileId), eq(profileVotesTable.voterId, viewer.id))),
+  ]);
+
+  const isSelf = viewer.id === profileId;
+  const canVote = !isSelf && await havePlayedTogether(viewer.id, profileId);
+
+  res.json({
+    likes: parseInt(String(likesRow[0]?.count ?? 0)),
+    dislikes: parseInt(String(dislikesRow[0]?.count ?? 0)),
+    myVote: myVoteRow[0]?.voteType ?? null,
+    canVote,
+  });
+});
+
+router.post("/users/:id/vote", requireAuth, async (req, res): Promise<void> => {
+  const voter = req.user!;
+  const profileId = parseInt(req.params.id);
+  if (isNaN(profileId)) { res.status(400).json({ error: "Invalid user ID" }); return; }
+  if (voter.id === profileId) { res.status(400).json({ error: "Cannot vote on your own profile" }); return; }
+
+  const { voteType } = req.body as { voteType?: string };
+  if (voteType !== "like" && voteType !== "dislike") {
+    res.status(400).json({ error: "voteType must be 'like' or 'dislike'" });
+    return;
+  }
+
+  const eligible = await havePlayedTogether(voter.id, profileId);
+  if (!eligible) {
+    res.status(403).json({ error: "You must have completed a session with this user to vote" });
+    return;
+  }
+
+  const [existing] = await db
+    .select()
+    .from(profileVotesTable)
+    .where(and(eq(profileVotesTable.userId, profileId), eq(profileVotesTable.voterId, voter.id)));
+
+  if (existing) {
+    if (existing.voteType === voteType) {
+      // Clicking the same button again — remove the vote
+      await db.delete(profileVotesTable).where(eq(profileVotesTable.id, existing.id));
+      // Reverse old TF adjustment
+      if (voteType === "like") {
+        await db.update(usersTable).set({ trustFactor: sql`GREATEST(${usersTable.trustFactor} - 1, 0)` }).where(eq(usersTable.id, profileId));
+      } else {
+        await db.update(usersTable).set({ trustFactor: sql`LEAST(${usersTable.trustFactor} + 1, 100)` }).where(eq(usersTable.id, profileId));
+      }
+      res.json({ success: true, action: "removed", myVote: null });
+      return;
+    }
+    // Changing vote (like → dislike or vice versa)
+    await db.update(profileVotesTable).set({ voteType }).where(eq(profileVotesTable.id, existing.id));
+    const tfDelta = voteType === "like" ? 2 : -2;
+    await db.update(usersTable)
+      .set({ trustFactor: sql`LEAST(GREATEST(${usersTable.trustFactor} + ${tfDelta}, 0), 100)` })
+      .where(eq(usersTable.id, profileId));
+    res.json({ success: true, action: "changed", myVote: voteType });
+    return;
+  }
+
+  // New vote
+  await db.insert(profileVotesTable).values({ userId: profileId, voterId: voter.id, voteType });
+  const tfDelta = voteType === "like" ? 1 : -1;
+  await db.update(usersTable)
+    .set({ trustFactor: sql`LEAST(GREATEST(${usersTable.trustFactor} + ${tfDelta}, 0), 100)` })
+    .where(eq(usersTable.id, profileId));
+
+  res.json({ success: true, action: "added", myVote: voteType });
 });
 
 export default router;

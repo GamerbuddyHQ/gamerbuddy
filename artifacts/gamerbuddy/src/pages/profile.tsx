@@ -4,6 +4,7 @@ import {
   useUserProfile, useUpdateProfile, useShopItems, usePurchaseItem,
   useMyQuestEntries, useAddQuestEntry, useDeleteQuestEntry, useVerifyId,
   useMyStreamingAccounts, useConnectStreaming, useDisconnectStreaming,
+  useProfileVotes,
   STREAMING_PLATFORM_META,
   type ShopItem, type QuestEntry,
 } from "@/lib/bids-api";
@@ -997,6 +998,7 @@ export default function Profile() {
   const { user } = useAuth();
   const { toast } = useToast();
   const { data: profile, isLoading } = useUserProfile(user?.id ?? null);
+  const { data: myVotes } = useProfileVotes(user?.id ?? null);
   const updateProfile = useUpdateProfile();
 
   const [editingBio, setEditingBio] = useState(false);
@@ -1118,6 +1120,24 @@ export default function Profile() {
               <ReputationBadges badges={repBadges} />
             )}
             <TrustMeter value={trustFactor} />
+
+            {/* Like / Dislike count — what the community thinks */}
+            {((myVotes?.likes ?? 0) > 0 || (myVotes?.dislikes ?? 0) > 0) && (
+              <div className="flex items-center gap-3 px-1">
+                <span className="inline-flex items-center gap-1.5 text-sm font-bold text-green-400">
+                  <span className="text-base">👍</span>
+                  {myVotes?.likes ?? 0}
+                  <span className="text-xs font-normal text-muted-foreground">Likes</span>
+                </span>
+                <span className="text-border">•</span>
+                <span className="inline-flex items-center gap-1.5 text-sm font-bold text-red-400">
+                  <span className="text-base">👎</span>
+                  {myVotes?.dislikes ?? 0}
+                  <span className="text-xs font-normal text-muted-foreground">Dislikes</span>
+                </span>
+              </div>
+            )}
+
             <div className="grid grid-cols-3 gap-2 sm:gap-3">
               <div className="p-2.5 sm:p-3 bg-background/50 rounded-xl border border-border text-center space-y-1">
                 <div className="text-xl sm:text-2xl font-black text-primary">{points}</div>

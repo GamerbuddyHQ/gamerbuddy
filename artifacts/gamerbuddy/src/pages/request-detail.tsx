@@ -624,7 +624,9 @@ function BidCard({
             </div>
             <div>
               <div className="font-bold text-white text-sm flex items-center gap-2 flex-wrap">
-                {bid.bidderName}
+                <Link href={`/users/${bid.bidderId}`}>
+                  <a className="hover:text-primary transition-colors">{bid.bidderName}</a>
+                </Link>
                 <VerifiedBadge idVerified={bid.bidderIdVerified ?? false} variant="compact" />
                 <TrustChip value={bid.bidderTrustFactor ?? 50} />
                 {isMe && <span className="text-xs text-secondary font-normal">(You)</span>}

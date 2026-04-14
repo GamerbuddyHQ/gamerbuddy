@@ -18,6 +18,7 @@ import AddFunds from "@/pages/add-funds";
 import Profile from "@/pages/profile";
 import RequestDetail from "@/pages/request-detail";
 import Notifications from "@/pages/notifications";
+import UserProfilePage from "@/pages/user-profile";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -58,6 +59,7 @@ function Router() {
         <Route path="/add-funds"><ProtectedRoute component={AddFunds} /></Route>
         <Route path="/profile"><ProtectedRoute component={Profile} /></Route>
         <Route path="/requests/:id" component={RequestDetail} />
+        <Route path="/users/:id" component={UserProfilePage} />
         <Route path="/notifications"><ProtectedRoute component={Notifications} /></Route>
         
         <Route component={NotFound} />
