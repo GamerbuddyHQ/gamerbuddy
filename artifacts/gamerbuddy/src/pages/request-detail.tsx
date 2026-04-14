@@ -1049,6 +1049,8 @@ function BidCard({
   const matchesGender = !hasGenderPref || bid.bidderGender  === preferredGender;
   const fullyMatches  = hasAnyPref && matchesNation && matchesGender;
   const partialMatch  = hasAnyPref && !fullyMatches && (matchesNation || matchesGender);
+  /* Perfect dual match: hirer has BOTH prefs set and this bidder satisfies BOTH */
+  const dualPrefMatch = hasNationPref && hasGenderPref && matchesNation && matchesGender;
 
   return (
     <>
@@ -1067,19 +1069,22 @@ function BidCard({
 
       <div
         className={`group rounded-2xl border overflow-hidden transition-all duration-300 ${
-          isAccepted  ? "border-green-500/45 shadow-[0_0_28px_rgba(34,197,94,0.10)]" :
-          isRejected  ? "border-border/25 opacity-45" :
-          isSelected  ? "border-purple-500/65 shadow-[0_0_32px_rgba(168,85,247,0.18)]" :
-          fullyMatches && isHirer ? "border-emerald-500/50 shadow-[0_0_28px_rgba(16,185,129,0.12)]" :
-          isMe        ? "border-secondary/40" :
+          isAccepted                  ? "border-green-500/45 shadow-[0_0_28px_rgba(34,197,94,0.10)]" :
+          isRejected                  ? "border-border/25 opacity-45" :
+          isSelected                  ? "border-purple-500/65 shadow-[0_0_32px_rgba(168,85,247,0.18)]" :
+          dualPrefMatch && isHirer    ? "border-emerald-400/70 shadow-[0_0_44px_rgba(16,185,129,0.28)]" :
+          fullyMatches  && isHirer    ? "border-emerald-500/50 shadow-[0_0_28px_rgba(16,185,129,0.12)]" :
+          partialMatch  && isHirer    ? "border-amber-500/35" :
+          isMe                        ? "border-secondary/40" :
           "border-border/60 hover:border-primary/30 hover:shadow-[0_0_24px_rgba(168,85,247,0.08)]"
         }`}
         style={{
-          background: isAccepted   ? "linear-gradient(135deg,rgba(34,197,94,0.05) 0%,rgba(0,0,0,0.55) 100%)" :
-                      isSelected   ? "linear-gradient(135deg,rgba(168,85,247,0.07) 0%,rgba(0,0,0,0.55) 100%)" :
-                      fullyMatches && isHirer ? "linear-gradient(135deg,rgba(16,185,129,0.06) 0%,rgba(0,0,0,0.55) 100%)" :
-                      isMe         ? "linear-gradient(135deg,rgba(6,182,212,0.05) 0%,rgba(0,0,0,0.55) 100%)" :
-                                     "linear-gradient(135deg,rgba(255,255,255,0.025) 0%,rgba(0,0,0,0.50) 100%)",
+          background: isAccepted        ? "linear-gradient(135deg,rgba(34,197,94,0.05) 0%,rgba(0,0,0,0.55) 100%)" :
+                      isSelected        ? "linear-gradient(135deg,rgba(168,85,247,0.07) 0%,rgba(0,0,0,0.55) 100%)" :
+                      dualPrefMatch && isHirer ? "linear-gradient(135deg,rgba(16,185,129,0.11) 0%,rgba(5,150,105,0.04) 60%,rgba(0,0,0,0.55) 100%)" :
+                      fullyMatches && isHirer  ? "linear-gradient(135deg,rgba(16,185,129,0.06) 0%,rgba(0,0,0,0.55) 100%)" :
+                      isMe            ? "linear-gradient(135deg,rgba(6,182,212,0.05) 0%,rgba(0,0,0,0.55) 100%)" :
+                                        "linear-gradient(135deg,rgba(255,255,255,0.025) 0%,rgba(0,0,0,0.50) 100%)",
         }}
       >
         {/* ── Top accent line ── */}
@@ -1088,12 +1093,14 @@ function BidCard({
           style={{
             background: isAccepted
               ? "linear-gradient(90deg,transparent 0%,#22c55e 40%,#22c55e 60%,transparent 100%)"
+              : dualPrefMatch && isHirer
+              ? "linear-gradient(90deg,transparent 0%,#34d399 20%,#10b981 50%,#34d399 80%,transparent 100%)"
               : fullyMatches && isHirer
               ? "linear-gradient(90deg,transparent 0%,#10b981 40%,#10b981 60%,transparent 100%)"
               : isMe
               ? "linear-gradient(90deg,transparent 0%,#22d3ee 40%,#22d3ee 60%,transparent 100%)"
               : "linear-gradient(90deg,transparent 0%,#a855f7 40%,#a855f7 60%,transparent 100%)",
-            opacity: isRejected ? 0.2 : 0.7,
+            opacity: isRejected ? 0.2 : dualPrefMatch && isHirer ? 1 : 0.7,
           }}
         />
 
@@ -1223,24 +1230,41 @@ function BidCard({
           {isHirer && hasAnyPref && (fullyMatches || partialMatch) && (
             <div
               className="flex items-center gap-2 px-3 py-2 rounded-xl flex-wrap"
-              style={{
-                background: fullyMatches
-                  ? "linear-gradient(90deg,rgba(16,185,129,0.10) 0%,rgba(16,185,129,0.04) 100%)"
-                  : "linear-gradient(90deg,rgba(245,158,11,0.08) 0%,rgba(245,158,11,0.02) 100%)",
-                border: fullyMatches
-                  ? "1px solid rgba(16,185,129,0.30)"
-                  : "1px solid rgba(245,158,11,0.25)",
-              }}
+              style={
+                dualPrefMatch
+                  ? {
+                      background: "linear-gradient(90deg,rgba(16,185,129,0.16) 0%,rgba(52,211,153,0.08) 60%,rgba(16,185,129,0.04) 100%)",
+                      border: "1px solid rgba(52,211,153,0.45)",
+                      boxShadow: "0 0 16px rgba(16,185,129,0.15)",
+                    }
+                  : fullyMatches
+                  ? {
+                      background: "linear-gradient(90deg,rgba(16,185,129,0.10) 0%,rgba(16,185,129,0.04) 100%)",
+                      border: "1px solid rgba(16,185,129,0.30)",
+                    }
+                  : {
+                      background: "linear-gradient(90deg,rgba(245,158,11,0.08) 0%,rgba(245,158,11,0.02) 100%)",
+                      border: "1px solid rgba(245,158,11,0.25)",
+                    }
+              }
             >
-              <Sparkles
-                className="h-3.5 w-3.5 shrink-0"
-                style={{ color: fullyMatches ? "#10b981" : "#f59e0b" }}
-              />
+              {dualPrefMatch ? (
+                <span className="text-base leading-none shrink-0">✦</span>
+              ) : (
+                <Sparkles
+                  className="h-3.5 w-3.5 shrink-0"
+                  style={{ color: fullyMatches ? "#10b981" : "#f59e0b" }}
+                />
+              )}
               <span
                 className="text-[11px] font-extrabold uppercase tracking-widest"
-                style={{ color: fullyMatches ? "#10b981" : "#f59e0b" }}
+                style={
+                  dualPrefMatch
+                    ? { color: "#34d399", letterSpacing: "0.14em" }
+                    : { color: fullyMatches ? "#10b981" : "#f59e0b" }
+                }
               >
-                {fullyMatches ? "Matches Your Preferences" : "Partial Match"}
+                {dualPrefMatch ? "✦ Perfect Match" : fullyMatches ? "Matches Your Preferences" : "Partial Match"}
               </span>
               <div className="flex items-center gap-1.5 ml-auto">
                 {hasNationPref && (
@@ -2267,15 +2291,23 @@ export default function RequestDetail() {
             return true;
           });
         }
-        /* Helper: match score for a bid given request prefs */
+        /* Helper: match score for a bid given request prefs
+           Scoring tiers:
+             5 — perfect dual match (both prefs set, both match)
+             2 — partial match or single-pref match
+             0 — no match / no prefs
+        */
         const prefHasNation = !!request.preferredCountry && request.preferredCountry !== "any";
         const prefHasGender = !!request.preferredGender  && request.preferredGender  !== "any";
         const bidMatchScore = (b: Bid) => {
           if (!prefHasNation && !prefHasGender) return 0;
-          let score = 0;
-          if (prefHasNation && b.bidderCountry === request.preferredCountry) score += 2;
-          if (prefHasGender && b.bidderGender  === request.preferredGender)  score += 2;
-          return score;
+          const nationHit = prefHasNation && b.bidderCountry === request.preferredCountry;
+          const genderHit = prefHasGender && b.bidderGender  === request.preferredGender;
+          /* Perfect dual match earns a 5 — beats any partial combination */
+          if (prefHasNation && prefHasGender && nationHit && genderHit) return 5;
+          /* Single hit (either pref) */
+          if (nationHit || genderHit) return 2;
+          return 0;
         };
 
         filteredBids.sort((a, b) => {
