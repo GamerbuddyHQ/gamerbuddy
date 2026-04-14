@@ -1128,6 +1128,17 @@ function BidCard({
 
         {!isMe && <BidderQuestSummary bidderId={bid.bidderId} gameName={gameName} />}
 
+        {bid.bidderBio && (
+          <div className="flex items-start gap-2 px-3 py-2 rounded-lg border border-white/[0.05] bg-white/[0.02]">
+            <User className="h-3 w-3 mt-0.5 shrink-0 text-primary/50" />
+            <p className="text-xs text-foreground/55 leading-relaxed italic">
+              {bid.bidderBio.length > 100
+                ? bid.bidderBio.slice(0, 100).trimEnd() + "…"
+                : bid.bidderBio}
+            </p>
+          </div>
+        )}
+
         <div className="flex gap-2 flex-wrap">
           {isHirer && bid.status === "pending" && requestStatus === "open" && (
             <Button

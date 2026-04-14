@@ -10,6 +10,7 @@ export type Bid = {
   bidderIdVerified?: boolean;
   bidderTrustFactor?: number;
   bidderSessionsAsGamerCount?: number;
+  bidderBio?: string | null;
   price: number;
   message: string;
   status: string;

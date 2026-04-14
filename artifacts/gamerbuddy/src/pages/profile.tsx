@@ -1226,6 +1226,9 @@ export default function Profile() {
       {/* ── VERIFICATION CARD ── */}
       <VerificationSection idVerified={user.idVerified} />
 
+      {/* MY QUEST */}
+      <QuestSection />
+
       {/* ── BIO / ABOUT ME ── */}
       {(() => {
         const charPct = Math.min(100, (draftBio.length / 300) * 100);
@@ -1446,9 +1449,6 @@ export default function Profile() {
           </div>
         );
       })()}
-
-      {/* MY QUEST */}
-      <QuestSection />
 
       {/* CONNECTED STREAMING PLATFORMS */}
       <StreamingAccountsSection />

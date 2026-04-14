@@ -250,6 +250,7 @@ function formatBid(
   bidderIdVerified?: boolean,
   bidderTrustFactor?: number,
   bidderSessionsAsGamerCount?: number,
+  bidderBio?: string | null,
 ) {
   return {
     id: bid.id,
@@ -259,6 +260,7 @@ function formatBid(
     bidderIdVerified: bidderIdVerified ?? false,
     bidderTrustFactor: bidderTrustFactor ?? 50,
     bidderSessionsAsGamerCount: bidderSessionsAsGamerCount ?? 0,
+    bidderBio: bidderBio ?? null,
     price: parseFloat(bid.price),
     message: bid.message,
     status: bid.status,
@@ -287,6 +289,7 @@ router.get("/requests/:id/bids", async (req, res): Promise<void> => {
       bidderName: usersTable.name,
       bidderIdVerified: usersTable.idVerified,
       bidderTrustFactor: usersTable.trustFactor,
+      bidderBio: usersTable.bio,
     })
     .from(bidsTable)
     .leftJoin(usersTable, eq(bidsTable.bidderId, usersTable.id))
@@ -325,6 +328,7 @@ router.get("/requests/:id/bids", async (req, res): Promise<void> => {
         r.bidderIdVerified ?? false,
         r.bidderTrustFactor ?? 50,
         sessMap[r.bidderId] ?? 0,
+        r.bidderBio ?? null,
       ),
     ),
   );
