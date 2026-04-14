@@ -11,6 +11,7 @@ import {
   ArrowLeft, Info, Shield, Users, Globe, Sun, Moon,
 } from "lucide-react";
 import { useTheme } from "@/lib/theme";
+import { RegionalClock } from "@/components/regional-clock";
 import { GamerbuddyLogo, GamerbuddyIcon } from "@/components/gamerbuddy-logo";
 import { Button } from "@/components/ui/button";
 import {
@@ -387,6 +388,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           </nav>
 
           <div className="flex items-center gap-2 shrink-0">
+            <RegionalClock />
             {/* Theme toggle with animated icon + tooltip */}
             <div className="relative group/theme">
               <button
