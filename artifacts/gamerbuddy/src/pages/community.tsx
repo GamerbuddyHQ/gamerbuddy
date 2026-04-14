@@ -149,14 +149,31 @@ function StatusBadge({ status }: { status: SuggestionStatus }) {
 }
 
 /* ── Category badge ── */
-function CategoryBadge({ category }: { category: SuggestionCategory }) {
+function CategoryBadge({ category, size = "md" }: { category: SuggestionCategory; size?: "sm" | "md" }) {
   const cfg = CATEGORY_CONFIG[category] ?? CATEGORY_CONFIG.other;
+  const glowAlpha = cfg.bg.replace(/[\d.]+\)$/, "0.28)");
+  if (size === "sm") {
+    return (
+      <span
+        className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0"
+        style={{ background: cfg.bg, border: `1px solid ${cfg.border}`, color: cfg.color }}
+      >
+        <cfg.Icon className="h-2.5 w-2.5" />
+        {cfg.label}
+      </span>
+    );
+  }
   return (
     <span
-      className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0"
-      style={{ background: cfg.bg, border: `1px solid ${cfg.border}`, color: cfg.color }}
+      className="inline-flex items-center gap-1.5 text-[11px] font-extrabold px-2.5 py-1 rounded-lg shrink-0 tracking-wide"
+      style={{
+        background: `linear-gradient(135deg, ${cfg.bg}, ${cfg.bg.replace(/[\d.]+\)$/, "0.07)")})`,
+        border: `1px solid ${cfg.border}`,
+        color: cfg.color,
+        boxShadow: `0 0 10px ${glowAlpha}, inset 0 1px 0 rgba(255,255,255,0.06)`,
+      }}
     >
-      <cfg.Icon className="h-2.5 w-2.5" />
+      <cfg.Icon className="h-3 w-3 shrink-0" />
       {cfg.label}
     </span>
   );
@@ -331,7 +348,7 @@ function CommentsPanel({ suggestion }: { suggestion: Suggestion }) {
   });
 
   return (
-    <div className="border-t px-5 py-4 space-y-4" style={{ borderColor: "rgba(168,85,247,0.10)", background: "rgba(0,0,0,0.20)" }}>
+    <div className="border-t px-4 sm:px-5 py-4 space-y-4" style={{ borderColor: "rgba(168,85,247,0.12)", background: "rgba(0,0,0,0.25)" }}>
       {user && (
         <div className="space-y-2">
           <textarea
@@ -628,19 +645,33 @@ function SuggestionCard({ suggestion, isAdmin }: { suggestion: Suggestion; isAdm
 
   const score = suggestion.likes - suggestion.dislikes;
   const scoreColor = score > 0 ? "text-emerald-400" : score < 0 ? "text-red-400" : "text-muted-foreground/60";
+  const catCfg = CATEGORY_CONFIG[suggestion.category ?? "other"] ?? CATEGORY_CONFIG.other;
 
   const borderColor = suggestion.status === "spam"
-    ? "rgba(239,68,68,0.25)"
+    ? "rgba(239,68,68,0.30)"
     : suggestion.status === "hidden"
-    ? "rgba(234,179,8,0.20)"
-    : suggestion.myVote
-    ? "rgba(168,85,247,0.35)"
-    : "rgba(255,255,255,0.07)";
+    ? "rgba(234,179,8,0.25)"
+    : suggestion.myVote === "up"
+    ? "rgba(34,197,94,0.30)"
+    : suggestion.myVote === "down"
+    ? "rgba(239,68,68,0.22)"
+    : "rgba(255,255,255,0.08)";
+
+  const accentColor = suggestion.status === "spam"
+    ? "#ef4444"
+    : suggestion.status === "hidden"
+    ? "#eab308"
+    : catCfg.color;
 
   return (
     <div
-      className="rounded-2xl border overflow-hidden transition-all duration-200"
-      style={{ background: "rgba(12,7,22,0.92)", borderColor, boxShadow: "0 4px 20px rgba(0,0,0,0.4)" }}
+      className="rounded-2xl border overflow-hidden transition-all duration-200 hover:border-white/[0.13]"
+      style={{
+        background: "rgba(10,5,20,0.94)",
+        borderColor,
+        boxShadow: "0 4px 24px rgba(0,0,0,0.45)",
+        borderLeft: `3px solid ${accentColor}55`,
+      }}
     >
       {/* Top accent line for non-visible */}
       {suggestion.status !== "visible" && (
@@ -651,28 +682,28 @@ function SuggestionCard({ suggestion, isAdmin }: { suggestion: Suggestion; isAdm
       )}
 
       {/* Card body */}
-      <div className="flex gap-4 p-5">
+      <div className="flex gap-3 sm:gap-4 p-4 sm:p-5">
         {/* Score column */}
         <div className="flex flex-col items-center gap-1 shrink-0 pt-0.5">
           <button
             onClick={() => user ? voteMutation.mutate("up") : toast({ title: "Log in to vote", variant: "destructive" })}
-            className={`h-8 w-8 rounded-lg flex items-center justify-center transition-all duration-150 active:scale-90 ${
+            className={`h-9 w-9 sm:h-8 sm:w-8 rounded-xl flex items-center justify-center transition-all duration-150 active:scale-90 ${
               suggestion.myVote === "up"
-                ? "bg-emerald-500/25 border border-emerald-500/50 text-emerald-400"
-                : "border border-border/40 text-muted-foreground/60 hover:border-emerald-500/40 hover:text-emerald-400 hover:bg-emerald-500/10"
+                ? "bg-emerald-500/25 border border-emerald-500/55 text-emerald-400 shadow-[0_0_10px_rgba(34,197,94,0.20)]"
+                : "border border-border/40 text-muted-foreground/55 hover:border-emerald-500/45 hover:text-emerald-400 hover:bg-emerald-500/10"
             }`}
           >
             <ThumbsUp className="h-3.5 w-3.5" />
           </button>
-          <span className={`text-[13px] font-extrabold tabular-nums leading-none ${scoreColor}`}>
+          <span className={`text-[13px] font-black tabular-nums leading-none ${scoreColor}`}>
             {score > 0 ? `+${score}` : score}
           </span>
           <button
             onClick={() => user ? voteMutation.mutate("down") : toast({ title: "Log in to vote", variant: "destructive" })}
-            className={`h-8 w-8 rounded-lg flex items-center justify-center transition-all duration-150 active:scale-90 ${
+            className={`h-9 w-9 sm:h-8 sm:w-8 rounded-xl flex items-center justify-center transition-all duration-150 active:scale-90 ${
               suggestion.myVote === "down"
-                ? "bg-red-500/20 border border-red-500/40 text-red-400"
-                : "border border-border/40 text-muted-foreground/60 hover:border-red-400/40 hover:text-red-400 hover:bg-red-500/10"
+                ? "bg-red-500/20 border border-red-500/45 text-red-400 shadow-[0_0_10px_rgba(239,68,68,0.18)]"
+                : "border border-border/40 text-muted-foreground/55 hover:border-red-400/45 hover:text-red-400 hover:bg-red-500/10"
             }`}
           >
             <ThumbsDown className="h-3.5 w-3.5" />
@@ -681,38 +712,42 @@ function SuggestionCard({ suggestion, isAdmin }: { suggestion: Suggestion; isAdm
 
         {/* Content */}
         <div className="flex-1 min-w-0">
-          <div className="flex items-start justify-between gap-3">
-            <h3 className="text-[15px] font-bold text-white leading-snug flex-1 min-w-0">{suggestion.title}</h3>
-            <span className="text-[10px] text-muted-foreground/35 tabular-nums shrink-0">
+          <div className="flex items-start justify-between gap-2">
+            <h3 className="text-[15px] sm:text-[16px] font-bold text-white leading-snug flex-1 min-w-0">{suggestion.title}</h3>
+            <span className="text-[10px] text-muted-foreground/30 tabular-nums shrink-0 mt-0.5">
               {suggestion.likes}↑ {suggestion.dislikes}↓
             </span>
           </div>
 
           {/* Category + status badges */}
-          <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+          <div className="flex items-center gap-2 mt-2 flex-wrap">
             <CategoryBadge category={suggestion.category ?? "other"} />
             <StatusBadge status={suggestion.status} />
           </div>
 
-          <p className="text-[13px] text-muted-foreground/70 leading-relaxed mt-2.5 whitespace-pre-wrap break-words">
+          <p className="text-[13px] text-muted-foreground/70 leading-relaxed mt-3 whitespace-pre-wrap break-words">
             {suggestion.body}
           </p>
 
           {/* Meta row */}
-          <div className="flex items-center gap-3 mt-3.5 flex-wrap">
+          <div className="flex items-center gap-3 mt-4 flex-wrap">
             <div className="flex items-center gap-1.5">
-              <Avatar name={suggestion.authorName} size={18} />
-              <span className="text-[11px] font-semibold text-white/65">{suggestion.authorName}</span>
+              <Avatar name={suggestion.authorName} size={20} />
+              <span className="text-[11px] font-semibold text-white/60">{suggestion.authorName}</span>
             </div>
-            <span className="text-[10px] text-muted-foreground/40">
+            <span className="text-[10px] text-muted-foreground/38">
               {formatDistanceToNow(new Date(suggestion.createdAt), { addSuffix: true })}
             </span>
             <button
               onClick={() => setExpanded((v) => !v)}
-              className="ml-auto flex items-center gap-1.5 text-[11px] font-semibold text-muted-foreground/55 hover:text-primary transition-colors"
+              className="ml-auto flex items-center gap-1.5 text-[11px] font-semibold transition-all duration-150 active:scale-95 rounded-lg px-2.5 py-1"
+              style={expanded
+                ? { background: "rgba(168,85,247,0.14)", border: "1px solid rgba(168,85,247,0.30)", color: "#c084fc" }
+                : { background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.45)" }
+              }
             >
               <MessageSquare className="h-3.5 w-3.5" />
-              {suggestion.commentCount} {suggestion.commentCount === 1 ? "comment" : "comments"}
+              <span>{suggestion.commentCount} {suggestion.commentCount === 1 ? "comment" : "comments"}</span>
               {expanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
             </button>
           </div>
@@ -1091,7 +1126,7 @@ export default function CommunityPage() {
   const visibleSuggestions = isAdmin ? suggestions.filter((s) => s.status === "visible") : suggestions;
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
+    <div className="max-w-2xl mx-auto space-y-5">
       {/* Subtle bg glow */}
       <div
         className="pointer-events-none fixed inset-0 -z-10 opacity-30"
@@ -1101,45 +1136,48 @@ export default function CommunityPage() {
       {/* ── Page header ── */}
       <div>
         <div className="flex items-center gap-2 mb-3">
-          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/70 border border-primary/25 rounded-full px-2.5 py-1">
+          <span
+            className="text-[10px] font-black uppercase tracking-[0.2em] px-2.5 py-1 rounded-full"
+            style={{ background: "rgba(168,85,247,0.12)", border: "1px solid rgba(168,85,247,0.30)", color: "#c084fc" }}
+          >
             Community
           </span>
         </div>
         <div className="flex items-start justify-between gap-4">
-          <div>
+          <div className="min-w-0">
             <h1 className="text-3xl md:text-4xl font-extrabold uppercase tracking-tight text-white leading-none" style={{ letterSpacing: "-0.02em" }}>
               <span className="flex items-center gap-3">
-                <Users className="h-8 w-8 text-primary shrink-0" />
+                <Users className="h-7 w-7 md:h-8 md:w-8 text-primary shrink-0" />
                 Community
               </span>
               <span className="text-primary text-2xl md:text-3xl">Suggestions</span>
             </h1>
-            <p className="text-muted-foreground mt-2 text-sm max-w-md">
-              Help us improve Gamerbuddy — share ideas, vote on your favourites, and discuss with the community.
+            <p className="text-muted-foreground/70 mt-2 text-sm leading-relaxed">
+              Share ideas, vote on your favourites, and discuss with the community.
             </p>
           </div>
 
-          {user && !showForm && (
-            <Button
-              onClick={() => setShowForm(true)}
-              className="shrink-0 font-bold"
-              style={{ background: "linear-gradient(135deg,#a855f7,#7c3aed)", boxShadow: "0 0 16px rgba(168,85,247,0.30)" }}
-            >
-              <Plus className="h-4 w-4 mr-1.5" /> New Idea
-            </Button>
-          )}
-
-          {user && showForm && (
-            <Button onClick={() => setShowForm(false)} variant="outline" className="shrink-0 font-bold border-border/50">
-              <X className="h-4 w-4 mr-1.5" /> Cancel
-            </Button>
-          )}
-
-          {!user && (
-            <Button asChild variant="outline" className="shrink-0 font-semibold border-primary/40 text-primary hover:bg-primary/10">
-              <Link href="/login">Log in to suggest</Link>
-            </Button>
-          )}
+          <div className="shrink-0 flex flex-col items-end gap-2">
+            {user && !showForm && (
+              <Button
+                onClick={() => setShowForm(true)}
+                className="font-bold whitespace-nowrap"
+                style={{ background: "linear-gradient(135deg,#a855f7,#7c3aed)", boxShadow: "0 0 18px rgba(168,85,247,0.32)" }}
+              >
+                <Plus className="h-4 w-4 mr-1.5" /> New Idea
+              </Button>
+            )}
+            {user && showForm && (
+              <Button onClick={() => setShowForm(false)} variant="outline" className="font-bold border-border/50 whitespace-nowrap">
+                <X className="h-4 w-4 mr-1.5" /> Cancel
+              </Button>
+            )}
+            {!user && (
+              <Button asChild variant="outline" className="font-semibold border-primary/40 text-primary hover:bg-primary/10 whitespace-nowrap">
+                <Link href="/login">Log in to suggest</Link>
+              </Button>
+            )}
+          </div>
         </div>
       </div>
 
@@ -1151,17 +1189,17 @@ export default function CommunityPage() {
 
       {/* ── Link safety banner ── */}
       <div
-        className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-[11px]"
-        style={{ background: "rgba(251,191,36,0.06)", border: "1px solid rgba(251,191,36,0.18)", color: "rgba(251,191,36,0.65)" }}
+        className="flex items-center gap-2 px-3 py-2 rounded-lg text-[11px]"
+        style={{ background: "rgba(251,191,36,0.05)", border: "1px solid rgba(251,191,36,0.15)", color: "rgba(251,191,36,0.55)" }}
       >
-        <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
-        For safety, external links are not allowed in the community. Any URLs you type will be automatically removed.
+        <AlertTriangle className="h-3 w-3 shrink-0" />
+        <span>External links are automatically removed for safety.</span>
       </div>
 
       {/* ── Sort tabs ── */}
       <div
         className="flex items-center p-1 gap-1 rounded-xl"
-        style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}
+        style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}
       >
         {SORTS.map(({ value, label, Icon }) => {
           const active = sort === value;
@@ -1169,24 +1207,27 @@ export default function CommunityPage() {
             <button
               key={value}
               onClick={() => setSort(value)}
-              className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg text-[12px] font-semibold transition-all duration-200 active:scale-95"
+              className="flex-1 flex items-center justify-center gap-1.5 px-2 sm:px-3 py-3 sm:py-2.5 rounded-lg text-[12px] font-bold transition-all duration-200 active:scale-95"
               style={active ? {
-                background: "rgba(168,85,247,0.22)",
-                border: "1px solid rgba(168,85,247,0.50)",
+                background: "linear-gradient(135deg,rgba(168,85,247,0.28),rgba(168,85,247,0.18))",
+                border: "1px solid rgba(168,85,247,0.55)",
                 color: "#c084fc",
-                boxShadow: "0 0 14px rgba(168,85,247,0.18)",
+                boxShadow: "0 0 16px rgba(168,85,247,0.20)",
               } : {
-                color: "rgba(255,255,255,0.45)",
+                color: "rgba(255,255,255,0.42)",
+                border: "1px solid transparent",
               }}
             >
               <Icon className="h-3.5 w-3.5 shrink-0" />
               <span className="hidden sm:inline">{label}</span>
-              <span className="sm:hidden">{label.split(" ")[0]}</span>
             </button>
           );
         })}
-        <span className="ml-2 text-[11px] text-muted-foreground/35 tabular-nums whitespace-nowrap pr-1">
-          {visibleSuggestions.length} {visibleSuggestions.length === 1 ? "idea" : "ideas"}
+        <span
+          className="text-[11px] font-semibold tabular-nums whitespace-nowrap px-2.5 py-1 rounded-lg ml-1 shrink-0"
+          style={{ background: "rgba(255,255,255,0.04)", color: "rgba(255,255,255,0.30)" }}
+        >
+          {visibleSuggestions.length}
         </span>
       </div>
 
@@ -1231,7 +1272,7 @@ export default function CommunityPage() {
       )}
 
       {!isLoading && !isError && visibleSuggestions.length > 0 && (
-        <div className="space-y-3">
+        <div className="space-y-4">
           {visibleSuggestions.map((s) => (
             <SuggestionCard key={s.id} suggestion={s} isAdmin={isAdmin} />
           ))}
