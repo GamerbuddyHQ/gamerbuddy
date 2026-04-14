@@ -9,6 +9,7 @@ import {
   Trophy, MessageSquare, Zap, CircleDollarSign, ChevronRight, Menu,
   ArrowLeft, Info, Shield,
 } from "lucide-react";
+import { GamerbuddyLogo, GamerbuddyIcon } from "@/components/gamerbuddy-logo";
 import { Button } from "@/components/ui/button";
 import {
   useUnreadCount, useNotifications, useMarkNotificationRead,
@@ -220,10 +221,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 <span className="hidden sm:inline">Back</span>
               </button>
             )}
-            <Link href="/" className="flex items-center gap-2 text-primary">
-              <Gamepad2 className="h-6 w-6" />
-              <span className="font-bold text-xl tracking-tight uppercase hidden sm:inline">GAMERBUDDY</span>
-              <span className="font-bold text-lg tracking-tight uppercase sm:hidden">GB</span>
+            <Link href="/" className="flex items-center">
+              <span className="hidden sm:flex">
+                <GamerbuddyLogo iconSize={26} textSize="xl" />
+              </span>
+              <span className="sm:hidden">
+                <GamerbuddyIcon size={26} />
+              </span>
             </Link>
           </div>
 
@@ -334,10 +338,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <div className="container py-6 md:py-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             {/* Branding */}
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <Gamepad2 className="h-5 w-5 text-primary/60" />
-              <span className="font-bold text-sm tracking-tight uppercase text-white/40">GAMERBUDDY</span>
-              <span className="text-white/15 text-xs">·</span>
+            <div className="flex items-center gap-3 opacity-60">
+              <GamerbuddyLogo iconSize={20} textSize="lg" />
+              <span className="text-white/20 text-xs">·</span>
               <span className="text-xs text-muted-foreground/50">Global Gaming Marketplace</span>
             </div>
 
