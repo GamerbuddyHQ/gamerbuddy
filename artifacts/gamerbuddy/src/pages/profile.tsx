@@ -989,7 +989,7 @@ function VerificationSection({ idVerified }: { idVerified: boolean }) {
           <div>
             <span className="text-[11px] font-semibold text-white">Verification helps keep Gamerbuddy safe</span>
             <p className="text-[10px] text-muted-foreground leading-relaxed mt-0.5">
-              It usually takes 7–15 days. You can browse and bid freely in the meantime — posting requests and hiring unlock once you're verified.
+              It usually takes 7–15 days. You can browse all open requests freely while we review your details. <span className="text-primary/90 font-semibold">Placing bids, joining tournaments, posting requests, and hiring all unlock once you're verified.</span>
             </p>
           </div>
         </div>

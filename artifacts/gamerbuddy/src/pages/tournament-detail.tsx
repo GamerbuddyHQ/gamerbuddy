@@ -5,7 +5,7 @@ import { formatDistanceToNow, format } from "date-fns";
 import {
   Trophy, Swords, Users, Crown, ArrowLeft, Gamepad2, Loader2,
   AlertTriangle, CheckCircle2, Shield, Lock, Globe, Clock,
-  Star, X, ChevronRight, Zap, Flame, UserCheck, UserX, MapPin, Check,
+  Star, X, ChevronRight, Zap, Flame, UserCheck, UserX, MapPin, Check, ShieldAlert,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -683,7 +683,22 @@ export default function TournamentDetailPage() {
           {/* ── Action buttons ── */}
           <div className="flex gap-2 flex-wrap">
             {/* Request to Join — with eligibility gate */}
-            {!isHost && !myReg && user && tournament.status === "open" && (
+            {!isHost && !myReg && user && !user.idVerified && tournament.status === "open" && (
+              <div className="flex-1 rounded-2xl px-4 py-3.5"
+                style={{ background: "rgba(245,158,11,0.07)", border: "1.5px solid rgba(245,158,11,0.28)" }}>
+                <p className="text-[13px] font-extrabold text-amber-400 flex items-center gap-2 mb-1">
+                  <ShieldAlert className="h-4 w-4 shrink-0" /> Verification required to join
+                </p>
+                <p className="text-[12px] text-amber-400/70 leading-relaxed">
+                  Almost there! Finish verification (7–15 days) and you'll be able to compete in tournaments.
+                </p>
+                <Link href="/profile" className="inline-block text-[11px] font-bold text-amber-400 underline mt-1.5">
+                  Check verification status →
+                </Link>
+              </div>
+            )}
+
+            {!isHost && !myReg && user && user.idVerified && tournament.status === "open" && (
               eligibility.eligible ? (
                 <Button onClick={() => joinMutation.mutate()} disabled={joinMutation.isPending || isFull}
                   className="flex-1 font-extrabold text-[14px] py-3 h-auto"

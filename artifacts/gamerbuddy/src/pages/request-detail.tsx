@@ -34,7 +34,7 @@ import {
   CheckCircle2, Send, Star, Trophy, AlertTriangle, User, Gift,
   Flag, X, MessageCircle, Gamepad2, Target, Zap, ChevronDown, ChevronUp,
   Phone, PhoneOff, Wifi, WifiOff, Volume2, ShieldCheck, Users, Lock,
-  SlidersHorizontal, ArrowUpDown, ArrowUp, ArrowDown, Tv, Sparkles,
+  SlidersHorizontal, ArrowUpDown, ArrowUp, ArrowDown, Tv, Sparkles, ShieldAlert,
 } from "lucide-react";
 import { SafetyBanner } from "@/components/safety-banner";
 import { VerifiedBadge } from "@/components/verified-badge";
@@ -1752,7 +1752,7 @@ export default function RequestDetail() {
   const acceptedBid = bids.find((b: Bid) => b.status === "accepted");
   const isGamer = myBid?.status === "accepted";
   const sessionStarted = !!(request as any)?.startedAt;
-  const canBid = user && !isHirer && !myBid && request?.status === "open";
+  const canBid = user && user.idVerified && !isHirer && !myBid && request?.status === "open";
   const canReview = user && (request?.status === "completed" || request?.status === "awaiting_reviews") && (isHirer || isGamer);
   const mustReview = user && request?.status === "awaiting_reviews" && (isHirer || isGamer);
 
@@ -2187,6 +2187,27 @@ export default function RequestDetail() {
             <Button asChild className="bg-primary font-bold uppercase">
               <Link href="/login">Log In to Bid</Link>
             </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {user && !user.idVerified && !isHirer && !myBid && request?.status === "open" && (
+        <Card className="border-amber-500/30 bg-amber-500/5 overflow-hidden">
+          <CardContent className="pt-5 pb-5">
+            <div className="flex flex-col sm:flex-row items-center gap-4">
+              <div className="h-11 w-11 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center shrink-0">
+                <ShieldAlert className="h-5 w-5 text-amber-400" />
+              </div>
+              <div className="flex-1 text-center sm:text-left">
+                <p className="font-bold text-amber-300 text-sm">Verification required to place bids</p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  You must complete verification (7–15 days) before you can place bids. Almost there — once approved you'll be able to squad up with skilled gamers!
+                </p>
+              </div>
+              <Button size="sm" variant="outline" asChild className="border-amber-500/40 text-amber-300 hover:bg-amber-500/10 shrink-0 text-xs">
+                <Link href="/profile">Check Verification Status</Link>
+              </Button>
+            </div>
           </CardContent>
         </Card>
       )}

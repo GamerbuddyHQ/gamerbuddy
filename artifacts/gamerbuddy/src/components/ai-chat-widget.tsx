@@ -28,7 +28,7 @@ const RESPONSES: Array<{ patterns: RegExp; reply: string }> = [
   /* ── BIDDING / GETTING HIRED ── */
   {
     patterns: /bid|apply.*request|get hired|become.*gamer|earn.*money|hired|place.*bid/i,
-    reply: `Time to squad up and secure that bag! 💰 Here's how to get hired:\n\n1. Head to **Browse Requests** and find sessions you can dominate\n2. Click **"Place Bid"** — drop your price and a hype pitch about why you're the one\n3. Hirer accepts → you coordinate and play\n4. Finish the session, drop a review each\n5. Profit lands in your **Earnings Wallet** ✅\n\n💡 You pocket **90%** of your bid — we take 10%. Low bids + a killer pitch = more wins. Go get it!`,
+    reply: `Time to squad up and secure that bag! 💰 Here's how to get hired:\n\n⚠️ **Important:** You need to be **verified first** before you can place any bids. Verification takes 7–15 days — get that sorted and you're good to go!\n\n1. Head to **Browse Requests** and find sessions you can dominate\n2. Click **"Place Bid"** — drop your price and a hype pitch about why you're the one\n3. Hirer accepts → you coordinate and play\n4. Finish the session, drop a review each\n5. Profit lands in your **Earnings Wallet** ✅\n\n💡 You pocket **90%** of your bid — we take 10%. Low bids + a killer pitch = more wins. Go get it!`,
   },
 
   /* ── BULK HIRING ── */
@@ -166,7 +166,7 @@ const RESPONSES: Array<{ patterns: RegExp; reply: string }> = [
   /* ── VERIFICATION / BADGE ── */
   {
     patterns: /verif|badge|trust.*factor|id.*check|how.*long.*verify|7.*day|15.*day|green.*tick/i,
-    reply: `Great question! Here's the full scoop on verification ✅\n\nVerification usually takes **7 to 15 days** after you submit your:\n• 📧 **Email** confirmation\n• 📱 **Phone number** verification\n• 🪪 **ID check** (standard platform safety stuff)\n\nWhile you're waiting, you're **not locked out**!\n• ✅ Browse all open requests freely\n• ✅ Scout the competition and prep your strategy\n• ✅ Place bids on sessions\n\nOnce approved, you unlock the full experience:\n• Post your own requests\n• Hire gamers directly\n• The green **✅ Verified badge** on your profile, bids, and listings\n\nThat badge is a big deal — hirers specifically filter for verified players. Get it and watch those bid acceptances go up! 🚀`,
+    reply: `Great question! Here's the full scoop on verification ✅\n\nVerification usually takes **7 to 15 days** after you submit your:\n• 📧 **Email** confirmation\n• 📱 **Phone number** verification\n• 🪪 **ID check** (standard platform safety stuff)\n\nWhile you're waiting, you can still:\n• ✅ Browse all open requests freely\n• ✅ Scout the competition and prep your strategy\n\n🔒 **You cannot place bids or join tournaments until you're verified.** This keeps the platform safe for everyone.\n\nOnce approved, you unlock the full experience:\n• 💰 Place bids on sessions\n• 🏆 Join and compete in tournaments\n• 📋 Post your own requests\n• 🤝 Hire gamers directly\n• The green **✅ Verified badge** on your profile, bids, and listings\n\nThat badge is a big deal — hirers specifically filter for verified players. Get it done and watch those bid acceptances go up! 🚀`,
   },
 
   /* ── TRUST FACTOR ── */

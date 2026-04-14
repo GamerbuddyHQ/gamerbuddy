@@ -20,7 +20,7 @@ import {
   CheckCircle2, AlertCircle, User, Clock, TrendingDown, TrendingUp,
   Zap, ExternalLink, LogIn, Trophy, Shield, Star,
   Flame, Target, Users, X, SlidersHorizontal, Tv, Sparkles,
-  ArrowDownUp, ArrowUp, ArrowDown, Globe, UserRound,
+  ArrowDownUp, ArrowUp, ArrowDown, Globe, UserRound, ShieldAlert,
 } from "lucide-react";
 import { SafetyBanner } from "@/components/safety-banner";
 import { useToast } from "@/hooks/use-toast";
@@ -144,6 +144,23 @@ function QuickBidPanel({ req, onClose }: { req: GameRequest; onClose: () => void
           <Button size="sm" variant="outline" onClick={() => setLocation("/login")} className="text-xs">Log In</Button>
           <Button size="sm" onClick={() => setLocation("/signup")} className="bg-primary text-xs">Sign Up</Button>
         </div>
+      </div>
+    );
+  }
+
+  if (!user.idVerified) {
+    return (
+      <div className="mt-4 rounded-xl border border-amber-500/30 bg-amber-500/6 p-5 flex flex-col sm:flex-row items-center gap-4">
+        <div className="h-10 w-10 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center shrink-0">
+          <ShieldAlert className="h-5 w-5 text-amber-400" />
+        </div>
+        <div className="flex-1 text-center sm:text-left">
+          <div className="font-bold text-amber-300 text-sm">Verification required to place bids</div>
+          <div className="text-xs text-muted-foreground mt-0.5">Almost there! Finish verification (7–15 days) and you'll be able to squad up with skilled gamers.</div>
+        </div>
+        <Button size="sm" variant="outline" onClick={() => setLocation("/profile")} className="text-xs border-amber-500/40 text-amber-300 hover:bg-amber-500/10 shrink-0">
+          Check Status
+        </Button>
       </div>
     );
   }
