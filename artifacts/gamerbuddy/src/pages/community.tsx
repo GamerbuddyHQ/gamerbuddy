@@ -6,11 +6,23 @@ import {
   Send, Plus, X, Lightbulb, Users, AlertTriangle, ArrowUpDown,
   Flame, Clock, CornerDownRight, Shield, EyeOff, Trash2,
   CheckCircle2, AlertOctagon, Eye, ShieldAlert, Sparkles,
+  CircleDashed, Loader2,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "wouter";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const BASE = "/api";
 
@@ -98,7 +110,7 @@ function LinkRemovedNotice() {
   );
 }
 
-/* ── Status badge ── */
+/* ── Status badge — shown for non-visible on public cards ── */
 function StatusBadge({ status }: { status: SuggestionStatus }) {
   if (status === "visible") return null;
   if (status === "hidden") return (
@@ -109,6 +121,54 @@ function StatusBadge({ status }: { status: SuggestionStatus }) {
   return (
     <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: "rgba(239,68,68,0.15)", border: "1px solid rgba(239,68,68,0.35)", color: "#f87171" }}>
       <AlertOctagon className="h-2.5 w-2.5" /> Spam
+    </span>
+  );
+}
+
+/* ── Admin status pill — shows current moderation state clearly ── */
+const STATUS_CONFIG: Record<SuggestionStatus, {
+  label: string;
+  Icon: React.FC<{ className?: string; style?: React.CSSProperties }>;
+  bg: string;
+  border: string;
+  color: string;
+  glow: string;
+}> = {
+  visible: {
+    label: "Approved",
+    Icon: CheckCircle2,
+    bg: "rgba(34,197,94,0.10)",
+    border: "rgba(34,197,94,0.35)",
+    color: "#4ade80",
+    glow: "rgba(34,197,94,0.15)",
+  },
+  hidden: {
+    label: "Hidden",
+    Icon: EyeOff,
+    bg: "rgba(234,179,8,0.10)",
+    border: "rgba(234,179,8,0.35)",
+    color: "#fbbf24",
+    glow: "rgba(234,179,8,0.12)",
+  },
+  spam: {
+    label: "Spam",
+    Icon: AlertOctagon,
+    bg: "rgba(239,68,68,0.10)",
+    border: "rgba(239,68,68,0.35)",
+    color: "#f87171",
+    glow: "rgba(239,68,68,0.12)",
+  },
+};
+
+function AdminStatusPill({ status }: { status: SuggestionStatus }) {
+  const cfg = STATUS_CONFIG[status];
+  return (
+    <span
+      className="inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-full"
+      style={{ background: cfg.bg, border: `1px solid ${cfg.border}`, color: cfg.color, boxShadow: `0 0 10px ${cfg.glow}` }}
+    >
+      <cfg.Icon className="h-3 w-3" />
+      {cfg.label}
     </span>
   );
 }
@@ -284,6 +344,7 @@ function CommentsPanel({ suggestion }: { suggestion: Suggestion }) {
 function AdminToolbar({ suggestion }: { suggestion: Suggestion }) {
   const { toast } = useToast();
   const qc = useQueryClient();
+  const [deleteOpen, setDeleteOpen] = useState(false);
 
   const moderateMutation = useMutation({
     mutationFn: async (action: "approve" | "hide" | "spam") => {
@@ -297,7 +358,11 @@ function AdminToolbar({ suggestion }: { suggestion: Suggestion }) {
       if (!r.ok) throw new Error(data.error ?? "Moderation failed");
       return data;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["suggestions"] }),
+    onSuccess: (_data, action) => {
+      qc.invalidateQueries({ queryKey: ["suggestions"] });
+      const labels: Record<string, string> = { approve: "Approved", hide: "Hidden", spam: "Marked as spam" };
+      toast({ title: labels[action] ?? "Status updated" });
+    },
     onError: (e: Error) => toast({ title: "Error", description: e.message, variant: "destructive" }),
   });
 
@@ -313,7 +378,8 @@ function AdminToolbar({ suggestion }: { suggestion: Suggestion }) {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["suggestions"] });
-      toast({ title: "Suggestion deleted" });
+      toast({ title: "Suggestion permanently deleted" });
+      setDeleteOpen(false);
     },
     onError: (e: Error) => toast({ title: "Error", description: e.message, variant: "destructive" }),
   });
@@ -321,60 +387,138 @@ function AdminToolbar({ suggestion }: { suggestion: Suggestion }) {
   const busy = moderateMutation.isPending || deleteMutation.isPending;
 
   return (
-    <div
-      className="border-t px-4 py-2.5 flex flex-wrap items-center gap-2"
-      style={{ borderColor: "rgba(168,85,247,0.15)", background: "rgba(168,85,247,0.04)" }}
-    >
-      <span className="text-[9px] font-black uppercase tracking-[0.18em] text-primary/40 flex items-center gap-1 mr-1">
-        <Shield className="h-3 w-3" /> Admin
-      </span>
-
-      {suggestion.status !== "visible" && (
-        <button
-          onClick={() => moderateMutation.mutate("approve")}
-          disabled={busy}
-          className="flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-lg transition-all disabled:opacity-50"
-          style={{ background: "rgba(34,197,94,0.12)", border: "1px solid rgba(34,197,94,0.35)", color: "#4ade80" }}
-        >
-          <Eye className="h-3 w-3" /> Approve
-        </button>
-      )}
-
-      {suggestion.status !== "hidden" && (
-        <button
-          onClick={() => moderateMutation.mutate("hide")}
-          disabled={busy}
-          className="flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-lg transition-all disabled:opacity-50"
-          style={{ background: "rgba(234,179,8,0.10)", border: "1px solid rgba(234,179,8,0.30)", color: "#fbbf24" }}
-        >
-          <EyeOff className="h-3 w-3" /> Hide
-        </button>
-      )}
-
-      {suggestion.status !== "spam" && (
-        <button
-          onClick={() => moderateMutation.mutate("spam")}
-          disabled={busy}
-          className="flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-lg transition-all disabled:opacity-50"
-          style={{ background: "rgba(239,68,68,0.10)", border: "1px solid rgba(239,68,68,0.30)", color: "#f87171" }}
-        >
-          <AlertOctagon className="h-3 w-3" /> Flag Spam
-        </button>
-      )}
-
-      <button
-        onClick={() => {
-          if (window.confirm("Permanently delete this suggestion and all its comments?")) {
-            deleteMutation.mutate();
-          }
-        }}
-        disabled={busy}
-        className="flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-lg transition-all disabled:opacity-50 ml-auto"
-        style={{ background: "rgba(239,68,68,0.12)", border: "1px solid rgba(239,68,68,0.35)", color: "#f87171" }}
+    <>
+      {/* Admin status bar */}
+      <div
+        className="border-t px-4 py-3 space-y-3"
+        style={{ borderColor: "rgba(168,85,247,0.15)", background: "rgba(10,5,20,0.60)" }}
       >
-        <Trash2 className="h-3 w-3" /> Delete
-      </button>
-    </div>
+        {/* Header row: label + current status */}
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <div
+              className="h-6 w-6 rounded-md flex items-center justify-center shrink-0"
+              style={{ background: "rgba(168,85,247,0.18)", border: "1px solid rgba(168,85,247,0.40)" }}
+            >
+              <Shield className="h-3.5 w-3.5 text-primary" />
+            </div>
+            <span className="text-[11px] font-black uppercase tracking-[0.14em] text-primary/70">
+              Moderation
+            </span>
+          </div>
+
+          {/* Current status pill */}
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] text-muted-foreground/40 font-medium">Status:</span>
+            <AdminStatusPill status={suggestion.status} />
+          </div>
+        </div>
+
+        {/* Action buttons */}
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Approve */}
+          <button
+            onClick={() => moderateMutation.mutate("approve")}
+            disabled={busy || suggestion.status === "visible"}
+            className="flex items-center gap-1.5 text-[12px] font-semibold px-3 py-1.5 rounded-lg transition-all duration-150 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
+            style={suggestion.status === "visible"
+              ? { background: "rgba(34,197,94,0.08)", border: "1px solid rgba(34,197,94,0.20)", color: "rgba(74,222,128,0.45)" }
+              : { background: "rgba(34,197,94,0.14)", border: "1px solid rgba(34,197,94,0.45)", color: "#4ade80", boxShadow: "0 0 12px rgba(34,197,94,0.12)" }
+            }
+            title={suggestion.status === "visible" ? "Already approved" : "Make visible to everyone"}
+          >
+            {moderateMutation.isPending && moderateMutation.variables === "approve"
+              ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              : <CheckCircle2 className="h-3.5 w-3.5" />
+            }
+            Approve
+          </button>
+
+          {/* Hide */}
+          <button
+            onClick={() => moderateMutation.mutate("hide")}
+            disabled={busy || suggestion.status === "hidden"}
+            className="flex items-center gap-1.5 text-[12px] font-semibold px-3 py-1.5 rounded-lg transition-all duration-150 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
+            style={suggestion.status === "hidden"
+              ? { background: "rgba(234,179,8,0.07)", border: "1px solid rgba(234,179,8,0.18)", color: "rgba(251,191,36,0.40)" }
+              : { background: "rgba(234,179,8,0.12)", border: "1px solid rgba(234,179,8,0.40)", color: "#fbbf24", boxShadow: "0 0 12px rgba(234,179,8,0.10)" }
+            }
+            title={suggestion.status === "hidden" ? "Already hidden" : "Hide from public view"}
+          >
+            {moderateMutation.isPending && moderateMutation.variables === "hide"
+              ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              : <EyeOff className="h-3.5 w-3.5" />
+            }
+            Hide
+          </button>
+
+          {/* Flag Spam */}
+          <button
+            onClick={() => moderateMutation.mutate("spam")}
+            disabled={busy || suggestion.status === "spam"}
+            className="flex items-center gap-1.5 text-[12px] font-semibold px-3 py-1.5 rounded-lg transition-all duration-150 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
+            style={suggestion.status === "spam"
+              ? { background: "rgba(239,68,68,0.07)", border: "1px solid rgba(239,68,68,0.18)", color: "rgba(248,113,113,0.40)" }
+              : { background: "rgba(239,68,68,0.12)", border: "1px solid rgba(239,68,68,0.38)", color: "#f87171", boxShadow: "0 0 12px rgba(239,68,68,0.10)" }
+            }
+            title={suggestion.status === "spam" ? "Already marked as spam" : "Flag as spam — hides from public"}
+          >
+            {moderateMutation.isPending && moderateMutation.variables === "spam"
+              ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              : <AlertOctagon className="h-3.5 w-3.5" />
+            }
+            Flag Spam
+          </button>
+
+          {/* Delete — danger, separated to the right */}
+          <div className="ml-auto">
+            <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+              <AlertDialogTrigger asChild>
+                <button
+                  disabled={busy}
+                  className="flex items-center gap-1.5 text-[12px] font-semibold px-3 py-1.5 rounded-lg transition-all duration-150 active:scale-95 disabled:opacity-40"
+                  style={{ background: "rgba(239,68,68,0.14)", border: "1px solid rgba(239,68,68,0.45)", color: "#f87171" }}
+                  title="Permanently delete this suggestion"
+                >
+                  <Trash2 className="h-3.5 w-3.5" /> Delete
+                </button>
+              </AlertDialogTrigger>
+              <AlertDialogContent className="border-red-500/30" style={{ background: "rgba(15,7,26,0.98)", boxShadow: "0 0 40px rgba(239,68,68,0.15)" }}>
+                <AlertDialogHeader>
+                  <div className="flex items-center gap-3 mb-1">
+                    <div className="h-10 w-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: "rgba(239,68,68,0.15)", border: "1px solid rgba(239,68,68,0.40)" }}>
+                      <Trash2 className="h-5 w-5 text-red-400" />
+                    </div>
+                    <AlertDialogTitle className="text-white text-lg">Delete Suggestion</AlertDialogTitle>
+                  </div>
+                  <AlertDialogDescription className="text-muted-foreground leading-relaxed">
+                    This will permanently delete{" "}
+                    <span className="font-semibold text-white/80">"{suggestion.title}"</span>{" "}
+                    and all of its comments. This action cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter className="gap-2 sm:gap-2">
+                  <AlertDialogCancel className="border-border/50 text-muted-foreground hover:text-white">
+                    Cancel
+                  </AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={(e) => { e.preventDefault(); deleteMutation.mutate(); }}
+                    disabled={deleteMutation.isPending}
+                    className="font-bold border-0 text-white"
+                    style={{ background: "linear-gradient(135deg,#dc2626,#b91c1c)", boxShadow: "0 0 16px rgba(239,68,68,0.30)" }}
+                  >
+                    {deleteMutation.isPending
+                      ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Deleting…</>
+                      : <><Trash2 className="h-4 w-4 mr-2" />Yes, Delete Permanently</>
+                    }
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
+        </div>
+      </div>
+    </>
   );
 }
 
@@ -647,51 +791,122 @@ type Sort = typeof SORTS[number]["value"];
 /* ── Admin moderation queue ── */
 function AdminQueue({ suggestions, isAdmin }: { suggestions: Suggestion[]; isAdmin: boolean }) {
   const [open, setOpen] = useState(true);
-  const pending = suggestions.filter((s) => s.status !== "visible");
-  if (!isAdmin || pending.length === 0) return null;
+  const [tab, setTab] = useState<"all" | "hidden" | "spam">("all");
+
+  if (!isAdmin) return null;
+
+  const hidden  = suggestions.filter((s) => s.status === "hidden");
+  const spam    = suggestions.filter((s) => s.status === "spam");
+  const all     = suggestions.filter((s) => s.status !== "visible");
+  const visible = suggestions.filter((s) => s.status === "visible");
+
+  const tabItems = tab === "hidden" ? hidden : tab === "spam" ? spam : all;
+  const totalNonVisible = all.length;
 
   return (
     <div
       className="rounded-2xl border overflow-hidden"
-      style={{ borderColor: "rgba(168,85,247,0.45)", background: "rgba(168,85,247,0.04)", boxShadow: "0 0 24px rgba(168,85,247,0.08)" }}
+      style={{ borderColor: "rgba(168,85,247,0.40)", background: "rgba(8,4,18,0.80)", boxShadow: "0 0 32px rgba(168,85,247,0.08), inset 0 1px 0 rgba(168,85,247,0.10)" }}
     >
-      {/* Queue header */}
+      {/* ── Collapsible header ── */}
       <button
         onClick={() => setOpen((v) => !v)}
-        className="w-full flex items-center justify-between px-5 py-4"
+        className="w-full flex items-center justify-between px-5 py-4 hover:bg-white/[0.02] transition-colors"
       >
         <div className="flex items-center gap-3">
           <div
-            className="h-8 w-8 rounded-xl flex items-center justify-center"
-            style={{ background: "rgba(168,85,247,0.20)", border: "1px solid rgba(168,85,247,0.45)" }}
+            className="h-9 w-9 rounded-xl flex items-center justify-center shrink-0"
+            style={{ background: "linear-gradient(135deg,rgba(168,85,247,0.25),rgba(168,85,247,0.10))", border: "1px solid rgba(168,85,247,0.50)" }}
           >
-            <Shield className="h-4 w-4 text-primary" />
+            <Shield className="h-4.5 w-4.5 text-primary" />
           </div>
           <div className="text-left">
-            <div className="text-sm font-extrabold text-white flex items-center gap-2">
-              Admin Moderation Tools
-              <span
-                className="text-[10px] font-black px-2 py-0.5 rounded-full"
-                style={{ background: "rgba(168,85,247,0.25)", border: "1px solid rgba(168,85,247,0.45)", color: "#c084fc" }}
-              >
-                {pending.length} pending
-              </span>
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-[13px] font-extrabold text-white">Admin Moderation Panel</span>
+              {totalNonVisible > 0 && (
+                <span
+                  className="text-[10px] font-black px-2 py-0.5 rounded-full animate-pulse"
+                  style={{ background: "rgba(239,68,68,0.20)", border: "1px solid rgba(239,68,68,0.45)", color: "#f87171" }}
+                >
+                  {totalNonVisible} need review
+                </span>
+              )}
             </div>
-            <div className="text-[11px] text-muted-foreground/60">Visible only to the platform owner</div>
+            <div className="text-[11px] text-muted-foreground/50 mt-0.5">Visible only to you — platform owner</div>
           </div>
         </div>
-        {open ? <ChevronUp className="h-4 w-4 text-primary/60" /> : <ChevronDown className="h-4 w-4 text-primary/60" />}
+        {open
+          ? <ChevronUp className="h-4 w-4 text-primary/50 shrink-0" />
+          : <ChevronDown className="h-4 w-4 text-primary/50 shrink-0" />
+        }
       </button>
 
       {open && (
-        <div className="border-t px-5 py-4 space-y-3" style={{ borderColor: "rgba(168,85,247,0.15)" }}>
-          <p className="text-[11px] text-muted-foreground/55 leading-relaxed">
-            The following suggestions are hidden from public view. Use the controls on each card to approve, hide, flag as spam, or delete.
-          </p>
-          <div className="space-y-3">
-            {pending.map((s) => (
-              <SuggestionCard key={s.id} suggestion={s} isAdmin={isAdmin} />
+        <div className="border-t" style={{ borderColor: "rgba(168,85,247,0.15)" }}>
+          {/* ── Stats row ── */}
+          <div className="grid grid-cols-3 divide-x" style={{ divideColor: "rgba(168,85,247,0.12)", borderBottom: "1px solid rgba(168,85,247,0.12)" }}>
+            {[
+              { label: "Approved", count: visible.length, cfg: STATUS_CONFIG.visible },
+              { label: "Hidden",   count: hidden.length,  cfg: STATUS_CONFIG.hidden  },
+              { label: "Spam",     count: spam.length,    cfg: STATUS_CONFIG.spam    },
+            ].map(({ label, count, cfg }) => (
+              <div key={label} className="flex flex-col items-center py-3 gap-1" style={{ borderRight: "1px solid rgba(168,85,247,0.10)" }}>
+                <span className="text-xl font-black tabular-nums" style={{ color: cfg.color }}>{count}</span>
+                <div className="flex items-center gap-1">
+                  <cfg.Icon className="h-3 w-3" style={{ color: cfg.color }} />
+                  <span className="text-[10px] font-semibold text-muted-foreground/55">{label}</span>
+                </div>
+              </div>
             ))}
+          </div>
+
+          {/* ── Tab bar (only if there's non-visible content) ── */}
+          {totalNonVisible > 0 && (
+            <div className="flex items-center gap-1.5 px-4 pt-4">
+              {(["all", "hidden", "spam"] as const).map((t) => {
+                const counts = { all: totalNonVisible, hidden: hidden.length, spam: spam.length };
+                const labels = { all: "All Pending", hidden: "Hidden", spam: "Spam" };
+                const active = tab === t;
+                return (
+                  <button
+                    key={t}
+                    onClick={() => setTab(t)}
+                    className="flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1.5 rounded-lg transition-all"
+                    style={active
+                      ? { background: "rgba(168,85,247,0.20)", border: "1px solid rgba(168,85,247,0.45)", color: "#c084fc" }
+                      : { background: "transparent", border: "1px solid rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.40)" }
+                    }
+                  >
+                    {labels[t]}
+                    <span
+                      className="text-[9px] font-black min-w-[14px] text-center"
+                      style={{ color: active ? "#c084fc" : "rgba(255,255,255,0.30)" }}
+                    >
+                      {counts[t]}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
+          {/* ── Content ── */}
+          <div className="px-4 py-4 space-y-3">
+            {totalNonVisible === 0 ? (
+              <div className="flex flex-col items-center gap-3 py-6 text-center">
+                <div className="h-10 w-10 rounded-full flex items-center justify-center" style={{ background: "rgba(34,197,94,0.12)", border: "1px solid rgba(34,197,94,0.30)" }}>
+                  <CheckCircle2 className="h-5 w-5 text-green-400" />
+                </div>
+                <div>
+                  <div className="text-sm font-bold text-white/70">All clear!</div>
+                  <div className="text-[11px] text-muted-foreground/45 mt-0.5">No suggestions need moderation right now.</div>
+                </div>
+              </div>
+            ) : tabItems.length === 0 ? (
+              <p className="text-[12px] text-muted-foreground/40 text-center py-4">No {tab} items.</p>
+            ) : (
+              tabItems.map((s) => <SuggestionCard key={s.id} suggestion={s} isAdmin={isAdmin} />)
+            )}
           </div>
         </div>
       )}

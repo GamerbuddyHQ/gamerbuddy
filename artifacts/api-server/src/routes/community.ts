@@ -7,7 +7,7 @@ import {
   usersTable,
 } from "@workspace/db";
 import { eq, sql, and, inArray } from "drizzle-orm";
-import { requireAuth } from "../middlewares/auth";
+import { requireAuth, loadUser } from "../middlewares/auth";
 
 const router: IRouter = Router();
 
@@ -30,7 +30,7 @@ type SuggestionStatus = (typeof VALID_STATUSES)[number];
    GET /community/suggestions?sort=newest|liked|discussed
    Admins see all; normal users only see 'visible'
 ────────────────────────────────────────────────────────────── */
-router.get("/community/suggestions", async (req, res): Promise<void> => {
+router.get("/community/suggestions", loadUser, async (req, res): Promise<void> => {
   const sort = (req.query.sort as string) ?? "newest";
   const currentUser = req.user ?? null;
   const adminMode = currentUser ? isAdmin(currentUser) : false;
