@@ -369,10 +369,7 @@ function RequestCard({ req }: { req: GameRequest }) {
 
   const skill = SKILL_CONFIG[req.skillLevel] ?? DEFAULT_SKILL;
   const isZeroBids = req.bidCount === 0;
-  const hasContextTags = req.isBulkHiring
-    || (req.preferredCountry && req.preferredCountry !== "any")
-    || (req.preferredGender && req.preferredGender !== "any")
-    || isZeroBids;
+  const hasContextTags = isZeroBids;
 
   return (
     <div
@@ -464,22 +461,7 @@ function RequestCard({ req }: { req: GameRequest }) {
               {/* Row 4: Context tags (only when relevant) */}
               {hasContextTags && (
                 <div className="flex flex-wrap items-center gap-2">
-                  {req.isBulkHiring && (
-                    <span className="inline-flex items-center gap-1 text-[10px] bg-purple-500/10 border border-purple-500/25 text-purple-300/90 rounded-full px-2.5 py-1 font-bold uppercase tracking-wider">
-                      <Users className="h-2.5 w-2.5" /> Bulk · {req.bulkGamersNeeded} slots
-                    </span>
-                  )}
-                  {req.preferredCountry && req.preferredCountry !== "any" && (
-                    <span className="inline-flex items-center gap-1 text-[10px] bg-amber-500/8 border border-amber-500/20 text-amber-300/80 rounded-full px-2.5 py-1 font-semibold">
-                      {COUNTRY_MAP[req.preferredCountry]?.flag} {COUNTRY_MAP[req.preferredCountry]?.label ?? req.preferredCountry}
-                    </span>
-                  )}
-                  {req.preferredGender && req.preferredGender !== "any" && (
-                    <span className="inline-flex items-center gap-1 text-[10px] bg-pink-500/8 border border-pink-500/18 text-pink-300/80 rounded-full px-2.5 py-1 font-semibold">
-                      {GENDER_MAP[req.preferredGender]?.label ?? req.preferredGender}
-                    </span>
-                  )}
-                  {isZeroBids && !req.isBulkHiring && (
+                  {isZeroBids && (
                     <span className="inline-flex items-center gap-1 text-[10px] bg-green-500/10 border border-green-500/25 text-green-400/90 rounded-full px-2.5 py-1 font-bold uppercase tracking-wider">
                       <Flame className="h-2.5 w-2.5" /> First bid!
                     </span>
@@ -499,24 +481,7 @@ function RequestCard({ req }: { req: GameRequest }) {
                   </span>
                   {isZeroBids && <span className="text-muted-foreground/35">— be first!</span>}
                 </div>
-                {req.isBulkHiring && (
-                  <div
-                    className="inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs"
-                    style={{ borderColor: "rgba(168,85,247,0.18)", background: "rgba(168,85,247,0.05)" }}
-                  >
-                    <Users className="h-3 w-3 text-purple-400/55 shrink-0" />
-                    <span className="text-purple-300/75">
-                      <span className="font-bold">{req.acceptedBidsCount}</span>
-                      <span className="text-purple-400/40">/{req.bulkGamersNeeded}</span>
-                      <span className="ml-1">filled</span>
-                    </span>
-                    {(req.bulkGamersNeeded ?? 0) - (req.acceptedBidsCount ?? 0) > 0 && (
-                      <span className="text-[11px] text-emerald-400/85 font-bold">
-                        · {(req.bulkGamersNeeded ?? 0) - (req.acceptedBidsCount ?? 0)} left
-                      </span>
-                    )}
-                  </div>
-                )}
+                {/* Bulk slot counter hidden in Phase 1 */}
                 {req.lowestBid && (
                   <div
                     className="inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs"
@@ -1016,76 +981,7 @@ export default function Browse() {
           </div>
         </div>
 
-        {/* ── Nation + Gender row ── */}
-        {(() => {
-          const nationActive = countryFilter !== "any";
-          const genderActive = genderFilter !== "any";
-          const geoActive = nationActive || genderActive;
-          return (
-            <div
-              className="flex flex-col sm:flex-row sm:items-start gap-3 px-5 py-4 border-b transition-colors duration-200"
-              style={{
-                borderColor: "rgba(255,255,255,0.05)",
-                background: geoActive ? "rgba(251,191,36,0.04)" : "rgba(0,0,0,0.12)",
-              }}
-            >
-              <div className="sm:shrink-0 sm:w-16 sm:pt-1 flex items-center gap-1.5">
-                <span
-                  className="text-[10px] font-extrabold uppercase tracking-widest"
-                  style={{ color: geoActive ? "rgba(251,191,36,0.75)" : "rgba(255,255,255,0.30)" }}
-                >
-                  Match
-                </span>
-                {geoActive && (
-                  <span
-                    className="text-[8px] font-black px-1 py-0.5 rounded-full"
-                    style={{ background: "rgba(251,191,36,0.20)", color: "#fbbf24", border: "1px solid rgba(251,191,36,0.35)" }}
-                  >
-                    {[nationActive, genderActive].filter(Boolean).length}
-                  </span>
-                )}
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 flex-1">
-                <div className="space-y-1.5">
-                  <span
-                    className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest"
-                    style={{ color: nationActive ? "rgba(251,191,36,0.70)" : "rgba(255,255,255,0.30)" }}
-                  >
-                    <Globe className="h-3 w-3" /> Nation
-                    {nationActive && (
-                      <button
-                        onClick={() => setCountryFilter("any")}
-                        className="ml-auto"
-                        title="Clear nation filter"
-                      >
-                        <X className="h-2.5 w-2.5 text-amber-400/60 hover:text-amber-400 transition-colors" />
-                      </button>
-                    )}
-                  </span>
-                  <CountryCombobox value={countryFilter} onValueChange={setCountryFilter} />
-                </div>
-                <div className="space-y-1.5">
-                  <span
-                    className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest"
-                    style={{ color: genderActive ? "rgba(236,72,153,0.70)" : "rgba(255,255,255,0.30)" }}
-                  >
-                    <UserRound className="h-3 w-3" /> Gender
-                    {genderActive && (
-                      <button
-                        onClick={() => setGenderFilter("any")}
-                        className="ml-auto"
-                        title="Clear gender filter"
-                      >
-                        <X className="h-2.5 w-2.5 text-pink-400/60 hover:text-pink-400 transition-colors" />
-                      </button>
-                    )}
-                  </span>
-                  <GenderSelect value={genderFilter} onValueChange={setGenderFilter} />
-                </div>
-              </div>
-            </div>
-          );
-        })()}
+        {/* Nation + Gender filters hidden in Phase 1 */}
 
         {/* ── Toggle filters row ── */}
         <div
@@ -1097,11 +993,8 @@ export default function Browse() {
           </span>
           <div className="flex flex-wrap gap-2">
             {([
-              { label: "Verified Poster", Icon: Shield,   on: verifiedPosterOnly, set: () => setVerifiedPosterOnly(v => !v), activeStyle: { bg: "rgba(34,197,94,0.18)",   border: "rgba(34,197,94,0.50)",   color: "#4ade80",   glow: "rgba(34,197,94,0.16)"   } },
-              { label: "Bulk Hiring",     Icon: Users,    on: bulkOnly,           set: () => setBulkOnly(v => !v),           activeStyle: { bg: "rgba(168,85,247,0.18)", border: "rgba(168,85,247,0.50)", color: "#c084fc",   glow: "rgba(168,85,247,0.16)" } },
-              { label: "Easy Wins",       Icon: Flame,    on: noBidsOnly,         set: () => setNoBidsOnly(v => !v),         activeStyle: { bg: "rgba(34,211,238,0.15)", border: "rgba(34,211,238,0.45)", color: "#22d3ee",   glow: "rgba(34,211,238,0.14)" } },
-              { label: "Has Streaming",   Icon: Tv,       on: hasStreamingFilter, set: () => setHasStreamingFilter(v => !v), activeStyle: { bg: "rgba(145,70,255,0.18)", border: "rgba(145,70,255,0.50)", color: "#c084fc",   glow: "rgba(145,70,255,0.16)" } },
-              { label: "Quest Bids",      Icon: Sparkles, on: hasQuestFilter,     set: () => setHasQuestFilter(v => !v),     activeStyle: { bg: "rgba(251,191,36,0.16)", border: "rgba(251,191,36,0.45)", color: "#fbbf24",   glow: "rgba(251,191,36,0.14)" } },
+              { label: "Verified Poster", Icon: Shield, on: verifiedPosterOnly, set: () => setVerifiedPosterOnly(v => !v), activeStyle: { bg: "rgba(34,197,94,0.18)",   border: "rgba(34,197,94,0.50)",   color: "#4ade80", glow: "rgba(34,197,94,0.16)"   } },
+              { label: "Easy Wins",       Icon: Flame,  on: noBidsOnly,         set: () => setNoBidsOnly(v => !v),         activeStyle: { bg: "rgba(34,211,238,0.15)", border: "rgba(34,211,238,0.45)", color: "#22d3ee", glow: "rgba(34,211,238,0.14)" } },
             ] as const).map(({ label, Icon, on, set, activeStyle }) => (
               <button
                 key={label}

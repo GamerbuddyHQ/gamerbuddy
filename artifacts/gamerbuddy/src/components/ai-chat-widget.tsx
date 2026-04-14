@@ -16,7 +16,7 @@ const RESPONSES: Array<{ patterns: RegExp; reply: string }> = [
   /* ── GREETING / INTRO ── */
   {
     patterns: /^(hello|hi+|hey|yo|sup|howdy)\b|what can you (do|help)|who are you|what are you/i,
-    reply: `Yo! 👾 I'm **Buddy** — your in-game support homie, always online and always got your back!\n\nHit me up about anything:\n• 📋 Posting requests & bidding\n• 💰 Wallets, payments & escrow\n• 🏆 Tournaments & Bulk Hiring\n• ⭐ Points, ranks & profile shop\n• 🔴 Streaming connections\n• 🌍 Nation & gender filters\n• 🔒 Safety rules & who to report\n• 💬 Community suggestions\n\nLet's get you that W — what do you need? 🎮`,
+    reply: `Yo! 👾 I'm **Buddy** — your in-game support homie, always online and always got your back!\n\nWe're currently in **Phase 1** — the core hiring experience. Here's what I can help with:\n\n• 📋 **Posting requests** & placing bids\n• 💰 **Wallets** — Hiring Wallet & Earnings Wallet\n• 🔒 **Safety rules** — passwords, scams, reporting\n• ✅ **Verification** — how to get your badge (7–15 days)\n• ⭐ **Reviews** — how they work after a session\n• 💳 **Payments** — escrow, platform fee, release\n• 🛡️ **Trust Factor** & your profile\n\nMore features drop in Phase 2 — check the **[Roadmap](/roadmap)** for what's coming! Let's get you that W 🎮`,
   },
 
   /* ── POST / CREATE REQUEST ── */
@@ -107,6 +107,12 @@ const RESPONSES: Array<{ patterns: RegExp; reply: string }> = [
   {
     patterns: /clock|time.*zone|timezone|region.*time|world.*time|primary.*region|clock.*region/i,
     reply: `**Regional Clock** 🕒\n\nThe clock in the top navbar shows the current time for your **pinned primary region**.\n\nClick it to:\n• See live times for **9 gaming regions** — India, USA East, USA West, Europe, UK, Japan, South Korea, Brazil, Australia\n• **Tap any region** to set it as your primary display\n• Your local time is shown as a secondary reference when the primary differs\n\nYour region choice is saved automatically. Great for scheduling sessions with players across time zones!`,
+  },
+
+  /* ── PHASE 2+ FEATURES (Coming Soon) ── */
+  {
+    patterns: /tournament|bulk.*hir|hir.*bulk|community|suggest.*feature|quest.*system|promoted.*game|streaming.*connection|twitch|kick.*stream|light.*dark|dark.*light|theme.*toggle|region.*clock|language.*select|multi.*lang/i,
+    reply: `That feature is coming in **Phase 2 or later**! 🔜\n\nWe're currently in **Phase 1** — focused on the core co-op hiring experience:\n• Post requests → receive bids → hire gamers\n• Two wallets (Hiring + Earnings)\n• Session flow, escrow, and reviews\n\nComing up in future phases:\n• Tournaments & Bulk Hiring\n• Community Suggestions\n• Quest system & Promoted Games\n• Streaming connections\n• Theme toggle & Language selector\n\nCheck the **[Roadmap](/roadmap)** for the full plan, and drop your vote on **[Community Suggestions](/community)** to help shape what ships next! 🚀`,
   },
 
   /* ── ROADMAP / FUTURE FEATURES ── */

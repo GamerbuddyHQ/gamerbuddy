@@ -82,11 +82,11 @@ function Router() {
         <Route path="/users/:id" component={UserProfilePage} />
         <Route path="/notifications"><ProtectedRoute component={Notifications} /></Route>
         <Route path="/about" component={About} />
-        <Route path="/socials" component={Socials} />
-        <Route path="/community" component={Community} />
-        <Route path="/tournaments" component={Tournaments} />
-        <Route path="/my-tournaments" component={MyTournaments} />
-        <Route path="/tournaments/:id" component={TournamentDetail} />
+        <Route path="/socials"><Redirect to="/" /></Route>
+        <Route path="/community"><Redirect to="/" /></Route>
+        <Route path="/tournaments"><Redirect to="/" /></Route>
+        <Route path="/my-tournaments"><Redirect to="/" /></Route>
+        <Route path="/tournaments/:id"><Redirect to="/" /></Route>
 
         <Route path="/roadmap" component={Roadmap} />
 

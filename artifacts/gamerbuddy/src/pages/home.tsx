@@ -169,6 +169,27 @@ export default function Home() {
 
   return (
     <div className="overflow-x-hidden">
+
+      {/* ── Phase 1 Banner ── */}
+      <div
+        className="flex items-center justify-center gap-2.5 px-4 py-2.5 text-sm font-semibold text-center"
+        style={{
+          background: "linear-gradient(90deg, rgba(168,85,247,0.12) 0%, rgba(34,211,238,0.10) 100%)",
+          borderBottom: "1px solid rgba(168,85,247,0.20)",
+        }}
+      >
+        <span
+          className="h-2 w-2 rounded-full shrink-0"
+          style={{ background: "#22c55e", boxShadow: "0 0 6px rgba(34,197,94,0.6)", animation: "pulse 1.5s infinite" }}
+        />
+        <span style={{ color: "rgba(255,255,255,0.85)" }}>
+          Welcome to Gamerbuddy Phase 1 — Simple &amp; Safe Co-op Hiring.{" "}
+          <Link href="/roadmap" className="font-bold hover:underline" style={{ color: "#c084fc" }}>
+            More features coming soon!
+          </Link>
+        </span>
+      </div>
+
       {/* ═══════════════════ HERO ═══════════════════ */}
       <section className="relative flex flex-col items-center justify-center text-center px-4 pt-16 pb-20 overflow-hidden">
         {/* animated canvas particles */}

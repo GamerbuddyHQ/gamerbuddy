@@ -1133,16 +1133,7 @@ export default function Profile() {
                     <span className="text-muted-foreground font-normal text-[10px]">({profile.reviewCount})</span>
                   </span>
                 )}
-                {((myVotes?.likes ?? 0) > 0) && (
-                  <span className="inline-flex items-center gap-1 text-[11px] font-bold text-green-400 bg-green-500/10 px-2 py-0.5 rounded-full border border-green-500/25 transition-all duration-150 hover:brightness-110 hover:scale-105 cursor-default">
-                    👍 {myVotes?.likes ?? 0}
-                  </span>
-                )}
-                {((myVotes?.dislikes ?? 0) > 0) && (
-                  <span className="inline-flex items-center gap-1 text-[11px] font-bold text-red-400 bg-red-500/10 px-2 py-0.5 rounded-full border border-red-500/25 transition-all duration-150 hover:brightness-110 hover:scale-105 cursor-default">
-                    👎 {myVotes?.dislikes ?? 0}
-                  </span>
-                )}
+                {/* Likes/dislikes hidden in Phase 1 */}
               </div>
 
               {/* Reputation badges */}
@@ -1228,8 +1219,7 @@ export default function Profile() {
       {/* ── VERIFICATION CARD ── */}
       <VerificationSection idVerified={user.idVerified} />
 
-      {/* MY QUEST */}
-      <QuestSection />
+      {/* Quest hidden in Phase 1 */}
 
       {/* ── BIO / ABOUT ME ── */}
       {(() => {

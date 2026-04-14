@@ -303,21 +303,17 @@ export function Layout({ children }: { children: React.ReactNode }) {
   };
 
   const navItems = [
-    { href: "/browse",      label: t.nav.browseRequests, icon: Compass   },
-    { href: "/tournaments", label: t.nav.tournaments,    icon: Trophy    },
-    { href: "/community",   label: t.nav.community,      icon: Users     },
+    { href: "/browse",  label: t.nav.browseRequests, icon: Compass },
     ...(user
       ? [
-          { href: "/dashboard",      label: t.nav.dashboard,      icon: LayoutDashboard },
-          { href: "/my-requests",    label: t.nav.myRequests,     icon: FileText        },
-          { href: "/my-tournaments", label: t.nav.myTournaments,  icon: Swords          },
-          { href: "/wallets",        label: t.nav.wallets,        icon: Wallet          },
-          { href: "/profile",        label: t.nav.profile,        icon: UserIcon        },
+          { href: "/dashboard",   label: t.nav.dashboard,  icon: LayoutDashboard },
+          { href: "/my-requests", label: t.nav.myRequests,  icon: FileText        },
+          { href: "/wallets",     label: t.nav.wallets,     icon: Wallet          },
+          { href: "/profile",     label: t.nav.profile,     icon: UserIcon        },
         ]
       : []),
-    { href: "/roadmap", label: "Roadmap", icon: Map },
-    { href: "/socials", label: "Follow Us", icon: Sparkles },
-    { href: "/about", label: t.nav.about, icon: Info },
+    { href: "/roadmap", label: "Roadmap", icon: Map  },
+    { href: "/about",   label: t.nav.about, icon: Info },
   ];
 
   return (
@@ -414,36 +410,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
           </nav>
 
           <div className="flex items-center gap-2 shrink-0">
-            <RegionalClock />
-            {/* Theme toggle with animated icon + tooltip */}
-            <div className="relative group/theme">
-              <button
-                onClick={toggleTheme}
-                aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
-                className="relative h-9 w-9 flex items-center justify-center rounded-xl border border-border/60 bg-background/60 hover:border-primary/50 hover:bg-primary/10 active:scale-90 transition-all duration-200 overflow-hidden"
-              >
-                <Sun
-                  className="absolute h-[18px] w-[18px] text-yellow-400 transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
-                  style={{
-                    opacity: isDark ? 1 : 0,
-                    transform: isDark ? "rotate(0deg) scale(1)" : "rotate(90deg) scale(0.4)",
-                  }}
-                />
-                <Moon
-                  className="absolute h-[18px] w-[18px] text-primary transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
-                  style={{
-                    opacity: isDark ? 0 : 1,
-                    transform: isDark ? "rotate(-90deg) scale(0.4)" : "rotate(0deg) scale(1)",
-                  }}
-                />
-              </button>
-              {/* Tooltip — desktop only */}
-              <div className="pointer-events-none absolute top-full left-1/2 mt-2 -translate-x-1/2 hidden md:flex items-center px-2.5 py-1 rounded-lg text-[11px] font-semibold whitespace-nowrap bg-popover text-popover-foreground border border-border/70 shadow-md opacity-0 group-hover/theme:opacity-100 translate-y-1 group-hover/theme:translate-y-0 transition-all duration-150 z-[200]">
-                Switch Theme
-                <span className="absolute -top-[5px] left-1/2 -translate-x-1/2 w-[9px] h-[9px] rotate-45 bg-popover border-l border-t border-border/70" />
-              </div>
-            </div>
-            <LangSelector />
             <NotificationBell />
 
             {/* Desktop auth */}
@@ -573,12 +539,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
             <div className="flex flex-col gap-4">
               <div className="flex flex-wrap gap-x-6 gap-y-2">
                 {[
-                  { href: "/browse",      label: t.footer.browse,         icon: Compass  },
-                  { href: "/tournaments", label: t.nav.tournaments,        icon: Trophy   },
-                  { href: "/community",   label: t.nav.community,          icon: Users    },
-                  { href: "/roadmap",     label: "Roadmap",                icon: Map      },
-                  { href: "/socials",     label: "Follow Us",              icon: Sparkles },
-                  { href: "/about",       label: t.footer.aboutDisclaimer, icon: Shield   },
+                  { href: "/browse",   label: t.footer.browse,         icon: Compass },
+                  { href: "/roadmap",  label: "Roadmap",                icon: Map     },
+                  { href: "/about",    label: t.footer.aboutDisclaimer, icon: Shield  },
                 ].map(({ href, label, icon: Icon }) => (
                   <Link
                     key={href}
@@ -632,7 +595,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   { href: "/roadmap",          label: "Roadmap"    },
                   { href: "/about",            label: "Terms"      },
                   { href: "/about#disclaimer", label: "Disclaimer" },
-                  { href: "/socials",          label: "Socials"    },
                 ].map(({ href, label }, i, arr) => (
                   <span key={label} className="flex items-center gap-4">
                     <Link
