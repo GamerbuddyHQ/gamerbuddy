@@ -1543,7 +1543,7 @@ export default function RequestDetail() {
   type ExpFilter = "all" | "beginner" | "decent" | "best" | "expert";
   const [bidSort, setBidSort] = useState<BidSortKey>("newest");
   const [bidExpFilter, setBidExpFilter] = useState<ExpFilter>("all");
-  const [bidVerifiedOnly, setBidVerifiedOnly] = useState(false);
+  const [bidVerifiedOnly, setBidVerifiedOnly] = useState(true);
   const [bidHasStreaming, setBidHasStreaming] = useState(false);
   const [bidHasQuest, setBidHasQuest] = useState(false);
 
@@ -2145,7 +2145,7 @@ export default function RequestDetail() {
 
         const clearAll = () => {
           setBidSort("newest"); setBidExpFilter("all");
-          setBidVerifiedOnly(false); setBidHasStreaming(false); setBidHasQuest(false);
+          setBidVerifiedOnly(true); setBidHasStreaming(false); setBidHasQuest(false);
         };
 
         /* Key for animated list re-render when filters change */
