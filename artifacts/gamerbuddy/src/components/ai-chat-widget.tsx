@@ -109,6 +109,12 @@ const RESPONSES: Array<{ patterns: RegExp; reply: string }> = [
     reply: `**Regional Clock** 🕒\n\nThe clock in the top navbar shows the current time for your **pinned primary region**.\n\nClick it to:\n• See live times for **9 gaming regions** — India, USA East, USA West, Europe, UK, Japan, South Korea, Brazil, Australia\n• **Tap any region** to set it as your primary display\n• Your local time is shown as a secondary reference when the primary differs\n\nYour region choice is saved automatically. Great for scheduling sessions with players across time zones!`,
   },
 
+  /* ── ROADMAP / FUTURE FEATURES ── */
+  {
+    patterns: /roadmap|future.*feature|what.*coming|upcoming|phase|whats.*next|next.*update|coming.*soon|release|plan.*feature|feature.*plan/i,
+    reply: `**Gamerbuddy Roadmap** 🗺️\n\nHere's what we're building — check the full **[Roadmap page](/roadmap)** for all the details!\n\n✅ **Phase 1 — Now Live**\n• Core hiring system (post, bid, accept, play, review)\n• Dual wallets with 10% platform fee\n• Account verification (7–15 days)\n\n🔜 **Phase 2 — Coming Soon**\n• Improved Browse layout\n• Community Suggestions with emojis & GIFs\n• Light/Dark theme toggle\n• Regional clock with selectable timezones\n\n🔵 **Phase 3 — Next**\n• Bulk Hiring (2–100 gamers)\n• Tournaments (hirer approves participants)\n• Quest system & Promoted Games with bonus rewards\n\n🚀 **Phase 4 — Future**\n• Advanced AI Support with quick replies\n• Full social features & streaming integrations\n• Stronger security & admin tools\n• More features based on your feedback!\n\nWant to shape what gets built? Head to **[Community Suggestions](/community)** and drop your idea — the community votes on what's next! 💡`,
+  },
+
   /* ── COMMUNITY SUGGESTIONS ── */
   {
     patterns: /community|suggest|suggestion|feedback.*platform|feature.*request|upvote.*feature|comment.*suggest|emoji|gif|reaction.*comment|add.*emoji|insert.*gif|flag.*comment|country.*comment|nationality.*comment|timestamp.*comment/i,

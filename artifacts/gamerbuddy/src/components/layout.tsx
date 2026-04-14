@@ -629,9 +629,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
               <div className="flex flex-wrap items-center justify-center sm:justify-start gap-x-4 gap-y-1 text-xs text-muted-foreground/50">
                 {[
                   { href: "/about",            label: "About"      },
-                  { href: "/about#disclaimer", label: "Disclaimer" },
+                  { href: "/roadmap",          label: "Roadmap"    },
                   { href: "/about",            label: "Terms"      },
-                  { href: "/about",            label: "Privacy"    },
+                  { href: "/about#disclaimer", label: "Disclaimer" },
+                  { href: "/socials",          label: "Socials"    },
                 ].map(({ href, label }, i, arr) => (
                   <span key={label} className="flex items-center gap-4">
                     <Link
