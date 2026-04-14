@@ -19,9 +19,10 @@ const MIN_PRIZE_POOL = 100;
 const MAX_PRIZE_POOL = 10000;
 const MIN_PLAYERS = 2;
 
+const MAX_PLAYERS = 100;
+
 const VALID_TYPES = ["h2h", "squad", "ffa"] as const;
 type TournamentType = (typeof VALID_TYPES)[number];
-const TYPE_MAX_PLAYERS: Record<TournamentType, number> = { h2h: 2, squad: 4, ffa: 16 };
 
 async function recordTx(
   userId: number,
@@ -141,9 +142,8 @@ router.post("/tournaments", requireAuth, async (req, res): Promise<void> => {
   const fee = round2(Math.max(0, parseFloat(entryFee ?? "0") || 0));
 
   const players = parseInt(maxPlayers);
-  const typeMax = TYPE_MAX_PLAYERS[tournamentType as TournamentType];
-  if (isNaN(players) || players < MIN_PLAYERS || players > typeMax) {
-    res.status(400).json({ error: `Player count must be between ${MIN_PLAYERS} and ${typeMax} for "${tournamentType}"` }); return;
+  if (isNaN(players) || players < MIN_PLAYERS || players > MAX_PLAYERS) {
+    res.status(400).json({ error: `Number of slots must be between ${MIN_PLAYERS} and ${MAX_PLAYERS}` }); return;
   }
 
   if (!rules?.trim()) { res.status(400).json({ error: "Rules / objectives are required" }); return; }

@@ -17,6 +17,7 @@ import {
   Zap,
   Clock,
   ShieldAlert,
+  Trophy,
 } from "lucide-react";
 
 const WITHDRAWAL_THRESHOLD = 100;
@@ -339,6 +340,38 @@ export default function Dashboard() {
             </Button>
           </CardContent>
         </Card>
+      </div>
+
+      {/* ── Tournament CTA Banner ── */}
+      <div
+        className="rounded-2xl px-6 py-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+        style={{
+          background: "linear-gradient(135deg,rgba(251,191,36,0.10) 0%,rgba(168,85,247,0.08) 100%)",
+          border: "1px solid rgba(251,191,36,0.25)",
+          boxShadow: "0 0 30px rgba(251,191,36,0.07)",
+        }}
+      >
+        <div className="flex items-center gap-4">
+          <div
+            className="h-11 w-11 rounded-xl flex items-center justify-center shrink-0"
+            style={{ background: "rgba(251,191,36,0.15)", border: "1px solid rgba(251,191,36,0.35)" }}
+          >
+            <Trophy className="h-6 w-6 text-yellow-400" />
+          </div>
+          <div>
+            <p className="text-[14px] font-extrabold text-white">Host a Tournament</p>
+            <p className="text-[12px] text-muted-foreground/60 mt-0.5">Create your own tournament and crown the champion — prize pools from $100</p>
+          </div>
+        </div>
+        <Button
+          asChild
+          className="shrink-0 font-bold whitespace-nowrap"
+          style={{ background: "linear-gradient(135deg,#fbbf24,#f59e0b)", color: "#000", boxShadow: "0 0 16px rgba(251,191,36,0.28)" }}
+        >
+          <Link href="/tournaments">
+            <Trophy className="h-4 w-4 mr-1.5" /> Go to Tournaments
+          </Link>
+        </Button>
       </div>
     </div>
   );

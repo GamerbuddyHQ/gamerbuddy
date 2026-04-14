@@ -51,11 +51,16 @@ type Tournament = {
   registrations: Registration[];
 };
 
+const MIN_PLAYERS = 2;
+const MAX_PLAYERS = 100;
+const MIN_PRIZE = 100;
+const MAX_PRIZE = 10000;
+
 /* ── Config ── */
-const TYPE_CONFIG: Record<TournamentType, { label: string; desc: string; icon: React.FC<{ className?: string }>; color: string; maxPlayers: number }> = {
-  h2h:   { label: "Head-to-Head", desc: "1v1 duel — winner takes all",       icon: Swords,  color: "#f87171", maxPlayers: 2  },
-  squad: { label: "Squad Battle",  desc: "4-player team clash",                icon: Users,   color: "#a855f7", maxPlayers: 4  },
-  ffa:   { label: "Free-for-All",  desc: "Up to 16-player battle royale",      icon: Crown,   color: "#fbbf24", maxPlayers: 16 },
+const TYPE_CONFIG: Record<TournamentType, { label: string; desc: string; icon: React.FC<{ className?: string }>; color: string; defaultPlayers: number }> = {
+  h2h:   { label: "Head-to-Head", desc: "1v1 or small bracket",              icon: Swords,  color: "#f87171", defaultPlayers: 2  },
+  squad: { label: "Squad Battle",  desc: "Team-based clash",                  icon: Users,   color: "#a855f7", defaultPlayers: 4  },
+  ffa:   { label: "Free-for-All",  desc: "Multi-player battle royale",        icon: Crown,   color: "#fbbf24", defaultPlayers: 8  },
 };
 
 const STATUS_CONFIG: Record<TournamentStatus, { label: string; color: string; bg: string; border: string }> = {
@@ -227,10 +232,16 @@ function TournamentCard({ tournament, currentUserId }: { tournament: Tournament;
             {/* Slots progress bar */}
             <div className="mt-3.5">
               <div className="flex items-center justify-between mb-1.5">
-                <span className="text-[11px] text-muted-foreground/50 font-medium">Players</span>
-                <span className="text-[11px] font-bold text-white/70">{tournament.currentPlayers} / {tournament.maxPlayers}</span>
+                <span className="text-[11px] text-muted-foreground/50 font-medium flex items-center gap-1">
+                  <Users className="h-3 w-3" /> Slots
+                </span>
+                <span className="text-[12px] font-extrabold" style={{
+                  color: pct >= 100 ? "#f87171" : pct > 60 ? "#fbbf24" : "#a855f7"
+                }}>
+                  {tournament.currentPlayers} / {tournament.maxPlayers}
+                </span>
               </div>
-              <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.07)" }}>
+              <div className="h-2 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.07)" }}>
                 <div
                   className="h-full rounded-full transition-all duration-500"
                   style={{
@@ -243,11 +254,16 @@ function TournamentCard({ tournament, currentUserId }: { tournament: Tournament;
                   }}
                 />
               </div>
-              {tournament.status === "open" && tournament.slotsLeft > 0 && (
-                <p className="text-[10px] text-muted-foreground/40 mt-1">
-                  {tournament.slotsLeft} slot{tournament.slotsLeft !== 1 ? "s" : ""} remaining
-                </p>
-              )}
+              <div className="flex items-center justify-between mt-1">
+                {tournament.status === "open" && tournament.slotsLeft > 0 ? (
+                  <p className="text-[10px] text-muted-foreground/40">
+                    {tournament.slotsLeft} slot{tournament.slotsLeft !== 1 ? "s" : ""} remaining
+                  </p>
+                ) : pct >= 100 ? (
+                  <p className="text-[10px] font-bold text-red-400/70">Full</p>
+                ) : <span />}
+                <p className="text-[10px] text-muted-foreground/30">max {tournament.maxPlayers}</p>
+              </div>
             </div>
 
             {/* Prize distribution */}
@@ -473,9 +489,22 @@ function CreateTournamentForm({ onClose, onSuccess }: { onClose: () => void; onS
     onError: (e: Error) => toast({ title: "Failed to create", description: e.message, variant: "destructive" }),
   });
 
-  const canSubmit = title.trim() && gameName.trim() && rules.trim() && prize >= 100 && prize <= 10000 && Math.abs(distTotal - 100) <= 0.5 && !createMutation.isPending;
+  const prizeError = prizePool !== "" && (prize < MIN_PRIZE || prize > MAX_PRIZE)
+    ? `Prize pool must be between $${MIN_PRIZE} and $${MAX_PRIZE.toLocaleString()}`
+    : null;
+  const playersError = maxPlayers < MIN_PLAYERS || maxPlayers > MAX_PLAYERS
+    ? `Slots must be between ${MIN_PLAYERS} and ${MAX_PLAYERS}`
+    : null;
 
-  const typeMax = TYPE_MAX_PLAYERS[tournamentType];
+  const canSubmit =
+    title.trim() !== "" &&
+    gameName.trim() !== "" &&
+    rules.trim() !== "" &&
+    !prizeError &&
+    !playersError &&
+    prize >= MIN_PRIZE &&
+    Math.abs(distTotal - 100) <= 0.5 &&
+    !createMutation.isPending;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -554,7 +583,7 @@ function CreateTournamentForm({ onClose, onSuccess }: { onClose: () => void; onS
                 return (
                   <button
                     key={type}
-                    onClick={() => { setTournamentType(type); setMaxPlayers(type === "ffa" ? 8 : cfg.maxPlayers); }}
+                    onClick={() => { setTournamentType(type); setMaxPlayers(cfg.defaultPlayers); }}
                     className="flex flex-col items-center gap-2 rounded-xl py-4 px-3 transition-all duration-150 active:scale-95"
                     style={active ? {
                       background: `${cfg.color}18`,
@@ -577,52 +606,64 @@ function CreateTournamentForm({ onClose, onSuccess }: { onClose: () => void; onS
           </section>
 
           {/* ── Player Slots ── */}
-          {tournamentType === "ffa" && (
-            <section>
-              <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40 block mb-2">
-                Number of Players (FFA: 2–16)
-              </label>
-              <input
-                type="number"
-                min={2} max={16}
-                value={maxPlayers}
-                onChange={(e) => setMaxPlayers(Math.max(2, Math.min(16, parseInt(e.target.value) || 2)))}
-                className="w-full rounded-xl px-3.5 py-2.5 text-[13px] outline-none bg-background/60 border border-border/60 text-foreground focus:border-primary/60 transition-all"
-              />
-            </section>
-          )}
-
-          {tournamentType !== "ffa" && (
-            <div
-              className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-[12px]"
-              style={{ background: "rgba(168,85,247,0.07)", border: "1px solid rgba(168,85,247,0.20)", color: "rgba(168,85,247,0.80)" }}
-            >
-              <Info className="h-3.5 w-3.5 shrink-0" />
-              {tournamentType === "h2h" ? "Head-to-Head is exactly 2 players." : "Squad Battle is exactly 4 players."}
-            </div>
-          )}
+          <section>
+            <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40 block mb-2">
+              Number of Slots (min {MIN_PLAYERS} – max {MAX_PLAYERS})
+            </label>
+            <input
+              type="number"
+              min={MIN_PLAYERS}
+              max={MAX_PLAYERS}
+              value={maxPlayers}
+              onChange={(e) => {
+                const v = parseInt(e.target.value) || MIN_PLAYERS;
+                setMaxPlayers(Math.max(1, Math.min(MAX_PLAYERS + 10, v)));
+              }}
+              className={`w-full rounded-xl px-3.5 py-2.5 text-[13px] outline-none bg-background/60 border text-foreground focus:ring-0 transition-all ${
+                playersError ? "border-red-500/60 focus:border-red-500" : "border-border/60 focus:border-primary/60"
+              }`}
+            />
+            {playersError ? (
+              <p className="flex items-center gap-1.5 text-[11px] font-semibold text-red-400 mt-1.5">
+                <AlertTriangle className="h-3 w-3 shrink-0" />{playersError}
+              </p>
+            ) : (
+              <p className="text-[10px] text-muted-foreground/40 mt-1">
+                Set how many players can join — from {MIN_PLAYERS} to {MAX_PLAYERS} slots
+              </p>
+            )}
+          </section>
 
           {/* ── Prize Pool ── */}
           <section>
-            <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40 block mb-2">Prize Pool ($100 – $10,000)</label>
+            <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40 block mb-2">
+              Prize Pool ($100 – $10,000)
+            </label>
             <div className="relative">
               <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/60 font-bold">$</span>
               <input
                 type="number"
-                min={100} max={10000}
+                min={MIN_PRIZE}
+                max={MAX_PRIZE}
                 value={prizePool}
                 onChange={(e) => setPrizePool(e.target.value)}
                 placeholder="500"
-                className="w-full rounded-xl pl-7 pr-3.5 py-2.5 text-[13px] outline-none bg-background/60 border border-border/60 text-foreground focus:border-primary/60 transition-all"
+                className={`w-full rounded-xl pl-7 pr-3.5 py-2.5 text-[13px] outline-none bg-background/60 border text-foreground focus:ring-0 transition-all ${
+                  prizeError ? "border-red-500/60 focus:border-red-500" : "border-border/60 focus:border-primary/60"
+                }`}
               />
             </div>
-            {prize >= 100 && (
+            {prizeError ? (
+              <p className="flex items-center gap-1.5 text-[11px] font-semibold text-red-400 mt-1.5">
+                <AlertTriangle className="h-3 w-3 shrink-0" />{prizeError}
+              </p>
+            ) : prize >= MIN_PRIZE ? (
               <div className="mt-2 flex items-center gap-3 text-[11px] text-muted-foreground/50">
                 <span>Platform fee (10%): <span className="text-red-400/70 font-semibold">−${platformFeeEst.toFixed(2)}</span></span>
                 <span className="text-muted-foreground/30">·</span>
                 <span>Net prize pool: <span className="text-emerald-400/80 font-bold">${netPrizeEst.toFixed(2)}</span></span>
               </div>
-            )}
+            ) : null}
           </section>
 
           {/* ── Entry Fee ── */}
@@ -959,4 +1000,4 @@ export default function TournamentsPage() {
   );
 }
 
-const TYPE_MAX_PLAYERS: Record<TournamentType, number> = { h2h: 2, squad: 4, ffa: 16 };
+
