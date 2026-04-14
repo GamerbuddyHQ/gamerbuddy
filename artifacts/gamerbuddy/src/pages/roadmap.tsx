@@ -237,10 +237,11 @@ export default function Roadmap() {
           </span>
         </div>
         <p className="text-sm sm:text-[15px] text-foreground/80 leading-[1.75]">
-          <strong className="text-foreground font-bold">The foundation is set.</strong> Phase 1 gives you everything you need to start hiring and playing today — post requests, receive bids, use escrow, and leave honest reviews.
+          We are currently in <strong className="text-foreground">Phase 1</strong> — focused on core hiring and safe co-op sessions.
+          We are rolling out features gradually to ensure everything works smoothly and securely.
         </p>
         <p className="text-sm text-muted-foreground/60 leading-[1.75]">
-          Every phase that follows is deliberate: we ship when it's tested, trusted, and genuinely better than what's already here. Your experience in Phase 1 directly shapes what we build next — and when we build it.
+          Thank you for your patience as we build the best gaming buddy experience!
         </p>
       </div>
 

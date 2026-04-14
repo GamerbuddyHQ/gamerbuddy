@@ -442,146 +442,26 @@ export default function PostRequest() {
                 </div>
               </div>
 
-              {/* Bulk Hiring Toggle */}
-              <div className={`rounded-xl border p-5 space-y-4 transition-colors ${isBulkHiring ? "border-purple-500/50 bg-purple-500/8" : "border-purple-500/30 bg-purple-500/5"}`}>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2.5">
-                    <div className="h-8 w-8 rounded-lg bg-purple-500/15 border border-purple-500/30 flex items-center justify-center">
-                      <Users className="h-4 w-4 text-purple-400" />
-                    </div>
-                    <div>
-                      <div className="text-sm font-bold text-white flex items-center gap-2">
-                        Bulk Hiring
-                        {isBulkHiring && (
-                          <span className="text-[10px] font-black text-purple-300 bg-purple-500/15 border border-purple-500/30 px-2 py-0.5 rounded-full uppercase tracking-wider">
-                            Active
-                          </span>
-                        )}
-                      </div>
-                      <div className="text-xs text-muted-foreground">Hire 3–100 gamers for raids, events &amp; content creation</div>
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => { setIsBulkHiring((v) => !v); setBulkError(""); }}
-                    className={`relative h-6 w-11 rounded-full transition-colors duration-200 focus:outline-none ${
-                      isBulkHiring ? "bg-purple-500" : "bg-white/10 border border-white/20"
-                    }`}
-                  >
-                    <span
-                      className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform duration-200 ${
-                        isBulkHiring ? "translate-x-5" : "translate-x-0"
-                      }`}
-                    />
-                  </button>
+              {/* Bulk Hiring — Phase 3 Coming Soon */}
+              <div
+                className="rounded-xl border p-5 flex items-center gap-4 opacity-60"
+                style={{ borderColor: "rgba(168,85,247,0.18)", background: "rgba(168,85,247,0.04)" }}
+              >
+                <div className="h-9 w-9 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(168,85,247,0.12)", border: "1px solid rgba(168,85,247,0.22)" }}>
+                  <Users className="h-4 w-4" style={{ color: "rgba(168,85,247,0.7)" }} />
                 </div>
-
-                {isBulkHiring && (
-                  <div className="space-y-3 pt-3 border-t border-purple-500/20">
-                    <div className="flex items-center justify-between">
-                      <label className="text-xs uppercase tracking-widest text-purple-400 font-bold flex items-center gap-1.5">
-                        <Users className="h-3 w-3" />
-                        Number of Gamers Needed <span className="text-destructive">*</span>
-                      </label>
-                      <span className="text-[10px] text-muted-foreground">Min: 3 · Max: 100</span>
-                    </div>
-
-                    {/* Slider + number input row */}
-                    <div className="flex items-center gap-3">
-                      <input
-                        type="range"
-                        min={3}
-                        max={100}
-                        step={1}
-                        value={bulkGamersNeeded}
-                        onChange={(e) => {
-                          const v = Number(e.target.value);
-                          setBulkGamersNeeded(v);
-                          setBulkError("");
-                        }}
-                        className="flex-1 accent-purple-500"
-                      />
-                      <input
-                        type="number"
-                        min={3}
-                        max={100}
-                        value={bulkGamersNeeded}
-                        onChange={(e) => {
-                          const raw = e.target.value;
-                          const v = parseInt(raw, 10);
-                          if (raw === "" || isNaN(v)) { setBulkGamersNeeded(3); return; }
-                          setBulkGamersNeeded(Math.min(100, Math.max(1, v)));
-                          if (v < 3) setBulkError("Minimum is 3 gamers");
-                          else if (v > 100) setBulkError("Maximum is 100 gamers");
-                          else setBulkError("");
-                        }}
-                        onBlur={(e) => {
-                          const v = parseInt(e.target.value, 10);
-                          if (isNaN(v) || v < 3) { setBulkGamersNeeded(3); setBulkError("Minimum is 3 gamers"); }
-                          else if (v > 100) { setBulkGamersNeeded(100); setBulkError(""); }
-                          else setBulkError("");
-                        }}
-                        className="w-16 text-center rounded-lg border border-purple-500/30 bg-purple-500/10 px-2 py-1.5 text-sm font-black text-purple-300 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none focus:outline-none focus:border-purple-500/60"
-                      />
-                    </div>
-
-                    {/* Validation error */}
-                    {bulkError && (
-                      <div className="flex items-center gap-1.5 text-xs text-red-400 font-semibold">
-                        <span className="h-3.5 w-3.5 rounded-full bg-red-500/15 border border-red-500/30 flex items-center justify-center text-[9px] font-black shrink-0">!</span>
-                        {bulkError}
-                      </div>
-                    )}
-
-                    {/* Zone indicator — updates live with slider */}
-                    {(() => {
-                      const n = bulkGamersNeeded;
-                      const zone =
-                        n <= 9  ? { label: "Small Squad", desc: "Perfect for co-op or small team runs", color: "text-purple-300", border: "border-purple-500/30", bg: "bg-purple-500/8", icon: "⚔️" }
-                        : n <= 24 ? { label: "Team Raid", desc: "Great for guild raids and coordinated events", color: "text-cyan-300", border: "border-cyan-500/30", bg: "bg-cyan-500/8", icon: "🛡️" }
-                        : n <= 50 ? { label: "Guild Event", desc: "Large-scale event or competitive session", color: "text-amber-300", border: "border-amber-500/30", bg: "bg-amber-500/8", icon: "👑" }
-                        : { label: "Massive Event", desc: "Huge raid, tournament or content creation army", color: "text-red-300", border: "border-red-500/30", bg: "bg-red-500/8", icon: "🔥" };
-                      return (
-                        <div className={`rounded-xl border ${zone.border} ${zone.bg} px-4 py-3 flex items-center gap-3`}>
-                          <span className="text-2xl">{zone.icon}</span>
-                          <div>
-                            <div className={`text-sm font-black ${zone.color}`}>{zone.label}</div>
-                            <div className="text-[11px] text-muted-foreground">{zone.desc}</div>
-                          </div>
-                          <div className="ml-auto flex flex-col items-end">
-                            <span className={`text-2xl font-black tabular-nums ${zone.color}`}>{n}</span>
-                            <span className="text-[10px] text-muted-foreground">gamers</span>
-                          </div>
-                        </div>
-                      );
-                    })()}
-
-                    {/* Range reference strip */}
-                    <div className="relative text-[9px] text-muted-foreground/50 font-bold pt-1">
-                      <div className="flex justify-between px-0.5 mb-1">
-                        <span className="text-purple-400/60">3 min</span>
-                        <span>25</span>
-                        <span>50</span>
-                        <span>75</span>
-                        <span className="text-purple-400/60">100 max</span>
-                      </div>
-                      <div className="h-1 rounded-full bg-white/5 overflow-hidden">
-                        <div
-                          className="h-full rounded-full transition-all duration-300"
-                          style={{
-                            width: `${((bulkGamersNeeded - 3) / 97) * 100}%`,
-                            background: "linear-gradient(90deg, #7c3aed, #a855f7, #22d3ee)",
-                          }}
-                        />
-                      </div>
-                    </div>
-
-                    <p className="text-xs text-muted-foreground">
-                      Bids stay open until you've reserved <strong className="text-white/70">{bulkGamersNeeded} gamers</strong> or manually lock the roster.
-                      Full group payment is collected from your wallet at lock — <strong className="text-white/70">not per-bid</strong>. 10% platform fee applies.
-                    </p>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-sm font-bold text-foreground/60">Bulk Hiring</span>
+                    <span
+                      className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full"
+                      style={{ background: "rgba(168,85,247,0.12)", color: "rgba(192,132,252,0.70)" }}
+                    >
+                      Phase 3 · Coming Soon
+                    </span>
                   </div>
-                )}
+                  <p className="text-[11px] text-muted-foreground/45 mt-0.5">Hire 3–100 gamers for raids, events &amp; content creation — unlocking in Phase 3.</p>
+                </div>
               </div>
 
               {/* Preview summary */}

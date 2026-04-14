@@ -397,6 +397,11 @@ router.post("/requests/:id/bids", requireAuth, bidLimiter, validate(PlaceBidSche
     return;
   }
 
+  if (!user.idVerified) {
+    res.status(403).json({ error: "Only verified users can place bids. Complete your account verification to start bidding." });
+    return;
+  }
+
   const { price, message } = req.body as { price: number; message: string };
 
   const [existing] = await db

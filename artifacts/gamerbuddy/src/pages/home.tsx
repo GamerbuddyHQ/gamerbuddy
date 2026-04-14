@@ -182,11 +182,10 @@ export default function Home() {
           className="h-2 w-2 rounded-full shrink-0"
           style={{ background: "#22c55e", boxShadow: "0 0 6px rgba(34,197,94,0.6)", animation: "pulse 1.5s infinite" }}
         />
-        <span style={{ color: "rgba(255,255,255,0.65)" }}>
-          <strong style={{ color: "rgba(255,255,255,0.90)", fontWeight: 700 }}>Phase 1 is live.</strong>{" "}
-          Hire gamers, bid on sessions, and play — more features dropping soon.{" "}
-          <Link href="/roadmap" className="hover:underline transition-opacity hover:opacity-100" style={{ color: "rgba(192,132,252,0.75)", fontWeight: 600 }}>
-            See what's next →
+        <span style={{ color: "rgba(255,255,255,0.75)" }}>
+          Gamerbuddy is currently in Phase 1. More exciting features are coming soon!{" "}
+          <Link href="/roadmap" className="font-semibold hover:underline" style={{ color: "rgba(192,132,252,0.85)" }}>
+            View Roadmap →
           </Link>
         </span>
       </div>
