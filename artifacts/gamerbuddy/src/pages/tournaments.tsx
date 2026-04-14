@@ -3,9 +3,9 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { formatDistanceToNow } from "date-fns";
 import {
-  Trophy, Swords, Users, Crown, Plus, X, Zap, ChevronDown, ChevronUp,
-  Gamepad2, Loader2, DollarSign, Info, AlertTriangle, CheckCircle2,
-  Flame, Clock, Filter, Star, Shield, Lock, Globe, HelpCircle, Sparkles,
+  Trophy, Swords, Users, Crown, Plus, X, Zap, ChevronRight,
+  Gamepad2, Loader2, AlertTriangle, CheckCircle2,
+  Shield, Lock, Globe, HelpCircle, Flame,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -241,7 +241,6 @@ function StatusPill({ status }: { status: TournamentStatus }) {
 function TournamentCard({ tournament, currentUserId }: { tournament: Tournament; currentUserId?: number }) {
   const { toast } = useToast();
   const qc = useQueryClient();
-  const [expanded, setExpanded] = useState(false);
   const tcfg = TYPE_CONFIG[tournament.tournamentType];
   const TypeIcon = tcfg.icon;
 
@@ -325,7 +324,9 @@ function TournamentCard({ tournament, currentUserId }: { tournament: Tournament;
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-2">
               <div>
-                <h3 className="text-[16px] font-extrabold text-white leading-tight">{tournament.title}</h3>
+                <Link href={`/tournaments/${tournament.id}`}>
+                  <h3 className="text-[16px] font-extrabold text-white leading-tight hover:text-primary/90 transition-colors cursor-pointer">{tournament.title}</h3>
+                </Link>
                 <div className="flex items-center gap-2 mt-1 flex-wrap">
                   <span className="text-[12px] font-semibold text-primary/80">{tournament.gameName}</span>
                   <span className="text-muted-foreground/30">·</span>
@@ -461,87 +462,18 @@ function TournamentCard({ tournament, currentUserId }: { tournament: Tournament;
             </Link>
           )}
 
-          {/* Expand toggle */}
-          <button
-            onClick={() => setExpanded((v) => !v)}
-            className="ml-auto flex items-center gap-1.5 text-[11px] font-semibold transition-all duration-150 active:scale-95 rounded-lg px-2.5 py-1"
-            style={expanded
-              ? { background: "rgba(168,85,247,0.14)", border: "1px solid rgba(168,85,247,0.30)", color: "#c084fc" }
-              : { background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.45)" }
-            }
+          {/* View details link */}
+          <Link
+            href={`/tournaments/${tournament.id}`}
+            className="ml-auto flex items-center gap-1.5 text-[11px] font-bold transition-all duration-150 active:scale-95 rounded-lg px-2.5 py-1.5"
+            style={{ background: "rgba(168,85,247,0.10)", border: "1px solid rgba(168,85,247,0.28)", color: "#c084fc" }}
           >
-            <Users className="h-3.5 w-3.5" />
-            <span>Details</span>
-            {expanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
-          </button>
+            View Details
+            <ChevronRight className="h-3.5 w-3.5" />
+          </Link>
         </div>
       </div>
 
-      {/* ── Expanded details ── */}
-      {expanded && (
-        <div
-          className="border-t px-5 py-4 space-y-4"
-          style={{ borderColor: "rgba(168,85,247,0.12)", background: "rgba(0,0,0,0.25)" }}
-        >
-          {/* Rules */}
-          <div>
-            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40 mb-1.5">Rules / Objectives</p>
-            <p className="text-[13px] text-muted-foreground/70 leading-relaxed whitespace-pre-wrap">{tournament.rules}</p>
-          </div>
-
-          {/* Participants */}
-          {tournament.registrations.length > 0 && (
-            <div>
-              <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40 mb-2">
-                Participants ({tournament.registrations.length})
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {tournament.registrations.map((r) => (
-                  <div
-                    key={r.userId}
-                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold"
-                    style={r.placement === 1
-                      ? { background: "rgba(251,191,36,0.12)", border: "1px solid rgba(251,191,36,0.35)", color: "#fbbf24" }
-                      : { background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.60)" }
-                    }
-                  >
-                    {r.placement === 1 && <Crown className="h-3 w-3" />}
-                    {r.placement === 2 && <Star className="h-3 w-3" />}
-                    <Avatar name={r.userName} size={16} />
-                    {r.userName}
-                    {r.prizeWon != null && r.prizeWon > 0 && (
-                      <span className="text-[10px] text-emerald-400 font-bold">+${r.prizeWon.toFixed(2)}</span>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Winners */}
-          {tournament.winnersData && tournament.winnersData.length > 0 && (
-            <div
-              className="rounded-xl p-4"
-              style={{ background: "rgba(251,191,36,0.06)", border: "1px solid rgba(251,191,36,0.20)" }}
-            >
-              <p className="text-[10px] font-black uppercase tracking-widest text-yellow-400/60 mb-3">
-                Tournament Results
-              </p>
-              <div className="space-y-2">
-                {tournament.winnersData.sort((a, b) => a.placement - b.placement).map((w) => (
-                  <div key={w.userId} className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="text-[13px]">{w.placement === 1 ? "🥇" : w.placement === 2 ? "🥈" : "🥉"}</span>
-                      <span className="text-[12px] font-bold text-white/80">{w.userName}</span>
-                    </div>
-                    <span className="text-[12px] font-extrabold text-yellow-400">+${w.prizeWon.toFixed(2)}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
     </div>
   );
 }
@@ -1000,6 +932,21 @@ function CreateTournamentForm({ onClose, onSuccess }: { onClose: () => void; onS
 
 /* ── Filter bar ── */
 type FilterStatus = "all" | TournamentStatus;
+type SortKey = "newest" | "prize_desc" | "slots_asc";
+
+const SORT_OPTIONS: { value: SortKey; label: string }[] = [
+  { value: "newest",     label: "Newest" },
+  { value: "prize_desc", label: "Prize ↓" },
+  { value: "slots_asc",  label: "Slots Left" },
+];
+
+function sortTournaments(list: Tournament[], key: SortKey): Tournament[] {
+  return [...list].sort((a, b) => {
+    if (key === "prize_desc") return b.prizePool - a.prizePool;
+    if (key === "slots_asc") return b.slotsLeft - a.slotsLeft;
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+  });
+}
 
 /* ── Main Page ── */
 export default function TournamentsPage() {
@@ -1007,6 +954,7 @@ export default function TournamentsPage() {
   const [showForm, setShowForm] = useState(false);
   const [filter, setFilter] = useState<FilterStatus>("all");
   const [search, setSearch] = useState("");
+  const [sort, setSort] = useState<SortKey>("newest");
 
   const { data: tournaments = [], isLoading, isError } = useQuery({
     queryKey: ["tournaments"],
@@ -1014,14 +962,17 @@ export default function TournamentsPage() {
     refetchInterval: 15_000,
   });
 
-  const filtered = tournaments.filter((t) => {
-    if (filter !== "all" && t.status !== filter) return false;
-    if (search.trim()) {
-      const q = search.toLowerCase();
-      return t.title.toLowerCase().includes(q) || t.gameName.toLowerCase().includes(q) || t.hostName.toLowerCase().includes(q);
-    }
-    return true;
-  });
+  const filtered = sortTournaments(
+    tournaments.filter((t) => {
+      if (filter !== "all" && t.status !== filter) return false;
+      if (search.trim()) {
+        const q = search.toLowerCase();
+        return t.title.toLowerCase().includes(q) || t.gameName.toLowerCase().includes(q) || t.hostName.toLowerCase().includes(q);
+      }
+      return true;
+    }),
+    sort,
+  );
 
   const openCount = tournaments.filter((t) => t.status === "open").length;
   const ongoingCount = tournaments.filter((t) => t.status === "ongoing").length;
@@ -1109,43 +1060,64 @@ export default function TournamentsPage() {
       </div>
 
       {/* ── Search + Filter ── */}
-      <div className="flex flex-col sm:flex-row gap-2">
-        <input
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search by game, title, or host…"
-          className="flex-1 rounded-xl px-3.5 py-2.5 text-[13px] outline-none bg-background/60 border border-border/60 text-foreground placeholder:text-muted-foreground/40 focus:border-primary/60 transition-all"
-        />
-        <div
-          className="flex items-center p-1 gap-1 rounded-xl shrink-0"
-          style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}
-        >
-          {FILTERS.map(({ value, label, count }) => (
+      <div className="space-y-2">
+        <div className="flex flex-col sm:flex-row gap-2">
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search by game, title, or host…"
+            className="flex-1 rounded-xl px-3.5 py-2.5 text-[13px] outline-none bg-background/60 border border-border/60 text-foreground placeholder:text-muted-foreground/40 focus:border-primary/60 transition-all"
+          />
+          <div
+            className="flex items-center p-1 gap-1 rounded-xl shrink-0"
+            style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}
+          >
+            {FILTERS.map(({ value, label, count }) => (
+              <button
+                key={value}
+                onClick={() => setFilter(value)}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-[11px] font-bold transition-all duration-150 active:scale-95 whitespace-nowrap"
+                style={filter === value ? {
+                  background: "linear-gradient(135deg,rgba(168,85,247,0.28),rgba(168,85,247,0.18))",
+                  border: "1px solid rgba(168,85,247,0.55)",
+                  color: "#c084fc",
+                } : {
+                  color: "rgba(255,255,255,0.40)",
+                  border: "1px solid transparent",
+                }}
+              >
+                {label}
+                {count !== undefined && count > 0 && (
+                  <span
+                    className="text-[9px] font-black px-1 rounded-full"
+                    style={filter === value
+                      ? { background: "rgba(168,85,247,0.35)", color: "#e9d5ff" }
+                      : { background: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.35)" }
+                    }
+                  >
+                    {count}
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Sort row */}
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] font-bold text-muted-foreground/35 uppercase tracking-widest shrink-0">Sort:</span>
+          {SORT_OPTIONS.map(({ value, label }) => (
             <button
               key={value}
-              onClick={() => setFilter(value)}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-[11px] font-bold transition-all duration-150 active:scale-95 whitespace-nowrap"
-              style={filter === value ? {
-                background: "linear-gradient(135deg,rgba(168,85,247,0.28),rgba(168,85,247,0.18))",
-                border: "1px solid rgba(168,85,247,0.55)",
-                color: "#c084fc",
+              onClick={() => setSort(value)}
+              className="px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all duration-150 active:scale-95"
+              style={sort === value ? {
+                background: "rgba(168,85,247,0.18)", border: "1px solid rgba(168,85,247,0.45)", color: "#c084fc",
               } : {
-                color: "rgba(255,255,255,0.40)",
-                border: "1px solid transparent",
+                background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.35)",
               }}
             >
               {label}
-              {count !== undefined && count > 0 && (
-                <span
-                  className="text-[9px] font-black px-1 rounded-full"
-                  style={filter === value
-                    ? { background: "rgba(168,85,247,0.35)", color: "#e9d5ff" }
-                    : { background: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.35)" }
-                  }
-                >
-                  {count}
-                </span>
-              )}
             </button>
           ))}
         </div>
