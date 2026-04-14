@@ -12,7 +12,14 @@ import { useToast } from "@/hooks/use-toast";
 import { Link } from "wouter";
 
 const BASE = "/api";
-const URL_RE = /https?:\/\/|www\.\S+|\S+\.(com|net|org|io|co|app|gg|tv|me)\b/i;
+
+/* ── Link stripping ── */
+const LINK_STRIP_RE = /(?:https?:\/\/\S+|www\.\S+|\b\S+\.(?:com|net|org|io|co|app|gg|tv|me|ly|link|xyz|info|gov|edu)(?:\/\S*)?)/gi;
+
+function stripLinks(text: string): { clean: string; stripped: boolean } {
+  const clean = text.replace(LINK_STRIP_RE, "").replace(/ {2,}/g, " ");
+  return { clean, stripped: clean !== text };
+}
 
 /* ── Types ── */
 type Suggestion = {
@@ -66,12 +73,15 @@ function Avatar({ name, size = 32 }: { name: string; size?: number }) {
   );
 }
 
-/* ── Link-safety warning ── */
-function LinkWarning() {
+/* ── Inline "links were removed" notice ── */
+function LinkRemovedNotice() {
   return (
-    <div className="flex items-start gap-2 px-3 py-2 rounded-lg text-[11px]" style={{ background: "rgba(251,191,36,0.08)", border: "1px solid rgba(251,191,36,0.25)", color: "rgba(251,191,36,0.80)" }}>
-      <AlertTriangle className="h-3.5 w-3.5 shrink-0 mt-0.5" />
-      Links are not allowed in the community to keep it safe.
+    <div
+      className="flex items-center gap-2 px-3 py-2 rounded-lg text-[11px] animate-in fade-in slide-in-from-top-1 duration-200"
+      style={{ background: "rgba(251,191,36,0.10)", border: "1px solid rgba(251,191,36,0.30)", color: "rgba(251,191,36,0.90)" }}
+    >
+      <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+      <span>For safety, external links are not allowed in the community and have been removed.</span>
     </div>
   );
 }
@@ -91,7 +101,7 @@ function CommentItem({
   const qc = useQueryClient();
   const [replying, setReplying] = useState(false);
   const [replyText, setReplyText] = useState("");
-  const [replyHasLink, setReplyHasLink] = useState(false);
+  const [replyStripped, setReplyStripped] = useState(false);
 
   const replyMutation = useMutation({
     mutationFn: async (body: string) => {
@@ -141,20 +151,21 @@ function CommentItem({
               <textarea
                 value={replyText}
                 onChange={(e) => {
-                  setReplyText(e.target.value);
-                  setReplyHasLink(URL_RE.test(e.target.value));
+                  const { clean, stripped } = stripLinks(e.target.value);
+                  setReplyText(clean);
+                  setReplyStripped(stripped);
                 }}
                 placeholder="Write a reply..."
                 rows={2}
                 maxLength={500}
                 className="w-full rounded-lg px-3 py-2 text-[12px] resize-none outline-none transition-all bg-background/60 border border-border/60 text-foreground placeholder:text-muted-foreground/40 focus:border-primary/50"
               />
-              {replyHasLink && <LinkWarning />}
+              {replyStripped && <LinkRemovedNotice />}
               <div className="flex gap-2">
                 <Button
                   size="sm"
                   className="h-7 text-[11px] px-3"
-                  disabled={!replyText.trim() || replyHasLink || replyMutation.isPending}
+                  disabled={!replyText.trim() || replyMutation.isPending}
                   onClick={() => replyMutation.mutate(replyText.trim())}
                 >
                   <Send className="h-3 w-3 mr-1" /> Reply
@@ -185,7 +196,7 @@ function CommentsPanel({ suggestion }: { suggestion: Suggestion }) {
   const { toast } = useToast();
   const qc = useQueryClient();
   const [commentText, setCommentText] = useState("");
-  const [hasLink, setHasLink] = useState(false);
+  const [commentStripped, setCommentStripped] = useState(false);
 
   const { data: comments = [], isLoading } = useQuery({
     queryKey: ["comments", suggestion.id],
@@ -222,21 +233,22 @@ function CommentsPanel({ suggestion }: { suggestion: Suggestion }) {
           <textarea
             value={commentText}
             onChange={(e) => {
-              setCommentText(e.target.value);
-              setHasLink(URL_RE.test(e.target.value));
+              const { clean, stripped } = stripLinks(e.target.value);
+              setCommentText(clean);
+              setCommentStripped(stripped);
             }}
             placeholder="Share your thoughts on this suggestion..."
             rows={2}
             maxLength={500}
             className="w-full rounded-xl px-3 py-2.5 text-[13px] resize-none outline-none transition-all bg-background/60 border border-border/60 text-foreground placeholder:text-muted-foreground/40 focus:border-primary/50"
           />
-          {hasLink && <LinkWarning />}
+          {commentStripped && <LinkRemovedNotice />}
           <div className="flex items-center justify-between">
             <span className="text-[10px] text-muted-foreground/40">{commentText.length}/500</span>
             <Button
               size="sm"
               className="h-8 text-[12px] px-4"
-              disabled={!commentText.trim() || hasLink || commentMutation.isPending}
+              disabled={!commentText.trim() || commentMutation.isPending}
               onClick={() => commentMutation.mutate(commentText.trim())}
             >
               <Send className="h-3.5 w-3.5 mr-1.5" /> Post Comment
@@ -396,8 +408,8 @@ function SubmitForm({ onSuccess }: { onSuccess: () => void }) {
   const qc = useQueryClient();
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
-  const [titleHasLink, setTitleHasLink] = useState(false);
-  const [bodyHasLink, setBodyHasLink] = useState(false);
+  const [titleStripped, setTitleStripped] = useState(false);
+  const [bodyStripped, setBodyStripped] = useState(false);
 
   const submitMutation = useMutation({
     mutationFn: async () => {
@@ -421,8 +433,8 @@ function SubmitForm({ onSuccess }: { onSuccess: () => void }) {
     onError: (e: Error) => toast({ title: "Error", description: e.message, variant: "destructive" }),
   });
 
-  const hasLink = titleHasLink || bodyHasLink;
-  const canSubmit = title.trim().length > 0 && body.trim().length > 0 && !hasLink && !submitMutation.isPending;
+  const canSubmit = title.trim().length > 0 && body.trim().length > 0 && !submitMutation.isPending;
+  const anyStripped = titleStripped || bodyStripped;
 
   return (
     <div
@@ -446,8 +458,9 @@ function SubmitForm({ onSuccess }: { onSuccess: () => void }) {
             type="text"
             value={title}
             onChange={(e) => {
-              setTitle(e.target.value);
-              setTitleHasLink(URL_RE.test(e.target.value));
+              const { clean, stripped } = stripLinks(e.target.value);
+              setTitle(clean);
+              setTitleStripped(stripped);
             }}
             placeholder="Short, clear title for your idea…"
             maxLength={120}
@@ -463,8 +476,9 @@ function SubmitForm({ onSuccess }: { onSuccess: () => void }) {
           <textarea
             value={body}
             onChange={(e) => {
-              setBody(e.target.value);
-              setBodyHasLink(URL_RE.test(e.target.value));
+              const { clean, stripped } = stripLinks(e.target.value);
+              setBody(clean);
+              setBodyStripped(stripped);
             }}
             placeholder="Describe your suggestion in detail. What problem does it solve? How would it work?"
             rows={4}
@@ -477,7 +491,7 @@ function SubmitForm({ onSuccess }: { onSuccess: () => void }) {
           </div>
         </div>
 
-        {hasLink && <LinkWarning />}
+        {anyStripped && <LinkRemovedNotice />}
 
         <Button
           className="w-full font-bold"
@@ -572,7 +586,7 @@ export default function CommunityPage() {
         style={{ background: "rgba(251,191,36,0.06)", border: "1px solid rgba(251,191,36,0.18)", color: "rgba(251,191,36,0.65)" }}
       >
         <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
-        Links are not allowed in the community to keep it safe. Posts containing URLs will be rejected.
+        For safety, external links are not allowed in the community. Any URLs you type will be automatically removed.
       </div>
 
       {/* ── Sort bar ── */}

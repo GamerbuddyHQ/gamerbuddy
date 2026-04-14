@@ -11,10 +11,10 @@ import { requireAuth } from "../middlewares/auth";
 
 const router: IRouter = Router();
 
-const URL_RE = /https?:\/\/|www\.\S+|\S+\.(com|net|org|io|co|app|gg|tv|me)\b/i;
+const LINK_STRIP_RE = /(?:https?:\/\/\S+|www\.\S+|\b\S+\.(?:com|net|org|io|co|app|gg|tv|me|ly|link|xyz|info|gov|edu)(?:\/\S*)?)/gi;
 
-function containsLink(text: string): boolean {
-  return URL_RE.test(text);
+function stripLinks(text: string): string {
+  return text.replace(LINK_STRIP_RE, "").replace(/ {2,}/g, " ").trim();
 }
 
 /* ──────────────────────────────────────────────────────────────
@@ -87,22 +87,22 @@ router.post("/community/suggestions", requireAuth, async (req, res): Promise<voi
     res.status(400).json({ error: "Title and body are required" });
     return;
   }
-  if (title.trim().length > 120) {
+  const cleanTitle = stripLinks(title.trim());
+  const cleanBody  = stripLinks(body.trim());
+  if (!cleanTitle) { res.status(400).json({ error: "Title is required" }); return; }
+  if (!cleanBody)  { res.status(400).json({ error: "Body is required" });  return; }
+  if (cleanTitle.length > 120) {
     res.status(400).json({ error: "Title must be 120 characters or less" });
     return;
   }
-  if (body.trim().length > 1000) {
+  if (cleanBody.length > 1000) {
     res.status(400).json({ error: "Body must be 1000 characters or less" });
-    return;
-  }
-  if (containsLink(title) || containsLink(body)) {
-    res.status(400).json({ error: "Links are not allowed in suggestions to keep the community safe." });
     return;
   }
 
   const [suggestion] = await db
     .insert(suggestionsTable)
-    .values({ userId: user.id, title: title.trim(), body: body.trim() })
+    .values({ userId: user.id, title: cleanTitle, body: cleanBody })
     .returning();
 
   res.status(201).json({ ...suggestion, authorName: user.name, likes: 0, dislikes: 0, commentCount: 0, myVote: null });
@@ -185,11 +185,9 @@ router.post("/community/suggestions/:id/comments", requireAuth, async (req, res)
   const { body, parentId } = req.body as { body?: string; parentId?: number | null };
 
   if (!body?.trim()) { res.status(400).json({ error: "Comment body is required" }); return; }
-  if (body.trim().length > 500) { res.status(400).json({ error: "Comment must be 500 characters or less" }); return; }
-  if (containsLink(body)) {
-    res.status(400).json({ error: "Links are not allowed in comments to keep the community safe." });
-    return;
-  }
+  const cleanBody = stripLinks(body.trim());
+  if (!cleanBody) { res.status(400).json({ error: "Comment body is required" }); return; }
+  if (cleanBody.length > 500) { res.status(400).json({ error: "Comment must be 500 characters or less" }); return; }
 
   const [suggestion] = await db.select().from(suggestionsTable).where(eq(suggestionsTable.id, suggestionId));
   if (!suggestion) { res.status(404).json({ error: "Suggestion not found" }); return; }
@@ -204,7 +202,7 @@ router.post("/community/suggestions/:id/comments", requireAuth, async (req, res)
 
   const [comment] = await db
     .insert(suggestionCommentsTable)
-    .values({ suggestionId, userId: user.id, parentId: parentId ?? null, body: body.trim() })
+    .values({ suggestionId, userId: user.id, parentId: parentId ?? null, body: cleanBody })
     .returning();
 
   res.status(201).json({ ...comment, authorName: user.name, replies: [] });
