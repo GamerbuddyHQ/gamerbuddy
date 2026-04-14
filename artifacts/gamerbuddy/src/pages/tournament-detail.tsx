@@ -23,6 +23,7 @@ type Registration = {
   status: string;
   placement: number | null;
   prizeWon: number | null;
+  entryFeePaid?: number;
   joinedAt: string;
 };
 
@@ -164,8 +165,26 @@ function DeclareWinnersModal({
 
   const [placements, setPlacements] = useState<Record<number, number>>({});
 
+  /* ── Math ── */
   const dist = tournament.prizeDistribution;
   const maxPlacements = [dist.first > 0 ? 1 : 0, dist.second > 0 ? 2 : 0, dist.third > 0 ? 3 : 0].filter(Boolean);
+
+  const prizePool   = tournament.prizePool;
+  const entryFees   = round2(tournament.registrations.reduce((s, r) => s + (r.entryFeePaid ?? 0), 0));
+  const totalPool   = round2(prizePool + entryFees);
+  const platformFee = round2(totalPool * 0.1);
+  const netPool     = round2(totalPool - platformFee);
+
+  const prizeByPlace: Record<number, number> = {
+    1: round2(netPool * dist.first  / 100),
+    2: round2(netPool * dist.second / 100),
+    3: round2(netPool * dist.third  / 100),
+  };
+
+  const placementColors: Record<number, string>  = { 1: "#fbbf24", 2: "#94a3b8", 3: "#c2813a" };
+  const placementEmojis: Record<number, string>  = { 1: "🥇", 2: "🥈", 3: "🥉" };
+  const placementLabels: Record<number, string>  = { 1: "1st Place", 2: "2nd Place", 3: "3rd Place" };
+  const placementPercent: Record<number, number> = { 1: dist.first, 2: dist.second, 3: dist.third };
 
   const assignPlacement = (userId: number, placement: number) => {
     setPlacements((prev) => {
@@ -177,11 +196,16 @@ function DeclareWinnersModal({
   };
 
   const readyWinners = Object.entries(placements).map(([uid, placement]) => ({
-    userId: Number(uid),
-    placement,
+    userId: Number(uid), placement,
   }));
-
   const canSubmit = readyWinners.length > 0 && readyWinners.length === maxPlacements.length;
+
+  const assignedPreviews = readyWinners
+    .map((w) => {
+      const reg = tournament.registrations.find((r) => r.userId === w.userId);
+      return { ...w, userName: reg?.userName ?? "Unknown", prize: prizeByPlace[w.placement] ?? 0 };
+    })
+    .sort((a, b) => a.placement - b.placement);
 
   const declareMutation = useMutation({
     mutationFn: async () => {
@@ -216,7 +240,7 @@ function DeclareWinnersModal({
           boxShadow: "0 0 60px rgba(168,85,247,0.20), 0 24px 80px rgba(0,0,0,0.8)",
         }}
       >
-        {/* Header */}
+        {/* ── Header ── */}
         <div
           className="sticky top-0 z-10 flex items-center justify-between px-5 py-4 border-b"
           style={{ background: "rgba(8,4,18,0.98)", borderColor: "rgba(168,85,247,0.20)" }}
@@ -224,10 +248,10 @@ function DeclareWinnersModal({
           <div>
             <h2 className="text-[15px] font-extrabold text-white flex items-center gap-2">
               <Trophy className="h-4 w-4 text-yellow-400" />
-              Declare Winners
+              Declare Winners & Distribute Prizes
             </h2>
             <p className="text-[11px] text-muted-foreground/50 mt-0.5">
-              Assign placements — prizes distribute automatically
+              Review the full calculation, then assign placements to distribute automatically
             </p>
           </div>
           <button onClick={onClose} className="h-8 w-8 rounded-lg flex items-center justify-center border border-border/50 text-muted-foreground hover:text-white transition-colors">
@@ -235,73 +259,178 @@ function DeclareWinnersModal({
           </button>
         </div>
 
-        <div className="p-5 space-y-4">
-          {/* Prize distribution reminder */}
+        <div className="p-5 space-y-5">
+
+          {/* ── Section 1: Math breakdown ── */}
           <div
-            className="rounded-xl p-3.5 space-y-2"
-            style={{ background: "rgba(251,191,36,0.07)", border: "1px solid rgba(251,191,36,0.22)" }}
+            className="rounded-2xl overflow-hidden border"
+            style={{ borderColor: "rgba(255,255,255,0.08)" }}
           >
-            <p className="text-[11px] font-bold text-yellow-400/80">Prize distribution on declaration:</p>
-            <div className="flex gap-4 flex-wrap">
-              {dist.first > 0 && (
-                <span className="text-[12px] font-extrabold text-yellow-400">
-                  🥇 ${Math.round(tournament.netPrize * dist.first / 100).toLocaleString()}
-                </span>
-              )}
-              {dist.second > 0 && (
-                <span className="text-[12px] font-extrabold text-slate-300">
-                  🥈 ${Math.round(tournament.netPrize * dist.second / 100).toLocaleString()}
-                </span>
-              )}
-              {dist.third > 0 && (
-                <span className="text-[12px] font-extrabold" style={{ color: "#c2813a" }}>
-                  🥉 ${Math.round(tournament.netPrize * dist.third / 100).toLocaleString()}
-                </span>
-              )}
+            <div
+              className="px-4 py-2.5 border-b"
+              style={{ background: "rgba(255,255,255,0.03)", borderColor: "rgba(255,255,255,0.06)" }}
+            >
+              <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">
+                Prize Pool Calculation
+              </p>
             </div>
-            <p className="text-[10px] text-muted-foreground/45">
-              10% platform fee already deducted · funds go directly to Earnings Wallet
-            </p>
+            <div className="divide-y" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
+              {/* Prize pool */}
+              <div className="flex items-center justify-between px-4 py-3">
+                <span className="text-[13px] text-muted-foreground/65">Prize pool (escrowed)</span>
+                <span className="text-[14px] font-bold text-white/85">${prizePool.toFixed(2)}</span>
+              </div>
+              {/* Entry fees */}
+              {entryFees > 0 && (
+                <div className="flex items-center justify-between px-4 py-3">
+                  <span className="text-[13px] text-muted-foreground/65">
+                    Entry fees ({participants.length} × ${tournament.entryFee.toFixed(2)})
+                  </span>
+                  <span className="text-[14px] font-bold text-emerald-400">+${entryFees.toFixed(2)}</span>
+                </div>
+              )}
+              {/* Total pool */}
+              <div
+                className="flex items-center justify-between px-4 py-3"
+                style={{ background: "rgba(255,255,255,0.02)" }}
+              >
+                <span className="text-[13px] font-semibold text-white/70">Total pool</span>
+                <span className="text-[14px] font-extrabold text-white">${totalPool.toFixed(2)}</span>
+              </div>
+              {/* Platform fee */}
+              <div className="flex items-center justify-between px-4 py-3">
+                <div>
+                  <span className="text-[13px] text-muted-foreground/65">Platform fee</span>
+                  <span
+                    className="ml-2 text-[10px] font-bold px-1.5 py-0.5 rounded-md"
+                    style={{ background: "rgba(239,68,68,0.12)", border: "1px solid rgba(239,68,68,0.25)", color: "#f87171" }}
+                  >
+                    10%
+                  </span>
+                </div>
+                <span className="text-[14px] font-bold text-red-400">−${platformFee.toFixed(2)}</span>
+              </div>
+              {/* Net pool — highlighted */}
+              <div
+                className="flex items-center justify-between px-4 py-4"
+                style={{ background: "linear-gradient(90deg,rgba(34,197,94,0.07),rgba(34,197,94,0.03))" }}
+              >
+                <div>
+                  <p className="text-[13px] font-extrabold text-emerald-400">Net prize pool</p>
+                  <p className="text-[10px] text-muted-foreground/40 mt-0.5">distributed to winners</p>
+                </div>
+                <span className="text-[22px] font-black text-emerald-400">${netPool.toFixed(2)}</span>
+              </div>
+            </div>
           </div>
 
-          {/* Participant list */}
+          {/* ── Section 2: Distribution breakdown per placement ── */}
+          <div>
+            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40 mb-3">
+              Distribution per Placement
+            </p>
+            {/* Visual bar */}
+            <div className="flex h-5 rounded-xl overflow-hidden w-full gap-px mb-3">
+              {maxPlacements.map((place) => (
+                <div
+                  key={place}
+                  className="flex items-center justify-center text-[9px] font-extrabold text-black/80 transition-all"
+                  style={{
+                    width: `${placementPercent[place]}%`,
+                    background: place === 1
+                      ? "linear-gradient(90deg,#fbbf24,#f59e0b)"
+                      : place === 2
+                      ? "linear-gradient(90deg,#94a3b8,#64748b)"
+                      : "linear-gradient(90deg,#c2813a,#a16207)",
+                  }}
+                >
+                  {placementPercent[place] > 12 ? placementEmojis[place] : ""}
+                </div>
+              ))}
+            </div>
+            {/* Cards */}
+            <div className={`grid gap-2 ${maxPlacements.length === 1 ? "grid-cols-1" : maxPlacements.length === 2 ? "grid-cols-2" : "grid-cols-3"}`}>
+              {maxPlacements.map((place) => (
+                <div
+                  key={place}
+                  className="rounded-xl p-3.5 space-y-1"
+                  style={{
+                    background: `${placementColors[place]}10`,
+                    border: `1px solid ${placementColors[place]}35`,
+                  }}
+                >
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-lg">{placementEmojis[place]}</span>
+                    <span className="text-[10px] font-bold" style={{ color: placementColors[place] }}>
+                      {placementLabels[place]}
+                    </span>
+                  </div>
+                  <p className="text-[19px] font-black leading-none" style={{ color: placementColors[place] }}>
+                    ${prizeByPlace[place].toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </p>
+                  <p className="text-[10px]" style={{ color: `${placementColors[place]}90` }}>
+                    {placementPercent[place]}% of ${netPool.toFixed(2)}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* ── Section 3: Assign placements ── */}
           <div>
             <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40 mb-2.5">
-              Assign Placements ({participants.length} participants)
+              Assign Placements — {participants.length} Participant{participants.length !== 1 ? "s" : ""}
             </p>
             <div className="space-y-2">
               {participants.map((p) => {
-                const assignedPlacement = placements[p.userId];
+                const assigned = placements[p.userId];
+                const prize = assigned ? prizeByPlace[assigned] : null;
                 return (
                   <div
                     key={p.userId}
-                    className="flex items-center gap-3 rounded-xl p-3 transition-all"
-                    style={{
-                      background: assignedPlacement ? "rgba(168,85,247,0.08)" : "rgba(255,255,255,0.02)",
-                      border: assignedPlacement ? "1px solid rgba(168,85,247,0.28)" : "1px solid rgba(255,255,255,0.06)",
+                    className="flex items-center gap-3 rounded-xl p-3 transition-all duration-150"
+                    style={assigned ? {
+                      background: `${placementColors[assigned]}0D`,
+                      border: `1px solid ${placementColors[assigned]}40`,
+                    } : {
+                      background: "rgba(255,255,255,0.02)",
+                      border: "1px solid rgba(255,255,255,0.06)",
                     }}
                   >
                     <Avatar name={p.userName} size={32} />
-                    <span className="flex-1 text-[13px] font-semibold text-white/80">{p.userName}</span>
-                    <div className="flex gap-1.5">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[13px] font-semibold text-white/85 truncate">{p.userName}</p>
+                      {assigned && prize != null ? (
+                        <p className="text-[11px] font-extrabold mt-0.5" style={{ color: placementColors[assigned] }}>
+                          {placementEmojis[assigned]} {placementLabels[assigned]} · +${prize.toFixed(2)}
+                        </p>
+                      ) : (
+                        <p className="text-[10px] text-muted-foreground/35 mt-0.5">no placement assigned</p>
+                      )}
+                    </div>
+                    <div className="flex gap-1.5 shrink-0">
                       {maxPlacements.map((place) => {
                         const isAssigned = placements[p.userId] === place;
-                        const takenBy = Object.entries(placements).find(([uid, pl]) => pl === place && Number(uid) !== p.userId)?.[0];
-                        const isTaken = !!takenBy;
-                        const emoji = place === 1 ? "🥇" : place === 2 ? "🥈" : "🥉";
+                        const takenByOther = Object.entries(placements).some(
+                          ([uid, pl]) => pl === place && Number(uid) !== p.userId,
+                        );
                         return (
                           <button
                             key={place}
                             onClick={() => assignPlacement(p.userId, place)}
-                            disabled={isTaken}
-                            className="w-9 h-9 rounded-lg text-base transition-all active:scale-95 disabled:opacity-30"
+                            disabled={takenByOther}
+                            title={takenByOther ? "Already assigned" : `Assign ${placementLabels[place]}`}
+                            className="w-9 h-9 rounded-lg text-[17px] transition-all duration-120 active:scale-90 disabled:opacity-25 disabled:cursor-not-allowed"
                             style={isAssigned ? {
-                              background: "rgba(168,85,247,0.30)", border: "1.5px solid rgba(168,85,247,0.60)",
+                              background: `${placementColors[place]}30`,
+                              border: `2px solid ${placementColors[place]}80`,
+                              boxShadow: `0 0 10px ${placementColors[place]}28`,
                             } : {
-                              background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.10)",
+                              background: "rgba(255,255,255,0.04)",
+                              border: "1px solid rgba(255,255,255,0.10)",
                             }}
                           >
-                            {emoji}
+                            {placementEmojis[place]}
                           </button>
                         );
                       })}
@@ -310,24 +439,76 @@ function DeclareWinnersModal({
                 );
               })}
             </div>
+
+            {/* Progress hint */}
+            {readyWinners.length < maxPlacements.length && (
+              <p className="text-[11px] text-muted-foreground/40 text-center mt-2.5">
+                {maxPlacements.length - readyWinners.length} placement{maxPlacements.length - readyWinners.length !== 1 ? "s" : ""} remaining before you can confirm
+              </p>
+            )}
           </div>
 
-          {/* Validation hint */}
-          {!canSubmit && readyWinners.length < maxPlacements.length && (
-            <p className="text-[11px] text-muted-foreground/50 text-center">
-              Assign {maxPlacements.length - readyWinners.length} more placement{maxPlacements.length - readyWinners.length !== 1 ? "s" : ""} to continue
-            </p>
+          {/* ── Section 4: Confirmation summary (shown when ready) ── */}
+          {canSubmit && (
+            <div
+              className="rounded-2xl border overflow-hidden"
+              style={{
+                background: "linear-gradient(135deg,rgba(34,197,94,0.08),rgba(34,197,94,0.03))",
+                borderColor: "rgba(34,197,94,0.35)",
+              }}
+            >
+              <div
+                className="px-4 py-2.5 border-b flex items-center gap-2"
+                style={{ borderColor: "rgba(34,197,94,0.20)", background: "rgba(34,197,94,0.06)" }}
+              >
+                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
+                <p className="text-[10px] font-black uppercase tracking-widest text-emerald-400/80">
+                  Ready to distribute — confirm payouts
+                </p>
+              </div>
+              <div className="divide-y" style={{ borderColor: "rgba(34,197,94,0.12)" }}>
+                {assignedPreviews.map((w) => (
+                  <div key={w.userId} className="flex items-center gap-3 px-4 py-3">
+                    <span className="text-xl">{placementEmojis[w.placement]}</span>
+                    <div className="flex-1">
+                      <p className="text-[13px] font-bold text-white/90">{w.userName}</p>
+                      <p className="text-[10px] text-muted-foreground/45">{placementLabels[w.placement]}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-[15px] font-extrabold text-emerald-400">+${w.prize.toFixed(2)}</p>
+                      <p className="text-[10px] text-muted-foreground/35">to Earnings Wallet</p>
+                    </div>
+                  </div>
+                ))}
+                <div className="flex items-center justify-between px-4 py-3" style={{ background: "rgba(34,197,94,0.04)" }}>
+                  <span className="text-[12px] font-bold text-emerald-400/70">Total distributed</span>
+                  <span className="text-[15px] font-extrabold text-emerald-400">
+                    ${assignedPreviews.reduce((s, w) => s + w.prize, 0).toFixed(2)}
+                  </span>
+                </div>
+              </div>
+            </div>
           )}
 
+          {/* ── Submit ── */}
           <Button
-            className="w-full font-extrabold text-[14px] py-3 h-auto"
+            className="w-full font-extrabold text-[14px] py-3.5 h-auto"
             disabled={!canSubmit || declareMutation.isPending}
             onClick={() => declareMutation.mutate()}
-            style={{ background: "linear-gradient(135deg,#fbbf24,#f59e0b)", color: "#000" }}
+            style={canSubmit ? {
+              background: "linear-gradient(135deg,#fbbf24,#f59e0b)",
+              color: "#000",
+              boxShadow: "0 0 24px rgba(251,191,36,0.30)",
+            } : {
+              background: "rgba(255,255,255,0.06)",
+              color: "rgba(255,255,255,0.30)",
+            }}
           >
             {declareMutation.isPending
               ? <><Loader2 className="h-5 w-5 mr-2 animate-spin" />Distributing Prizes…</>
-              : <><Trophy className="h-5 w-5 mr-2" />Declare Winners & Distribute Prizes</>
+              : canSubmit
+              ? <><Trophy className="h-5 w-5 mr-2" />Confirm & Distribute ${netPool.toFixed(2)}</>
+              : <>Assign all placements to continue</>
             }
           </Button>
         </div>
