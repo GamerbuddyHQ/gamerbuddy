@@ -373,6 +373,30 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 );
               }
 
+              const isFollowUs = item.href === "/socials";
+              if (isFollowUs) {
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="flex items-center gap-1.5 text-sm font-bold whitespace-nowrap transition-all duration-200 px-3 py-1.5 rounded-full"
+                    style={isActive ? {
+                      background: "rgba(34,211,238,0.18)",
+                      border: "1px solid rgba(34,211,238,0.55)",
+                      color: "#22d3ee",
+                      boxShadow: "0 0 14px rgba(34,211,238,0.25)",
+                    } : {
+                      background: "rgba(34,211,238,0.07)",
+                      border: "1px solid rgba(34,211,238,0.30)",
+                      color: "rgba(34,211,238,0.80)",
+                    }}
+                  >
+                    <item.icon className="h-3.5 w-3.5 shrink-0" />
+                    {item.label}
+                  </Link>
+                );
+              }
+
               return (
                 <Link
                   key={item.href}
