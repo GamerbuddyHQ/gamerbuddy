@@ -33,7 +33,7 @@ import {
   CheckCircle2, Send, Star, Trophy, AlertTriangle, User, Gift,
   Flag, X, MessageCircle, Gamepad2, Target, Zap, ChevronDown, ChevronUp,
   Phone, PhoneOff, Wifi, WifiOff, Volume2, ShieldCheck, Users, Lock,
-  SlidersHorizontal, ArrowUpDown, ArrowUp, ArrowDown,
+  SlidersHorizontal, ArrowUpDown, ArrowUp, ArrowDown, Tv, Sparkles,
 } from "lucide-react";
 import { SafetyBanner } from "@/components/safety-banner";
 import { VerifiedBadge } from "@/components/verified-badge";
@@ -1539,11 +1539,13 @@ export default function RequestDetail() {
   const [selectedBidIds, setSelectedBidIds] = useState<Set<number>>(new Set());
   const [bulkAccepting, setBulkAccepting] = useState(false);
 
-  type BidSortKey = "newest" | "price_high" | "price_low" | "trust_high";
+  type BidSortKey = "newest" | "price_high" | "price_low" | "trust_high" | "rating_high";
   type ExpFilter = "all" | "beginner" | "decent" | "best" | "expert";
   const [bidSort, setBidSort] = useState<BidSortKey>("newest");
   const [bidExpFilter, setBidExpFilter] = useState<ExpFilter>("all");
   const [bidVerifiedOnly, setBidVerifiedOnly] = useState(false);
+  const [bidHasStreaming, setBidHasStreaming] = useState(false);
+  const [bidHasQuest, setBidHasQuest] = useState(false);
 
   const isBulkRequest = request?.isBulkHiring ?? false;
   const bulkSlotsNeeded = request?.bulkGamersNeeded ?? 0;
@@ -2089,6 +2091,8 @@ export default function RequestDetail() {
         /* ── Apply filters ── */
         let filteredBids = [...bids];
         if (bidVerifiedOnly) filteredBids = filteredBids.filter((b) => b.bidderIdVerified);
+        if (bidHasStreaming)  filteredBids = filteredBids.filter((b) => b.bidderHasStreaming);
+        if (bidHasQuest)      filteredBids = filteredBids.filter((b) => b.bidderHasQuestForGame);
         if (bidExpFilter !== "all") {
           filteredBids = filteredBids.filter((b) => {
             const tf = b.bidderTrustFactor ?? 50;
@@ -2100,18 +2104,21 @@ export default function RequestDetail() {
           });
         }
         filteredBids.sort((a, b) => {
-          if (bidSort === "price_high") return b.price - a.price;
-          if (bidSort === "price_low")  return a.price - b.price;
-          if (bidSort === "trust_high") return (b.bidderTrustFactor ?? 50) - (a.bidderTrustFactor ?? 50);
+          if (bidSort === "price_high")  return b.price - a.price;
+          if (bidSort === "price_low")   return a.price - b.price;
+          if (bidSort === "trust_high")  return (b.bidderTrustFactor ?? 50) - (a.bidderTrustFactor ?? 50);
+          if (bidSort === "rating_high") return (b.bidderAvgRating ?? 0) - (a.bidderAvgRating ?? 0);
           return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
         });
 
         /* ── UI data ── */
+        const anyHasQuest = bids.some((b: Bid) => b.bidderHasQuestForGame);
         const sortOptions: { key: typeof bidSort; label: string; Icon: React.ElementType }[] = [
-          { key: "newest",     label: "Newest First",    Icon: ArrowUpDown },
-          { key: "price_high", label: "Price: High → Low", Icon: ArrowDown },
-          { key: "price_low",  label: "Price: Low → High", Icon: ArrowUp },
-          { key: "trust_high", label: "Top Trust Factor",  Icon: ShieldCheck },
+          { key: "newest",      label: "Newest First",    Icon: ArrowUpDown },
+          { key: "price_high",  label: "Price: High → Low", Icon: ArrowDown },
+          { key: "price_low",   label: "Price: Low → High", Icon: ArrowUp },
+          { key: "trust_high",  label: "Top Trust Factor",  Icon: ShieldCheck },
+          { key: "rating_high", label: "Top Rated",         Icon: Star },
         ];
 
         const expOptions: { key: typeof bidExpFilter; label: string; dot: string }[] = [
@@ -2128,15 +2135,18 @@ export default function RequestDetail() {
           const opt = expOptions.find((o) => o.key === bidExpFilter)!;
           activeTags.push({ id: "exp", label: `Level: ${opt.label}`, onRemove: () => setBidExpFilter("all") });
         }
-        if (bidVerifiedOnly) {
-          activeTags.push({ id: "verified", label: "Verified Only", onRemove: () => setBidVerifiedOnly(false) });
-        }
+        if (bidVerifiedOnly) activeTags.push({ id: "verified", label: "Verified Only", onRemove: () => setBidVerifiedOnly(false) });
+        if (bidHasStreaming)  activeTags.push({ id: "streaming", label: "Has Streaming", onRemove: () => setBidHasStreaming(false) });
+        if (bidHasQuest)     activeTags.push({ id: "quest", label: "Quest Bid", onRemove: () => setBidHasQuest(false) });
         if (bidSort !== "newest") {
           const s = sortOptions.find((o) => o.key === bidSort)!;
           activeTags.push({ id: "sort", label: `Sort: ${s.label}`, onRemove: () => setBidSort("newest") });
         }
 
-        const clearAll = () => { setBidSort("newest"); setBidExpFilter("all"); setBidVerifiedOnly(false); };
+        const clearAll = () => {
+          setBidSort("newest"); setBidExpFilter("all");
+          setBidVerifiedOnly(false); setBidHasStreaming(false); setBidHasQuest(false);
+        };
 
         return (
           <div className="space-y-3">
@@ -2310,37 +2320,84 @@ export default function RequestDetail() {
                   </div>
                 </div>
 
-                {/* Badges row */}
+                {/* Badges / toggles row */}
                 <div
-                  className="flex items-center gap-3 px-4 py-3 flex-wrap"
+                  className="flex items-start gap-3 px-4 py-3 flex-wrap sm:flex-nowrap"
                   style={{ background: "rgba(0,0,0,0.10)" }}
                 >
                   <span
-                    className="text-[10px] font-extrabold uppercase tracking-widest shrink-0 w-14"
+                    className="text-[10px] font-extrabold uppercase tracking-widest shrink-0 w-14 pt-1.5"
                     style={{ color: "rgba(255,255,255,0.30)" }}
                   >
                     Badges
                   </span>
-                  <button
-                    onClick={() => setBidVerifiedOnly((v) => !v)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all duration-150"
-                    style={bidVerifiedOnly ? {
-                      background: "rgba(34,197,94,0.18)",
-                      border: "1px solid rgba(34,197,94,0.50)",
-                      color: "#4ade80",
-                      boxShadow: "0 0 10px rgba(34,197,94,0.15)",
-                    } : {
-                      background: "rgba(255,255,255,0.04)",
-                      border: "1px solid rgba(255,255,255,0.08)",
-                      color: "rgba(255,255,255,0.45)",
-                    }}
-                  >
-                    {bidVerifiedOnly
-                      ? <CheckCircle2 className="h-3 w-3 shrink-0" style={{ color: "#4ade80" }} />
-                      : <ShieldCheck className="h-3 w-3 shrink-0 opacity-50" />
-                    }
-                    Verified Only
-                  </button>
+                  <div className="flex flex-wrap gap-1.5">
+                    {/* Verified Only */}
+                    <button
+                      onClick={() => setBidVerifiedOnly((v) => !v)}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all duration-150"
+                      style={bidVerifiedOnly ? {
+                        background: "rgba(34,197,94,0.18)",
+                        border: "1px solid rgba(34,197,94,0.50)",
+                        color: "#4ade80",
+                        boxShadow: "0 0 10px rgba(34,197,94,0.15)",
+                      } : {
+                        background: "rgba(255,255,255,0.04)",
+                        border: "1px solid rgba(255,255,255,0.08)",
+                        color: "rgba(255,255,255,0.45)",
+                      }}
+                    >
+                      {bidVerifiedOnly
+                        ? <CheckCircle2 className="h-3 w-3 shrink-0" style={{ color: "#4ade80" }} />
+                        : <ShieldCheck className="h-3 w-3 shrink-0 opacity-50" />
+                      }
+                      Verified Only
+                    </button>
+                    {/* Has Streaming */}
+                    <button
+                      onClick={() => setBidHasStreaming((v) => !v)}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all duration-150"
+                      style={bidHasStreaming ? {
+                        background: "rgba(145,70,255,0.20)",
+                        border: "1px solid rgba(145,70,255,0.55)",
+                        color: "#c084fc",
+                        boxShadow: "0 0 10px rgba(145,70,255,0.18)",
+                      } : {
+                        background: "rgba(255,255,255,0.04)",
+                        border: "1px solid rgba(255,255,255,0.08)",
+                        color: "rgba(255,255,255,0.45)",
+                      }}
+                    >
+                      {bidHasStreaming
+                        ? <CheckCircle2 className="h-3 w-3 shrink-0" style={{ color: "#c084fc" }} />
+                        : <Tv className="h-3 w-3 shrink-0 opacity-50" />
+                      }
+                      Has Streaming
+                    </button>
+                    {/* Quest Bids — only visible when at least 1 bidder has a quest for this game */}
+                    {anyHasQuest && (
+                      <button
+                        onClick={() => setBidHasQuest((v) => !v)}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all duration-150"
+                        style={bidHasQuest ? {
+                          background: "rgba(251,191,36,0.18)",
+                          border: "1px solid rgba(251,191,36,0.50)",
+                          color: "#fbbf24",
+                          boxShadow: "0 0 10px rgba(251,191,36,0.15)",
+                        } : {
+                          background: "rgba(255,255,255,0.04)",
+                          border: "1px solid rgba(255,255,255,0.08)",
+                          color: "rgba(255,255,255,0.45)",
+                        }}
+                      >
+                        {bidHasQuest
+                          ? <CheckCircle2 className="h-3 w-3 shrink-0" style={{ color: "#fbbf24" }} />
+                          : <Sparkles className="h-3 w-3 shrink-0 opacity-50" />
+                        }
+                        Quest Bids Only
+                      </button>
+                    )}
+                  </div>
                 </div>
 
                 {/* Active filter tags row */}

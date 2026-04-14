@@ -11,6 +11,9 @@ export type Bid = {
   bidderTrustFactor?: number;
   bidderSessionsAsGamerCount?: number;
   bidderBio?: string | null;
+  bidderAvgRating?: number | null;
+  bidderHasStreaming?: boolean;
+  bidderHasQuestForGame?: boolean;
   price: number;
   message: string;
   status: string;

@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { db, gameRequestsTable, walletsTable, usersTable, bidsTable, reviewsTable, walletTransactionsTable } from "@workspace/db";
+import { db, gameRequestsTable, walletsTable, usersTable, bidsTable, reviewsTable, walletTransactionsTable, streamingAccountsTable, questEntriesTable } from "@workspace/db";
 import { eq, desc, and, sql, inArray } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
 import { createNotification, sendEmailNotification } from "../notifications-helper";
@@ -251,6 +251,9 @@ function formatBid(
   bidderTrustFactor?: number,
   bidderSessionsAsGamerCount?: number,
   bidderBio?: string | null,
+  bidderAvgRating?: number | null,
+  bidderHasStreaming?: boolean,
+  bidderHasQuestForGame?: boolean,
 ) {
   return {
     id: bid.id,
@@ -261,6 +264,9 @@ function formatBid(
     bidderTrustFactor: bidderTrustFactor ?? 50,
     bidderSessionsAsGamerCount: bidderSessionsAsGamerCount ?? 0,
     bidderBio: bidderBio ?? null,
+    bidderAvgRating: bidderAvgRating ?? null,
+    bidderHasStreaming: bidderHasStreaming ?? false,
+    bidderHasQuestForGame: bidderHasQuestForGame ?? false,
     price: parseFloat(bid.price),
     message: bid.message,
     status: bid.status,
@@ -275,6 +281,14 @@ router.get("/requests/:id/bids", async (req, res): Promise<void> => {
     res.status(400).json({ error: "Invalid request ID" });
     return;
   }
+
+  // Fetch request gameName for quest matching
+  const [gameReq] = await db
+    .select({ gameName: gameRequestsTable.gameName })
+    .from(gameRequestsTable)
+    .where(eq(gameRequestsTable.id, requestId))
+    .limit(1);
+  const gameName = gameReq?.gameName ?? "";
 
   const rows = await db
     .select({
@@ -296,29 +310,50 @@ router.get("/requests/:id/bids", async (req, res): Promise<void> => {
     .where(eq(bidsTable.requestId, requestId))
     .orderBy(desc(bidsTable.createdAt));
 
-  // Get completed session counts for each unique bidder (2-query, no N+1)
-  const bidderIds = [...new Set(rows.map((r) => r.bidderId).filter(Boolean))];
-  const sessionCounts =
+  const bidderIds = [...new Set(rows.map((r) => r.bidderId).filter(Boolean))] as number[];
+
+  // Batch queries — all run in parallel
+  const [sessionCounts, ratingRows, streamingRows, questRows] = await Promise.all([
+    // Completed session counts
     bidderIds.length > 0
-      ? await db
-          .select({
-            bidderId: bidsTable.bidderId,
-            count: sql<string>`COUNT(*)::int`,
-          })
+      ? db.select({ bidderId: bidsTable.bidderId, count: sql<string>`COUNT(*)::int` })
           .from(bidsTable)
           .leftJoin(gameRequestsTable, eq(bidsTable.requestId, gameRequestsTable.id))
-          .where(
-            and(
-              inArray(bidsTable.bidderId, bidderIds),
-              eq(bidsTable.status, "accepted"),
-              eq(gameRequestsTable.status, "completed"),
-            ),
-          )
+          .where(and(inArray(bidsTable.bidderId, bidderIds), eq(bidsTable.status, "accepted"), eq(gameRequestsTable.status, "completed")))
           .groupBy(bidsTable.bidderId)
-      : [];
+      : Promise.resolve([]),
+    // Average rating per bidder
+    bidderIds.length > 0
+      ? db.select({
+            revieweeId: reviewsTable.revieweeId,
+            avg: sql<string>`AVG(${reviewsTable.rating})::float`,
+          })
+          .from(reviewsTable)
+          .where(inArray(reviewsTable.revieweeId, bidderIds))
+          .groupBy(reviewsTable.revieweeId)
+      : Promise.resolve([]),
+    // Which bidders have streaming accounts
+    bidderIds.length > 0
+      ? db.select({ userId: streamingAccountsTable.userId })
+          .from(streamingAccountsTable)
+          .where(inArray(streamingAccountsTable.userId, bidderIds))
+      : Promise.resolve([]),
+    // Which bidders have a quest entry for this game
+    bidderIds.length > 0 && gameName
+      ? db.select({ userId: questEntriesTable.userId })
+          .from(questEntriesTable)
+          .where(and(inArray(questEntriesTable.userId, bidderIds), sql`LOWER(${questEntriesTable.gameName}) = LOWER(${gameName})`))
+      : Promise.resolve([]),
+  ]);
 
   const sessMap: Record<number, number> = {};
   for (const s of sessionCounts) sessMap[s.bidderId] = parseInt(String(s.count));
+
+  const ratingMap: Record<number, number> = {};
+  for (const r of ratingRows) ratingMap[r.revieweeId] = parseFloat(String(r.avg));
+
+  const streamingSet = new Set((streamingRows as { userId: number }[]).map((r) => r.userId));
+  const questSet = new Set((questRows as { userId: number }[]).map((r) => r.userId));
 
   res.json(
     rows.map((r) =>
@@ -329,6 +364,9 @@ router.get("/requests/:id/bids", async (req, res): Promise<void> => {
         r.bidderTrustFactor ?? 50,
         sessMap[r.bidderId] ?? 0,
         r.bidderBio ?? null,
+        ratingMap[r.bidderId] ?? null,
+        streamingSet.has(r.bidderId),
+        questSet.has(r.bidderId),
       ),
     ),
   );

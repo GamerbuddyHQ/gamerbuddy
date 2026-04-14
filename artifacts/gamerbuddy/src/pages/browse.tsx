@@ -17,7 +17,7 @@ import {
   ChevronDown, ChevronUp, DollarSign, MessageSquare,
   CheckCircle2, AlertCircle, User, Clock, TrendingDown,
   Zap, ExternalLink, LogIn, Trophy, Shield, Star,
-  Flame, Target, Users,
+  Flame, Target, Users, X,
 } from "lucide-react";
 import { SafetyBanner } from "@/components/safety-banner";
 import { useToast } from "@/hooks/use-toast";
@@ -639,7 +639,10 @@ export default function Browse() {
   const [platform, setPlatform] = useState("all");
   const [skillLevel, setSkillLevel] = useState("all");
   const [search, setSearch] = useState("");
-  const [sort, setSort] = useState<"newest" | "fewest_bids" | "most_bids">("newest");
+  const [sort, setSort] = useState<"newest" | "fewest_bids" | "most_bids" | "lowest_bid">("newest");
+  const [verifiedPosterOnly, setVerifiedPosterOnly] = useState(false);
+  const [bulkOnly, setBulkOnly] = useState(false);
+  const [noBidsOnly, setNoBidsOnly] = useState(false);
 
   const { data: allRequests, isLoading, isError } = useBrowseRequests({
     ...(platform !== "all" && { platform }),
@@ -648,20 +651,34 @@ export default function Browse() {
   });
 
   const requests = allRequests
-    ?.filter((r) =>
-      search.trim() === "" ||
-      r.gameName.toLowerCase().includes(search.toLowerCase()) ||
-      r.objectives.toLowerCase().includes(search.toLowerCase()) ||
-      r.userName.toLowerCase().includes(search.toLowerCase())
-    )
+    ?.filter((r) => {
+      if (search.trim() !== "" && !(
+        r.gameName.toLowerCase().includes(search.toLowerCase()) ||
+        r.objectives.toLowerCase().includes(search.toLowerCase()) ||
+        r.userName.toLowerCase().includes(search.toLowerCase())
+      )) return false;
+      if (verifiedPosterOnly && !r.userIdVerified) return false;
+      if (bulkOnly && !r.isBulkHiring) return false;
+      if (noBidsOnly && r.bidCount > 0) return false;
+      return true;
+    })
     ?.sort((a, b) => {
       if (sort === "fewest_bids") return a.bidCount - b.bidCount;
-      if (sort === "most_bids") return b.bidCount - a.bidCount;
+      if (sort === "most_bids")   return b.bidCount - a.bidCount;
+      if (sort === "lowest_bid") {
+        const aB = a.lowestBid ?? Infinity;
+        const bB = b.lowestBid ?? Infinity;
+        return aB - bB;
+      }
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     });
 
-  const hasFilters = platform !== "all" || skillLevel !== "all" || search.trim() !== "";
-  const clearFilters = () => { setPlatform("all"); setSkillLevel("all"); setSearch(""); };
+  const hasFilters = platform !== "all" || skillLevel !== "all" || search.trim() !== "" || verifiedPosterOnly || bulkOnly || noBidsOnly;
+  const clearFilters = () => {
+    setPlatform("all"); setSkillLevel("all"); setSearch("");
+    setVerifiedPosterOnly(false); setBulkOnly(false); setNoBidsOnly(false);
+    setSort("newest");
+  };
   const showFiller = !isLoading && !isError && requests && requests.length > 0 && requests.length <= 3;
 
   return (
@@ -714,65 +731,130 @@ export default function Browse() {
 
       {/* ── Filters ── */}
       <div
-        className="grid grid-cols-1 sm:grid-cols-4 gap-3 p-4 rounded-2xl border border-border/50"
-        style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.02) 0%, rgba(0,0,0,0.3) 100%)" }}
+        className="rounded-2xl border overflow-hidden"
+        style={{
+          borderColor: hasFilters ? "rgba(168,85,247,0.35)" : "rgba(255,255,255,0.08)",
+          background: "rgba(7,5,16,0.85)",
+          transition: "border-color 0.25s",
+        }}
       >
-        <div className="relative sm:col-span-2">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search game, objectives, or player…"
-            className="pl-9 bg-background/60 border-border/60"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
+        {/* Search + dropdowns */}
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 p-4 border-b" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
+          <div className="relative sm:col-span-2">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search game, objectives, or player…"
+              className="pl-9 bg-background/60 border-border/60"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
+
+          <Select value={platform} onValueChange={setPlatform}>
+            <SelectTrigger className="bg-background/60 border-border/60">
+              <Monitor className="h-4 w-4 mr-2 text-muted-foreground shrink-0" />
+              <SelectValue placeholder="Platform" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Platforms</SelectItem>
+              {PLATFORMS.map((p) => <SelectItem key={p} value={p}>{PLATFORM_ICON[p]} {p}</SelectItem>)}
+            </SelectContent>
+          </Select>
+
+          <Select value={skillLevel} onValueChange={setSkillLevel}>
+            <SelectTrigger className="bg-background/60 border-border/60">
+              <Layers className="h-4 w-4 mr-2 text-muted-foreground shrink-0" />
+              <SelectValue placeholder="Skill Level" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Skill Levels</SelectItem>
+              {SKILLS.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+            </SelectContent>
+          </Select>
         </div>
 
-        <Select value={platform} onValueChange={setPlatform}>
-          <SelectTrigger className="bg-background/60 border-border/60">
-            <Monitor className="h-4 w-4 mr-2 text-muted-foreground shrink-0" />
-            <SelectValue placeholder="Platform" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Platforms</SelectItem>
-            {PLATFORMS.map((p) => <SelectItem key={p} value={p}>{PLATFORM_ICON[p]} {p}</SelectItem>)}
-          </SelectContent>
-        </Select>
+        {/* Sort + toggle row */}
+        <div className="flex flex-wrap items-center gap-3 px-4 py-3" style={{ background: "rgba(0,0,0,0.15)" }}>
+          <span className="text-[10px] font-extrabold uppercase tracking-widest shrink-0" style={{ color: "rgba(255,255,255,0.30)" }}>Sort</span>
+          <div className="flex flex-wrap gap-1.5">
+            {([
+              { value: "newest",      label: "Newest" },
+              { value: "fewest_bids", label: "Fewest Bids" },
+              { value: "most_bids",   label: "Most Bids" },
+              { value: "lowest_bid",  label: "Lowest Bid" },
+            ] as const).map((opt) => {
+              const active = sort === opt.value;
+              return (
+                <button
+                  key={opt.value}
+                  onClick={() => setSort(opt.value)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all duration-150"
+                  style={active ? {
+                    background: "rgba(168,85,247,0.22)",
+                    border: "1px solid rgba(168,85,247,0.55)",
+                    color: "#c084fc",
+                    boxShadow: "0 0 10px rgba(168,85,247,0.20)",
+                  } : {
+                    background: "rgba(255,255,255,0.04)",
+                    border: "1px solid rgba(255,255,255,0.08)",
+                    color: "rgba(255,255,255,0.45)",
+                  }}
+                >
+                  {active && <CheckCircle2 className="h-3 w-3 shrink-0" />}
+                  {opt.label}
+                </button>
+              );
+            })}
+          </div>
 
-        <Select value={skillLevel} onValueChange={setSkillLevel}>
-          <SelectTrigger className="bg-background/60 border-border/60">
-            <Layers className="h-4 w-4 mr-2 text-muted-foreground shrink-0" />
-            <SelectValue placeholder="Skill Level" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Skill Levels</SelectItem>
-            {SKILLS.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-          </SelectContent>
-        </Select>
-      </div>
+          <div className="flex-1 h-px mx-1" style={{ background: "rgba(255,255,255,0.06)" }} />
 
-      {/* ── Sort bar ── */}
-      {!isLoading && requests && requests.length > 1 && (
-        <div className="flex flex-wrap items-center gap-2 text-xs">
-          <span className="text-muted-foreground font-semibold uppercase tracking-widest">Sort:</span>
-          {([
-            { value: "newest", label: "Newest" },
-            { value: "fewest_bids", label: "Fewest Bids" },
-            { value: "most_bids", label: "Most Bids" },
-          ] as const).map((opt) => (
+          {/* Toggle filters */}
+          <div className="flex flex-wrap gap-1.5">
+            {[
+              { label: "Verified Poster", icon: <Shield className="h-3 w-3 shrink-0" />, value: verifiedPosterOnly, set: setVerifiedPosterOnly, color: "34,197,94" },
+              { label: "Bulk Hiring",     icon: <Users className="h-3 w-3 shrink-0" />,  value: bulkOnly,           set: setBulkOnly,           color: "168,85,247" },
+              { label: "Easy Wins",       icon: <Flame className="h-3 w-3 shrink-0" />,  value: noBidsOnly,         set: setNoBidsOnly,         color: "34,211,238" },
+            ].map(({ label, icon, value, set, color }) => (
+              <button
+                key={label}
+                onClick={() => set((v) => !v)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all duration-150"
+                style={value ? {
+                  background: `rgba(${color},0.18)`,
+                  border: `1px solid rgba(${color},0.50)`,
+                  color: `rgb(${color})`,
+                  boxShadow: `0 0 10px rgba(${color},0.15)`,
+                } : {
+                  background: "rgba(255,255,255,0.04)",
+                  border: "1px solid rgba(255,255,255,0.08)",
+                  color: "rgba(255,255,255,0.45)",
+                }}
+              >
+                {value ? <CheckCircle2 className="h-3 w-3 shrink-0" /> : icon}
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Active filters + result count */}
+        {hasFilters && (
+          <div className="flex items-center justify-between gap-3 px-4 py-2 border-t" style={{ borderColor: "rgba(168,85,247,0.15)", background: "rgba(168,85,247,0.04)" }}>
+            <span className="text-[10px] text-muted-foreground/60">
+              Showing <span className="font-bold text-white">{requests?.length ?? 0}</span> of{" "}
+              <span className="font-bold">{allRequests?.length ?? 0}</span> requests
+            </span>
             <button
-              key={opt.value}
-              onClick={() => setSort(opt.value)}
-              className={`px-3 py-2 rounded-lg border font-semibold transition-all ${
-                sort === opt.value
-                  ? "bg-primary/20 border-primary/50 text-primary"
-                  : "border-border/50 text-muted-foreground hover:border-primary/30 hover:text-white"
-              }`}
+              onClick={clearFilters}
+              className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider rounded-lg px-2.5 py-1 transition-all duration-150 hover:brightness-110"
+              style={{ background: "rgba(239,68,68,0.12)", border: "1px solid rgba(239,68,68,0.30)", color: "#f87171" }}
             >
-              {opt.label}
+              <X className="h-2.5 w-2.5" /> Clear All
             </button>
-          ))}
-        </div>
-      )}
+          </div>
+        )}
+      </div>
 
       {/* ── Content ── */}
       {isLoading ? (
