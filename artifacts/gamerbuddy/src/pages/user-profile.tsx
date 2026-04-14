@@ -51,71 +51,180 @@ function VotePanel({ profileId }: { profileId: number }) {
     });
   };
 
-  const likes = votes?.likes ?? 0;
+  const likes    = votes?.likes    ?? 0;
   const dislikes = votes?.dislikes ?? 0;
-  const myVote = votes?.myVote ?? null;
-  const canVote = votes?.canVote ?? false;
+  const myVote   = votes?.myVote   ?? null;
+  const canVote  = votes?.canVote  ?? false;
+  const isSelf   = user.id === profileId;
+  const pending  = voteMutation.isPending;
 
   return (
     <div
-      className="rounded-2xl border p-4 space-y-3"
-      style={{ background: "rgba(255,255,255,0.03)", borderColor: "rgba(255,255,255,0.08)" }}
+      className="rounded-2xl border overflow-hidden"
+      style={{ background: "rgba(255,255,255,0.025)", borderColor: "rgba(255,255,255,0.07)" }}
     >
-      {/* Vote counts — always visible */}
-      <div className="flex items-center justify-center gap-6">
-        <div className="text-center">
-          <div className="text-2xl font-black text-green-400">{likes}</div>
-          <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-semibold mt-0.5">Likes</div>
-        </div>
-        <div className="h-10 w-px bg-border/50" />
-        <div className="text-center">
-          <div className="text-2xl font-black text-red-400">{dislikes}</div>
-          <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-semibold mt-0.5">Dislikes</div>
-        </div>
+      {/* Summary bar — always shown */}
+      <div className="flex items-center justify-center gap-2 px-6 py-3 border-b"
+        style={{ borderColor: "rgba(255,255,255,0.06)" }}>
+        <span className="text-lg">👍</span>
+        <span className="text-xl font-black text-green-400 tabular-nums">{likes}</span>
+        <span className="text-muted-foreground/40 font-bold mx-1">•</span>
+        <span className="text-lg">👎</span>
+        <span className="text-xl font-black text-red-400 tabular-nums">{dislikes}</span>
       </div>
 
-      {/* Vote buttons — only for eligible users */}
-      {canVote ? (
-        <div className="flex gap-3">
-          <button
-            disabled={voteMutation.isPending}
-            onClick={() => handleVote("like")}
-            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl font-bold text-sm border transition-all duration-200 ${
-              myVote === "like"
-                ? "bg-green-500/20 border-green-500/60 text-green-300 shadow-[0_0_16px_rgba(34,197,94,0.25)]"
-                : "bg-green-500/5 border-green-500/20 text-green-400/70 hover:bg-green-500/15 hover:border-green-500/40 hover:text-green-300"
-            }`}
-          >
-            <span className="text-base">👍</span>
-            Like{myVote === "like" ? "d" : ""}
-          </button>
-          <button
-            disabled={voteMutation.isPending}
-            onClick={() => handleVote("dislike")}
-            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl font-bold text-sm border transition-all duration-200 ${
-              myVote === "dislike"
-                ? "bg-red-500/20 border-red-500/60 text-red-300 shadow-[0_0_16px_rgba(239,68,68,0.25)]"
-                : "bg-red-500/5 border-red-500/20 text-red-400/70 hover:bg-red-500/15 hover:border-red-500/40 hover:text-red-300"
-            }`}
-          >
-            <span className="text-base">👎</span>
-            Dislike{myVote === "dislike" ? "d" : ""}
-          </button>
-        </div>
-      ) : (
-        <p className="text-center text-xs text-muted-foreground/60 italic">
-          {user?.id === profileId
-            ? "This is your own profile."
-            : "Complete a session together to leave feedback."}
-        </p>
-      )}
-
-      {canVote && myVote && (
-        <p className="text-center text-[10px] text-muted-foreground/50">
-          Click again to remove your vote
-        </p>
-      )}
+      <div className="p-4 space-y-3">
+        {canVote ? (
+          <>
+            <div className="flex gap-3">
+              {/* Like button */}
+              <VoteButton
+                emoji="👍"
+                label="Like"
+                count={likes}
+                active={myVote === "like"}
+                disabled={pending}
+                activeStyle={{
+                  bg: "rgba(34,197,94,0.18)",
+                  border: "rgba(74,222,128,0.60)",
+                  text: "#4ade80",
+                  glow: "0 0 24px rgba(34,197,94,0.35), 0 0 8px rgba(34,197,94,0.20)",
+                  countColor: "#4ade80",
+                }}
+                inactiveStyle={{
+                  bg: "rgba(34,197,94,0.04)",
+                  border: "rgba(74,222,128,0.18)",
+                  text: "rgba(74,222,128,0.55)",
+                  hoverBg: "rgba(34,197,94,0.12)",
+                  hoverBorder: "rgba(74,222,128,0.40)",
+                  hoverText: "#4ade80",
+                  countColor: "rgba(74,222,128,0.45)",
+                }}
+                onClick={() => handleVote("like")}
+              />
+              {/* Dislike button */}
+              <VoteButton
+                emoji="👎"
+                label="Dislike"
+                count={dislikes}
+                active={myVote === "dislike"}
+                disabled={pending}
+                activeStyle={{
+                  bg: "rgba(239,68,68,0.18)",
+                  border: "rgba(248,113,113,0.60)",
+                  text: "#f87171",
+                  glow: "0 0 24px rgba(239,68,68,0.35), 0 0 8px rgba(239,68,68,0.20)",
+                  countColor: "#f87171",
+                }}
+                inactiveStyle={{
+                  bg: "rgba(239,68,68,0.04)",
+                  border: "rgba(248,113,113,0.18)",
+                  text: "rgba(248,113,113,0.55)",
+                  hoverBg: "rgba(239,68,68,0.12)",
+                  hoverBorder: "rgba(248,113,113,0.40)",
+                  hoverText: "#f87171",
+                  countColor: "rgba(248,113,113,0.45)",
+                }}
+                onClick={() => handleVote("dislike")}
+              />
+            </div>
+            {myVote && (
+              <p className="text-center text-[10px] text-muted-foreground/40">
+                Click your vote again to remove it
+              </p>
+            )}
+          </>
+        ) : (
+          <p className="text-center text-xs text-muted-foreground/50 py-1 italic">
+            {isSelf
+              ? "You can't vote on your own profile."
+              : "Complete a session with this user to leave feedback."}
+          </p>
+        )}
+      </div>
     </div>
+  );
+}
+
+type VoteButtonStyle = {
+  bg: string; border: string; text: string; glow: string; countColor: string;
+};
+type VoteButtonInactiveStyle = {
+  bg: string; border: string; text: string;
+  hoverBg: string; hoverBorder: string; hoverText: string; countColor: string;
+};
+
+function VoteButton({
+  emoji, label, count, active, disabled, activeStyle, inactiveStyle, onClick,
+}: {
+  emoji: string;
+  label: string;
+  count: number;
+  active: boolean;
+  disabled: boolean;
+  activeStyle: VoteButtonStyle;
+  inactiveStyle: VoteButtonInactiveStyle;
+  onClick: () => void;
+}) {
+  const [hovered, setHovered] = React.useState(false);
+
+  const bg      = active ? activeStyle.bg      : hovered ? inactiveStyle.hoverBg     : inactiveStyle.bg;
+  const border  = active ? activeStyle.border  : hovered ? inactiveStyle.hoverBorder : inactiveStyle.border;
+  const text    = active ? activeStyle.text    : hovered ? inactiveStyle.hoverText   : inactiveStyle.text;
+  const cColor  = active ? activeStyle.countColor : inactiveStyle.countColor;
+  const shadow  = active ? activeStyle.glow : "none";
+  const scale   = hovered && !disabled ? "scale(1.03)" : "scale(1)";
+
+  return (
+    <button
+      disabled={disabled}
+      onClick={onClick}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        flex: 1,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: "6px",
+        padding: "16px 12px",
+        borderRadius: "16px",
+        border: `1.5px solid ${border}`,
+        background: bg,
+        boxShadow: shadow,
+        color: text,
+        transform: scale,
+        transition: "all 0.18s ease",
+        cursor: disabled ? "not-allowed" : "pointer",
+        opacity: disabled ? 0.7 : 1,
+      }}
+    >
+      {/* Emoji */}
+      <span style={{ fontSize: "28px", lineHeight: 1 }}>{emoji}</span>
+      {/* Count */}
+      <span style={{
+        fontSize: "22px",
+        fontWeight: 900,
+        lineHeight: 1,
+        color: cColor,
+        fontVariantNumeric: "tabular-nums",
+        transition: "color 0.18s ease",
+      }}>
+        {count}
+      </span>
+      {/* Label */}
+      <span style={{
+        fontSize: "10px",
+        fontWeight: 700,
+        letterSpacing: "0.12em",
+        textTransform: "uppercase",
+        color: text,
+        transition: "color 0.18s ease",
+      }}>
+        {active ? `${label}d ✓` : label}
+      </span>
+    </button>
   );
 }
 
