@@ -107,6 +107,9 @@ router.post(
   },
 );
 
+const MAX_LOGIN_ATTEMPTS = 5;
+const LOCKOUT_DURATION_MS = 15 * 60 * 1000; // 15 minutes
+
 router.post("/auth/login", loginLimiter, validate(LoginSchema), async (req, res): Promise<void> => {
   const { email, password } = req.body as { email: string; password: string };
 
@@ -115,15 +118,63 @@ router.post("/auth/login", loginLimiter, validate(LoginSchema), async (req, res)
     .from(usersTable)
     .where(eq(usersTable.email, email));
 
+  // Always run a bcrypt comparison even if user not found — prevents timing attacks
+  // that would let an attacker enumerate valid email addresses by response time.
+  const dummyHash = "$2b$10$dummyhashfortimingprotectiononly.............";
+  const passwordToCheck = user ? user.passwordHash : dummyHash;
+  const valid = await bcryptjs.compare(password, passwordToCheck);
+
   if (!user) {
     res.status(401).json({ error: "Invalid email or password" });
     return;
   }
 
-  const valid = await bcryptjs.compare(password, user.passwordHash);
-  if (!valid) {
-    res.status(401).json({ error: "Invalid email or password" });
+  // ── Account lockout check ──────────────────────────────────────────────
+  if (user.lockedUntil && user.lockedUntil > new Date()) {
+    const secondsLeft = Math.ceil((user.lockedUntil.getTime() - Date.now()) / 1000);
+    const minutesLeft = Math.ceil(secondsLeft / 60);
+    req.log.warn({ userId: user.id }, "Login attempt on locked account");
+    res.status(423).json({
+      error: `Account temporarily locked due to too many failed login attempts. Try again in ${minutesLeft} minute${minutesLeft === 1 ? "" : "s"}.`,
+      lockedUntil: user.lockedUntil.toISOString(),
+    });
     return;
+  }
+
+  if (!valid) {
+    // Increment failed attempts; lock account if threshold reached
+    const newAttempts = (user.loginAttempts ?? 0) + 1;
+    const shouldLock = newAttempts >= MAX_LOGIN_ATTEMPTS;
+    const lockedUntil = shouldLock ? new Date(Date.now() + LOCKOUT_DURATION_MS) : null;
+
+    await db
+      .update(usersTable)
+      .set({ loginAttempts: newAttempts, lockedUntil })
+      .where(eq(usersTable.id, user.id));
+
+    req.log.warn({ userId: user.id, attempts: newAttempts, locked: shouldLock }, "Failed login attempt");
+
+    if (shouldLock) {
+      res.status(423).json({
+        error: `Too many failed login attempts. Your account has been locked for 15 minutes.`,
+        lockedUntil: lockedUntil!.toISOString(),
+      });
+    } else {
+      const remaining = MAX_LOGIN_ATTEMPTS - newAttempts;
+      res.status(401).json({
+        error: `Invalid email or password. ${remaining} attempt${remaining === 1 ? "" : "s"} remaining before account lockout.`,
+        attemptsRemaining: remaining,
+      });
+    }
+    return;
+  }
+
+  // ── Successful login — reset lockout counters ──────────────────────────
+  if (user.loginAttempts > 0 || user.lockedUntil) {
+    await db
+      .update(usersTable)
+      .set({ loginAttempts: 0, lockedUntil: null })
+      .where(eq(usersTable.id, user.id));
   }
 
   const token = crypto.randomBytes(32).toString("hex");

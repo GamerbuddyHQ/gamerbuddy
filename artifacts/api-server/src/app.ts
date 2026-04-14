@@ -7,6 +7,12 @@ import { logger } from "./lib/logger";
 
 const app: Express = express();
 
+// Replit (and most hosting providers) run behind a reverse proxy.
+// This tells Express to trust the X-Forwarded-For header so that
+// req.ip resolves to the real client IP, and express-rate-limit
+// works correctly for IP-based limiting.
+app.set("trust proxy", 1);
+
 app.use(
   pinoHttp({
     logger,
