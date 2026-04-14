@@ -1,4 +1,4 @@
-import { ExternalLink, Radio } from "lucide-react";
+import { ExternalLink, Radio, Plus } from "lucide-react";
 import { STREAMING_PLATFORM_META } from "@/lib/bids-api";
 import type { StreamingAccount } from "@workspace/db";
 
@@ -48,34 +48,35 @@ export function StreamingAccountsDisplay({ accounts, className = "", onConnect }
     <div
       className={`rounded-2xl border overflow-hidden ${className}`}
       style={{
-        borderColor: "rgba(168,85,247,0.2)",
-        background: "rgba(8,6,18,0.7)",
+        borderColor: connectedCount > 0 ? "rgba(168,85,247,0.25)" : "rgba(255,255,255,0.07)",
+        background: "rgba(8,6,18,0.75)",
         boxShadow: connectedCount > 0
-          ? "0 0 0 1px rgba(168,85,247,0.08), 0 4px 32px rgba(168,85,247,0.06)"
+          ? "0 0 0 1px rgba(168,85,247,0.06), 0 4px 32px rgba(168,85,247,0.08)"
           : "none",
       }}
     >
       {/* ── Header ── */}
       <div
-        className="flex items-center justify-between px-5 py-3.5 border-b"
+        className="flex items-center justify-between px-4 sm:px-5 py-3.5 border-b"
         style={{
           borderColor: "rgba(255,255,255,0.06)",
-          background: "rgba(168,85,247,0.05)",
+          background: connectedCount > 0
+            ? "rgba(168,85,247,0.07)"
+            : "rgba(255,255,255,0.02)",
         }}
       >
         <div className="flex items-center gap-2.5">
-          {/* Pulsing dot */}
           <span className="relative flex h-2.5 w-2.5">
             <span
               className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-60"
-              style={{ background: "#a855f7" }}
+              style={{ background: connectedCount > 0 ? "#a855f7" : "#4b5563" }}
             />
             <span
               className="relative inline-flex rounded-full h-2.5 w-2.5"
-              style={{ background: "#a855f7" }}
+              style={{ background: connectedCount > 0 ? "#a855f7" : "#4b5563" }}
             />
           </span>
-          <span className="text-xs font-extrabold uppercase tracking-widest text-white/80">
+          <span className="text-[11px] font-extrabold uppercase tracking-widest text-white/80">
             Streaming Profiles
           </span>
         </div>
@@ -85,22 +86,22 @@ export function StreamingAccountsDisplay({ accounts, className = "", onConnect }
             className="text-[10px] font-black px-2.5 py-0.5 rounded-full"
             style={{
               background: "rgba(34,197,94,0.12)",
-              border: "1px solid rgba(34,197,94,0.3)",
+              border: "1px solid rgba(34,197,94,0.28)",
               color: "#4ade80",
             }}
           >
-            {connectedCount} / {PLATFORM_ORDER.length} connected
+            {connectedCount}/{PLATFORM_ORDER.length} live
           </span>
         ) : (
-          <span className="text-[10px] text-muted-foreground/40 font-medium">
+          <span className="text-[10px] text-white/25 font-semibold tracking-wide">
             No accounts linked
           </span>
         )}
       </div>
 
       {/* ── Platform grid ── */}
-      <div className="p-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+      <div className="p-3 sm:p-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           {PLATFORM_ORDER.map((platform) => {
             const meta = STREAMING_PLATFORM_META[platform];
             const username = connectedMap[platform];
@@ -116,27 +117,43 @@ export function StreamingAccountsDisplay({ accounts, className = "", onConnect }
                   href={url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group relative flex items-center gap-3 rounded-xl px-4 py-3.5 transition-all duration-200"
+                  className="group relative flex items-center gap-3 rounded-xl px-3.5 py-3 transition-all duration-200 hover:-translate-y-0.5"
                   style={{
                     background: meta.bg,
                     border: `1px solid ${meta.border}`,
                   }}
                   onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLElement).style.boxShadow =
-                      `0 0 18px ${meta.color}28, 0 0 6px ${meta.color}18`;
-                    (e.currentTarget as HTMLElement).style.borderColor = meta.color + "60";
+                    const el = e.currentTarget as HTMLElement;
+                    el.style.boxShadow = `0 0 20px ${meta.color}30, 0 0 6px ${meta.color}18, 0 4px 12px rgba(0,0,0,0.4)`;
+                    el.style.borderColor = `${meta.color}70`;
                   }}
                   onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLElement).style.boxShadow = "none";
-                    (e.currentTarget as HTMLElement).style.borderColor = meta.border;
+                    const el = e.currentTarget as HTMLElement;
+                    el.style.boxShadow = "none";
+                    el.style.borderColor = meta.border;
                   }}
                 >
+                  {/* Live dot */}
+                  <span
+                    className="absolute top-2 right-2.5 flex h-1.5 w-1.5"
+                    aria-hidden
+                  >
+                    <span
+                      className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75"
+                      style={{ background: meta.color }}
+                    />
+                    <span
+                      className="relative inline-flex rounded-full h-1.5 w-1.5"
+                      style={{ background: meta.color }}
+                    />
+                  </span>
+
                   {/* Icon */}
                   <div
-                    className="h-11 w-11 shrink-0 rounded-xl flex items-center justify-center p-2 transition-transform duration-200 group-hover:scale-110"
+                    className="h-10 w-10 shrink-0 rounded-xl flex items-center justify-center p-2 transition-transform duration-200 group-hover:scale-110"
                     style={{
-                      background: `${meta.color}1a`,
-                      border: `1.5px solid ${meta.color}40`,
+                      background: `${meta.color}1e`,
+                      border: `1.5px solid ${meta.color}45`,
                       color: meta.color,
                     }}
                   >
@@ -148,7 +165,7 @@ export function StreamingAccountsDisplay({ accounts, className = "", onConnect }
                   {/* Text */}
                   <div className="flex-1 min-w-0">
                     <div
-                      className="text-[10px] font-black uppercase tracking-widest leading-none mb-1.5"
+                      className="text-[9px] font-black uppercase tracking-widest leading-none mb-1"
                       style={{ color: meta.color }}
                     >
                       {meta.label}
@@ -157,38 +174,47 @@ export function StreamingAccountsDisplay({ accounts, className = "", onConnect }
                       @{username}
                     </div>
                     <div
-                      className="text-[10px] mt-1 font-medium opacity-0 group-hover:opacity-80 transition-opacity duration-150 truncate"
+                      className="text-[10px] mt-1 font-semibold opacity-0 group-hover:opacity-80 transition-opacity duration-150 truncate"
                       style={{ color: meta.color }}
                     >
                       Visit channel →
                     </div>
                   </div>
 
-                  {/* External link icon */}
                   <ExternalLink
-                    className="h-4 w-4 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity duration-150"
+                    className="h-3.5 w-3.5 shrink-0 opacity-0 group-hover:opacity-70 transition-opacity duration-150"
                     style={{ color: meta.color }}
                   />
                 </a>
               );
             }
 
-            /* ── Unconnected platform — grayed out placeholder ── */
+            /* ── Unconnected platform — dimmed but colour-hinted ── */
             return (
               <div
                 key={platform}
-                className="flex items-center gap-3 rounded-xl px-4 py-3.5 opacity-30"
+                className="group flex items-center gap-3 rounded-xl px-3.5 py-3 transition-all duration-200 cursor-default"
                 style={{
-                  background: "rgba(255,255,255,0.02)",
-                  border: "1px solid rgba(255,255,255,0.06)",
+                  background: `${meta.color}06`,
+                  border: `1px dashed ${meta.color}22`,
+                }}
+                onMouseEnter={(e) => {
+                  const el = e.currentTarget as HTMLElement;
+                  el.style.background = `${meta.color}0d`;
+                  el.style.borderColor = `${meta.color}38`;
+                }}
+                onMouseLeave={(e) => {
+                  const el = e.currentTarget as HTMLElement;
+                  el.style.background = `${meta.color}06`;
+                  el.style.borderColor = `${meta.color}22`;
                 }}
               >
                 <div
-                  className="h-11 w-11 shrink-0 rounded-xl flex items-center justify-center p-2"
+                  className="h-10 w-10 shrink-0 rounded-xl flex items-center justify-center p-2 opacity-25 group-hover:opacity-40 transition-opacity duration-200"
                   style={{
-                    background: "rgba(255,255,255,0.04)",
-                    border: "1.5px dashed rgba(255,255,255,0.12)",
-                    color: "rgba(255,255,255,0.3)",
+                    background: `${meta.color}10`,
+                    border: `1.5px dashed ${meta.color}30`,
+                    color: meta.color,
                   }}
                 >
                   {PLATFORM_SVG[platform] ?? (
@@ -196,35 +222,56 @@ export function StreamingAccountsDisplay({ accounts, className = "", onConnect }
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="text-[10px] font-black uppercase tracking-widest leading-none mb-1.5 text-white/40">
+                  <div
+                    className="text-[9px] font-black uppercase tracking-widest leading-none mb-1 opacity-35 group-hover:opacity-50 transition-opacity duration-200"
+                    style={{ color: meta.color }}
+                  >
                     {meta.label}
                   </div>
-                  <div className="text-xs text-white/25 italic font-medium">
+                  <div className="text-[11px] text-white/20 font-medium group-hover:text-white/30 transition-colors duration-200">
                     Not connected
                   </div>
                 </div>
+                {onConnect && (
+                  <Plus
+                    className="h-3.5 w-3.5 shrink-0 opacity-0 group-hover:opacity-40 transition-opacity duration-200"
+                    style={{ color: meta.color }}
+                  />
+                )}
               </div>
             );
           })}
         </div>
 
-        {/* ── CTA: prompt own-profile owner to connect ── */}
-        {onConnect && connectedCount === 0 && (
-          <div className="mt-3 pt-3 border-t border-border/30 flex items-center justify-between gap-3">
-            <p className="text-[11px] text-muted-foreground/50 italic">
-              Show hirers where to find you live
+        {/* ── CTA ── */}
+        {onConnect && (
+          <div
+            className="mt-3 pt-3 border-t flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3"
+            style={{ borderColor: "rgba(255,255,255,0.06)" }}
+          >
+            <p className="text-[11px] text-white/35 leading-relaxed">
+              {connectedCount > 0
+                ? "Link more platforms to grow your audience"
+                : "Show hirers where to find you streaming live"}
             </p>
             <button
               onClick={onConnect}
-              className="shrink-0 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg transition-all hover:brightness-110"
+              className="w-full sm:w-auto shrink-0 flex items-center justify-center gap-1.5 text-[11px] font-bold uppercase tracking-wider px-4 py-2 rounded-xl transition-all duration-200 hover:brightness-115 hover:scale-[1.02] active:scale-[0.98]"
               style={{
-                background: "rgba(168,85,247,0.12)",
-                border: "1px solid rgba(168,85,247,0.3)",
+                background: "linear-gradient(135deg, rgba(168,85,247,0.18), rgba(168,85,247,0.08))",
+                border: "1px solid rgba(168,85,247,0.35)",
                 color: "#c084fc",
+                boxShadow: "0 0 0 0 rgba(168,85,247,0)",
+              }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLElement).style.boxShadow = "0 0 14px rgba(168,85,247,0.3)";
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLElement).style.boxShadow = "0 0 0 0 rgba(168,85,247,0)";
               }}
             >
               <Radio className="h-3 w-3" />
-              Connect Accounts
+              {connectedCount > 0 ? "Manage Accounts" : "Connect Accounts"}
             </button>
           </div>
         )}

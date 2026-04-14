@@ -1076,15 +1076,16 @@ export default function Profile() {
         <div className="bg-card/80 backdrop-blur-sm px-4 sm:px-6 pb-6 -mt-px">
 
           {/* ── Avatar + Name/Badges row ── */}
-          <div className="flex flex-col sm:flex-row sm:items-end gap-4 sm:gap-5 -translate-y-10 sm:-translate-y-12 mb-0">
+          {/* Mobile: centered column. Desktop: side-by-side aligned at bottom. */}
+          <div className="flex flex-col items-center sm:flex-row sm:items-end gap-4 sm:gap-5 -translate-y-10 sm:-translate-y-12 mb-0">
 
             {/* Avatar with glow ring + verified dot */}
-            <div className="relative shrink-0 self-start sm:self-auto">
+            <div className="relative shrink-0">
               <div
                 className="h-24 w-24 sm:h-28 sm:w-28 rounded-full border-4 border-card flex items-center justify-center"
                 style={{
                   background: `linear-gradient(135deg, ${bgAccent.replace("0.6", "0.4")}, rgba(0,0,0,0.85))`,
-                  boxShadow: `0 0 0 3px ${bgAccent.replace("0.6", "0.18")}, 0 0 32px ${bgAccent}`,
+                  boxShadow: `0 0 0 3px ${bgAccent.replace("0.6", "0.18")}, 0 0 36px ${bgAccent}`,
                 }}
               >
                 <span className="text-4xl sm:text-5xl font-black text-white uppercase select-none">
@@ -1094,7 +1095,7 @@ export default function Profile() {
               {user.idVerified && (
                 <div
                   className="absolute -bottom-0.5 -right-0.5 h-7 w-7 rounded-full bg-emerald-500 border-2 border-card flex items-center justify-center"
-                  style={{ boxShadow: "0 0 10px rgba(52,211,153,0.6)" }}
+                  style={{ boxShadow: "0 0 12px rgba(52,211,153,0.65)" }}
                   title="Identity Verified"
                 >
                   <CheckCircle2 className="h-3.5 w-3.5 text-white" />
@@ -1103,38 +1104,40 @@ export default function Profile() {
             </div>
 
             {/* Name + rank + rating + votes */}
-            <div className="flex-1 min-w-0 sm:pb-2 sm:translate-y-8">
-              <div className="flex flex-wrap items-center gap-2 mb-2">
+            <div className="flex-1 min-w-0 sm:pb-2 sm:translate-y-8 text-center sm:text-left">
+              <div className="flex flex-wrap justify-center sm:justify-start items-center gap-2 mb-2">
                 <h1 className="text-2xl sm:text-3xl font-extrabold text-white uppercase tracking-tight leading-none">
                   {user.name}
                 </h1>
                 {titleLabel && (
-                  <span className="text-[11px] font-black uppercase tracking-widest text-primary border border-primary/40 bg-primary/10 px-2.5 py-0.5 rounded-full">
+                  <span className="text-[11px] font-black uppercase tracking-widest text-primary border border-primary/40 bg-primary/10 px-2.5 py-0.5 rounded-full transition-all duration-150 hover:brightness-110">
                     {titleLabel}
                   </span>
                 )}
               </div>
 
               {/* Status pills row */}
-              <div className="flex flex-wrap items-center gap-1.5">
+              <div className="flex flex-wrap justify-center sm:justify-start items-center gap-1.5">
                 <VerifiedBadge idVerified={user.idVerified} variant="compact" />
-                <span className={`flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full border ${currentRank.color}`}>
+                <span
+                  className={`flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full border transition-all duration-150 hover:brightness-110 hover:scale-105 cursor-default ${currentRank.color}`}
+                >
                   {currentRank.emoji} {currentRank.label}
                 </span>
                 {profile?.avgRating != null && (
-                  <span className="flex items-center gap-1 text-[11px] font-bold text-yellow-400 bg-yellow-500/10 px-2.5 py-0.5 rounded-full border border-yellow-500/30">
+                  <span className="flex items-center gap-1 text-[11px] font-bold text-yellow-400 bg-yellow-500/10 px-2.5 py-0.5 rounded-full border border-yellow-500/30 transition-all duration-150 hover:brightness-110 hover:scale-105 cursor-default">
                     <Star className="w-3 h-3 fill-yellow-400" />
                     {profile.avgRating.toFixed(1)}/10
                     <span className="text-muted-foreground font-normal text-[10px]">({profile.reviewCount})</span>
                   </span>
                 )}
                 {((myVotes?.likes ?? 0) > 0) && (
-                  <span className="inline-flex items-center gap-1 text-[11px] font-bold text-green-400 bg-green-500/10 px-2 py-0.5 rounded-full border border-green-500/25">
+                  <span className="inline-flex items-center gap-1 text-[11px] font-bold text-green-400 bg-green-500/10 px-2 py-0.5 rounded-full border border-green-500/25 transition-all duration-150 hover:brightness-110 hover:scale-105 cursor-default">
                     👍 {myVotes?.likes ?? 0}
                   </span>
                 )}
                 {((myVotes?.dislikes ?? 0) > 0) && (
-                  <span className="inline-flex items-center gap-1 text-[11px] font-bold text-red-400 bg-red-500/10 px-2 py-0.5 rounded-full border border-red-500/25">
+                  <span className="inline-flex items-center gap-1 text-[11px] font-bold text-red-400 bg-red-500/10 px-2 py-0.5 rounded-full border border-red-500/25 transition-all duration-150 hover:brightness-110 hover:scale-105 cursor-default">
                     👎 {myVotes?.dislikes ?? 0}
                   </span>
                 )}
@@ -1142,25 +1145,25 @@ export default function Profile() {
 
               {/* Reputation badges */}
               {repBadges.length > 0 && (
-                <div className="mt-2.5">
+                <div className="mt-2.5 flex justify-center sm:justify-start">
                   <ReputationBadges badges={repBadges} />
                 </div>
               )}
             </div>
           </div>
 
-          {/* ── Trust Factor + Stats (full width below avatar row) ── */}
-          <div className="-mt-6 sm:-mt-8 space-y-4 pt-1">
+          {/* ── Trust Factor + Stats ── */}
+          <div className="-mt-4 sm:-mt-7 space-y-3 pt-1">
             <TrustMeter value={trustFactor} />
 
-            {/* Stats row with icons */}
+            {/* Stats row */}
             <div className="grid grid-cols-3 gap-2 sm:gap-3">
 
               {/* Points */}
-              <div className="relative p-3 sm:p-4 bg-background/50 rounded-2xl border border-border hover:border-yellow-500/30 transition-colors text-center space-y-2 overflow-hidden group">
-                <div className="absolute inset-0 bg-gradient-to-b from-yellow-500/4 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl" />
+              <div className="relative p-3 sm:p-4 bg-background/50 rounded-2xl border border-border hover:border-yellow-500/40 hover:-translate-y-0.5 transition-all duration-200 text-center space-y-2 overflow-hidden group cursor-default">
+                <div className="absolute inset-0 bg-gradient-to-b from-yellow-500/6 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded-2xl" />
                 <div className="relative flex justify-center">
-                  <div className="h-8 w-8 rounded-xl bg-yellow-500/10 border border-yellow-500/25 flex items-center justify-center">
+                  <div className="h-8 w-8 rounded-xl bg-yellow-500/10 border border-yellow-500/25 flex items-center justify-center group-hover:border-yellow-500/50 group-hover:bg-yellow-500/15 transition-colors duration-200">
                     <Trophy className="h-4 w-4 text-yellow-400" />
                   </div>
                 </div>
@@ -1176,10 +1179,10 @@ export default function Profile() {
               </div>
 
               {/* Hired */}
-              <div className="relative p-3 sm:p-4 bg-background/50 rounded-2xl border border-border hover:border-secondary/30 transition-colors text-center space-y-2 overflow-hidden group">
-                <div className="absolute inset-0 bg-gradient-to-b from-secondary/4 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl" />
+              <div className="relative p-3 sm:p-4 bg-background/50 rounded-2xl border border-border hover:border-secondary/40 hover:-translate-y-0.5 transition-all duration-200 text-center space-y-2 overflow-hidden group cursor-default">
+                <div className="absolute inset-0 bg-gradient-to-b from-secondary/6 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded-2xl" />
                 <div className="relative flex justify-center">
-                  <div className="h-8 w-8 rounded-xl bg-secondary/10 border border-secondary/25 flex items-center justify-center">
+                  <div className="h-8 w-8 rounded-xl bg-secondary/10 border border-secondary/25 flex items-center justify-center group-hover:border-secondary/50 group-hover:bg-secondary/15 transition-colors duration-200">
                     <Users className="h-4 w-4 text-secondary" />
                   </div>
                 </div>
@@ -1192,10 +1195,10 @@ export default function Profile() {
               </div>
 
               {/* Played */}
-              <div className="relative p-3 sm:p-4 bg-background/50 rounded-2xl border border-border hover:border-green-500/30 transition-colors text-center space-y-2 overflow-hidden group">
-                <div className="absolute inset-0 bg-gradient-to-b from-green-500/4 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl" />
+              <div className="relative p-3 sm:p-4 bg-background/50 rounded-2xl border border-border hover:border-green-500/40 hover:-translate-y-0.5 transition-all duration-200 text-center space-y-2 overflow-hidden group cursor-default">
+                <div className="absolute inset-0 bg-gradient-to-b from-green-500/6 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded-2xl" />
                 <div className="relative flex justify-center">
-                  <div className="h-8 w-8 rounded-xl bg-green-500/10 border border-green-500/25 flex items-center justify-center">
+                  <div className="h-8 w-8 rounded-xl bg-green-500/10 border border-green-500/25 flex items-center justify-center group-hover:border-green-500/50 group-hover:bg-green-500/15 transition-colors duration-200">
                     <Gamepad2 className="h-4 w-4 text-green-400" />
                   </div>
                 </div>

@@ -207,37 +207,81 @@ export function TrustMeter({ value }: { value: number }) {
   const color = tfColor(capped);
 
   return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between text-xs">
-        <span className="uppercase tracking-widest text-muted-foreground font-bold flex items-center gap-1.5">
-          <ShieldCheck className="h-3.5 w-3.5" /> Trust Factor
+    <div
+      className="rounded-2xl px-4 py-3.5 space-y-3"
+      style={{
+        background: `linear-gradient(135deg, ${color}08, rgba(0,0,0,0.3))`,
+        border: `1px solid ${color}20`,
+        boxShadow: `0 0 0 1px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.03)`,
+      }}
+    >
+      {/* Header row */}
+      <div className="flex items-center justify-between">
+        <span
+          className="flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-widest"
+          style={{ color: "rgba(255,255,255,0.55)" }}
+        >
+          <ShieldCheck className="h-4 w-4" style={{ color, filter: `drop-shadow(0 0 4px ${color}80)` }} />
+          Trust Factor
         </span>
         <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold" style={{ color }}>{label}</span>
-          <span className="font-black text-white text-sm">
+          <span
+            className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full"
+            style={{
+              background: `${color}18`,
+              border: `1px solid ${color}35`,
+              color,
+            }}
+          >
+            {label}
+          </span>
+          <span className="font-black text-white text-lg leading-none tabular-nums">
             {capped}
-            <span className="text-muted-foreground font-normal text-xs">/100</span>
+            <span className="text-white/35 font-normal text-xs">/100</span>
           </span>
         </div>
       </div>
-      <div className="h-3 rounded-full bg-background border border-border/60 overflow-hidden">
+
+      {/* Bar track */}
+      <div className="relative h-4 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.07)" }}>
+        {/* Fill */}
         <div
-          className={`h-full rounded-full bg-gradient-to-r ${tfGradient(capped)} transition-all duration-700`}
-          style={{
-            width: `${capped}%`,
-            boxShadow: `0 0 8px ${color}55`,
-          }}
-        />
+          className={`h-full rounded-full bg-gradient-to-r ${tfGradient(capped)} transition-all duration-700 relative overflow-hidden`}
+          style={{ width: `${capped}%`, boxShadow: `0 0 10px ${color}60, 0 0 4px ${color}40` }}
+        >
+          {/* Shimmer sweep */}
+          <div
+            className="absolute inset-0"
+            style={{
+              background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.18) 50%, transparent 100%)",
+              animation: "shimmer 2.5s ease-in-out infinite",
+              backgroundSize: "200% 100%",
+            }}
+          />
+        </div>
+        {/* Tick marks at 35, 55, 75 */}
+        {[35, 55, 75].map((pct) => (
+          <div
+            key={pct}
+            className="absolute top-0 bottom-0 w-px"
+            style={{ left: `${pct}%`, background: "rgba(255,255,255,0.12)" }}
+          />
+        ))}
       </div>
-      <div className="flex justify-between text-[10px] text-muted-foreground/40">
-        <span>Risky &lt;35</span>
-        <span>Fair 45–64</span>
-        <span>Excellent 80+</span>
+
+      {/* Scale labels */}
+      <div className="flex justify-between text-[9px] font-bold uppercase tracking-wider" style={{ color: "rgba(255,255,255,0.25)" }}>
+        <span>Risky</span>
+        <span>Fair</span>
+        <span>Good</span>
+        <span>Excellent</span>
       </div>
-      <p className="text-[10px] text-muted-foreground/50 leading-relaxed">
-        Earned from <span className="text-muted-foreground">rating quality</span> (60 pts),{" "}
-        <span className="text-muted-foreground">session experience</span> (30 pts) and{" "}
-        <span className="text-muted-foreground">review volume</span> (10 pts).
+
+      {/* Footnote */}
+      <p className="text-[10px] leading-relaxed" style={{ color: "rgba(255,255,255,0.28)" }}>
+        Weighted from <span style={{ color: "rgba(255,255,255,0.5)" }}>rating quality</span>,{" "}
+        <span style={{ color: "rgba(255,255,255,0.5)" }}>session history</span> &amp;{" "}
+        <span style={{ color: "rgba(255,255,255,0.5)" }}>community reviews</span>.
       </p>
     </div>
   );
