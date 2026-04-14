@@ -235,9 +235,34 @@ export function Layout({ children }: { children: React.ReactNode }) {
           </div>
 
           {/* Desktop nav */}
-          <nav className="hidden md:flex gap-6 flex-1 justify-center">
+          <nav className="hidden md:flex gap-5 flex-1 justify-center items-center">
             {navItems.map((item) => {
               const isActive = location.startsWith(item.href);
+              const isCommunity = item.href === "/community";
+
+              if (isCommunity) {
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="flex items-center gap-1.5 text-sm font-semibold whitespace-nowrap transition-all duration-200 px-3 py-1.5 rounded-full"
+                    style={isActive ? {
+                      background: "rgba(168,85,247,0.18)",
+                      border: "1px solid rgba(168,85,247,0.55)",
+                      color: "#c084fc",
+                      boxShadow: "0 0 14px rgba(168,85,247,0.25), inset 0 1px 0 rgba(168,85,247,0.15)",
+                    } : {
+                      background: "rgba(168,85,247,0.06)",
+                      border: "1px solid rgba(168,85,247,0.28)",
+                      color: "rgba(192,132,252,0.70)",
+                    }}
+                  >
+                    <item.icon className="h-3.5 w-3.5 shrink-0" />
+                    {item.label}
+                  </Link>
+                );
+              }
+
               return (
                 <Link
                   key={item.href}
@@ -291,6 +316,31 @@ export function Layout({ children }: { children: React.ReactNode }) {
           <div className="container py-6 space-y-2">
             {navItems.map((item) => {
               const isActive = location.startsWith(item.href);
+              const isCommunity = item.href === "/community";
+
+              if (isCommunity) {
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="flex items-center gap-3 px-4 py-3.5 rounded-xl border font-semibold text-base transition-all duration-200"
+                    style={isActive ? {
+                      background: "rgba(168,85,247,0.14)",
+                      borderColor: "rgba(168,85,247,0.55)",
+                      color: "#c084fc",
+                      boxShadow: "0 0 20px rgba(168,85,247,0.18), inset 0 1px 0 rgba(168,85,247,0.12)",
+                    } : {
+                      background: "rgba(168,85,247,0.05)",
+                      borderColor: "rgba(168,85,247,0.30)",
+                      color: "rgba(192,132,252,0.75)",
+                    }}
+                  >
+                    <item.icon className="h-5 w-5 shrink-0" />
+                    {item.label}
+                  </Link>
+                );
+              }
+
               return (
                 <Link
                   key={item.href}
