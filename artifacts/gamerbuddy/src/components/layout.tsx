@@ -199,10 +199,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
     { href: "/community",   label: "Community",        icon: Users     },
     ...(user
       ? [
-          { href: "/dashboard",   label: "Dashboard",   icon: LayoutDashboard },
-          { href: "/my-requests", label: "My Requests", icon: FileText        },
-          { href: "/wallets",     label: "Wallets",     icon: Wallet          },
-          { href: "/profile",     label: "Profile",     icon: UserIcon        },
+          { href: "/dashboard",      label: "Dashboard",      icon: LayoutDashboard },
+          { href: "/my-requests",    label: "My Requests",    icon: FileText        },
+          { href: "/my-tournaments", label: "My Tournaments", icon: Swords          },
+          { href: "/wallets",        label: "Wallets",        icon: Wallet          },
+          { href: "/profile",        label: "Profile",        icon: UserIcon        },
         ]
       : []),
     { href: "/about", label: "About", icon: Info },
