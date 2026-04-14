@@ -83,7 +83,7 @@ const PHASES = [
   },
   {
     id: 3,
-    tag: "Next",
+    tag: "Future",
     title: "Competition & Rewards",
     status: "next" as const,
     accent: "#22d3ee",
@@ -119,7 +119,7 @@ const PHASES = [
   },
   {
     id: 4,
-    tag: "Future Plans",
+    tag: "Future",
     title: "Next-Level Platform",
     status: "future" as const,
     accent: "#f59e0b",
@@ -158,8 +158,8 @@ const PHASES = [
 const STATUS_STYLES = {
   live:   { dot: "#22c55e", pulse: true,  label: "Now Live"      },
   soon:   { dot: "#a855f7", pulse: false, label: "Coming Soon"   },
-  next:   { dot: "#22d3ee", pulse: false, label: "Next"          },
-  future: { dot: "#f59e0b", pulse: false, label: "Future Plans"  },
+  next:   { dot: "#22d3ee", pulse: false, label: "Future" },
+  future: { dot: "#f59e0b", pulse: false, label: "Future" },
 };
 
 const STATUS_ICON = {
@@ -216,6 +216,33 @@ export default function Roadmap() {
             );
           })}
         </div>
+      </div>
+
+      {/* ── Phase 1 Context Banner ── */}
+      <div
+        className="rounded-2xl border p-6 space-y-3"
+        style={{
+          background: "linear-gradient(135deg, rgba(34,197,94,0.07) 0%, rgba(168,85,247,0.05) 100%)",
+          borderColor: "rgba(34,197,94,0.22)",
+          boxShadow: "0 0 32px rgba(34,197,94,0.08)",
+        }}
+      >
+        <div className="flex items-center gap-2">
+          <span
+            className="h-2.5 w-2.5 rounded-full shrink-0"
+            style={{ background: "#22c55e", boxShadow: "0 0 7px rgba(34,197,94,0.7)", animation: "pulse 1.5s infinite" }}
+          />
+          <span className="text-xs font-black uppercase tracking-widest text-green-400">
+            Currently Active — Phase 1
+          </span>
+        </div>
+        <p className="text-sm sm:text-base text-foreground/85 leading-relaxed">
+          We are currently in <strong className="text-foreground">Phase 1</strong> — focused on core hiring and safe co-op sessions.
+          We are rolling out features gradually to ensure everything works smoothly and securely.
+        </p>
+        <p className="text-sm text-muted-foreground leading-relaxed">
+          Thank you for your patience as we build the best gaming buddy experience. Each phase unlocks new capabilities based on your feedback and our readiness to deliver them reliably.
+        </p>
       </div>
 
       {/* ── Phases ── */}

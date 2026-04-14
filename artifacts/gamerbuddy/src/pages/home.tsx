@@ -183,9 +183,9 @@ export default function Home() {
           style={{ background: "#22c55e", boxShadow: "0 0 6px rgba(34,197,94,0.6)", animation: "pulse 1.5s infinite" }}
         />
         <span style={{ color: "rgba(255,255,255,0.85)" }}>
-          Welcome to Gamerbuddy Phase 1 — Simple &amp; Safe Co-op Hiring.{" "}
+          Gamerbuddy is currently in Phase 1. More exciting features are coming soon!{" "}
           <Link href="/roadmap" className="font-bold hover:underline" style={{ color: "#c084fc" }}>
-            More features coming soon!
+            View Roadmap →
           </Link>
         </span>
       </div>

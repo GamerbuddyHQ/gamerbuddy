@@ -112,7 +112,7 @@ const RESPONSES: Array<{ patterns: RegExp; reply: string }> = [
   /* ── PHASE 2+ FEATURES (Coming Soon) ── */
   {
     patterns: /tournament|bulk.*hir|hir.*bulk|community|suggest.*feature|quest.*system|promoted.*game|streaming.*connection|twitch|kick.*stream|light.*dark|dark.*light|theme.*toggle|region.*clock|language.*select|multi.*lang/i,
-    reply: `That feature is coming in **Phase 2 or later**! 🔜\n\nWe're currently in **Phase 1** — focused on the core co-op hiring experience:\n• Post requests → receive bids → hire gamers\n• Two wallets (Hiring + Earnings)\n• Session flow, escrow, and reviews\n\nComing up in future phases:\n• Tournaments & Bulk Hiring\n• Community Suggestions\n• Quest system & Promoted Games\n• Streaming connections\n• Theme toggle & Language selector\n\nCheck the **[Roadmap](/roadmap)** for the full plan, and drop your vote on **[Community Suggestions](/community)** to help shape what ships next! 🚀`,
+    reply: `That feature is part of our phased rollout! 🔜\n\nWe're rolling out Gamerbuddy **gradually** — starting with the core experience and adding features phase by phase to make sure everything works smoothly and securely.\n\n**Where we are right now:**\n✅ **Phase 1 (Live)** — Core hiring: post requests, bid, escrow, review, dual wallets\n\n**Coming next:**\n🔜 **Phase 2** — Community Suggestions, improved Browse layout, theme toggle, regional clock\n🔵 **Phase 3** — Tournaments, Bulk Hiring, Quest system, Promoted Games\n🚀 **Phase 4** — Advanced AI, full social features, open API\n\nThank you for your patience — we're building the best gaming buddy experience, one phase at a time! Check the **[Roadmap](/roadmap)** for full details. 🗺️`,
   },
 
   /* ── ROADMAP / FUTURE FEATURES ── */

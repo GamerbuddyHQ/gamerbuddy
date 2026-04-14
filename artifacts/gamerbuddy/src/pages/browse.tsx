@@ -369,7 +369,9 @@ function RequestCard({ req }: { req: GameRequest }) {
 
   const skill = SKILL_CONFIG[req.skillLevel] ?? DEFAULT_SKILL;
   const isZeroBids = req.bidCount === 0;
-  const hasContextTags = isZeroBids;
+  const hasNationPref = !!req.preferredCountry && req.preferredCountry !== "any";
+  const hasGenderPref = !!req.preferredGender  && req.preferredGender  !== "any";
+  const hasContextTags = isZeroBids || hasNationPref || hasGenderPref;
 
   return (
     <div
@@ -464,6 +466,32 @@ function RequestCard({ req }: { req: GameRequest }) {
                   {isZeroBids && (
                     <span className="inline-flex items-center gap-1 text-[10px] bg-green-500/10 border border-green-500/25 text-green-400/90 rounded-full px-2.5 py-1 font-bold uppercase tracking-wider">
                       <Flame className="h-2.5 w-2.5" /> First bid!
+                    </span>
+                  )}
+                  {hasNationPref && COUNTRY_MAP[req.preferredCountry!] && (
+                    <span
+                      className="inline-flex items-center gap-1 text-[10px] rounded-full px-2.5 py-1 font-bold uppercase tracking-wider"
+                      style={{
+                        background: "rgba(252,211,77,0.10)",
+                        border: "1px solid rgba(252,211,77,0.28)",
+                        color: "rgba(252,211,77,0.80)",
+                      }}
+                    >
+                      <Globe className="h-2.5 w-2.5 shrink-0" />
+                      {COUNTRY_MAP[req.preferredCountry!].flag} {COUNTRY_MAP[req.preferredCountry!].label}
+                    </span>
+                  )}
+                  {hasGenderPref && GENDER_MAP[req.preferredGender!] && (
+                    <span
+                      className="inline-flex items-center gap-1 text-[10px] rounded-full px-2.5 py-1 font-bold uppercase tracking-wider"
+                      style={{
+                        background: "rgba(236,72,153,0.10)",
+                        border: "1px solid rgba(236,72,153,0.28)",
+                        color: "rgba(236,72,153,0.80)",
+                      }}
+                    >
+                      <UserRound className="h-2.5 w-2.5 shrink-0" />
+                      {GENDER_MAP[req.preferredGender!].icon} {GENDER_MAP[req.preferredGender!].label}
                     </span>
                   )}
                 </div>
@@ -981,7 +1009,35 @@ export default function Browse() {
           </div>
         </div>
 
-        {/* Nation + Gender filters hidden in Phase 1 */}
+        {/* ── Nation + Gender filter row ── */}
+        <div
+          className="flex flex-col sm:flex-row sm:items-center gap-3 px-5 py-4 border-b"
+          style={{ borderColor: "rgba(255,255,255,0.05)", background: "rgba(0,0,0,0.13)" }}
+        >
+          <span className="text-[10px] font-extrabold uppercase tracking-widest shrink-0 sm:w-16 text-muted-foreground/35">
+            Nation
+          </span>
+          <div className="flex flex-wrap gap-3 items-center flex-1">
+            <div className="w-full sm:w-56">
+              <CountryCombobox
+                value={countryFilter}
+                onValueChange={setCountryFilter}
+              />
+            </div>
+            <span className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground/35 shrink-0 hidden sm:block">
+              Gender
+            </span>
+            <span className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground/35 shrink-0 sm:hidden">
+              Gender
+            </span>
+            <div className="w-full sm:w-44">
+              <GenderSelect
+                value={genderFilter}
+                onValueChange={setGenderFilter}
+              />
+            </div>
+          </div>
+        </div>
 
         {/* ── Toggle filters row ── */}
         <div

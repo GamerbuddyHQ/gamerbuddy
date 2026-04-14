@@ -28,6 +28,7 @@ import TournamentDetail from "@/pages/tournament-detail";
 import MyTournaments from "@/pages/my-tournaments";
 import Socials from "@/pages/socials";
 import Roadmap from "@/pages/roadmap";
+import ComingSoon from "@/pages/coming-soon";
 import AdminSecurity from "@/pages/admin-security";
 
 const queryClient = new QueryClient({
@@ -82,11 +83,11 @@ function Router() {
         <Route path="/users/:id" component={UserProfilePage} />
         <Route path="/notifications"><ProtectedRoute component={Notifications} /></Route>
         <Route path="/about" component={About} />
-        <Route path="/socials"><Redirect to="/" /></Route>
-        <Route path="/community"><Redirect to="/" /></Route>
-        <Route path="/tournaments"><Redirect to="/" /></Route>
-        <Route path="/my-tournaments"><Redirect to="/" /></Route>
-        <Route path="/tournaments/:id"><Redirect to="/" /></Route>
+        <Route path="/socials">{() => <ComingSoon feature="Socials & Follow Us" phase={2} description="Our social hub — follow us across platforms, see community highlights, and connect with your gaming squad. Coming in Phase 2!" />}</Route>
+        <Route path="/community">{() => <ComingSoon feature="Community Suggestions" phase={2} description="Submit ideas, vote on features, react with emojis & GIFs, and shape what Gamerbuddy builds next. Coming in Phase 2!" />}</Route>
+        <Route path="/tournaments">{() => <ComingSoon feature="Tournaments" phase={3} description="Compete in free-to-join tournaments. Hirers approve every participant — competitive, fair, and open to all. Coming in Phase 3!" />}</Route>
+        <Route path="/my-tournaments">{() => <ComingSoon feature="Tournaments" phase={3} description="Manage your tournament entries and brackets here. Coming in Phase 3!" />}</Route>
+        <Route path="/tournaments/:id">{() => <ComingSoon feature="Tournaments" phase={3} description="Tournament details and bracket view. Coming in Phase 3!" />}</Route>
 
         <Route path="/roadmap" component={Roadmap} />
 

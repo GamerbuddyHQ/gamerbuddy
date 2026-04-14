@@ -1219,7 +1219,39 @@ export default function Profile() {
       {/* ── VERIFICATION CARD ── */}
       <VerificationSection idVerified={user.idVerified} />
 
-      {/* Quest hidden in Phase 1 */}
+      {/* Quest — Phase 3 Coming Soon */}
+      <div
+        className="rounded-2xl border p-5 flex items-center gap-4"
+        style={{
+          borderColor: "rgba(255,255,255,0.06)",
+          background: "rgba(255,255,255,0.02)",
+        }}
+      >
+        <div
+          className="shrink-0 h-10 w-10 rounded-xl flex items-center justify-center border"
+          style={{ background: "rgba(168,85,247,0.10)", borderColor: "rgba(168,85,247,0.25)" }}
+        >
+          <span className="text-lg">🗺️</span>
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-sm font-bold text-foreground">My Quest</span>
+            <span
+              className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border"
+              style={{
+                background: "rgba(168,85,247,0.10)",
+                borderColor: "rgba(168,85,247,0.30)",
+                color: "#c084fc",
+              }}
+            >
+              Phase 3 · Coming Soon
+            </span>
+          </div>
+          <p className="text-xs text-muted-foreground/60 mt-0.5">
+            Complete gaming challenges and earn bonus points. Unlocks in a future phase.
+          </p>
+        </div>
+      </div>
 
       {/* ── BIO / ABOUT ME ── */}
       {(() => {
