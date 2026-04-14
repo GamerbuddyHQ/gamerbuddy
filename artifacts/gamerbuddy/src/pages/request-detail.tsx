@@ -2174,13 +2174,20 @@ export default function RequestDetail() {
               </div>
             </div>
 
-            {/* ── Filter panel ── */}
+            {/* ── Filter panel (sticky) ── */}
             {!loadingBids && bids.length > 1 && (
+              <div className="sticky top-16 z-40">
               <div
                 className="rounded-2xl border overflow-hidden"
                 style={{
-                  borderColor: activeTags.length > 0 ? "rgba(168,85,247,0.35)" : "rgba(255,255,255,0.08)",
-                  transition: "border-color 0.25s",
+                  borderColor: activeTags.length > 0 ? "rgba(168,85,247,0.40)" : "rgba(255,255,255,0.09)",
+                  background: "rgba(7,5,16,0.92)",
+                  backdropFilter: "blur(18px)",
+                  WebkitBackdropFilter: "blur(18px)",
+                  boxShadow: activeTags.length > 0
+                    ? "0 4px 28px rgba(0,0,0,0.45), 0 0 0 1px rgba(168,85,247,0.08)"
+                    : "0 4px 24px rgba(0,0,0,0.35)",
+                  transition: "border-color 0.25s, box-shadow 0.25s",
                 }}
               >
                 {/* Panel header */}
@@ -2370,6 +2377,7 @@ export default function RequestDetail() {
                     </span>
                   </div>
                 )}
+              </div>
               </div>
             )}
 
