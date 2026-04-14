@@ -376,15 +376,16 @@ function RequestCard({ req }: { req: GameRequest }) {
 
   return (
     <div
-      className={`group rounded-2xl border overflow-hidden transition-all duration-300 will-change-transform ${
+      className={`group rounded-2xl border overflow-hidden transition-[transform,border-color,box-shadow] duration-[280ms] will-change-transform ${
         expanded
           ? "border-primary/50 shadow-[0_8px_48px_rgba(168,85,247,0.22)] translate-y-0"
-          : "border-border/35 hover:border-primary/35 hover:-translate-y-[3px] hover:shadow-[0_8px_40px_rgba(168,85,247,0.16)]"
+          : "border-border/35 hover:border-primary/40 hover:-translate-y-[3px] hover:shadow-[0_10px_44px_rgba(168,85,247,0.18)]"
       }`}
       style={{
         background: expanded
           ? `linear-gradient(145deg, ${skill.bar}0e 0%, rgba(0,0,0,0.72) 100%)`
           : `linear-gradient(145deg, rgba(255,255,255,0.022) 0%, rgba(0,0,0,0.52) 100%)`,
+        transitionTimingFunction: "cubic-bezier(0.25, 0.46, 0.45, 0.94)",
       }}
     >
       {/* Top skill-color accent line */}
@@ -404,13 +405,13 @@ function RequestCard({ req }: { req: GameRequest }) {
             </div>
 
             {/* ── Center column ── */}
-            <div className="flex-1 min-w-0 space-y-3.5 sm:space-y-4">
+            <div className="flex-1 min-w-0 space-y-4">
 
               {/* Row 1: Badges — on mobile, avatar sits inline with badges */}
               <div className="flex flex-wrap items-center gap-2">
                 {/* Mobile-only avatar (small) */}
                 <div
-                  className="sm:hidden w-8 h-8 rounded-xl flex items-center justify-center text-sm font-black shrink-0 select-none mr-0.5"
+                  className="sm:hidden w-8 h-8 rounded-xl flex items-center justify-center text-sm font-black shrink-0 select-none"
                   style={{
                     background: `linear-gradient(135deg, ${skill.bar}22 0%, ${skill.bar}44 100%)`,
                     border: `1.5px solid ${skill.bar}55`,
@@ -419,7 +420,7 @@ function RequestCard({ req }: { req: GameRequest }) {
                 >
                   {req.gameName.trim()[0]?.toUpperCase() ?? "G"}
                 </div>
-                <span className="inline-flex items-center gap-1.5 text-xs border border-border/40 rounded-full px-3 py-1 font-semibold text-muted-foreground/75 bg-white/[0.025]">
+                <span className="inline-flex items-center gap-1.5 text-xs border border-border/40 rounded-full px-3 py-1 font-semibold text-muted-foreground/70 bg-white/[0.025]">
                   <span className="text-sm leading-none">{PLATFORM_ICON[req.platform] ?? "🎮"}</span>
                   {req.platform}
                 </span>
@@ -431,21 +432,21 @@ function RequestCard({ req }: { req: GameRequest }) {
               {/* Row 2: Game title + poster */}
               <div>
                 <h3
-                  className="text-[1.5rem] sm:text-[1.65rem] md:text-[1.9rem] font-extrabold text-white leading-tight cursor-pointer tracking-tight transition-colors duration-200 group-hover:text-primary/90"
-                  style={{ letterSpacing: "-0.03em" }}
+                  className="text-[1.5rem] sm:text-[1.65rem] md:text-[1.9rem] font-black text-white cursor-pointer tracking-tight transition-colors duration-200 group-hover:text-primary/90"
+                  style={{ letterSpacing: "-0.035em", lineHeight: 1.15 }}
                   onClick={() => setLocation(`/requests/${req.id}`)}
                 >
                   {req.gameName}
                 </h3>
                 <div className="flex items-center gap-2 mt-2 flex-wrap">
-                  <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground/65">
+                  <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground/60">
                     <User className="h-3 w-3 shrink-0" />
-                    <span className="text-primary/85 font-semibold">{req.userName}</span>
+                    <span className="text-primary/90 font-bold">{req.userName}</span>
                     <VerifiedBadge idVerified={req.userIdVerified ?? false} variant="icon" />
                     <ReportButton userId={req.userId} userName={req.userName} variant="icon" />
                   </span>
                   <span className="text-muted-foreground/20 text-xs select-none">·</span>
-                  <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground/45">
+                  <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground/40">
                     <Clock className="h-3 w-3 shrink-0" />
                     {format(new Date(req.createdAt), "MMM d")}
                   </span>
@@ -454,32 +455,32 @@ function RequestCard({ req }: { req: GameRequest }) {
 
               {/* Row 3: Objectives */}
               <p
-                className="text-[0.875rem] text-foreground/55 leading-[1.7] line-clamp-2 pl-3.5"
-                style={{ borderLeft: `2px solid ${skill.bar}55` }}
+                className="text-[0.875rem] text-foreground/60 leading-[1.75] line-clamp-2 pl-3.5"
+                style={{ borderLeft: `2px solid ${skill.bar}50` }}
               >
                 {req.objectives}
               </p>
 
               {/* Row 4: Context tags (only when relevant) */}
               {hasContextTags && (
-                <div className="flex flex-wrap items-center gap-1.5">
+                <div className="flex flex-wrap items-center gap-2">
                   {req.isBulkHiring && (
-                    <span className="inline-flex items-center gap-1 text-[10px] bg-purple-500/10 border border-purple-500/28 text-purple-300/90 rounded-full px-2.5 py-0.5 font-bold uppercase tracking-wider">
+                    <span className="inline-flex items-center gap-1 text-[10px] bg-purple-500/10 border border-purple-500/25 text-purple-300/90 rounded-full px-2.5 py-1 font-bold uppercase tracking-wider">
                       <Users className="h-2.5 w-2.5" /> Bulk · {req.bulkGamersNeeded} slots
                     </span>
                   )}
                   {req.preferredCountry && req.preferredCountry !== "any" && (
-                    <span className="inline-flex items-center gap-1 text-[10px] bg-amber-500/8 border border-amber-500/22 text-amber-300/80 rounded-full px-2.5 py-0.5 font-semibold">
+                    <span className="inline-flex items-center gap-1 text-[10px] bg-amber-500/8 border border-amber-500/20 text-amber-300/80 rounded-full px-2.5 py-1 font-semibold">
                       {COUNTRY_MAP[req.preferredCountry]?.flag} {COUNTRY_MAP[req.preferredCountry]?.label ?? req.preferredCountry}
                     </span>
                   )}
                   {req.preferredGender && req.preferredGender !== "any" && (
-                    <span className="inline-flex items-center gap-1 text-[10px] bg-pink-500/8 border border-pink-500/20 text-pink-300/80 rounded-full px-2.5 py-0.5 font-semibold">
+                    <span className="inline-flex items-center gap-1 text-[10px] bg-pink-500/8 border border-pink-500/18 text-pink-300/80 rounded-full px-2.5 py-1 font-semibold">
                       {GENDER_MAP[req.preferredGender]?.label ?? req.preferredGender}
                     </span>
                   )}
                   {isZeroBids && !req.isBulkHiring && (
-                    <span className="inline-flex items-center gap-1 text-[10px] bg-green-500/10 border border-green-500/28 text-green-400/90 rounded-full px-2.5 py-0.5 font-bold uppercase tracking-wider">
+                    <span className="inline-flex items-center gap-1 text-[10px] bg-green-500/10 border border-green-500/25 text-green-400/90 rounded-full px-2.5 py-1 font-bold uppercase tracking-wider">
                       <Flame className="h-2.5 w-2.5" /> First bid!
                     </span>
                   )}
@@ -489,28 +490,28 @@ function RequestCard({ req }: { req: GameRequest }) {
               {/* Row 5: Bid stats (compact pills) */}
               <div className="flex flex-wrap items-center gap-2">
                 <div
-                  className="inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-[11px]"
-                  style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.022)" }}
+                  className="inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs"
+                  style={{ borderColor: "rgba(255,255,255,0.07)", background: "rgba(255,255,255,0.025)" }}
                 >
-                  <Gavel className="h-3 w-3 text-muted-foreground/45 shrink-0" />
-                  <span className="font-semibold text-white/75">
+                  <Gavel className="h-3 w-3 text-muted-foreground/40 shrink-0" />
+                  <span className="font-semibold text-white/70">
                     {isZeroBids ? "No bids yet" : `${req.bidCount} bid${req.bidCount === 1 ? "" : "s"}`}
                   </span>
                   {isZeroBids && <span className="text-muted-foreground/35">— be first!</span>}
                 </div>
                 {req.isBulkHiring && (
                   <div
-                    className="inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-[11px]"
-                    style={{ borderColor: "rgba(168,85,247,0.16)", background: "rgba(168,85,247,0.045)" }}
+                    className="inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs"
+                    style={{ borderColor: "rgba(168,85,247,0.18)", background: "rgba(168,85,247,0.05)" }}
                   >
-                    <Users className="h-3 w-3 text-purple-400/60 shrink-0" />
+                    <Users className="h-3 w-3 text-purple-400/55 shrink-0" />
                     <span className="text-purple-300/75">
                       <span className="font-bold">{req.acceptedBidsCount}</span>
-                      <span className="text-purple-400/45">/{req.bulkGamersNeeded}</span>
+                      <span className="text-purple-400/40">/{req.bulkGamersNeeded}</span>
                       <span className="ml-1">filled</span>
                     </span>
                     {(req.bulkGamersNeeded ?? 0) - (req.acceptedBidsCount ?? 0) > 0 && (
-                      <span className="text-[10px] text-emerald-400/85 font-bold">
+                      <span className="text-[11px] text-emerald-400/85 font-bold">
                         · {(req.bulkGamersNeeded ?? 0) - (req.acceptedBidsCount ?? 0)} left
                       </span>
                     )}
@@ -518,12 +519,12 @@ function RequestCard({ req }: { req: GameRequest }) {
                 )}
                 {req.lowestBid && (
                   <div
-                    className="inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-[11px]"
-                    style={{ borderColor: "rgba(34,211,238,0.12)", background: "rgba(34,211,238,0.028)" }}
+                    className="inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs"
+                    style={{ borderColor: "rgba(34,211,238,0.14)", background: "rgba(34,211,238,0.03)" }}
                   >
-                    <TrendingDown className="h-3 w-3 text-cyan-400/60 shrink-0" />
-                    <span className="text-muted-foreground/60">
-                      Lowest <span className="font-bold text-white/75">${req.lowestBid.toFixed(2)}</span>
+                    <TrendingDown className="h-3 w-3 text-cyan-400/55 shrink-0" />
+                    <span className="text-muted-foreground/55">
+                      Lowest <span className="font-bold text-white/70">${req.lowestBid.toFixed(2)}</span>
                     </span>
                   </div>
                 )}
