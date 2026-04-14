@@ -6,7 +6,7 @@ import {
   suggestionCommentsTable,
   usersTable,
 } from "@workspace/db";
-import { eq, sql, and, isNull } from "drizzle-orm";
+import { eq, sql, and, inArray } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
 
 const router: IRouter = Router();
@@ -17,18 +17,30 @@ function stripLinks(text: string): string {
   return text.replace(LINK_STRIP_RE, "").replace(/ {2,}/g, " ").trim();
 }
 
+/* Admin detection — first registered user (id=1) is the platform owner */
+function isAdmin(user: { id: number; email: string }): boolean {
+  const adminEmails = (process.env.ADMIN_EMAILS ?? "admin@gamerbuddy.com").split(",").map((e) => e.trim().toLowerCase());
+  return user.id === 1 || adminEmails.includes(user.email.toLowerCase());
+}
+
+const VALID_STATUSES = ["visible", "hidden", "spam"] as const;
+type SuggestionStatus = (typeof VALID_STATUSES)[number];
+
 /* ──────────────────────────────────────────────────────────────
    GET /community/suggestions?sort=newest|liked|discussed
+   Admins see all; normal users only see 'visible'
 ────────────────────────────────────────────────────────────── */
 router.get("/community/suggestions", async (req, res): Promise<void> => {
   const sort = (req.query.sort as string) ?? "newest";
-  const currentUserId = req.user?.id ?? null;
+  const currentUser = req.user ?? null;
+  const adminMode = currentUser ? isAdmin(currentUser) : false;
 
   const rows = await db
     .select({
       id: suggestionsTable.id,
       title: suggestionsTable.title,
       body: suggestionsTable.body,
+      status: suggestionsTable.status,
       createdAt: suggestionsTable.createdAt,
       userId: suggestionsTable.userId,
       authorName: usersTable.name,
@@ -51,19 +63,21 @@ router.get("/community/suggestions", async (req, res): Promise<void> => {
   const commentMap = new Map(commentCounts.map((r) => [r.suggestionId, r.cnt]));
 
   let myVotes: Map<number, string> = new Map();
-  if (currentUserId) {
+  if (currentUser) {
     const votes = await db
       .select()
       .from(suggestionVotesTable)
-      .where(eq(suggestionVotesTable.userId, currentUserId));
+      .where(eq(suggestionVotesTable.userId, currentUser.id));
     myVotes = new Map(votes.map((v) => [v.suggestionId, v.vote]));
   }
 
-  const enriched = rows.map((r) => ({
-    ...r,
-    commentCount: commentMap.get(r.id) ?? 0,
-    myVote: myVotes.get(r.id) ?? null,
-  }));
+  const enriched = rows
+    .filter((r) => adminMode || r.status === "visible")
+    .map((r) => ({
+      ...r,
+      commentCount: commentMap.get(r.id) ?? 0,
+      myVote: myVotes.get(r.id) ?? null,
+    }));
 
   if (sort === "liked") {
     enriched.sort((a, b) => b.likes - a.likes || new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
@@ -102,15 +116,72 @@ router.post("/community/suggestions", requireAuth, async (req, res): Promise<voi
 
   const [suggestion] = await db
     .insert(suggestionsTable)
-    .values({ userId: user.id, title: cleanTitle, body: cleanBody })
+    .values({ userId: user.id, title: cleanTitle, body: cleanBody, status: "visible" })
     .returning();
 
   res.status(201).json({ ...suggestion, authorName: user.name, likes: 0, dislikes: 0, commentCount: 0, myVote: null });
 });
 
 /* ──────────────────────────────────────────────────────────────
+   PATCH /community/suggestions/:id/moderate   (admin only)
+   Body: { action: 'approve' | 'hide' | 'spam' }
+────────────────────────────────────────────────────────────── */
+router.patch("/community/suggestions/:id/moderate", requireAuth, async (req, res): Promise<void> => {
+  const user = req.user!;
+  if (!isAdmin(user)) {
+    res.status(403).json({ error: "Admin only" });
+    return;
+  }
+
+  const suggestionId = parseInt(req.params.id, 10);
+  if (isNaN(suggestionId)) { res.status(400).json({ error: "Invalid ID" }); return; }
+
+  const { action } = req.body as { action?: string };
+  const statusMap: Record<string, SuggestionStatus> = {
+    approve: "visible",
+    hide:    "hidden",
+    spam:    "spam",
+  };
+
+  if (!action || !statusMap[action]) {
+    res.status(400).json({ error: "action must be 'approve', 'hide', or 'spam'" });
+    return;
+  }
+
+  const [suggestion] = await db.select().from(suggestionsTable).where(eq(suggestionsTable.id, suggestionId));
+  if (!suggestion) { res.status(404).json({ error: "Suggestion not found" }); return; }
+
+  const [updated] = await db
+    .update(suggestionsTable)
+    .set({ status: statusMap[action] })
+    .where(eq(suggestionsTable.id, suggestionId))
+    .returning();
+
+  res.json({ success: true, status: updated.status });
+});
+
+/* ──────────────────────────────────────────────────────────────
+   DELETE /community/suggestions/:id   (admin only)
+────────────────────────────────────────────────────────────── */
+router.delete("/community/suggestions/:id", requireAuth, async (req, res): Promise<void> => {
+  const user = req.user!;
+  if (!isAdmin(user)) {
+    res.status(403).json({ error: "Admin only" });
+    return;
+  }
+
+  const suggestionId = parseInt(req.params.id, 10);
+  if (isNaN(suggestionId)) { res.status(400).json({ error: "Invalid ID" }); return; }
+
+  const [suggestion] = await db.select().from(suggestionsTable).where(eq(suggestionsTable.id, suggestionId));
+  if (!suggestion) { res.status(404).json({ error: "Suggestion not found" }); return; }
+
+  await db.delete(suggestionsTable).where(eq(suggestionsTable.id, suggestionId));
+  res.json({ success: true });
+});
+
+/* ──────────────────────────────────────────────────────────────
    POST /community/suggestions/:id/vote  { vote: 'up'|'down' }
-   DELETE /community/suggestions/:id/vote  (removes vote)
 ────────────────────────────────────────────────────────────── */
 router.post("/community/suggestions/:id/vote", requireAuth, async (req, res): Promise<void> => {
   const user = req.user!;

@@ -6,6 +6,7 @@ export const suggestionsTable = pgTable("suggestions", {
   userId: integer("user_id").notNull().references(() => usersTable.id),
   title: text("title").notNull(),
   body: text("body").notNull(),
+  status: text("status").notNull().default("visible"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
