@@ -2,7 +2,7 @@ import { ExternalLink, Radio } from "lucide-react";
 import { STREAMING_PLATFORM_META } from "@/lib/bids-api";
 import type { StreamingAccount } from "@workspace/db";
 
-/* ── Per-platform SVG icons (Simple Icons, 24×24 viewBox) ── */
+/* ── Official platform SVG logos (Simple Icons, 24×24 viewBox) ── */
 const PLATFORM_SVG: Record<string, React.ReactNode> = {
   twitch: (
     <svg viewBox="0 0 24 24" fill="currentColor" className="w-full h-full">
@@ -31,26 +31,55 @@ const PLATFORM_SVG: Record<string, React.ReactNode> = {
   ),
 };
 
+/* ── Platform display order ── */
+const PLATFORM_ORDER = ["twitch", "youtube", "kick", "facebook", "tiktok"] as const;
+
 interface Props {
   accounts: StreamingAccount[];
   className?: string;
 }
 
 export function StreamingAccountsDisplay({ accounts, className = "" }: Props) {
-  return (
-    <div className={`rounded-xl border border-border/60 overflow-hidden ${className}`}
-      style={{ background: "rgba(10,8,20,0.55)" }}>
+  const connectedMap = Object.fromEntries(accounts.map((a) => [a.platform, a.username]));
+  const connectedCount = accounts.length;
 
-      {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-border/40"
-        style={{ background: "rgba(168,85,247,0.04)" }}>
-        <div className="flex items-center gap-2">
-          <Radio className="h-4 w-4 text-primary/80" />
+  return (
+    <div
+      className={`rounded-2xl border overflow-hidden ${className}`}
+      style={{
+        borderColor: "rgba(168,85,247,0.2)",
+        background: "rgba(8,6,18,0.7)",
+        boxShadow: connectedCount > 0
+          ? "0 0 0 1px rgba(168,85,247,0.08), 0 4px 32px rgba(168,85,247,0.06)"
+          : "none",
+      }}
+    >
+      {/* ── Header ── */}
+      <div
+        className="flex items-center justify-between px-5 py-3.5 border-b"
+        style={{
+          borderColor: "rgba(255,255,255,0.06)",
+          background: "rgba(168,85,247,0.05)",
+        }}
+      >
+        <div className="flex items-center gap-2.5">
+          {/* Pulsing dot */}
+          <span className="relative flex h-2.5 w-2.5">
+            <span
+              className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-60"
+              style={{ background: "#a855f7" }}
+            />
+            <span
+              className="relative inline-flex rounded-full h-2.5 w-2.5"
+              style={{ background: "#a855f7" }}
+            />
+          </span>
           <span className="text-xs font-extrabold uppercase tracking-widest text-white/80">
             Streaming Profiles
           </span>
         </div>
-        {accounts.length > 0 && (
+
+        {connectedCount > 0 ? (
           <span
             className="text-[10px] font-black px-2.5 py-0.5 rounded-full"
             style={{
@@ -59,75 +88,124 @@ export function StreamingAccountsDisplay({ accounts, className = "" }: Props) {
               color: "#4ade80",
             }}
           >
-            {accounts.length} connected
+            {connectedCount} / {PLATFORM_ORDER.length} connected
+          </span>
+        ) : (
+          <span className="text-[10px] text-muted-foreground/40 font-medium">
+            No accounts linked
           </span>
         )}
       </div>
 
-      {/* Body */}
+      {/* ── Platform grid ── */}
       <div className="p-4">
-        {accounts.length === 0 ? (
-          /* Empty state */
-          <div className="flex flex-col items-center gap-2 py-4 text-center">
-            <div className="h-8 w-8 rounded-full flex items-center justify-center"
-              style={{ background: "rgba(168,85,247,0.08)", border: "1px solid rgba(168,85,247,0.15)" }}>
-              <Radio className="h-4 w-4 text-primary/30" />
-            </div>
-            <p className="text-xs text-muted-foreground/50 italic">
-              No streaming accounts connected yet.
-            </p>
-          </div>
-        ) : (
-          <div className="flex flex-col gap-2.5">
-            {accounts.map((sa) => {
-              const meta = STREAMING_PLATFORM_META[sa.platform];
-              if (!meta) return null;
-              const url = meta.urlTemplate.replace("{username}", sa.username);
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          {PLATFORM_ORDER.map((platform) => {
+            const meta = STREAMING_PLATFORM_META[platform];
+            const username = connectedMap[platform];
+            const isConnected = !!username;
+            const url = isConnected
+              ? meta.urlTemplate.replace("{username}", username)
+              : undefined;
+
+            if (isConnected) {
               return (
                 <a
-                  key={sa.platform}
+                  key={platform}
                   href={url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group flex items-center gap-3 rounded-xl px-3.5 py-3 transition-all hover:brightness-110 hover:scale-[1.01] active:scale-[0.99]"
+                  className="group relative flex items-center gap-3 rounded-xl px-4 py-3.5 transition-all duration-200"
                   style={{
                     background: meta.bg,
                     border: `1px solid ${meta.border}`,
                   }}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLElement).style.boxShadow =
+                      `0 0 18px ${meta.color}28, 0 0 6px ${meta.color}18`;
+                    (e.currentTarget as HTMLElement).style.borderColor = meta.color + "60";
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLElement).style.boxShadow = "none";
+                    (e.currentTarget as HTMLElement).style.borderColor = meta.border;
+                  }}
                 >
-                  {/* Icon bubble */}
+                  {/* Icon */}
                   <div
-                    className="h-9 w-9 shrink-0 rounded-lg flex items-center justify-center p-1.5"
+                    className="h-11 w-11 shrink-0 rounded-xl flex items-center justify-center p-2 transition-transform duration-200 group-hover:scale-110"
                     style={{
-                      background: `${meta.color}22`,
-                      border: `1px solid ${meta.color}44`,
+                      background: `${meta.color}1a`,
+                      border: `1.5px solid ${meta.color}40`,
                       color: meta.color,
                     }}
                   >
-                    {PLATFORM_SVG[sa.platform] ?? <span className="text-base">{meta.emoji}</span>}
+                    {PLATFORM_SVG[platform] ?? (
+                      <span className="text-lg">{meta.emoji}</span>
+                    )}
                   </div>
 
                   {/* Text */}
                   <div className="flex-1 min-w-0">
-                    <div className="text-[11px] font-bold uppercase tracking-widest leading-none mb-1"
-                      style={{ color: meta.color }}>
+                    <div
+                      className="text-[10px] font-black uppercase tracking-widest leading-none mb-1.5"
+                      style={{ color: meta.color }}
+                    >
                       {meta.label}
                     </div>
-                    <div className="text-sm font-black text-white truncate">
-                      @{sa.username}
+                    <div className="text-sm font-black text-white truncate leading-none">
+                      @{username}
+                    </div>
+                    <div
+                      className="text-[10px] mt-1 font-medium opacity-0 group-hover:opacity-80 transition-opacity duration-150 truncate"
+                      style={{ color: meta.color }}
+                    >
+                      Visit channel →
                     </div>
                   </div>
 
-                  {/* External link */}
+                  {/* External link icon */}
                   <ExternalLink
-                    className="h-3.5 w-3.5 shrink-0 opacity-40 group-hover:opacity-100 transition-opacity"
+                    className="h-4 w-4 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity duration-150"
                     style={{ color: meta.color }}
                   />
                 </a>
               );
-            })}
-          </div>
-        )}
+            }
+
+            /* ── Unconnected platform — grayed out placeholder ── */
+            return (
+              <div
+                key={platform}
+                className="flex items-center gap-3 rounded-xl px-4 py-3.5 opacity-30"
+                style={{
+                  background: "rgba(255,255,255,0.02)",
+                  border: "1px solid rgba(255,255,255,0.06)",
+                }}
+              >
+                <div
+                  className="h-11 w-11 shrink-0 rounded-xl flex items-center justify-center p-2"
+                  style={{
+                    background: "rgba(255,255,255,0.04)",
+                    border: "1.5px dashed rgba(255,255,255,0.12)",
+                    color: "rgba(255,255,255,0.3)",
+                  }}
+                >
+                  {PLATFORM_SVG[platform] ?? (
+                    <span className="text-lg">{meta.emoji}</span>
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-[10px] font-black uppercase tracking-widest leading-none mb-1.5 text-white/40">
+                    {meta.label}
+                  </div>
+                  <div className="text-xs text-white/25 italic font-medium">
+                    Not connected
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
