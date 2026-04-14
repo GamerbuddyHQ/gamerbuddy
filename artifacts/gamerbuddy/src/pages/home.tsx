@@ -98,9 +98,7 @@ function FeatureCard({
   return (
     <div
       className="relative group rounded-2xl border border-border/60 p-6 flex flex-col gap-4 transition-all duration-300 overflow-hidden"
-      style={{
-        background: "linear-gradient(145deg, rgba(15,12,30,0.95) 0%, rgba(8,8,20,0.98) 100%)",
-      }}
+      style={{ background: "var(--surface-dark)" }}
     >
       {/* hover border glow */}
       <div
@@ -122,7 +120,7 @@ function FeatureCard({
 
       <div className="space-y-1.5">
         <div className="flex items-center gap-2">
-          <h3 className="font-extrabold text-white uppercase tracking-wider text-base">{title}</h3>
+          <h3 className="font-extrabold text-foreground uppercase tracking-wider text-base">{title}</h3>
           <span
             className="text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded border"
             style={{ color: glowColor, borderColor: `${glowColor}50`, background: `${glowColor}10` }}
@@ -148,7 +146,7 @@ function Step({ n, title, desc }: { n: number; title: string; desc: string }) {
   return (
     <div className="flex gap-4 items-start">
       <div
-        className="shrink-0 w-9 h-9 rounded-xl flex items-center justify-center font-black text-sm text-white"
+        className="shrink-0 w-9 h-9 rounded-xl flex items-center justify-center font-black text-sm text-primary-foreground"
         style={{
           background: "linear-gradient(135deg, rgba(168,85,247,0.4), rgba(34,211,238,0.2))",
           border: "1px solid rgba(168,85,247,0.4)",
@@ -158,7 +156,7 @@ function Step({ n, title, desc }: { n: number; title: string; desc: string }) {
         {n}
       </div>
       <div>
-        <div className="font-bold text-white text-sm uppercase tracking-wide">{title}</div>
+        <div className="font-bold text-foreground text-sm uppercase tracking-wide">{title}</div>
         <div className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{desc}</div>
       </div>
     </div>
@@ -213,9 +211,9 @@ export default function Home() {
             <div
               className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-medium"
               style={{
-                background: "rgba(168,85,247,0.1)",
-                border: "1px solid rgba(168,85,247,0.22)",
-                color: "#c4b5fd",
+                background: "rgba(168,85,247,0.12)",
+                border: "1px solid rgba(168,85,247,0.28)",
+                color: "hsl(var(--primary))",
               }}
             >
               <Gamepad2 className="h-3.5 w-3.5" />
@@ -225,17 +223,14 @@ export default function Home() {
 
           {/* headline */}
           <h1 className="font-black tracking-tight leading-tight mb-5">
-            <span
-              className="block text-white text-4xl sm:text-6xl md:text-7xl"
-              style={{ textShadow: "0 2px 20px rgba(255,255,255,0.08)" }}
-            >
+            <span className="block text-foreground text-4xl sm:text-6xl md:text-7xl">
               {t.home.headline1}
             </span>
             <span
               className="block text-4xl sm:text-6xl md:text-7xl"
               style={{
-                color: "#b87ef7",
-                textShadow: "0 0 40px rgba(168,85,247,0.55), 0 2px 12px rgba(168,85,247,0.3)",
+                color: "hsl(var(--primary))",
+                textShadow: "0 0 40px rgba(168,85,247,0.45), 0 2px 12px rgba(168,85,247,0.25)",
               }}
             >
               {t.home.headline2}
@@ -244,7 +239,7 @@ export default function Home() {
 
           {/* subheadline */}
           <p className="text-base sm:text-lg leading-relaxed mb-8 mx-auto max-w-2xl"
-            style={{ color: "rgba(255,255,255,0.6)" }}
+            style={{ color: "var(--text-subdued)" }}
           >
             {t.home.subheadline}
           </p>
@@ -268,11 +263,11 @@ export default function Home() {
 
             <Link href="/browse">
               <button
-                className="group w-full sm:w-auto px-8 py-3.5 rounded-2xl font-semibold text-base transition-all duration-200 hover:brightness-125 active:scale-[0.98]"
+                className="group w-full sm:w-auto px-8 py-3.5 rounded-2xl font-semibold text-base transition-all duration-200 hover:brightness-110 active:scale-[0.98]"
                 style={{
-                  background: "rgba(255,255,255,0.07)",
-                  border: "1.5px solid rgba(255,255,255,0.15)",
-                  color: "rgba(255,255,255,0.72)",
+                  background: "var(--glass-btn-bg)",
+                  border: "1.5px solid var(--glass-btn-border)",
+                  color: "var(--text-subdued)",
                 }}
               >
                 <span className="flex items-center justify-center gap-2">
@@ -284,7 +279,7 @@ export default function Home() {
           </div>
 
           {/* verification note */}
-          <p className="text-center text-[11px]" style={{ color: "rgba(255,255,255,0.32)" }}>
+          <p className="text-center text-[11px]" style={{ color: "var(--text-dim)" }}>
             Verification helps keep Gamerbuddy safe — it usually takes 7–15 days
           </p>
 
@@ -296,17 +291,17 @@ export default function Home() {
                   <Star key={i} className="h-3 w-3 fill-yellow-400 text-yellow-400" />
                 ))}
               </div>
-              <span className="text-sm" style={{ color: "rgba(255,255,255,0.5)" }}>
+              <span className="text-sm text-muted-foreground">
                 Join gamers worldwide •{" "}
-                <span style={{ color: "rgba(255,255,255,0.75)", fontWeight: 600 }}>2,450+ sessions</span>
+                <span className="text-foreground font-semibold">2,450+ sessions</span>
                 {" "}and counting
               </span>
             </div>
-            <div className="flex items-center justify-center gap-2 flex-wrap" style={{ color: "rgba(255,255,255,0.3)" }}>
+            <div className="flex items-center justify-center gap-2 flex-wrap text-muted-foreground">
               {["PC", "PlayStation", "Xbox", "Switch", "Steam Deck", "Mobile"].map((p, i, arr) => (
                 <React.Fragment key={p}>
                   <span className="text-xs">{p}</span>
-                  {i < arr.length - 1 && <span className="text-xs" style={{ color: "rgba(255,255,255,0.12)" }}>·</span>}
+                  {i < arr.length - 1 && <span className="text-xs opacity-40">·</span>}
                 </React.Fragment>
               ))}
             </div>
@@ -342,8 +337,8 @@ export default function Home() {
                 <Trophy className="h-7 w-7 text-yellow-400" />
               </div>
               <div className="text-left">
-                <p className="text-[15px] font-extrabold text-white">{t.home.cta3} — Crown the Champion!</p>
-                <p className="text-[12px] mt-0.5" style={{ color: "rgba(255,255,255,0.50)" }}>
+                <p className="text-[15px] font-extrabold text-foreground">{t.home.cta3} — Crown the Champion!</p>
+                <p className="text-[12px] mt-0.5 text-muted-foreground">
                   2–100 players · Prize pools $100–$10,000 · 10% platform fee · {t.tournaments.free}
                 </p>
               </div>
@@ -368,16 +363,16 @@ export default function Home() {
               Platform Features
               <div className="h-px w-10 bg-gradient-to-l from-transparent to-purple-500/60" />
             </div>
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-white leading-tight mb-4">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-foreground leading-tight mb-4">
               Why Gamers{" "}
-              <span style={{ color: "#a855f7", textShadow: "0 0 24px rgba(168,85,247,0.5)" }}>
+              <span style={{ color: "hsl(var(--primary))", textShadow: "0 0 24px rgba(168,85,247,0.4)" }}>
                 Love
               </span>{" "}
               Gamerbuddy
             </h2>
             <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
               The safest and most fun way to find real teammates for co-op and multiplayer games — anywhere in the world.{" "}
-              <span className="text-white/80 font-medium">Verified players, escrow-secured payments, real fun.</span>
+              <span className="text-foreground/75 font-medium">Verified players, escrow-secured payments, real fun.</span>
             </p>
           </div>
 
@@ -448,7 +443,7 @@ export default function Home() {
                 >
                   <Users className="h-3.5 w-3.5" /> For Hirers
                 </div>
-                <h3 className="text-xl font-extrabold text-white uppercase tracking-tight">
+                <h3 className="text-xl font-extrabold text-foreground uppercase tracking-tight">
                   Get a Gamer in Minutes
                 </h3>
               </div>
@@ -472,7 +467,7 @@ export default function Home() {
                 >
                   <Coins className="h-3.5 w-3.5" /> For Gamers
                 </div>
-                <h3 className="text-xl font-extrabold text-white uppercase tracking-tight">
+                <h3 className="text-xl font-extrabold text-foreground uppercase tracking-tight">
                   Earn While You Play
                 </h3>
               </div>
@@ -500,19 +495,12 @@ export default function Home() {
             ].map(({ icon, label, sub }) => (
               <div
                 key={label}
-                className="flex flex-col items-center text-center gap-2.5 p-5 rounded-2xl"
-                style={{
-                  background: "rgba(255,255,255,0.025)",
-                  border: "1px solid rgba(255,255,255,0.06)",
-                }}
+                className="flex flex-col items-center text-center gap-2.5 p-5 rounded-2xl bg-card border border-border"
               >
-                <div
-                  className="w-10 h-10 rounded-xl flex items-center justify-center"
-                  style={{ background: "rgba(255,255,255,0.06)" }}
-                >
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-muted">
                   {icon}
                 </div>
-                <div className="font-bold text-white text-sm">{label}</div>
+                <div className="font-bold text-foreground text-sm">{label}</div>
                 <div className="text-xs text-muted-foreground leading-relaxed">{sub}</div>
               </div>
             ))}
@@ -544,7 +532,7 @@ export default function Home() {
             <div className="text-xs font-black uppercase tracking-widest text-primary mb-1">
               {t.home.finalCta}
             </div>
-            <h2 className="text-3xl sm:text-4xl font-black text-white uppercase tracking-tight leading-tight">
+            <h2 className="text-3xl sm:text-4xl font-black text-foreground uppercase tracking-tight leading-tight">
               Your Next Session<br />Starts Here
             </h2>
             <p className="text-muted-foreground text-base max-w-md mx-auto leading-relaxed">
@@ -555,8 +543,8 @@ export default function Home() {
                 <button
                   className="relative overflow-hidden group px-10 py-4 rounded-xl font-black text-sm uppercase tracking-widest text-white w-full sm:w-auto"
                   style={{
-                    background: "linear-gradient(135deg, #9333ea 0%, #7c3aed 100%)",
-                    boxShadow: "0 0 28px rgba(168,85,247,0.5), 0 4px 20px rgba(0,0,0,0.4)",
+                    background: "linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(272,72%,35%) 100%)",
+                    boxShadow: "0 0 28px rgba(168,85,247,0.4), 0 4px 16px rgba(0,0,0,0.2)",
                   }}
                 >
                   <span className="flex items-center justify-center gap-2">
@@ -571,10 +559,11 @@ export default function Home() {
               </Link>
               <Link href="/browse">
                 <button
-                  className="px-10 py-4 rounded-xl font-bold text-sm uppercase tracking-widest text-white/70 hover:text-white transition-colors w-full sm:w-auto"
+                  className="px-10 py-4 rounded-xl font-bold text-sm uppercase tracking-widest transition-colors w-full sm:w-auto"
                   style={{
-                    border: "1.5px solid rgba(255,255,255,0.1)",
-                    background: "rgba(255,255,255,0.04)",
+                    border: "1.5px solid var(--glass-btn-border)",
+                    background: "var(--glass-btn-bg)",
+                    color: "var(--text-subdued)",
                   }}
                 >
                   {t.home.cta2}

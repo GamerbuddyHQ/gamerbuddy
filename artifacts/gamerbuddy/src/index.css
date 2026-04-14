@@ -76,67 +76,79 @@
   --elevate-1: rgba(0,0,0, .04);
   --elevate-2: rgba(0,0,0, .09);
 
-  /* Soft off-white gaming background */
-  --background: 240 15% 96%;
-  --foreground: 240 10% 8%;
+  /* Theme-sensitive inline-style variables */
+  --text-on-surface: hsl(222, 47%, 11%);
+  --text-subdued: rgba(20, 24, 45, 0.58);
+  --text-dim: rgba(20, 24, 45, 0.35);
+  --glass-bg: rgba(0, 0, 0, 0.025);
+  --glass-border: rgba(0, 0, 0, 0.07);
+  --glass-btn-bg: rgba(0, 0, 0, 0.04);
+  --glass-btn-border: rgba(0, 0, 0, 0.12);
+  --surface-dark: linear-gradient(145deg, rgba(248,250,252,1) 0%, rgba(238,242,246,1) 100%);
+  --surface-dark-border: rgba(0, 0, 0, 0.09);
+  --icon-glass-bg: rgba(0, 0, 0, 0.05);
 
-  --border: 240 10% 82%;
+  /* #f8fafc — soft blue-white */
+  --background: 210 40% 98%;
+  --foreground: 222 47% 11%;
+
+  --border: 220 13% 86%;
 
   --card: 0 0% 100%;
-  --card-foreground: 240 10% 8%;
-  --card-border: 240 10% 85%;
+  --card-foreground: 222 47% 11%;
+  --card-border: 220 13% 88%;
 
   --sidebar: 0 0% 100%;
-  --sidebar-foreground: 240 10% 8%;
-  --sidebar-border: 240 10% 85%;
-  --sidebar-primary: 275 80% 50%;
+  --sidebar-foreground: 222 47% 11%;
+  --sidebar-border: 220 13% 88%;
+  --sidebar-primary: 272 72% 42%;
   --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 240 10% 92%;
-  --sidebar-accent-foreground: 240 10% 8%;
-  --sidebar-ring: 275 80% 50%;
+  --sidebar-accent: 220 13% 93%;
+  --sidebar-accent-foreground: 222 47% 11%;
+  --sidebar-ring: 272 72% 42%;
 
   --popover: 0 0% 100%;
-  --popover-foreground: 240 10% 8%;
-  --popover-border: 240 10% 85%;
+  --popover-foreground: 222 47% 11%;
+  --popover-border: 220 13% 88%;
 
-  /* Deeper purple for contrast on white */
-  --primary: 275 80% 50%;
+  /* Deeper purple for strong contrast on white */
+  --primary: 272 72% 42%;
   --primary-foreground: 0 0% 100%;
 
-  /* Deeper cyan for contrast on white */
-  --secondary: 190 100% 34%;
+  /* Deeper teal for contrast on white */
+  --secondary: 190 90% 30%;
   --secondary-foreground: 0 0% 100%;
 
-  --muted: 240 10% 91%;
-  --muted-foreground: 240 5% 42%;
+  --muted: 220 13% 93%;
+  --muted-foreground: 215 20% 40%;
 
-  --accent: 240 10% 91%;
-  --accent-foreground: 240 10% 8%;
+  --accent: 220 13% 93%;
+  --accent-foreground: 222 47% 11%;
 
-  --destructive: 0 84% 50%;
+  --destructive: 0 84% 47%;
   --destructive-foreground: 0 0% 100%;
 
-  --input: 240 10% 88%;
-  --ring: 275 80% 50%;
+  --input: 220 13% 90%;
+  --ring: 272 72% 42%;
 
-  --chart-1: 275 80% 50%;
-  --chart-2: 190 100% 34%;
-  --chart-3: 160 100% 35%;
-  --chart-4: 340 100% 45%;
-  --chart-5: 45 100% 42%;
+  --chart-1: 272 72% 42%;
+  --chart-2: 190 90% 30%;
+  --chart-3: 160 80% 32%;
+  --chart-4: 340 80% 42%;
+  --chart-5: 45 90% 40%;
 
   --app-font-sans: 'Space Mono', 'Inter', monospace, sans-serif;
   --app-font-serif: Georgia, serif;
   --app-font-mono: Menlo, monospace;
   --radius: .5rem;
-  --shadow-2xs: 0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0.00);
-  --shadow-xs: 0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0.00);
-  --shadow-sm: 0px 2px 4px -1px rgba(0,0,0,0.08);
-  --shadow: 0px 2px 4px -1px rgba(0,0,0,0.10);
-  --shadow-md: 0px 4px 12px -2px rgba(0,0,0,0.12);
-  --shadow-lg: 0px 8px 24px -4px rgba(0,0,0,0.14);
-  --shadow-xl: 0px 16px 40px -6px rgba(0,0,0,0.16);
-  --shadow-2xl: 0px 24px 60px -8px rgba(0,0,0,0.18);
+  --shadow-2xs: 0px 1px 2px rgba(0,0,0,0.06);
+  --shadow-xs: 0px 1px 3px rgba(0,0,0,0.08);
+  --shadow-sm: 0px 2px 4px rgba(0,0,0,0.08), 0px 1px 2px rgba(0,0,0,0.04);
+  --shadow: 0px 2px 8px rgba(0,0,0,0.10), 0px 1px 2px rgba(0,0,0,0.06);
+  --shadow-md: 0px 4px 12px rgba(0,0,0,0.12), 0px 2px 4px rgba(0,0,0,0.06);
+  --shadow-lg: 0px 8px 24px rgba(0,0,0,0.12), 0px 4px 8px rgba(0,0,0,0.08);
+  --shadow-xl: 0px 16px 40px rgba(0,0,0,0.14), 0px 8px 16px rgba(0,0,0,0.08);
+  --shadow-2xl: 0px 24px 60px rgba(0,0,0,0.18);
   --tracking-normal: 0em;
   --spacing: 0.25rem;
 
@@ -158,6 +170,18 @@
 
   --elevate-1: rgba(255,255,255, .04);
   --elevate-2: rgba(255,255,255, .09);
+
+  /* Theme-sensitive inline-style variables */
+  --text-on-surface: rgba(255, 255, 255, 1);
+  --text-subdued: rgba(255, 255, 255, 0.60);
+  --text-dim: rgba(255, 255, 255, 0.32);
+  --glass-bg: rgba(255, 255, 255, 0.025);
+  --glass-border: rgba(255, 255, 255, 0.06);
+  --glass-btn-bg: rgba(255, 255, 255, 0.07);
+  --glass-btn-border: rgba(255, 255, 255, 0.15);
+  --surface-dark: linear-gradient(145deg, rgba(15,12,30,0.95) 0%, rgba(8,8,20,0.98) 100%);
+  --surface-dark-border: rgba(255, 255, 255, 0.07);
+  --icon-glass-bg: rgba(255, 255, 255, 0.06);
 
   /* Deep dark gaming background */
   --background: 240 10% 4%;
