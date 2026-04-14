@@ -111,8 +111,8 @@ const RESPONSES: Array<{ patterns: RegExp; reply: string }> = [
 
   /* ── COMMUNITY SUGGESTIONS ── */
   {
-    patterns: /community|suggest|suggestion|feedback.*platform|feature.*request|upvote.*feature|comment.*suggest/i,
-    reply: `**Community Suggestions** 💬\n\nHave an idea to improve Gamerbuddy? Head to the **Community** page!\n\n• Submit feature suggestions\n• **Like or dislike** other suggestions\n• Reply with **threaded comments** for discussion\n• Admins can mark suggestions as approved or rejected\n\n⚠️ **External links are not allowed** in comments or suggestions to keep the community safe.\n\nPopular suggestions with lots of votes are reviewed by the Gamerbuddy team for implementation!`,
+    patterns: /community|suggest|suggestion|feedback.*platform|feature.*request|upvote.*feature|comment.*suggest|emoji|gif|reaction.*comment|add.*emoji|insert.*gif/i,
+    reply: `**Community Suggestions** 💬\n\nHave an idea to improve Gamerbuddy? Head to the **Community** page!\n\n• Submit feature suggestions\n• **Like or dislike** other suggestions\n• Reply with **threaded comments** for discussion\n• Admins can mark suggestions as approved or rejected\n\n🎉 **New: Emojis & GIFs in comments!**\n• Click **😀** next to the comment box to open the emoji picker — choose from Gaming, Reactions, and Hype categories\n• Click **GIF** to search and insert animated GIFs powered by Tenor\n• Emojis and GIFs appear inline in the comment thread\n\n⚠️ **External links are not allowed** in comments or suggestions to keep the community safe.\n\nPopular suggestions with lots of votes are reviewed by the Gamerbuddy team for implementation!`,
   },
 
   /* ── PROMOTED / SPOTLIGHT GAMES ── */

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
 import {
@@ -227,14 +227,368 @@ function AdminStatusPill({ status }: { status: SuggestionStatus }) {
   );
 }
 
+/* ── Emoji data ─────────────────────────────────────────────────────────── */
+const EMOJI_CATEGORIES = [
+  {
+    label: "Gaming", emojis: [
+      "🎮","🕹️","🎯","🏆","⚔️","🛡️","🎲","👾","🤖","💀","🔥","⚡","💥","🚀","🎪",
+      "🎭","🏅","🥇","💣","🗡️","🪄","🧙","🧌","🐉","👑",
+    ],
+  },
+  {
+    label: "Reactions", emojis: [
+      "😂","😅","🤣","😎","😤","🤩","😱","🤯","🥶","😍","🤬","😭","😏","🥲","😆",
+      "🤔","😤","🥵","😤","🫡","🤡","💩","👻","🙈","🙉",
+    ],
+  },
+  {
+    label: "Hype", emojis: [
+      "👍","👎","🤝","🙌","👏","💪","✌️","👋","🫶","❤️","💔","💯","🎉","🥳","🫠",
+      "⭐","💫","✨","🌟","💎","🍀","🎊","🎁","🪩","🫰",
+    ],
+  },
+];
+
+/* ── Emoji Picker ────────────────────────────────────────────────────────── */
+function EmojiPicker({ onPick, onClose }: { onPick: (e: string) => void; onClose: () => void }) {
+  const [tab, setTab] = useState(0);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) onClose();
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [onClose]);
+
+  return (
+    <div
+      ref={ref}
+      className="absolute bottom-full mb-1 left-0 z-50 rounded-2xl border shadow-2xl overflow-hidden"
+      style={{ width: 288, background: "hsl(var(--card))", border: "1px solid rgba(168,85,247,0.30)" }}
+    >
+      {/* Tabs */}
+      <div className="flex border-b" style={{ borderColor: "rgba(168,85,247,0.15)" }}>
+        {EMOJI_CATEGORIES.map((cat, i) => (
+          <button
+            key={cat.label}
+            onClick={() => setTab(i)}
+            className="flex-1 py-2 text-[11px] font-bold transition-colors"
+            style={{ color: tab === i ? "#a855f7" : "rgba(148,163,184,0.6)", borderBottom: tab === i ? "2px solid #a855f7" : "2px solid transparent" }}
+          >
+            {cat.label}
+          </button>
+        ))}
+      </div>
+      {/* Grid */}
+      <div className="grid grid-cols-8 gap-0.5 p-2 max-h-40 overflow-y-auto">
+        {EMOJI_CATEGORIES[tab].emojis.map((em) => (
+          <button
+            key={em}
+            onClick={() => onPick(em)}
+            className="h-8 w-8 flex items-center justify-center rounded-lg text-lg hover:bg-primary/15 transition-colors"
+          >
+            {em}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ── GIF Picker ─────────────────────────────────────────────────────────── */
+const TENOR_KEY = "LIVDSRZULELA";
+const DEFAULT_GIF_QUERY = "gaming";
+
+type TenorGif = { id: string; url: string; preview: string; title: string };
+
+function GifPicker({ onPick, onClose }: { onPick: (gif: TenorGif) => void; onClose: () => void }) {
+  const [query, setQuery] = useState("");
+  const [gifs, setGifs] = useState<TenorGif[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const search = useCallback(async (q: string) => {
+    setLoading(true); setError(false);
+    try {
+      const term = encodeURIComponent(q || DEFAULT_GIF_QUERY);
+      const r = await fetch(`https://api.tenor.com/v1/search?q=${term}&key=${TENOR_KEY}&limit=24&media_filter=minimal`);
+      const data = await r.json();
+      const results: TenorGif[] = (data.results ?? []).map((item: any) => ({
+        id: item.id,
+        url: item.media?.[0]?.gif?.url ?? item.media?.[0]?.tinygif?.url ?? "",
+        preview: item.media?.[0]?.tinygif?.url ?? item.media?.[0]?.gif?.url ?? "",
+        title: item.title ?? "",
+      }));
+      setGifs(results);
+    } catch {
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { search(""); }, [search]);
+
+  useEffect(() => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => search(query), 400);
+    return () => { if (timerRef.current) clearTimeout(timerRef.current); };
+  }, [query, search]);
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) onClose();
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [onClose]);
+
+  return (
+    <div
+      ref={ref}
+      className="absolute bottom-full mb-1 left-0 z-50 rounded-2xl border shadow-2xl overflow-hidden"
+      style={{ width: 320, background: "hsl(var(--card))", border: "1px solid rgba(34,211,238,0.30)" }}
+    >
+      <div className="p-2 border-b" style={{ borderColor: "rgba(34,211,238,0.15)" }}>
+        <div className="relative">
+          <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground/50 text-xs font-bold">🔍</span>
+          <input
+            autoFocus
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search GIFs (e.g. 'gg', 'rage', 'win')…"
+            className="w-full rounded-lg pl-7 pr-3 py-1.5 text-xs bg-background/60 border border-border/50 outline-none focus:border-cyan-500/50 text-foreground placeholder:text-muted-foreground/40"
+          />
+        </div>
+      </div>
+      <div className="p-1.5 overflow-y-auto" style={{ maxHeight: 220 }}>
+        {loading && <p className="text-center text-xs text-muted-foreground/50 py-6 animate-pulse">Loading GIFs…</p>}
+        {error && <p className="text-center text-xs text-red-400/70 py-6">Couldn't load GIFs. Check your connection.</p>}
+        {!loading && !error && gifs.length === 0 && <p className="text-center text-xs text-muted-foreground/50 py-6">No GIFs found.</p>}
+        {!loading && !error && gifs.length > 0 && (
+          <div className="grid grid-cols-3 gap-1">
+            {gifs.map((g) => (
+              <button
+                key={g.id}
+                onClick={() => onPick(g)}
+                className="rounded-lg overflow-hidden aspect-square hover:opacity-80 hover:scale-95 transition-all focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
+              >
+                <img src={g.preview} alt={g.title} className="w-full h-full object-cover" loading="lazy" />
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+      <div className="px-2 py-1 text-center border-t" style={{ borderColor: "rgba(34,211,238,0.10)" }}>
+        <span className="text-[9px] text-muted-foreground/30">Powered by Tenor</span>
+      </div>
+    </div>
+  );
+}
+
+/* ── Comment body renderer (handles embedded GIFs) ───────────────────────── */
+const GIF_MARKER_RE = /\[gif:(https?:\/\/[^\]]+)\]/g;
+
+function CommentBody({ body }: { body: string }) {
+  const parts: React.ReactNode[] = [];
+  let last = 0;
+  let match: RegExpExecArray | null;
+  GIF_MARKER_RE.lastIndex = 0;
+  while ((match = GIF_MARKER_RE.exec(body)) !== null) {
+    if (match.index > last) {
+      parts.push(<span key={last}>{body.slice(last, match.index)}</span>);
+    }
+    parts.push(
+      <div key={match.index} className="mt-2 inline-block">
+        <img
+          src={match[1]}
+          alt="GIF"
+          className="rounded-xl max-w-full"
+          style={{ maxHeight: 200, display: "block" }}
+          loading="lazy"
+        />
+      </div>
+    );
+    last = match.index + match[0].length;
+  }
+  if (last < body.length) parts.push(<span key={last}>{body.slice(last)}</span>);
+  return (
+    <p className="text-[12px] text-muted-foreground/75 leading-relaxed mt-1 whitespace-pre-wrap break-words">
+      {parts.length > 0 ? parts : body}
+    </p>
+  );
+}
+
+/* ── Shared comment/reply input box ─────────────────────────────────────── */
+function CommentInputBox({
+  value,
+  onChange,
+  onSubmit,
+  onCancel,
+  isPending,
+  placeholder,
+  isReply = false,
+  selectedGif,
+  onGifSelect,
+  onGifClear,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  onSubmit: () => void;
+  onCancel?: () => void;
+  isPending: boolean;
+  placeholder: string;
+  isReply?: boolean;
+  selectedGif?: TenorGif | null;
+  onGifSelect?: (g: TenorGif) => void;
+  onGifClear?: () => void;
+}) {
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [showEmoji, setShowEmoji] = useState(false);
+  const [showGif, setShowGif] = useState(false);
+  const [stripped, setStripped] = useState(false);
+
+  const handleChange = (raw: string) => {
+    const { clean, stripped: s } = stripLinks(raw);
+    onChange(clean);
+    setStripped(s);
+  };
+
+  const insertEmoji = useCallback((em: string) => {
+    const el = textareaRef.current;
+    if (!el) { onChange(value + em); return; }
+    const start = el.selectionStart ?? value.length;
+    const end = el.selectionEnd ?? value.length;
+    const next = value.slice(0, start) + em + value.slice(end);
+    onChange(next.slice(0, 500));
+    requestAnimationFrame(() => {
+      el.focus();
+      const pos = start + em.length;
+      el.setSelectionRange(pos, pos);
+    });
+    setShowEmoji(false);
+  }, [value, onChange]);
+
+  const canPost = value.trim().length > 0 || !!selectedGif;
+
+  return (
+    <div className="space-y-2">
+      {/* Textarea */}
+      <div
+        className="rounded-xl overflow-hidden transition-all"
+        style={{ border: "1px solid rgba(168,85,247,0.35)", background: "rgba(0,0,0,0.3)" }}
+      >
+        <textarea
+          ref={textareaRef}
+          value={value}
+          onChange={(e) => handleChange(e.target.value)}
+          placeholder={placeholder}
+          rows={isReply ? 2 : 3}
+          maxLength={500}
+          className="w-full px-3 py-2.5 text-[13px] resize-none outline-none bg-transparent text-foreground placeholder:text-muted-foreground/40"
+          style={{ fontFamily: "inherit" }}
+        />
+
+        {/* Selected GIF preview */}
+        {selectedGif && (
+          <div className="px-3 pb-2 relative inline-block">
+            <img
+              src={selectedGif.preview}
+              alt="Selected GIF"
+              className="rounded-lg"
+              style={{ maxHeight: 120, maxWidth: 180, display: "block" }}
+            />
+            {onGifClear && (
+              <button
+                onClick={onGifClear}
+                className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-red-500 text-white flex items-center justify-center text-[10px] font-bold hover:bg-red-400 transition-colors"
+              >×</button>
+            )}
+          </div>
+        )}
+
+        {/* Toolbar row */}
+        <div className="flex items-center gap-1 px-2 pb-2 border-t border-border/10 pt-1.5">
+          {/* Emoji button */}
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => { setShowEmoji((v) => !v); setShowGif(false); }}
+              className="h-7 w-7 flex items-center justify-center rounded-lg text-base hover:bg-primary/15 transition-colors"
+              title="Insert emoji"
+              style={{ color: showEmoji ? "#a855f7" : "rgba(148,163,184,0.55)" }}
+            >😀</button>
+            {showEmoji && <EmojiPicker onPick={insertEmoji} onClose={() => setShowEmoji(false)} />}
+          </div>
+
+          {/* GIF button */}
+          {onGifSelect && (
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => { setShowGif((v) => !v); setShowEmoji(false); }}
+                className="h-7 px-2 flex items-center justify-center rounded-lg text-[11px] font-extrabold hover:bg-cyan-500/10 transition-colors"
+                title="Insert GIF"
+                style={{ color: showGif ? "#22d3ee" : "rgba(148,163,184,0.55)", letterSpacing: "0.05em" }}
+              >GIF</button>
+              {showGif && <GifPicker onPick={(g) => { onGifSelect(g); setShowGif(false); }} onClose={() => setShowGif(false)} />}
+            </div>
+          )}
+
+          {/* Char count */}
+          <span className="ml-auto text-[10px] text-muted-foreground/30">{value.length}/500</span>
+        </div>
+      </div>
+
+      {stripped && <LinkRemovedNotice />}
+
+      {/* Action buttons */}
+      <div className="flex items-center gap-2 justify-end">
+        {onCancel && (
+          <Button size="sm" variant="ghost" className="h-7 text-[11px]" onClick={onCancel}>Cancel</Button>
+        )}
+        <Button
+          size="sm"
+          className={isReply ? "h-7 text-[11px] px-3" : "h-8 text-[12px] px-4"}
+          disabled={!canPost || isPending}
+          onClick={onSubmit}
+        >
+          <Send className={isReply ? "h-3 w-3 mr-1" : "h-3.5 w-3.5 mr-1.5"} />
+          {isReply ? "Reply" : "Post Comment"}
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+/* ── Reply box (emoji only, no GIF for space reasons) ───────────────────── */
+function ReplyBox({ onSubmit, onCancel, isPending }: { onSubmit: (body: string) => void; onCancel: () => void; isPending: boolean }) {
+  const [text, setText] = useState("");
+  return (
+    <div className="mt-2.5 pl-1">
+      <CommentInputBox
+        value={text}
+        onChange={setText}
+        onSubmit={() => { if (text.trim()) { onSubmit(text.trim()); setText(""); } }}
+        onCancel={onCancel}
+        isPending={isPending}
+        placeholder="Write a reply…"
+        isReply
+      />
+    </div>
+  );
+}
+
 /* ── Comment thread ── */
 function CommentItem({ comment, suggestionId, depth = 0 }: { comment: Comment; suggestionId: number; depth?: number }) {
   const { user } = useAuth();
   const { toast } = useToast();
   const qc = useQueryClient();
   const [replying, setReplying] = useState(false);
-  const [replyText, setReplyText] = useState("");
-  const [replyStripped, setReplyStripped] = useState(false);
 
   const replyMutation = useMutation({
     mutationFn: async (body: string) => {
@@ -267,9 +621,7 @@ function CommentItem({ comment, suggestionId, depth = 0 }: { comment: Comment; s
               {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
             </span>
           </div>
-          <p className="text-[12px] text-muted-foreground/75 leading-relaxed mt-1 whitespace-pre-wrap break-words">
-            {comment.body}
-          </p>
+          <CommentBody body={comment.body} />
           {user && depth === 0 && (
             <button
               onClick={() => setReplying((v) => !v)}
@@ -279,27 +631,11 @@ function CommentItem({ comment, suggestionId, depth = 0 }: { comment: Comment; s
             </button>
           )}
           {replying && (
-            <div className="mt-2.5 space-y-2 pl-1">
-              <textarea
-                value={replyText}
-                onChange={(e) => {
-                  const { clean, stripped } = stripLinks(e.target.value);
-                  setReplyText(clean);
-                  setReplyStripped(stripped);
-                }}
-                placeholder="Write a reply..."
-                rows={2}
-                maxLength={500}
-                className="w-full rounded-lg px-3 py-2 text-[12px] resize-none outline-none transition-all bg-background/60 border border-border/60 text-foreground placeholder:text-muted-foreground/40 focus:border-primary/50"
-              />
-              {replyStripped && <LinkRemovedNotice />}
-              <div className="flex gap-2">
-                <Button size="sm" className="h-7 text-[11px] px-3" disabled={!replyText.trim() || replyMutation.isPending} onClick={() => replyMutation.mutate(replyText.trim())}>
-                  <Send className="h-3 w-3 mr-1" /> Reply
-                </Button>
-                <Button size="sm" variant="ghost" className="h-7 text-[11px]" onClick={() => setReplying(false)}>Cancel</Button>
-              </div>
-            </div>
+            <ReplyBox
+              onSubmit={(body) => replyMutation.mutate(body)}
+              onCancel={() => setReplying(false)}
+              isPending={replyMutation.isPending}
+            />
           )}
         </div>
       </div>
@@ -320,7 +656,7 @@ function CommentsPanel({ suggestion }: { suggestion: Suggestion }) {
   const { toast } = useToast();
   const qc = useQueryClient();
   const [commentText, setCommentText] = useState("");
-  const [commentStripped, setCommentStripped] = useState(false);
+  const [selectedGif, setSelectedGif] = useState<TenorGif | null>(null);
 
   const { data: comments = [], isLoading } = useQuery({
     queryKey: ["comments", suggestion.id],
@@ -343,34 +679,31 @@ function CommentsPanel({ suggestion }: { suggestion: Suggestion }) {
       qc.invalidateQueries({ queryKey: ["comments", suggestion.id] });
       qc.invalidateQueries({ queryKey: ["suggestions"] });
       setCommentText("");
+      setSelectedGif(null);
     },
     onError: (e: Error) => toast({ title: "Error", description: e.message, variant: "destructive" }),
   });
 
+  const handlePost = () => {
+    let body = commentText.trim();
+    if (selectedGif) body = (body ? body + "\n" : "") + `[gif:${selectedGif.url}]`;
+    if (!body) return;
+    commentMutation.mutate(body);
+  };
+
   return (
     <div className="border-t px-4 sm:px-5 py-4 space-y-4" style={{ borderColor: "rgba(168,85,247,0.12)", background: "rgba(0,0,0,0.25)" }}>
       {user && (
-        <div className="space-y-2">
-          <textarea
-            value={commentText}
-            onChange={(e) => {
-              const { clean, stripped } = stripLinks(e.target.value);
-              setCommentText(clean);
-              setCommentStripped(stripped);
-            }}
-            placeholder="Share your thoughts on this suggestion..."
-            rows={2}
-            maxLength={500}
-            className="w-full rounded-xl px-3 py-2.5 text-[13px] resize-none outline-none transition-all bg-background/60 border border-border/60 text-foreground placeholder:text-muted-foreground/40 focus:border-primary/50"
-          />
-          {commentStripped && <LinkRemovedNotice />}
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] text-muted-foreground/35">{commentText.length}/500</span>
-            <Button size="sm" className="h-8 text-[12px] px-4" disabled={!commentText.trim() || commentMutation.isPending} onClick={() => commentMutation.mutate(commentText.trim())}>
-              <Send className="h-3.5 w-3.5 mr-1.5" /> Post Comment
-            </Button>
-          </div>
-        </div>
+        <CommentInputBox
+          value={commentText}
+          onChange={setCommentText}
+          onSubmit={handlePost}
+          isPending={commentMutation.isPending}
+          placeholder="Share your thoughts… add emojis or a GIF! 🎮"
+          selectedGif={selectedGif}
+          onGifSelect={setSelectedGif}
+          onGifClear={() => setSelectedGif(null)}
+        />
       )}
 
       {!user && (
@@ -382,7 +715,7 @@ function CommentsPanel({ suggestion }: { suggestion: Suggestion }) {
       {isLoading && <div className="text-[12px] text-muted-foreground/40 text-center py-3 animate-pulse">Loading comments…</div>}
 
       {!isLoading && comments.length === 0 && (
-        <p className="text-[12px] text-muted-foreground/40 text-center py-2">No comments yet — be the first!</p>
+        <p className="text-[12px] text-muted-foreground/40 text-center py-2">No comments yet — be the first! 🎮</p>
       )}
 
       {comments.length > 0 && (
