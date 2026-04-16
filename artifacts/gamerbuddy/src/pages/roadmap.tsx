@@ -7,7 +7,7 @@ import {
   Lock, AlertTriangle, CircleDollarSign, Gift, BadgeDollarSign,
 } from "lucide-react";
 
-/* ── Phase definitions — Phase 1 (live), Phase 3 & 4 (future). No Phase 2. ── */
+/* ── Phase definitions — Phase 1 (live), Phase 2 (coming soon), Phase 3 (future) ── */
 const PHASES = [
   {
     id: 1,
@@ -61,8 +61,8 @@ const PHASES = [
     ],
   },
   {
-    id: 3,
-    tag: "Future",
+    id: 2,
+    tag: "Coming Soon",
     title: "Competition & Rewards",
     status: "next" as const,
     accent: "#22d3ee",
@@ -97,8 +97,8 @@ const PHASES = [
     ],
   },
   {
-    id: 4,
-    tag: "Future Plans",
+    id: 3,
+    tag: "Future",
     title: "Next-Level Platform",
     status: "future" as const,
     accent: "#f59e0b",
@@ -136,8 +136,8 @@ const PHASES = [
 
 const STATUS_STYLES = {
   live:   { dot: "#22c55e", pulse: true,  label: "Now Live"    },
-  next:   { dot: "#22d3ee", pulse: false, label: "Future"      },
-  future: { dot: "#f59e0b", pulse: false, label: "Future Plans" },
+  next:   { dot: "#22d3ee", pulse: false, label: "Coming Soon" },
+  future: { dot: "#f59e0b", pulse: false, label: "Future"      },
 };
 
 const STATUS_ICON = {
@@ -217,7 +217,7 @@ export default function Roadmap() {
           <strong className="text-foreground">Phase 1 is fully live</strong> — the core hiring platform is open, including wallets, escrow payments, a 10% platform fee, the gift button, wallet limits, account verification, and safety rules.
         </p>
         <p className="text-sm text-muted-foreground/60 leading-[1.75]">
-          We're now building Phase 3 — tournaments, quests, and bulk hiring. Your Community votes directly shape what we prioritise next. 🚀
+          We're now building Phase 2 — tournaments, quests, and bulk hiring. Your Community votes directly shape what we prioritise next. 🚀
         </p>
       </div>
 
