@@ -606,6 +606,7 @@ function EmptyState({ hasFilters, onClear }: { hasFilters: boolean; onClear: () 
 function FillerSection() {
   const [, setLocation] = useLocation();
   const { user } = useAuth();
+  const { isDark } = useTheme();
 
   const steps = [
     { num: "01", icon: <Search className="h-6 w-6" />, color: "#a855f7", title: "Browse Missions", desc: "Find game requests that match your skills, platform, and schedule. Use filters to zero in fast." },
@@ -638,7 +639,7 @@ function FillerSection() {
               </div>
               <span
                 className="font-black tabular-nums leading-none"
-                style={{ fontSize: 28, color: `${s.color}20`, letterSpacing: "-0.04em" }}
+                style={{ fontSize: 28, color: isDark ? `${s.color}20` : `${s.color}50`, letterSpacing: "-0.04em" }}
               >
                 {s.num}
               </span>
@@ -655,8 +656,10 @@ function FillerSection() {
       <div
         className="rounded-2xl border p-6 sm:p-7 flex flex-col sm:flex-row items-center gap-5 justify-between"
         style={{
-          background: "linear-gradient(145deg, rgba(168,85,247,0.07) 0%, rgba(0,0,0,0.4) 100%)",
-          borderColor: "rgba(168,85,247,0.18)",
+          background: isDark
+            ? "linear-gradient(145deg, rgba(168,85,247,0.07) 0%, rgba(0,0,0,0.4) 100%)"
+            : "linear-gradient(145deg, rgba(124,58,237,0.07) 0%, rgba(124,58,237,0.03) 100%)",
+          borderColor: isDark ? "rgba(168,85,247,0.18)" : "rgba(124,58,237,0.20)",
         }}
       >
         <div className="text-center sm:text-left">
@@ -836,7 +839,9 @@ export default function Browse() {
               key={requests.length}
               className="flex items-center gap-2.5 rounded-xl border border-primary/30 px-4 py-2.5"
               style={{
-                background: "linear-gradient(135deg, rgba(168,85,247,0.1) 0%, rgba(0,0,0,0.3) 100%)",
+                background: isDark
+                  ? "linear-gradient(135deg, rgba(168,85,247,0.1) 0%, rgba(0,0,0,0.3) 100%)"
+                  : "linear-gradient(135deg, rgba(124,58,237,0.10) 0%, rgba(124,58,237,0.04) 100%)",
                 animation: "count-up 0.18s ease-out both",
               }}
             >
@@ -1004,7 +1009,7 @@ export default function Browse() {
                 >
                   {active
                     ? <CheckCircle2 className="h-3 w-3 shrink-0 text-blue-300" />
-                    : <div className="h-2 w-2 rounded-full shrink-0" style={{ background: dot }} />
+                    : <div className="h-2 w-2 rounded-full shrink-0" style={{ background: value === "all" ? (isDark ? dot : "rgba(0,0,0,0.28)") : dot }} />
                   }
                   {label}
                 </button>
@@ -1102,13 +1107,13 @@ export default function Browse() {
               {/* Divider line */}
               <span className="flex-1 h-px mx-1" style={{ background: "rgba(168,85,247,0.12)" }} />
               {/* Result count */}
-              <span className="text-[10px] font-semibold shrink-0 tabular-nums" style={{ color: "rgba(255,255,255,0.35)" }}>
+              <span className="text-[10px] font-semibold shrink-0 tabular-nums" style={{ color: isDark ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.45)" }}>
                 {requests?.length === allRequests?.length
                   ? `${allRequests?.length ?? 0} open`
                   : (
                     <>
-                      <span style={{ color: "rgba(168,85,247,0.80)" }}>{requests?.length ?? 0}</span>
-                      <span style={{ color: "rgba(255,255,255,0.25)" }}> / {allRequests?.length ?? 0} match</span>
+                      <span style={{ color: isDark ? "rgba(168,85,247,0.80)" : "hsl(272 72% 42%)" }}>{requests?.length ?? 0}</span>
+                      <span style={{ color: isDark ? "rgba(255,255,255,0.25)" : "rgba(0,0,0,0.35)" }}> / {allRequests?.length ?? 0} match</span>
                     </>
                   )}
               </span>
