@@ -182,10 +182,16 @@ const RESPONSES: Array<{ patterns: RegExp; reply: string }> = [
     reply: `You **cannot hire yourself** on Gamerbuddy 🚫\n\nThe platform prevents placing a bid on your own request. This is a built-in safeguard to ensure fair competition and genuine transactions between different users — we check this at the API level, not just the UI.`,
   },
 
+  /* ── DISCORD ── */
+  {
+    patterns: /discord|join.*server|server.*link|discord.*link|join.*discord/i,
+    reply: `Yes! We have an official Discord server 🎮\n\n👾 **[Join our Discord → discord.gg/pJcmECke](https://discord.gg/pJcmECke)**\n\nInside you'll find:\n• Live squad-finding channels\n• Platform support & help\n• Community highlights & giveaways\n• First looks at upcoming features\n\nCome hang — the squad is waiting! 🚀`,
+  },
+
   /* ── SOCIAL MEDIA / FOLLOW ── */
   {
     patterns: /social|follow.*us|where.*find.*you|youtube|instagram|twitter|facebook|gamejolt|x\.com|our.*channel|official.*channel/i,
-    reply: `We're everywhere — come join the squad! 🎮\n\nCheck out our **[Socials page](/socials)** for the full list with clickable links.\n\n• 🔴 **YouTube** → youtube.com/@GamerbuddyHQ — streams, highlights & more\n• 🐦 **X (Twitter)** → x.com/GamerbuddyHQ — live updates & gaming takes\n• 📸 **Instagram** → instagram.com/gamerbuddy — community highlights\n• 🟢 **GameJolt** → gamejolt.com/@Gamerbuddy — game pages & dev logs\n• 🔵 **Facebook** → facebook.com/gamerbuddy — events & announcements\n\nHit follow so you never miss a platform update or giveaway! 🚀`,
+    reply: `We're everywhere — come join the squad! 🎮\n\nCheck out our **[Socials page](/socials)** for the full list with clickable links.\n\n• 👾 **Discord** → discord.gg/pJcmECke — live chat, squads & support\n• 🔴 **YouTube** → youtube.com/@GamerbuddyHQ — streams & highlights\n• 🐦 **X (Twitter)** → x.com/GamerbuddyHQ — live updates & drops\n• 📸 **Instagram** → instagram.com/gamerbuddy — community highlights\n• 🟢 **GameJolt** → gamejolt.com/@Gamerbuddy — game pages & dev logs\n• 🔵 **Facebook** → facebook.com/gamerbuddy — events & announcements\n\nHit follow so you never miss a platform update or giveaway! 🚀`,
   },
 
   /* ── REPORT / MODERATION ── */
