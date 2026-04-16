@@ -26,7 +26,6 @@ import Community from "@/pages/community";
 import Tournaments from "@/pages/tournaments";
 import TournamentDetail from "@/pages/tournament-detail";
 import MyTournaments from "@/pages/my-tournaments";
-import Socials from "@/pages/socials";
 import Roadmap from "@/pages/roadmap";
 import ComingSoon from "@/pages/coming-soon";
 import AdminSecurity from "@/pages/admin-security";
@@ -83,7 +82,6 @@ function Router() {
         <Route path="/users/:id" component={UserProfilePage} />
         <Route path="/notifications"><ProtectedRoute component={Notifications} /></Route>
         <Route path="/about" component={About} />
-        <Route path="/socials" component={Socials} />
         <Route path="/community" component={Community} />
         <Route path="/tournaments">{() => <ComingSoon feature="Tournaments" phase={3} description="Compete in free-to-join tournaments. Hirers approve every participant — competitive, fair, and open to all. Coming in Phase 3!" />}</Route>
         <Route path="/my-tournaments">{() => <ComingSoon feature="Tournaments" phase={3} description="Manage your tournament entries and brackets here. Coming in Phase 3!" />}</Route>

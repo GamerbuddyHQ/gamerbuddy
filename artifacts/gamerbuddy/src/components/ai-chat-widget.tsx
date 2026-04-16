@@ -191,13 +191,13 @@ const RESPONSES: Array<{ patterns: RegExp; reply: string }> = [
   /* ── DISCORD ── */
   {
     patterns: /discord|join.*server|server.*link|discord.*link|join.*discord/i,
-    reply: `You can find our Discord and all other social links on the **[Socials page](/socials)** under **"All Socials & Links"**. 🔗\n\nTap that button to reach our full hub — every platform in one place!`,
+    reply: `You can find all our social links, Discord, updates and support in one place here: **[superr.bio/gamerbuddy](https://www.superr.bio/gamerbuddy)** 🔗\n\nEvery platform, every update — all in one hub!`,
   },
 
   /* ── SOCIAL MEDIA / FOLLOW ── */
   {
     patterns: /social|follow.*us|where.*find.*you|youtube|instagram|twitter|facebook|gamejolt|x\.com|our.*channel|official.*channel/i,
-    reply: `The easiest way to find everything Gamerbuddy is the **[Socials page](/socials)** — hit the **"All Socials & Links"** button there. 🔗\n\nIt takes you to our central hub at **superr.bio/gamerbuddy** — every platform, every link, all in one place. Bookmark it!`,
+    reply: `You can find all our social links, Discord, updates and support in one place here: **[superr.bio/gamerbuddy](https://www.superr.bio/gamerbuddy)** 🔗\n\nYouTube, Instagram, X, Facebook, GameJolt — every platform, every link, all in one hub. Bookmark it!`,
   },
 
   /* ── REPORT / MODERATION ── */
@@ -227,20 +227,20 @@ const RESPONSES: Array<{ patterns: RegExp; reply: string }> = [
   /* ── CONTACT / SUPPORT ── */
   {
     patterns: /contact.*support|support.*email|email.*support|reach.*support|reach.*team|how.*contact|email.*us|email.*team|contact.*us|get.*in.*touch|how.*reach|reach.*you/i,
-    reply: `For any support or questions, please visit our **[Socials page](/socials)** and click **"All Socials & Links"**. 🔗\n\nThis is the best way to connect with us — every platform, every update, and direct community access all in one place!`,
+    reply: `You can find all our social links, Discord, updates and support in one place here: **[superr.bio/gamerbuddy](https://www.superr.bio/gamerbuddy)** 🔗\n\nThis is the best way to connect with us — every platform, direct community access, all in one place!`,
   },
 
   /* ── GENERAL HELP ── */
   {
     patterns: /help|support|question|how.*work|what.*is.*gamerbuddy|about.*platform/i,
-    reply: `**Gamerbuddy** is a global gaming marketplace — hire skilled gamers for co-op, ranked sessions, raids, and more across PC, PlayStation, Xbox, Switch, Steam Deck, and Mobile 🎮\n\n**Phase 1 is live right now. Here's the core:**\n• Post requests → receive bids → hire verified gamers\n• Bids require verification (7–15 days) — keeps it safe\n• 10% platform fee on every completed session\n• Funds held in escrow until session is approved\n• Two wallets: Hiring (spend) & Earnings (receive)\n• Withdraw earnings once you hit $100\n• Private chat between hirer and gamer\n• Gift button for optional tips after sessions\n• Points earned per session → spend in Profile Shop\n\nFor anything beyond what I can answer, visit the **[Socials page](/socials)** and click **"All Socials & Links"** to connect with us directly! 🔗\n\nAsk me about any specific feature and I'll give you the full breakdown!`,
+    reply: `**Gamerbuddy** is a global gaming marketplace — hire skilled gamers for co-op, ranked sessions, raids, and more across PC, PlayStation, Xbox, Switch, Steam Deck, and Mobile 🎮\n\n**Phase 1 is live right now. Here's the core:**\n• Post requests → receive bids → hire verified gamers\n• Bids require verification (7–15 days) — keeps it safe\n• 10% platform fee on every completed session\n• Funds held in escrow until session is approved\n• Two wallets: Hiring (spend) & Earnings (receive)\n• Withdraw earnings once you hit $100\n• Private chat between hirer and gamer\n• Gift button for optional tips after sessions\n• Points earned per session → spend in Profile Shop\n\nFor anything beyond what I can answer, you can find all our links and support at **[superr.bio/gamerbuddy](https://www.superr.bio/gamerbuddy)** 🔗\n\nAsk me about any specific feature and I'll give you the full breakdown!`,
   },
 ];
 
 const FALLBACK_RESPONSES = [
   "Hmm, didn't catch that one — mind rephrasing? I'm best with Phase 1 features: posting requests, bidding, wallets, verification, reviews, escrow, gifts, private chat, and safety! 🎮",
   "That one's got me stumped! Try asking: 'How does bidding work?', 'What's the platform fee?', 'How does escrow work?', or 'How does verification work?' — full answers ready! 👾",
-  "Need more context on that one! For anything I can't resolve, head to the **[Socials page](/socials)** and hit **'All Socials & Links'** to connect with us. For Phase 1 features — requests, wallets, sessions, points, safety, reviews — I'm your guy. What else can I help with? 🎯",
+  "Need more context on that one! For anything I can't resolve, find all our links and support at **[superr.bio/gamerbuddy](https://www.superr.bio/gamerbuddy)**. For Phase 1 features — requests, wallets, sessions, points, safety, reviews — I'm your guy. What else can I help with? 🎯",
 ];
 
 let fallbackIndex = 0;
@@ -446,7 +446,9 @@ export function AIChatWidget() {
           {/* Socials quick-action */}
           <div className="px-3.5 pb-2 shrink-0">
             <a
-              href="/socials"
+              href="https://www.superr.bio/gamerbuddy"
+              target="_blank"
+              rel="noopener noreferrer"
               className="flex items-center justify-center gap-2 w-full py-2 rounded-xl text-[11px] font-bold text-white transition-all hover:scale-[1.02] active:scale-[0.98]"
               style={{
                 background: "linear-gradient(135deg, #a855f7 0%, #7c3aed 60%, #22d3ee 100%)",

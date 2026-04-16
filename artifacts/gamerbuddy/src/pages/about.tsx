@@ -257,7 +257,9 @@ export default function About() {
           </p>
         </div>
         <a
-          href="/socials"
+          href="https://www.superr.bio/gamerbuddy"
+          target="_blank"
+          rel="noopener noreferrer"
           className="shrink-0 inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm text-white transition-all hover:scale-105 active:scale-95"
           style={{
             background: "linear-gradient(135deg, #a855f7 0%, #7c3aed 60%, #22d3ee 100%)",
