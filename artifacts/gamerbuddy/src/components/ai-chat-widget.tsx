@@ -191,7 +191,7 @@ const RESPONSES: Array<{ patterns: RegExp; reply: string }> = [
   /* ── DISCORD ── */
   {
     patterns: /discord|join.*server|server.*link|discord.*link|join.*discord/i,
-    reply: `Yes! We have an official Discord server 🎮\n\n👾 **[Join our Discord → discord.gg/pJcmECke](https://discord.gg/pJcmECke)**\n\nInside you'll find:\n• Live squad-finding channels\n• Platform support & help\n• Community highlights & giveaways\n• First looks at upcoming features\n\nCome hang — the squad is waiting! 🚀`,
+    reply: `Head to our **[Socials page](/socials)** and hit the "Join Our Discord Server" button — or go direct:\n\n👾 **[discord.gg/pJcmECke](https://discord.gg/pJcmECke)**\n\nInside you'll find live squad channels, platform support, community events, and giveaways. Come hang! 🚀`,
   },
 
   /* ── SOCIAL MEDIA / FOLLOW ── */

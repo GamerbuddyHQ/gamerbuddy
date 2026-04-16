@@ -4,13 +4,6 @@ import { useTheme } from "@/lib/theme";
 const SUPERR_URL  = "https://www.superr.bio/gamerbuddy";
 const DISCORD_URL = "https://discord.gg/pJcmECke";
 
-const OTHER_PLATFORMS = [
-  { label: "YouTube",   url: "https://www.youtube.com/@GamerbuddyHQ" },
-  { label: "X",         url: "https://x.com/GamerbuddyHQ"            },
-  { label: "Instagram", url: "https://instagram.com/gamerbuddy"      },
-  { label: "GameJolt",  url: "https://gamejolt.com/@Gamerbuddy"      },
-  { label: "Facebook",  url: "https://facebook.com/gamerbuddy"       },
-];
 
 export default function SocialsPage() {
   const { isDark } = useTheme();
@@ -123,25 +116,6 @@ export default function SocialsPage() {
           </svg>
         </a>
 
-        {/* ── Other platforms — minimal text links ── */}
-        <div className="pt-2 space-y-2">
-          <p className="text-[11px] text-muted-foreground/35 uppercase tracking-[0.18em] font-black">
-            Also find us on
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
-            {OTHER_PLATFORMS.map((p) => (
-              <a
-                key={p.label}
-                href={p.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs text-muted-foreground/40 hover:text-muted-foreground/70 transition-colors duration-150 font-medium"
-              >
-                {p.label}
-              </a>
-            ))}
-          </div>
-        </div>
 
       </div>
     </div>
