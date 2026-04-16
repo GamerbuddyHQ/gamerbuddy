@@ -719,20 +719,33 @@ export default function AddFunds() {
       <div className="max-w-md mx-auto space-y-5">
         {processing && <ProcessingOverlay method={payMethod} />}
 
+        {/* Preview banner */}
+        <div
+          className="flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 border text-xs font-semibold"
+          style={{
+            background: "rgba(245,158,11,0.10)",
+            borderColor: "rgba(245,158,11,0.35)",
+            color: "#f59e0b",
+          }}
+        >
+          <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+          Preview only — no real money will be charged until payment integration is live
+        </div>
+
         {/* Header */}
         <div className="flex items-center gap-3">
           <button
             onClick={() => setStep("amount")}
-            className="h-9 w-9 rounded-xl border border-border bg-background/40 flex items-center justify-center text-muted-foreground hover:text-white hover:border-primary/40 transition-all"
+            className="h-9 w-9 rounded-xl border border-border bg-background/40 flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-primary/40 transition-all"
           >
             <ArrowLeft className="h-4 w-4" />
           </button>
           <div>
-            <div className="font-extrabold text-white flex items-center gap-2">
+            <div className="font-extrabold text-foreground flex items-center gap-2">
               <Lock className="h-4 w-4 text-green-400" /> Secure Checkout
             </div>
             <div className="text-xs text-muted-foreground">
-              Depositing <span className="text-white font-semibold">${selectedAmount.toFixed(2)}</span> to Hiring Wallet
+              Depositing <span className="text-foreground font-semibold">${selectedAmount.toFixed(2)}</span> to Hiring Wallet
             </div>
           </div>
         </div>
@@ -770,10 +783,7 @@ export default function AddFunds() {
         </div>
 
         {/* Panel */}
-        <div
-          className="rounded-2xl border border-border/60 p-5"
-          style={{ background: "linear-gradient(160deg, rgba(168,85,247,0.04) 0%, rgba(0,0,0,0.3) 100%)" }}
-        >
+        <div className="rounded-2xl border border-border/60 p-5 bg-card/80">
           {payMethod === "razorpay" ? (
             <RazorpayPanel
               amount={selectedAmount}
@@ -800,15 +810,40 @@ export default function AddFunds() {
   /* ── AMOUNT SELECTION ── */
   return (
     <div className="max-w-lg mx-auto space-y-6">
+      {/* ── PAYMENT NOT YET ACTIVE BANNER ── */}
+      <div
+        className="flex items-start gap-3 rounded-xl p-4 border"
+        style={{
+          background: "linear-gradient(135deg, rgba(245,158,11,0.12) 0%, rgba(234,88,12,0.08) 100%)",
+          borderColor: "rgba(245,158,11,0.40)",
+        }}
+      >
+        <div
+          className="shrink-0 w-9 h-9 rounded-lg flex items-center justify-center mt-0.5"
+          style={{ background: "rgba(245,158,11,0.15)", border: "1px solid rgba(245,158,11,0.35)" }}
+        >
+          <AlertCircle className="h-5 w-5" style={{ color: "#f59e0b" }} />
+        </div>
+        <div className="space-y-0.5">
+          <div className="text-sm font-extrabold uppercase tracking-wider" style={{ color: "#f59e0b" }}>
+            Payments Not Yet Active
+          </div>
+          <div className="text-xs leading-relaxed" style={{ color: "rgba(245,158,11,0.80)" }}>
+            Real payment processing is not enabled yet — no real money will be charged.
+            This page is a <strong>preview only</strong>. Stripe &amp; Razorpay integration goes live in the next phase.
+          </div>
+        </div>
+      </div>
+
       <button
         onClick={() => setLocation("/wallets")}
-        className="flex items-center gap-2 text-muted-foreground hover:text-white text-sm transition-colors"
+        className="flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm transition-colors"
       >
         <ArrowLeft className="h-4 w-4" /> Back to Wallets
       </button>
 
       <div>
-        <h1 className="text-3xl font-extrabold uppercase tracking-tight text-white flex items-center gap-3">
+        <h1 className="text-3xl font-extrabold uppercase tracking-tight text-foreground flex items-center gap-3">
           <Zap className="h-7 w-7 text-primary" /> Add Funds
         </h1>
         <p className="text-muted-foreground mt-1 text-sm">Top up your Hiring Wallet to post game requests.</p>
@@ -821,7 +856,7 @@ export default function AddFunds() {
       </div>
 
       {/* Amount card */}
-      <div className="rounded-2xl border border-border/60 p-5 space-y-5" style={{ background: "linear-gradient(160deg, rgba(168,85,247,0.04) 0%, rgba(0,0,0,0.3) 100%)" }}>
+      <div className="rounded-2xl border border-border/60 p-5 space-y-5 bg-card/80">
         <div>
           <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-1">Choose Amount</div>
           <div className="text-[11px] text-muted-foreground/60">Min $10.75 · Max $1,000.00</div>
@@ -834,8 +869,8 @@ export default function AddFunds() {
               onClick={() => handleSelectPreset(preset)}
               className={`rounded-xl border py-3.5 px-2 text-center font-bold transition-all text-sm ${
                 amount === String(preset)
-                  ? "border-primary bg-primary/20 text-white shadow-[0_0_14px_rgba(168,85,247,0.3)]"
-                  : "border-border/60 bg-background/40 text-muted-foreground hover:border-primary/40 hover:text-white"
+                  ? "border-primary bg-primary/20 text-foreground shadow-[0_0_14px_rgba(168,85,247,0.3)]"
+                  : "border-border/60 bg-background/40 text-muted-foreground hover:border-primary/40 hover:text-foreground"
               }`}
             >
               ${preset === 10.75 ? "10.75" : preset}
@@ -871,7 +906,7 @@ export default function AddFunds() {
           <div className="rounded-xl bg-primary/5 border border-primary/20 p-3.5 space-y-2 text-sm">
             <div className="flex justify-between">
               <span className="text-muted-foreground">Deposit amount</span>
-              <span className="font-bold text-white">${selectedAmount.toFixed(2)}</span>
+              <span className="font-bold text-foreground">${selectedAmount.toFixed(2)}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">New balance</span>
@@ -888,7 +923,7 @@ export default function AddFunds() {
             <Smartphone className="h-5 w-5 text-primary" />
           </div>
           <div>
-            <div className="text-sm font-bold text-white">UPI & Wallets</div>
+            <div className="text-sm font-bold text-foreground">UPI & Wallets</div>
             <div className="text-[10px] text-muted-foreground">GPay · PhonePe · Paytm · More</div>
           </div>
         </div>
@@ -897,7 +932,7 @@ export default function AddFunds() {
             <Globe className="h-5 w-5 text-cyan-400" />
           </div>
           <div>
-            <div className="text-sm font-bold text-white">Visa / Mastercard</div>
+            <div className="text-sm font-bold text-foreground">Visa / Mastercard</div>
             <div className="text-[10px] text-muted-foreground">PayPal · Amex · All major cards</div>
           </div>
         </div>

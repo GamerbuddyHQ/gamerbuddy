@@ -465,7 +465,7 @@ export default function Home() {
             {[
               { icon: <Shield className="h-5 w-5 text-green-400" />, label: "Escrow Protected", sub: "Funds held until session complete" },
               { icon: <Star className="h-5 w-5 text-yellow-400" />, label: "Verified Reviews", sub: "Both sides must review" },
-              { icon: <Zap className="h-5 w-5 text-cyan-400" />, label: "Real-Time Chat", sub: "Built-in messaging + voice" },
+              { icon: <Zap className="h-5 w-5 text-cyan-400" />, label: "Instant Alerts", sub: "Real-time notifications for bids, session starts, and payments." },
               { icon: <Coins className="h-5 w-5 text-amber-400" />, label: "Transparent 10% Fee", sub: "Gamers keep 90% of every job. No hidden charges." },
             ].map(({ icon, label, sub }) => (
               <div

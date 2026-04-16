@@ -78,13 +78,10 @@ export default function ComingSoon({
         </div>
 
         {/* Slim phase status strip */}
-        <div
-          className="flex items-stretch rounded-2xl overflow-hidden border"
-          style={{ borderColor: "rgba(255,255,255,0.06)" }}
-        >
+        <div className="flex items-stretch rounded-2xl overflow-hidden border border-border/50">
           <div
-            className="flex-1 flex items-center gap-2.5 px-4 py-3.5"
-            style={{ background: "rgba(34,197,94,0.07)", borderRight: "1px solid rgba(255,255,255,0.05)" }}
+            className="flex-1 flex items-center gap-2.5 px-4 py-3.5 border-r border-border/40"
+            style={{ background: "rgba(34,197,94,0.07)" }}
           >
             <span
               className="h-2 w-2 rounded-full shrink-0"

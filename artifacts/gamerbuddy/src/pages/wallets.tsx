@@ -182,6 +182,15 @@ export default function WalletsPage() {
               </Link>
             </Button>
 
+            {/* Payment not-yet-live notice */}
+            <div className="flex items-start gap-2 rounded-lg bg-amber-500/5 border border-amber-500/20 p-2.5 text-xs">
+              <AlertTriangle className="h-3.5 w-3.5 shrink-0 mt-0.5 text-amber-400" />
+              <span className="text-amber-300/80">
+                <strong className="text-amber-300">Real payments not yet active.</strong>{" "}
+                The Add Funds page is a preview — no real money will be charged until payment integration is live.
+              </span>
+            </div>
+
             <div className="flex items-start gap-2.5 rounded-lg bg-amber-500/5 border border-amber-500/20 p-3 text-xs text-amber-300/80">
               <Ban className="h-4 w-4 shrink-0 mt-0.5 text-amber-400" />
               <span>

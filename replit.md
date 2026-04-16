@@ -90,16 +90,31 @@ A full-stack gaming marketplace web app where users can hire other gamers to pla
 - `POST /api/reports` — report a user
 - `GET /api/dashboard/summary`
 
+## Phase 1 Status (current)
+
+Core hiring MVP is live. All non-core features are locked and redirect to Coming Soon pages.
+
+**Active (Phase 1):**
+- Post Request, Browse, Bid (verified users only), Accept, Escrow, Session flow, Reviews, Wallets, Verification, Nation/Gender filtering
+- Rate limiting: `bidLimiter` enforced on `POST /requests/:id/bids` (5 bids/min)
+- Verified-only bidding: enforced server-side via `idVerified` check before bid insertion
+- Payment keys: 100% env-based via `process.env` (RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET, STRIPE_SECRET_KEY, STRIPE_PUBLISHABLE_KEY) — add-funds page shows "Payments Not Yet Active" preview banner since no keys are configured yet
+
+**Locked → Coming Soon (Phase 2+):**
+- Community, Tournaments, My-Tournaments, Socials → all redirect to ComingSoon component
+
 ## Pages
 
-- `/` — Landing/home page
+- `/` — Landing/home page (Phase 1 core hiring focus)
 - `/login` / `/signup` — Auth forms
 - `/dashboard` — Dashboard (wallets + open requests count)
-- `/browse` — Browse open requests
+- `/browse` — Browse open requests (with country/gender filters)
 - `/my-requests` — User's requests (with cancel + session flow)
 - `/requests/:id` — Request detail (bids, chat, session flow, reviews, gift)
 - `/post-request` — Create new request
 - `/wallets` — Wallet management + transaction history
 - `/profile` — Steam-style profile (banner, badges, bio, shop, history, reviews)
-- `/shop` — Game Key Shop
-- `/add-funds` — Add funds to hiring wallet
+- `/add-funds` — Add funds preview (payments not yet active)
+- `/community` → Coming Soon (Phase 2)
+- `/tournaments` + `/my-tournaments` + `/tournaments/:id` → Coming Soon (Phase 3)
+- `/socials` → Coming Soon (Phase 2)
