@@ -1,4 +1,4 @@
-import { Shield, Info, Gamepad2, AlertTriangle, CheckCircle2, Users, Lock, Star, Zap } from "lucide-react";
+import { Shield, Info, Gamepad2, AlertTriangle, CheckCircle2, Users, Lock, Star, Zap, Mail } from "lucide-react";
 
 const SECTIONS = [
   {
@@ -226,6 +226,54 @@ export default function About() {
         <div className="pt-1 text-xs text-primary/60 font-semibold uppercase tracking-wide">
           Gamerbuddy — Global Gaming Marketplace · April 2026
         </div>
+      </div>
+
+      {/* ── Contact Support ── */}
+      <div
+        className="rounded-2xl border p-6 sm:p-8 flex flex-col sm:flex-row items-center gap-6"
+        style={{
+          background: "linear-gradient(135deg, rgba(34,211,238,0.06) 0%, rgba(168,85,247,0.04) 100%)",
+          borderColor: "rgba(34,211,238,0.22)",
+          boxShadow: "0 0 30px rgba(34,211,238,0.06)",
+        }}
+      >
+        <div
+          className="shrink-0 h-14 w-14 rounded-2xl border flex items-center justify-center"
+          style={{ background: "rgba(34,211,238,0.10)", borderColor: "rgba(34,211,238,0.28)" }}
+        >
+          <Mail className="h-7 w-7" style={{ color: "#22d3ee" }} />
+        </div>
+        <div className="flex-1 text-center sm:text-left space-y-1.5">
+          <p className="text-[11px] font-black uppercase tracking-widest" style={{ color: "#22d3ee" }}>
+            Questions? We've Got You
+          </p>
+          <h3 className="text-lg sm:text-xl font-black text-foreground">
+            Reach out to the squad
+          </h3>
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            For platform questions, account issues, or feedback — email us directly.{" "}
+            <a
+              href="mailto:gamerbuddyhq@gmail.com"
+              className="font-semibold hover:underline transition-all"
+              style={{ color: "#22d3ee" }}
+            >
+              gamerbuddyhq@gmail.com
+            </a>
+          </p>
+        </div>
+        <a
+          href="mailto:gamerbuddyhq@gmail.com"
+          className="shrink-0 inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition-all hover:scale-105 active:scale-95"
+          style={{
+            background: "linear-gradient(135deg, rgba(34,211,238,0.18), rgba(34,211,238,0.08))",
+            border: "1px solid rgba(34,211,238,0.35)",
+            color: "#22d3ee",
+            boxShadow: "0 4px 20px rgba(34,211,238,0.15)",
+          }}
+        >
+          <Mail className="h-4 w-4 shrink-0" />
+          Contact Support
+        </a>
       </div>
     </div>
   );

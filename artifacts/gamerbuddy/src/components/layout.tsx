@@ -600,8 +600,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
           </div>
         </div>
 
-        {/* ── Support email ── */}
-        <div className="container pb-5">
+        {/* ── Support email / Contact button ── */}
+        <div className="container pb-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <a
             href="mailto:gamerbuddyhq@gmail.com"
             className="inline-flex items-center gap-2 text-xs text-muted-foreground/60 hover:text-primary transition-colors group"
@@ -619,6 +619,21 @@ export function Layout({ children }: { children: React.ReactNode }) {
             <span className="underline underline-offset-2 decoration-muted-foreground/30 group-hover:decoration-primary">
               gamerbuddyhq@gmail.com
             </span>
+          </a>
+          <a
+            href="mailto:gamerbuddyhq@gmail.com"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border text-xs font-bold transition-all hover:scale-105 active:scale-95"
+            style={{
+              background: "rgba(168,85,247,0.08)",
+              borderColor: "rgba(168,85,247,0.28)",
+              color: "#c084fc",
+            }}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect width="20" height="16" x="2" y="4" rx="2" />
+              <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+            </svg>
+            Contact Support
           </a>
         </div>
 

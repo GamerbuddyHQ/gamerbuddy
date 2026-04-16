@@ -264,6 +264,7 @@ const QUICK_PROMPTS = [
   "How does bidding work?",
   "What is the verification time?",
   "How does escrow work?",
+  "How do I contact support?",
 ];
 
 let msgIdCounter = 1;
@@ -429,6 +430,25 @@ export function AIChatWidget() {
               ))}
             </div>
           )}
+
+          {/* Contact Support quick-action */}
+          <div className="px-3.5 pb-2 shrink-0">
+            <a
+              href="mailto:gamerbuddyhq@gmail.com"
+              className="flex items-center justify-center gap-2 w-full py-2 rounded-xl border text-[11px] font-bold transition-all hover:scale-[1.02] active:scale-[0.98]"
+              style={{
+                background: "rgba(34,211,238,0.06)",
+                borderColor: "rgba(34,211,238,0.22)",
+                color: "#22d3ee",
+              }}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect width="20" height="16" x="2" y="4" rx="2" />
+                <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+              </svg>
+              Need Help? Email the Squad — gamerbuddyhq@gmail.com
+            </a>
+          </div>
 
           {/* Input */}
           <div className="px-3.5 pb-3.5 pt-2 shrink-0" style={{ borderTop: "1px solid rgba(168,85,247,0.12)" }}>

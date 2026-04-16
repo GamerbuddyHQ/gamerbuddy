@@ -354,6 +354,48 @@ export default function Roadmap() {
         </Link>
       </div>
 
+      {/* ── Need Help section ── */}
+      <div
+        className="rounded-2xl border p-6 sm:p-8 flex flex-col sm:flex-row items-center gap-6"
+        style={{
+          background: "linear-gradient(135deg, rgba(34,211,238,0.06) 0%, rgba(168,85,247,0.04) 100%)",
+          borderColor: "rgba(34,211,238,0.22)",
+          boxShadow: "0 0 30px rgba(34,211,238,0.06)",
+        }}
+      >
+        <div className="shrink-0 h-14 w-14 rounded-2xl border flex items-center justify-center"
+          style={{ background: "rgba(34,211,238,0.10)", borderColor: "rgba(34,211,238,0.28)" }}>
+          <MessageSquare className="h-7 w-7" style={{ color: "#22d3ee" }} />
+        </div>
+        <div className="flex-1 text-center sm:text-left space-y-1.5">
+          <p className="text-[11px] font-black uppercase tracking-widest" style={{ color: "#22d3ee" }}>
+            Need Help or Have Questions?
+          </p>
+          <h3 className="text-lg sm:text-xl font-black text-foreground">
+            Reach out to the squad
+          </h3>
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            Questions about the roadmap, a feature, or anything else? Our support team is always here for you.
+          </p>
+        </div>
+        <a
+          href="mailto:gamerbuddyhq@gmail.com"
+          className="shrink-0 inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition-all hover:scale-105 active:scale-95"
+          style={{
+            background: "linear-gradient(135deg, rgba(34,211,238,0.18), rgba(34,211,238,0.08))",
+            border: "1px solid rgba(34,211,238,0.35)",
+            color: "#22d3ee",
+            boxShadow: "0 4px 20px rgba(34,211,238,0.15)",
+          }}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect width="20" height="16" x="2" y="4" rx="2" />
+            <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+          </svg>
+          Contact Support
+        </a>
+      </div>
+
       {/* ── Early dev note ── */}
       <div
         className="rounded-xl border px-6 py-5 text-center"
