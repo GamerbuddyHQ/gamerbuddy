@@ -185,7 +185,7 @@ const RESPONSES: Array<{ patterns: RegExp; reply: string }> = [
   /* ── SOCIAL MEDIA / FOLLOW ── */
   {
     patterns: /social|follow.*us|where.*find.*you|youtube|instagram|twitter|facebook|gamejolt|x\.com|our.*channel|official.*channel/i,
-    reply: `We're everywhere — come join the squad! 🎮\n\nCheck out our **[Socials page](/socials)** for the full list with clickable links.\n\n• 🔴 **YouTube** → youtube.com/@GamerbuddyHQ — streams, highlights & more\n• 🐦 **X (Twitter)** → x.com/GamerbuddyHQ — live updates & gaming takes\n• 📸 **Instagram** → instagram.com/gamerbuddy — community highlights\n• 🟢 **GameJolt** → gamejolt.com/@gamerbuddy — game pages & dev logs\n• 🔵 **Facebook** → facebook.com/gamerbuddy — events & announcements\n\nHit follow so you never miss a platform update or giveaway! 🚀`,
+    reply: `We're everywhere — come join the squad! 🎮\n\nCheck out our **[Socials page](/socials)** for the full list with clickable links.\n\n• 🔴 **YouTube** → youtube.com/@GamerbuddyHQ — streams, highlights & more\n• 🐦 **X (Twitter)** → x.com/GamerbuddyHQ — live updates & gaming takes\n• 📸 **Instagram** → instagram.com/gamerbuddy — community highlights\n• 🟢 **GameJolt** → gamejolt.com/@Gamerbuddy — game pages & dev logs\n• 🔵 **Facebook** → facebook.com/gamerbuddy — events & announcements\n\nHit follow so you never miss a platform update or giveaway! 🚀`,
   },
 
   /* ── REPORT / MODERATION ── */

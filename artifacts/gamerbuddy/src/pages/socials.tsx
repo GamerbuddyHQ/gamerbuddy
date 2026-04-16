@@ -81,8 +81,8 @@ const SOCIALS = [
   {
     id: "gamejolt",
     label: "GameJolt",
-    handle: "@gamerbuddy",
-    url: "https://gamejolt.com/@gamerbuddy",
+    handle: "@Gamerbuddy",
+    url: "https://gamejolt.com/@Gamerbuddy",
     tagline: "Find us on GameJolt for dev updates & stickers",
     description: "Explore our GameJolt presence with game pages, developer logs, community stickers, badges, and achievements.",
     subscribers: "Follow",
