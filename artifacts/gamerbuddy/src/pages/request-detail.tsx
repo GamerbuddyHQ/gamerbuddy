@@ -1449,11 +1449,58 @@ const WPA_OPTIONS: { value: "yes" | "no" | "maybe"; label: string; icon: string;
   { value: "no",    label: "No",     icon: "👎", activeColor: "#f87171", activeBg: "rgba(248,113,113,0.15)", activeBorder: "rgba(248,113,113,0.5)" },
 ];
 
-function WouldPlayAgainToggle({ value, onChange }: { value: string | null; onChange: (v: "yes" | "no" | "maybe") => void }) {
+const REVIEW_CHIPS: { id: string; emoji: string; label: string; text: string }[] = [
+  { id: "comm_great",   emoji: "💬", label: "Great comms",      text: "Great communication throughout." },
+  { id: "skill_high",   emoji: "🎮", label: "Highly skilled",   text: "Very skilled player." },
+  { id: "friendly",     emoji: "🤝", label: "Friendly",         text: "Friendly and easy to play with." },
+  { id: "fun",          emoji: "🔥", label: "Super fun!",       text: "The session was super fun!" },
+  { id: "on_time",      emoji: "⚡", label: "Punctual",         text: "Was on time and ready to go." },
+  { id: "as_described", emoji: "✅", label: "As described",     text: "Exactly as described in their profile." },
+  { id: "recommend",    emoji: "💯", label: "Recommend",        text: "I'd recommend them to anyone." },
+  { id: "pro",          emoji: "🚀", label: "Pro level",        text: "Plays at a seriously pro level." },
+  { id: "comm_poor",    emoji: "🔇", label: "Poor comms",       text: "Communication could be improved." },
+  { id: "toxic",        emoji: "⚠️", label: "Rude/Toxic",       text: "Behavior was not acceptable at times." },
+  { id: "skill_low",    emoji: "📉", label: "Below described",  text: "Skill wasn't quite as described." },
+];
+
+function ReviewChips({ comment, onToggle }: { comment: string; onToggle: (chip: { id: string; text: string }) => void }) {
   return (
     <div className="space-y-1.5">
-      <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Would you play with them again?</div>
-      <div className="flex gap-2">
+      <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">
+        Quick tags — tap to add to your review
+      </div>
+      <div className="flex flex-wrap gap-1.5">
+        {REVIEW_CHIPS.map((chip) => {
+          const active = comment.includes(chip.text);
+          return (
+            <button
+              key={chip.id}
+              type="button"
+              onClick={() => onToggle(chip)}
+              className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold border transition-all select-none"
+              style={active
+                ? { background: "rgba(168,85,247,0.2)", borderColor: "rgba(168,85,247,0.6)", color: "#c084fc" }
+                : { background: "rgba(255,255,255,0.03)", borderColor: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.45)" }
+              }
+            >
+              <span>{chip.emoji}</span>
+              <span>{chip.label}</span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function WouldPlayAgainToggle({ value, onChange }: { value: string | null; onChange: (v: "yes" | "no" | "maybe") => void }) {
+  return (
+    <div className="space-y-2">
+      <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+        Would you play with them again?
+        <span className="ml-1 text-muted-foreground/40 font-normal normal-case tracking-normal">(optional)</span>
+      </div>
+      <div className="grid grid-cols-3 gap-2">
         {WPA_OPTIONS.map((opt) => {
           const active = value === opt.value;
           return (
@@ -1461,12 +1508,12 @@ function WouldPlayAgainToggle({ value, onChange }: { value: string | null; onCha
               key={opt.value}
               type="button"
               onClick={() => onChange(opt.value)}
-              className="flex-1 flex items-center justify-center gap-1.5 rounded-xl border px-3 py-2.5 text-sm font-bold transition-all"
+              className="flex flex-col items-center justify-center gap-1 rounded-xl border py-3 text-xs font-bold transition-all"
               style={active
-                ? { borderColor: opt.activeBorder, background: opt.activeBg, color: opt.activeColor }
-                : { borderColor: "rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.03)", color: "rgba(255,255,255,0.4)" }}
+                ? { borderColor: opt.activeBorder, background: opt.activeBg, color: opt.activeColor, boxShadow: `0 0 12px ${opt.activeBorder}` }
+                : { borderColor: "rgba(255,255,255,0.07)", background: "rgba(255,255,255,0.02)", color: "rgba(255,255,255,0.35)" }}
             >
-              <span>{opt.icon}</span>
+              <span className="text-xl">{opt.icon}</span>
               <span>{opt.label}</span>
             </button>
           );
@@ -1486,6 +1533,14 @@ function ReviewPanel({ requestId, currentUserId, awaitingReviews }: { requestId:
 
   const myReview = reviews.find((r) => r.reviewerId === currentUserId);
 
+  const toggleChip = (chip: { id: string; text: string }) => {
+    if (comment.includes(chip.text)) {
+      setComment(comment.replace(chip.text, "").replace(/\s{2,}/g, " ").trim());
+    } else {
+      setComment((prev) => prev ? prev.trim() + " " + chip.text : chip.text);
+    }
+  };
+
   if (myReview) {
     const color = SCORE_COLOR[myReview.rating] ?? "bg-green-500";
     const label = SCORE_LABELS[myReview.rating] ?? "";
@@ -1498,82 +1553,90 @@ function ReviewPanel({ requestId, currentUserId, awaitingReviews }: { requestId:
             Your Review — Submitted
           </div>
           <div className="flex items-center gap-2">
-            <span className={`text-sm font-black px-2.5 py-1 rounded ${color} text-black`}>
-              {myReview.rating}/10
-            </span>
+            <span className={`text-sm font-black px-2.5 py-1 rounded ${color} text-black`}>{myReview.rating}/10</span>
             <span className="text-xs text-muted-foreground">{label}</span>
           </div>
         </div>
         {wpaOpt && (
           <div className="flex items-center gap-1.5 text-xs font-semibold" style={{ color: wpaOpt.activeColor }}>
-            <span>{wpaOpt.icon}</span>
-            <span>Would play again: {wpaOpt.label}</span>
+            <span>{wpaOpt.icon}</span><span>Would play again: {wpaOpt.label}</span>
           </div>
         )}
         {myReview.comment && <p className="text-sm text-foreground/80 leading-relaxed border-l-2 border-yellow-500/30 pl-3">{myReview.comment}</p>}
         <div className="flex items-center gap-1.5 text-xs pt-1">
-          {awaitingReviews ? (
-            <><div className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" /><span className="text-amber-400">Waiting for the other player to submit their review…</span></>
-          ) : (
-            <><Trophy className="h-3.5 w-3.5 text-yellow-400" /><span className="text-yellow-400">+50 points awarded — session fully complete!</span></>
-          )}
+          {awaitingReviews
+            ? <><div className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" /><span className="text-amber-400">Waiting for the other player to submit their review…</span></>
+            : <><Trophy className="h-3.5 w-3.5 text-yellow-400" /><span className="text-yellow-400">+50 points awarded — session fully complete!</span></>
+          }
         </div>
       </div>
     );
   }
 
+  const canSubmit = rating > 0 && comment.trim().length >= 10;
+
   return (
-    <div className="rounded-xl border-2 border-yellow-500/50 bg-yellow-500/5 p-5 space-y-4"
-      style={{ boxShadow: "0 0 20px rgba(234,179,8,0.08)" }}>
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 text-yellow-400 font-black text-sm uppercase tracking-wide">
-          <Star className="h-4 w-4 fill-yellow-400" />
-          ⚡ Review Required
+    <div className="rounded-2xl overflow-hidden border-2 border-yellow-500/40"
+      style={{ background: "linear-gradient(135deg, rgba(234,179,8,0.05), rgba(168,85,247,0.04))", boxShadow: "0 0 28px rgba(234,179,8,0.10)" }}>
+      <div className="h-1 bg-gradient-to-r from-yellow-600 via-amber-400 to-yellow-600 animate-pulse" />
+      <div className="p-5 space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 text-yellow-400 font-black text-sm uppercase tracking-wide">
+            <Star className="h-4 w-4 fill-yellow-400" />⚡ Review Required
+          </div>
+          <div className="flex items-center gap-1 text-xs font-bold text-yellow-400/70">
+            <Trophy className="h-3.5 w-3.5" />+50 pts when both review
+          </div>
         </div>
-        <div className="flex items-center gap-1 text-xs font-bold text-yellow-400/70">
-          <Trophy className="h-3.5 w-3.5" />
-          +50 pts when both review
+
+        <ScoreRating value={rating} onChange={setRating} />
+
+        <ReviewChips comment={comment} onToggle={toggleChip} />
+
+        <div className="space-y-1">
+          <Textarea
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
+            placeholder="How was the session? Communication, skill level, behavior, fun factor…"
+            className="resize-none h-24 bg-background/60 text-sm border-border/50"
+            maxLength={500}
+          />
+          <div className="text-[11px] text-muted-foreground/50 text-right">
+            <span className={comment.trim().length > 0 && comment.trim().length < 10 ? "text-destructive font-bold" : ""}>
+              {comment.trim().length}/500{comment.trim().length < 10 && comment.trim().length > 0 ? ` — ${10 - comment.trim().length} more needed` : ""}
+            </span>
+          </div>
         </div>
+
+        <WouldPlayAgainToggle value={wouldPlayAgain} onChange={setWouldPlayAgain} />
+
+        <Button
+          className="w-full font-black uppercase tracking-wider text-sm py-5 disabled:opacity-40"
+          style={canSubmit ? { background: "linear-gradient(135deg, #eab308, #f59e0b)", color: "#000" } : undefined}
+          variant={canSubmit ? "default" : "outline"}
+          onClick={() => {
+            if (!rating) { toast({ title: "Pick a score first", description: "Tap a number 1–10.", variant: "destructive" }); return; }
+            if (comment.trim().length < 10) { toast({ title: "Comment too short", description: "At least 10 characters required.", variant: "destructive" }); return; }
+            submit.mutate({ requestId, rating, comment: comment.trim(), wouldPlayAgain: wouldPlayAgain ?? undefined }, {
+              onSuccess: (data: any) => {
+                if (data?.bothReviewed) {
+                  toast({ title: "🎉 +50 Points Earned!", description: "Both reviews in — session fully complete!", duration: 7000 });
+                } else {
+                  toast({ title: "✅ Review Submitted!", description: "Waiting for the other player to review…", duration: 7000 });
+                }
+                refetch();
+              },
+              onError: (err: any) => toast({ title: "Error", description: err?.error || "Failed", variant: "destructive" }),
+            });
+          }}
+          disabled={!canSubmit || submit.isPending}
+        >
+          {submit.isPending
+            ? <><div className="h-4 w-4 rounded-full border-2 border-current/30 border-t-current animate-spin mr-2" />Submitting…</>
+            : <><Star className="h-4 w-4 mr-1.5 fill-current" />{rating > 0 ? `Submit Review · ${rating}/10` : "Submit Review — pick a score"}</>
+          }
+        </Button>
       </div>
-      <p className="text-xs text-muted-foreground -mt-1">
-        Rate your partner 1–10 · <span className="text-yellow-400/80">Communication · Skill · Behavior · Fun factor</span>
-      </p>
-      <ScoreRating value={rating} onChange={setRating} />
-      <Textarea
-        value={comment}
-        onChange={(e) => setComment(e.target.value)}
-        placeholder="How was the session? Was communication good? Skill level what you expected? Behavior respectful? Fun?"
-        className="resize-none h-24 bg-background text-sm"
-        maxLength={500}
-      />
-      <div className="text-xs text-muted-foreground">
-        <span className={comment.trim().length > 0 && comment.trim().length < 10 ? "text-destructive" : ""}>{comment.trim().length}/500 {comment.trim().length < 10 && comment.trim().length > 0 ? `— ${10 - comment.trim().length} more chars needed` : ""}</span>
-      </div>
-      <WouldPlayAgainToggle value={wouldPlayAgain} onChange={setWouldPlayAgain} />
-      <Button
-        className="w-full font-black uppercase tracking-wider text-sm py-5"
-        style={{ background: rating && comment.trim().length >= 10 ? "rgba(234,179,8,0.9)" : undefined }}
-        variant={rating && comment.trim().length >= 10 ? "default" : "outline"}
-        onClick={() => {
-          if (!rating) { toast({ title: "Pick a score first", description: "Tap a number 1–10 to rate.", variant: "destructive" }); return; }
-          if (comment.trim().length < 10) { toast({ title: "Comment too short", description: "At least 10 characters required.", variant: "destructive" }); return; }
-          submit.mutate({ requestId, rating, comment: comment.trim(), wouldPlayAgain: wouldPlayAgain ?? undefined }, {
-            onSuccess: (data: any) => {
-              if (data?.bothReviewed) {
-                toast({ title: "🎉 +50 Points Earned!", description: "Both reviews are in — session fully complete!", duration: 7000 });
-              } else {
-                toast({ title: "✅ Review Submitted!", description: "Waiting for the other player to review…", duration: 7000 });
-              }
-              refetch();
-            },
-            onError: (err: any) => toast({ title: "Error", description: err?.error || "Failed", variant: "destructive" }),
-          });
-        }}
-        disabled={!rating || comment.trim().length < 10 || submit.isPending}
-      >
-        <Star className="h-4 w-4 mr-1.5 fill-current" />
-        {submit.isPending ? "Submitting…" : `Submit Review${rating > 0 ? ` · ${rating}/10` : " — pick a score"}`}
-      </Button>
     </div>
   );
 }
@@ -1598,14 +1661,24 @@ function ForcedReviewModal({
   const [wouldPlayAgain, setWouldPlayAgain] = useState<"yes" | "no" | "maybe" | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const [bothDone, setBothDone] = useState(false);
+  const [skipWarning, setSkipWarning] = useState(false);
   const { data: reviews = [], refetch } = useRequestReviews(requestId);
   const submit = useSubmitReview();
   const { toast } = useToast();
 
   const myReview = reviews.find((r) => r.reviewerId === currentUserId);
+  const alreadyReviewed = !!myReview;
+
+  const toggleChip = (chip: { id: string; text: string }) => {
+    if (comment.includes(chip.text)) {
+      setComment(comment.replace(chip.text, "").replace(/\s{2,}/g, " ").trim());
+    } else {
+      setComment((prev) => prev ? prev.trim() + " " + chip.text : chip.text);
+    }
+  };
 
   const handleSubmit = () => {
-    if (!rating) { toast({ title: "Pick a score first", description: "Tap a number 1–10 to rate.", variant: "destructive" }); return; }
+    if (!rating) { toast({ title: "Pick a score first", description: "Tap a number 1–10.", variant: "destructive" }); return; }
     if (comment.trim().length < 10) { toast({ title: "Review too short", description: "Write at least 10 characters.", variant: "destructive" }); return; }
     submit.mutate({ requestId, rating, comment: comment.trim(), wouldPlayAgain: wouldPlayAgain ?? undefined }, {
       onSuccess: (data: any) => {
@@ -1613,160 +1686,217 @@ function ForcedReviewModal({
         setSubmitted(true);
         setBothDone(both);
         refetch();
-        if (both) setTimeout(onDone, 2200);
+        if (both) setTimeout(onDone, 2400);
       },
       onError: (err: any) => toast({ title: "Submission failed", description: err?.error || "Please try again.", variant: "destructive" }),
     });
   };
 
-  const alreadyReviewed = !!myReview;
   const scoreLabel = rating > 0 ? SCORE_LABELS[rating] ?? "" : "";
   const scoreColor = rating > 0 ? (SCORE_COLOR[rating] ?? "bg-green-500") : "bg-muted";
   const wpaOptSubmitted = WPA_OPTIONS.find((o) => o.value === myReview?.wouldPlayAgain);
+  const canSubmit = rating > 0 && comment.trim().length >= 10;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4"
-      style={{ background: "rgba(0,0,0,0.94)", backdropFilter: "blur(12px)" }}>
-      <div className="w-full max-w-lg rounded-2xl border border-yellow-500/50 bg-card overflow-hidden shadow-2xl"
-        style={{ boxShadow: "0 0 80px rgba(234,179,8,0.18), 0 25px 60px rgba(0,0,0,0.85)" }}>
+    <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4"
+      style={{ background: "rgba(0,0,0,0.96)", backdropFilter: "blur(16px)" }}>
+      <div className="w-full max-w-lg rounded-t-3xl sm:rounded-2xl bg-card overflow-hidden"
+        style={{
+          border: "2px solid rgba(234,179,8,0.45)",
+          boxShadow: "0 0 100px rgba(234,179,8,0.15), 0 30px 80px rgba(0,0,0,0.9)",
+          maxHeight: "92dvh",
+          overflowY: "auto",
+        }}>
 
         {/* Pulsing top stripe */}
-        <div className="h-1.5 bg-gradient-to-r from-yellow-600 via-yellow-400 to-yellow-600 animate-pulse" />
+        <div className="h-1.5 bg-gradient-to-r from-yellow-700 via-amber-400 to-yellow-700 animate-pulse shrink-0" />
 
-        <div className="p-6 space-y-5">
-          {/* Icon + title */}
+        <div className="p-5 sm:p-6 space-y-5">
+
+          {/* ── HEADER ── */}
           <div className="text-center space-y-2">
             <div className="relative inline-flex mx-auto">
               <div className="h-16 w-16 rounded-full flex items-center justify-center border-2 border-yellow-500/50 bg-yellow-500/10"
-                style={{ boxShadow: "0 0 24px rgba(234,179,8,0.2)" }}>
-                <Star className="h-8 w-8 text-yellow-400 fill-yellow-400" />
+                style={{ boxShadow: "0 0 32px rgba(234,179,8,0.25)" }}>
+                {alreadyReviewed || submitted
+                  ? <CheckCircle2 className="h-9 w-9 text-green-400" />
+                  : <Star className="h-9 w-9 text-yellow-400 fill-yellow-400" />
+                }
               </div>
               {!alreadyReviewed && !submitted && (
                 <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-500 border-2 border-card flex items-center justify-center text-[9px] font-black text-white animate-bounce">!</span>
               )}
             </div>
-            <h2 className="text-xl font-extrabold uppercase tracking-tight text-foreground">
-              {alreadyReviewed || submitted ? "✅ Review Submitted" : "⚡ Session Complete — Rate Your Partner"}
+            <h2 className="text-lg sm:text-xl font-extrabold uppercase tracking-tight text-foreground">
+              {alreadyReviewed || submitted
+                ? submitted && bothDone ? "🎉 Session Complete!" : "✅ Review Submitted"
+                : "⚡ Rate Your Gaming Session"
+              }
             </h2>
             <p className="text-sm text-muted-foreground leading-relaxed max-w-sm mx-auto">
               {alreadyReviewed || submitted
                 ? submitted && bothDone
-                  ? "Both reviews are in — 50 points awarded to each player! Session fully complete!"
-                  : `Waiting for ${otherPersonName} to submit their review…`
-                : <>Payment released for <strong className="text-yellow-400">{gameName}</strong>. Rate <strong className="text-foreground">{otherPersonName}</strong> — your honest review builds a safer community.</>
+                  ? <>Both reviews in — <span className="text-yellow-400 font-black">+50 points</span> awarded to each player!</>
+                  : <>Waiting for <strong className="text-foreground">{otherPersonName}</strong> to review. You'll both get your points when they do.</>
+                : <>Your <strong className="text-yellow-400">{gameName}</strong> session with <strong className="text-foreground">{otherPersonName}</strong> is complete. Your honest review makes Gamerbuddy safer for everyone.</>
               }
             </p>
           </div>
 
-          {/* Prize callout */}
+          {/* ── POINTS CALLOUT ── */}
           {!alreadyReviewed && !submitted && (
-            <div className="flex items-center justify-center gap-2 rounded-xl border border-yellow-500/30 bg-yellow-500/10 px-4 py-3">
-              <Trophy className="h-4 w-4 text-yellow-400 shrink-0" />
+            <div className="flex items-center justify-center gap-3 rounded-xl border border-yellow-500/25 bg-yellow-500/8 px-4 py-3"
+              style={{ background: "rgba(234,179,8,0.06)" }}>
+              <Trophy className="h-5 w-5 text-yellow-400 shrink-0" />
               <span className="text-sm font-bold text-yellow-300">
                 Both players earn <span className="text-white font-black">+50 points</span> when both reviews are in
               </span>
             </div>
           )}
 
-          {/* Waiting state — after submitted */}
+          {/* ── WAITING STATE ── */}
           {(alreadyReviewed || submitted) && !bothDone && (
-            <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-4 text-center space-y-3">
+            <div className="rounded-xl border border-amber-500/25 bg-amber-500/5 p-4 text-center space-y-3">
               {myReview && wpaOptSubmitted && (
                 <div className="flex items-center justify-center gap-2 text-sm font-bold" style={{ color: wpaOptSubmitted.activeColor }}>
-                  <span>{wpaOptSubmitted.icon}</span>
-                  <span>You said: Would play again — {wpaOptSubmitted.label}</span>
+                  <span className="text-lg">{wpaOptSubmitted.icon}</span>
+                  <span>You selected: Would play again — {wpaOptSubmitted.label}</span>
                 </div>
               )}
-              <div className="h-2 w-2 rounded-full bg-amber-400 animate-pulse mx-auto" />
-              <div className="text-sm font-bold text-amber-400">Waiting on {otherPersonName}</div>
+              <div className="flex items-center justify-center gap-2">
+                <div className="h-2 w-2 rounded-full bg-amber-400 animate-ping" />
+                <div className="text-sm font-bold text-amber-400">Waiting on {otherPersonName}</div>
+              </div>
               <p className="text-xs text-muted-foreground">
-                {isHirer ? "The gamer" : "The hirer"} still needs to leave their review.
-                You'll both receive your 50 points when they do.
+                {isHirer ? "The gamer" : "The hirer"} still needs to leave their review. You'll both get +50 points when they do.
               </p>
-              <Button
-                onClick={onDone}
-                size="sm"
-                variant="outline"
-                className="text-xs font-bold uppercase text-muted-foreground hover:text-amber-400 hover:border-amber-500/40"
-              >
+              <Button onClick={onDone} size="sm" variant="outline"
+                className="text-xs font-bold uppercase text-muted-foreground hover:text-amber-400 hover:border-amber-500/40">
                 Close — I'll check back later
               </Button>
             </div>
           )}
 
-          {/* Both done celebration */}
-          {(submitted && bothDone) && (
+          {/* ── BOTH DONE CELEBRATION ── */}
+          {submitted && bothDone && (
             <div className="rounded-xl border border-green-500/30 bg-green-500/5 p-5 text-center space-y-3">
-              <CheckCircle2 className="h-12 w-12 text-green-400 mx-auto" />
-              <div className="text-lg font-extrabold text-green-400 uppercase tracking-wide">🎉 Session Complete!</div>
-              <div className="text-sm text-muted-foreground">Both reviews in · <span className="text-yellow-400 font-black">+50 points</span> awarded to each player</div>
+              <div className="text-4xl">🎉</div>
+              <div className="text-lg font-extrabold text-green-400 uppercase tracking-wide">Session Fully Complete!</div>
+              <div className="text-sm text-muted-foreground">
+                Both reviews submitted · <span className="text-yellow-400 font-black">+50 points</span> awarded
+              </div>
               <Button onClick={onDone} className="bg-green-500 hover:bg-green-400 text-black font-black uppercase tracking-wider w-full">
-                <CheckCircle2 className="h-4 w-4 mr-2" /> Done
+                <CheckCircle2 className="h-4 w-4 mr-2" /> Awesome, close
               </Button>
             </div>
           )}
 
-          {/* Review form */}
+          {/* ── REVIEW FORM ── */}
           {!alreadyReviewed && !submitted && (
-            <div className="space-y-4">
+            <div className="space-y-5">
+
+              {/* Score */}
               <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
-                    Rate {otherPersonName} · 1–10 <span className="text-red-400">*</span>
-                  </div>
-                  <div className="text-xs text-muted-foreground/50">Communication · Skill · Behavior · Fun</div>
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-black uppercase tracking-widest text-foreground/70">
+                    Overall Score <span className="text-red-400">*</span>
+                  </span>
+                  {rating > 0 && (
+                    <div className="flex items-center gap-1.5">
+                      <span className={`font-black px-2 py-0.5 rounded text-xs ${scoreColor} text-black`}>{rating}/10</span>
+                      <span className="text-muted-foreground">{scoreLabel}</span>
+                    </div>
+                  )}
                 </div>
                 <ScoreRating value={rating} onChange={setRating} />
-                {rating > 0 && (
-                  <div className="flex items-center gap-2">
-                    <span className={`text-sm font-black px-2.5 py-1 rounded ${scoreColor} text-black`}>{rating}/10</span>
-                    <span className="text-sm text-muted-foreground">{scoreLabel}</span>
-                  </div>
-                )}
+                <div className="grid grid-cols-4 gap-2 pt-1">
+                  {[
+                    { label: "💬 Comms", hint: "How well did they communicate?" },
+                    { label: "🎮 Skill", hint: "Skill level as described?" },
+                    { label: "🤝 Behavior", hint: "Respectful and friendly?" },
+                    { label: "🎉 Fun", hint: "Did you actually enjoy it?" },
+                  ].map((dim) => (
+                    <div key={dim.label} className="text-center rounded-lg border border-border/30 bg-background/30 px-1.5 py-2" title={dim.hint}>
+                      <div className="text-[10px] font-bold text-muted-foreground/70 leading-tight">{dim.label}</div>
+                    </div>
+                  ))}
+                </div>
               </div>
 
+              {/* Quick chips */}
+              <ReviewChips comment={comment} onToggle={toggleChip} />
+
+              {/* Written review */}
               <div className="space-y-1.5">
-                <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
-                  Written Review <span className="text-red-400">*</span> <span className="font-normal normal-case tracking-normal text-muted-foreground/50">(min 10 chars)</span>
+                <div className="text-xs font-black uppercase tracking-widest text-foreground/70">
+                  Written Review <span className="text-red-400">*</span>
+                  <span className="ml-1 font-normal normal-case tracking-normal text-muted-foreground/50">min 10 chars</span>
                 </div>
                 <Textarea
                   value={comment}
                   onChange={(e) => setComment(e.target.value)}
-                  placeholder={`How was the session with ${otherPersonName}? How was their communication? Skill level as described? Behavior respectful and fun?`}
-                  className="resize-none h-28 bg-background text-sm"
+                  placeholder={`How was the session with ${otherPersonName}? Communication, skill, behavior, fun — be honest and specific.`}
+                  className="resize-none h-28 bg-background/60 text-sm border-border/50"
                   maxLength={500}
                 />
-                <div className="text-xs text-muted-foreground">
-                  <span className={comment.trim().length > 0 && comment.trim().length < 10 ? "text-destructive" : ""}>
-                    {comment.trim().length}/500{comment.trim().length < 10 && comment.trim().length > 0 ? ` — ${10 - comment.trim().length} more needed` : ""}
+                <div className="flex items-center justify-between text-[11px] text-muted-foreground/50">
+                  <span>Honest reviews build trust — yours matters</span>
+                  <span className={comment.trim().length > 0 && comment.trim().length < 10 ? "text-destructive font-bold" : ""}>
+                    {comment.trim().length}/500
                   </span>
                 </div>
               </div>
 
+              {/* Would play again */}
               <WouldPlayAgainToggle value={wouldPlayAgain} onChange={setWouldPlayAgain} />
 
-              <div className="flex flex-col gap-2 pt-1">
+              {/* Submit */}
+              <div className="space-y-2 pt-1">
                 <Button
                   onClick={handleSubmit}
-                  disabled={!rating || comment.trim().length < 10 || submit.isPending}
-                  className="w-full text-black font-black uppercase tracking-wider text-sm py-5 disabled:opacity-50 disabled:cursor-not-allowed"
-                  style={{ background: "linear-gradient(135deg, #eab308, #f59e0b)" }}
+                  disabled={!canSubmit || submit.isPending}
+                  className="w-full font-black uppercase tracking-wider text-sm py-6 disabled:opacity-40 disabled:cursor-not-allowed"
+                  style={canSubmit ? { background: "linear-gradient(135deg, #eab308, #f59e0b)", color: "#000" } : undefined}
                 >
-                  {submit.isPending ? (
-                    <span className="flex items-center gap-2">
-                      <div className="h-4 w-4 rounded-full border-2 border-black/30 border-t-black animate-spin" />
-                      Submitting…
-                    </span>
-                  ) : (
-                    <><Star className="h-4 w-4 mr-2 fill-black" />Submit Review{rating > 0 ? ` · ${rating}/10` : " — choose a score first"}</>
-                  )}
+                  {submit.isPending
+                    ? <><div className="h-4 w-4 rounded-full border-2 border-black/30 border-t-black animate-spin mr-2" />Submitting…</>
+                    : canSubmit
+                      ? <><Star className="h-4 w-4 mr-2 fill-black" />Submit Review · {rating}/10</>
+                      : <><Star className="h-4 w-4 mr-2" />{!rating ? "Choose a score above first" : "Write at least 10 characters"}</>
+                  }
                 </Button>
-                <p className="text-center text-[10px] text-muted-foreground/50 uppercase tracking-widest">
-                  Review required to finalise the session · Can't be edited after submission
-                </p>
+
+                {/* Skip / disclaimer row */}
+                <div className="flex items-center justify-between px-1">
+                  <p className="text-[10px] text-muted-foreground/40 leading-tight">
+                    Can't be edited after submission
+                  </p>
+                  {!skipWarning
+                    ? (
+                      <button
+                        type="button"
+                        onClick={() => setSkipWarning(true)}
+                        className="text-[10px] text-muted-foreground/35 hover:text-muted-foreground/60 underline underline-offset-2 transition-colors"
+                      >
+                        Skip for now
+                      </button>
+                    ) : (
+                      <div className="flex items-center gap-2 rounded-lg border border-amber-500/30 bg-amber-500/8 px-2.5 py-1.5 max-w-[220px]"
+                        style={{ background: "rgba(245,158,11,0.07)" }}>
+                        <span className="text-[10px] text-amber-400/80 leading-snug">
+                          Reviews build community trust — you'll be reminded next time you visit this session.{" "}
+                          <button type="button" onClick={onDone} className="underline font-bold text-amber-400 hover:text-amber-300">
+                            Leave anyway
+                          </button>
+                        </span>
+                      </div>
+                    )
+                  }
+                </div>
               </div>
             </div>
           )}
+
         </div>
       </div>
     </div>
