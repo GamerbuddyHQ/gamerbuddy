@@ -1229,6 +1229,15 @@ function SuggestionCard({ suggestion, isAdmin }: { suggestion: Suggestion; isAdm
             <div className="flex items-center gap-1.5">
               <Avatar name={suggestion.authorName} size={20} />
               <span className="text-[11px] font-semibold text-white/60">{suggestion.authorName}</span>
+              {suggestion.authorCountry && suggestion.authorCountry !== "any" && COUNTRY_MAP[suggestion.authorCountry]?.flag && (
+                <span
+                  className="text-base leading-none"
+                  title={COUNTRY_MAP[suggestion.authorCountry]?.label}
+                  aria-label={COUNTRY_MAP[suggestion.authorCountry]?.label}
+                >
+                  {COUNTRY_MAP[suggestion.authorCountry].flag}
+                </span>
+              )}
             </div>
             <span className="text-[10px] text-muted-foreground/38">
               {formatDistanceToNow(new Date(suggestion.createdAt), { addSuffix: true })}

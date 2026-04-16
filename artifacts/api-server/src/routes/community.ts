@@ -47,13 +47,14 @@ router.get("/community/suggestions", loadUser, async (req, res): Promise<void> =
       createdAt: suggestionsTable.createdAt,
       userId: suggestionsTable.userId,
       authorName: usersTable.name,
+      authorCountry: usersTable.country,
       likes: sql<number>`cast(count(case when ${suggestionVotesTable.vote} = 'up' then 1 end) as int)`,
       dislikes: sql<number>`cast(count(case when ${suggestionVotesTable.vote} = 'down' then 1 end) as int)`,
     })
     .from(suggestionsTable)
     .leftJoin(usersTable, eq(suggestionsTable.userId, usersTable.id))
     .leftJoin(suggestionVotesTable, eq(suggestionVotesTable.suggestionId, suggestionsTable.id))
-    .groupBy(suggestionsTable.id, usersTable.name);
+    .groupBy(suggestionsTable.id, usersTable.name, usersTable.country);
 
   const commentCounts = await db
     .select({
