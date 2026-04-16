@@ -191,13 +191,13 @@ const RESPONSES: Array<{ patterns: RegExp; reply: string }> = [
   /* ── DISCORD ── */
   {
     patterns: /discord|join.*server|server.*link|discord.*link|join.*discord/i,
-    reply: `Head to our **[Socials page](/socials)** and hit the "Join Our Discord Server" button — or go direct:\n\n👾 **[discord.gg/pJcmECke](https://discord.gg/pJcmECke)**\n\nInside you'll find live squad channels, platform support, community events, and giveaways. Come hang! 🚀`,
+    reply: `You can find our Discord and all other social links on the **[Socials page](/socials)** under **"All Socials & Links"**. 🔗\n\nTap that button to reach our full hub — every platform in one place!`,
   },
 
   /* ── SOCIAL MEDIA / FOLLOW ── */
   {
     patterns: /social|follow.*us|where.*find.*you|youtube|instagram|twitter|facebook|gamejolt|x\.com|our.*channel|official.*channel/i,
-    reply: `The easiest way is our **"All Socials & Links"** button on the **[Socials page](/socials)** 🔗\n\nIt points to **superr.bio/gamerbuddy** — one place with every platform, link, and update.\n\nFor live chat and squad-finding, join us directly on Discord:\n👾 **[discord.gg/pJcmECke](https://discord.gg/pJcmECke)**\n\nCheck the Socials page for everything else! 🚀`,
+    reply: `The easiest way to find everything Gamerbuddy is the **[Socials page](/socials)** — hit the **"All Socials & Links"** button there. 🔗\n\nIt takes you to our central hub at **superr.bio/gamerbuddy** — every platform, every link, all in one place. Bookmark it!`,
   },
 
   /* ── REPORT / MODERATION ── */
