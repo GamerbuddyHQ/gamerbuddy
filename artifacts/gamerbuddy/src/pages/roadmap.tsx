@@ -4,15 +4,15 @@ import {
   CheckCircle2, Clock, Rocket, Zap, Users, Trophy,
   Gamepad2, Wallet, Star, Shield, Globe, MessageSquare,
   Swords, Bot, Sparkles, Map, Lightbulb, ChevronRight,
-  Sun, Lock, AlertTriangle, BarChart3, Smile, Video,
+  Lock, AlertTriangle, CircleDollarSign, Gift, BadgeDollarSign,
 } from "lucide-react";
 
-/* ── Phase definitions ── */
+/* ── Phase definitions — Phase 1 (live), Phase 3 & 4 (future). No Phase 2. ── */
 const PHASES = [
   {
     id: 1,
     tag: "Now Live",
-    title: "Core Platform & Community",
+    title: "Core Platform",
     status: "live" as const,
     accent: "#22c55e",
     bg: "rgba(34,197,94,0.07)",
@@ -21,52 +21,47 @@ const PHASES = [
     bar: "from-green-500 to-emerald-400",
     Icon: Gamepad2,
     description:
-      "The full first-generation Gamerbuddy experience — hire, play, pay, review, and connect with the community.",
+      "The essential hiring experience — post, bid, play, pay, and review. Everything you need to hire gamers or earn as one.",
     items: [
       {
         icon: Zap,
         title: "Core Hiring System",
-        desc: "Post requests, place bids, accept sessions, play together, and complete payments with reviews.",
+        desc: "Post requests, place bids, accept sessions, play together, and complete payments — with full reviews on completion.",
       },
       {
         icon: Wallet,
         title: "Dual Wallets",
-        desc: "Hiring Wallet + Earnings Wallet with a 10% platform fee on completed sessions.",
+        desc: "Hiring Wallet for posting sessions and an Earnings Wallet for receiving payouts — fully separated.",
+      },
+      {
+        icon: CircleDollarSign,
+        title: "10% Platform Fee",
+        desc: "A 10% fee is deducted from the session escrow on completion. The rest goes straight to the gamer's Earnings Wallet.",
+      },
+      {
+        icon: Gift,
+        title: "Gift Button",
+        desc: "Send a tip or bonus to a gamer you loved playing with — right from the session or their profile.",
+      },
+      {
+        icon: BadgeDollarSign,
+        title: "Wallet Limits",
+        desc: "Minimum $10.75 required to post a request. Maximum $1,000 balance per wallet for safety.",
       },
       {
         icon: Shield,
         title: "Account Verification",
-        desc: "Identity check for safety and trust. Review usually takes 7–15 days.",
+        desc: "Identity check for safety and trust — protects both hirers and gamers. Review takes 7–15 days.",
       },
       {
         icon: AlertTriangle,
         title: "Safety Rules & Warnings",
-        desc: "Never share passwords. Recording sessions is your own responsibility.",
-      },
-      {
-        icon: BarChart3,
-        title: "Improved Browse Page",
-        desc: "Redesigned Browse Requests layout with advanced filters, smart sorting, and nation/gender preferences.",
-      },
-      {
-        icon: MessageSquare,
-        title: "Community Suggestions",
-        desc: "Likes, dislikes, threaded comments, emojis & GIFs — share ideas and vote on what gets built next.",
-      },
-      {
-        icon: Sun,
-        title: "Light / Dark Theme",
-        desc: "Switch between light and dark mode from any page with one click.",
-      },
-      {
-        icon: Globe,
-        title: "Regional Clock",
-        desc: "Selectable timezone display in the navbar — perfect for scheduling cross-region sessions.",
+        desc: "Never share account passwords. Recording sessions is your own responsibility. Violations lead to bans.",
       },
     ],
   },
   {
-    id: 2,
+    id: 3,
     tag: "Future",
     title: "Competition & Rewards",
     status: "next" as const,
@@ -87,12 +82,12 @@ const PHASES = [
       {
         icon: Swords,
         title: "Tournaments",
-        desc: "Free to join, hirer approves every participant — competitive and fair.",
+        desc: "Free to join, hirer approves every participant — competitive, fair, and open to all.",
       },
       {
         icon: Star,
         title: "Quest System",
-        desc: "Challenges on user profiles — complete quests to earn bonus points and badges.",
+        desc: "Challenges on user profiles — complete quests to earn bonus points and profile badges.",
       },
       {
         icon: Sparkles,
@@ -102,8 +97,8 @@ const PHASES = [
     ],
   },
   {
-    id: 3,
-    tag: "Future",
+    id: 4,
+    tag: "Future Plans",
     title: "Next-Level Platform",
     status: "future" as const,
     accent: "#f59e0b",
@@ -133,16 +128,16 @@ const PHASES = [
       {
         icon: Lightbulb,
         title: "Community-Driven Enhancements",
-        desc: "More platform features shaped directly by your suggestions and feedback.",
+        desc: "More platform features shaped directly by your suggestions and community votes.",
       },
     ],
   },
 ];
 
 const STATUS_STYLES = {
-  live:   { dot: "#22c55e", pulse: true,  label: "Now Live" },
-  next:   { dot: "#22d3ee", pulse: false, label: "Future"   },
-  future: { dot: "#f59e0b", pulse: false, label: "Future"   },
+  live:   { dot: "#22c55e", pulse: true,  label: "Now Live"    },
+  next:   { dot: "#22d3ee", pulse: false, label: "Future"      },
+  future: { dot: "#f59e0b", pulse: false, label: "Future Plans" },
 };
 
 const STATUS_ICON = {
@@ -215,14 +210,14 @@ export default function Roadmap() {
             style={{ background: "#22c55e", boxShadow: "0 0 7px rgba(34,197,94,0.7)", animation: "pulse 1.5s infinite" }}
           />
           <span className="text-[11px] font-black uppercase tracking-[0.14em] text-green-400/90">
-            Phase 1 is fully live
+            Phase 1 is live now
           </span>
         </div>
         <p className="text-sm sm:text-[15px] text-foreground/80 leading-[1.75]">
-          <strong className="text-foreground">Phase 1 is complete</strong> — the full core platform is live, including hiring, wallets, verification, Community Suggestions, light/dark theme, regional clock, and an improved Browse experience.
+          <strong className="text-foreground">Phase 1 is fully live</strong> — the core hiring platform is open, including wallets, escrow payments, a 10% platform fee, the gift button, wallet limits, account verification, and safety rules.
         </p>
         <p className="text-sm text-muted-foreground/60 leading-[1.75]">
-          We're now building towards Phase 2: tournaments, quests, and bulk hiring. Your feedback and Community votes directly shape what we prioritise. 🚀
+          We're now building Phase 3 — tournaments, quests, and bulk hiring. Your Community votes directly shape what we prioritise next. 🚀
         </p>
       </div>
 

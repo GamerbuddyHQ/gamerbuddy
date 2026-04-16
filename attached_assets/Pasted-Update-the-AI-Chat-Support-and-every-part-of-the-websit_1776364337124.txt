@@ -1,0 +1,38 @@
+Update the AI Chat Support and every part of the website to reflect the current state of Gamerbuddy after all recent changes.
+
+Current Status:
+- We are in an expanded **Phase 1** (no separate Phase 2 anymore).
+- Enabled features in current version:
+  - Core hiring: Post request, Browse Requests, Place Bid (verified users only), Accept, Play, Release Payment with 10% fee, Review & Rating
+  - Dual Wallets: Hiring Wallet (non-withdrawable) + Earnings Wallet (withdrawable after $100)
+  - 10% platform fee on every completed Quest/Job
+  - Gift Button after session
+  - Minimum $10.75 in Hiring Wallet to post requests
+  - Maximum $1000 wallet balance
+  - Community Suggestions (with likes/dislikes, threaded comments, emojis & GIFs, nationality flags + timestamps)
+  - Light / Dark theme toggle
+  - Regional Clock with selectable region
+  - Improved Browse Requests layout
+
+- Removed: Phase 2 section from Roadmap. Keep only Phase 1 (Live), Phase 3 (Future), and Phase 4 (Future).
+
+Tasks:
+1. Update the AI Chat Support completely:
+   - Make it fully aware of the current expanded Phase 1 features.
+   - When users ask about removed or future features (Tournaments, Bulk Hiring, etc.), reply: 
+     "That feature is planned for a future phase. We're currently focused on making core hiring, community, and scheduling smooth and safe."
+   - Use friendly, gamer-like tone.
+
+2. Update the Roadmap page:
+   - Remove the entire Phase 2 section.
+   - Keep Phase 1 as "Now Live" with the expanded features listed above.
+   - Keep Phase 3 and Phase 4 as "Future".
+
+3. Update Homepage:
+   - Change the banner to: "Gamerbuddy Phase 1 is now expanded! Core hiring, Community, Light/Dark theme, and Regional Clock are live."
+
+4. Update everywhere else:
+   - Navigation, footer, and any messages should reflect the current active features.
+   - Ensure no outdated "Coming Soon" messages appear for features that are now enabled (Community, Light theme, Regional Clock).
+
+Apply these updates consistently across the entire website.
