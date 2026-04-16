@@ -97,33 +97,27 @@ function FeatureCard({
 }) {
   return (
     <div
-      className="relative group rounded-2xl border border-border/60 p-6 flex flex-col gap-4 transition-all duration-300 overflow-hidden"
-      style={{ background: "var(--surface-dark)" }}
+      className="relative group rounded-2xl border border-border bg-card p-6 flex flex-col gap-4 transition-all duration-300 overflow-hidden hover:border-primary/40 hover:shadow-[0_8px_32px_rgba(168,85,247,0.12)]"
     >
-      {/* hover border glow */}
-      <div
-        className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
-        style={{ boxShadow: `inset 0 0 0 1px ${glowColor}` }}
-      />
       {/* subtle corner accent */}
       <div
-        className="absolute top-0 right-0 w-24 h-24 rounded-bl-full opacity-10 group-hover:opacity-20 transition-opacity duration-500"
-        style={{ background: `radial-gradient(circle, ${glowColor} 0%, transparent 70%)` }}
+        className="absolute top-0 right-0 w-28 h-28 rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+        style={{ background: `radial-gradient(circle, ${glowColor}18 0%, transparent 70%)` }}
       />
 
       <div
-        className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${iconBg}`}
-        style={{ boxShadow: `0 0 18px ${glowColor}40` }}
+        className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${iconBg}`}
+        style={{ boxShadow: `0 0 16px ${glowColor}30` }}
       >
         <div className={iconColor}>{icon}</div>
       </div>
 
-      <div className="space-y-1.5">
+      <div className="space-y-2">
         <div className="flex items-center gap-2">
-          <h3 className="font-extrabold text-foreground uppercase tracking-wider text-base">{title}</h3>
+          <h3 className="font-extrabold text-foreground tracking-wide text-[15px]">{title}</h3>
           <span
-            className="text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded border"
-            style={{ color: glowColor, borderColor: `${glowColor}50`, background: `${glowColor}10` }}
+            className="text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-full border"
+            style={{ color: glowColor, borderColor: `${glowColor}50`, background: `${glowColor}12` }}
           >
             {tag}
           </span>
@@ -131,9 +125,9 @@ function FeatureCard({
         <p className="text-sm text-muted-foreground leading-relaxed">{desc}</p>
       </div>
 
-      <div className="mt-auto pt-2">
+      <div className="mt-auto pt-1">
         <div
-          className="h-0.5 w-8 rounded-full group-hover:w-full transition-all duration-500"
+          className="h-0.5 w-6 rounded-full group-hover:w-full transition-all duration-500"
           style={{ background: `linear-gradient(90deg, ${glowColor}, transparent)` }}
         />
       </div>
@@ -340,25 +334,20 @@ export default function Home() {
       </section>
 
       {/* ═══════════════════ FEATURES ═══════════════════ */}
-      <section className="relative px-4 pb-16 -mt-4">
+      <section className="relative px-4 pb-16 pt-4">
         <div className="max-w-5xl mx-auto">
           {/* section label */}
-          <div className="text-center mb-12 px-2">
-            <div className="inline-flex items-center gap-3 text-[11px] font-bold uppercase tracking-[0.2em] text-primary/70 mb-5">
+          <div className="text-center mb-8 px-2">
+            <div className="inline-flex items-center gap-3 text-[11px] font-bold uppercase tracking-[0.2em] text-primary/70 mb-4">
               <div className="h-px w-10 bg-gradient-to-r from-transparent to-purple-500/60" />
-              Platform Features
+              Core Features
               <div className="h-px w-10 bg-gradient-to-l from-transparent to-purple-500/60" />
             </div>
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-foreground leading-tight mb-4">
-              Why Gamers{" "}
-              <span style={{ color: "hsl(var(--primary))", textShadow: "0 0 24px rgba(168,85,247,0.4)" }}>
-                Love
-              </span>{" "}
-              Gamerbuddy
+            <h2 className="text-2xl sm:text-3xl font-black text-foreground leading-tight mb-3">
+              How Gamerbuddy Works
             </h2>
-            <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-              The safest and most fun way to find real teammates for co-op and multiplayer games — anywhere in the world.{" "}
-              <span className="text-foreground/75 font-medium">Verified players, escrow-secured payments, real fun.</span>
+            <p className="text-sm sm:text-base text-muted-foreground max-w-xl mx-auto leading-relaxed">
+              Post a request, get bids from verified gamers, play together — funds held in escrow until the session is complete.
             </p>
           </div>
 
