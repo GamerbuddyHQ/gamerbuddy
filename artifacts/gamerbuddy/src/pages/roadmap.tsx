@@ -7,12 +7,12 @@ import {
   Sun, Lock, AlertTriangle, BarChart3, Smile, Video,
 } from "lucide-react";
 
-/* ── Phase definitions with user-specified content ── */
+/* ── Phase definitions ── */
 const PHASES = [
   {
     id: 1,
     tag: "Now Live",
-    title: "Core Platform",
+    title: "Core Platform & Community",
     status: "live" as const,
     accent: "#22c55e",
     bg: "rgba(34,197,94,0.07)",
@@ -21,7 +21,7 @@ const PHASES = [
     bar: "from-green-500 to-emerald-400",
     Icon: Gamepad2,
     description:
-      "The essential hiring experience — post, bid, play, pay, and review. Everything you need to hire gamers or earn as one.",
+      "The full first-generation Gamerbuddy experience — hire, play, pay, review, and connect with the community.",
     items: [
       {
         icon: Zap,
@@ -35,7 +35,7 @@ const PHASES = [
       },
       {
         icon: Shield,
-        title: "Basic Account Verification",
+        title: "Account Verification",
         desc: "Identity check for safety and trust. Review usually takes 7–15 days.",
       },
       {
@@ -43,31 +43,15 @@ const PHASES = [
         title: "Safety Rules & Warnings",
         desc: "Never share passwords. Recording sessions is your own responsibility.",
       },
-    ],
-  },
-  {
-    id: 2,
-    tag: "Coming Soon",
-    title: "Platform Improvements",
-    status: "soon" as const,
-    accent: "#a855f7",
-    bg: "rgba(168,85,247,0.07)",
-    border: "rgba(168,85,247,0.22)",
-    glow: "rgba(168,85,247,0.12)",
-    bar: "from-purple-500 to-violet-400",
-    Icon: Sparkles,
-    description:
-      "Quality-of-life upgrades, smarter browsing, and more ways to express yourself in the community.",
-    items: [
       {
         icon: BarChart3,
         title: "Improved Browse Page",
-        desc: "Redesigned Browse Requests layout with better filters and smarter sorting.",
+        desc: "Redesigned Browse Requests layout with advanced filters, smart sorting, and nation/gender preferences.",
       },
       {
         icon: MessageSquare,
         title: "Community Suggestions",
-        desc: "Likes, dislikes, threaded comments, emojis & GIFs — have your voice heard.",
+        desc: "Likes, dislikes, threaded comments, emojis & GIFs — share ideas and vote on what gets built next.",
       },
       {
         icon: Sun,
@@ -82,7 +66,7 @@ const PHASES = [
     ],
   },
   {
-    id: 3,
+    id: 2,
     tag: "Future",
     title: "Competition & Rewards",
     status: "next" as const,
@@ -118,7 +102,7 @@ const PHASES = [
     ],
   },
   {
-    id: 4,
+    id: 3,
     tag: "Future",
     title: "Next-Level Platform",
     status: "future" as const,
@@ -156,15 +140,13 @@ const PHASES = [
 ];
 
 const STATUS_STYLES = {
-  live:   { dot: "#22c55e", pulse: true,  label: "Now Live"      },
-  soon:   { dot: "#a855f7", pulse: false, label: "Coming Soon"   },
-  next:   { dot: "#22d3ee", pulse: false, label: "Future" },
-  future: { dot: "#f59e0b", pulse: false, label: "Future" },
+  live:   { dot: "#22c55e", pulse: true,  label: "Now Live" },
+  next:   { dot: "#22d3ee", pulse: false, label: "Future"   },
+  future: { dot: "#f59e0b", pulse: false, label: "Future"   },
 };
 
 const STATUS_ICON = {
   live:   CheckCircle2,
-  soon:   Clock,
   next:   Clock,
   future: Rocket,
 };
@@ -218,7 +200,7 @@ export default function Roadmap() {
         </div>
       </div>
 
-      {/* ── Phase 1 Context Banner ── */}
+      {/* ── Phase 1 Live Banner ── */}
       <div
         className="rounded-2xl border p-6 space-y-4"
         style={{
@@ -233,15 +215,14 @@ export default function Roadmap() {
             style={{ background: "#22c55e", boxShadow: "0 0 7px rgba(34,197,94,0.7)", animation: "pulse 1.5s infinite" }}
           />
           <span className="text-[11px] font-black uppercase tracking-[0.14em] text-green-400/90">
-            Phase 1 is Live
+            Phase 1 is fully live
           </span>
         </div>
         <p className="text-sm sm:text-[15px] text-foreground/80 leading-[1.75]">
-          We are currently in <strong className="text-foreground">Phase 1</strong> — focused on core hiring and safe co-op sessions.
-          We are rolling out features gradually to ensure everything works smoothly and securely.
+          <strong className="text-foreground">Phase 1 is complete</strong> — the full core platform is live, including hiring, wallets, verification, Community Suggestions, light/dark theme, regional clock, and an improved Browse experience.
         </p>
         <p className="text-sm text-muted-foreground/60 leading-[1.75]">
-          Thank you for your patience as we build the best gaming buddy experience!
+          We're now building towards Phase 2: tournaments, quests, and bulk hiring. Your feedback and Community votes directly shape what we prioritise. 🚀
         </p>
       </div>
 
@@ -387,9 +368,9 @@ export default function Roadmap() {
         }}
       >
         <p className="text-sm text-muted-foreground leading-relaxed">
-          We are in early development phase. Features will be rolled out gradually based on feedback.
+          Phase 1 is complete and live. Phase 2 features are in active development.
           <br className="hidden sm:block" />
-          Timelines are estimates and subject to change.
+          Timelines are estimates and subject to change based on community feedback.
         </p>
         <p className="text-[11px] text-muted-foreground/40 mt-2">
           Last updated: April 2026
