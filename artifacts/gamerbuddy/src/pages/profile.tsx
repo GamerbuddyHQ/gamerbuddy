@@ -45,6 +45,45 @@ function computeProfileCompletion(profile: any): {
 }
 
 /* ── POST-VERIFICATION MODAL ────────────────────────────────── */
+
+const BIO_TEMPLATES: { archetype: string; emoji: string; color: string; border: string; text: string }[] = [
+  {
+    archetype: "Competitive Carry",
+    emoji: "🏆",
+    color: "rgba(250,204,21,0.12)",
+    border: "rgba(250,204,21,0.35)",
+    text: "Competitive player focused on ranked improvement. I specialize in FPS and battle royale — reliable, communicative, and always playing to win. Patient with newer players and clean track record.",
+  },
+  {
+    archetype: "Chill Co-op",
+    emoji: "🤝",
+    color: "rgba(34,211,238,0.10)",
+    border: "rgba(34,211,238,0.35)",
+    text: "Chill gamer happy to help at your own pace. I play mostly RPGs, adventure, and co-op titles — no pressure, good vibes, and solid teamwork. Always on time and easy to communicate with.",
+  },
+  {
+    archetype: "Pro Speedrunner",
+    emoji: "⚡",
+    color: "rgba(168,85,247,0.12)",
+    border: "rgba(168,85,247,0.35)",
+    text: "Pro-level player across multiple titles with a fast, efficient playstyle. I'll carry you to your goals quickly and share tips along the way. Results-oriented and always prepared.",
+  },
+  {
+    archetype: "Versatile All-Rounder",
+    emoji: "🎮",
+    color: "rgba(52,211,153,0.10)",
+    border: "rgba(52,211,153,0.35)",
+    text: "Multi-genre gamer comfortable with ranked, co-op, and casual sessions. Friendly, communicative, and adaptable to any playstyle or objective. Let's get that W together!",
+  },
+];
+
+const COMPLETION_BENEFITS: Record<string, string> = {
+  "Write your bio":            "Hirers read this before accepting bids",
+  "Set your region / country": "Appears on every bid you place",
+  "Set your gender":           "Enables gender-preference matching",
+  "Connect a gaming account":  "Proves you're a real, active gamer",
+};
+
 function PostVerificationModal({
   profile,
   onClose,
@@ -54,114 +93,258 @@ function PostVerificationModal({
   onClose: () => void;
   onComplete: () => void;
 }) {
+  const [copiedIdx, setCopiedIdx] = useState<number | null>(null);
   const { score, items } = computeProfileCompletion(profile);
   const incomplete = items.filter((i) => !i.done);
+  const done = items.filter((i) => i.done);
+  const needsBio = incomplete.some((i) => i.section === "bio");
+
+  const handleCopy = (text: string, idx: number) => {
+    navigator.clipboard.writeText(text).catch(() => {});
+    setCopiedIdx(idx);
+    setTimeout(() => setCopiedIdx(null), 2000);
+  };
 
   return (
     <div
-      className="fixed inset-0 z-[110] flex items-end sm:items-center justify-center p-0 sm:p-6"
-      style={{ background: "rgba(0,0,0,0.97)", backdropFilter: "blur(20px)" }}
+      className="fixed inset-0 z-[110] flex items-end sm:items-center justify-center p-0 sm:p-4"
+      style={{ background: "rgba(0,0,0,0.97)", backdropFilter: "blur(24px)" }}
     >
       <div
-        className="w-full max-w-md rounded-t-3xl sm:rounded-3xl overflow-hidden"
+        className="w-full max-w-lg rounded-t-3xl sm:rounded-3xl overflow-hidden flex flex-col"
         style={{
-          border: "2px solid rgba(52,211,153,0.45)",
-          boxShadow: "0 0 120px rgba(52,211,153,0.12), 0 30px 80px rgba(0,0,0,0.95)",
+          border: "2px solid rgba(52,211,153,0.4)",
+          boxShadow: "0 0 140px rgba(52,211,153,0.10), 0 0 60px rgba(168,85,247,0.08), 0 40px 100px rgba(0,0,0,0.98)",
           background: "hsl(var(--card))",
-          maxHeight: "90dvh",
-          overflowY: "auto",
+          maxHeight: "92dvh",
         }}
       >
-        {/* Emerald pulsing top stripe */}
-        <div className="h-1.5 bg-gradient-to-r from-emerald-700 via-emerald-400 to-emerald-700 animate-pulse shrink-0" />
-
-        <div className="p-6 space-y-5">
-          {/* Celebration header */}
-          <div className="text-center space-y-3">
-            <div className="text-5xl select-none">🎉</div>
-            <div
-              className="h-20 w-20 rounded-full flex items-center justify-center border-2 border-emerald-500/50 bg-emerald-500/10 mx-auto"
-              style={{ boxShadow: "0 0 50px rgba(52,211,153,0.25)" }}
-            >
-              <ShieldCheck className="h-10 w-10 text-emerald-400" />
-            </div>
-            <h2 className="text-2xl font-extrabold uppercase tracking-tight text-foreground">
-              You're Verified! ✅
-            </h2>
-            <p className="text-sm text-muted-foreground leading-relaxed max-w-xs mx-auto">
-              Congratulations — your Gamerbuddy account is now fully verified. You can bid, hire, and unlock the full platform experience!
-            </p>
+        {/* ── HERO HEADER (gradient panel) ─────────────────── */}
+        <div
+          className="relative px-6 pt-7 pb-6 text-center shrink-0 overflow-hidden"
+          style={{
+            background: "linear-gradient(160deg, rgba(52,211,153,0.18) 0%, rgba(168,85,247,0.12) 50%, rgba(34,211,238,0.08) 100%)",
+            borderBottom: "1px solid rgba(52,211,153,0.15)",
+          }}
+        >
+          {/* Decorative background icons */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none select-none" aria-hidden>
+            <span className="absolute top-3 left-4 text-2xl opacity-10">🎮</span>
+            <span className="absolute top-2 right-6 text-xl opacity-10">⚡</span>
+            <span className="absolute bottom-3 left-8 text-xl opacity-8">🏆</span>
+            <span className="absolute bottom-2 right-5 text-2xl opacity-10">🎯</span>
+            <span className="absolute top-5 left-1/2 -translate-x-1/2 text-6xl opacity-[0.04]">🎮</span>
           </div>
 
-          {/* Profile nudge */}
-          {incomplete.length > 0 ? (
+          {/* Verified badge */}
+          <div className="relative inline-flex flex-col items-center gap-3 mx-auto">
             <div
-              className="rounded-2xl overflow-hidden"
-              style={{ border: "1px solid rgba(168,85,247,0.25)", background: "rgba(168,85,247,0.06)" }}
+              className="h-20 w-20 rounded-full flex items-center justify-center border-2 border-emerald-400/60 bg-emerald-500/15 relative"
+              style={{ boxShadow: "0 0 0 8px rgba(52,211,153,0.07), 0 0 60px rgba(52,211,153,0.2)" }}
             >
-              <div className="px-4 pt-4 pb-4 space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-black uppercase tracking-widest text-foreground/80 flex items-center gap-1.5">
-                    <Sparkles className="h-3.5 w-3.5 text-primary" />
-                    Profile Completion
-                  </span>
-                  <span className="text-xs font-black text-primary">{score}%</span>
+              <ShieldCheck className="h-10 w-10 text-emerald-400" />
+              {/* Pulse ring */}
+              <div
+                className="absolute inset-0 rounded-full border-2 border-emerald-400/30 animate-ping"
+                style={{ animationDuration: "2.5s" }}
+              />
+            </div>
+
+            <div>
+              <div className="flex items-center justify-center gap-2 mb-1">
+                <span
+                  className="text-[10px] font-black uppercase tracking-[0.2em] px-3 py-1 rounded-full"
+                  style={{ background: "rgba(52,211,153,0.15)", color: "#34d399", border: "1px solid rgba(52,211,153,0.4)" }}
+                >
+                  ✅ Account Verified
+                </span>
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-extrabold uppercase tracking-tight text-foreground leading-tight">
+                Welcome to the Squad! 🎉
+              </h2>
+              <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed max-w-sm mx-auto">
+                You can now <strong className="text-emerald-400">bid</strong>, <strong className="text-primary">hire</strong>, and access everything on Gamerbuddy. Now let's make your profile <em>unforgettable</em>.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* ── SCROLLABLE BODY ──────────────────────────────── */}
+        <div className="overflow-y-auto flex-1 overscroll-contain">
+          <div className="p-5 sm:p-6 space-y-5">
+
+            {/* ── PROGRESS BAR ── */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-black uppercase tracking-widest text-foreground/70 flex items-center gap-1.5">
+                  <Sparkles className="h-3.5 w-3.5 text-primary" />
+                  Profile Power
+                </span>
+                <span className="font-black text-primary">{score}/100%</span>
+              </div>
+              <div className="h-3 rounded-full bg-background/60 overflow-hidden border border-border/30">
+                <div
+                  className="h-full rounded-full transition-all duration-700 relative"
+                  style={{
+                    width: `${Math.max(score, 3)}%`,
+                    background: score >= 80
+                      ? "linear-gradient(90deg, #10b981, #34d399)"
+                      : "linear-gradient(90deg, #7c3aed, #a855f7, #22d3ee)",
+                  }}
+                >
+                  {/* Shimmer */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse" />
                 </div>
+              </div>
+              <div className="flex items-center justify-between text-[10px] text-muted-foreground/50">
+                <span>{score < 80 ? `${80 - score}% away from Trust Badge 🛡️` : "🏆 Trust Badge unlocked!"}</span>
+                <span>{done.length}/{items.length} steps done</span>
+              </div>
+            </div>
 
-                {/* Progress bar */}
-                <div className="h-2.5 rounded-full bg-background/60 overflow-hidden">
-                  <div
-                    className="h-full rounded-full transition-all duration-700"
-                    style={{ width: `${score}%`, background: "linear-gradient(90deg, #a855f7, #7c3aed)" }}
-                  />
+            {/* ── COMPLETION STEPS ── */}
+            {incomplete.length > 0 && (
+              <div className="space-y-2">
+                <div className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">
+                  What to fill in next
                 </div>
-
-                <p className="text-xs text-muted-foreground">
-                  Complete your profile to get <strong className="text-foreground">better matches</strong>, build trust, and stand out as a reliable squad member! 🎮
-                </p>
-
-                {/* What's missing */}
-                <div className="space-y-1.5">
+                <div className="space-y-2">
                   {incomplete.map((item) => (
-                    <div key={item.label} className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <div className="h-4 w-4 rounded-full border border-muted-foreground/30 flex items-center justify-center shrink-0">
-                        <div className="h-1.5 w-1.5 rounded-full bg-muted-foreground/30" />
+                    <div
+                      key={item.label}
+                      className="flex items-center gap-3 rounded-xl border px-3.5 py-3"
+                      style={{ borderColor: "rgba(168,85,247,0.2)", background: "rgba(168,85,247,0.05)" }}
+                    >
+                      <span className="text-xl shrink-0">{item.icon}</span>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-xs font-bold text-foreground">{item.label}</div>
+                        <div className="text-[10px] text-muted-foreground/60 leading-snug">
+                          {COMPLETION_BENEFITS[item.label] ?? "Improves your profile"}
+                        </div>
                       </div>
-                      <span>{item.icon} {item.label}</span>
-                      <span className="ml-auto text-[10px] font-bold text-primary/60">+{item.pts}%</span>
+                      <span
+                        className="text-[10px] font-black px-2 py-0.5 rounded-full shrink-0"
+                        style={{ background: "rgba(168,85,247,0.15)", color: "#c084fc", border: "1px solid rgba(168,85,247,0.35)" }}
+                      >
+                        +{item.pts}%
+                      </span>
+                    </div>
+                  ))}
+                  {done.map((item) => (
+                    <div
+                      key={item.label}
+                      className="flex items-center gap-3 rounded-xl border px-3.5 py-2.5 opacity-50"
+                      style={{ borderColor: "rgba(52,211,153,0.2)", background: "rgba(52,211,153,0.03)" }}
+                    >
+                      <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
+                      <div className="text-xs font-semibold text-muted-foreground line-through">{item.label}</div>
+                      <span className="ml-auto text-[10px] font-bold text-emerald-400/70">✓ Done</span>
                     </div>
                   ))}
                 </div>
               </div>
-            </div>
-          ) : (
-            <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-4 text-center space-y-1">
-              <div className="text-sm font-bold text-emerald-400">🏆 Profile is 100% complete!</div>
-              <div className="text-xs text-muted-foreground">You're all set to attract the best matches.</div>
-            </div>
-          )}
-
-          {/* CTAs */}
-          <div className="flex flex-col gap-2 pt-1">
-            {incomplete.length > 0 && (
-              <Button
-                onClick={onComplete}
-                className="w-full font-black uppercase tracking-wider text-sm py-5 text-white"
-                style={{ background: "linear-gradient(135deg, #a855f7, #7c3aed)" }}
-              >
-                <Sparkles className="h-4 w-4 mr-2" />
-                Complete My Profile Now
-              </Button>
             )}
-            <Button
-              onClick={onClose}
-              variant="outline"
-              className="w-full font-bold uppercase tracking-wide text-sm py-5"
-            >
-              <CheckCircle2 className="h-4 w-4 mr-2 text-emerald-400" />
-              {incomplete.length === 0 ? "Awesome — Let's Go!" : "I'll Do It Later"}
-            </Button>
+
+            {/* ── BIO QUICK-FILL TEMPLATES (only if bio is missing) ── */}
+            {needsBio && (
+              <div className="space-y-2.5">
+                <div className="flex items-center gap-2">
+                  <div className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">
+                    ✍️ Bio Quick-Start — tap to copy
+                  </div>
+                  <div
+                    className="text-[9px] font-bold px-1.5 py-0.5 rounded-full"
+                    style={{ background: "rgba(34,211,238,0.12)", color: "#22d3ee", border: "1px solid rgba(34,211,238,0.3)" }}
+                  >
+                    Edit after pasting
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 gap-2">
+                  {BIO_TEMPLATES.map((t, idx) => (
+                    <button
+                      key={t.archetype}
+                      type="button"
+                      onClick={() => handleCopy(t.text, idx)}
+                      className="text-left rounded-xl border px-3.5 py-3 transition-all active:scale-[0.98] group"
+                      style={{
+                        background: copiedIdx === idx ? "rgba(52,211,153,0.10)" : t.color,
+                        borderColor: copiedIdx === idx ? "rgba(52,211,153,0.5)" : t.border,
+                      }}
+                    >
+                      <div className="flex items-center justify-between gap-2 mb-1">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-base">{t.emoji}</span>
+                          <span className="text-[11px] font-black uppercase tracking-wide text-foreground/80">
+                            {t.archetype}
+                          </span>
+                        </div>
+                        <span
+                          className="text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 transition-all"
+                          style={
+                            copiedIdx === idx
+                              ? { background: "rgba(52,211,153,0.2)", color: "#34d399", border: "1px solid rgba(52,211,153,0.4)" }
+                              : { background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.4)", border: "1px solid rgba(255,255,255,0.1)" }
+                          }
+                        >
+                          {copiedIdx === idx ? "✓ Copied!" : "Copy"}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-muted-foreground leading-relaxed line-clamp-2 group-hover:line-clamp-none transition-all">
+                        {t.text}
+                      </p>
+                    </button>
+                  ))}
+                </div>
+                <p className="text-[10px] text-muted-foreground/40 text-center leading-snug">
+                  Copy a template → go to your bio section → paste and personalise it
+                </p>
+              </div>
+            )}
+
+            {/* ── ALL DONE STATE ── */}
+            {incomplete.length === 0 && (
+              <div
+                className="rounded-2xl p-5 text-center space-y-2"
+                style={{ background: "rgba(52,211,153,0.07)", border: "1px solid rgba(52,211,153,0.3)" }}
+              >
+                <div className="text-3xl">🏆</div>
+                <div className="text-base font-extrabold text-emerald-400 uppercase tracking-wide">Profile Complete!</div>
+                <p className="text-xs text-muted-foreground">
+                  You're all set — hirers will immediately see a complete, trusted profile when reviewing your bids.
+                </p>
+              </div>
+            )}
+
           </div>
+        </div>
+
+        {/* ── STICKY FOOTER CTAs ───────────────────────────── */}
+        <div
+          className="shrink-0 px-5 pb-6 pt-3 space-y-2"
+          style={{ borderTop: "1px solid rgba(255,255,255,0.06)", background: "hsl(var(--card))" }}
+        >
+          {incomplete.length > 0 && (
+            <Button
+              onClick={onComplete}
+              className="w-full font-black uppercase tracking-wider text-sm text-white"
+              style={{
+                background: "linear-gradient(135deg, #a855f7 0%, #7c3aed 50%, #6d28d9 100%)",
+                boxShadow: "0 0 24px rgba(168,85,247,0.35)",
+                padding: "14px",
+              }}
+            >
+              <Sparkles className="h-4 w-4 mr-2" />
+              Complete My Profile Now
+            </Button>
+          )}
+          <Button
+            onClick={onClose}
+            variant="ghost"
+            className="w-full font-semibold text-muted-foreground/60 hover:text-muted-foreground text-sm"
+            style={{ padding: "10px" }}
+          >
+            {incomplete.length === 0 ? "🎮 Let's Play — Close" : "I'll finish it later"}
+          </Button>
         </div>
       </div>
     </div>
