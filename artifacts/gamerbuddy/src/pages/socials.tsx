@@ -6,9 +6,9 @@ const SOCIALS = [
   {
     id: "youtube",
     label: "YouTube",
-    handle: "@gamerbuddy",
-    url: "https://youtube.com/@gamerbuddy",
-    tagline: "Watch gameplay & announcements on YouTube",
+    handle: "@GamerbuddyHQ",
+    url: "https://www.youtube.com/@GamerbuddyHQ",
+    tagline: "Watch gameplay, streams & announcements on YouTube",
     description: "Catch live streams, tournament replays, highlight reels, gaming tips, and platform updates — all on our YouTube channel.",
     subscribers: "Subscribe",
     colors: {
@@ -31,8 +31,8 @@ const SOCIALS = [
   {
     id: "x",
     label: "X (Twitter)",
-    handle: "@gamerbuddy",
-    url: "https://x.com/gamerbuddy",
+    handle: "@GamerbuddyHQ",
+    url: "https://x.com/GamerbuddyHQ",
     tagline: "Follow us on X for live updates & drops",
     description: "Get breaking news, giveaway announcements, gaming hot takes, community shoutouts, and real-time platform updates.",
     subscribers: "Follow",

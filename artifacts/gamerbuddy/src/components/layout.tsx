@@ -319,8 +319,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
           { href: "/profile",     label: t.nav.profile,     icon: UserIcon        },
         ]
       : []),
-    { href: "/roadmap", label: "Roadmap", icon: Map  },
-    { href: "/about",   label: t.nav.about, icon: Info },
+    { href: "/roadmap",  label: "Roadmap", icon: Map   },
+    { href: "/socials",  label: "Socials",  icon: Globe },
+    { href: "/about",    label: t.nav.about, icon: Info },
   ];
 
   return (
@@ -558,6 +559,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 {[
                   { href: "/browse",   label: t.footer.browse,         icon: Compass },
                   { href: "/roadmap",  label: "Roadmap",                icon: Map     },
+                  { href: "/socials",  label: "Socials",                icon: Globe   },
                   { href: "/about",    label: t.footer.aboutDisclaimer, icon: Shield  },
                 ].map(({ href, label, icon: Icon }) => (
                   <Link
