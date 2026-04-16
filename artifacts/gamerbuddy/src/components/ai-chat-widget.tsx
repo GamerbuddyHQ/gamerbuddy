@@ -197,7 +197,7 @@ const RESPONSES: Array<{ patterns: RegExp; reply: string }> = [
   /* ── SOCIAL MEDIA / FOLLOW ── */
   {
     patterns: /social|follow.*us|where.*find.*you|youtube|instagram|twitter|facebook|gamejolt|x\.com|our.*channel|official.*channel/i,
-    reply: `We're everywhere — come join the squad! 🎮\n\nCheck out our **[Socials page](/socials)** for the full list with clickable links.\n\n• 👾 **Discord** → discord.gg/pJcmECke — live chat, squads & support\n• 🔴 **YouTube** → youtube.com/@GamerbuddyHQ — streams & highlights\n• 🐦 **X (Twitter)** → x.com/GamerbuddyHQ — live updates & drops\n• 📸 **Instagram** → instagram.com/gamerbuddy — community highlights\n• 🟢 **GameJolt** → gamejolt.com/@Gamerbuddy — game pages & dev logs\n• 🔵 **Facebook** → facebook.com/gamerbuddy — events & announcements\n\nHit follow so you never miss a platform update or giveaway! 🚀`,
+    reply: `The easiest way is our **"All Socials & Links"** button on the **[Socials page](/socials)** 🔗\n\nIt points to **superr.bio/gamerbuddy** — one place with every platform, link, and update.\n\nFor live chat and squad-finding, join us directly on Discord:\n👾 **[discord.gg/pJcmECke](https://discord.gg/pJcmECke)**\n\nCheck the Socials page for everything else! 🚀`,
   },
 
   /* ── REPORT / MODERATION ── */
