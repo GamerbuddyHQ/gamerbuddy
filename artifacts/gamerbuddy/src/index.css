@@ -345,32 +345,67 @@
 :root:not(.dark) .text-amber-300,
 :root:not(.dark) .text-amber-300\/90,
 :root:not(.dark) .text-amber-300\/80,
-:root:not(.dark) .text-amber-300\/70 {
+:root:not(.dark) .text-amber-300\/70,
+:root:not(.dark) .text-amber-300\/65 {
   color: hsl(30 80% 32%);
+}
+:root:not(.dark) .text-amber-400,
+:root:not(.dark) .text-amber-400\/70,
+:root:not(.dark) .text-amber-400\/60,
+:root:not(.dark) .text-amber-400\/50 {
+  color: hsl(35 85% 36%);
+}
+:root:not(.dark) .text-yellow-400,
+:root:not(.dark) .text-yellow-400\/80,
+:root:not(.dark) .text-yellow-500 {
+  color: hsl(42 80% 35%);
 }
 :root:not(.dark) .text-red-300,
 :root:not(.dark) .text-red-300\/80 {
   color: hsl(0 65% 40%);
 }
 :root:not(.dark) .text-cyan-400,
-:root:not(.dark) .text-cyan-400\/55 {
+:root:not(.dark) .text-cyan-400\/55,
+:root:not(.dark) .text-cyan-400\/65,
+:root:not(.dark) .text-cyan-400\/60 {
   color: hsl(191 72% 32%);
 }
 :root:not(.dark) .text-green-400,
-:root:not(.dark) .text-green-400\/90 {
+:root:not(.dark) .text-green-400\/90,
+:root:not(.dark) .text-green-400\/70 {
   color: hsl(142 68% 28%);
+}
+:root:not(.dark) .text-emerald-400,
+:root:not(.dark) .text-emerald-400\/80 {
+  color: hsl(152 60% 30%);
 }
 :root:not(.dark) .text-purple-400,
 :root:not(.dark) .text-purple-400\/80 {
   color: hsl(272 72% 42%);
 }
-/* bg-amber-500/5 + bg-red-500/5 on white are nearly invisible — give them more tint */
+/* Bare hover:text-white has no dark backing in light mode — text becomes invisible.
+   Override it to foreground color so it stays readable. */
+:root:not(.dark) .hover\:text-white:hover { color: hsl(var(--foreground)); }
+/* BUT when a solid dark bg is ALSO applied on hover, white text still wins (8:1 contrast on purple/green/etc.) */
+:root:not(.dark) .hover\:bg-primary.hover\:text-white:hover,
+:root:not(.dark) .hover\:bg-green-500.hover\:text-white:hover,
+:root:not(.dark) .hover\:bg-green-400.hover\:text-white:hover,
+:root:not(.dark) .hover\:bg-destructive.hover\:text-white:hover,
+:root:not(.dark) .hover\:bg-purple-500.hover\:text-white:hover,
+:root:not(.dark) .hover\:bg-pink-500.hover\:text-white:hover,
+:root:not(.dark) .hover\:bg-indigo-500.hover\:text-white:hover { color: #fff; }
+
+/* bg-* variants that are nearly invisible on white — boost tint */
 :root:not(.dark) .bg-amber-500\/5  { background-color: hsl(38 92% 50% / 0.10); }
+:root:not(.dark) .bg-amber-500\/10 { background-color: hsl(38 92% 50% / 0.14); }
+:root:not(.dark) .bg-yellow-500\/10 { background-color: hsl(42 80% 45% / 0.14); }
 :root:not(.dark) .bg-red-500\/5    { background-color: hsl(0 84% 60% / 0.10); }
 :root:not(.dark) .bg-red-500\/6    { background-color: hsl(0 84% 60% / 0.10); }
 :root:not(.dark) .bg-red-500\/8    { background-color: hsl(0 84% 60% / 0.10); }
 :root:not(.dark) .bg-cyan-500\/5   { background-color: hsl(191 91% 36% / 0.10); }
 :root:not(.dark) .bg-green-500\/5  { background-color: hsl(142 76% 36% / 0.10); }
+:root:not(.dark) .fill-yellow-400  { fill: hsl(42 80% 35%); }
+:root:not(.dark) .fill-star        { fill: hsl(42 80% 42%); }
 
 @keyframes shimmer {
   0% { transform: translateX(-100%); }

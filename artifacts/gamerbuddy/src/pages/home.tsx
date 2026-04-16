@@ -26,7 +26,7 @@ function ParticleCanvas() {
     resize();
     window.addEventListener("resize", resize);
 
-    const COLORS = ["rgba(168,85,247,", "rgba(34,211,238,", "rgba(255,255,255,"];
+    const COLORS = ["rgba(168,85,247,", "rgba(34,211,238,", "rgba(124,58,237,"];
 
     for (let i = 0; i < 55; i++) {
       particles.push({
@@ -142,9 +142,9 @@ function Step({ n, title, desc }: { n: number; title: string; desc: string }) {
       <div
         className="shrink-0 w-9 h-9 rounded-xl flex items-center justify-center font-black text-sm text-primary-foreground"
         style={{
-          background: "linear-gradient(135deg, rgba(168,85,247,0.4), rgba(34,211,238,0.2))",
-          border: "1px solid rgba(168,85,247,0.4)",
-          boxShadow: "0 0 14px rgba(168,85,247,0.2)",
+          background: "linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(272,90%,48%) 100%)",
+          border: "1px solid hsl(var(--primary) / 0.5)",
+          boxShadow: "0 0 14px hsl(var(--primary) / 0.25)",
         }}
       >
         {n}
@@ -411,9 +411,9 @@ export default function Home() {
                 <div
                   className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest px-3 py-1.5 rounded-full mb-3"
                   style={{
-                    background: "rgba(34,211,238,0.1)",
-                    border: "1px solid rgba(34,211,238,0.3)",
-                    color: "rgba(34,211,238,1)",
+                    background: "hsl(var(--secondary) / 0.12)",
+                    border: "1px solid hsl(var(--secondary) / 0.35)",
+                    color: "hsl(var(--secondary))",
                   }}
                 >
                   <Users className="h-3.5 w-3.5" /> For Hirers
@@ -435,9 +435,9 @@ export default function Home() {
                 <div
                   className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest px-3 py-1.5 rounded-full mb-3"
                   style={{
-                    background: "rgba(168,85,247,0.1)",
-                    border: "1px solid rgba(168,85,247,0.3)",
-                    color: "rgba(168,85,247,1)",
+                    background: "hsl(var(--primary) / 0.12)",
+                    border: "1px solid hsl(var(--primary) / 0.35)",
+                    color: "hsl(var(--primary))",
                   }}
                 >
                   <Coins className="h-3.5 w-3.5" /> For Gamers

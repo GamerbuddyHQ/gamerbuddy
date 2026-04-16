@@ -131,7 +131,7 @@ function NotificationBell() {
           <div className="flex items-center justify-between px-4 py-3 border-b border-border/40">
             <div className="flex items-center gap-2">
               <Bell className="h-4 w-4 text-primary" />
-              <span className="text-sm font-bold uppercase tracking-wider text-white">{t.nav.notifications}</span>
+              <span className="text-sm font-bold uppercase tracking-wider text-foreground">{t.nav.notifications}</span>
               {unread > 0 && (
                 <span className="text-[10px] font-black bg-primary/20 text-primary border border-primary/30 rounded-full px-1.5 py-0.5">
                   {unread} new
@@ -142,12 +142,12 @@ function NotificationBell() {
               {unread > 0 && (
                 <button
                   onClick={() => markAllRead.mutate()}
-                  className="text-[10px] text-primary hover:text-white transition-colors flex items-center gap-1 font-semibold"
+                  className="text-[10px] text-primary hover:text-foreground transition-colors flex items-center gap-1 font-semibold"
                 >
                   <CheckCheck className="h-3 w-3" /> {t.nav.markAllRead}
                 </button>
               )}
-              <button onClick={() => setOpen(false)} className="text-muted-foreground hover:text-white transition-colors p-0.5">
+              <button onClick={() => setOpen(false)} className="text-muted-foreground hover:text-foreground transition-colors p-0.5">
                 <X className="h-3.5 w-3.5" />
               </button>
             </div>
@@ -168,7 +168,7 @@ function NotificationBell() {
             <div className="border-t border-border/40 p-2">
               <button
                 onClick={() => { setOpen(false); setLocation("/notifications"); }}
-                className="w-full text-center text-xs text-primary hover:text-white transition-colors py-2 font-semibold flex items-center justify-center gap-1.5"
+                className="w-full text-center text-xs text-primary hover:text-foreground transition-colors py-2 font-semibold flex items-center justify-center gap-1.5"
               >
                 {t.nav.viewAll} <ChevronRight className="h-3.5 w-3.5" />
               </button>
@@ -183,6 +183,7 @@ function NotificationBell() {
 /* ── Language Selector ── */
 function LangSelector() {
   const { lang, setLang, t } = useI18n();
+  const { isDark } = useTheme();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -229,7 +230,7 @@ function LangSelector() {
                   key={l.code}
                   onClick={() => { setLang(l.code); setOpen(false); }}
                   className="w-full flex items-center gap-3 px-3 py-2 text-left transition-colors hover:bg-primary/10"
-                  style={isActive ? { color: "#c084fc" } : { color: "rgba(255,255,255,0.70)" }}
+                  style={isActive ? { color: "#c084fc" } : { color: isDark ? "rgba(255,255,255,0.70)" : "rgba(0,0,0,0.65)" }}
                 >
                   <span className="text-lg w-6 text-center leading-none">{l.flag}</span>
                   <div className="flex-1 min-w-0">
@@ -252,6 +253,7 @@ function LangSelector() {
 /* ── Mobile Language Picker (standalone so hooks aren't inside a map) ── */
 function MobileLangPicker({ onPick }: { onPick: () => void }) {
   const { lang, setLang, t } = useI18n();
+  const { isDark } = useTheme();
   return (
     <div className="pt-3">
       <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40 px-1 mb-2">{t.nav.selectLanguage}</p>
@@ -267,10 +269,14 @@ function MobileLangPicker({ onPick }: { onPick: () => void }) {
                 background: "rgba(168,85,247,0.15)",
                 borderColor: "rgba(168,85,247,0.40)",
                 color: "#c084fc",
-              } : {
+              } : isDark ? {
                 background: "rgba(255,255,255,0.03)",
                 borderColor: "rgba(255,255,255,0.08)",
                 color: "rgba(255,255,255,0.55)",
+              } : {
+                background: "rgba(0,0,0,0.04)",
+                borderColor: "rgba(0,0,0,0.10)",
+                color: "rgba(0,0,0,0.60)",
               }}
             >
               <span className="text-xl leading-none">{l.flag}</span>
