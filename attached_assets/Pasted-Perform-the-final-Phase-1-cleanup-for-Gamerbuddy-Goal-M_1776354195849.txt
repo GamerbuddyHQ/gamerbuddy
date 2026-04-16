@@ -1,0 +1,31 @@
+Perform the final Phase 1 cleanup for Gamerbuddy.
+
+Goal: Make the website focused, clean, professional, and stable with ONLY core hiring features enabled.
+
+1. **Lock down to Phase 1 only**
+   - Keep active: Post Request, Browse Requests, Place Bid (verified users only), Accept bid, Session completion, Payment with 10% fee, Review & Rating, Basic wallets, Verification system, Safety warnings.
+   - Completely hide/disable everything else: Tournaments, Bulk Hiring, Community Suggestions, Quest system, Promoted Games, Like/Dislike, Regional clock, Advanced filters, Socials page, etc.
+
+2. **Remove Tournament Content**
+   - Remove the "Host a Tournament — Crown the Champion!" banner from the homepage completely.
+   - Hide any "Tournaments" button or link.
+   - Ensure no tournament-related text or promotions appear anywhere in Phase 1.
+
+3. **Fix Light Theme**
+   - Fix all dim/low-contrast issues in Light (White) theme.
+   - Use soft off-white background (#f8fafc), dark text (#1f2937), and deeper purple accents (#7c3aed or #6d28d9).
+   - Improve contrast on cards, buttons, filters, text, and icons across all pages (especially Browse Requests and homepage).
+   - Make sure the theme toggle is clearly visible and works smoothly.
+
+4. **Add Clear Phased Messaging**
+   - Add a subtle banner on the homepage: "Gamerbuddy is currently in Phase 1 — Core Hiring Only. More features coming soon!"
+   - Update the Roadmap page with a clear explanation at the top about the phased approach.
+   - Add "Coming Soon" badges on any hidden features that might still be accessible.
+
+5. **Overall Polish**
+   - Improve spacing and visual hierarchy on Browse Requests page (less stacked, cleaner cards).
+   - Make navigation clean: Home, Browse Requests, About, Roadmap.
+   - Ensure the site feels focused and professional in both dark and light themes.
+   - Update AI Support to only talk about Phase 1 features.
+
+Run this cleanup thoroughly so the website feels ready for initial launch with just the core hiring experience.

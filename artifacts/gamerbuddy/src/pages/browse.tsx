@@ -239,7 +239,7 @@ function QuickBidPanel({ req, onClose }: { req: GameRequest; onClose: () => void
       {req.lowestBid && (
         <div className="flex items-center gap-2 text-xs text-cyan-400 bg-cyan-500/5 border border-cyan-500/20 rounded-lg px-3 py-2">
           <TrendingDown className="h-3.5 w-3.5 shrink-0" />
-          Lowest current bid: <span className="font-bold text-white ml-1">${req.lowestBid.toFixed(2)}</span>
+          Lowest current bid: <span className="font-bold text-foreground ml-1">${req.lowestBid.toFixed(2)}</span>
           <span className="text-muted-foreground ml-1">— bid lower to stand out</span>
         </div>
       )}
@@ -266,7 +266,7 @@ function QuickBidPanel({ req, onClose }: { req: GameRequest; onClose: () => void
         </div>
         <div className="space-y-1.5 flex flex-col justify-end">
           <div className="rounded-xl border border-border/40 bg-background/30 p-3 text-xs space-y-1.5">
-            <div className="font-bold text-white text-[11px] flex items-center gap-1.5">
+            <div className="font-bold text-foreground text-[11px] flex items-center gap-1.5">
               <Zap className="h-3 w-3 text-amber-400" /> Tips to win this bid
             </div>
             <ul className="text-muted-foreground space-y-0.5 text-[10px]">
@@ -655,7 +655,7 @@ function FillerSection() {
               </span>
             </div>
             <div>
-              <div className="text-sm font-extrabold text-white tracking-tight mb-1.5">{s.title}</div>
+              <div className="text-sm font-extrabold text-foreground tracking-tight mb-1.5">{s.title}</div>
               <div className="text-xs text-muted-foreground/55 leading-relaxed">{s.desc}</div>
             </div>
           </div>
@@ -671,7 +671,7 @@ function FillerSection() {
         }}
       >
         <div className="text-center sm:text-left">
-          <div className="font-extrabold text-white text-lg tracking-tight">Need a skilled teammate?</div>
+          <div className="font-extrabold text-foreground text-lg tracking-tight">Need a skilled teammate?</div>
           <div className="text-sm text-muted-foreground/60 mt-1">Post your game request and get bids from verified gamers within minutes.</div>
         </div>
         <div className="flex items-center gap-3 shrink-0">
@@ -734,6 +734,7 @@ const LEVEL_OPTIONS = [
 
 /* ── MAIN PAGE ───────────────────────────────────────────────────────────── */
 export default function Browse() {
+  const { isDark } = useTheme();
   const [search, setSearch]                   = useState("");
   const [platform, setPlatform]               = useState("all");
   const [sort, setSort]                       = useState<BrowseSortKey>("newest");
@@ -828,7 +829,7 @@ export default function Browse() {
               Live Marketplace
             </span>
           </div>
-          <h1 className="text-4xl md:text-5xl font-extrabold uppercase tracking-tight text-white leading-none" style={{ letterSpacing: "-0.02em" }}>
+          <h1 className="text-4xl md:text-5xl font-extrabold uppercase tracking-tight text-foreground leading-none" style={{ letterSpacing: "-0.02em" }}>
             <span className="inline-flex items-center gap-3">
               <Swords className="h-9 w-9 md:h-11 md:w-11 text-primary shrink-0" />
               Browse Requests
@@ -851,7 +852,7 @@ export default function Browse() {
               }}
             >
               <div className="h-2 w-2 rounded-full bg-green-400 animate-pulse shadow-[0_0_6px_rgba(74,222,128,0.6)]" />
-              <span className="text-sm font-extrabold text-white tabular-nums">{requests.length}</span>
+              <span className="text-sm font-extrabold text-foreground tabular-nums">{requests.length}</span>
               <span className="text-xs text-muted-foreground uppercase tracking-widest font-semibold">
                 {requests.length === 1 ? "Request" : "Requests"}
               </span>
@@ -866,13 +867,13 @@ export default function Browse() {
       <div
         className="rounded-2xl border overflow-hidden filter-panel-animate sm:sticky sm:top-16 sm:z-40"
         style={{
-          borderColor: hasFilters ? "rgba(168,85,247,0.40)" : "rgba(255,255,255,0.08)",
-          background: "rgba(7,5,16,0.96)",
+          borderColor: hasFilters ? "rgba(168,85,247,0.40)" : isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.10)",
+          background: isDark ? "rgba(7,5,16,0.96)" : "hsl(var(--card))",
           backdropFilter: "blur(24px)",
           WebkitBackdropFilter: "blur(24px)",
           boxShadow: hasFilters
-            ? "0 6px 32px rgba(0,0,0,0.60), 0 0 0 1px rgba(168,85,247,0.10)"
-            : "0 4px 24px rgba(0,0,0,0.50)",
+            ? "0 6px 32px rgba(0,0,0,0.20), 0 0 0 1px rgba(168,85,247,0.10)"
+            : "0 4px 24px rgba(0,0,0,0.12)",
           transition: "border-color 0.3s, box-shadow 0.3s",
         }}
       >
@@ -880,14 +881,14 @@ export default function Browse() {
         <div
           className="flex items-center justify-between px-5 py-3.5 border-b"
           style={{
-            borderColor: "rgba(255,255,255,0.07)",
-            background: hasFilters ? "rgba(168,85,247,0.07)" : "rgba(255,255,255,0.025)",
+            borderColor: isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.07)",
+            background: hasFilters ? "rgba(168,85,247,0.07)" : isDark ? "rgba(255,255,255,0.025)" : "rgba(0,0,0,0.025)",
             transition: "background 0.3s",
           }}
         >
           <div className="flex items-center gap-2.5">
-            <SlidersHorizontal className="h-4 w-4" style={{ color: hasFilters ? "#a855f7" : "rgba(255,255,255,0.35)" }} />
-            <span className="text-xs font-extrabold uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.55)" }}>
+            <SlidersHorizontal className="h-4 w-4" style={{ color: hasFilters ? "#a855f7" : isDark ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.45)" }} />
+            <span className="text-xs font-extrabold uppercase tracking-widest" style={{ color: isDark ? "rgba(255,255,255,0.55)" : "rgba(0,0,0,0.60)" }}>
               Sort &amp; Filter
             </span>
             {hasFilters && (

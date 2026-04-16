@@ -17,7 +17,6 @@ import {
   Zap,
   Clock,
   ShieldAlert,
-  Trophy,
 } from "lucide-react";
 
 const WITHDRAWAL_THRESHOLD = 100;
@@ -68,7 +67,7 @@ export default function Dashboard() {
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap mb-1">
-              <span className="text-sm font-extrabold text-white uppercase tracking-wide">Verification In Progress</span>
+              <span className="text-sm font-extrabold text-foreground uppercase tracking-wide">Verification In Progress</span>
               <span
                 className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full"
                 style={{ background: "rgba(245,158,11,0.15)", color: "#f59e0b", border: "1px solid rgba(245,158,11,0.3)" }}
@@ -77,7 +76,7 @@ export default function Dashboard() {
               </span>
             </div>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              Verification is almost complete — usually takes 7–15 days. <span className="text-amber-400/90 font-semibold">Once verified, you'll be able to place bids, join tournaments, post requests, and hire gamers.</span> In the meantime, browse all open requests and get your strategy ready!
+              Verification is almost complete — usually takes 7–15 days. <span className="text-amber-400/90 font-semibold">Once verified, you'll be able to place bids, post requests, and hire gamers.</span> In the meantime, browse all open requests and get your strategy ready!
             </p>
           </div>
           <ShieldAlert className="h-4 w-4 text-amber-400/60 shrink-0 mt-1 hidden sm:block" />
@@ -116,7 +115,7 @@ export default function Dashboard() {
                   <Wallet className="h-3.5 w-3.5" />
                   Hiring Wallet
                 </div>
-                <div className="text-4xl font-black text-white tabular-nums">
+                <div className="text-4xl font-black text-foreground tabular-nums">
                   ${wallets.hiringBalance.toFixed(2)}
                 </div>
                 {wallets.canPostRequest ? (
@@ -158,7 +157,7 @@ export default function Dashboard() {
                   <TrendingUp className="h-3.5 w-3.5" />
                   Earnings Wallet
                 </div>
-                <div className="text-4xl font-black text-white tabular-nums">
+                <div className="text-4xl font-black text-foreground tabular-nums">
                   ${wallets.earningsBalance.toFixed(2)}
                 </div>
                 {wallets.canWithdraw ? (
@@ -181,7 +180,7 @@ export default function Dashboard() {
               <div className="space-y-1.5">
                 <div className="flex justify-between text-xs text-muted-foreground">
                   <span className="flex items-center gap-1"><AlertTriangle className="h-3 w-3 text-amber-400" /> Withdrawal threshold</span>
-                  <span className="text-white font-medium">${wallets.earningsBalance.toFixed(2)} / $100</span>
+                  <span className="text-foreground font-medium">${wallets.earningsBalance.toFixed(2)} / $100</span>
                 </div>
                 <div className="h-1.5 rounded-full bg-muted/40 overflow-hidden">
                   <div
@@ -217,13 +216,13 @@ export default function Dashboard() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card className="bg-card/30 border-border">
           <CardContent className="pt-5 pb-4 text-center">
-            <div className="text-2xl font-extrabold text-white">{totalRequestsPosted}</div>
+            <div className="text-2xl font-extrabold text-foreground">{totalRequestsPosted}</div>
             <div className="text-xs uppercase tracking-widest text-muted-foreground mt-0.5">Total Posted</div>
           </CardContent>
         </Card>
         <Card className="bg-card/30 border-border">
           <CardContent className="pt-5 pb-4 text-center">
-            <div className="text-2xl font-extrabold text-white">{openRequestsCount}</div>
+            <div className="text-2xl font-extrabold text-foreground">{openRequestsCount}</div>
             <div className="text-xs uppercase tracking-widest text-muted-foreground mt-0.5">Open</div>
           </CardContent>
         </Card>
@@ -275,7 +274,7 @@ export default function Dashboard() {
                     className="flex items-center justify-between p-3 border border-border rounded-lg bg-card/40 hover:bg-card/80 transition-colors"
                   >
                     <div>
-                      <div className="font-bold text-white text-sm">{req.gameName}</div>
+                      <div className="font-bold text-foreground text-sm">{req.gameName}</div>
                       <div className="text-xs text-muted-foreground">
                         {req.platform} · {req.skillLevel}
                       </div>
@@ -317,7 +316,7 @@ export default function Dashboard() {
             </Button>
             <Button
               asChild
-              className="w-full justify-start bg-card/40 hover:bg-card text-white border border-border font-semibold transition-colors"
+              className="w-full justify-start bg-card/40 hover:bg-card text-foreground border border-border font-semibold transition-colors"
               disabled={!wallets.canPostRequest}
             >
               <Link href="/post-request">
@@ -326,13 +325,13 @@ export default function Dashboard() {
                 {!wallets.canPostRequest && <span className="ml-auto text-xs text-muted-foreground">Needs $10.75</span>}
               </Link>
             </Button>
-            <Button asChild className="w-full justify-start bg-card/40 hover:bg-card text-white border border-border font-semibold transition-colors">
+            <Button asChild className="w-full justify-start bg-card/40 hover:bg-card text-foreground border border-border font-semibold transition-colors">
               <Link href="/browse">
                 <Swords className="h-4 w-4 mr-3" />
                 Browse Open Requests
               </Link>
             </Button>
-            <Button asChild className="w-full justify-start bg-card/40 hover:bg-card text-white border border-border font-semibold transition-colors">
+            <Button asChild className="w-full justify-start bg-card/40 hover:bg-card text-foreground border border-border font-semibold transition-colors">
               <Link href="/profile">
                 <User className="h-4 w-4 mr-3" />
                 View Profile
@@ -342,37 +341,6 @@ export default function Dashboard() {
         </Card>
       </div>
 
-      {/* ── Tournament CTA Banner ── */}
-      <div
-        className="rounded-2xl px-6 py-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
-        style={{
-          background: "linear-gradient(135deg,rgba(251,191,36,0.10) 0%,rgba(168,85,247,0.08) 100%)",
-          border: "1px solid rgba(251,191,36,0.25)",
-          boxShadow: "0 0 30px rgba(251,191,36,0.07)",
-        }}
-      >
-        <div className="flex items-center gap-4">
-          <div
-            className="h-11 w-11 rounded-xl flex items-center justify-center shrink-0"
-            style={{ background: "rgba(251,191,36,0.15)", border: "1px solid rgba(251,191,36,0.35)" }}
-          >
-            <Trophy className="h-6 w-6 text-yellow-400" />
-          </div>
-          <div>
-            <p className="text-[14px] font-extrabold text-white">Host a Tournament</p>
-            <p className="text-[12px] text-muted-foreground/60 mt-0.5">Create your own tournament and crown the champion — prize pools from $100</p>
-          </div>
-        </div>
-        <Button
-          asChild
-          className="shrink-0 font-bold whitespace-nowrap"
-          style={{ background: "linear-gradient(135deg,#fbbf24,#f59e0b)", color: "#000", boxShadow: "0 0 16px rgba(251,191,36,0.28)" }}
-        >
-          <Link href="/tournaments">
-            <Trophy className="h-4 w-4 mr-1.5" /> Go to Tournaments
-          </Link>
-        </Button>
-      </div>
     </div>
   );
 }

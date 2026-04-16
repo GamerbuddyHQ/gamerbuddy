@@ -458,9 +458,9 @@ export default function Home() {
                 </h3>
               </div>
               <div className="space-y-5">
-                <Step n={1} title="Build Your Quest" desc="List the games you play and the help you can offer." />
+                <Step n={1} title="Set Up Your Profile" desc="List your games, ranks, and the type of help you can offer to hirers." />
                 <Step n={2} title="Bid on Requests" desc="Find requests that match your skills and place a competitive bid." />
-                <Step n={3} title="Complete &amp; Cash Out" desc="Session done — you keep 90% of your bid. Gamerbuddy takes a transparent 10% platform fee per completed Quest/Job. Withdraw anytime." />
+                <Step n={3} title="Complete &amp; Cash Out" desc="Session done — you keep 90% of your bid. Gamerbuddy takes a transparent 10% platform fee. Withdraw anytime." />
               </div>
             </div>
           </div>

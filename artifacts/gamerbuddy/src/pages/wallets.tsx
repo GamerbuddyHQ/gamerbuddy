@@ -139,7 +139,7 @@ export default function WalletsPage() {
   return (
     <div className="max-w-4xl mx-auto space-y-6 md:space-y-8">
       <div>
-        <h1 className="text-2xl md:text-3xl font-extrabold uppercase tracking-tight text-white flex items-center gap-3">
+        <h1 className="text-2xl md:text-3xl font-extrabold uppercase tracking-tight text-foreground flex items-center gap-3">
           <Wallet className="h-7 w-7 md:h-8 md:w-8 text-primary" />
           My Wallets
         </h1>
@@ -163,7 +163,7 @@ export default function WalletsPage() {
           <CardContent className="space-y-5">
             <div className="text-center py-4 rounded-lg bg-background/60 border border-border/40">
               <div className="text-xs uppercase tracking-widest text-muted-foreground mb-1">Current Balance</div>
-              <div className="text-4xl md:text-5xl font-black text-white tabular-nums">${wallets.hiringBalance.toFixed(2)}</div>
+              <div className="text-4xl md:text-5xl font-black text-foreground tabular-nums">${wallets.hiringBalance.toFixed(2)}</div>
               {wallets.canPostRequest ? (
                 <div className="mt-2 inline-flex items-center gap-1.5 text-xs text-green-400 font-medium">
                   <CheckCircle2 className="h-3.5 w-3.5" /> Ready to post requests
@@ -207,7 +207,7 @@ export default function WalletsPage() {
           <CardContent className="space-y-5">
             <div className="text-center py-4 rounded-lg bg-background/60 border border-border/40">
               <div className="text-xs uppercase tracking-widest text-muted-foreground mb-1">Current Balance</div>
-              <div className="text-4xl md:text-5xl font-black text-white tabular-nums">${wallets.earningsBalance.toFixed(2)}</div>
+              <div className="text-4xl md:text-5xl font-black text-foreground tabular-nums">${wallets.earningsBalance.toFixed(2)}</div>
               {wallets.canWithdraw ? (
                 <div className="mt-2 inline-flex items-center gap-1.5 text-xs text-green-400 font-medium">
                   <CheckCircle2 className="h-3.5 w-3.5" /> Eligible to withdraw
@@ -223,7 +223,7 @@ export default function WalletsPage() {
               <div className="space-y-1.5">
                 <div className="flex justify-between text-xs text-muted-foreground">
                   <span>Withdrawal progress</span>
-                  <span className="font-medium text-white">${wallets.earningsBalance.toFixed(2)} / ${WITHDRAWAL_THRESHOLD}</span>
+                  <span className="font-medium text-foreground">${wallets.earningsBalance.toFixed(2)} / ${WITHDRAWAL_THRESHOLD}</span>
                 </div>
                 <div className="h-2 rounded-full bg-muted/40 overflow-hidden">
                   <div
@@ -265,7 +265,7 @@ export default function WalletsPage() {
                   </Button>
                 </div>
                 <button
-                  className="text-xs text-muted-foreground hover:text-white transition-colors"
+                  className="text-xs text-muted-foreground hover:text-foreground transition-colors"
                   onClick={() => setWithdrawAmount(String(wallets.earningsBalance))}
                 >
                   Withdraw all (${wallets.earningsBalance.toFixed(2)})
@@ -291,7 +291,7 @@ export default function WalletsPage() {
           <div className="grid grid-cols-3 gap-3 text-center">
             <div className="px-2 py-2 rounded-lg bg-background/40 border border-border/40">
               <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">Total</div>
-              <div className="text-lg font-extrabold text-white tabular-nums">
+              <div className="text-lg font-extrabold text-foreground tabular-nums">
                 ${(wallets.hiringBalance + wallets.earningsBalance).toFixed(2)}
               </div>
             </div>
@@ -357,7 +357,7 @@ export default function WalletsPage() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-sm font-semibold text-white">{meta.label}</span>
+                        <span className="text-sm font-semibold text-foreground">{meta.label}</span>
                         <Badge
                           variant="outline"
                           className={`text-xs py-0 ${tx.wallet === "hiring" ? "border-primary/40 text-primary/70" : "border-secondary/40 text-secondary/70"}`}

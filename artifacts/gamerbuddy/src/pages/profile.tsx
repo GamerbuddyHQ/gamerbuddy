@@ -95,7 +95,7 @@ function GamerRulesCard() {
             <ShieldCheck className="h-4 w-4 text-amber-400" />
           </div>
           <div className="text-left">
-            <div className="text-sm font-bold text-white">Gamer Code of Conduct</div>
+            <div className="text-sm font-bold text-foreground">Gamer Code of Conduct</div>
             <div className="text-xs text-muted-foreground mt-0.5">Rules for gamers who want to get hired</div>
           </div>
         </div>
@@ -104,8 +104,8 @@ function GamerRulesCard() {
             {open ? "Collapse" : "Read Rules"}
           </span>
           {open
-            ? <ChevronUp className="h-4 w-4 text-muted-foreground group-hover:text-white transition-colors" />
-            : <ChevronDown className="h-4 w-4 text-muted-foreground group-hover:text-white transition-colors" />}
+            ? <ChevronUp className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+            : <ChevronDown className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />}
         </div>
       </button>
 
@@ -135,7 +135,7 @@ function GamerRulesCard() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5 flex-wrap mb-0.5">
                     <span className="text-[13px]">{rule.icon}</span>
-                    <span className={`text-xs font-bold ${rule.highlight ? "text-red-300" : "text-white"}`}>
+                    <span className={`text-xs font-bold ${rule.highlight ? "text-red-300" : "text-foreground"}`}>
                       {rule.title}
                     </span>
                     {rule.highlight && (
@@ -245,7 +245,7 @@ function StreamingAccountsSection() {
         <div>
           <div className="flex items-center gap-2 mb-0.5">
             <Zap className="h-4 w-4 text-purple-400" />
-            <span className="text-sm font-extrabold text-white uppercase tracking-widest">Streaming Channels</span>
+            <span className="text-sm font-extrabold text-foreground uppercase tracking-widest">Streaming Channels</span>
           </div>
           <p className="text-[11px] text-muted-foreground/60">
             Link your channels — they'll appear on your profile and bid cards
@@ -857,12 +857,12 @@ function ShopSection({
                 )}
                 {item.type === "title" && (
                   <div className="h-12 rounded-lg border border-border bg-background/60 flex items-center justify-center">
-                    <span className="text-sm font-black text-white uppercase tracking-widest">{item.label}</span>
+                    <span className="text-sm font-black text-foreground uppercase tracking-widest">{item.label}</span>
                   </div>
                 )}
                 <div className="flex items-start justify-between gap-2">
                   <div>
-                    <div className="text-sm font-bold text-white">{item.label}</div>
+                    <div className="text-sm font-bold text-foreground">{item.label}</div>
                     <div className="text-xs text-muted-foreground">{item.description}</div>
                   </div>
                   <div className="shrink-0 flex items-center gap-1 text-xs font-bold text-yellow-400">
@@ -931,7 +931,7 @@ function VerificationSection({ idVerified }: { idVerified: boolean }) {
             </div>
             <div>
               <div className="flex items-center gap-2.5 mb-1">
-                <span className="text-sm font-extrabold text-white uppercase tracking-wide">Identity Verified</span>
+                <span className="text-sm font-extrabold text-foreground uppercase tracking-wide">Identity Verified</span>
                 <VerifiedBadge idVerified={true} variant="compact" />
               </div>
               <p className="text-xs text-emerald-300/70 leading-relaxed">
@@ -955,7 +955,7 @@ function VerificationSection({ idVerified }: { idVerified: boolean }) {
               <ShieldAlert className="h-5 w-5 text-amber-400" />
             </div>
             <div>
-              <div className="text-sm font-bold text-white mb-0.5">Verification In Progress</div>
+              <div className="text-sm font-bold text-foreground mb-0.5">Verification In Progress</div>
               <p className="text-xs text-muted-foreground/70">
                 Earn the <span className="text-emerald-400 font-semibold">Verified</span> badge — trusted by more hirers, more bids accepted.
               </p>
@@ -987,9 +987,9 @@ function VerificationSection({ idVerified }: { idVerified: boolean }) {
         >
           <Clock className="h-3.5 w-3.5 text-primary shrink-0 mt-0.5" />
           <div>
-            <span className="text-[11px] font-semibold text-white">Verification helps keep Gamerbuddy safe</span>
+            <span className="text-[11px] font-semibold text-foreground">Verification helps keep Gamerbuddy safe</span>
             <p className="text-[10px] text-muted-foreground leading-relaxed mt-0.5">
-              It usually takes 7–15 days. You can browse all open requests freely while we review your details. <span className="text-primary/90 font-semibold">Placing bids, joining tournaments, posting requests, and hiring all unlock once you're verified.</span>
+              It usually takes 7–15 days. You can browse all open requests freely while we review your details. <span className="text-primary/90 font-semibold">Placing bids, posting requests, and hiring all unlock once verified.</span>
             </p>
           </div>
         </div>
