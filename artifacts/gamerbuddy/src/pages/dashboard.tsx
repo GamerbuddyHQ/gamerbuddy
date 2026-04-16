@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useGetDashboardSummary, getGetDashboardSummaryQueryKey } from "@workspace/api-client-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -18,7 +18,65 @@ import {
   Clock,
   ShieldAlert,
   Star,
+  Sparkles,
+  X,
 } from "lucide-react";
+
+const DASH_PROFILE_KEY = "gb_dash_profile_banner_v1";
+
+function FinishProfileBanner({ userName }: { userName: string }) {
+  const [, setLocation] = useLocation();
+  const [dismissed, setDismissed] = useState(() => localStorage.getItem(DASH_PROFILE_KEY) === "1");
+  if (dismissed) return null;
+  return (
+    <div
+      className="rounded-2xl overflow-hidden"
+      style={{
+        border: "1px solid rgba(168,85,247,0.35)",
+        background: "linear-gradient(135deg, rgba(168,85,247,0.07), rgba(34,211,238,0.04))",
+        boxShadow: "0 0 24px rgba(168,85,247,0.07)",
+      }}
+    >
+      <div className="h-1 bg-gradient-to-r from-violet-600 via-purple-400 to-cyan-500" />
+      <div className="px-5 py-4 flex items-start gap-4">
+        <div
+          className="h-10 w-10 rounded-xl bg-primary/15 border border-primary/30 flex items-center justify-center shrink-0 mt-0.5"
+          style={{ boxShadow: "0 0 12px rgba(168,85,247,0.2)" }}
+        >
+          <Sparkles className="h-5 w-5 text-primary" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap mb-1.5">
+            <span className="text-sm font-extrabold text-foreground uppercase tracking-wide">
+              🎮 Complete Your Profile, {userName}!
+            </span>
+          </div>
+          <p className="text-xs text-muted-foreground leading-relaxed mb-3">
+            Help other gamers know you're a <strong className="text-foreground">reliable squad member</strong>. A full profile — bio, region, connected accounts — gets you{" "}
+            <strong className="text-primary">better matches and more bids</strong>. It takes less than 2 minutes!
+          </p>
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              onClick={() => setLocation("/profile")}
+              className="flex items-center gap-1.5 text-xs font-black uppercase tracking-wider px-3 py-1.5 rounded-lg text-white transition-all"
+              style={{ background: "linear-gradient(135deg, #a855f7, #7c3aed)" }}
+            >
+              <Sparkles className="h-3.5 w-3.5" />
+              Finish Setup →
+            </button>
+            <button
+              type="button"
+              onClick={() => { localStorage.setItem(DASH_PROFILE_KEY, "1"); setDismissed(true); }}
+              className="text-[11px] text-muted-foreground/40 hover:text-muted-foreground transition-colors flex items-center gap-1"
+            >
+              <X className="h-3 w-3" /> Dismiss
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 const WITHDRAWAL_THRESHOLD = 100;
 
@@ -110,6 +168,9 @@ export default function Dashboard() {
           </div>
         </div>
       )}
+
+      {/* ── FINISH PROFILE BANNER — shown for verified users ── */}
+      {user.idVerified && <FinishProfileBanner userName={user.name} />}
 
       {/* Verification status banner — shown while pending */}
       {!user.idVerified && (

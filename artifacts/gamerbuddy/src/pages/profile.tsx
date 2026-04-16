@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useLocation } from "wouter";
 import { useAuth } from "@/lib/auth";
 import { COUNTRY_MAP, GENDER_MAP } from "@/lib/geo-options";
 import { CountryCombobox, GenderSelect } from "@/components/country-combobox";
@@ -27,6 +28,238 @@ import {
 } from "lucide-react";
 import { TrustMeter, ReputationBadges, computeBadges } from "@/components/reputation-badges";
 import { StreamingAccountsDisplay } from "@/components/streaming-accounts-display";
+
+/* ── PROFILE COMPLETION HELPERS ────────────────────────────── */
+function computeProfileCompletion(profile: any): {
+  score: number;
+  items: Array<{ label: string; pts: number; done: boolean; section: string; icon: string }>;
+} {
+  const items = [
+    { label: "Write your bio",             pts: 30, done: !!(profile?.bio?.trim()),                                         section: "bio",       icon: "✍️" },
+    { label: "Set your region / country",  pts: 15, done: !!(profile?.country && profile.country !== "any"),                section: "basics",    icon: "🌍" },
+    { label: "Set your gender",            pts: 15, done: !!(profile?.gender && profile.gender !== "any"),                  section: "basics",    icon: "👤" },
+    { label: "Connect a gaming account",   pts: 40, done: (profile?.streamingAccounts?.length ?? 0) > 0,                   section: "streaming", icon: "🔗" },
+  ];
+  const score = items.filter((i) => i.done).reduce((a, i) => a + i.pts, 0);
+  return { score, items };
+}
+
+/* ── POST-VERIFICATION MODAL ────────────────────────────────── */
+function PostVerificationModal({
+  profile,
+  onClose,
+  onComplete,
+}: {
+  profile: any;
+  onClose: () => void;
+  onComplete: () => void;
+}) {
+  const { score, items } = computeProfileCompletion(profile);
+  const incomplete = items.filter((i) => !i.done);
+
+  return (
+    <div
+      className="fixed inset-0 z-[110] flex items-end sm:items-center justify-center p-0 sm:p-6"
+      style={{ background: "rgba(0,0,0,0.97)", backdropFilter: "blur(20px)" }}
+    >
+      <div
+        className="w-full max-w-md rounded-t-3xl sm:rounded-3xl overflow-hidden"
+        style={{
+          border: "2px solid rgba(52,211,153,0.45)",
+          boxShadow: "0 0 120px rgba(52,211,153,0.12), 0 30px 80px rgba(0,0,0,0.95)",
+          background: "hsl(var(--card))",
+          maxHeight: "90dvh",
+          overflowY: "auto",
+        }}
+      >
+        {/* Emerald pulsing top stripe */}
+        <div className="h-1.5 bg-gradient-to-r from-emerald-700 via-emerald-400 to-emerald-700 animate-pulse shrink-0" />
+
+        <div className="p-6 space-y-5">
+          {/* Celebration header */}
+          <div className="text-center space-y-3">
+            <div className="text-5xl select-none">🎉</div>
+            <div
+              className="h-20 w-20 rounded-full flex items-center justify-center border-2 border-emerald-500/50 bg-emerald-500/10 mx-auto"
+              style={{ boxShadow: "0 0 50px rgba(52,211,153,0.25)" }}
+            >
+              <ShieldCheck className="h-10 w-10 text-emerald-400" />
+            </div>
+            <h2 className="text-2xl font-extrabold uppercase tracking-tight text-foreground">
+              You're Verified! ✅
+            </h2>
+            <p className="text-sm text-muted-foreground leading-relaxed max-w-xs mx-auto">
+              Congratulations — your Gamerbuddy account is now fully verified. You can bid, hire, and unlock the full platform experience!
+            </p>
+          </div>
+
+          {/* Profile nudge */}
+          {incomplete.length > 0 ? (
+            <div
+              className="rounded-2xl overflow-hidden"
+              style={{ border: "1px solid rgba(168,85,247,0.25)", background: "rgba(168,85,247,0.06)" }}
+            >
+              <div className="px-4 pt-4 pb-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-black uppercase tracking-widest text-foreground/80 flex items-center gap-1.5">
+                    <Sparkles className="h-3.5 w-3.5 text-primary" />
+                    Profile Completion
+                  </span>
+                  <span className="text-xs font-black text-primary">{score}%</span>
+                </div>
+
+                {/* Progress bar */}
+                <div className="h-2.5 rounded-full bg-background/60 overflow-hidden">
+                  <div
+                    className="h-full rounded-full transition-all duration-700"
+                    style={{ width: `${score}%`, background: "linear-gradient(90deg, #a855f7, #7c3aed)" }}
+                  />
+                </div>
+
+                <p className="text-xs text-muted-foreground">
+                  Complete your profile to get <strong className="text-foreground">better matches</strong>, build trust, and stand out as a reliable squad member! 🎮
+                </p>
+
+                {/* What's missing */}
+                <div className="space-y-1.5">
+                  {incomplete.map((item) => (
+                    <div key={item.label} className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <div className="h-4 w-4 rounded-full border border-muted-foreground/30 flex items-center justify-center shrink-0">
+                        <div className="h-1.5 w-1.5 rounded-full bg-muted-foreground/30" />
+                      </div>
+                      <span>{item.icon} {item.label}</span>
+                      <span className="ml-auto text-[10px] font-bold text-primary/60">+{item.pts}%</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-4 text-center space-y-1">
+              <div className="text-sm font-bold text-emerald-400">🏆 Profile is 100% complete!</div>
+              <div className="text-xs text-muted-foreground">You're all set to attract the best matches.</div>
+            </div>
+          )}
+
+          {/* CTAs */}
+          <div className="flex flex-col gap-2 pt-1">
+            {incomplete.length > 0 && (
+              <Button
+                onClick={onComplete}
+                className="w-full font-black uppercase tracking-wider text-sm py-5 text-white"
+                style={{ background: "linear-gradient(135deg, #a855f7, #7c3aed)" }}
+              >
+                <Sparkles className="h-4 w-4 mr-2" />
+                Complete My Profile Now
+              </Button>
+            )}
+            <Button
+              onClick={onClose}
+              variant="outline"
+              className="w-full font-bold uppercase tracking-wide text-sm py-5"
+            >
+              <CheckCircle2 className="h-4 w-4 mr-2 text-emerald-400" />
+              {incomplete.length === 0 ? "Awesome — Let's Go!" : "I'll Do It Later"}
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── PROFILE COMPLETION BANNER ──────────────────────────────── */
+const PROFILE_BANNER_KEY = "gb_profile_banner_v2";
+
+function ProfileCompletionBanner({ profile }: { profile: any }) {
+  const [dismissed, setDismissed] = useState(() => localStorage.getItem(PROFILE_BANNER_KEY) === "1");
+  const { score, items } = computeProfileCompletion(profile);
+  const incomplete = items.filter((i) => !i.done);
+
+  if (dismissed || score >= 80) return null;
+
+  return (
+    <div
+      className="rounded-2xl overflow-hidden"
+      style={{
+        border: "1px solid rgba(168,85,247,0.35)",
+        background: "linear-gradient(135deg, rgba(168,85,247,0.07), rgba(34,211,238,0.04))",
+        boxShadow: "0 0 30px rgba(168,85,247,0.07)",
+      }}
+    >
+      <div className="h-1 bg-gradient-to-r from-violet-600 via-purple-400 to-cyan-500" />
+      <div className="px-5 py-4 space-y-3">
+        {/* Header row */}
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-start gap-3">
+            <div
+              className="h-10 w-10 rounded-xl bg-primary/15 border border-primary/30 flex items-center justify-center shrink-0 mt-0.5"
+              style={{ boxShadow: "0 0 12px rgba(168,85,247,0.2)" }}
+            >
+              <Sparkles className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-sm font-extrabold text-foreground uppercase tracking-wide">
+                  Finish Your Profile Setup
+                </span>
+                <span
+                  className="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full"
+                  style={{ background: "rgba(168,85,247,0.2)", color: "#c084fc", border: "1px solid rgba(168,85,247,0.4)" }}
+                >
+                  {score}% done
+                </span>
+              </div>
+              <p className="text-xs text-muted-foreground mt-0.5 leading-snug">
+                Help other players know you're a reliable squad member — a full profile gets{" "}
+                <strong className="text-foreground">more bids and better matches</strong>!
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => { localStorage.setItem(PROFILE_BANNER_KEY, "1"); setDismissed(true); }}
+            className="text-muted-foreground/40 hover:text-muted-foreground shrink-0 mt-0.5 transition-colors"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        {/* Progress bar */}
+        <div className="space-y-1">
+          <div className="h-2 rounded-full bg-background/50 overflow-hidden">
+            <div
+              className="h-full rounded-full transition-all duration-700"
+              style={{ width: `${score}%`, background: "linear-gradient(90deg, #a855f7, #7c3aed)" }}
+            />
+          </div>
+          <div className="text-[10px] text-muted-foreground/50 text-right">
+            {score}/80% to unlock Trust badge
+          </div>
+        </div>
+
+        {/* Incomplete items as chips */}
+        <div className="flex flex-wrap gap-1.5">
+          {incomplete.map((item) => (
+            <span
+              key={item.label}
+              className="flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-full border"
+              style={{
+                background: "rgba(168,85,247,0.08)",
+                borderColor: "rgba(168,85,247,0.25)",
+                color: "rgba(192,132,252,0.9)",
+              }}
+            >
+              <span>{item.icon}</span>
+              <span>{item.label}</span>
+              <span className="opacity-50">+{item.pts}%</span>
+            </span>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 /* ── GAMER RULES CARD ───────────────────────────────────────── */
 const GAMER_RULES = [
@@ -908,13 +1141,16 @@ function ShopSection({
   );
 }
 
-function VerificationSection({ idVerified }: { idVerified: boolean }) {
+function VerificationSection({ idVerified, onJustVerified }: { idVerified: boolean; onJustVerified?: () => void }) {
   const verifyId = useVerifyId();
   const { toast } = useToast();
 
   const handleVerify = () => {
     verifyId.mutate(null, {
-      onSuccess: () => toast({ title: "Identity Verified!", description: "Your Verified badge is now active on your profile." }),
+      onSuccess: () => {
+        toast({ title: "🎉 Identity Verified!", description: "Your Verified badge is now active on your profile and bids." });
+        onJustVerified?.();
+      },
       onError: (err: any) => toast({ title: "Verification Failed", description: err?.error || "Please try again.", variant: "destructive" }),
     });
   };
@@ -1001,12 +1237,14 @@ function VerificationSection({ idVerified }: { idVerified: boolean }) {
 export default function Profile() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
   const { data: profile, isLoading } = useUserProfile(user?.id ?? null);
   const { data: myVotes } = useProfileVotes(user?.id ?? null);
   const updateProfile = useUpdateProfile();
 
   const [editingBio, setEditingBio] = useState(false);
   const [draftBio, setDraftBio] = useState("");
+  const [showSetupModal, setShowSetupModal] = useState(false);
 
   if (!user) return null;
   if (isLoading) return (
@@ -1049,8 +1287,36 @@ export default function Profile() {
     });
   };
 
+  const handleJustVerified = () => setShowSetupModal(true);
+
+  const scrollToSection = (section: string) => {
+    const id =
+      section === "bio"       ? "profile-bio-section"
+      : section === "quest"   ? "profile-quest-section"
+      : section === "streaming" ? "profile-streaming-section"
+      : "profile-basics-section";
+    setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" }), 200);
+  };
+
   return (
     <div className="max-w-3xl mx-auto space-y-5">
+
+      {/* ── POST-VERIFICATION MODAL ── */}
+      {showSetupModal && (
+        <PostVerificationModal
+          profile={profile}
+          onClose={() => setShowSetupModal(false)}
+          onComplete={() => {
+            setShowSetupModal(false);
+            const { items } = computeProfileCompletion(profile);
+            const first = items.find((i) => !i.done);
+            if (first) scrollToSection(first.section);
+          }}
+        />
+      )}
+
+      {/* ── PROFILE COMPLETION BANNER (verified users only) ── */}
+      {user.idVerified && profile && <ProfileCompletionBanner profile={profile} />}
 
       {/* ── HERO CARD ─────────────────────────────────────────── */}
       <div className="rounded-2xl overflow-hidden border border-border/60">
@@ -1217,7 +1483,7 @@ export default function Profile() {
       />
 
       {/* ── VERIFICATION CARD ── */}
-      <VerificationSection idVerified={user.idVerified} />
+      <VerificationSection idVerified={user.idVerified} onJustVerified={handleJustVerified} />
 
       {/* Quest — Phase 3 Coming Soon */}
       <div
@@ -1254,6 +1520,7 @@ export default function Profile() {
       </div>
 
       {/* ── BIO / ABOUT ME ── */}
+      <span id="profile-bio-section" className="scroll-mt-24" />
       {(() => {
         const charPct = Math.min(100, (draftBio.length / 300) * 100);
         const counterColor =
@@ -1483,6 +1750,7 @@ export default function Profile() {
       })()}
 
       {/* ── LOCATION & IDENTITY ── */}
+      <span id="profile-basics-section" className="scroll-mt-24" />
       <div
         className="rounded-2xl overflow-hidden border"
         style={{ borderColor: "rgba(255,255,255,0.07)", background: "rgba(8,6,18,0.65)" }}
@@ -1544,6 +1812,7 @@ export default function Profile() {
       </div>
 
       {/* CONNECTED STREAMING PLATFORMS */}
+      <span id="profile-streaming-section" className="scroll-mt-24" />
       <StreamingAccountsSection />
 
       {/* GAMER CODE OF CONDUCT */}
