@@ -95,34 +95,35 @@ function BidConductReminder() {
 function RequestCardSkeleton() {
   return (
     <div className="rounded-2xl border border-border/25 bg-card/30 overflow-hidden animate-pulse">
-      <div className="h-[2px] w-full bg-primary/10" />
+      <div className="h-[3px] w-full bg-primary/10" />
       <div className="flex">
-        <div className="w-[3px] shrink-0 bg-primary/15" />
-        <div className="flex-1 px-6 py-7 md:px-8 md:py-8">
-          <div className="flex items-start gap-6">
+        <div className="w-[5px] shrink-0 bg-primary/15" />
+        <div className="flex-1 px-6 py-9 sm:px-9 sm:py-10 md:px-11 md:py-11">
+          <div className="flex items-start gap-7 sm:gap-9">
             {/* Avatar placeholder */}
-            <Skeleton className="hidden sm:block w-16 h-16 rounded-2xl shrink-0" />
+            <Skeleton className="hidden sm:block w-[68px] h-[68px] md:w-20 md:h-20 rounded-2xl shrink-0 mt-1" />
             {/* Content */}
-            <div className="flex-1 space-y-4 min-w-0">
-              <div className="flex gap-2">
-                <Skeleton className="h-6 w-20 rounded-full" />
-                <Skeleton className="h-6 w-24 rounded-full" />
-              </div>
-              <div className="space-y-2">
-                <Skeleton className="h-9 w-64" />
-                <Skeleton className="h-4 w-40" />
+            <div className="flex-1 space-y-6 min-w-0">
+              <div className="space-y-2.5">
+                <Skeleton className="h-10 w-72" />
+                <Skeleton className="h-4 w-48" />
               </div>
               <Skeleton className="h-4 w-full" />
               <Skeleton className="h-4 w-3/4" />
-              <div className="flex gap-2">
-                <Skeleton className="h-6 w-24 rounded-lg" />
-                <Skeleton className="h-6 w-28 rounded-lg" />
+              <div className="flex gap-2.5">
+                <Skeleton className="h-8 w-24 rounded-full" />
+                <Skeleton className="h-8 w-28 rounded-full" />
+                <Skeleton className="h-8 w-20 rounded-full" />
+              </div>
+              <div className="flex gap-3">
+                <Skeleton className="h-9 w-28 rounded-xl" />
+                <Skeleton className="h-9 w-36 rounded-xl" />
               </div>
             </div>
             {/* CTA placeholder */}
-            <div className="shrink-0 sm:min-w-[156px] space-y-3 hidden sm:flex sm:flex-col">
-              <Skeleton className="h-13 w-full rounded-xl" style={{ height: 52 }} />
-              <Skeleton className="h-9 w-full rounded-xl" />
+            <div className="shrink-0 sm:min-w-[196px] space-y-3 hidden sm:flex sm:flex-col">
+              <Skeleton className="w-full rounded-xl" style={{ height: 60 }} />
+              <Skeleton className="h-11 w-full rounded-xl" />
             </div>
           </div>
         </div>
@@ -350,12 +351,13 @@ function GameAvatar({ name, bar }: { name: string; bar: string }) {
   const letter = name.trim()[0]?.toUpperCase() ?? "G";
   return (
     <div
-      className="w-14 h-14 md:w-16 md:h-16 shrink-0 rounded-2xl flex items-center justify-center text-2xl font-black select-none"
+      className="w-[68px] h-[68px] md:w-20 md:h-20 shrink-0 rounded-2xl flex items-center justify-center text-3xl font-black select-none"
       style={{
-        background: `linear-gradient(135deg, ${bar}22 0%, ${bar}44 100%)`,
-        border: `1.5px solid ${bar}55`,
+        background: `linear-gradient(135deg, ${bar}20 0%, ${bar}42 100%)`,
+        border: `2px solid ${bar}60`,
         color: bar,
-        textShadow: `0 0 12px ${bar}`,
+        textShadow: `0 0 18px ${bar}`,
+        boxShadow: `0 6px 20px ${bar}28, inset 0 1px 0 ${bar}30`,
       }}
     >
       {letter}
@@ -373,14 +375,13 @@ function RequestCard({ req }: { req: GameRequest }) {
   const isZeroBids = req.bidCount === 0;
   const hasNationPref = !!req.preferredCountry && req.preferredCountry !== "any";
   const hasGenderPref = !!req.preferredGender  && req.preferredGender  !== "any";
-  const hasContextTags = isZeroBids || hasNationPref || hasGenderPref;
 
   return (
     <div
-      className={`group rounded-2xl border overflow-hidden transition-[transform,border-color,box-shadow] duration-[280ms] will-change-transform ${
+      className={`group rounded-2xl border overflow-hidden transition-[transform,border-color,box-shadow] duration-300 will-change-transform ${
         expanded
-          ? "border-primary/50 shadow-[0_8px_48px_rgba(168,85,247,0.22)] translate-y-0"
-          : "border-border/35 hover:border-primary/40 hover:-translate-y-[3px] hover:shadow-[0_10px_44px_rgba(168,85,247,0.18)]"
+          ? "border-primary/55 shadow-[0_12px_64px_rgba(168,85,247,0.28)] translate-y-0"
+          : "border-border/35 hover:border-primary/50 hover:-translate-y-[6px] hover:shadow-[0_20px_64px_rgba(168,85,247,0.22)]"
       }`}
       style={{
         background: isDark
@@ -394,55 +395,56 @@ function RequestCard({ req }: { req: GameRequest }) {
       }}
     >
       {/* Top skill-color accent line */}
-      <div className="h-[2px] w-full" style={{ background: `linear-gradient(90deg, transparent 0%, ${skill.bar} 35%, ${skill.bar} 65%, transparent 100%)` }} />
+      <div className="h-[3px] w-full" style={{ background: `linear-gradient(90deg, transparent 0%, ${skill.bar} 25%, ${skill.bar} 75%, transparent 100%)` }} />
 
       <div className="flex">
         {/* Left skill bar */}
-        <div className="w-[3px] shrink-0" style={{ background: `linear-gradient(180deg, ${skill.bar} 0%, ${skill.bar}28 100%)` }} />
+        <div className="w-[5px] shrink-0" style={{ background: `linear-gradient(180deg, ${skill.bar} 0%, ${skill.bar}22 100%)` }} />
 
         {/* Card body */}
-        <div className="flex-1 px-5 py-7 sm:px-8 sm:py-9 md:px-10 md:py-10">
-          <div className="flex flex-col sm:flex-row sm:items-start gap-6 sm:gap-8">
+        <div className="flex-1 px-6 py-9 sm:px-9 sm:py-10 md:px-11 md:py-11">
+          <div className="flex flex-col sm:flex-row sm:items-start gap-7 sm:gap-9">
 
             {/* Game avatar — desktop only */}
-            <div className="hidden sm:block shrink-0">
+            <div className="hidden sm:block shrink-0 mt-1">
               <GameAvatar name={req.gameName} bar={skill.bar} />
             </div>
 
             {/* ── Center column ── */}
-            <div className="flex-1 min-w-0 space-y-5">
+            <div className="flex-1 min-w-0 space-y-6">
 
-              {/* Row 1: Game title — dominant, always first */}
+              {/* Row 1: Game title + meta */}
               <div>
-                <div className="flex items-center gap-3 mb-1.5">
+                <div className="flex items-center gap-3 mb-2.5">
                   {/* Mobile-only avatar inline with title */}
                   <div
-                    className="sm:hidden w-10 h-10 rounded-xl flex items-center justify-center text-base font-black shrink-0 select-none"
+                    className="sm:hidden w-12 h-12 rounded-xl flex items-center justify-center text-lg font-black shrink-0 select-none"
                     style={{
-                      background: `linear-gradient(135deg, ${skill.bar}22 0%, ${skill.bar}44 100%)`,
-                      border: `1.5px solid ${skill.bar}55`,
+                      background: `linear-gradient(135deg, ${skill.bar}20 0%, ${skill.bar}44 100%)`,
+                      border: `2px solid ${skill.bar}60`,
                       color: skill.bar,
+                      boxShadow: `0 4px 12px ${skill.bar}28`,
                     }}
                   >
                     {req.gameName.trim()[0]?.toUpperCase() ?? "G"}
                   </div>
                   <h3
-                    className="text-[1.6rem] sm:text-[1.85rem] md:text-[2.1rem] font-black text-foreground cursor-pointer transition-colors duration-200 group-hover:text-primary/90 leading-none"
+                    className="text-[1.7rem] sm:text-[1.95rem] md:text-[2.2rem] font-black text-foreground cursor-pointer transition-colors duration-200 group-hover:text-primary/90 leading-none"
                     style={{ letterSpacing: "-0.04em" }}
                     onClick={() => setLocation(`/requests/${req.id}`)}
                   >
                     {req.gameName}
                   </h3>
                 </div>
-                <div className="flex items-center gap-2 flex-wrap">
+                <div className="flex items-center gap-2.5 flex-wrap">
                   <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground/60">
                     <User className="h-3 w-3 shrink-0" />
                     <span className="text-primary/90 font-bold">{req.userName}</span>
                     <VerifiedBadge idVerified={req.userIdVerified ?? false} variant="icon" />
                     <ReportButton userId={req.userId} userName={req.userName} variant="icon" />
                   </span>
-                  <span className="text-muted-foreground/20 text-xs select-none">·</span>
-                  <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground/40">
+                  <span className="text-muted-foreground/25 text-xs select-none">·</span>
+                  <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground/45">
                     <Clock className="h-3 w-3 shrink-0" />
                     {format(new Date(req.createdAt), "MMM d")}
                   </span>
@@ -451,29 +453,29 @@ function RequestCard({ req }: { req: GameRequest }) {
 
               {/* Row 2: Objectives */}
               <p
-                className="text-sm text-foreground/60 leading-[1.8] line-clamp-2 pl-4"
-                style={{ borderLeft: `2px solid ${skill.bar}55` }}
+                className="text-sm text-foreground/60 leading-[1.85] line-clamp-2 pl-4 py-0.5"
+                style={{ borderLeft: `3px solid ${skill.bar}55` }}
               >
                 {req.objectives}
               </p>
 
-              {/* Row 3: Unified tag strip — platform + level + context all in one row */}
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="inline-flex items-center gap-1.5 text-xs border border-border/40 rounded-full px-3.5 py-1.5 font-semibold text-muted-foreground/70 bg-muted/25">
+              {/* Row 3: Tag strip — platform + level + context badges */}
+              <div className="flex flex-wrap items-center gap-2.5">
+                <span className="inline-flex items-center gap-1.5 text-xs border border-border/40 rounded-full px-4 py-2 font-semibold text-muted-foreground/70 bg-muted/25">
                   <span className="text-sm leading-none">{PLATFORM_ICON[req.platform] ?? "🎮"}</span>
                   {req.platform}
                 </span>
-                <span className={`inline-flex items-center text-xs border rounded-full px-3.5 py-1.5 font-bold tracking-wide ${skill.border} ${skill.text} ${skill.bg}`}>
+                <span className={`inline-flex items-center text-xs border rounded-full px-4 py-2 font-bold tracking-wide ${skill.border} ${skill.text} ${skill.bg}`}>
                   {req.skillLevel}
                 </span>
                 {isZeroBids && (
-                  <span className="inline-flex items-center gap-1.5 text-xs bg-green-500/10 border border-green-500/25 text-green-400 rounded-full px-3.5 py-1.5 font-bold">
+                  <span className="inline-flex items-center gap-1.5 text-xs bg-green-500/10 border border-green-500/25 text-green-400 rounded-full px-4 py-2 font-bold">
                     <Flame className="h-3 w-3" /> First bid!
                   </span>
                 )}
                 {hasNationPref && COUNTRY_MAP[req.preferredCountry!] && (
                   <span
-                    className="inline-flex items-center gap-1.5 text-xs rounded-full px-3.5 py-1.5 font-bold"
+                    className="inline-flex items-center gap-1.5 text-xs rounded-full px-4 py-2 font-bold"
                     style={{
                       background: "rgba(252,211,77,0.10)",
                       border: "1px solid rgba(180,140,0,0.28)",
@@ -486,7 +488,7 @@ function RequestCard({ req }: { req: GameRequest }) {
                 )}
                 {hasGenderPref && GENDER_MAP[req.preferredGender!] && (
                   <span
-                    className="inline-flex items-center gap-1.5 text-xs rounded-full px-3.5 py-1.5 font-bold"
+                    className="inline-flex items-center gap-1.5 text-xs rounded-full px-4 py-2 font-bold"
                     style={{
                       background: "rgba(236,72,153,0.09)",
                       border: "1px solid rgba(236,72,153,0.25)",
@@ -500,18 +502,18 @@ function RequestCard({ req }: { req: GameRequest }) {
               </div>
 
               {/* Row 4: Bid stats */}
-              <div className="flex flex-wrap items-center gap-2.5">
-                <div className="inline-flex items-center gap-1.5 rounded-lg border border-border/30 px-3.5 py-1.5 text-xs bg-muted/20">
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="inline-flex items-center gap-2 rounded-xl border border-border/30 px-4 py-2.5 text-xs bg-muted/20">
                   <Gavel className="h-3.5 w-3.5 text-muted-foreground/40 shrink-0" />
                   <span className="font-semibold text-foreground/70">
                     {isZeroBids ? "No bids yet" : `${req.bidCount} bid${req.bidCount === 1 ? "" : "s"}`}
                   </span>
-                  {isZeroBids && <span className="text-muted-foreground/35">— be first!</span>}
+                  {isZeroBids && <span className="text-muted-foreground/40">— be first!</span>}
                 </div>
                 {req.lowestBid && (
                   <div
-                    className="inline-flex items-center gap-1.5 rounded-lg border px-3.5 py-1.5 text-xs"
-                    style={{ borderColor: "rgba(34,211,238,0.20)", background: "rgba(34,211,238,0.05)" }}
+                    className="inline-flex items-center gap-2 rounded-xl border px-4 py-2.5 text-xs"
+                    style={{ borderColor: "rgba(34,211,238,0.22)", background: "rgba(34,211,238,0.06)" }}
                   >
                     <TrendingDown className="h-3.5 w-3.5 text-cyan-400/65 shrink-0" />
                     <span className="text-muted-foreground/60">
@@ -523,25 +525,25 @@ function RequestCard({ req }: { req: GameRequest }) {
             </div>
 
             {/* ── Right CTA column ── */}
-            <div className="flex flex-col items-stretch gap-3 shrink-0 sm:min-w-[170px]">
-              {/* PLACE BID */}
-              <div className="relative">
+            <div className="flex sm:flex-col items-stretch gap-3 shrink-0 sm:min-w-[196px]">
+              {/* PLACE BID — primary action */}
+              <div className="relative flex-1 sm:flex-none">
                 {!expanded && (
                   <div
-                    className="absolute -inset-[5px] rounded-[18px] opacity-45"
-                    style={{ background: "linear-gradient(135deg, #a855f7, #7c3aed)", filter: "blur(12px)" }}
+                    className="absolute -inset-[7px] rounded-[22px] opacity-45 transition-opacity duration-300 group-hover:opacity-65"
+                    style={{ background: "linear-gradient(135deg, #a855f7, #7c3aed)", filter: "blur(16px)" }}
                   />
                 )}
                 <button
                   onClick={() => setExpanded(!expanded)}
-                  className={`relative w-full flex items-center justify-center gap-2 rounded-xl font-black text-sm px-5 py-4 transition-all duration-200 uppercase tracking-widest whitespace-nowrap ${
+                  className={`relative w-full flex items-center justify-center gap-2.5 rounded-xl font-black text-sm px-5 transition-all duration-200 uppercase tracking-widest whitespace-nowrap ${
                     expanded
-                      ? "bg-primary/10 text-primary border border-primary/35"
-                      : "text-white border border-primary/50"
+                      ? "py-4 bg-primary/10 text-primary border border-primary/40"
+                      : "py-5 text-white border border-primary/40"
                   }`}
                   style={
                     !expanded
-                      ? { background: "linear-gradient(135deg, #a855f7 0%, #7c3aed 100%)", boxShadow: "0 4px 32px rgba(168,85,247,0.55), inset 0 1px 0 rgba(255,255,255,0.14)" }
+                      ? { background: "linear-gradient(135deg, #a855f7 0%, #7c3aed 100%)", boxShadow: "0 6px 40px rgba(168,85,247,0.65), inset 0 1px 0 rgba(255,255,255,0.18)" }
                       : {}
                   }
                 >
@@ -551,10 +553,10 @@ function RequestCard({ req }: { req: GameRequest }) {
                 </button>
               </div>
 
-              {/* Full Details */}
+              {/* Full Details — secondary action */}
               <button
                 onClick={() => setLocation(`/requests/${req.id}`)}
-                className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground/55 hover:text-primary/90 transition-colors font-semibold whitespace-nowrap px-3 py-3 rounded-xl border border-border/25 hover:border-primary/25 hover:bg-primary/5"
+                className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground/55 hover:text-primary/90 transition-all duration-200 font-semibold whitespace-nowrap px-4 py-3.5 rounded-xl border border-border/25 hover:border-primary/30 hover:bg-primary/5"
               >
                 Full Details <ArrowRight className="h-3.5 w-3.5 shrink-0" />
               </button>
@@ -912,7 +914,7 @@ export default function Browse() {
 
         {/* ── Search + platform row ── */}
         <div
-          className="grid grid-cols-1 sm:grid-cols-3 gap-3 px-6 py-5 border-b"
+          className="grid grid-cols-1 sm:grid-cols-3 gap-3 px-6 py-6 border-b"
           style={{
             borderColor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.07)",
             background: isDark ? "rgba(0,0,0,0.14)" : "rgba(0,0,0,0.025)",
@@ -941,7 +943,7 @@ export default function Browse() {
 
         {/* ── Sort row ── */}
         <div
-          className="flex flex-col sm:flex-row sm:items-center gap-3 px-6 py-5 border-b"
+          className="flex flex-col sm:flex-row sm:items-center gap-3 px-6 py-6 border-b"
           style={{
             borderColor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.07)",
             background: isDark ? "rgba(0,0,0,0.18)" : "rgba(0,0,0,0.02)",
@@ -979,7 +981,7 @@ export default function Browse() {
 
         {/* ── Experience level row ── */}
         <div
-          className="flex flex-col sm:flex-row sm:items-center gap-3 px-6 py-5 border-b"
+          className="flex flex-col sm:flex-row sm:items-center gap-3 px-6 py-6 border-b"
           style={{
             borderColor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.07)",
             background: isDark ? "rgba(0,0,0,0.12)" : "rgba(0,0,0,0.015)",
@@ -1020,7 +1022,7 @@ export default function Browse() {
 
         {/* ── Nation + Gender filter row ── */}
         <div
-          className="flex flex-col sm:flex-row sm:items-center gap-4 px-6 py-5 border-b"
+          className="flex flex-col sm:flex-row sm:items-center gap-4 px-6 py-6 border-b"
           style={{
             borderColor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.07)",
             background: isDark ? "rgba(0,0,0,0.16)" : "rgba(0,0,0,0.02)",
@@ -1044,7 +1046,7 @@ export default function Browse() {
 
         {/* ── Toggle filters row ── */}
         <div
-          className="flex flex-col sm:flex-row sm:items-center gap-3 px-6 py-5"
+          className="flex flex-col sm:flex-row sm:items-center gap-3 px-6 py-6"
           style={{ background: isDark ? "rgba(0,0,0,0.12)" : "rgba(0,0,0,0.015)" }}
         >
           <span className="text-[11px] font-extrabold uppercase tracking-widest shrink-0 sm:w-16 text-muted-foreground/45">
@@ -1173,7 +1175,7 @@ export default function Browse() {
       ) : !requests || requests.length === 0 ? (
         <EmptyState hasFilters={hasFilters} onClear={clearFilters} />
       ) : (
-        <div key={filterKey} className="bid-list-animate space-y-6">
+        <div key={filterKey} className="bid-list-animate space-y-8">
           {requests.map((req) => <RequestCard key={req.id} req={req} />)}
         </div>
       )}
