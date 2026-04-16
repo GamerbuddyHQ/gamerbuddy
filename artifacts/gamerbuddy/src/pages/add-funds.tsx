@@ -667,7 +667,9 @@ export default function AddFunds() {
   const { data: wallets } = useGetWallets({ query: { queryKey: getGetWalletsQueryKey() } });
 
   const selectedAmount = parseFloat(amount || customAmount || "0");
-  const isValidAmount = selectedAmount >= 10.75 && selectedAmount <= 1000;
+  const currentBalance = wallets?.hiringBalance ?? 0;
+  const maxCanAdd = Math.max(0, Math.round((1000 - currentBalance) * 100) / 100);
+  const isValidAmount = selectedAmount >= 10.75 && selectedAmount <= 1000 && selectedAmount <= maxCanAdd;
 
   const handleSelectPreset = (val: number) => { setAmount(String(val)); setCustomAmount(""); };
   const handleCustomChange = (val: string) => { setCustomAmount(val); setAmount(""); };
@@ -718,19 +720,6 @@ export default function AddFunds() {
     return (
       <div className="max-w-md mx-auto space-y-5">
         {processing && <ProcessingOverlay method={payMethod} />}
-
-        {/* Preview banner */}
-        <div
-          className="flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 border text-xs font-semibold"
-          style={{
-            background: "rgba(245,158,11,0.10)",
-            borderColor: "rgba(245,158,11,0.35)",
-            color: "#f59e0b",
-          }}
-        >
-          <AlertCircle className="h-3.5 w-3.5 shrink-0" />
-          Preview only — no real money will be charged until payment integration is live
-        </div>
 
         {/* Header */}
         <div className="flex items-center gap-3">
@@ -810,31 +799,6 @@ export default function AddFunds() {
   /* ── AMOUNT SELECTION ── */
   return (
     <div className="max-w-lg mx-auto space-y-6">
-      {/* ── PAYMENT NOT YET ACTIVE BANNER ── */}
-      <div
-        className="flex items-start gap-3 rounded-xl p-4 border"
-        style={{
-          background: "linear-gradient(135deg, rgba(245,158,11,0.12) 0%, rgba(234,88,12,0.08) 100%)",
-          borderColor: "rgba(245,158,11,0.40)",
-        }}
-      >
-        <div
-          className="shrink-0 w-9 h-9 rounded-lg flex items-center justify-center mt-0.5"
-          style={{ background: "rgba(245,158,11,0.15)", border: "1px solid rgba(245,158,11,0.35)" }}
-        >
-          <AlertCircle className="h-5 w-5" style={{ color: "#f59e0b" }} />
-        </div>
-        <div className="space-y-0.5">
-          <div className="text-sm font-extrabold uppercase tracking-wider" style={{ color: "#f59e0b" }}>
-            Payments Not Yet Active
-          </div>
-          <div className="text-xs leading-relaxed" style={{ color: "rgba(245,158,11,0.80)" }}>
-            Real payment processing is not enabled yet — no real money will be charged.
-            This page is a <strong>preview only</strong>. Stripe &amp; Razorpay integration goes live in the next phase.
-          </div>
-        </div>
-      </div>
-
       <button
         onClick={() => setLocation("/wallets")}
         className="flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm transition-colors"
@@ -859,23 +823,31 @@ export default function AddFunds() {
       <div className="rounded-2xl border border-border/60 p-5 space-y-5 bg-card/80">
         <div>
           <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-1">Choose Amount</div>
-          <div className="text-[11px] text-muted-foreground/60">Min $10.75 · Max $1,000.00</div>
+          <div className="text-[11px] text-muted-foreground/60">
+            Min $10.75 · {maxCanAdd < 1000 ? `Max you can add: $${maxCanAdd.toFixed(2)}` : "Max $1,000.00"}
+          </div>
         </div>
 
         <div className="grid grid-cols-3 gap-2.5">
-          {PRESETS.map((preset) => (
-            <button
-              key={preset}
-              onClick={() => handleSelectPreset(preset)}
-              className={`rounded-xl border py-3.5 px-2 text-center font-bold transition-all text-sm ${
-                amount === String(preset)
-                  ? "border-primary bg-primary/20 text-foreground shadow-[0_0_14px_rgba(168,85,247,0.3)]"
-                  : "border-border/60 bg-background/40 text-muted-foreground hover:border-primary/40 hover:text-foreground"
-              }`}
-            >
-              ${preset === 10.75 ? "10.75" : preset}
-            </button>
-          ))}
+          {PRESETS.map((preset) => {
+            const disabled = preset > maxCanAdd;
+            return (
+              <button
+                key={preset}
+                onClick={() => !disabled && handleSelectPreset(preset)}
+                disabled={disabled}
+                className={`rounded-xl border py-3.5 px-2 text-center font-bold transition-all text-sm ${
+                  disabled
+                    ? "border-border/30 bg-background/20 text-muted-foreground/30 cursor-not-allowed"
+                    : amount === String(preset)
+                    ? "border-primary bg-primary/20 text-foreground shadow-[0_0_14px_rgba(168,85,247,0.3)]"
+                    : "border-border/60 bg-background/40 text-muted-foreground hover:border-primary/40 hover:text-foreground"
+                }`}
+              >
+                ${preset === 10.75 ? "10.75" : preset}
+              </button>
+            );
+          })}
         </div>
 
         <div className="space-y-1.5">
@@ -895,10 +867,21 @@ export default function AddFunds() {
           </div>
         </div>
 
-        {selectedAmount > 0 && !isValidAmount && (
+        {maxCanAdd === 0 && (
+          <div className="flex items-center gap-2 text-xs text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded-lg px-3 py-2">
+            <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+            Your Hiring Wallet is at the $1,000.00 cap. Spend some funds first before adding more.
+          </div>
+        )}
+
+        {selectedAmount > 0 && !isValidAmount && maxCanAdd > 0 && (
           <div className="flex items-center gap-2 text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">
             <AlertCircle className="h-3.5 w-3.5 shrink-0" />
-            {selectedAmount < 10.75 ? "Minimum deposit is $10.75" : "Maximum deposit is $1,000.00"}
+            {selectedAmount < 10.75
+              ? "Minimum deposit is $10.75"
+              : selectedAmount > 1000
+              ? "Maximum deposit per transaction is $1,000.00"
+              : `Adding $${selectedAmount.toFixed(2)} would exceed the $1,000.00 wallet cap. Max you can add: $${maxCanAdd.toFixed(2)}`}
           </div>
         )}
 

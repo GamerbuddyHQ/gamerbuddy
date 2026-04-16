@@ -176,6 +176,14 @@ router.post("/wallets/deposit", requireAuth, async (req, res): Promise<void> => 
     return;
   }
 
+  if (round2(wallet.hiringBalance + rounded) > MAX_DEPOSIT) {
+    const canAdd = round2(MAX_DEPOSIT - wallet.hiringBalance);
+    res.status(400).json({
+      error: `This deposit would exceed the $${MAX_DEPOSIT.toFixed(2)} wallet cap. Current balance: $${wallet.hiringBalance.toFixed(2)}. You can add up to $${canAdd.toFixed(2)}.`,
+    });
+    return;
+  }
+
   const [updated] = await db
     .update(walletsTable)
     .set({ hiringBalance: round2(wallet.hiringBalance + rounded) })

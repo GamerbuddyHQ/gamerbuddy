@@ -79,6 +79,23 @@ router.post("/payments/razorpay/create-order", requireAuth, async (req, res): Pr
   // Anomaly: flag unusually large deposit attempts
   checkDepositAnomaly(req.user!.id, amount, "razorpay-create-order", req.log);
 
+  // Balance cap — block order creation if deposit would push wallet over $1,000
+  const [walletRzp] = await db
+    .select({ hiringBalance: walletsTable.hiringBalance })
+    .from(walletsTable)
+    .where(eq(walletsTable.userId, req.user!.id));
+  if (!walletRzp) {
+    res.status(404).json({ error: "Wallet not found" });
+    return;
+  }
+  if (round2(walletRzp.hiringBalance + amount) > MAX_AMOUNT) {
+    const canAdd = Math.max(0, round2(MAX_AMOUNT - walletRzp.hiringBalance));
+    res.status(400).json({
+      error: `This deposit would exceed the $${MAX_AMOUNT.toFixed(2)} wallet cap. Current balance: $${walletRzp.hiringBalance.toFixed(2)}. You can add up to $${canAdd.toFixed(2)}.`,
+    });
+    return;
+  }
+
   try {
     const Razorpay = (await import("razorpay")).default;
     const rzp = new Razorpay({ key_id: RAZORPAY_KEY_ID, key_secret: RAZORPAY_KEY_SECRET });
@@ -218,6 +235,23 @@ router.post("/payments/stripe/create-intent", requireAuth, async (req, res): Pro
 
   // Anomaly: flag large deposits before creating the intent
   checkDepositAnomaly(req.user!.id, amount, "stripe-create-intent", req.log);
+
+  // Balance cap — block intent creation if deposit would push wallet over $1,000
+  const [walletStr] = await db
+    .select({ hiringBalance: walletsTable.hiringBalance })
+    .from(walletsTable)
+    .where(eq(walletsTable.userId, req.user!.id));
+  if (!walletStr) {
+    res.status(404).json({ error: "Wallet not found" });
+    return;
+  }
+  if (round2(walletStr.hiringBalance + amount) > MAX_AMOUNT) {
+    const canAdd = Math.max(0, round2(MAX_AMOUNT - walletStr.hiringBalance));
+    res.status(400).json({
+      error: `This deposit would exceed the $${MAX_AMOUNT.toFixed(2)} wallet cap. Current balance: $${walletStr.hiringBalance.toFixed(2)}. You can add up to $${canAdd.toFixed(2)}.`,
+    });
+    return;
+  }
 
   try {
     const Stripe = (await import("stripe")).default;
