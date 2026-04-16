@@ -306,6 +306,28 @@ export default function SocialsPage() {
           Follow us on all platforms for updates, tournaments, giveaways, and epic gaming moments!
         </p>
 
+        {/* Superr.bio hub CTA */}
+        <div className="flex justify-center pt-2">
+          <a
+            href="https://www.superr.bio/gamerbuddy"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group inline-flex items-center gap-3 rounded-2xl px-7 py-4 font-black text-base text-white transition-all duration-300 hover:scale-[1.04] hover:brightness-110 active:scale-[0.97]"
+            style={{
+              background: "linear-gradient(135deg, #a855f7 0%, #7c3aed 50%, #22d3ee 100%)",
+              boxShadow: "0 0 40px rgba(168,85,247,0.45), 0 4px 24px rgba(34,211,238,0.25), inset 0 1px 0 rgba(255,255,255,0.18)",
+            }}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} className="h-5 w-5 shrink-0">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" />
+            </svg>
+            All Socials &amp; Links
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+            </svg>
+          </a>
+        </div>
+
         {/* Quick icon bar */}
         <div className="flex items-center justify-center gap-3 pt-1 flex-wrap">
           {SOCIALS.map((s) => (

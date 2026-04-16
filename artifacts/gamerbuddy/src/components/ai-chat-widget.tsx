@@ -182,6 +182,12 @@ const RESPONSES: Array<{ patterns: RegExp; reply: string }> = [
     reply: `You **cannot hire yourself** on Gamerbuddy 🚫\n\nThe platform prevents placing a bid on your own request. This is a built-in safeguard to ensure fair competition and genuine transactions between different users — we check this at the API level, not just the UI.`,
   },
 
+  /* ── SUPERR.BIO / ALL LINKS ── */
+  {
+    patterns: /superr\.bio|linktree|link.*bio|bio.*link|all.*social|all.*link|every.*platform|find.*everything|one.*link/i,
+    reply: `The easiest way to find everything Gamerbuddy is our link-in-bio page! 🔗\n\n**[👉 superr.bio/gamerbuddy](https://www.superr.bio/gamerbuddy)**\n\nIt's our central hub — one link with all our platforms, Discord server, social channels, and everything else in one place. Bookmark it! 🚀`,
+  },
+
   /* ── DISCORD ── */
   {
     patterns: /discord|join.*server|server.*link|discord.*link|join.*discord/i,
