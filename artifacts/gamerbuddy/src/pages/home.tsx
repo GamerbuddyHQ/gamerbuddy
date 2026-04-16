@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { Link } from "wouter";
-import { Gamepad2, Users, Coins, Zap, Shield, Star, Trophy } from "lucide-react";
+import { Gamepad2, Users, Coins, Zap, Shield, Star } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 
 /* ── floating particles canvas ─────────────────────────────── */
@@ -183,7 +183,7 @@ export default function Home() {
           style={{ background: "#22c55e", boxShadow: "0 0 6px rgba(34,197,94,0.6)", animation: "pulse 1.5s infinite" }}
         />
         <span style={{ color: "var(--text-on-surface)", opacity: 0.82 }}>
-          Gamerbuddy is currently in Phase 1. More exciting features are coming soon!{" "}
+          Gamerbuddy is currently in Phase 1 — Core Hiring Only. Tournaments and more features are coming soon!{" "}
           <Link href="/roadmap" className="font-semibold hover:underline" style={{ color: "hsl(var(--primary))" }}>
             View Roadmap →
           </Link>
@@ -337,41 +337,6 @@ export default function Home() {
             zIndex: 2,
           }}
         />
-      </section>
-
-      {/* ═══════════════════ TOURNAMENT CTA ═══════════════════ */}
-      <section className="px-4 pb-4 -mt-4">
-        <Link href="/tournaments">
-          <div
-            className="max-w-5xl mx-auto rounded-2xl px-6 py-5 flex flex-col sm:flex-row items-center justify-between gap-4 cursor-pointer group transition-all duration-200 hover:scale-[1.01]"
-            style={{
-              background: "linear-gradient(135deg,rgba(251,191,36,0.12) 0%,rgba(168,85,247,0.10) 100%)",
-              border: "1px solid rgba(251,191,36,0.30)",
-              boxShadow: "0 0 40px rgba(251,191,36,0.08), 0 4px 20px rgba(0,0,0,0.3)",
-            }}
-          >
-            <div className="flex items-center gap-4">
-              <div
-                className="h-12 w-12 rounded-xl flex items-center justify-center shrink-0"
-                style={{ background: "rgba(251,191,36,0.18)", border: "1px solid rgba(251,191,36,0.40)" }}
-              >
-                <Trophy className="h-7 w-7 text-yellow-400" />
-              </div>
-              <div className="text-left">
-                <p className="text-[15px] font-extrabold text-foreground">{t.home.cta3} — Crown the Champion!</p>
-                <p className="text-[12px] mt-0.5 text-muted-foreground">
-                  2–100 players · Prize pools $100–$10,000 · 10% platform fee · {t.tournaments.free}
-                </p>
-              </div>
-            </div>
-            <div
-              className="shrink-0 px-5 py-2.5 rounded-xl font-extrabold text-[13px] transition-all duration-150 group-hover:brightness-110 active:scale-95"
-              style={{ background: "linear-gradient(135deg,#fbbf24,#f59e0b)", color: "#000", boxShadow: "0 0 20px rgba(251,191,36,0.30)" }}
-            >
-              {t.nav.tournaments}
-            </div>
-          </div>
-        </Link>
       </section>
 
       {/* ═══════════════════ FEATURES ═══════════════════ */}
