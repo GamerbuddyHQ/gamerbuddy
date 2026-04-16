@@ -5,14 +5,14 @@ import {
   Gamepad2, Wallet, Star, Shield, Globe, MessageSquare,
   Swords, Bot, Sparkles, Map, Lightbulb, ChevronRight,
   Lock, AlertTriangle, CircleDollarSign, Gift, BadgeDollarSign,
+  Radio, Smartphone, Link2, Handshake,
 } from "lucide-react";
 
-/* ── Phase definitions — Phase 1 (live), Phase 2 (coming soon), Phase 3 (future) ── */
 const PHASES = [
   {
     id: 1,
     tag: "Now Live",
-    title: "Core Platform",
+    title: "Core Hiring",
     status: "live" as const,
     accent: "#22c55e",
     bg: "rgba(34,197,94,0.07)",
@@ -21,49 +21,54 @@ const PHASES = [
     bar: "from-green-500 to-emerald-400",
     Icon: Gamepad2,
     description:
-      "The essential hiring experience — post, bid, play, pay, and review. Everything you need to hire gamers or earn as one.",
+      "The full core hiring experience — post, bid, pay, play, and review. Everything you need to hire a gamer or earn as one. Live right now.",
     items: [
       {
         icon: Zap,
         title: "Core Hiring System",
-        desc: "Post requests, place bids, accept sessions, play together, and complete payments — with full reviews on completion.",
+        desc: "Post requests, place bids, accept sessions, play together, and complete payments — with mandatory reviews on completion.",
       },
       {
         icon: Wallet,
-        title: "Dual Wallets",
-        desc: "Hiring Wallet for posting sessions and an Earnings Wallet for receiving payouts — fully separated.",
+        title: "Dual Wallets + Escrow",
+        desc: "Hiring Wallet for posting sessions and an Earnings Wallet for receiving payouts. Funds held in escrow until both players approve.",
       },
       {
         icon: CircleDollarSign,
         title: "10% Platform Fee",
-        desc: "A 10% fee is deducted from the session escrow on completion. The rest goes straight to the gamer's Earnings Wallet.",
+        desc: "A 10% fee is deducted from the session escrow on completion. The remaining 90% goes straight to the gamer's Earnings Wallet.",
       },
       {
         icon: Gift,
         title: "Gift Button",
-        desc: "Send a tip or bonus to a gamer you loved playing with — right from the session or their profile.",
-      },
-      {
-        icon: BadgeDollarSign,
-        title: "Wallet Limits",
-        desc: "Minimum $10.75 required to post a request. Maximum $1,000 balance per wallet for safety.",
+        desc: "Send a tip or bonus to a gamer you loved playing with — right from the session page or their profile.",
       },
       {
         icon: Shield,
         title: "Account Verification",
-        desc: "Identity check for safety and trust — protects both hirers and gamers. Review takes 7–15 days.",
+        desc: "Identity check for safety and trust — protects both hirers and gamers. Verification review takes 7–15 days.",
+      },
+      {
+        icon: Radio,
+        title: "Streaming Channel Linking",
+        desc: "Link your Twitch, YouTube Gaming, Kick, Facebook Gaming, or TikTok Live channels. They show on your profile and bid cards.",
+      },
+      {
+        icon: Globe,
+        title: "Superr.bio Social Hub",
+        desc: "All community links, Discord, and social platforms are unified at one place — the 'Social' tab in navigation.",
       },
       {
         icon: AlertTriangle,
         title: "Safety Rules & Warnings",
-        desc: "Never share account passwords. Recording sessions is your own responsibility. Violations lead to bans.",
+        desc: "Never share account passwords. Sessions are played in-game — no outside service required. Violations lead to bans.",
       },
     ],
   },
   {
     id: 2,
     tag: "Coming Soon",
-    title: "Competition & Rewards",
+    title: "Platform Expansion",
     status: "next" as const,
     accent: "#22d3ee",
     bg: "rgba(34,211,238,0.07)",
@@ -72,27 +77,42 @@ const PHASES = [
     bar: "from-cyan-400 to-sky-400",
     Icon: Trophy,
     description:
-      "Scale your sessions, compete in tournaments, and unlock quests and rewards across your profile.",
+      "Expand to more gaming platforms, run competitive tournaments, and unlock bulk hiring for group raids and team sessions.",
     items: [
+      {
+        icon: Link2,
+        title: "Console Account Linking",
+        desc: "Link your PlayStation Network, Xbox, and Nintendo Switch accounts to your Gamerbuddy profile for verified console identity.",
+      },
+      {
+        icon: Link2,
+        title: "PC Platform Linking",
+        desc: "Connect your Steam and Epic Games accounts directly — automatically verify your library and gaming history.",
+      },
+      {
+        icon: Smartphone,
+        title: "Mobile Account Linking",
+        desc: "Link your Google Play and iOS Game Center accounts for verified mobile gaming credentials.",
+      },
       {
         icon: Users,
         title: "Bulk Hiring",
-        desc: "Hire between 2 and 100 gamers in a single request for group raids or team sessions.",
+        desc: "Hire between 2 and 100 gamers in a single request for group raids or large team sessions.",
       },
       {
         icon: Swords,
         title: "Tournaments",
-        desc: "Free to join, hirer approves every participant — competitive, fair, and open to all.",
+        desc: "Free to join, hirer approves every participant — competitive, fair, and open to all with country, region, and gender filters.",
       },
       {
         icon: Star,
         title: "Quest System",
-        desc: "Challenges on user profiles — complete quests to earn bonus points and profile badges.",
+        desc: "Challenges on user profiles — complete quests to earn bonus points and exclusive profile badges.",
       },
       {
         icon: Sparkles,
         title: "Promoted Games",
-        desc: "Select games get spotlighted with bonus rewards for sessions played in them.",
+        desc: "Select games get spotlighted with bonus point rewards for sessions played in them.",
       },
     ],
   },
@@ -108,27 +128,32 @@ const PHASES = [
     bar: "from-amber-400 to-orange-400",
     Icon: Rocket,
     description:
-      "The long-term vision — smarter AI, richer social features, and a more secure and expansive Gamerbuddy.",
+      "The long-term vision — smarter AI, deeper mobile support, game developer partnerships, and a platform shaped entirely by the community.",
     items: [
+      {
+        icon: Smartphone,
+        title: "Full Mobile Enhancements",
+        desc: "Native mobile app improvements with push notifications, deeper platform integrations, and mobile-first UI.",
+      },
+      {
+        icon: Handshake,
+        title: "Game Dev Partnerships",
+        desc: "Partner with game developers and publishers for sponsored sessions, exclusive content, and in-game rewards.",
+      },
       {
         icon: Bot,
         title: "Advanced AI Support",
-        desc: "Quick replies, smart suggestions, and deeper answers for every platform question.",
-      },
-      {
-        icon: Globe,
-        title: "Full Social Features",
-        desc: "Streaming integrations, follower system, and more ways to connect with your gaming community.",
+        desc: "Smarter AI replies, proactive suggestions, and deeper answers for every platform question.",
       },
       {
         icon: Lock,
         title: "Stronger Security Tools",
-        desc: "More admin controls, fraud detection improvements, and enhanced account protection.",
+        desc: "Advanced fraud detection, enhanced account protection, and expanded admin moderation controls.",
       },
       {
         icon: Lightbulb,
         title: "Community-Driven Enhancements",
-        desc: "More platform features shaped directly by your suggestions and community votes.",
+        desc: "More platform features shaped directly by your Community suggestions and votes.",
       },
     ],
   },
@@ -214,10 +239,10 @@ export default function Roadmap() {
           </span>
         </div>
         <p className="text-sm sm:text-[15px] text-foreground/80 leading-[1.75]">
-          <strong className="text-foreground">Phase 1 is fully live</strong> — the core hiring platform is open, including wallets, escrow payments, a 10% platform fee, the gift button, wallet limits, account verification, and safety rules.
+          <strong className="text-foreground">Phase 1 — Core Hiring — is fully live.</strong> The platform is open: wallets, escrow payments, a 10% fee, verification, streaming channel linking, safety rules, and a simplified social strategy with one central hub via the Social tab.
         </p>
         <p className="text-sm text-muted-foreground/60 leading-[1.75]">
-          We're now building Phase 2 — tournaments, quests, and bulk hiring. Your Community votes directly shape what we prioritise next. 🚀
+          We're now building Phase 2 — console & PC account linking, tournaments, and bulk hiring. Your Community votes directly shape what gets prioritised next. 🚀
         </p>
       </div>
 
@@ -244,7 +269,6 @@ export default function Roadmap() {
                 {/* Header */}
                 <div className="flex items-start justify-between gap-4">
                   <div className="space-y-1.5">
-                    {/* Phase tag + status badge */}
                     <div className="flex items-center flex-wrap gap-2">
                       <span
                         className="text-[11px] font-black uppercase tracking-widest"
@@ -269,7 +293,6 @@ export default function Roadmap() {
                     </p>
                   </div>
 
-                  {/* Phase number */}
                   <div
                     className="shrink-0 hidden sm:flex items-center justify-center h-14 w-14 rounded-2xl border text-2xl font-black"
                     style={{ background: phase.bg, borderColor: phase.border, color: phase.accent }}
@@ -375,7 +398,7 @@ export default function Roadmap() {
             Find us on every platform
           </h3>
           <p className="text-sm text-muted-foreground leading-relaxed">
-            Questions about the roadmap, a feature, or anything else? Head to our Socials hub — support, community, and all links in one place.
+            Questions about the roadmap, a feature, or anything else? Hit the <strong className="text-foreground/80">Social</strong> tab in the navigation — Discord, community, and all links in one place.
           </p>
         </div>
         <a
@@ -388,10 +411,8 @@ export default function Roadmap() {
             boxShadow: "0 4px 24px rgba(168,85,247,0.30)",
           }}
         >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} className="h-4 w-4 shrink-0">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" />
-          </svg>
-          All Socials &amp; Links
+          <Globe className="h-4 w-4 shrink-0" />
+          Our Social Hub
         </a>
       </div>
 
