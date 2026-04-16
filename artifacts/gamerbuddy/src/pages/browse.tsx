@@ -401,8 +401,8 @@ function RequestCard({ req }: { req: GameRequest }) {
         <div className="w-[3px] shrink-0" style={{ background: `linear-gradient(180deg, ${skill.bar} 0%, ${skill.bar}28 100%)` }} />
 
         {/* Card body */}
-        <div className="flex-1 px-4 py-5 sm:px-6 sm:py-7 md:px-8 md:py-8">
-          <div className="flex flex-col sm:flex-row sm:items-start gap-5 sm:gap-6">
+        <div className="flex-1 px-5 py-7 sm:px-8 sm:py-9 md:px-10 md:py-10">
+          <div className="flex flex-col sm:flex-row sm:items-start gap-6 sm:gap-8">
 
             {/* Game avatar — desktop only */}
             <div className="hidden sm:block shrink-0">
@@ -410,40 +410,31 @@ function RequestCard({ req }: { req: GameRequest }) {
             </div>
 
             {/* ── Center column ── */}
-            <div className="flex-1 min-w-0 space-y-4">
+            <div className="flex-1 min-w-0 space-y-5">
 
-              {/* Row 1: Badges — on mobile, avatar sits inline with badges */}
-              <div className="flex flex-wrap items-center gap-2">
-                {/* Mobile-only avatar (small) */}
-                <div
-                  className="sm:hidden w-8 h-8 rounded-xl flex items-center justify-center text-sm font-black shrink-0 select-none"
-                  style={{
-                    background: `linear-gradient(135deg, ${skill.bar}22 0%, ${skill.bar}44 100%)`,
-                    border: `1.5px solid ${skill.bar}55`,
-                    color: skill.bar,
-                  }}
-                >
-                  {req.gameName.trim()[0]?.toUpperCase() ?? "G"}
-                </div>
-                <span className="inline-flex items-center gap-1.5 text-xs border border-border/40 rounded-full px-3 py-1 font-semibold text-muted-foreground/70 bg-muted/30">
-                  <span className="text-sm leading-none">{PLATFORM_ICON[req.platform] ?? "🎮"}</span>
-                  {req.platform}
-                </span>
-                <span className={`inline-flex items-center text-xs border rounded-full px-3 py-1 font-bold tracking-wide ${skill.border} ${skill.text} ${skill.bg}`}>
-                  {req.skillLevel}
-                </span>
-              </div>
-
-              {/* Row 2: Game title + poster */}
+              {/* Row 1: Game title — dominant, always first */}
               <div>
-                <h3
-                  className="text-[1.5rem] sm:text-[1.65rem] md:text-[1.9rem] font-black text-foreground cursor-pointer tracking-tight transition-colors duration-200 group-hover:text-primary/90"
-                  style={{ letterSpacing: "-0.035em", lineHeight: 1.15 }}
-                  onClick={() => setLocation(`/requests/${req.id}`)}
-                >
-                  {req.gameName}
-                </h3>
-                <div className="flex items-center gap-2 mt-2 flex-wrap">
+                <div className="flex items-center gap-3 mb-1.5">
+                  {/* Mobile-only avatar inline with title */}
+                  <div
+                    className="sm:hidden w-10 h-10 rounded-xl flex items-center justify-center text-base font-black shrink-0 select-none"
+                    style={{
+                      background: `linear-gradient(135deg, ${skill.bar}22 0%, ${skill.bar}44 100%)`,
+                      border: `1.5px solid ${skill.bar}55`,
+                      color: skill.bar,
+                    }}
+                  >
+                    {req.gameName.trim()[0]?.toUpperCase() ?? "G"}
+                  </div>
+                  <h3
+                    className="text-[1.6rem] sm:text-[1.85rem] md:text-[2.1rem] font-black text-foreground cursor-pointer transition-colors duration-200 group-hover:text-primary/90 leading-none"
+                    style={{ letterSpacing: "-0.04em" }}
+                    onClick={() => setLocation(`/requests/${req.id}`)}
+                  >
+                    {req.gameName}
+                  </h3>
+                </div>
+                <div className="flex items-center gap-2 flex-wrap">
                   <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground/60">
                     <User className="h-3 w-3 shrink-0" />
                     <span className="text-primary/90 font-bold">{req.userName}</span>
@@ -458,71 +449,73 @@ function RequestCard({ req }: { req: GameRequest }) {
                 </div>
               </div>
 
-              {/* Row 3: Objectives */}
+              {/* Row 2: Objectives */}
               <p
-                className="text-[0.875rem] text-foreground/60 leading-[1.75] line-clamp-2 pl-3.5"
-                style={{ borderLeft: `2px solid ${skill.bar}50` }}
+                className="text-sm text-foreground/60 leading-[1.8] line-clamp-2 pl-4"
+                style={{ borderLeft: `2px solid ${skill.bar}55` }}
               >
                 {req.objectives}
               </p>
 
-              {/* Row 4: Context tags (only when relevant) */}
-              {hasContextTags && (
-                <div className="flex flex-wrap items-center gap-2">
-                  {isZeroBids && (
-                    <span className="inline-flex items-center gap-1 text-[10px] bg-green-500/10 border border-green-500/25 text-green-400/90 rounded-full px-2.5 py-1 font-bold uppercase tracking-wider">
-                      <Flame className="h-2.5 w-2.5" /> First bid!
-                    </span>
-                  )}
-                  {hasNationPref && COUNTRY_MAP[req.preferredCountry!] && (
-                    <span
-                      className="inline-flex items-center gap-1 text-[10px] rounded-full px-2.5 py-1 font-bold uppercase tracking-wider"
-                      style={{
-                        background: "rgba(252,211,77,0.12)",
-                        border: "1px solid rgba(180,140,0,0.35)",
-                        color: "var(--text-on-surface)" === "rgba(255,255,255,1)" ? "rgba(252,211,77,0.85)" : "hsl(38 80% 35%)",
-                      }}
-                    >
-                      <Globe className="h-2.5 w-2.5 shrink-0" />
-                      {COUNTRY_MAP[req.preferredCountry!].flag} {COUNTRY_MAP[req.preferredCountry!].label}
-                    </span>
-                  )}
-                  {hasGenderPref && GENDER_MAP[req.preferredGender!] && (
-                    <span
-                      className="inline-flex items-center gap-1 text-[10px] rounded-full px-2.5 py-1 font-bold uppercase tracking-wider"
-                      style={{
-                        background: "rgba(236,72,153,0.10)",
-                        border: "1px solid rgba(236,72,153,0.28)",
-                        color: "rgba(236,72,153,0.80)",
-                      }}
-                    >
-                      <UserRound className="h-2.5 w-2.5 shrink-0" />
-                      {GENDER_MAP[req.preferredGender!].icon} {GENDER_MAP[req.preferredGender!].label}
-                    </span>
-                  )}
-                </div>
-              )}
-
-              {/* Row 5: Bid stats (compact pills) */}
+              {/* Row 3: Unified tag strip — platform + level + context all in one row */}
               <div className="flex flex-wrap items-center gap-2">
-                <div
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-border/30 px-3 py-1.5 text-xs bg-muted/20"
-                >
-                  <Gavel className="h-3 w-3 text-muted-foreground/40 shrink-0" />
+                <span className="inline-flex items-center gap-1.5 text-xs border border-border/40 rounded-full px-3.5 py-1.5 font-semibold text-muted-foreground/70 bg-muted/25">
+                  <span className="text-sm leading-none">{PLATFORM_ICON[req.platform] ?? "🎮"}</span>
+                  {req.platform}
+                </span>
+                <span className={`inline-flex items-center text-xs border rounded-full px-3.5 py-1.5 font-bold tracking-wide ${skill.border} ${skill.text} ${skill.bg}`}>
+                  {req.skillLevel}
+                </span>
+                {isZeroBids && (
+                  <span className="inline-flex items-center gap-1.5 text-xs bg-green-500/10 border border-green-500/25 text-green-400 rounded-full px-3.5 py-1.5 font-bold">
+                    <Flame className="h-3 w-3" /> First bid!
+                  </span>
+                )}
+                {hasNationPref && COUNTRY_MAP[req.preferredCountry!] && (
+                  <span
+                    className="inline-flex items-center gap-1.5 text-xs rounded-full px-3.5 py-1.5 font-bold"
+                    style={{
+                      background: "rgba(252,211,77,0.10)",
+                      border: "1px solid rgba(180,140,0,0.28)",
+                      color: "#c99a00",
+                    }}
+                  >
+                    <Globe className="h-3 w-3 shrink-0" />
+                    {COUNTRY_MAP[req.preferredCountry!].flag} {COUNTRY_MAP[req.preferredCountry!].label}
+                  </span>
+                )}
+                {hasGenderPref && GENDER_MAP[req.preferredGender!] && (
+                  <span
+                    className="inline-flex items-center gap-1.5 text-xs rounded-full px-3.5 py-1.5 font-bold"
+                    style={{
+                      background: "rgba(236,72,153,0.09)",
+                      border: "1px solid rgba(236,72,153,0.25)",
+                      color: "rgba(236,72,153,0.90)",
+                    }}
+                  >
+                    <UserRound className="h-3 w-3 shrink-0" />
+                    {GENDER_MAP[req.preferredGender!].icon} {GENDER_MAP[req.preferredGender!].label}
+                  </span>
+                )}
+              </div>
+
+              {/* Row 4: Bid stats */}
+              <div className="flex flex-wrap items-center gap-2.5">
+                <div className="inline-flex items-center gap-1.5 rounded-lg border border-border/30 px-3.5 py-1.5 text-xs bg-muted/20">
+                  <Gavel className="h-3.5 w-3.5 text-muted-foreground/40 shrink-0" />
                   <span className="font-semibold text-foreground/70">
                     {isZeroBids ? "No bids yet" : `${req.bidCount} bid${req.bidCount === 1 ? "" : "s"}`}
                   </span>
                   {isZeroBids && <span className="text-muted-foreground/35">— be first!</span>}
                 </div>
-                {/* Bulk slot counter hidden in Phase 1 */}
                 {req.lowestBid && (
                   <div
-                    className="inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs"
-                    style={{ borderColor: "rgba(34,211,238,0.14)", background: "rgba(34,211,238,0.03)" }}
+                    className="inline-flex items-center gap-1.5 rounded-lg border px-3.5 py-1.5 text-xs"
+                    style={{ borderColor: "rgba(34,211,238,0.20)", background: "rgba(34,211,238,0.05)" }}
                   >
-                    <TrendingDown className="h-3 w-3 text-cyan-400/55 shrink-0" />
-                    <span className="text-muted-foreground/55">
-                      Lowest <span className="font-bold text-foreground/70">${req.lowestBid.toFixed(2)}</span>
+                    <TrendingDown className="h-3.5 w-3.5 text-cyan-400/65 shrink-0" />
+                    <span className="text-muted-foreground/60">
+                      Lowest <span className="font-bold text-foreground/80">${req.lowestBid.toFixed(2)}</span>
                     </span>
                   </div>
                 )}
@@ -530,13 +523,13 @@ function RequestCard({ req }: { req: GameRequest }) {
             </div>
 
             {/* ── Right CTA column ── */}
-            <div className="flex flex-col items-stretch gap-3 shrink-0 sm:min-w-[156px]">
+            <div className="flex flex-col items-stretch gap-3 shrink-0 sm:min-w-[170px]">
               {/* PLACE BID */}
               <div className="relative">
                 {!expanded && (
                   <div
-                    className="absolute -inset-[4px] rounded-[16px] opacity-50"
-                    style={{ background: "linear-gradient(135deg, #a855f7, #7c3aed)", filter: "blur(10px)" }}
+                    className="absolute -inset-[5px] rounded-[18px] opacity-45"
+                    style={{ background: "linear-gradient(135deg, #a855f7, #7c3aed)", filter: "blur(12px)" }}
                   />
                 )}
                 <button
@@ -548,7 +541,7 @@ function RequestCard({ req }: { req: GameRequest }) {
                   }`}
                   style={
                     !expanded
-                      ? { background: "linear-gradient(135deg, #a855f7 0%, #7c3aed 100%)", boxShadow: "0 0 28px rgba(168,85,247,0.52), inset 0 1px 0 rgba(255,255,255,0.12)" }
+                      ? { background: "linear-gradient(135deg, #a855f7 0%, #7c3aed 100%)", boxShadow: "0 4px 32px rgba(168,85,247,0.55), inset 0 1px 0 rgba(255,255,255,0.14)" }
                       : {}
                   }
                 >
@@ -561,7 +554,7 @@ function RequestCard({ req }: { req: GameRequest }) {
               {/* Full Details */}
               <button
                 onClick={() => setLocation(`/requests/${req.id}`)}
-                className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground/55 hover:text-primary/90 transition-colors font-semibold whitespace-nowrap px-3 py-2.5 rounded-xl border border-border/25 hover:border-primary/22 hover:bg-primary/5"
+                className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground/55 hover:text-primary/90 transition-colors font-semibold whitespace-nowrap px-3 py-3 rounded-xl border border-border/25 hover:border-primary/25 hover:bg-primary/5"
               >
                 Full Details <ArrowRight className="h-3.5 w-3.5 shrink-0" />
               </button>
@@ -634,11 +627,7 @@ function FillerSection() {
         {steps.map((s, i) => (
           <div
             key={i}
-            className="rounded-2xl border p-6 flex flex-col gap-4"
-            style={{
-              background: "linear-gradient(145deg, rgba(255,255,255,0.018) 0%, rgba(0,0,0,0.45) 100%)",
-              borderColor: "rgba(255,255,255,0.07)",
-            }}
+            className="rounded-2xl border border-border/40 bg-card p-6 flex flex-col gap-4"
           >
             <div className="flex items-center gap-3">
               <div
@@ -812,7 +801,7 @@ export default function Browse() {
   const showFiller = !isLoading && !isError && requests && requests.length > 0 && requests.length <= 3;
 
   return (
-    <div className="space-y-6 relative">
+    <div className="space-y-8 relative">
       {/* Subtle background glow */}
       <div
         className="pointer-events-none fixed inset-0 -z-10 opacity-30"
@@ -879,16 +868,16 @@ export default function Browse() {
       >
         {/* ── Panel header ── */}
         <div
-          className="flex items-center justify-between px-5 py-3.5 border-b"
+          className="flex items-center justify-between px-6 py-4 border-b"
           style={{
-            borderColor: isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.07)",
-            background: hasFilters ? "rgba(168,85,247,0.07)" : isDark ? "rgba(255,255,255,0.025)" : "rgba(0,0,0,0.025)",
+            borderColor: isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.08)",
+            background: hasFilters ? "rgba(168,85,247,0.07)" : isDark ? "rgba(255,255,255,0.025)" : "rgba(0,0,0,0.02)",
             transition: "background 0.3s",
           }}
         >
           <div className="flex items-center gap-2.5">
-            <SlidersHorizontal className="h-4 w-4" style={{ color: hasFilters ? "#a855f7" : isDark ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.45)" }} />
-            <span className="text-xs font-extrabold uppercase tracking-widest" style={{ color: isDark ? "rgba(255,255,255,0.55)" : "rgba(0,0,0,0.60)" }}>
+            <SlidersHorizontal className="h-4 w-4" style={{ color: hasFilters ? "#a855f7" : isDark ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.40)" }} />
+            <span className="text-xs font-extrabold uppercase tracking-widest" style={{ color: isDark ? "rgba(255,255,255,0.55)" : "rgba(0,0,0,0.55)" }}>
               Sort &amp; Filter
             </span>
             {hasFilters && (
@@ -903,7 +892,7 @@ export default function Browse() {
           {hasFilters && (
             <button
               onClick={clearFilters}
-              className="flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-wider rounded-lg px-3.5 py-2 transition-all duration-200 hover:brightness-115 active:scale-95"
+              className="flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-wider rounded-xl px-4 py-2 transition-all duration-200 hover:brightness-115 active:scale-95"
               style={{
                 background: "linear-gradient(135deg,rgba(239,68,68,0.18) 0%,rgba(239,68,68,0.08) 100%)",
                 border: "1px solid rgba(239,68,68,0.40)",
@@ -918,20 +907,23 @@ export default function Browse() {
 
         {/* ── Search + platform row ── */}
         <div
-          className="grid grid-cols-1 sm:grid-cols-3 gap-3 px-5 py-4 border-b"
-          style={{ borderColor: "rgba(255,255,255,0.05)", background: "rgba(0,0,0,0.12)" }}
+          className="grid grid-cols-1 sm:grid-cols-3 gap-3 px-6 py-5 border-b"
+          style={{
+            borderColor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.07)",
+            background: isDark ? "rgba(0,0,0,0.14)" : "rgba(0,0,0,0.025)",
+          }}
         >
           <div className="relative sm:col-span-2">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
             <Input
               placeholder="Search game, objectives, or player…"
-              className="pl-10 h-10 bg-background/50 border-border/50 text-sm placeholder:text-muted-foreground/40 focus:border-primary/40"
+              className="pl-10 h-11 bg-background/60 border-border/50 text-sm placeholder:text-muted-foreground/40 focus:border-primary/40"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
           <Select value={platform} onValueChange={setPlatform}>
-            <SelectTrigger className="h-10 bg-background/50 border-border/50 text-sm">
+            <SelectTrigger className="h-11 bg-background/60 border-border/50 text-sm">
               <Monitor className="h-4 w-4 mr-2 text-muted-foreground/60 shrink-0" />
               <SelectValue placeholder="Platform" />
             </SelectTrigger>
@@ -944,10 +936,13 @@ export default function Browse() {
 
         {/* ── Sort row ── */}
         <div
-          className="flex flex-col sm:flex-row sm:items-center gap-3 px-5 py-4 border-b"
-          style={{ borderColor: "rgba(255,255,255,0.05)", background: "rgba(0,0,0,0.15)" }}
+          className="flex flex-col sm:flex-row sm:items-center gap-3 px-6 py-5 border-b"
+          style={{
+            borderColor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.07)",
+            background: isDark ? "rgba(0,0,0,0.18)" : "rgba(0,0,0,0.02)",
+          }}
         >
-          <span className="text-[10px] font-extrabold uppercase tracking-widest shrink-0 sm:w-16 text-muted-foreground/35">
+          <span className="text-[11px] font-extrabold uppercase tracking-widest shrink-0 sm:w-16 text-muted-foreground/45">
             Sort by
           </span>
           <div className="flex flex-wrap gap-2">
@@ -957,16 +952,16 @@ export default function Browse() {
                 <button
                   key={value}
                   onClick={() => setSort(value)}
-                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold transition-all duration-200 active:scale-95"
+                  className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 active:scale-95"
                   style={active ? {
                     background: "rgba(168,85,247,0.20)",
                     border: "1px solid rgba(168,85,247,0.50)",
                     color: "#c084fc",
-                    boxShadow: "0 0 14px rgba(168,85,247,0.20)",
+                    boxShadow: "0 0 16px rgba(168,85,247,0.22)",
                   } : {
-                    background: "rgba(255,255,255,0.04)",
-                    border: "1px solid rgba(255,255,255,0.09)",
-                    color: "rgba(255,255,255,0.45)",
+                    background: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)",
+                    border: isDark ? "1px solid rgba(255,255,255,0.10)" : "1px solid rgba(0,0,0,0.12)",
+                    color: isDark ? "rgba(255,255,255,0.50)" : "rgba(0,0,0,0.55)",
                   }}
                 >
                   {active ? <CheckCircle2 className="h-3 w-3 shrink-0 text-purple-400" /> : <Icon className="h-3 w-3 shrink-0 opacity-45" />}
@@ -979,10 +974,13 @@ export default function Browse() {
 
         {/* ── Experience level row ── */}
         <div
-          className="flex flex-col sm:flex-row sm:items-center gap-3 px-5 py-4 border-b"
-          style={{ borderColor: "rgba(255,255,255,0.05)", background: "rgba(0,0,0,0.10)" }}
+          className="flex flex-col sm:flex-row sm:items-center gap-3 px-6 py-5 border-b"
+          style={{
+            borderColor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.07)",
+            background: isDark ? "rgba(0,0,0,0.12)" : "rgba(0,0,0,0.015)",
+          }}
         >
-          <span className="text-[10px] font-extrabold uppercase tracking-widest shrink-0 sm:w-16 text-muted-foreground/35">
+          <span className="text-[11px] font-extrabold uppercase tracking-widest shrink-0 sm:w-16 text-muted-foreground/45">
             Level
           </span>
           <div className="flex flex-wrap gap-2">
@@ -992,16 +990,16 @@ export default function Browse() {
                 <button
                   key={value}
                   onClick={() => setLevelFilter(value)}
-                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold transition-all duration-200 active:scale-95"
+                  className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 active:scale-95"
                   style={active ? {
                     background: "rgba(96,165,250,0.18)",
                     border: "1px solid rgba(96,165,250,0.48)",
                     color: "#93c5fd",
-                    boxShadow: "0 0 14px rgba(96,165,250,0.18)",
+                    boxShadow: "0 0 16px rgba(96,165,250,0.18)",
                   } : {
-                    background: "rgba(255,255,255,0.04)",
-                    border: "1px solid rgba(255,255,255,0.09)",
-                    color: "rgba(255,255,255,0.50)",
+                    background: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)",
+                    border: isDark ? "1px solid rgba(255,255,255,0.10)" : "1px solid rgba(0,0,0,0.12)",
+                    color: isDark ? "rgba(255,255,255,0.55)" : "rgba(0,0,0,0.55)",
                   }}
                 >
                   {active
@@ -1017,40 +1015,34 @@ export default function Browse() {
 
         {/* ── Nation + Gender filter row ── */}
         <div
-          className="flex flex-col sm:flex-row sm:items-center gap-3 px-5 py-4 border-b"
-          style={{ borderColor: "rgba(255,255,255,0.05)", background: "rgba(0,0,0,0.13)" }}
+          className="flex flex-col sm:flex-row sm:items-center gap-4 px-6 py-5 border-b"
+          style={{
+            borderColor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.07)",
+            background: isDark ? "rgba(0,0,0,0.16)" : "rgba(0,0,0,0.02)",
+          }}
         >
-          <span className="text-[10px] font-extrabold uppercase tracking-widest shrink-0 sm:w-16 text-muted-foreground/35">
+          <span className="text-[11px] font-extrabold uppercase tracking-widest shrink-0 sm:w-16 text-muted-foreground/45">
             Nation
           </span>
           <div className="flex flex-wrap gap-3 items-center flex-1">
-            <div className="w-full sm:w-56">
-              <CountryCombobox
-                value={countryFilter}
-                onValueChange={setCountryFilter}
-              />
+            <div className="w-full sm:w-60">
+              <CountryCombobox value={countryFilter} onValueChange={setCountryFilter} />
             </div>
-            <span className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground/35 shrink-0 hidden sm:block">
+            <span className="text-[11px] font-extrabold uppercase tracking-widest text-muted-foreground/45 shrink-0">
               Gender
             </span>
-            <span className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground/35 shrink-0 sm:hidden">
-              Gender
-            </span>
-            <div className="w-full sm:w-44">
-              <GenderSelect
-                value={genderFilter}
-                onValueChange={setGenderFilter}
-              />
+            <div className="w-full sm:w-48">
+              <GenderSelect value={genderFilter} onValueChange={setGenderFilter} />
             </div>
           </div>
         </div>
 
         {/* ── Toggle filters row ── */}
         <div
-          className="flex flex-col sm:flex-row sm:items-center gap-3 px-5 py-4"
-          style={{ background: "rgba(0,0,0,0.10)" }}
+          className="flex flex-col sm:flex-row sm:items-center gap-3 px-6 py-5"
+          style={{ background: isDark ? "rgba(0,0,0,0.12)" : "rgba(0,0,0,0.015)" }}
         >
-          <span className="text-[10px] font-extrabold uppercase tracking-widest shrink-0 sm:w-16 text-muted-foreground/35">
+          <span className="text-[11px] font-extrabold uppercase tracking-widest shrink-0 sm:w-16 text-muted-foreground/45">
             Only
           </span>
           <div className="flex flex-wrap gap-2">
@@ -1061,16 +1053,16 @@ export default function Browse() {
               <button
                 key={label}
                 onClick={set}
-                className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold transition-all duration-200 active:scale-95"
+                className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 active:scale-95"
                 style={on ? {
                   background: activeStyle.bg,
                   border: `1px solid ${activeStyle.border}`,
                   color: activeStyle.color,
-                  boxShadow: `0 0 14px ${activeStyle.glow}`,
+                  boxShadow: `0 0 16px ${activeStyle.glow}`,
                 } : {
-                  background: "rgba(255,255,255,0.04)",
-                  border: "1px solid rgba(255,255,255,0.09)",
-                  color: "rgba(255,255,255,0.45)",
+                  background: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)",
+                  border: isDark ? "1px solid rgba(255,255,255,0.10)" : "1px solid rgba(0,0,0,0.12)",
+                  color: isDark ? "rgba(255,255,255,0.50)" : "rgba(0,0,0,0.55)",
                 }}
               >
                 {on
@@ -1093,7 +1085,7 @@ export default function Browse() {
             }}
           >
             {/* Section header: label + count + result summary */}
-            <div className="flex items-center gap-2 px-5 pt-3.5 pb-2.5">
+            <div className="flex items-center gap-2 px-6 pt-4 pb-2.5">
               <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse shrink-0" />
               <span
                 className="text-[10px] font-extrabold uppercase tracking-[0.14em] shrink-0"
@@ -1123,7 +1115,7 @@ export default function Browse() {
             </div>
 
             {/* Tag chips */}
-            <div className="flex flex-wrap gap-2 px-5 pb-4">
+            <div className="flex flex-wrap gap-2 px-6 pb-5">
               {activeTags.map((tag, idx) => (
                 <button
                   key={tag.id}
@@ -1176,7 +1168,7 @@ export default function Browse() {
       ) : !requests || requests.length === 0 ? (
         <EmptyState hasFilters={hasFilters} onClear={clearFilters} />
       ) : (
-        <div key={filterKey} className="bid-list-animate space-y-5">
+        <div key={filterKey} className="bid-list-animate space-y-6">
           {requests.map((req) => <RequestCard key={req.id} req={req} />)}
         </div>
       )}
