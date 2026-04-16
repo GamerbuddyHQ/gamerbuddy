@@ -224,23 +224,23 @@ const RESPONSES: Array<{ patterns: RegExp; reply: string }> = [
     reply: `**Trust Factor** 🛡️\n\nYour Trust Factor is a composite score that represents your overall reliability on the platform:\n\n• ⭐ **Average review rating** from all completed sessions\n• 🎮 **Total sessions completed** (more sessions = more trust)\n• ✅ **Verified status** (required for bidding)\n\nThe formula caps at 100: avg rating × 10 + up to 20 bonus points from sessions.\n\nA high Trust Factor gives you:\n• Better visibility when hirers are comparing bids\n• Access to higher-value requests\n• A competitive edge over lower-rated gamers\n\nThe fastest way to build it: **complete sessions + leave honest reviews**. Every session counts!`,
   },
 
-  /* ── CONTACT / SUPPORT EMAIL ── */
+  /* ── CONTACT / SUPPORT ── */
   {
-    patterns: /contact.*support|support.*email|email.*support|reach.*support|reach.*team|how.*contact|email.*us|email.*team|contact.*us|get.*in.*touch/i,
-    reply: `**Contact Support** ✉️\n\nNeed help that goes beyond what I can answer? Our team has you covered!\n\n📧 **Support Email:** [gamerbuddyhq@gmail.com](mailto:gamerbuddyhq@gmail.com)\n\nWhen emailing, include:\n• Your **username** or registered email\n• A clear description of the issue\n• Any relevant screenshots if possible\n\nWe aim to respond within **24–48 hours**.\n\nFor quick answers on wallets, sessions, bidding, verification, or safety — just ask me right here! I know Gamerbuddy inside out 💪`,
+    patterns: /contact.*support|support.*email|email.*support|reach.*support|reach.*team|how.*contact|email.*us|email.*team|contact.*us|get.*in.*touch|how.*reach|reach.*you/i,
+    reply: `For any support or questions, please visit our **[Socials page](/socials)** and click **"All Socials & Links"**. 🔗\n\nThis is the best way to connect with us — every platform, every update, and direct community access all in one place!`,
   },
 
   /* ── GENERAL HELP ── */
   {
     patterns: /help|support|question|how.*work|what.*is.*gamerbuddy|about.*platform/i,
-    reply: `**Gamerbuddy** is a global gaming marketplace — hire skilled gamers for co-op, ranked sessions, raids, and more across PC, PlayStation, Xbox, Switch, Steam Deck, and Mobile 🎮\n\n**Phase 1 is live right now. Here's the core:**\n• Post requests → receive bids → hire verified gamers\n• Bids require verification (7–15 days) — keeps it safe\n• 10% platform fee on every completed session\n• Funds held in escrow until session is approved\n• Two wallets: Hiring (spend) & Earnings (receive)\n• Withdraw earnings once you hit $100\n• Private chat between hirer and gamer\n• Gift button for optional tips after sessions\n• Points earned per session → spend in Profile Shop\n\nNeed to reach a human? Email us at **gamerbuddyhq@gmail.com** 📧\n\nAsk me about any specific feature and I'll give you the full breakdown!`,
+    reply: `**Gamerbuddy** is a global gaming marketplace — hire skilled gamers for co-op, ranked sessions, raids, and more across PC, PlayStation, Xbox, Switch, Steam Deck, and Mobile 🎮\n\n**Phase 1 is live right now. Here's the core:**\n• Post requests → receive bids → hire verified gamers\n• Bids require verification (7–15 days) — keeps it safe\n• 10% platform fee on every completed session\n• Funds held in escrow until session is approved\n• Two wallets: Hiring (spend) & Earnings (receive)\n• Withdraw earnings once you hit $100\n• Private chat between hirer and gamer\n• Gift button for optional tips after sessions\n• Points earned per session → spend in Profile Shop\n\nFor anything beyond what I can answer, visit the **[Socials page](/socials)** and click **"All Socials & Links"** to connect with us directly! 🔗\n\nAsk me about any specific feature and I'll give you the full breakdown!`,
   },
 ];
 
 const FALLBACK_RESPONSES = [
   "Hmm, didn't catch that one — mind rephrasing? I'm best with Phase 1 features: posting requests, bidding, wallets, verification, reviews, escrow, gifts, private chat, and safety! 🎮",
   "That one's got me stumped! Try asking: 'How does bidding work?', 'What's the platform fee?', 'How does escrow work?', or 'How does verification work?' — full answers ready! 👾",
-  "Need more context on that one! For issues I can't resolve, email our support team at **gamerbuddyhq@gmail.com** — we respond within 24–48 hours. For Phase 1 features — requests, wallets, sessions, points, safety, reviews — I'm your guy. What else can I help with? 🎯",
+  "Need more context on that one! For anything I can't resolve, head to the **[Socials page](/socials)** and hit **'All Socials & Links'** to connect with us. For Phase 1 features — requests, wallets, sessions, points, safety, reviews — I'm your guy. What else can I help with? 🎯",
 ];
 
 let fallbackIndex = 0;
@@ -443,22 +443,20 @@ export function AIChatWidget() {
             </div>
           )}
 
-          {/* Contact Support quick-action */}
+          {/* Socials quick-action */}
           <div className="px-3.5 pb-2 shrink-0">
             <a
-              href="mailto:gamerbuddyhq@gmail.com"
-              className="flex items-center justify-center gap-2 w-full py-2 rounded-xl border text-[11px] font-bold transition-all hover:scale-[1.02] active:scale-[0.98]"
+              href="/socials"
+              className="flex items-center justify-center gap-2 w-full py-2 rounded-xl text-[11px] font-bold text-white transition-all hover:scale-[1.02] active:scale-[0.98]"
               style={{
-                background: "rgba(34,211,238,0.06)",
-                borderColor: "rgba(34,211,238,0.22)",
-                color: "#22d3ee",
+                background: "linear-gradient(135deg, #a855f7 0%, #7c3aed 60%, #22d3ee 100%)",
+                boxShadow: "0 0 14px rgba(168,85,247,0.25)",
               }}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <rect width="20" height="16" x="2" y="4" rx="2" />
-                <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} className="h-3.5 w-3.5 shrink-0">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" />
               </svg>
-              Need Help? Email the Squad — gamerbuddyhq@gmail.com
+              All Socials &amp; Links
             </a>
           </div>
 

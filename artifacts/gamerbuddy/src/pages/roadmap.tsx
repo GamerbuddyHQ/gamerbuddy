@@ -368,31 +368,28 @@ export default function Roadmap() {
           <MessageSquare className="h-7 w-7" style={{ color: "#22d3ee" }} />
         </div>
         <div className="flex-1 text-center sm:text-left space-y-1.5">
-          <p className="text-[11px] font-black uppercase tracking-widest" style={{ color: "#22d3ee" }}>
+          <p className="text-[11px] font-black uppercase tracking-widest" style={{ color: "#a855f7" }}>
             Need Help or Have Questions?
           </p>
           <h3 className="text-lg sm:text-xl font-black text-foreground">
-            Reach out to the squad
+            Find us on every platform
           </h3>
           <p className="text-sm text-muted-foreground leading-relaxed">
-            Questions about the roadmap, a feature, or anything else? Our support team is always here for you.
+            Questions about the roadmap, a feature, or anything else? Head to our Socials hub — support, community, and all links in one place.
           </p>
         </div>
         <a
-          href="mailto:gamerbuddyhq@gmail.com"
-          className="shrink-0 inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition-all hover:scale-105 active:scale-95"
+          href="/socials"
+          className="shrink-0 inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm text-white transition-all hover:scale-105 active:scale-95"
           style={{
-            background: "linear-gradient(135deg, rgba(34,211,238,0.18), rgba(34,211,238,0.08))",
-            border: "1px solid rgba(34,211,238,0.35)",
-            color: "#22d3ee",
-            boxShadow: "0 4px 20px rgba(34,211,238,0.15)",
+            background: "linear-gradient(135deg, #a855f7 0%, #7c3aed 60%, #22d3ee 100%)",
+            boxShadow: "0 4px 24px rgba(168,85,247,0.30)",
           }}
         >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <rect width="20" height="16" x="2" y="4" rx="2" />
-            <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} className="h-4 w-4 shrink-0">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" />
           </svg>
-          Contact Support
+          All Socials &amp; Links
         </a>
       </div>
 

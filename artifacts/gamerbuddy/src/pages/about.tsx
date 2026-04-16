@@ -1,4 +1,4 @@
-import { Shield, Info, Gamepad2, AlertTriangle, CheckCircle2, Users, Lock, Star, Zap, Mail } from "lucide-react";
+import { Shield, Info, Gamepad2, AlertTriangle, CheckCircle2, Users, Lock, Star, Zap } from "lucide-react";
 
 const SECTIONS = [
   {
@@ -228,51 +228,46 @@ export default function About() {
         </div>
       </div>
 
-      {/* ── Contact Support ── */}
+      {/* ── Socials CTA ── */}
       <div
         className="rounded-2xl border p-6 sm:p-8 flex flex-col sm:flex-row items-center gap-6"
         style={{
-          background: "linear-gradient(135deg, rgba(34,211,238,0.06) 0%, rgba(168,85,247,0.04) 100%)",
-          borderColor: "rgba(34,211,238,0.22)",
-          boxShadow: "0 0 30px rgba(34,211,238,0.06)",
+          background: "linear-gradient(135deg, rgba(168,85,247,0.07) 0%, rgba(34,211,238,0.04) 100%)",
+          borderColor: "rgba(168,85,247,0.22)",
+          boxShadow: "0 0 30px rgba(168,85,247,0.08)",
         }}
       >
         <div
           className="shrink-0 h-14 w-14 rounded-2xl border flex items-center justify-center"
-          style={{ background: "rgba(34,211,238,0.10)", borderColor: "rgba(34,211,238,0.28)" }}
+          style={{ background: "rgba(168,85,247,0.12)", borderColor: "rgba(168,85,247,0.30)" }}
         >
-          <Mail className="h-7 w-7" style={{ color: "#22d3ee" }} />
+          <svg viewBox="0 0 24 24" fill="none" stroke="#a855f7" strokeWidth={2.2} className="h-7 w-7">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" />
+          </svg>
         </div>
         <div className="flex-1 text-center sm:text-left space-y-1.5">
-          <p className="text-[11px] font-black uppercase tracking-widest" style={{ color: "#22d3ee" }}>
+          <p className="text-[11px] font-black uppercase tracking-widest" style={{ color: "#a855f7" }}>
             Questions? We've Got You
           </p>
           <h3 className="text-lg sm:text-xl font-black text-foreground">
-            Reach out to the squad
+            Find us on every platform
           </h3>
           <p className="text-sm text-muted-foreground leading-relaxed">
-            For platform questions, account issues, or feedback — email us directly.{" "}
-            <a
-              href="mailto:gamerbuddyhq@gmail.com"
-              className="font-semibold hover:underline transition-all"
-              style={{ color: "#22d3ee" }}
-            >
-              gamerbuddyhq@gmail.com
-            </a>
+            For support, questions, feedback, and community — visit our Socials hub. Everything in one place.
           </p>
         </div>
         <a
-          href="mailto:gamerbuddyhq@gmail.com"
-          className="shrink-0 inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition-all hover:scale-105 active:scale-95"
+          href="/socials"
+          className="shrink-0 inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm text-white transition-all hover:scale-105 active:scale-95"
           style={{
-            background: "linear-gradient(135deg, rgba(34,211,238,0.18), rgba(34,211,238,0.08))",
-            border: "1px solid rgba(34,211,238,0.35)",
-            color: "#22d3ee",
-            boxShadow: "0 4px 20px rgba(34,211,238,0.15)",
+            background: "linear-gradient(135deg, #a855f7 0%, #7c3aed 60%, #22d3ee 100%)",
+            boxShadow: "0 4px 24px rgba(168,85,247,0.30)",
           }}
         >
-          <Mail className="h-4 w-4 shrink-0" />
-          Contact Support
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} className="h-4 w-4 shrink-0">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" />
+          </svg>
+          All Socials &amp; Links
         </a>
       </div>
     </div>
