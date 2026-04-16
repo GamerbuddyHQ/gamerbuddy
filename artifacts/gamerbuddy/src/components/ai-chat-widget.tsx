@@ -98,10 +98,16 @@ const RESPONSES: Array<{ patterns: RegExp; reply: string }> = [
     reply: `**Streaming platform connections** (Twitch, YouTube Gaming, Kick, etc.) are coming in **Phase 2** — not yet live! 🔜\n\nOnce available, you'll be able to link your streaming accounts to your profile to:\n• Show hirers you're an active streamer\n• Unlock the "Has Streaming" browse filter\n• Boost your profile's credibility\n\nFor now, **mention your streaming channel in your bid pitch** and in the **private chat** — hirers love knowing they might get featured on stream! 🎥\n\nCheck the **[Roadmap](/roadmap)** for Phase 2 details.`,
   },
 
-  /* ── LIKE / DISLIKE / PROFILE VOTES — Phase 2+ ── */
+  /* ── COMMUNITY — LIVE ── */
+  {
+    patterns: /community|suggest|idea|feature.*request|vote|upvote|downvote|comment.*community|community.*comment|gif.*community|emoji.*community|community.*tab|community.*page/i,
+    reply: `**Community** is live on Gamerbuddy! 🎉 Find it in the navigation bar — it's the space where players shape what gets built next.\n\n**What you can do:**\n• 💡 **Post suggestions** — feature requests, bug reports, UI ideas, or anything else\n• 👍 **Like / 👎 Dislike** any suggestion (one vote per user, toggle to remove)\n• 💬 **Comment & reply** in threaded conversations\n• 😄 **Emoji picker** — tap the smiley button to drop any emoji in your comment\n• 🎬 **GIF support** — tap the GIF button to search and embed a reaction GIF\n• 🌍 **Nationality flags** — every commenter shows their country flag + username + timestamp\n\n**When posting:**\n• Pick a category: Feature Request, Bug Report, UI Improvement, or Other\n• External links are automatically removed for community safety\n• You'll see a warning if your text contained a link\n\n**Admin moderation** (admin-only):\n• Approve, Hide, or Delete any post — visible only to the platform admin\n\nGo voice your ideas — the most upvoted suggestions get prioritised! 🚀`,
+  },
+
+  /* ── LIKE / DISLIKE / PROFILE VOTES ── */
   {
     patterns: /like|dislike|thumbs|vote.*profile|endorse|profile.*rating|upvote/i,
-    reply: `**Profile Likes & Dislikes** are coming in **Phase 2** as part of Community Suggestions — not yet live! 🔜\n\nWhen it drops:\n• Vote on suggestions and feature ideas in the Community\n• React to profiles of people you've played with\n• Votes will be tied to real session history — no fake boosting\n\nFor now, the best way to build reputation is through **reviews** — a string of 9s and 10s puts you right at the top of every hirer's shortlist. ⭐\n\nCheck the **[Roadmap](/roadmap)** for Phase 2 details.`,
+    reply: `**Likes & Dislikes** are live in the **Community** tab! 🎉\n\nHead to **[Community](/community)** to:\n• 👍 Upvote suggestions you agree with\n• 👎 Downvote ones you don't\n• Toggle your vote — click again to remove it\n• One vote per user per suggestion — fair and spam-proof\n\nFor profile reputation, the best signal is **reviews** — a string of 9s and 10s gets you to the top of every hirer's shortlist. ⭐`,
   },
 
   /* ── NATION / GENDER PREFERENCES — Phase 1 ── */

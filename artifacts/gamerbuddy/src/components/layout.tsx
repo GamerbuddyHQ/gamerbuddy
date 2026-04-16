@@ -309,7 +309,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
   };
 
   const navItems = [
-    { href: "/browse",  label: t.nav.browseRequests, icon: Compass },
+    { href: "/browse",     label: t.nav.browseRequests, icon: Compass },
+    { href: "/community",  label: "Community",           icon: Users   },
     ...(user
       ? [
           { href: "/dashboard",   label: t.nav.dashboard,  icon: LayoutDashboard },
