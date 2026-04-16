@@ -600,6 +600,28 @@ export function Layout({ children }: { children: React.ReactNode }) {
           </div>
         </div>
 
+        {/* ── Support email ── */}
+        <div className="container pb-5">
+          <a
+            href="mailto:gamerbuddyhq@gmail.com"
+            className="inline-flex items-center gap-2 text-xs text-muted-foreground/60 hover:text-primary transition-colors group"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-3.5 w-3.5 shrink-0 group-hover:text-primary transition-colors"
+              viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+              strokeLinecap="round" strokeLinejoin="round"
+            >
+              <rect width="20" height="16" x="2" y="4" rx="2" />
+              <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+            </svg>
+            <span className="font-medium">Support Email:</span>
+            <span className="underline underline-offset-2 decoration-muted-foreground/30 group-hover:decoration-primary">
+              gamerbuddyhq@gmail.com
+            </span>
+          </a>
+        </div>
+
         {/* ── Legal strip ── */}
         <div className="border-t border-border/40">
           <div className="container py-4 space-y-3">

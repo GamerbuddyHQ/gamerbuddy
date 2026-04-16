@@ -212,17 +212,23 @@ const RESPONSES: Array<{ patterns: RegExp; reply: string }> = [
     reply: `**Trust Factor** 🛡️\n\nYour Trust Factor is a composite score that represents your overall reliability on the platform:\n\n• ⭐ **Average review rating** from all completed sessions\n• 🎮 **Total sessions completed** (more sessions = more trust)\n• ✅ **Verified status** (required for bidding)\n\nThe formula caps at 100: avg rating × 10 + up to 20 bonus points from sessions.\n\nA high Trust Factor gives you:\n• Better visibility when hirers are comparing bids\n• Access to higher-value requests\n• A competitive edge over lower-rated gamers\n\nThe fastest way to build it: **complete sessions + leave honest reviews**. Every session counts!`,
   },
 
+  /* ── CONTACT / SUPPORT EMAIL ── */
+  {
+    patterns: /contact.*support|support.*email|email.*support|reach.*support|reach.*team|how.*contact|email.*us|email.*team|contact.*us|get.*in.*touch/i,
+    reply: `**Contact Support** ✉️\n\nNeed help that goes beyond what I can answer? Our team has you covered!\n\n📧 **Support Email:** [gamerbuddyhq@gmail.com](mailto:gamerbuddyhq@gmail.com)\n\nWhen emailing, include:\n• Your **username** or registered email\n• A clear description of the issue\n• Any relevant screenshots if possible\n\nWe aim to respond within **24–48 hours**.\n\nFor quick answers on wallets, sessions, bidding, verification, or safety — just ask me right here! I know Gamerbuddy inside out 💪`,
+  },
+
   /* ── GENERAL HELP ── */
   {
     patterns: /help|support|question|how.*work|what.*is.*gamerbuddy|about.*platform/i,
-    reply: `**Gamerbuddy** is a global gaming marketplace — hire skilled gamers for co-op, ranked sessions, raids, and more across PC, PlayStation, Xbox, Switch, Steam Deck, and Mobile 🎮\n\n**Phase 1 is live right now. Here's the core:**\n• Post requests → receive bids → hire verified gamers\n• Bids require verification (7–15 days) — keeps it safe\n• 10% platform fee on every completed session\n• Funds held in escrow until session is approved\n• Two wallets: Hiring (spend) & Earnings (receive)\n• Withdraw earnings once you hit $100\n• Private chat between hirer and gamer\n• Gift button for optional tips after sessions\n• Points earned per session → spend in Profile Shop\n\nAsk me about any specific feature and I'll give you the full breakdown!`,
+    reply: `**Gamerbuddy** is a global gaming marketplace — hire skilled gamers for co-op, ranked sessions, raids, and more across PC, PlayStation, Xbox, Switch, Steam Deck, and Mobile 🎮\n\n**Phase 1 is live right now. Here's the core:**\n• Post requests → receive bids → hire verified gamers\n• Bids require verification (7–15 days) — keeps it safe\n• 10% platform fee on every completed session\n• Funds held in escrow until session is approved\n• Two wallets: Hiring (spend) & Earnings (receive)\n• Withdraw earnings once you hit $100\n• Private chat between hirer and gamer\n• Gift button for optional tips after sessions\n• Points earned per session → spend in Profile Shop\n\nNeed to reach a human? Email us at **gamerbuddyhq@gmail.com** 📧\n\nAsk me about any specific feature and I'll give you the full breakdown!`,
   },
 ];
 
 const FALLBACK_RESPONSES = [
   "Hmm, didn't catch that one — mind rephrasing? I'm best with Phase 1 features: posting requests, bidding, wallets, verification, reviews, escrow, gifts, private chat, and safety! 🎮",
   "That one's got me stumped! Try asking: 'How does bidding work?', 'What's the platform fee?', 'How does escrow work?', or 'How does verification work?' — full answers ready! 👾",
-  "Need more context on that one! For tricky issues our support team's got you. But for Phase 1 features — requests, wallets, sessions, points, safety, reviews — I'm your guy. What else can I help with? 🎯",
+  "Need more context on that one! For issues I can't resolve, email our support team at **gamerbuddyhq@gmail.com** — we respond within 24–48 hours. For Phase 1 features — requests, wallets, sessions, points, safety, reviews — I'm your guy. What else can I help with? 🎯",
 ];
 
 let fallbackIndex = 0;
