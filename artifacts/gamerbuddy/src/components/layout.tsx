@@ -417,24 +417,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
           <div className="flex items-center gap-2 shrink-0">
             <NotificationBell />
 
-            {/* Superr.bio pill — desktop only */}
-            <a
-              href="https://www.superr.bio/gamerbuddy"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hidden lg:flex items-center gap-1.5 text-xs font-black px-3 py-1.5 rounded-full transition-all duration-200 hover:scale-105 active:scale-95 whitespace-nowrap text-white"
-              style={{
-                background: "linear-gradient(135deg, #a855f7, #22d3ee)",
-                boxShadow: "0 0 14px rgba(168,85,247,0.35)",
-              }}
-              title="All Gamerbuddy socials & links"
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} className="h-3.5 w-3.5 shrink-0">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" />
-              </svg>
-              All Links
-            </a>
-
             {/* Theme toggle */}
             <button
               onClick={toggleTheme}
@@ -610,22 +592,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 ))}
               </div>
 
-              {/* Social CTA button */}
-              <a
-                href="https://www.superr.bio/gamerbuddy"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-xs font-black text-white transition-all duration-200 hover:scale-[1.03] active:scale-[0.97]"
-                style={{
-                  background: "linear-gradient(135deg, #a855f7 0%, #7c3aed 60%, #22d3ee 100%)",
-                  boxShadow: "0 0 22px rgba(168,85,247,0.35)",
-                }}
-              >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} className="h-3.5 w-3.5 shrink-0">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" />
-                </svg>
-                All Socials &amp; Links
-              </a>
             </div>
           </div>
         </div>
