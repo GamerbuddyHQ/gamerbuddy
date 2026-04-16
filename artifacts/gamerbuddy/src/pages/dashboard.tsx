@@ -17,6 +17,7 @@ import {
   Zap,
   Clock,
   ShieldAlert,
+  Star,
 } from "lucide-react";
 
 const WITHDRAWAL_THRESHOLD = 100;
@@ -48,11 +49,68 @@ export default function Dashboard() {
   }
 
   const { user, wallets, recentRequests, totalRequestsPosted, openRequestsCount } = summary;
+  const pendingReviewSessions: Array<{ requestId: number; gameName: string | null; role: "hirer" | "gamer" }> =
+    (summary as any).pendingReviewSessions ?? [];
   const earningsPct = Math.min((wallets.earningsBalance / WITHDRAWAL_THRESHOLD) * 100, 100);
   const remaining = Math.max(WITHDRAWAL_THRESHOLD - wallets.earningsBalance, 0);
 
   return (
     <div className="space-y-8">
+      {/* ── REVIEW REQUIRED BANNER — highest priority, shown above everything ── */}
+      {pendingReviewSessions.length > 0 && (
+        <div
+          className="rounded-2xl overflow-hidden"
+          style={{
+            border: "2px solid rgba(234,179,8,0.5)",
+            background: "linear-gradient(135deg, rgba(234,179,8,0.08), rgba(168,85,247,0.05))",
+            boxShadow: "0 0 24px rgba(234,179,8,0.12)",
+          }}
+        >
+          {/* Pulsing top stripe */}
+          <div className="h-1 bg-gradient-to-r from-yellow-600 via-amber-400 to-yellow-600 animate-pulse" />
+          <div className="px-5 py-4 flex items-start gap-4">
+            <div className="h-10 w-10 rounded-xl bg-yellow-500/15 border border-yellow-500/40 flex items-center justify-center shrink-0 mt-0.5"
+              style={{ boxShadow: "0 0 12px rgba(234,179,8,0.2)" }}>
+              <Star className="h-5 w-5 text-yellow-400 fill-yellow-400" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 flex-wrap mb-1.5">
+                <span className="text-sm font-extrabold text-yellow-400 uppercase tracking-wide">
+                  ⚡ Review Required — {pendingReviewSessions.length} Session{pendingReviewSessions.length !== 1 ? "s" : ""}
+                </span>
+                <span
+                  className="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full animate-pulse"
+                  style={{ background: "rgba(234,179,8,0.2)", color: "#fbbf24", border: "1px solid rgba(234,179,8,0.4)" }}
+                >
+                  Action Required
+                </span>
+              </div>
+              <p className="text-xs text-muted-foreground leading-relaxed mb-3">
+                {pendingReviewSessions.length === 1
+                  ? <>Your <strong className="text-foreground">{pendingReviewSessions[0].gameName}</strong> session is complete — leave a review to earn your <strong className="text-yellow-400">+50 points</strong> and finalise the session.</>
+                  : <>You have <strong className="text-foreground">{pendingReviewSessions.length} completed sessions</strong> waiting for your review. Each review earns you <strong className="text-yellow-400">+50 points</strong> and builds trust on the platform.</>
+                }
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {pendingReviewSessions.map((s) => (
+                  <Link key={s.requestId} href={`/requests/${s.requestId}`}>
+                    <Button
+                      size="sm"
+                      className="text-xs font-black uppercase gap-1.5 text-black"
+                      style={{ background: "linear-gradient(135deg, #eab308, #f59e0b)" }}
+                    >
+                      <Star className="h-3.5 w-3.5 fill-black" />
+                      Rate {s.gameName ?? "Session"}
+                      <span className="opacity-60 font-normal">({s.role === "hirer" ? "as Hirer" : "as Gamer"})</span>
+                    </Button>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Verification status banner — shown while pending */}
       {!user.idVerified && (
         <div

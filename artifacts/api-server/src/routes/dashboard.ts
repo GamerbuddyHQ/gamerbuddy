@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
-import { db, walletsTable, gameRequestsTable } from "@workspace/db";
-import { eq, desc, count, and } from "drizzle-orm";
+import { db, walletsTable, gameRequestsTable, bidsTable, reviewsTable } from "@workspace/db";
+import { eq, desc, count, and, inArray, not } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
 
 const router: IRouter = Router();
@@ -33,6 +33,45 @@ router.get("/dashboard/summary", requireAuth, async (req, res): Promise<void> =>
     .from(gameRequestsTable)
     .where(and(eq(gameRequestsTable.userId, user.id), eq(gameRequestsTable.status, "open")));
 
+  // ── Pending reviews: sessions awaiting_reviews where user hasn't reviewed yet ──
+
+  // As hirer: my requests that are awaiting_reviews
+  const hirerAwaitingRequests = await db
+    .select({ id: gameRequestsTable.id, gameName: gameRequestsTable.gameName })
+    .from(gameRequestsTable)
+    .where(and(eq(gameRequestsTable.userId, user.id), eq(gameRequestsTable.status, "awaiting_reviews")));
+
+  // As gamer: accepted bids on awaiting_reviews requests
+  const gamerAwaitingBids = await db
+    .select({ requestId: bidsTable.requestId, gameName: gameRequestsTable.gameName })
+    .from(bidsTable)
+    .leftJoin(gameRequestsTable, eq(bidsTable.requestId, gameRequestsTable.id))
+    .where(and(eq(bidsTable.bidderId, user.id), eq(bidsTable.status, "accepted"), eq(gameRequestsTable.status, "awaiting_reviews")));
+
+  // Find which ones user has already reviewed
+  const allAwaitingIds = [
+    ...hirerAwaitingRequests.map((r) => r.id),
+    ...gamerAwaitingBids.map((b) => b.requestId!),
+  ].filter(Boolean);
+
+  let alreadyReviewedIds: number[] = [];
+  if (allAwaitingIds.length > 0) {
+    const existing = await db
+      .select({ requestId: reviewsTable.requestId })
+      .from(reviewsTable)
+      .where(and(eq(reviewsTable.reviewerId, user.id), inArray(reviewsTable.requestId, allAwaitingIds)));
+    alreadyReviewedIds = existing.map((r) => r.requestId);
+  }
+
+  const pendingReviewSessions = [
+    ...hirerAwaitingRequests
+      .filter((r) => !alreadyReviewedIds.includes(r.id))
+      .map((r) => ({ requestId: r.id, gameName: r.gameName, role: "hirer" as const })),
+    ...gamerAwaitingBids
+      .filter((b) => !alreadyReviewedIds.includes(b.requestId!))
+      .map((b) => ({ requestId: b.requestId!, gameName: b.gameName, role: "gamer" as const })),
+  ];
+
   const hiringBalance = wallet?.hiringBalance ?? 0;
   const earningsBalance = wallet?.earningsBalance ?? 0;
 
@@ -53,6 +92,7 @@ router.get("/dashboard/summary", requireAuth, async (req, res): Promise<void> =>
     },
     totalRequestsPosted: totalCountResult?.count ?? 0,
     openRequestsCount: openCountResult?.count ?? 0,
+    pendingReviewSessions,
     recentRequests: recentRequests.map((r) => ({
       id: r.id,
       userId: r.userId,

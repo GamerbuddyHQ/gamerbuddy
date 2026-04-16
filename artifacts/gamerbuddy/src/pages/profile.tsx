@@ -1613,27 +1613,69 @@ export default function Profile() {
       {/* REVIEWS */}
       {(profile?.reviews?.length ?? 0) > 0 && (
         <Card className="border-border bg-card/40">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-xs uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-              <Star className="h-4 w-4 text-yellow-400" /> Reviews Received
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3 max-h-72 overflow-y-auto">
-            {profile?.reviews?.map((r) => (
-              <div key={r.id} className="rounded-xl border border-border bg-background/50 p-3 space-y-2">
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-2">
-                    <div className="h-7 w-7 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center shrink-0">
-                      <User className="h-3.5 w-3.5 text-primary" />
-                    </div>
-                    <span className="text-sm font-semibold text-white">{r.reviewerName}</span>
-                  </div>
-                  <ScoreBadge rating={r.rating} />
-                </div>
-                {r.comment && <p className="text-sm text-foreground/75 leading-relaxed pl-9 border-l-2 border-border/40">{r.comment}</p>}
-                <div className="text-xs text-muted-foreground pl-9">{format(new Date(r.createdAt), "MMM d, yyyy")}</div>
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <CardTitle className="text-xs uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+                <Star className="h-4 w-4 text-yellow-400 fill-yellow-400" /> Reviews Received
+              </CardTitle>
+              <div className="flex items-center gap-2 flex-wrap">
+                {profile?.avgRating != null && (
+                  <span className="flex items-center gap-1 text-xs font-black text-yellow-400 bg-yellow-500/10 px-2.5 py-1 rounded-full border border-yellow-500/30">
+                    <Star className="w-3 h-3 fill-yellow-400" />
+                    {profile.avgRating.toFixed(1)}/10
+                    <span className="text-muted-foreground font-normal">({profile.reviewCount} review{profile.reviewCount !== 1 ? "s" : ""})</span>
+                  </span>
+                )}
+                {(profile as any)?.wouldPlayAgainPercent != null && (
+                  <span
+                    className="flex items-center gap-1 text-xs font-black px-2.5 py-1 rounded-full border"
+                    style={
+                      (profile as any).wouldPlayAgainPercent >= 75
+                        ? { color: "#4ade80", background: "rgba(74,222,128,0.1)", borderColor: "rgba(74,222,128,0.3)" }
+                        : (profile as any).wouldPlayAgainPercent >= 50
+                        ? { color: "#facc15", background: "rgba(250,204,21,0.1)", borderColor: "rgba(250,204,21,0.3)" }
+                        : { color: "#f87171", background: "rgba(248,113,113,0.1)", borderColor: "rgba(248,113,113,0.3)" }
+                    }
+                  >
+                    👍 {(profile as any).wouldPlayAgainPercent}% would play again
+                  </span>
+                )}
               </div>
-            ))}
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-3 max-h-96 overflow-y-auto">
+            {profile?.reviews?.map((r) => {
+              const wpaColors: Record<string, { color: string; icon: string; label: string }> = {
+                yes:   { color: "#4ade80", icon: "👍", label: "Would play again" },
+                maybe: { color: "#facc15", icon: "🤔", label: "Maybe again" },
+                no:    { color: "#f87171", icon: "👎", label: "Wouldn't play again" },
+              };
+              const wpa = r.wouldPlayAgain ? wpaColors[r.wouldPlayAgain] : null;
+              return (
+                <div key={r.id} className="rounded-xl border border-border bg-background/50 p-3 space-y-2">
+                  <div className="flex items-center justify-between gap-2 flex-wrap">
+                    <div className="flex items-center gap-2">
+                      <div className="h-7 w-7 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center shrink-0">
+                        <User className="h-3.5 w-3.5 text-primary" />
+                      </div>
+                      <span className="text-sm font-semibold text-foreground">{r.reviewerName}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      {wpa && (
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1"
+                          style={{ color: wpa.color, background: `${wpa.color}18`, border: `1px solid ${wpa.color}44` }}>
+                          <span>{wpa.icon}</span>
+                          <span>{wpa.label}</span>
+                        </span>
+                      )}
+                      <ScoreBadge rating={r.rating} />
+                    </div>
+                  </div>
+                  {r.comment && <p className="text-sm text-foreground/75 leading-relaxed pl-9 border-l-2 border-border/40">{r.comment}</p>}
+                  <div className="text-xs text-muted-foreground pl-9">{format(new Date(r.createdAt), "MMM d, yyyy")}</div>
+                </div>
+              );
+            })}
           </CardContent>
         </Card>
       )}

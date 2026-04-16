@@ -39,6 +39,7 @@ export type Review = {
   revieweeId: number;
   rating: number;
   comment: string | null;
+  wouldPlayAgain: "yes" | "no" | "maybe" | null;
   reviewerName?: string;
   createdAt: string;
 };
@@ -90,6 +91,7 @@ export type UserProfile = {
   createdAt: string;
   avgRating: number | null;
   reviewCount: number;
+  wouldPlayAgainPercent: number | null;
   reviews: Review[];
   sessionsAsHirer: { id: number; gameName: string; platform?: string; createdAt: string }[];
   sessionsAsGamer: { requestId: number; gameName: string | null; platform?: string | null; createdAt: string | null }[];
@@ -303,11 +305,11 @@ export function useRequestReviews(requestId: number) {
 
 export function useSubmitReview() {
   const qc = useQueryClient();
-  return useMutation<Review, any, { requestId: number; rating: number; comment?: string }>({
-    mutationFn: ({ requestId, rating, comment }) =>
+  return useMutation<Review, any, { requestId: number; rating: number; comment?: string; wouldPlayAgain?: string }>({
+    mutationFn: ({ requestId, rating, comment, wouldPlayAgain }) =>
       apiFetch(`${BASE}/requests/${requestId}/reviews`, {
         method: "POST",
-        body: JSON.stringify({ rating, comment }),
+        body: JSON.stringify({ rating, comment, wouldPlayAgain }),
       }),
     onSuccess: (_, vars) => {
       qc.invalidateQueries({ queryKey: bidKeys.reviews(vars.requestId) });

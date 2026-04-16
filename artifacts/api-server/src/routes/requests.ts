@@ -856,6 +856,7 @@ router.get("/requests/:id/reviews", async (req, res): Promise<void> => {
       revieweeId: reviewsTable.revieweeId,
       rating: reviewsTable.rating,
       comment: reviewsTable.comment,
+      wouldPlayAgain: reviewsTable.wouldPlayAgain,
       createdAt: reviewsTable.createdAt,
       reviewerName: usersTable.name,
     })
@@ -892,11 +893,12 @@ router.post("/requests/:id/reviews", requireAuth, async (req, res): Promise<void
     .where(and(eq(reviewsTable.requestId, requestId), eq(reviewsTable.reviewerId, user.id)));
   if (existing) { res.status(409).json({ error: "You have already reviewed this session" }); return; }
 
-  const { rating, comment } = req.body as { rating?: number; comment?: string };
+  const { rating, comment, wouldPlayAgain } = req.body as { rating?: number; comment?: string; wouldPlayAgain?: string };
   if (!rating || !Number.isInteger(rating) || rating < 1 || rating > 10) {
     res.status(400).json({ error: "Rating must be a whole number from 1 to 10" });
     return;
   }
+  const wpa = wouldPlayAgain === "yes" || wouldPlayAgain === "no" || wouldPlayAgain === "maybe" ? wouldPlayAgain : null;
 
   const [review] = await db.insert(reviewsTable).values({
     requestId,
@@ -904,6 +906,7 @@ router.post("/requests/:id/reviews", requireAuth, async (req, res): Promise<void
     revieweeId,
     rating,
     comment: comment?.trim() || null,
+    wouldPlayAgain: wpa,
   }).returning();
 
   // Recalculate trust factor from scratch (rating quality + session experience +

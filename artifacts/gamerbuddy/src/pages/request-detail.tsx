@@ -1443,9 +1443,43 @@ function GiftPanel({ requestId }: { requestId: number }) {
   );
 }
 
+const WPA_OPTIONS: { value: "yes" | "no" | "maybe"; label: string; icon: string; activeColor: string; activeBg: string; activeBorder: string }[] = [
+  { value: "yes",   label: "Yes!",   icon: "👍", activeColor: "#4ade80", activeBg: "rgba(74,222,128,0.15)", activeBorder: "rgba(74,222,128,0.5)" },
+  { value: "maybe", label: "Maybe",  icon: "🤔", activeColor: "#facc15", activeBg: "rgba(250,204,21,0.15)", activeBorder: "rgba(250,204,21,0.5)" },
+  { value: "no",    label: "No",     icon: "👎", activeColor: "#f87171", activeBg: "rgba(248,113,113,0.15)", activeBorder: "rgba(248,113,113,0.5)" },
+];
+
+function WouldPlayAgainToggle({ value, onChange }: { value: string | null; onChange: (v: "yes" | "no" | "maybe") => void }) {
+  return (
+    <div className="space-y-1.5">
+      <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Would you play with them again?</div>
+      <div className="flex gap-2">
+        {WPA_OPTIONS.map((opt) => {
+          const active = value === opt.value;
+          return (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => onChange(opt.value)}
+              className="flex-1 flex items-center justify-center gap-1.5 rounded-xl border px-3 py-2.5 text-sm font-bold transition-all"
+              style={active
+                ? { borderColor: opt.activeBorder, background: opt.activeBg, color: opt.activeColor }
+                : { borderColor: "rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.03)", color: "rgba(255,255,255,0.4)" }}
+            >
+              <span>{opt.icon}</span>
+              <span>{opt.label}</span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function ReviewPanel({ requestId, currentUserId, awaitingReviews }: { requestId: number; currentUserId: number; awaitingReviews?: boolean }) {
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
+  const [wouldPlayAgain, setWouldPlayAgain] = useState<"yes" | "no" | "maybe" | null>(null);
   const { data: reviews = [], refetch } = useRequestReviews(requestId);
   const submit = useSubmitReview();
   const { toast } = useToast();
@@ -1455,6 +1489,7 @@ function ReviewPanel({ requestId, currentUserId, awaitingReviews }: { requestId:
   if (myReview) {
     const color = SCORE_COLOR[myReview.rating] ?? "bg-green-500";
     const label = SCORE_LABELS[myReview.rating] ?? "";
+    const wpaOpt = WPA_OPTIONS.find((o) => o.value === myReview.wouldPlayAgain);
     return (
       <div className="rounded-xl border border-yellow-500/30 bg-yellow-500/5 p-4 space-y-2">
         <div className="flex items-center justify-between">
@@ -1469,6 +1504,12 @@ function ReviewPanel({ requestId, currentUserId, awaitingReviews }: { requestId:
             <span className="text-xs text-muted-foreground">{label}</span>
           </div>
         </div>
+        {wpaOpt && (
+          <div className="flex items-center gap-1.5 text-xs font-semibold" style={{ color: wpaOpt.activeColor }}>
+            <span>{wpaOpt.icon}</span>
+            <span>Would play again: {wpaOpt.label}</span>
+          </div>
+        )}
         {myReview.comment && <p className="text-sm text-foreground/80 leading-relaxed border-l-2 border-yellow-500/30 pl-3">{myReview.comment}</p>}
         <div className="flex items-center gap-1.5 text-xs pt-1">
           {awaitingReviews ? (
@@ -1482,40 +1523,46 @@ function ReviewPanel({ requestId, currentUserId, awaitingReviews }: { requestId:
   }
 
   return (
-    <div className="rounded-xl border border-yellow-500/30 bg-yellow-500/5 p-4 space-y-4">
+    <div className="rounded-xl border-2 border-yellow-500/50 bg-yellow-500/5 p-5 space-y-4"
+      style={{ boxShadow: "0 0 20px rgba(234,179,8,0.08)" }}>
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 text-yellow-400 font-bold text-sm">
-          <Star className="h-4 w-4" />
-          Rate this Session
+        <div className="flex items-center gap-2 text-yellow-400 font-black text-sm uppercase tracking-wide">
+          <Star className="h-4 w-4 fill-yellow-400" />
+          ⚡ Review Required
         </div>
-        <div className="flex items-center gap-1 text-xs text-yellow-400/60">
+        <div className="flex items-center gap-1 text-xs font-bold text-yellow-400/70">
           <Trophy className="h-3.5 w-3.5" />
           +50 pts when both review
         </div>
       </div>
-      <p className="text-xs text-muted-foreground -mt-1">Rate on a scale of 1–10. Your review affects the other player's Trust Factor.</p>
+      <p className="text-xs text-muted-foreground -mt-1">
+        Rate your partner 1–10 · <span className="text-yellow-400/80">Communication · Skill · Behavior · Fun factor</span>
+      </p>
       <ScoreRating value={rating} onChange={setRating} />
       <Textarea
         value={comment}
         onChange={(e) => setComment(e.target.value)}
-        placeholder="Share your experience (at least 10 characters)…"
-        className="resize-none h-20 bg-background text-sm"
-        maxLength={300}
+        placeholder="How was the session? Was communication good? Skill level what you expected? Behavior respectful? Fun?"
+        className="resize-none h-24 bg-background text-sm"
+        maxLength={500}
       />
-      <div className="flex items-center justify-between text-xs text-muted-foreground">
-        <span className={comment.length < 10 && comment.length > 0 ? "text-destructive" : ""}>{comment.length}/300 {comment.length < 10 ? `(${10 - comment.length} more to go)` : ""}</span>
+      <div className="text-xs text-muted-foreground">
+        <span className={comment.trim().length > 0 && comment.trim().length < 10 ? "text-destructive" : ""}>{comment.trim().length}/500 {comment.trim().length < 10 && comment.trim().length > 0 ? `— ${10 - comment.trim().length} more chars needed` : ""}</span>
       </div>
+      <WouldPlayAgainToggle value={wouldPlayAgain} onChange={setWouldPlayAgain} />
       <Button
-        className="w-full bg-yellow-500/20 border border-yellow-500/40 text-yellow-400 hover:bg-yellow-500 hover:text-black font-bold uppercase tracking-wider"
+        className="w-full font-black uppercase tracking-wider text-sm py-5"
+        style={{ background: rating && comment.trim().length >= 10 ? "rgba(234,179,8,0.9)" : undefined }}
+        variant={rating && comment.trim().length >= 10 ? "default" : "outline"}
         onClick={() => {
-          if (!rating) { toast({ title: "Pick a score first", variant: "destructive" }); return; }
-          if (comment.trim().length < 10) { toast({ title: "Comment too short", description: "Write at least 10 characters.", variant: "destructive" }); return; }
-          submit.mutate({ requestId, rating, comment: comment.trim() }, {
+          if (!rating) { toast({ title: "Pick a score first", description: "Tap a number 1–10 to rate.", variant: "destructive" }); return; }
+          if (comment.trim().length < 10) { toast({ title: "Comment too short", description: "At least 10 characters required.", variant: "destructive" }); return; }
+          submit.mutate({ requestId, rating, comment: comment.trim(), wouldPlayAgain: wouldPlayAgain ?? undefined }, {
             onSuccess: (data: any) => {
               if (data?.bothReviewed) {
-                toast({ title: "+50 Points Earned!", description: "Both reviews are in — session is officially complete!", duration: 7000 });
+                toast({ title: "🎉 +50 Points Earned!", description: "Both reviews are in — session fully complete!", duration: 7000 });
               } else {
-                toast({ title: "Review Submitted!", description: "Waiting for the other player to review…", duration: 7000 });
+                toast({ title: "✅ Review Submitted!", description: "Waiting for the other player to review…", duration: 7000 });
               }
               refetch();
             },
@@ -1524,8 +1571,8 @@ function ReviewPanel({ requestId, currentUserId, awaitingReviews }: { requestId:
         }}
         disabled={!rating || comment.trim().length < 10 || submit.isPending}
       >
-        <Star className="h-4 w-4 mr-1.5" />
-        {submit.isPending ? "Submitting…" : `Submit Review · ${rating > 0 ? `${rating}/10` : "choose score"}`}
+        <Star className="h-4 w-4 mr-1.5 fill-current" />
+        {submit.isPending ? "Submitting…" : `Submit Review${rating > 0 ? ` · ${rating}/10` : " — pick a score"}`}
       </Button>
     </div>
   );
@@ -1548,6 +1595,7 @@ function ForcedReviewModal({
 }) {
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
+  const [wouldPlayAgain, setWouldPlayAgain] = useState<"yes" | "no" | "maybe" | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const [bothDone, setBothDone] = useState(false);
   const { data: reviews = [], refetch } = useRequestReviews(requestId);
@@ -1557,53 +1605,55 @@ function ForcedReviewModal({
   const myReview = reviews.find((r) => r.reviewerId === currentUserId);
 
   const handleSubmit = () => {
-    if (!rating) { toast({ title: "Pick a score first", description: "Tap a number to rate the session.", variant: "destructive" }); return; }
+    if (!rating) { toast({ title: "Pick a score first", description: "Tap a number 1–10 to rate.", variant: "destructive" }); return; }
     if (comment.trim().length < 10) { toast({ title: "Review too short", description: "Write at least 10 characters.", variant: "destructive" }); return; }
-    submit.mutate({ requestId, rating, comment: comment.trim() }, {
+    submit.mutate({ requestId, rating, comment: comment.trim(), wouldPlayAgain: wouldPlayAgain ?? undefined }, {
       onSuccess: (data: any) => {
         const both = !!(data as any)?.bothReviewed;
         setSubmitted(true);
         setBothDone(both);
         refetch();
-        if (both) onDone();
+        if (both) setTimeout(onDone, 2200);
       },
       onError: (err: any) => toast({ title: "Submission failed", description: err?.error || "Please try again.", variant: "destructive" }),
     });
   };
 
-  // If already reviewed before modal opened
   const alreadyReviewed = !!myReview;
-
   const scoreLabel = rating > 0 ? SCORE_LABELS[rating] ?? "" : "";
   const scoreColor = rating > 0 ? (SCORE_COLOR[rating] ?? "bg-green-500") : "bg-muted";
+  const wpaOptSubmitted = WPA_OPTIONS.find((o) => o.value === myReview?.wouldPlayAgain);
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4"
-      style={{ background: "rgba(0,0,0,0.92)", backdropFilter: "blur(8px)" }}>
-      <div className="w-full max-w-lg rounded-2xl border border-yellow-500/40 bg-card overflow-hidden shadow-2xl"
-        style={{ boxShadow: "0 0 60px rgba(234,179,8,0.12), 0 25px 60px rgba(0,0,0,0.8)" }}>
+      style={{ background: "rgba(0,0,0,0.94)", backdropFilter: "blur(12px)" }}>
+      <div className="w-full max-w-lg rounded-2xl border border-yellow-500/50 bg-card overflow-hidden shadow-2xl"
+        style={{ boxShadow: "0 0 80px rgba(234,179,8,0.18), 0 25px 60px rgba(0,0,0,0.85)" }}>
 
-        {/* Header stripe */}
-        <div className="h-1 bg-gradient-to-r from-yellow-500 via-amber-400 to-yellow-500" />
+        {/* Pulsing top stripe */}
+        <div className="h-1.5 bg-gradient-to-r from-yellow-600 via-yellow-400 to-yellow-600 animate-pulse" />
 
         <div className="p-6 space-y-5">
           {/* Icon + title */}
           <div className="text-center space-y-2">
-            <div className="inline-flex h-14 w-14 rounded-full items-center justify-center border-2 border-yellow-500/40 bg-yellow-500/10 mx-auto">
-              <Star className="h-7 w-7 text-yellow-400" />
+            <div className="relative inline-flex mx-auto">
+              <div className="h-16 w-16 rounded-full flex items-center justify-center border-2 border-yellow-500/50 bg-yellow-500/10"
+                style={{ boxShadow: "0 0 24px rgba(234,179,8,0.2)" }}>
+                <Star className="h-8 w-8 text-yellow-400 fill-yellow-400" />
+              </div>
+              {!alreadyReviewed && !submitted && (
+                <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-500 border-2 border-card flex items-center justify-center text-[9px] font-black text-white animate-bounce">!</span>
+              )}
             </div>
-            <h2 className="text-xl font-extrabold uppercase tracking-tight text-white">
-              {alreadyReviewed || submitted ? "Review Submitted" : "Rate the Session"}
+            <h2 className="text-xl font-extrabold uppercase tracking-tight text-foreground">
+              {alreadyReviewed || submitted ? "✅ Review Submitted" : "⚡ Session Complete — Rate Your Partner"}
             </h2>
-            <p className="text-sm text-muted-foreground leading-relaxed">
+            <p className="text-sm text-muted-foreground leading-relaxed max-w-sm mx-auto">
               {alreadyReviewed || submitted
                 ? submitted && bothDone
-                  ? "Both reviews are in — session is fully complete and 50 points have been awarded!"
-                  : "Waiting for the other player to leave their review…"
-                : <>
-                    Payment has been released for <strong className="text-white">{gameName}</strong>.
-                    Both {isHirer ? "you and the gamer" : "you and the hirer"} must leave a review before the session is fully complete.
-                  </>
+                  ? "Both reviews are in — 50 points awarded to each player! Session fully complete!"
+                  : `Waiting for ${otherPersonName} to submit their review…`
+                : <>Payment released for <strong className="text-yellow-400">{gameName}</strong>. Rate <strong className="text-foreground">{otherPersonName}</strong> — your honest review builds a safer community.</>
               }
             </p>
           </div>
@@ -1613,37 +1663,44 @@ function ForcedReviewModal({
             <div className="flex items-center justify-center gap-2 rounded-xl border border-yellow-500/30 bg-yellow-500/10 px-4 py-3">
               <Trophy className="h-4 w-4 text-yellow-400 shrink-0" />
               <span className="text-sm font-bold text-yellow-300">
-                Both players earn <span className="text-white">+50 points</span> when both reviews are submitted
+                Both players earn <span className="text-white font-black">+50 points</span> when both reviews are in
               </span>
             </div>
           )}
 
-          {/* Waiting state */}
+          {/* Waiting state — after submitted */}
           {(alreadyReviewed || submitted) && !bothDone && (
-            <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-4 text-center space-y-2">
-              <div className="h-2.5 w-2.5 rounded-full bg-amber-400 animate-pulse mx-auto" />
+            <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-4 text-center space-y-3">
+              {myReview && wpaOptSubmitted && (
+                <div className="flex items-center justify-center gap-2 text-sm font-bold" style={{ color: wpaOptSubmitted.activeColor }}>
+                  <span>{wpaOptSubmitted.icon}</span>
+                  <span>You said: Would play again — {wpaOptSubmitted.label}</span>
+                </div>
+              )}
+              <div className="h-2 w-2 rounded-full bg-amber-400 animate-pulse mx-auto" />
               <div className="text-sm font-bold text-amber-400">Waiting on {otherPersonName}</div>
               <p className="text-xs text-muted-foreground">
-                {isHirer ? "The gamer" : "The hirer"} still needs to submit their review.
-                You'll both receive 50 points once they do.
+                {isHirer ? "The gamer" : "The hirer"} still needs to leave their review.
+                You'll both receive your 50 points when they do.
               </p>
               <Button
                 onClick={onDone}
-                className="mt-2 bg-background border border-border text-muted-foreground hover:border-amber-500/40 hover:text-amber-400 text-xs font-bold uppercase"
                 size="sm"
+                variant="outline"
+                className="text-xs font-bold uppercase text-muted-foreground hover:text-amber-400 hover:border-amber-500/40"
               >
-                Close — I'll come back later
+                Close — I'll check back later
               </Button>
             </div>
           )}
 
-          {/* Both done state */}
+          {/* Both done celebration */}
           {(submitted && bothDone) && (
-            <div className="rounded-xl border border-green-500/30 bg-green-500/5 p-4 text-center space-y-3">
-              <CheckCircle2 className="h-10 w-10 text-green-400 mx-auto" />
-              <div className="text-base font-bold text-green-400">Session Complete!</div>
-              <div className="text-xs text-muted-foreground">Both reviews submitted · <span className="text-yellow-400 font-bold">+50 points</span> awarded to each player</div>
-              <Button onClick={onDone} className="bg-green-500 text-black font-bold uppercase w-full">
+            <div className="rounded-xl border border-green-500/30 bg-green-500/5 p-5 text-center space-y-3">
+              <CheckCircle2 className="h-12 w-12 text-green-400 mx-auto" />
+              <div className="text-lg font-extrabold text-green-400 uppercase tracking-wide">🎉 Session Complete!</div>
+              <div className="text-sm text-muted-foreground">Both reviews in · <span className="text-yellow-400 font-black">+50 points</span> awarded to each player</div>
+              <Button onClick={onDone} className="bg-green-500 hover:bg-green-400 text-black font-black uppercase tracking-wider w-full">
                 <CheckCircle2 className="h-4 w-4 mr-2" /> Done
               </Button>
             </div>
@@ -1653,8 +1710,11 @@ function ForcedReviewModal({
           {!alreadyReviewed && !submitted && (
             <div className="space-y-4">
               <div className="space-y-2">
-                <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
-                  Rate {otherPersonName} (1–10) *
+                <div className="flex items-center justify-between">
+                  <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                    Rate {otherPersonName} · 1–10 <span className="text-red-400">*</span>
+                  </div>
+                  <div className="text-xs text-muted-foreground/50">Communication · Skill · Behavior · Fun</div>
                 </div>
                 <ScoreRating value={rating} onChange={setRating} />
                 {rating > 0 && (
@@ -1667,36 +1727,42 @@ function ForcedReviewModal({
 
               <div className="space-y-1.5">
                 <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
-                  Your Review * <span className="text-muted-foreground/50 font-normal normal-case tracking-normal">(minimum 10 characters)</span>
+                  Written Review <span className="text-red-400">*</span> <span className="font-normal normal-case tracking-normal text-muted-foreground/50">(min 10 chars)</span>
                 </div>
                 <Textarea
                   value={comment}
                   onChange={(e) => setComment(e.target.value)}
-                  placeholder={`Describe your experience playing with ${otherPersonName}…`}
-                  className="resize-none h-24 bg-background text-sm"
-                  maxLength={300}
+                  placeholder={`How was the session with ${otherPersonName}? How was their communication? Skill level as described? Behavior respectful and fun?`}
+                  className="resize-none h-28 bg-background text-sm"
+                  maxLength={500}
                 />
-                <div className="flex items-center justify-between text-xs">
-                  <span className={comment.length > 0 && comment.trim().length < 10 ? "text-destructive" : "text-muted-foreground"}>
-                    {comment.trim().length}/300 {comment.trim().length < 10 && comment.trim().length > 0 ? `— ${10 - comment.trim().length} more chars needed` : ""}
+                <div className="text-xs text-muted-foreground">
+                  <span className={comment.trim().length > 0 && comment.trim().length < 10 ? "text-destructive" : ""}>
+                    {comment.trim().length}/500{comment.trim().length < 10 && comment.trim().length > 0 ? ` — ${10 - comment.trim().length} more needed` : ""}
                   </span>
                 </div>
               </div>
+
+              <WouldPlayAgainToggle value={wouldPlayAgain} onChange={setWouldPlayAgain} />
 
               <div className="flex flex-col gap-2 pt-1">
                 <Button
                   onClick={handleSubmit}
                   disabled={!rating || comment.trim().length < 10 || submit.isPending}
-                  className="w-full bg-yellow-500 hover:bg-yellow-400 text-black font-black uppercase tracking-wider text-sm py-5 disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="w-full text-black font-black uppercase tracking-wider text-sm py-5 disabled:opacity-50 disabled:cursor-not-allowed"
+                  style={{ background: "linear-gradient(135deg, #eab308, #f59e0b)" }}
                 >
                   {submit.isPending ? (
-                    <span className="flex items-center gap-2"><div className="h-4 w-4 rounded-full border-2 border-black/30 border-t-black animate-spin" />Submitting…</span>
+                    <span className="flex items-center gap-2">
+                      <div className="h-4 w-4 rounded-full border-2 border-black/30 border-t-black animate-spin" />
+                      Submitting…
+                    </span>
                   ) : (
-                    <><Star className="h-4 w-4 mr-2" />Submit Review {rating > 0 ? `· ${rating}/10` : ""}</>
+                    <><Star className="h-4 w-4 mr-2 fill-black" />Submit Review{rating > 0 ? ` · ${rating}/10` : " — choose a score first"}</>
                   )}
                 </Button>
-                <p className="text-center text-[10px] text-muted-foreground/60 uppercase tracking-widest">
-                  A review is required to finalise the session
+                <p className="text-center text-[10px] text-muted-foreground/50 uppercase tracking-widest">
+                  Review required to finalise the session · Can't be edited after submission
                 </p>
               </div>
             </div>

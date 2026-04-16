@@ -62,6 +62,7 @@ router.get("/users/:id", async (req, res): Promise<void> => {
       id: reviewsTable.id,
       rating: reviewsTable.rating,
       comment: reviewsTable.comment,
+      wouldPlayAgain: reviewsTable.wouldPlayAgain,
       createdAt: reviewsTable.createdAt,
       reviewerName: usersTable.name,
     })
@@ -125,11 +126,17 @@ router.get("/users/:id", async (req, res): Promise<void> => {
     beginnerReviews.length >= 3 &&
     beginnerReviews.reduce((s, r) => s + r.rating, 0) / beginnerReviews.length >= 7.5;
 
+  const reviewsWithWPA = reviews.filter((r) => r.wouldPlayAgain === "yes" || r.wouldPlayAgain === "no");
+  const wouldPlayAgainPercent = reviewsWithWPA.length > 0
+    ? Math.round((reviewsWithWPA.filter((r) => r.wouldPlayAgain === "yes").length / reviewsWithWPA.length) * 100)
+    : null;
+
   res.json({
     ...user,
     createdAt: user.createdAt.toISOString(),
     avgRating,
     reviewCount: reviews.length,
+    wouldPlayAgainPercent,
     reviews: reviews.map((r) => ({ ...r, createdAt: r.createdAt.toISOString() })),
     sessionsAsHirer: completedAsHirer.map((s) => ({ ...s, createdAt: s.createdAt.toISOString() })),
     sessionsAsGamer: completedAsGamer.map((s) => ({ ...s, createdAt: s.createdAt?.toISOString() })),

@@ -9,6 +9,7 @@ export const reviewsTable = pgTable("reviews", {
   revieweeId: integer("reviewee_id").notNull().references(() => usersTable.id),
   rating: integer("rating").notNull(),
   comment: text("comment"),
+  wouldPlayAgain: text("would_play_again"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
