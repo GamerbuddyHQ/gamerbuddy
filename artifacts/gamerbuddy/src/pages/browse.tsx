@@ -604,86 +604,75 @@ function EmptyState({ hasFilters, onClear }: { hasFilters: boolean; onClear: () 
   );
 }
 
-/* ── FILLER SECTION ──────────────────────────────────────────────────────── */
+/* ── HOW IT WORKS SECTION ─────────────────────────────────────────────────── */
+function HowItWorksSection() {
+  const { isDark } = useTheme();
+  const steps = [
+    { num: "01", icon: <Search className="h-5 w-5" />, color: "#a855f7", title: "Browse Missions",  desc: "Find requests that match your skills, platform, and schedule. Filters help you zero in fast." },
+    { num: "02", icon: <Gavel  className="h-5 w-5" />, color: "#22d3ee", title: "Place Your Bid",   desc: "Set your price and pitch yourself directly — no middlemen, no agency cuts." },
+    { num: "03", icon: <Trophy className="h-5 w-5" />, color: "#facc15", title: "Play & Get Paid",  desc: "Complete the session, collect your review, and withdraw your 90% earnings." },
+  ];
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center gap-3">
+        <div className="flex-1 h-px" style={{ background: "rgba(168,85,247,0.10)" }} />
+        <span className="text-[10px] text-muted-foreground/30 uppercase tracking-[0.20em] font-black shrink-0">How it works</span>
+        <div className="flex-1 h-px" style={{ background: "rgba(168,85,247,0.10)" }} />
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        {steps.map((s, i) => (
+          <div
+            key={i}
+            className="flex items-center gap-4 sm:flex-col sm:items-start sm:gap-3 rounded-xl border border-border/35 px-4 py-4"
+            style={{
+              background: isDark ? "rgba(255,255,255,0.018)" : "rgba(0,0,0,0.018)",
+            }}
+          >
+            {/* Icon + step number */}
+            <div className="flex items-center gap-3 shrink-0">
+              <div
+                className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+                style={{ background: `${s.color}16`, border: `1px solid ${s.color}32`, color: s.color }}
+              >
+                {s.icon}
+              </div>
+              <span
+                className="font-black tabular-nums leading-none sm:hidden"
+                style={{ fontSize: 22, color: isDark ? `${s.color}28` : `${s.color}55`, letterSpacing: "-0.04em" }}
+              >
+                {s.num}
+              </span>
+            </div>
+            {/* Text */}
+            <div className="min-w-0 flex-1 sm:w-full">
+              <div className="flex items-baseline gap-2 mb-1">
+                <span
+                  className="hidden sm:inline font-black tabular-nums leading-none shrink-0"
+                  style={{ fontSize: 20, color: isDark ? `${s.color}25` : `${s.color}50`, letterSpacing: "-0.04em" }}
+                >
+                  {s.num}
+                </span>
+                <p className="text-sm font-extrabold text-foreground tracking-tight leading-tight">{s.title}</p>
+              </div>
+              <p className="text-xs text-muted-foreground/50 leading-relaxed">{s.desc}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ── FILLER SECTION (CTA — shown only when ≤3 results) ───────────────────── */
 function FillerSection() {
   const [, setLocation] = useLocation();
   const { user } = useAuth();
   const { isDark } = useTheme();
 
-  const steps = [
-    { num: "01", icon: <Search className="h-6 w-6" />, color: "#a855f7", title: "Browse Missions", desc: "Find game requests that match your skills, platform, and schedule. Use filters to zero in fast." },
-    { num: "02", icon: <Gavel className="h-6 w-6" />, color: "#22d3ee", title: "Place Your Bid", desc: "Set your price and pitch yourself directly — no middlemen, no agency cuts." },
-    { num: "03", icon: <Trophy className="h-6 w-6" />, color: "#facc15", title: "Play & Get Paid", desc: "Complete the session, collect your review, and withdraw earnings straight to your account." },
-  ];
-
   return (
     <div className="space-y-6 pt-4">
-      {/* Divider */}
-      <div className="flex items-center gap-4">
-        <div className="flex-1 h-px" style={{ background: "rgba(168,85,247,0.12)" }} />
-        <span className="text-[10px] text-muted-foreground/30 uppercase tracking-[0.22em] font-black">How it works</span>
-        <div className="flex-1 h-px" style={{ background: "rgba(168,85,247,0.12)" }} />
-      </div>
-
-      {/* Steps */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {steps.map((s, i) => (
-          <div
-            key={i}
-            className="rounded-2xl border border-border/40 bg-card p-6 flex flex-col gap-4"
-          >
-            <div className="flex items-center gap-3">
-              <div
-                className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0"
-                style={{ background: `${s.color}18`, border: `1px solid ${s.color}35`, color: s.color }}
-              >
-                {s.icon}
-              </div>
-              <span
-                className="font-black tabular-nums leading-none"
-                style={{ fontSize: 28, color: isDark ? `${s.color}20` : `${s.color}50`, letterSpacing: "-0.04em" }}
-              >
-                {s.num}
-              </span>
-            </div>
-            <div>
-              <div className="text-sm font-extrabold text-foreground tracking-tight mb-1.5">{s.title}</div>
-              <div className="text-xs text-muted-foreground/55 leading-relaxed">{s.desc}</div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* CTA banner */}
-      <div
-        className="rounded-2xl border p-6 sm:p-7 flex flex-col sm:flex-row items-center gap-5 justify-between"
-        style={{
-          background: isDark
-            ? "linear-gradient(145deg, rgba(168,85,247,0.07) 0%, rgba(0,0,0,0.4) 100%)"
-            : "linear-gradient(145deg, rgba(124,58,237,0.07) 0%, rgba(124,58,237,0.03) 100%)",
-          borderColor: isDark ? "rgba(168,85,247,0.18)" : "rgba(124,58,237,0.20)",
-        }}
-      >
-        <div className="text-center sm:text-left">
-          <div className="font-extrabold text-foreground text-lg tracking-tight">Need a skilled teammate?</div>
-          <div className="text-sm text-muted-foreground/60 mt-1">Post your game request and get bids from verified gamers within minutes.</div>
-        </div>
-        <div className="flex items-center gap-3 shrink-0">
-          {!user && (
-            <Button variant="outline" size="sm" onClick={() => setLocation("/login")} className="text-xs border-primary/30 text-primary/80">
-              Log In
-            </Button>
-          )}
-          <Button
-            size="sm"
-            onClick={() => setLocation(user ? "/post-request" : "/signup")}
-            className="bg-primary text-white font-bold uppercase tracking-wider text-xs px-5 shadow-[0_0_22px_rgba(168,85,247,0.35)] hover:shadow-[0_0_32px_rgba(168,85,247,0.5)] transition-shadow"
-          >
-            <Zap className="h-3.5 w-3.5 mr-1.5" />
-            {user ? "Post a Request" : "Get Started Free"}
-          </Button>
-        </div>
-      </div>
 
       {/* Trust strip */}
       <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-2.5 pb-2">
@@ -1161,6 +1150,9 @@ export default function Browse() {
           </div>
         )}
       </div>
+
+      {/* ── How it works ── */}
+      <HowItWorksSection />
 
       {/* ── Content ── */}
       {isLoading ? (
