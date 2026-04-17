@@ -1,0 +1,53 @@
+Perform a complete end-to-end test of ALL Phase 1 features on Gamerbuddy and fix any issues found.
+
+Phase 1 Features to Test (must all be working perfectly):
+
+1. **Core Hiring Flow**
+   - Post a new 1-on-1 hiring request
+   - Browse requests with filters (level, nation, gender, etc.)
+   - Place a bid
+   - Accept a bid and start session
+   - Complete session + both sides submit reviews
+
+2. **Account Linking & Verification**
+   - Link Steam, Epic, PlayStation, Xbox, Nintendo Switch accounts
+   - Show connected accounts on profile and bid cards
+   - Enforce that users must link at least one account to post requests or place bids
+   - Display connected accounts clearly with icons/checkmarks
+
+3. **Payments & Escrow (Razorpay Test Mode)**
+   - Deposit into Hiring Wallet (min $10.75)
+   - Money moves to escrow when session accepted
+   - After session + reviews: 90% to gamer's Earnings Wallet, 10% to platform owner
+   - Gift button works with same split
+   - UPI withdrawal simulation for Indian users
+   - Bank transfer note for international users
+   - Transaction history shows clear breakdown
+
+4. **Community Tab**
+   - Post suggestions, like/dislike, comment with emojis/GIFs
+   - No external links allowed
+   - Nationality flags and timestamps on comments
+
+5. **Safety & Anti-Backdoor Protections**
+   - Warnings against off-platform deals appear at right moments
+   - AI Assistant correctly warns users and directs them to stay on platform
+   - Report button works
+
+6. **Other Phase 1 Features**
+   - Dual wallets (Hiring Wallet non-withdrawable, Earnings Wallet)
+   - Trust Factor and Verified badge
+   - Simplified Social tab → directly to Superr.bio
+   - "How it Works" section placed correctly above filters
+   - No bulk hiring or tournaments visible in Phase 1
+
+Instructions:
+- Test the full user journey from signup → link accounts → post request → bid → session → payment → withdrawal.
+- Fix any bugs, broken flows, UI issues, or missing features automatically.
+- Make sure everything works in both dark and light themes.
+- Update AI Assistant with current Phase 1 status.
+
+After testing and fixing everything, give a clear summary:
+"✅ Full Phase 1 end-to-end test completed. All features working: [list key ones]. Issues found and fixed: [details]."
+
+Run the complete test now.

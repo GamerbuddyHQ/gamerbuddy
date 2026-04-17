@@ -59,13 +59,13 @@ const RESPONSES: Array<{ patterns: RegExp; reply: string }> = [
   /* ── WALLETS ── */
   {
     patterns: /wallet|deposit|withdraw|add.*fund|fund|money|pay(?:ment)?|transfer|balance/i,
-    reply: `Gamerbuddy runs on **two separate wallets** — here's the full breakdown 💸\n\n🔵 **Hiring Wallet** — fund this to hire gamers\n• Deposit via **Razorpay** (UPI, GPay, PhonePe, Paytm…) or **Stripe** (Visa, Mastercard, international cards)\n• Min deposit: **$10.75** | Max wallet balance: **$1,000**\n• **Cannot be withdrawn** — only spent on game sessions and tips\n\n🟢 **Earnings Wallet** — where your gamer income lands\n• Earn 90% of every accepted bid when the session completes\n• Withdraw once your balance hits **$100 (≈ ₹8,300)**\n\n🔒 The moment a bid is accepted, funds lock into **escrow** — safe, untouchable by either side until the session is done.\n\nHead to **[Wallets](/wallets)** or **[Add Funds](/add-funds)** to get started! 💪`,
+    reply: `Gamerbuddy runs on **two separate wallets** — here's the full breakdown 💸\n\n🔵 **Hiring Wallet** — fund this to hire gamers\n• Deposit via **Razorpay** (UPI, GPay, PhonePe, Paytm, cards…)\n• Min deposit: **$10.75** | Max wallet balance: **$1,000**\n• **Cannot be withdrawn** — only spent on game sessions and tips\n\n🟢 **Earnings Wallet** — where your gamer income lands\n• Earn **90%** of every accepted bid when the session completes (10% platform fee)\n• Withdraw once your balance hits **$100**\n• 🇮🇳 **Indian users** → withdraw via **UPI** (GPay, PhonePe, Paytm, etc.) — instant!\n• 🌍 **International users** → withdraw via **Bank Transfer** (3–5 business days)\n\n🔒 The moment a bid is accepted, funds lock into **escrow** — safe and untouchable by either side until the session is done.\n\nHead to **[Wallets](/wallets)** or **[Add Funds](/add-funds)** to get started! 💪`,
   },
 
   /* ── PLATFORM FEE ── */
   {
     patterns: /fee|commission|percent|10%|platform.*cut|how much.*charge/i,
-    reply: `Totally fair question — here's exactly how it works 💰\n\nWe take a **flat 10% platform fee** on every completed Quest or Job. That's it — no hidden charges.\n\n• **Hirer pays** the full agreed bid amount\n• **90% goes to the gamer** straight into their Earnings Wallet 💸\n• **10% goes to Gamerbuddy** — covers platform costs, payment protection & support\n\n**Example:** Gamer bids $20 → Hirer pays $20 → Gamer receives **$18.00** ✅\n\n⚠️ **Tips/Gifts** after sessions are **fee-free** — 100% goes directly to the gamer.\n\nNo surprises, no fine print. Just a flat 10% every time a session completes.`,
+    reply: `Totally fair question — here's exactly how it works 💰\n\nWe take a **flat 10% platform fee** on every completed session and every tip. That's it — no hidden charges.\n\n• **Hirer pays** the full agreed bid amount\n• **90% goes to the gamer** straight into their Earnings Wallet 💸\n• **10% goes to Gamerbuddy** — covers platform costs, payment protection & support\n\n**Example:** Gamer bids $20 → Hirer pays $20 → Gamer receives **$18.00** ✅\n\n**Tips/Gifts** follow the same 90/10 split — 90% goes to the gamer, 10% platform fee.\n\n**Example tip:** Hirer tips $10 → Gamer receives **$9.00** 🎁\n\nNo surprises, no fine print. Flat 10% on sessions and tips.`,
   },
 
   /* ── ESCROW ── */
@@ -167,7 +167,7 @@ const RESPONSES: Array<{ patterns: RegExp; reply: string }> = [
   /* ── TIP / GIFT ── */
   {
     patterns: /tip|gift|bonus.*pay|extra.*pay|send.*extra|thank.*gamer/i,
-    reply: `**Tips & Gifts** 🎁 — available in Phase 1!\n\nAfter a session completes (or enters the review stage), hirers can tap the **Gift / Tip** button to send a bonus directly to the gamer.\n\n• 💸 Tips go **100% to the gamer** — **no platform fee** on tips\n• Deducted from your **Hiring Wallet**\n• Shows as a separate "Tip Received" entry in the gamer's transaction history\n\nA great way to reward a gamer who went above and beyond! Find the Gift button on the **Request Detail** page once the session wraps.`,
+    reply: `**Tips & Gifts** 🎁 — available in Phase 1!\n\nAfter a session completes (or enters the review stage), hirers can tap the **Gift / Tip** button to send a bonus directly to the gamer.\n\n• 💸 **90% of the tip goes to the gamer** — same 10% platform fee applies\n• **Example:** Tip $10 → Gamer receives **$9.00** ✅\n• Deducted from your **Hiring Wallet**\n• Shows as a separate "Tip Received" entry in the gamer's transaction history\n\nA great way to reward a gamer who went above and beyond! Find the Gift button on the **Request Detail** page once the session wraps.`,
   },
 
   /* ── VOICE CHAT / DISCORD ── */

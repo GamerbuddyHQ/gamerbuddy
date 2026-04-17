@@ -30,6 +30,7 @@ import Roadmap from "@/pages/roadmap";
 import ComingSoon from "@/pages/coming-soon";
 import AdminSecurity from "@/pages/admin-security";
 import PlatformEarnings from "@/pages/platform-earnings";
+import SocialsPage from "@/pages/socials";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -88,6 +89,7 @@ function Router() {
         <Route path="/my-tournaments">{() => <ComingSoon feature="Tournaments" phase={3} description="Manage your tournament entries and brackets here. Coming in Phase 3!" />}</Route>
         <Route path="/tournaments/:id">{() => <ComingSoon feature="Tournaments" phase={3} description="Tournament details and bracket view. Coming in Phase 3!" />}</Route>
 
+        <Route path="/socials" component={SocialsPage} />
         <Route path="/roadmap" component={Roadmap} />
 
         <Route path="/admin/security"><AdminRoute component={AdminSecurity} /></Route>
