@@ -11,9 +11,10 @@ import { Label } from "@/components/ui/label";
 import {
   ArrowLeft, Lock, CheckCircle2, Zap, ShieldCheck,
   Smartphone, AlertCircle, RefreshCw, Wifi, BadgeCheck,
-  Wallet, Loader2,
+  Wallet, Loader2, Globe,
 } from "lucide-react";
 import { apiFetch } from "@/lib/bids-api";
+import { useAuth } from "@/lib/auth";
 
 // ─── Razorpay global type ────────────────────────────────────────────────────
 interface RazorpayOptions {
@@ -422,6 +423,9 @@ function TrustBadges() {
 export default function AddFunds() {
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
+  const { user } = useAuth();
+
+  const isInternational = user?.country !== "India";
 
   const [step, setStep] = useState<Step>("amount");
   const [amount, setAmount] = useState<string>("");
@@ -543,6 +547,31 @@ export default function AddFunds() {
           </div>
         )}
       </div>
+
+      {/* International payment notice */}
+      {isInternational && (
+        <div
+          className="rounded-2xl border p-4 flex gap-3.5 items-start"
+          style={{
+            borderColor: "rgba(34,211,238,0.25)",
+            background: "rgba(34,211,238,0.05)",
+          }}
+        >
+          <Globe className="h-5 w-5 shrink-0 mt-0.5" style={{ color: "rgb(103,232,249)" }} />
+          <div className="space-y-1">
+            <p className="text-sm font-semibold" style={{ color: "rgb(103,232,249)" }}>
+              A note for international users
+            </p>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              We're currently powered by{" "}
+              <span className="text-foreground font-medium">Razorpay</span>, which works great for UPI and Indian cards.
+              We know <span className="text-foreground font-medium">Stripe</span> is popular globally and we plan to add it —
+              plus more payment options — <span className="text-foreground font-medium">within the next 6 months</span>.
+              Thank you for supporting Gamerbuddy! 🙏
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Amount card */}
       <div className="rounded-2xl border border-border/60 p-5 space-y-5 bg-card/80">
