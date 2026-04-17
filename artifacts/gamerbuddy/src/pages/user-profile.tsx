@@ -351,7 +351,11 @@ export default function UserProfilePage() {
               {/* Name + verified */}
               <div className="flex items-center gap-2 flex-wrap">
                 <h1 className="text-xl sm:text-2xl font-black text-white truncate">{profile.name}</h1>
-                <VerifiedBadge idVerified={profile.idVerified} variant="compact" />
+                <VerifiedBadge
+                  idVerified={profile.idVerified}
+                  underReview={!profile.idVerified && gamingAccounts.length > 0}
+                  variant="compact"
+                />
               </div>
               {/* Rank + rating */}
               <div className="flex items-center gap-2 mt-1 flex-wrap">

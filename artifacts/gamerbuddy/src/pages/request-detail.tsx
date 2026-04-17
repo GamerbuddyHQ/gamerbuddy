@@ -17,6 +17,7 @@ import {
   useSendGift,
   useReportUser,
   useUserProfile,
+  useMyGamingAccounts,
   STREAMING_PLATFORM_META,
   GAMING_PLATFORM_META,
   type Bid,
@@ -1219,7 +1220,11 @@ function BidCard({
                 <Link href={`/users/${bid.bidderId}`} className="font-extrabold text-white text-base leading-none hover:text-primary transition-colors">
                   {bid.bidderName}
                 </Link>
-                <VerifiedBadge idVerified={bid.bidderIdVerified ?? false} variant="compact" />
+                <VerifiedBadge
+                  idVerified={bid.bidderIdVerified ?? false}
+                  underReview={!(bid.bidderIdVerified ?? false) && (bid.bidderGamingAccounts?.length ?? 0) > 0}
+                  variant="compact"
+                />
                 {isMe && <span className="text-xs text-secondary font-semibold">(You)</span>}
                 {isAccepted && bid.discordUsername && (
                   <span className="text-xs text-indigo-400 font-semibold flex items-center gap-1">
@@ -1988,6 +1993,8 @@ export default function RequestDetail() {
   const [, setLocation] = useLocation();
   const { user } = useAuth();
   const { toast } = useToast();
+  const { data: myGamingAccounts = [] } = useMyGamingAccounts();
+  const hasGamingAccount = myGamingAccounts.length > 0;
   const [showReportHirer, setShowReportHirer] = useState(false);
   const [reviewDismissed, setReviewDismissed] = useState(false);
 
@@ -2010,7 +2017,7 @@ export default function RequestDetail() {
   type ExpFilter = "all" | "beginner" | "decent" | "best" | "expert";
   const [bidSort, setBidSort] = useState<BidSortKey>("newest");
   const [bidExpFilter, setBidExpFilter] = useState<ExpFilter>("all");
-  const [bidVerifiedOnly, setBidVerifiedOnly] = useState(true);
+  const [bidVerifiedOnly, setBidVerifiedOnly] = useState(false);
   const [bidHasStreaming, setBidHasStreaming] = useState(false);
   const [bidHasQuest, setBidHasQuest] = useState(false);
 
@@ -2028,7 +2035,7 @@ export default function RequestDetail() {
   const acceptedBid = bids.find((b: Bid) => b.status === "accepted");
   const isGamer = myBid?.status === "accepted";
   const sessionStarted = !!(request as any)?.startedAt;
-  const canBid = user && user.idVerified && !isHirer && !myBid && request?.status === "open";
+  const canBid = user && !isHirer && !myBid && request?.status === "open";
   const canReview = user && (request?.status === "completed" || request?.status === "awaiting_reviews") && (isHirer || isGamer);
   const mustReview = user && request?.status === "awaiting_reviews" && (isHirer || isGamer);
 
@@ -2467,7 +2474,7 @@ export default function RequestDetail() {
         </Card>
       )}
 
-      {user && !user.idVerified && !isHirer && !myBid && request?.status === "open" && (
+      {user && !isHirer && !myBid && !hasGamingAccount && request?.status === "open" && (
         <Card className="border-amber-500/30 bg-amber-500/5 overflow-hidden">
           <CardContent className="pt-5 pb-5">
             <div className="flex flex-col sm:flex-row items-center gap-4">
@@ -2475,13 +2482,13 @@ export default function RequestDetail() {
                 <ShieldAlert className="h-5 w-5 text-amber-400" />
               </div>
               <div className="flex-1 text-center sm:text-left">
-                <p className="font-bold text-amber-300 text-sm">Almost verified — hang tight! 🎮</p>
+                <p className="font-bold text-amber-300 text-sm">Link a gaming account to place bids 🎮</p>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  Verification is almost complete! Once you're verified (usually 7–15 days), you'll be able to place bids and squad up with skilled gamers.
+                  Connect at least one gaming account (Steam, Epic, PSN, Xbox, or Nintendo Switch) on your profile. We review within 24 hours — keep your profile Public during review.
                 </p>
               </div>
               <Button size="sm" variant="outline" asChild className="border-amber-500/40 text-amber-300 hover:bg-amber-500/10 shrink-0 text-xs">
-                <Link href="/profile">Check Verification Status</Link>
+                <Link href="/profile#gaming-management">Link Account</Link>
               </Button>
             </div>
           </CardContent>

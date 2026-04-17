@@ -671,7 +671,7 @@ function GamingAccountsSection() {
             <span className="text-sm font-extrabold text-foreground uppercase tracking-widest">Gaming Accounts</span>
           </div>
           <p className="text-[11px] text-muted-foreground/60">
-            Link your gaming profiles — required to post requests or place bids
+            Connect at least one account to post requests or place bids — reviewed within 24 hours
           </p>
         </div>
         {connectedCount > 0 && (
@@ -717,7 +717,7 @@ function GamingAccountsSection() {
           >
             <span className="text-amber-400 mt-0.5 shrink-0">⚠️</span>
             <p className="text-[11px] text-amber-300/80 leading-relaxed">
-              <strong className="text-amber-300">Account required.</strong> You must link at least one gaming account to post requests or place bids.
+              <strong className="text-amber-300">Link an account to unlock posting & bidding.</strong> Connect Steam, Epic, PSN, Xbox, or Nintendo Switch below. We'll review within <strong className="text-amber-300">24 hours</strong>. Keep your profile Public during review so we can confirm real gaming activity.
             </p>
           </div>
         )}
@@ -1608,17 +1608,17 @@ function ShopSection({
   );
 }
 
-function VerificationSection({ idVerified, onJustVerified }: { idVerified: boolean; onJustVerified?: () => void }) {
+function VerificationSection({ idVerified, gamingAccountCount, onJustVerified }: { idVerified: boolean; gamingAccountCount: number; onJustVerified?: () => void }) {
   const verifyId = useVerifyId();
   const { toast } = useToast();
 
   const handleVerify = () => {
     verifyId.mutate(null, {
       onSuccess: () => {
-        toast({ title: "🎉 Identity Verified!", description: "Your Verified badge is now active on your profile and bids." });
+        toast({ title: "🎉 Review Requested!", description: "We'll check your gaming account within 24 hours. Keep it Public during review!" });
         onJustVerified?.();
       },
-      onError: (err: any) => toast({ title: "Verification Failed", description: err?.error || "Please try again.", variant: "destructive" }),
+      onError: (err: any) => toast({ title: "Request Failed", description: err?.error || "Please try again.", variant: "destructive" }),
     });
   };
 
@@ -1634,11 +1634,32 @@ function VerificationSection({ idVerified, onJustVerified }: { idVerified: boole
             </div>
             <div>
               <div className="flex items-center gap-2.5 mb-1">
-                <span className="text-sm font-extrabold text-foreground uppercase tracking-wide">Identity Verified</span>
+                <span className="text-sm font-extrabold text-foreground uppercase tracking-wide">Gaming Account Verified</span>
                 <VerifiedBadge idVerified={true} variant="compact" />
               </div>
               <p className="text-xs text-emerald-300/70 leading-relaxed">
-                Your Verified badge is now active on your profile, bids, and request listings.
+                Your green Verified badge is active on your profile and all your bids — hirers trust you more.
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (gamingAccountCount === 0) {
+    return (
+      <Card className="border-muted/40 bg-card/60 overflow-hidden">
+        <div className="h-0.5 w-full" style={{ background: "linear-gradient(90deg, #a855f7, #22d3ee)" }} />
+        <CardContent className="pt-5 pb-5">
+          <div className="flex items-center gap-3.5">
+            <div className="h-10 w-10 rounded-xl bg-primary/10 border border-primary/25 flex items-center justify-center shrink-0">
+              <Gamepad2 className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <div className="text-sm font-bold text-foreground mb-0.5">Link a Gaming Account to Start</div>
+              <p className="text-xs text-muted-foreground/70 leading-relaxed">
+                Connect at least one account (Steam, Epic, PSN, Xbox, or Nintendo Switch) above. We review within <span className="text-foreground font-semibold">24 hours</span> and award your Verified badge once confirmed.
               </p>
             </div>
           </div>
@@ -1658,9 +1679,9 @@ function VerificationSection({ idVerified, onJustVerified }: { idVerified: boole
               <ShieldAlert className="h-5 w-5 text-amber-400" />
             </div>
             <div>
-              <div className="text-sm font-bold text-foreground mb-0.5">Verification In Progress</div>
+              <div className="text-sm font-bold text-foreground mb-0.5">Gaming Account Under Review</div>
               <p className="text-xs text-muted-foreground/70">
-                Earn the <span className="text-emerald-400 font-semibold">Verified</span> badge — trusted by more hirers, more bids accepted.
+                You can <span className="text-emerald-400 font-semibold">post requests and place bids now</span> — your Verified badge appears once we confirm your account.
               </p>
             </div>
           </div>
@@ -1677,22 +1698,22 @@ function VerificationSection({ idVerified, onJustVerified }: { idVerified: boole
             }}
           >
             {verifyId.isPending ? (
-              <><div className="h-3 w-3 rounded-full border-2 border-white/30 border-t-white animate-spin mr-1.5" />Verifying…</>
+              <><div className="h-3 w-3 rounded-full border-2 border-white/30 border-t-white animate-spin mr-1.5" />Requesting…</>
             ) : (
-              <><ShieldCheck className="h-3.5 w-3.5 mr-1.5" />Submit for Review</>
+              <><ShieldCheck className="h-3.5 w-3.5 mr-1.5" />Request Review</>
             )}
           </Button>
         </div>
-        {/* Timeline info */}
+        {/* 24h + keep public tip */}
         <div
           className="flex items-start gap-2.5 rounded-lg px-3 py-2.5"
           style={{ background: "rgba(168,85,247,0.07)", border: "1px solid rgba(168,85,247,0.18)" }}
         >
           <Clock className="h-3.5 w-3.5 text-primary shrink-0 mt-0.5" />
           <div>
-            <span className="text-[11px] font-semibold text-foreground">Verification helps keep Gamerbuddy safe</span>
+            <span className="text-[11px] font-semibold text-foreground">Review takes up to 24 hours</span>
             <p className="text-[10px] text-muted-foreground leading-relaxed mt-0.5">
-              It usually takes 7–15 days. You can browse all open requests freely while we review your details. <span className="text-primary/90 font-semibold">Placing bids, posting requests, and hiring all unlock once verified.</span>
+              For faster verification, keep your linked gaming profile <span className="text-primary/90 font-semibold">Public</span> during review so we can confirm real gaming activity. You can make it private again once verified.
             </p>
           </div>
         </div>
@@ -1951,7 +1972,11 @@ export default function Profile() {
       />
 
       {/* ── VERIFICATION CARD ── */}
-      <VerificationSection idVerified={user.idVerified} onJustVerified={handleJustVerified} />
+      <VerificationSection
+        idVerified={user.idVerified}
+        gamingAccountCount={profile?.gamingAccounts?.length ?? 0}
+        onJustVerified={handleJustVerified}
+      />
 
       {/* Quest — Phase 3 Coming Soon */}
       <div

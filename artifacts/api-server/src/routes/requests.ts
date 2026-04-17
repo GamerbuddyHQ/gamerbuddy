@@ -483,11 +483,6 @@ router.post("/requests/:id/bids", requireAuth, bidLimiter, validate(PlaceBidSche
     return;
   }
 
-  if (!user.idVerified) {
-    res.status(403).json({ error: "Only verified users can place bids. Complete your account verification to start bidding." });
-    return;
-  }
-
   const [bidderGamingCheck] = await db
     .select({ userId: gamingAccountsTable.userId })
     .from(gamingAccountsTable)

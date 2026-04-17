@@ -1,11 +1,12 @@
 import React from "react";
-import { Clock } from "lucide-react";
+import { Clock, Search } from "lucide-react";
 
 type VerifiedBadgeVariant = "full" | "icon" | "compact";
 
 interface VerifiedBadgeProps {
   idVerified: boolean;
   pending?: boolean;
+  underReview?: boolean;
   variant?: VerifiedBadgeVariant;
   className?: string;
 }
@@ -67,6 +68,7 @@ function CheckIconLg({ className }: { className?: string }) {
 export function VerifiedBadge({
   idVerified,
   pending = false,
+  underReview = false,
   variant = "full",
   className = "",
 }: VerifiedBadgeProps) {
@@ -151,6 +153,54 @@ export function VerifiedBadge({
             animation: "shimmer 3s ease-in-out infinite",
           }}
         />
+      </span>
+    );
+  }
+
+  if (underReview && !idVerified) {
+    if (variant === "icon") {
+      return (
+        <span title="Gaming account under review — within 24 hours" className={`inline-flex items-center justify-center ${className}`} style={{ color: "#facc15" }}>
+          <Search className="h-4 w-4" />
+        </span>
+      );
+    }
+
+    if (variant === "compact") {
+      return (
+        <span
+          title="Gaming account under review — we'll verify within 24 hours"
+          className={`inline-flex items-center gap-1 shrink-0 ${className}`}
+          style={{
+            background: "rgba(234,179,8,0.10)",
+            border: "1px solid rgba(234,179,8,0.35)",
+            borderRadius: "999px",
+            padding: "2px 7px 2px 5px",
+          }}
+        >
+          <Search className="h-3 w-3 shrink-0" style={{ color: "#facc15" }} />
+          <span style={{ fontSize: "9px", fontWeight: 800, letterSpacing: "0.08em", textTransform: "uppercase", color: "#facc15", lineHeight: 1 }}>
+            Under Review
+          </span>
+        </span>
+      );
+    }
+
+    return (
+      <span
+        title="Gaming account under review — we'll verify within 24 hours"
+        className={`inline-flex items-center gap-1.5 shrink-0 ${className}`}
+        style={{
+          background: "rgba(234,179,8,0.10)",
+          border: "1px solid rgba(234,179,8,0.35)",
+          borderRadius: "999px",
+          padding: "4px 12px 4px 8px",
+        }}
+      >
+        <Search className="h-3.5 w-3.5 shrink-0" style={{ color: "#facc15" }} />
+        <span style={{ fontSize: "11px", fontWeight: 800, letterSpacing: "0.07em", textTransform: "uppercase", color: "#facc15" }}>
+          Under Review
+        </span>
       </span>
     );
   }
