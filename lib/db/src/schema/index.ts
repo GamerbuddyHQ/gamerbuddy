@@ -11,6 +11,7 @@ export * from "./profile_purchases";
 export * from "./quest_entries";
 export * from "./notifications";
 export * from "./streaming_accounts";
+export * from "./gaming_accounts";
 export * from "./profile_votes";
 export * from "./suggestions";
 export * from "./tournaments";

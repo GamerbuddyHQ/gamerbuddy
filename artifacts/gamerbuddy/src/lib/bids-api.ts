@@ -66,6 +66,22 @@ export type StreamingAccount = {
   username: string;
 };
 
+export type GamingAccount = {
+  platform: string;
+  username: string;
+};
+
+export const GAMING_PLATFORM_META: Record<
+  string,
+  { label: string; color: string; bg: string; border: string; emoji: string; profileUrl?: string }
+> = {
+  steam:  { label: "Steam",             color: "#1b2838", bg: "rgba(102,192,244,0.12)", border: "rgba(102,192,244,0.3)",  emoji: "🖥️",  profileUrl: "https://steamcommunity.com/id/{username}" },
+  epic:   { label: "Epic Games",        color: "#2f2f2f", bg: "rgba(255,255,255,0.08)", border: "rgba(255,255,255,0.22)", emoji: "🎮" },
+  psn:    { label: "PlayStation",       color: "#003087", bg: "rgba(0,70,174,0.14)",   border: "rgba(0,70,174,0.35)",    emoji: "🎮",  profileUrl: "https://my.playstation.com/profile/{username}" },
+  xbox:   { label: "Xbox",             color: "#107c10", bg: "rgba(16,124,16,0.14)",  border: "rgba(16,124,16,0.35)",   emoji: "🎮",  profileUrl: "https://www.xbox.com/en-US/play/user/{username}" },
+  switch: { label: "Nintendo Switch",  color: "#e4000f", bg: "rgba(228,0,15,0.12)",   border: "rgba(228,0,15,0.30)",    emoji: "🎮" },
+};
+
 export const STREAMING_PLATFORM_META: Record<
   string,
   { label: string; color: string; bg: string; border: string; emoji: string; urlTemplate: string }
@@ -101,6 +117,7 @@ export type UserProfile = {
   purchasedItems: string[];
   questEntries: QuestEntry[];
   streamingAccounts?: StreamingAccount[];
+  gamingAccounts?: GamingAccount[];
 };
 
 export async function apiFetch<T = any>(url: string, opts?: RequestInit): Promise<T> {
@@ -375,6 +392,37 @@ export function useDisconnectStreaming() {
       apiFetch(`${BASE}/streaming-accounts/${platform}`, { method: "DELETE" }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["streaming-accounts"] });
+      qc.invalidateQueries({ queryKey: ["user-profile"] });
+    },
+  });
+}
+
+export function useMyGamingAccounts() {
+  return useQuery<GamingAccount[]>({
+    queryKey: ["gaming-accounts"],
+    queryFn: () => apiFetch(`${BASE}/gaming-accounts`),
+  });
+}
+
+export function useConnectGaming() {
+  const qc = useQueryClient();
+  return useMutation<any, any, { platform: string; username: string }>({
+    mutationFn: (body) =>
+      apiFetch(`${BASE}/gaming-accounts`, { method: "POST", body: JSON.stringify(body) }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["gaming-accounts"] });
+      qc.invalidateQueries({ queryKey: ["user-profile"] });
+    },
+  });
+}
+
+export function useDisconnectGaming() {
+  const qc = useQueryClient();
+  return useMutation<any, any, string>({
+    mutationFn: (platform) =>
+      apiFetch(`${BASE}/gaming-accounts/${platform}`, { method: "DELETE" }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["gaming-accounts"] });
       qc.invalidateQueries({ queryKey: ["user-profile"] });
     },
   });

@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import multer from "multer";
-import { db, usersTable, reviewsTable, gameRequestsTable, bidsTable, profilePurchasesTable, questEntriesTable, streamingAccountsTable, profileVotesTable, STREAMING_PLATFORMS } from "@workspace/db";
+import { db, usersTable, reviewsTable, gameRequestsTable, bidsTable, profilePurchasesTable, questEntriesTable, streamingAccountsTable, gamingAccountsTable, profileVotesTable, STREAMING_PLATFORMS, GAMING_PLATFORMS } from "@workspace/db";
 import { eq, desc, and, sql, or } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
 import { recalculateTrustFactor } from "../trust-factor";
@@ -54,6 +54,7 @@ router.get("/users/:id", async (req, res): Promise<void> => {
     purchases,
     questEntries,
     streamingAccounts,
+    gamingAccounts,
     gamerSessionsTotal,
     hirerSessionsTotal,
     beginnerReviews,
@@ -97,6 +98,10 @@ router.get("/users/:id", async (req, res): Promise<void> => {
     db.select({ platform: streamingAccountsTable.platform, username: streamingAccountsTable.username })
     .from(streamingAccountsTable)
     .where(eq(streamingAccountsTable.userId, userId)),
+
+    db.select({ platform: gamingAccountsTable.platform, username: gamingAccountsTable.username })
+    .from(gamingAccountsTable)
+    .where(eq(gamingAccountsTable.userId, userId)),
 
     // Total completed sessions as gamer (untruncated count)
     db.select({ count: sql<string>`COUNT(*)::int` })
@@ -146,6 +151,7 @@ router.get("/users/:id", async (req, res): Promise<void> => {
     purchasedItems: purchases.map((p) => p.itemId),
     questEntries: questEntries.map((q) => ({ ...q, createdAt: q.createdAt.toISOString() })),
     streamingAccounts,
+    gamingAccounts,
   });
 });
 
@@ -335,6 +341,51 @@ router.delete("/streaming-accounts/:platform", requireAuth, async (req, res): Pr
 
   await db.delete(streamingAccountsTable)
     .where(and(eq(streamingAccountsTable.userId, user.id), eq(streamingAccountsTable.platform, platform)));
+
+  res.json({ success: true });
+});
+
+/* ── GAMING ACCOUNTS ─────────────────────────────────────────────── */
+
+router.get("/gaming-accounts", requireAuth, async (req, res): Promise<void> => {
+  const user = req.user!;
+  const accounts = await db.select({ platform: gamingAccountsTable.platform, username: gamingAccountsTable.username })
+    .from(gamingAccountsTable)
+    .where(eq(gamingAccountsTable.userId, user.id));
+  res.json(accounts);
+});
+
+router.post("/gaming-accounts", requireAuth, async (req, res): Promise<void> => {
+  const user = req.user!;
+  const { platform, username } = req.body as { platform?: string; username?: string };
+
+  if (!platform || !(GAMING_PLATFORMS as readonly string[]).includes(platform)) {
+    res.status(400).json({ error: "Invalid platform", valid: GAMING_PLATFORMS });
+    return;
+  }
+  if (!username || username.trim().length < 1 || username.trim().length > 64) {
+    res.status(400).json({ error: "Username/ID must be 1–64 characters" });
+    return;
+  }
+
+  await db.delete(gamingAccountsTable)
+    .where(and(eq(gamingAccountsTable.userId, user.id), eq(gamingAccountsTable.platform, platform)));
+
+  const [account] = await db.insert(gamingAccountsTable).values({
+    userId: user.id,
+    platform,
+    username: username.trim(),
+  }).returning({ platform: gamingAccountsTable.platform, username: gamingAccountsTable.username });
+
+  res.status(201).json({ success: true, account });
+});
+
+router.delete("/gaming-accounts/:platform", requireAuth, async (req, res): Promise<void> => {
+  const user = req.user!;
+  const { platform } = req.params;
+
+  await db.delete(gamingAccountsTable)
+    .where(and(eq(gamingAccountsTable.userId, user.id), eq(gamingAccountsTable.platform, platform)));
 
   res.json({ success: true });
 });

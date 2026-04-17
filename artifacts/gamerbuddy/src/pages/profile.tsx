@@ -7,8 +7,9 @@ import {
   useUserProfile, useUpdateProfile, useShopItems, usePurchaseItem,
   useMyQuestEntries, useAddQuestEntry, useDeleteQuestEntry, useVerifyId,
   useMyStreamingAccounts, useConnectStreaming, useDisconnectStreaming,
+  useMyGamingAccounts, useConnectGaming, useDisconnectGaming,
   useProfileVotes,
-  STREAMING_PLATFORM_META,
+  STREAMING_PLATFORM_META, GAMING_PLATFORM_META,
   type ShopItem, type QuestEntry,
 } from "@/lib/bids-api";
 import { VerifiedBadge } from "@/components/verified-badge";
@@ -38,7 +39,8 @@ function computeProfileCompletion(profile: any): {
     { label: "Write your bio",             pts: 30, done: !!(profile?.bio?.trim()),                                         section: "bio",       icon: "✍️" },
     { label: "Set your region / country",  pts: 15, done: !!(profile?.country && profile.country !== "any"),                section: "basics",    icon: "🌍" },
     { label: "Set your gender",            pts: 15, done: !!(profile?.gender && profile.gender !== "any"),                  section: "basics",    icon: "👤" },
-    { label: "Connect a gaming account",   pts: 40, done: (profile?.streamingAccounts?.length ?? 0) > 0,                   section: "streaming", icon: "🔗" },
+    { label: "Connect a gaming account",   pts: 40, done: (profile?.gamingAccounts?.length ?? 0) > 0,                    section: "gaming",    icon: "🎮" },
+    { label: "Connect a streaming channel", pts: 20, done: (profile?.streamingAccounts?.length ?? 0) > 0,                  section: "streaming", icon: "📡" },
   ];
   const score = items.filter((i) => i.done).reduce((a, i) => a + i.pts, 0);
   return { score, items };
@@ -581,6 +583,282 @@ function GamerRulesCard() {
         </div>
       )}
     </Card>
+  );
+}
+
+/* ── GAMING ACCOUNTS SECTION ────────────────────────────────── */
+const GAMING_PLATFORM_ORDER = ["steam", "epic", "psn", "xbox", "switch"] as const;
+
+const GAMING_PLATFORM_SVG: Record<string, React.ReactNode> = {
+  steam: (
+    <svg viewBox="0 0 24 24" fill="currentColor" className="w-full h-full">
+      <path d="M11.979 0C5.678 0 .511 4.86.022 11.037l6.432 2.658c.545-.371 1.203-.59 1.912-.59.063 0 .125.004.188.006l2.861-4.142V8.91c0-2.495 2.028-4.52 4.524-4.52 2.495 0 4.522 2.027 4.522 4.52 0 2.494-2.028 4.519-4.522 4.519h-.105l-4.076 2.911c0 .052.004.105.004.159 0 1.875-1.515 3.396-3.39 3.396-1.635 0-3.016-1.173-3.331-2.727L.436 15.27C1.862 20.307 6.486 24 11.979 24c6.627 0 11.999-5.373 11.999-12S18.606 0 11.979 0zM7.54 18.21l-1.473-.61c.262.543.714.999 1.314 1.25 1.297.539 2.793-.076 3.332-1.375.263-.63.264-1.319.005-1.949s-.75-1.121-1.377-1.383c-.624-.26-1.29-.249-1.878-.03l1.523.63c.956.4 1.409 1.5 1.009 2.455-.397.957-1.497 1.41-2.454 1.012H7.54zm11.415-9.303c0-1.662-1.353-3.015-3.015-3.015-1.665 0-3.015 1.353-3.015 3.015 0 1.665 1.35 3.015 3.015 3.015 1.662 0 3.015-1.35 3.015-3.015zm-5.273-.005c0-1.252 1.013-2.266 2.265-2.266 1.249 0 2.266 1.014 2.266 2.266 0 1.251-1.017 2.265-2.266 2.265-1.252 0-2.265-1.014-2.265-2.265z" />
+    </svg>
+  ),
+  epic: (
+    <svg viewBox="0 0 24 24" fill="currentColor" className="w-full h-full">
+      <path d="M3 2v20l9-4.5L21 22V2H3zm2 2h14v14.764l-7-3.5-7 3.5V4z" />
+    </svg>
+  ),
+  psn: (
+    <svg viewBox="0 0 24 24" fill="currentColor" className="w-full h-full">
+      <path d="M8.985 2.596v17.548l3.915 1.261V6.688c0-.69.304-1.151.794-.991.636.181.76.814.76 1.505v5.601c2.556 1.191 4.51-.128 4.51-3.844 0-3.682-1.249-5.423-4.8-6.56-1.095-.33-3.067-.745-5.179-.804M0 18.719c2.886.998 5.817 1.583 8.22 1.744l.003-2.431-6.473-2.096V12.16l6.473 2.005V11.7L2.15 9.747v-3.45L8.22 8.267V5.945C5.237 5.48 2.07 5.015 0 5.787v12.932zm14.655-3.793c-1.696.094-3.475-.202-4.757-.69l-.016 2.466c1.24.506 3.462.733 5.22.608 2.306-.16 4.103-1.086 4.103-3.855 0-2.872-2.16-3.437-4.496-4.066-1.299-.328-1.711-.627-1.711-1.254 0-.635.46-1.062 1.605-1.061 1.177.001 2.368.364 3.517.735l.016-2.415c-.949-.38-2.266-.735-3.555-.74-2.32-.01-4.35.981-4.35 3.67 0 2.594 1.793 3.266 3.963 3.866 1.404.378 2.27.7 2.27 1.488.001.737-.619 1.189-1.814 1.248" />
+    </svg>
+  ),
+  xbox: (
+    <svg viewBox="0 0 24 24" fill="currentColor" className="w-full h-full">
+      <path d="M4.102 7.512a9.78 9.78 0 0 1 1.81-2.223s-1.119-1.27-2.694-.344a9.818 9.818 0 0 0-1.6 8.134C2.503 10.762 3.171 8.967 4.102 7.512zm15.798 0c.93 1.455 1.6 3.25 2.482 5.567a9.818 9.818 0 0 0-1.6-8.134c-1.575-.926-2.694.344-2.694.344a9.78 9.78 0 0 1 1.81 2.223zM12 3.993S9.872 2.05 7.227 3.71C7.227 3.71 9.03 4.46 12 7.9c2.97-3.44 4.773-4.19 4.773-4.19C14.128 2.05 12 3.993 12 3.993zM3.804 15.31C5.15 18.608 8.327 21 12 21s6.85-2.392 8.196-5.69C18.658 12.086 15.397 8.4 12 5.14c-3.396 3.26-6.657 6.946-8.196 10.17z" />
+    </svg>
+  ),
+  switch: (
+    <svg viewBox="0 0 24 24" fill="currentColor" className="w-full h-full">
+      <path d="M14.176 0H9.824A9.536 9.536 0 0 0 .288 9.537v4.926A9.536 9.536 0 0 0 9.824 24h4.352A9.536 9.536 0 0 0 23.712 14.463V9.537A9.536 9.536 0 0 0 14.176 0zm-4.352 21.408a6.946 6.946 0 0 1-6.936-6.945V9.537a6.946 6.946 0 0 1 6.936-6.945h.697v18.816zm5.353-9.024a1.536 1.536 0 1 1 0-3.073 1.536 1.536 0 0 1 0 3.073zm0-5.76a4.224 4.224 0 1 0 0 8.448 4.224 4.224 0 0 0 0-8.448z" />
+    </svg>
+  ),
+};
+
+function GamingAccountsSection() {
+  const { data: accounts = [], isLoading } = useMyGamingAccounts();
+  const connect = useConnectGaming();
+  const disconnect = useDisconnectGaming();
+  const { toast } = useToast();
+
+  const [connecting, setConnecting] = useState<string | null>(null);
+  const [inputVal, setInputVal] = useState("");
+
+  const connectedMap = Object.fromEntries(accounts.map((a) => [a.platform, a.username]));
+  const connectedCount = accounts.length;
+
+  async function handleConnect(platform: string) {
+    const handle = inputVal.trim();
+    if (!handle) return;
+    try {
+      await connect.mutateAsync({ platform, username: handle });
+      toast({ title: `${GAMING_PLATFORM_META[platform].label} linked!`, description: handle });
+      setConnecting(null);
+      setInputVal("");
+    } catch {
+      toast({ title: "Failed to link", description: "Please try again.", variant: "destructive" });
+    }
+  }
+
+  async function handleDisconnect(platform: string) {
+    try {
+      await disconnect.mutateAsync(platform);
+      toast({ title: `${GAMING_PLATFORM_META[platform].label} unlinked` });
+    } catch {
+      toast({ title: "Failed to unlink", variant: "destructive" });
+    }
+  }
+
+  return (
+    <div
+      id="gaming-management"
+      className="rounded-2xl border overflow-hidden"
+      style={{ borderColor: "rgba(34,211,238,0.2)", background: "rgba(10,8,20,0.6)" }}
+    >
+      {/* Header */}
+      <div className="px-5 pt-5 pb-4 flex items-center justify-between border-b" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
+        <div>
+          <div className="flex items-center gap-2 mb-0.5">
+            <Gamepad2 className="h-4 w-4 text-cyan-400" />
+            <span className="text-sm font-extrabold text-foreground uppercase tracking-widest">Gaming Accounts</span>
+          </div>
+          <p className="text-[11px] text-muted-foreground/60">
+            Link your gaming profiles — required to post requests or place bids
+          </p>
+        </div>
+        {connectedCount > 0 && (
+          <div className="shrink-0 flex flex-col items-end gap-1">
+            <span
+              className="text-[11px] font-black px-3 py-1 rounded-full"
+              style={{ background: "rgba(34,211,238,0.12)", border: "1px solid rgba(34,211,238,0.3)", color: "#22d3ee" }}
+            >
+              {connectedCount} / {GAMING_PLATFORM_ORDER.length} Linked
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* Connected quick-links strip */}
+      {connectedCount > 0 && (
+        <div className="px-5 py-3 flex flex-wrap gap-2 border-b" style={{ borderColor: "rgba(255,255,255,0.05)", background: "rgba(255,255,255,0.02)" }}>
+          {accounts.map((a) => {
+            const meta = GAMING_PLATFORM_META[a.platform];
+            if (!meta) return null;
+            const url = meta.profileUrl?.replace("{username}", a.username);
+            const el = (
+              <span className="inline-flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-full text-[11px] font-bold"
+                style={{ background: meta.bg, border: `1px solid ${meta.border}`, color: "#e2e8f0" }}>
+                <span className="w-3.5 h-3.5 shrink-0" style={{ color: "#22d3ee" }}>{GAMING_PLATFORM_SVG[a.platform]}</span>
+                <span style={{ color: "#22d3ee" }}>{meta.label}</span>
+                <span className="opacity-60 font-mono text-[10px]">{a.username}</span>
+              </span>
+            );
+            return url
+              ? <a key={a.platform} href={url} target="_blank" rel="noopener noreferrer" className="hover:brightness-125 hover:scale-105 transition-all">{el}</a>
+              : <div key={a.platform}>{el}</div>;
+          })}
+        </div>
+      )}
+
+      {/* Platform cards */}
+      <div className="p-4 space-y-2.5">
+        {connectedCount === 0 && !isLoading && (
+          <div
+            className="rounded-xl border px-4 py-3 mb-2 flex items-start gap-2.5"
+            style={{ borderColor: "rgba(234,179,8,0.3)", background: "rgba(234,179,8,0.06)" }}
+          >
+            <span className="text-amber-400 mt-0.5 shrink-0">⚠️</span>
+            <p className="text-[11px] text-amber-300/80 leading-relaxed">
+              <strong className="text-amber-300">Account required.</strong> You must link at least one gaming account to post requests or place bids.
+            </p>
+          </div>
+        )}
+
+        {isLoading ? (
+          <div className="space-y-2.5">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-[72px] rounded-2xl animate-pulse" style={{ background: "rgba(255,255,255,0.04)" }} />
+            ))}
+          </div>
+        ) : (
+          GAMING_PLATFORM_ORDER.map((platform) => {
+            const meta = GAMING_PLATFORM_META[platform];
+            const username = connectedMap[platform];
+            const isConnected = !!username;
+            const isThisConnecting = connecting === platform;
+
+            return (
+              <div key={platform}>
+                <div
+                  className="rounded-2xl overflow-hidden transition-all duration-200"
+                  style={{
+                    border: isConnected
+                      ? "1px solid rgba(34,211,238,0.35)"
+                      : isThisConnecting
+                        ? "1px solid rgba(255,255,255,0.12)"
+                        : "1px solid rgba(255,255,255,0.06)",
+                    background: isConnected
+                      ? "linear-gradient(135deg, rgba(34,211,238,0.08), rgba(0,0,0,0.4))"
+                      : "rgba(255,255,255,0.03)",
+                    boxShadow: isConnected ? "0 0 20px -8px rgba(34,211,238,0.4)" : "none",
+                  }}
+                >
+                  <div className="flex items-center gap-0">
+                    {/* Icon panel */}
+                    <div
+                      className="w-16 h-16 shrink-0 flex items-center justify-center relative overflow-hidden"
+                      style={{
+                        background: isConnected ? "rgba(34,211,238,0.12)" : "rgba(255,255,255,0.04)",
+                        borderRight: `1px solid ${isConnected ? "rgba(34,211,238,0.25)" : "rgba(255,255,255,0.06)"}`,
+                      }}
+                    >
+                      <div
+                        className="relative w-7 h-7"
+                        style={{ color: isConnected ? "#22d3ee" : "rgba(255,255,255,0.2)" }}
+                      >
+                        {GAMING_PLATFORM_SVG[platform]}
+                      </div>
+                    </div>
+
+                    {/* Info */}
+                    <div className="flex-1 min-w-0 px-4 py-3">
+                      <div
+                        className="text-sm font-extrabold leading-tight"
+                        style={{ color: isConnected ? "#22d3ee" : "rgba(255,255,255,0.65)" }}
+                      >
+                        {meta.label}
+                      </div>
+                      {isConnected ? (
+                        <div className="flex items-center gap-1.5 mt-1">
+                          <span className="inline-block w-1.5 h-1.5 rounded-full shrink-0 animate-pulse" style={{ background: "#4ade80" }} />
+                          <span className="text-[11px] font-mono font-semibold text-green-300 truncate">
+                            {username}
+                          </span>
+                        </div>
+                      ) : (
+                        <div className="text-[11px] text-muted-foreground/40 mt-0.5">
+                          {isThisConnecting ? "Enter your username/ID below ↓" : "Not linked"}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* CTA */}
+                    <div className="pr-3 shrink-0">
+                      {isConnected ? (
+                        <button
+                          onClick={() => handleDisconnect(platform)}
+                          disabled={disconnect.isPending}
+                          className="text-[10px] font-bold uppercase tracking-widest px-2.5 py-1.5 rounded-xl transition-all hover:bg-red-500/15 hover:text-red-300 disabled:opacity-40"
+                          style={{ color: "rgba(248,113,113,0.6)", border: "1px solid rgba(248,113,113,0.18)" }}
+                        >
+                          {disconnect.isPending ? "···" : "Remove"}
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => { setConnecting(isThisConnecting ? null : platform); setInputVal(""); }}
+                          className="text-[11px] font-extrabold uppercase tracking-wide px-3.5 py-1.5 rounded-xl transition-all hover:brightness-110 active:scale-95"
+                          style={{
+                            background: isThisConnecting ? "rgba(255,255,255,0.06)" : "rgba(34,211,238,0.15)",
+                            border: "1px solid rgba(34,211,238,0.3)",
+                            color: "#22d3ee",
+                          }}
+                        >
+                          {isThisConnecting ? "Cancel" : "Link"}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Input expansion */}
+                  {isThisConnecting && (
+                    <div
+                      className="px-4 pb-3 pt-0 border-t"
+                      style={{ borderColor: "rgba(34,211,238,0.12)", background: "rgba(34,211,238,0.04)" }}
+                    >
+                      <p className="text-[10px] text-cyan-300/50 mt-2 mb-1.5">
+                        {platform === "steam" && "Enter your Steam username or custom URL ID (e.g. gabe_newell)"}
+                        {platform === "epic" && "Enter your Epic Games display name"}
+                        {platform === "psn" && "Enter your PlayStation Network ID (PSN ID)"}
+                        {platform === "xbox" && "Enter your Xbox Gamertag"}
+                        {platform === "switch" && "Enter your Nintendo Switch Friend Code or display name"}
+                      </p>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          placeholder={
+                            platform === "psn" ? "PSN ID" :
+                            platform === "switch" ? "Friend Code or Name" :
+                            platform === "xbox" ? "Gamertag" :
+                            "Username"
+                          }
+                          value={inputVal}
+                          onChange={(e) => setInputVal(e.target.value)}
+                          onKeyDown={(e) => e.key === "Enter" && handleConnect(platform)}
+                          maxLength={64}
+                          className="flex-1 h-9 px-3 text-sm rounded-xl border bg-background/60 focus:outline-none focus:border-cyan-400/50 text-foreground placeholder:text-muted-foreground/40"
+                          style={{ borderColor: "rgba(34,211,238,0.25)" }}
+                          autoFocus
+                        />
+                        <button
+                          onClick={() => handleConnect(platform)}
+                          disabled={!inputVal.trim() || connect.isPending}
+                          className="h-9 px-4 text-xs font-bold rounded-xl transition-all hover:brightness-110 active:scale-95 disabled:opacity-40"
+                          style={{ background: "rgba(34,211,238,0.2)", border: "1px solid rgba(34,211,238,0.4)", color: "#22d3ee" }}
+                        >
+                          {connect.isPending ? "···" : "Save"}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+    </div>
   );
 }
 
@@ -1476,6 +1754,7 @@ export default function Profile() {
     const id =
       section === "bio"       ? "profile-bio-section"
       : section === "quest"   ? "profile-quest-section"
+      : section === "gaming"  ? "profile-gaming-section"
       : section === "streaming" ? "profile-streaming-section"
       : "profile-basics-section";
     setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" }), 200);
@@ -1993,6 +2272,10 @@ export default function Profile() {
           </div>
         </div>
       </div>
+
+      {/* CONNECTED GAMING ACCOUNTS */}
+      <span id="profile-gaming-section" className="scroll-mt-24" />
+      <GamingAccountsSection />
 
       {/* CONNECTED STREAMING PLATFORMS */}
       <span id="profile-streaming-section" className="scroll-mt-24" />

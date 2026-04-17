@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { db, gameRequestsTable, walletsTable, usersTable, bidsTable, reviewsTable, streamingAccountsTable, questEntriesTable } from "@workspace/db";
+import { db, gameRequestsTable, walletsTable, usersTable, bidsTable, reviewsTable, streamingAccountsTable, gamingAccountsTable, questEntriesTable } from "@workspace/db";
 import { eq, desc, and, sql, inArray, gte } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
 import { createNotification, sendEmailNotification } from "../notifications-helper";
@@ -186,6 +186,19 @@ router.post("/requests", requireAuth, validate(PostRequestSchema), async (req, r
   if (!wallet || wallet.hiringBalance < MIN_HIRING_BALANCE) {
     res.status(400).json({
       error: `You need at least ${MIN_HIRING_BALANCE} in your hiring wallet to post a request`,
+    });
+    return;
+  }
+
+  const [gamingAccountCheck] = await db
+    .select({ userId: gamingAccountsTable.userId })
+    .from(gamingAccountsTable)
+    .where(eq(gamingAccountsTable.userId, user.id))
+    .limit(1);
+
+  if (!gamingAccountCheck) {
+    res.status(403).json({
+      error: "You must link at least one gaming account (Steam, Epic, PlayStation, Xbox, or Nintendo Switch) before posting a request.",
     });
     return;
   }
@@ -399,6 +412,19 @@ router.post("/requests/:id/bids", requireAuth, bidLimiter, validate(PlaceBidSche
 
   if (!user.idVerified) {
     res.status(403).json({ error: "Only verified users can place bids. Complete your account verification to start bidding." });
+    return;
+  }
+
+  const [bidderGamingCheck] = await db
+    .select({ userId: gamingAccountsTable.userId })
+    .from(gamingAccountsTable)
+    .where(eq(gamingAccountsTable.userId, user.id))
+    .limit(1);
+
+  if (!bidderGamingCheck) {
+    res.status(403).json({
+      error: "You must link at least one gaming account (Steam, Epic, PlayStation, Xbox, or Nintendo Switch) to place bids.",
+    });
     return;
   }
 

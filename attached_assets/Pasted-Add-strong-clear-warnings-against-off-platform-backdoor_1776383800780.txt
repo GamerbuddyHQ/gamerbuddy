@@ -1,0 +1,31 @@
+Add strong, clear warnings against off-platform / backdoor deals with specific emphasis on security risks.
+
+Implementation:
+
+1. **Prominent Warnings** (show at critical moments):
+   - When viewing bids or during session approval, show this warning:
+     "⚠️ Never agree to pay or make any deal outside Gamerbuddy. Anyone asking you to pay directly via UPI, bank transfer, or outside the platform could be a hacker or untrustworthy person trying to scam you. Always complete payments through our secure escrow system on the website."
+
+   - When a hired gamer is bidding or chatting:
+     "⚠️ Do not offer or ask the hirer to pay you directly or move the deal off-platform. This is against our rules and could be used by scammers. Staying on Gamerbuddy with escrow is the safest option for everyone."
+
+2. **During Account Creation / Verification**:
+   - Add a clear rule that users must accept:
+     "Going through the Gamerbuddy website with escrow protection is the best and safest choice for both hirers and hired gamers. Avoiding off-platform payments protects you from hackers and scammers."
+
+3. **AI Assistant Update**:
+   - When users ask about payment methods, direct deals, or "can we pay outside?", the AI must reply:
+     "For your safety, all payments must go through Gamerbuddy's secure escrow system. Never pay or accept money directly outside the platform. The person suggesting this could be a hacker or untrustworthy individual. Staying on the website is always the best and safest choice for everyone involved."
+
+4. **Report & Enforcement**:
+   - Add "Attempted off-platform payment / backdoor deal" as a quick report reason.
+   - Any user caught encouraging off-platform deals should face warning or suspension.
+
+5. **General Rule Text** (add to Rules / About section):
+   "We strongly recommend completing all transactions through Gamerbuddy. Going through the website with escrow is the safest option. Anyone asking you to skip the platform and pay directly may be trying to scam you."
+
+Make all warnings firm, clear, and protective — emphasize that off-platform deals expose users to hackers and untrustworthy people, while the platform is the safest choice.
+
+Apply these changes everywhere: request creation, bidding, chat, session flow, and AI responses.
+
+Test the warnings by simulating a hiring flow.
