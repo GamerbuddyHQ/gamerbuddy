@@ -242,7 +242,11 @@ router.post("/wallets/deposit", requireAuth, async (req, res): Promise<void> => 
 // ── POST /wallets/withdraw ──────────────────────────────────────────────────
 router.post("/wallets/withdraw", requireAuth, async (req, res): Promise<void> => {
   const user = req.user!;
-  const { amount } = req.body as { amount?: number };
+  const { amount, withdrawalMethod, details } = req.body as {
+    amount?: number;
+    withdrawalMethod?: string;
+    details?: string;
+  };
 
   if (amount == null || typeof amount !== "number") {
     res.status(400).json({ error: "Amount is required" });
@@ -253,6 +257,31 @@ router.post("/wallets/withdraw", requireAuth, async (req, res): Promise<void> =>
 
   if (rounded <= 0) {
     res.status(400).json({ error: "Withdrawal amount must be positive" });
+    return;
+  }
+
+  // Determine expected withdrawal method based on country
+  const isIndian = user.country === "India";
+  const expectedMethod = isIndian ? "upi" : "bank_transfer";
+  const effectiveMethod = withdrawalMethod ?? expectedMethod;
+
+  // Validate the method matches the user's country
+  if (isIndian && effectiveMethod !== "upi") {
+    res.status(400).json({ error: "Indian accounts must withdraw via UPI." });
+    return;
+  }
+  if (!isIndian && effectiveMethod === "upi") {
+    res.status(400).json({ error: "UPI is only available for Indian accounts. Please use bank transfer." });
+    return;
+  }
+
+  // Validate details
+  if (effectiveMethod === "upi" && !details?.trim()) {
+    res.status(400).json({ error: "Please enter your UPI ID (e.g. yourname@upi)" });
+    return;
+  }
+  if (effectiveMethod === "bank_transfer" && !details?.trim()) {
+    res.status(400).json({ error: "Please enter your bank account details" });
     return;
   }
 
@@ -297,10 +326,20 @@ router.post("/wallets/withdraw", requireAuth, async (req, res): Promise<void> =>
     return;
   }
 
-  await recordTransaction(user.id, "earnings", "withdrawal", rounded, `Withdrew $${rounded.toFixed(2)} from Earnings Wallet`);
+  const methodLabel = effectiveMethod === "upi"
+    ? `UPI (${details?.trim()})`
+    : `Bank Transfer (${details?.trim()})`;
 
-  req.log.info({ userId: user.id, amount: rounded }, "Withdrawal from earnings wallet");
-  res.json(formatWallets(updated));
+  await recordTransaction(
+    user.id,
+    "earnings",
+    "withdrawal",
+    rounded,
+    `Withdrew $${rounded.toFixed(2)} via ${methodLabel}`,
+  );
+
+  req.log.info({ userId: user.id, amount: rounded, method: effectiveMethod }, "Withdrawal from earnings wallet");
+  res.json({ ...formatWallets(updated), withdrawalMethod: effectiveMethod, details: details?.trim() });
 });
 
 export default router;

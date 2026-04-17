@@ -35,9 +35,12 @@ A full-stack gaming marketplace web app where users can hire other gamers to pla
 ## Key Features
 
 1. **Authentication**: Signup (name, email, password, phone, official ID upload) + Login with session cookies
-2. **Two Wallets**:
-   - Hiring Wallet: deposit only (min $10.75, max $1000) — used to post requests and escrow bids
-   - Earnings Wallet: withdraw only when balance >= $100
+2. **Three Wallets / Money Flow**:
+   - Hiring Wallet: deposit only (min $10.75, max $1000) — deposits via Razorpay (UPI/cards, Test Mode); used to post requests
+   - Escrow: when bid is accepted, the full bid amount is held in `gameRequests.escrowAmount` and shown as an "In Escrow" card
+   - Earnings Wallet: released on session completion — gamer gets 90%, platform gets 10%; withdrawal requires $100 min
+   - **Withdrawal routing**: Indian users (country="India") withdraw via UPI (UPI ID required); all others via Bank Transfer (account details required)
+   - **Platform Fee**: 10% collected on every session payout + every tip/gift; recorded in `platform_fees` table; visible at `/admin/platform-earnings`
 3. **Game Requests + Bidding**: Post requests → gamers bid → hirer accepts (escrow) → gamer starts → hirer approves → payout (90%/10% fee)
 4. **Session Flow**: open → bid accepted (Discord + escrow) → in_progress → gamer "Start Session" → hirer approves → completed → both review
 5. **Bulk Hiring**: Post a request for 5–100 gamers at once; request stays `open` while hirer accepts multiple bids (each held in escrow individually); hirer locks roster (or auto-locks when all slots filled) → `in_progress`; on completion all accepted gamers paid 90% of their individual bid; purple badge + slot progress bar in browse/detail views

@@ -3,10 +3,9 @@ import { Link } from "wouter";
 import {
   useGetWallets,
   getGetWalletsQueryKey,
-  useWithdrawEarningsWallet,
   getGetDashboardSummaryQueryKey,
 } from "@workspace/api-client-react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,6 +14,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { apiFetch } from "@/lib/bids-api";
+import { useAuth } from "@/lib/auth";
 import {
   Wallet,
   ArrowUpFromLine,
@@ -31,6 +31,10 @@ import {
   Gamepad2,
   Receipt,
   Lock,
+  Smartphone,
+  Building2,
+  Globe,
+  Info,
 } from "lucide-react";
 
 const MIN_DEPOSIT = 10.75;
@@ -72,15 +76,42 @@ function useTransactions() {
 export default function WalletsPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { user } = useAuth();
+
   const [withdrawAmount, setWithdrawAmount] = useState<string>("");
+  const [withdrawDetails, setWithdrawDetails] = useState<string>("");
   const [txFilter, setTxFilter] = useState<"all" | "hiring" | "earnings">("all");
+
+  const isIndian = user?.country === "India";
+  const withdrawalMethod = isIndian ? "upi" : "bank_transfer";
 
   const { data: wallets, isLoading, isError } = useGetWallets({
     query: { queryKey: getGetWalletsQueryKey() },
   });
   const { data: transactions, isLoading: txLoading } = useTransactions();
 
-  const withdrawMutation = useWithdrawEarningsWallet();
+  const withdrawMutation = useMutation({
+    mutationFn: (body: { amount: number; withdrawalMethod: string; details: string }) =>
+      apiFetch("/api/wallets/withdraw", {
+        method: "POST",
+        body: JSON.stringify(body),
+      }),
+    onSuccess: (updated: any) => {
+      queryClient.setQueryData(getGetWalletsQueryKey(), updated);
+      queryClient.invalidateQueries({ queryKey: getGetDashboardSummaryQueryKey() });
+      queryClient.invalidateQueries({ queryKey: ["wallet-transactions"] });
+      setWithdrawAmount("");
+      setWithdrawDetails("");
+      const methodLabel = withdrawalMethod === "upi" ? "UPI" : "Bank Transfer";
+      toast({
+        title: "Withdrawal Initiated 🎉",
+        description: `$${parseFloat(withdrawAmount).toFixed(2)} is on its way via ${methodLabel}!`,
+      });
+    },
+    onError: (err: any) => {
+      toast({ title: "Withdrawal Failed", description: err?.error || "Unknown error", variant: "destructive" });
+    },
+  });
 
   const handleWithdraw = () => {
     const amount = parseFloat(withdrawAmount);
@@ -96,22 +127,14 @@ export default function WalletsPage() {
       toast({ title: "Insufficient Balance", description: "Amount exceeds your earnings balance.", variant: "destructive" });
       return;
     }
-
-    withdrawMutation.mutate(
-      { data: { amount } },
-      {
-        onSuccess: (updated) => {
-          queryClient.setQueryData(getGetWalletsQueryKey(), updated);
-          queryClient.invalidateQueries({ queryKey: getGetDashboardSummaryQueryKey() });
-          queryClient.invalidateQueries({ queryKey: ["wallet-transactions"] });
-          setWithdrawAmount("");
-          toast({ title: "Withdrawal Initiated", description: `$${amount.toFixed(2)} will arrive in your account shortly.` });
-        },
-        onError: (err: any) => {
-          toast({ title: "Withdrawal Failed", description: err?.error || "Unknown error", variant: "destructive" });
-        },
-      }
-    );
+    if (!withdrawDetails.trim()) {
+      const hint = withdrawalMethod === "upi"
+        ? "Please enter your UPI ID (e.g. name@upi)"
+        : "Please enter your bank account details";
+      toast({ title: "Details Required", description: hint, variant: "destructive" });
+      return;
+    }
+    withdrawMutation.mutate({ amount, withdrawalMethod, details: withdrawDetails });
   };
 
   if (isLoading) {
@@ -240,6 +263,27 @@ export default function WalletsPage() {
               </div>
             )}
 
+            {/* Withdrawal method info banner — always visible */}
+            <div
+              className="flex items-start gap-2.5 rounded-lg p-3 text-xs border"
+              style={{
+                background: isIndian ? "rgba(34,197,94,0.04)" : "rgba(34,211,238,0.04)",
+                borderColor: isIndian ? "rgba(34,197,94,0.20)" : "rgba(34,211,238,0.20)",
+                color: isIndian ? "rgb(134,239,172)" : "rgb(103,232,249)",
+              }}
+            >
+              {isIndian
+                ? <Smartphone className="h-4 w-4 shrink-0 mt-0.5 text-green-400" />
+                : <Building2 className="h-4 w-4 shrink-0 mt-0.5 text-cyan-400" />
+              }
+              <span>
+                {isIndian
+                  ? <><strong className="text-green-300">Indian users</strong> withdraw instantly via <strong className="text-green-300">UPI</strong> (GPay, PhonePe, Paytm, etc.).</>
+                  : <><strong className="text-cyan-300">International users</strong> withdraw via <strong className="text-cyan-300">Bank Transfer</strong>. Processing time: 3–5 business days.</>
+                }
+              </span>
+            </div>
+
             {wallets.canWithdraw && (
               <div className="space-y-3">
                 <Label className="text-xs uppercase tracking-widest text-muted-foreground">Withdraw Amount</Label>
@@ -257,21 +301,53 @@ export default function WalletsPage() {
                       onChange={(e) => setWithdrawAmount(e.target.value)}
                     />
                   </div>
-                  <Button
-                    onClick={handleWithdraw}
-                    disabled={withdrawMutation.isPending || !withdrawAmount}
-                    variant="outline"
-                    className="border-secondary text-secondary hover:bg-secondary hover:text-black font-bold uppercase h-10 sm:h-auto"
+                  <button
+                    className="text-xs text-secondary hover:text-secondary/70 transition-colors whitespace-nowrap"
+                    onClick={() => setWithdrawAmount(String(wallets.earningsBalance))}
                   >
-                    {withdrawMutation.isPending ? "Sending..." : "Withdraw"}
-                  </Button>
+                    Max (${wallets.earningsBalance.toFixed(2)})
+                  </button>
                 </div>
-                <button
-                  className="text-xs text-muted-foreground hover:text-foreground transition-colors"
-                  onClick={() => setWithdrawAmount(String(wallets.earningsBalance))}
+
+                {/* UPI / Bank Transfer details field */}
+                <div className="space-y-1.5">
+                  <Label className="text-xs uppercase tracking-widest text-muted-foreground">
+                    {isIndian ? "UPI ID" : "Bank Account Details"}
+                  </Label>
+                  <Input
+                    placeholder={isIndian ? "e.g. yourname@okaxis" : "Account No · IFSC · Bank Name"}
+                    className="bg-background"
+                    value={withdrawDetails}
+                    onChange={(e) => setWithdrawDetails(e.target.value)}
+                  />
+                  <p className="text-[10px] text-muted-foreground/50">
+                    {isIndian
+                      ? "Enter the UPI ID to receive funds instantly. Double-check before submitting."
+                      : "Enter your bank account number, IFSC/SWIFT code, and bank name."
+                    }
+                  </p>
+                </div>
+
+                <Button
+                  onClick={handleWithdraw}
+                  disabled={withdrawMutation.isPending || !withdrawAmount || !withdrawDetails}
+                  variant="outline"
+                  className="w-full border-secondary text-secondary hover:bg-secondary hover:text-black font-bold uppercase tracking-wider"
                 >
-                  Withdraw all (${wallets.earningsBalance.toFixed(2)})
-                </button>
+                  {withdrawMutation.isPending ? (
+                    <span className="flex items-center gap-2">Processing…</span>
+                  ) : isIndian ? (
+                    <span className="flex items-center gap-2">
+                      <Smartphone className="h-4 w-4" />
+                      Withdraw via UPI
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-2">
+                      <Building2 className="h-4 w-4" />
+                      Request Bank Transfer
+                    </span>
+                  )}
+                </Button>
               </div>
             )}
 
