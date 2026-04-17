@@ -1,7 +1,7 @@
 import { Router, type IRouter } from "express";
 import multer from "multer";
 import { db, usersTable, reviewsTable, gameRequestsTable, bidsTable, profilePurchasesTable, questEntriesTable, streamingAccountsTable, gamingAccountsTable, profileVotesTable, STREAMING_PLATFORMS, GAMING_PLATFORMS } from "@workspace/db";
-import { eq, desc, and, sql, or } from "drizzle-orm";
+import { eq, desc, and, ne, sql, or } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
 import { recalculateTrustFactor } from "../trust-factor";
 import { validate, sanitize, UpdateProfileSchema, PostQuestSchema } from "../lib/validate";
@@ -365,6 +365,25 @@ router.post("/gaming-accounts", requireAuth, async (req, res): Promise<void> => 
   }
   if (!username || username.trim().length < 1 || username.trim().length > 64) {
     res.status(400).json({ error: "Username/ID must be 1–64 characters" });
+    return;
+  }
+
+  const trimmedUsername = username.trim().toLowerCase();
+
+  const [duplicate] = await db
+    .select({ userId: gamingAccountsTable.userId })
+    .from(gamingAccountsTable)
+    .where(
+      and(
+        eq(gamingAccountsTable.platform, platform),
+        eq(sql`LOWER(${gamingAccountsTable.username})`, trimmedUsername),
+        ne(gamingAccountsTable.userId, user.id),
+      ),
+    )
+    .limit(1);
+
+  if (duplicate) {
+    res.status(409).json({ error: "This gaming account is already linked to another profile." });
     return;
   }
 

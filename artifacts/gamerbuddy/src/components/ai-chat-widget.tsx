@@ -35,7 +35,7 @@ const RESPONSES: Array<{ patterns: RegExp; reply: string }> = [
   /* ── BIDDING / GETTING HIRED ── */
   {
     patterns: /bid|apply.*request|get hired|become.*gamer|earn.*money|hired|place.*bid/i,
-    reply: `Love the hustle! 💰 Before you start placing bids, there's one thing you need first:\n\n🔒 **Verification is required to place bids.** It keeps the platform safe for everyone — and it's a one-time thing!\n\n**How to get verified (takes 7–15 days):**\n1. Go to your **Profile** page\n2. Confirm your **Email** address\n3. Verify your **Phone number**\n4. Submit your **ID** for review\n5. Our team reviews and approves you 🎉\n\n**Once verified, here's how bidding works:**\n1. Head to **Browse Requests** and find sessions you can dominate\n2. Click **"Place Bid"** — set your price and write a pitch\n3. Hirer accepts → chat opens, coordinate via **private chat** and Discord\n4. Gamer clicks "Start Session" → hirer approves → you play\n5. Session completes → both drop a **review** (mandatory)\n6. 90% of the bid lands in your **Earnings Wallet** ✅\n\n💡 **You keep 90%** of every bid — we take a flat 10%. Verified badge + solid pitch = way more W's. Let's go!`,
+    reply: `Love the hustle! 💰 To start placing bids, you need one thing first:\n\n🎮 **Link at least one gaming account** — Steam, Epic, PSN, Xbox, or Nintendo Switch. That's it!\n\n**How to unlock bidding (takes ~24 hours):**\n1. Go to your **[Profile](/profile)** page\n2. Scroll to **"Gaming Accounts"**\n3. Click any platform, enter your username, hit **Connect**\n4. Keep that gaming profile **Public** during review — it helps us verify real activity\n5. We review within **24 hours** → you get your badge! 🎉\n\n**Once unlocked, here's how bidding works:**\n1. Head to **[Browse Requests](/browse)** and find sessions you can dominate\n2. Click **"Place Bid"** — set your price and write a pitch\n3. Hirer accepts → private chat opens, coordinate via **chat** and Discord\n4. Gamer clicks "Start Session" → hirer approves → you play\n5. Session completes → both drop a **review** (mandatory)\n6. 90% of the bid lands in your **Earnings Wallet** ✅\n\n💡 **You keep 90%** of every bid — we take a flat 10%. Linked accounts + solid pitch = way more W's. Let's go!`,
   },
 
   /* ── PRIVATE CHAT / MESSAGING ── */
@@ -137,13 +137,13 @@ const RESPONSES: Array<{ patterns: RegExp; reply: string }> = [
   /* ── PHASE 2+ FEATURES — accurate catch-all ── */
   {
     patterns: /community.*suggest|suggest.*feature|feature.*request|emoji.*comment|gif.*comment|light.*dark|dark.*light|theme.*toggle|multi.*lang|language.*select/i,
-    reply: `That feature is part of our phased rollout — coming soon! 🔜\n\nWe're building Gamerbuddy phase by phase to make sure everything works perfectly before unlocking more.\n\n**Right now — Phase 1 (Live):**\n✅ Core hiring: post, bid, accept, play, review\n✅ Dual wallets, 10% platform fee, escrow\n✅ Verification (7–15 days)\n✅ Private chat + Gift/Tip button\n✅ Nation & Gender filtering\n✅ Points shop & profile customisation\n✅ Streaming channel linking (Twitch, YouTube, Kick, Facebook Gaming, TikTok Live)\n✅ Superr.bio as single social hub\n\n**Phase 2 (Coming Soon):**\n🔜 Console linking — PlayStation, Xbox, Nintendo Switch\n🔜 PC linking — Steam & Epic Games\n🔜 Mobile linking — Google Play & iOS Game Center\n🔜 Bulk Hiring (2–100 gamers)\n🔜 Tournaments with filters\n🔜 Quest System & Promoted Games\n\n**Phase 3 (Future):**\n🔵 Full mobile app enhancements\n🔵 Game dev & publisher partnerships\n🔵 Advanced AI, stronger security\n\nCheck the **[Roadmap](/roadmap)** for all the details! 🗺️`,
+    reply: `That feature is part of our phased rollout — coming soon! 🔜\n\nWe're building Gamerbuddy phase by phase to make sure everything works perfectly before unlocking more.\n\n**Right now — Phase 1 (Live):**\n✅ Core hiring: post, bid, accept, play, review\n✅ Dual wallets, 10% platform fee, escrow\n✅ Gaming account linking — Steam, Epic, PSN, Xbox, Nintendo Switch (24-hour review)\n✅ Private chat + Gift/Tip button\n✅ Nation & Gender filtering\n✅ Points shop & profile customisation\n✅ Streaming channel linking (Twitch, YouTube, Kick, Facebook Gaming, TikTok Live)\n✅ Superr.bio as single social hub\n\n**Phase 2 (Coming Soon):**\n🔜 Mobile account linking — Google Play & iOS Game Center\n🔜 Bulk Hiring (2–100 gamers)\n🔜 Tournaments with filters\n🔜 Quest System & Promoted Games\n\n**Phase 3 (Future):**\n🔵 Full mobile app enhancements\n🔵 Game dev & publisher partnerships\n🔵 Advanced AI, stronger security\n\nCheck the **[Roadmap](/roadmap)** for all the details! 🗺️`,
   },
 
   /* ── ROADMAP / FUTURE FEATURES ── */
   {
     patterns: /roadmap|future.*feature|what.*coming|upcoming|phase|whats.*next|next.*update|coming.*soon|release|plan.*feature|feature.*plan/i,
-    reply: `**Gamerbuddy Roadmap** 🗺️\n\n✅ **Phase 1 — Core Hiring (Live Now)**\n• Post requests, bid (verified only), accept, play, review\n• Dual wallets — Hiring + Earnings, fully separated\n• 10% platform fee + escrow protection\n• Verification badge (7–15 days)\n• Private chat per session\n• Gift / Tip button after sessions\n• Nation & Gender filtering\n• Points shop & profile customisation\n• Safety rules — all sessions played in-game, no external tools required\n• Streaming channel linking (Twitch, YouTube, Kick, Facebook Gaming, TikTok Live)\n• Superr.bio as the single social hub (Social tab in nav)\n\n🔜 **Phase 2 — Platform Expansion (Coming Soon)**\n• Console account linking — PlayStation Network, Xbox, Nintendo Switch\n• PC platform linking — Steam & Epic Games\n• Mobile account linking — Google Play & iOS Game Center\n• Bulk Hiring (2–100 gamers in one request)\n• Tournaments (with country/region/gender filters)\n• Quest System with bonus challenges\n• Promoted / Spotlight Games\n\n🔵 **Phase 3 — Future**\n• Full mobile app enhancements\n• Game developer & publisher partnerships\n• Advanced AI features\n• Stronger security & fraud detection\n• Community-driven platform improvements\n\nFull details on the **[Roadmap page](/roadmap)**! 🗺️`,
+    reply: `**Gamerbuddy Roadmap** 🗺️\n\n✅ **Phase 1 — Core Hiring (Live Now)**\n• Post requests, bid, accept, play, review\n• Dual wallets — Hiring + Earnings, fully separated\n• 10% platform fee + escrow protection\n• **Gaming account linking** — Steam, Epic, PSN, Xbox, Nintendo Switch (reviewed in 24 hours)\n• Private chat per session\n• Gift / Tip button after sessions\n• Nation & Gender filtering\n• Points shop & profile customisation\n• Safety rules — all sessions played in-game, no external tools required\n• Streaming channel linking (Twitch, YouTube, Kick, Facebook Gaming, TikTok Live)\n• Superr.bio as the single social hub (Social tab in nav)\n\n🔜 **Phase 2 — Expansion (Coming Soon)**\n• Mobile account linking — Google Play & iOS Game Center\n• Bulk Hiring (2–100 gamers in one request)\n• Tournaments (with country/region/gender filters)\n• Quest System with bonus challenges\n• Promoted / Spotlight Games\n\n🔵 **Phase 3 — Future**\n• Full mobile app enhancements\n• Game developer & publisher partnerships\n• Advanced AI features\n• Stronger security & fraud detection\n• Community-driven platform improvements\n\nFull details on the **[Roadmap page](/roadmap)**! 🗺️`,
   },
 
   /* ── COMMUNITY SUGGESTIONS — Phase 2 ── */
@@ -227,7 +227,7 @@ const RESPONSES: Array<{ patterns: RegExp; reply: string }> = [
   /* ── VERIFICATION / BADGE ── */
   {
     patterns: /verif|badge|trust.*factor|id.*check|how.*long.*verify|7.*day|15.*day|green.*tick/i,
-    reply: `Verification is your ticket to bidding on Gamerbuddy — here's everything! ✅\n\n**How to get verified (one-time, 7–15 days):**\n1. Go to your **Profile** page\n2. ✉️ Confirm your **Email** address\n3. 📱 Verify your **Phone number**\n4. 🪪 Submit your **ID** for review\n5. Our team reviews and approves — you'll see a celebration modal instantly! 🎉\n\n**While you wait, you can:**\n• Browse all open requests and scout the competition\n• **Start filling out your profile now** — bio, region, connected accounts\n• Top up your Hiring Wallet if you plan to hire\n\n**Once verified, you can:**\n• 💰 **Place bids** on any open session\n• 📋 **Post your own requests** to hire gamers\n• 🤝 **Accept bids** and start sessions\n• Show the green **✅ Verified badge** on your profile and every bid\n\n🌟 **Pro tip:** Right after verification, we'll prompt you to complete your profile — a full profile with bio, region, and connected gaming accounts gets you **significantly more bids and better matches**. Hirers trust complete profiles! Don't skip it. 🚀`,
+    reply: `Verification unlocks posting and bidding on Gamerbuddy — and it's fast! ✅\n\n**How to get verified (~24 hours):**\n1. Go to your **[Profile](/profile)** page\n2. Scroll to **"Gaming Accounts"**\n3. 🎮 Click any platform — **Steam, Epic, PSN, Xbox, or Nintendo Switch**\n4. Enter your username/gamertag and hit **Connect**\n5. Keep that gaming account **Public** so we can verify real activity\n6. We review within **24 hours** → Green badge appears! 🎉\n\n**What each badge means:**\n• 🟡 **Under Review** — account linked, review in progress (you can still bid!)\n• 🟢 **Verified** — fully reviewed, trust fully established\n• No badge — link a gaming account to get started\n\n**While you wait, you can:**\n• Browse all open requests and scout the competition\n• Fill out your profile — bio, region, linked accounts\n• Top up your Hiring Wallet if you plan to hire\n\n**Once linked, you can:**\n• 💰 **Place bids** on any open session\n• 📋 **Post your own requests** to hire gamers\n• 🤝 **Accept bids** and start sessions\n\n🌟 **Pro tip:** A full profile with bio, region, and connected accounts gets you **significantly more bids**. Hirers trust complete profiles! 🚀`,
   },
 
   /* ── PROFILE COMPLETION ── */
@@ -257,7 +257,7 @@ const RESPONSES: Array<{ patterns: RegExp; reply: string }> = [
   /* ── GENERAL HELP ── */
   {
     patterns: /help|support|question|how.*work|what.*is.*gamerbuddy|about.*platform/i,
-    reply: `**Gamerbuddy** is a global gaming marketplace — hire skilled gamers for co-op, ranked sessions, raids, and more across PC, PlayStation, Xbox, Switch, Steam Deck, and Mobile 🎮\n\n**Phase 1 is fully live — everything below is available right now:**\n• Core 1-on-1 hiring — post requests, get bids, hire gamers\n• Secure escrow payments + 10% platform fee\n• **Full account linking** — Steam, Epic, PlayStation, Xbox, Nintendo Switch\n• **Active Community tab** — post suggestions, vote on features, comment\n• Identity verification & Trust Factor system (7–15 days for badge)\n• Simplified social hub via Superr.bio\n• Safety rules & anti-backdoor protections built in\n• Private chat, gift/tip button, points & profile shop\n\n**Phase 2 (Coming Soon):** Tournaments, Bulk Hiring (3–100 gamers), Mobile account linking\n**Phase 3 (Future):** Advanced AI, Game Dev Partnerships, Stronger Security\n\nFor anything beyond what I can answer, click the **"Social"** tab to reach all our links. 🔗\n\nAsk me about any feature and I'll give you the full breakdown!`,
+    reply: `**Gamerbuddy** is a global gaming marketplace — hire skilled gamers for co-op, ranked sessions, raids, and more across PC, PlayStation, Xbox, Switch, Steam Deck, and Mobile 🎮\n\n**Phase 1 is fully live — everything below is available right now:**\n• Core 1-on-1 hiring — post requests, get bids, hire gamers\n• Secure escrow payments + 10% platform fee\n• **Gaming account linking** — Steam, Epic, PlayStation, Xbox, Nintendo Switch (reviewed in 24 hours)\n• **Active Community tab** — post suggestions, vote on features, comment\n• Trust Factor system & verification badges\n• Simplified social hub via Superr.bio\n• Safety rules & anti-backdoor protections built in\n• Private chat, gift/tip button, points & profile shop\n\n**Phase 2 (Coming Soon):** Tournaments, Bulk Hiring (3–100 gamers), Mobile account linking\n**Phase 3 (Future):** Advanced AI, Game Dev Partnerships, Stronger Security\n\nFor anything beyond what I can answer, click the **"Social"** tab to reach all our links. 🔗\n\nAsk me about any feature and I'll give you the full breakdown!`,
   },
 ];
 
@@ -312,18 +312,30 @@ export function AIChatWidget() {
     {
       id: 0,
       role: "assistant",
-      text: "Yo! 👾 I'm **Buddy** — your Gamerbuddy support homie, always online.\n\nWe're in **Phase 1** — core hiring is fully live! I know every feature inside out: posting requests, bidding (verified users only), wallets, escrow, platform fee, reviews, tips, private chat, and safety rules.\n\nTap a quick question below or just ask me anything. Let's get you that W! 🎮",
+      text: "Yo! 👾 I'm **Buddy** — your Gamerbuddy support homie, always online.\n\nWe're in **Phase 1** — core hiring is fully live! I know every feature inside out: posting requests, bidding (link a gaming account to unlock), wallets, escrow, platform fee, reviews, tips, private chat, and safety rules.\n\nTap a quick question below or just ask me anything. Let's get you that W! 🎮",
     },
   ]);
   const [input, setInput]   = useState("");
   const [typing, setTyping] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const widgetRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (open && !minimized) {
       bottomRef.current?.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages, open, minimized]);
+
+  useEffect(() => {
+    if (!open) return;
+    function handleClickOutside(e: MouseEvent) {
+      if (widgetRef.current && !widgetRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [open]);
 
   function sendMessage(text: string) {
     if (!text.trim()) return;
@@ -360,6 +372,7 @@ export function AIChatWidget() {
 
   return (
     <div
+      ref={widgetRef}
       className="fixed bottom-5 right-5 z-50 flex flex-col rounded-2xl shadow-2xl overflow-hidden transition-all duration-300"
       style={{
         width: "clamp(320px, 90vw, 390px)",

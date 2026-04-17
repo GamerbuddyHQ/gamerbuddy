@@ -643,8 +643,9 @@ function GamingAccountsSection() {
       toast({ title: `${GAMING_PLATFORM_META[platform].label} linked!`, description: handle });
       setConnecting(null);
       setInputVal("");
-    } catch {
-      toast({ title: "Failed to link", description: "Please try again.", variant: "destructive" });
+    } catch (err: any) {
+      const msg = err?.error || err?.message || "Please try again.";
+      toast({ title: "Failed to link", description: msg, variant: "destructive" });
     }
   }
 
