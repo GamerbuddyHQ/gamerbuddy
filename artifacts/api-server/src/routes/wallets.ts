@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
-import { db, walletsTable, walletTransactionsTable } from "@workspace/db";
-import { eq, desc, sql, and, gte } from "drizzle-orm";
+import { db, walletsTable, walletTransactionsTable, gameRequestsTable, platformFeesTable } from "@workspace/db";
+import { eq, desc, sql, and, gte, sum } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
 
 const router: IRouter = Router();
@@ -21,10 +21,12 @@ export function round2(n: number) {
 export function formatWallets(wallet: {
   hiringBalance: number;
   earningsBalance: number;
+  escrowBalance?: number;
 }) {
   return {
     hiringBalance: round2(wallet.hiringBalance),
     earningsBalance: round2(wallet.earningsBalance),
+    escrowBalance: round2(wallet.escrowBalance ?? 0),
     canWithdraw: round2(wallet.earningsBalance) >= MIN_WITHDRAWAL_BALANCE,
     canPostRequest: round2(wallet.hiringBalance) >= MIN_DEPOSIT,
   };
@@ -125,7 +127,48 @@ router.get("/wallets", requireAuth, async (req, res): Promise<void> => {
     return;
   }
 
-  res.json(formatWallets(wallet));
+  // Compute total escrow currently held for this user's in-progress requests
+  const [escrowRow] = await db
+    .select({ total: sum(gameRequestsTable.escrowAmount) })
+    .from(gameRequestsTable)
+    .where(and(eq(gameRequestsTable.userId, user.id), eq(gameRequestsTable.status, "in_progress")));
+
+  const escrowBalance = round2(parseFloat(escrowRow?.total ?? "0") || 0);
+
+  res.json(formatWallets({ ...wallet, escrowBalance }));
+});
+
+// ── GET /admin/platform-earnings ─────────────────────────────────────────────
+// Shows the platform owner's accumulated fee earnings.
+// In test mode this is accessible to any authenticated user.
+router.get("/admin/platform-earnings", requireAuth, async (req, res): Promise<void> => {
+  const fees = await db
+    .select()
+    .from(platformFeesTable)
+    .orderBy(desc(platformFeesTable.createdAt))
+    .limit(200);
+
+  const [totals] = await db
+    .select({
+      total: sum(platformFeesTable.amount),
+      sessionTotal: sql<string>`sum(case when type = 'session_fee' then amount else 0 end)`,
+      bulkTotal: sql<string>`sum(case when type = 'bulk_session_fee' then amount else 0 end)`,
+      giftTotal: sql<string>`sum(case when type = 'gift_fee' then amount else 0 end)`,
+    })
+    .from(platformFeesTable);
+
+  res.json({
+    totalFees: round2(parseFloat(totals?.total ?? "0") || 0),
+    sessionFees: round2(parseFloat(totals?.sessionTotal ?? "0") || 0),
+    bulkFees: round2(parseFloat(totals?.bulkTotal ?? "0") || 0),
+    giftFees: round2(parseFloat(totals?.giftTotal ?? "0") || 0),
+    feeCount: fees.length,
+    fees: fees.map((f) => ({
+      ...f,
+      amount: round2(parseFloat(f.amount)),
+      createdAt: f.createdAt.toISOString(),
+    })),
+  });
 });
 
 // ── GET /wallets/transactions ───────────────────────────────────────────────

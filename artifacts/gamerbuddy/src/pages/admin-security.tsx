@@ -714,6 +714,34 @@ export default function AdminSecurity() {
         </Section>
       ) : null}
 
+      {/* ── Platform Earnings link ── */}
+      <div
+        className="rounded-2xl border px-6 py-5 flex items-center justify-between gap-4"
+        style={{ borderColor: "rgba(168,85,247,0.25)", background: "rgba(168,85,247,0.04)" }}
+      >
+        <div className="flex items-center gap-3">
+          <div
+            className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+            style={{ background: "rgba(168,85,247,0.12)", border: "1px solid rgba(168,85,247,0.25)" }}
+          >
+            <DollarSign className="h-5 w-5" style={{ color: "#a855f7" }} />
+          </div>
+          <div>
+            <div className="text-sm font-extrabold text-foreground">Platform Earnings</div>
+            <div className="text-xs text-muted-foreground/60 mt-0.5">
+              View all 10% platform fees collected from sessions and tips.
+            </div>
+          </div>
+        </div>
+        <a
+          href="/admin/platform-earnings"
+          className="shrink-0 inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold uppercase tracking-widest border transition-all hover:opacity-80"
+          style={{ borderColor: "rgba(168,85,247,0.40)", color: "#a855f7", background: "rgba(168,85,247,0.08)" }}
+        >
+          View Earnings →
+        </a>
+      </div>
+
       {/* ── Footer note ── */}
       <div className="flex items-start gap-3 rounded-xl border border-border/25 bg-white/[0.015] px-5 py-4">
         <FileText className="h-4 w-4 text-muted-foreground/30 shrink-0 mt-0.5" />

@@ -30,6 +30,7 @@ import {
   Gift,
   Gamepad2,
   Receipt,
+  Lock,
 } from "lucide-react";
 
 const MIN_DEPOSIT = 10.75;
@@ -131,6 +132,7 @@ export default function WalletsPage() {
 
   const earningsPct = Math.min((wallets.earningsBalance / WITHDRAWAL_THRESHOLD) * 100, 100);
   const remaining = Math.max(WITHDRAWAL_THRESHOLD - wallets.earningsBalance, 0);
+  const escrowBalance: number = (wallets as any).escrowBalance ?? 0;
 
   const filteredTxns = (transactions ?? []).filter(
     (t) => txFilter === "all" || t.wallet === txFilter
@@ -285,6 +287,44 @@ export default function WalletsPage() {
         </Card>
       </div>
 
+      {/* Escrow card — only shown if funds are locked in sessions */}
+      {escrowBalance > 0 && (
+        <Card
+          className="overflow-hidden"
+          style={{ borderColor: "rgba(251,146,60,0.30)", background: "rgba(251,146,60,0.04)" }}
+        >
+          <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-orange-500/50 via-orange-400 to-orange-500/50" />
+          <CardHeader className="pb-2">
+            <div className="flex items-center justify-between">
+              <CardTitle
+                className="uppercase tracking-wider flex items-center gap-2 text-sm"
+                style={{ color: "#fb923c" }}
+              >
+                <Lock className="h-4 w-4" /> In Escrow
+              </CardTitle>
+              <span className="text-xs uppercase tracking-widest text-muted-foreground bg-muted/30 px-2 py-0.5 rounded">
+                Locked in session
+              </span>
+            </div>
+            <CardDescription>
+              These funds are held safely while your session is in progress. On completion, 90% goes to your gamer
+              and 10% is the platform fee.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="text-center py-4 rounded-lg border" style={{ background: "rgba(0,0,0,0.15)", borderColor: "rgba(251,146,60,0.20)" }}>
+              <div className="text-xs uppercase tracking-widest text-muted-foreground mb-1">Currently Locked</div>
+              <div className="text-4xl md:text-5xl font-black tabular-nums" style={{ color: "#fb923c" }}>
+                ${escrowBalance.toFixed(2)}
+              </div>
+              <div className="mt-2 text-xs text-muted-foreground/60">
+                Released automatically when the session completes ✓
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Summary row */}
       <Card className="border-border bg-card/30">
         <CardContent className="pt-5 pb-5">
@@ -292,7 +332,7 @@ export default function WalletsPage() {
             <div className="px-2 py-2 rounded-lg bg-background/40 border border-border/40">
               <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">Total</div>
               <div className="text-lg font-extrabold text-foreground tabular-nums">
-                ${(wallets.hiringBalance + wallets.earningsBalance).toFixed(2)}
+                ${(wallets.hiringBalance + wallets.earningsBalance + escrowBalance).toFixed(2)}
               </div>
             </div>
             <div className="px-2 py-2 rounded-lg bg-background/40 border border-border/40">

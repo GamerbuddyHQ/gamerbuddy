@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { db, gameRequestsTable, walletsTable, usersTable, bidsTable, reviewsTable, streamingAccountsTable, gamingAccountsTable, questEntriesTable } from "@workspace/db";
+import { db, gameRequestsTable, walletsTable, usersTable, bidsTable, reviewsTable, streamingAccountsTable, gamingAccountsTable, questEntriesTable, platformFeesTable } from "@workspace/db";
 import { eq, desc, and, sql, inArray, gte } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
 import { createNotification, sendEmailNotification } from "../notifications-helper";
@@ -821,33 +821,44 @@ router.post("/requests/:id/complete", requireAuth, async (req, res): Promise<voi
     let totalPaid = 0;
     for (const bid of acceptedBids) {
       const bidPrice = round2(parseFloat(String(bid.price)));
-      // Each gamer receives 90% of their individual bid price
       const gamerPayout = round2(bidPrice * 0.9);
+      const bidFee = round2(bidPrice - gamerPayout);
       totalPaid = round2(totalPaid + gamerPayout);
 
       if (gamerPayout > 0) {
-        // Atomic increment — no read-then-write race
         await db
           .update(walletsTable)
           .set({ earningsBalance: sql`earnings_balance + ${gamerPayout}` })
           .where(eq(walletsTable.userId, bid.bidderId));
         await recordTx(bid.bidderId, "earnings", "session_payout", gamerPayout,
-          `Bulk session payout: ${gameRequest.gameName} (90% of $${bidPrice.toFixed(2)} bid)`);
+          `Bulk session payout: ${gameRequest.gameName} — 90% of $${bidPrice.toFixed(2)} ($${bidFee.toFixed(2)} platform fee deducted)`);
       }
 
       void createNotification({
         userId: bid.bidderId,
         type: "payment_released",
         title: "Bulk Session Payout! 💸",
-        message: `$${gamerPayout.toFixed(2)} has been released to your Earnings wallet for the bulk ${gameRequest.gameName} session. (90% of your $${bidPrice.toFixed(2)} bid)`,
+        message: `$${gamerPayout.toFixed(2)} has been released to your Earnings wallet for the bulk ${gameRequest.gameName} session. (90% of your $${bidPrice.toFixed(2)} bid — $${bidFee.toFixed(2)} platform fee deducted)`,
         link: `/requests/${requestId}`,
       });
     }
 
-    req.log.info({ userId: user.id, requestId, gamerCount: acceptedBids.length, groupTotal, platformFee, totalPaid }, "Bulk session completed — group payout distributed");
+    // Record platform fee on hirer's transaction history and in the platform ledger
+    if (platformFee > 0) {
+      await recordTx(user.id, "hiring", "platform_fee", platformFee,
+        `Platform fee (10%): Bulk ${gameRequest.gameName} — $${groupTotal.toFixed(2)} × 10%`);
+      await db.insert(platformFeesTable).values({
+        requestId,
+        amount: String(platformFee),
+        type: "bulk_session_fee",
+        description: `Bulk: ${gameRequest.gameName} — $${groupTotal.toFixed(2)} group total × 10% (${acceptedBids.length} gamers, hirer #${user.id})`,
+      });
+    }
+
+    req.log.info({ userId: user.id, requestId, gamerCount: acceptedBids.length, groupTotal, platformFee, totalPaid }, "Bulk session completed — group payout distributed — platform fee recorded");
     res.json({
       success: true,
-      message: `Bulk session completed! ${acceptedBids.length} gamer${acceptedBids.length !== 1 ? "s" : ""} paid $${totalPaid.toFixed(2)} total. Platform fee: $${platformFee.toFixed(2)}.`,
+      message: `Bulk session completed! ${acceptedBids.length} gamer${acceptedBids.length !== 1 ? "s" : ""} paid $${totalPaid.toFixed(2)} total (90%). Platform fee: $${platformFee.toFixed(2)} (10%).`,
       gamerCount: acceptedBids.length,
       groupTotal,
       platformFee,
@@ -872,7 +883,24 @@ router.post("/requests/:id/complete", requireAuth, async (req, res): Promise<voi
       .update(walletsTable)
       .set({ earningsBalance: sql`earnings_balance + ${gamerPayout}` })
       .where(eq(walletsTable.userId, acceptedBid.bidderId));
-    await recordTx(acceptedBid.bidderId, "earnings", "session_payout", gamerPayout, `Earnings for session: ${gameRequest.gameName} (90% after fee)`);
+    await recordTx(
+      acceptedBid.bidderId, "earnings", "session_payout", gamerPayout,
+      `Session payout: ${gameRequest.gameName} — 90% of $${escrow.toFixed(2)} escrow ($${platformFee.toFixed(2)} platform fee deducted)`,
+    );
+  }
+
+  // Record the 10% platform fee on the hirer's transaction history and in the platform ledger
+  if (platformFee > 0) {
+    await recordTx(
+      user.id, "hiring", "platform_fee", platformFee,
+      `Platform fee (10%): ${gameRequest.gameName} — $${platformFee.toFixed(2)} of $${escrow.toFixed(2)} escrow`,
+    );
+    await db.insert(platformFeesTable).values({
+      requestId,
+      amount: String(platformFee),
+      type: "session_fee",
+      description: `Session: ${gameRequest.gameName} — $${escrow.toFixed(2)} × 10% (hirer #${user.id} → gamer #${acceptedBid?.bidderId ?? "?"})`
+    });
   }
 
   if (acceptedBid) {
@@ -881,14 +909,14 @@ router.post("/requests/:id/complete", requireAuth, async (req, res): Promise<voi
       userId: acceptedBid.bidderId,
       type: "payment_released",
       title: "Payment Released! 💸",
-      message: `$${gamerPayout.toFixed(2)} has been released to your Earnings wallet for ${gameRequest.gameName}. Leave a review to earn 50 bonus points!`,
+      message: `$${gamerPayout.toFixed(2)} has been released to your Earnings wallet for ${gameRequest.gameName}. (90% of $${escrow.toFixed(2)} — $${platformFee.toFixed(2)} platform fee deducted.) Leave a review to earn 50 bonus points!`,
       link: `/requests/${requestId}`,
     });
     if (gamerUser) {
       void sendEmailNotification({
         to: gamerUser.email,
         subject: `Payment of $${gamerPayout.toFixed(2)} received — Gamerbuddy`,
-        body: `Hi ${gamerUser.name},\n\n$${gamerPayout.toFixed(2)} has been added to your Earnings wallet for your ${gameRequest.gameName} session.\n\nLeave a review to earn 50 bonus points!\n\nGamerbuddy`,
+        body: `Hi ${gamerUser.name},\n\n$${gamerPayout.toFixed(2)} has been added to your Earnings wallet for your ${gameRequest.gameName} session.\n\n(90% of $${escrow.toFixed(2)} escrow — $${platformFee.toFixed(2)} platform fee deducted.)\n\nLeave a review to earn 50 bonus points!\n\nGamerbuddy`,
       });
     }
   }
@@ -897,14 +925,15 @@ router.post("/requests/:id/complete", requireAuth, async (req, res): Promise<voi
     userId: user.id,
     type: "payment_released",
     title: "Payment Approved — Review Required",
-    message: `You released $${gamerPayout.toFixed(2)} for ${gameRequest.gameName}. Leave a review now to earn 50 points!`,
+    message: `You released $${gamerPayout.toFixed(2)} for ${gameRequest.gameName}. (10% platform fee: $${platformFee.toFixed(2)}) Leave a review now to earn 50 points!`,
     link: `/requests/${requestId}`,
   });
 
-  req.log.info({ userId: user.id, requestId, gamerPayout, platformFee }, "Payment released — awaiting reviews");
+  req.log.info({ userId: user.id, requestId, escrow, gamerPayout, platformFee }, "Payment released — platform fee recorded — awaiting reviews");
   res.json({
     success: true,
-    message: "Payment released! Both players must now leave a review to earn 50 points each.",
+    message: `Payment released! Gamer receives $${gamerPayout.toFixed(2)} (90%). Platform fee: $${platformFee.toFixed(2)} (10%). Both players must now leave a review to earn 50 points each.`,
+    escrow,
     gamerPayout,
     platformFee,
     awaitingReviews: true,
@@ -1103,19 +1132,50 @@ router.post("/requests/:id/gift", requireAuth, async (req, res): Promise<void> =
   if (!acceptedBid) { res.status(404).json({ error: "No accepted bid found" }); return; }
 
   const giftAmount = round2(amount);
-  const [gamerWalletForGift] = await db.select().from(walletsTable).where(eq(walletsTable.userId, acceptedBid.bidderId));
+  const giftFee = round2(giftAmount * 0.1);
+  const gamerGift = round2(giftAmount - giftFee); // 90% goes to gamer
 
-  await db.update(walletsTable).set({ hiringBalance: round2(wallet.hiringBalance - giftAmount) }).where(eq(walletsTable.userId, user.id));
-  if (gamerWalletForGift) {
-    await db.update(walletsTable)
-      .set({ earningsBalance: round2(gamerWalletForGift.earningsBalance + giftAmount) })
-      .where(eq(walletsTable.userId, acceptedBid.bidderId));
+  // Atomic deduct full gift from hirer
+  const [deductedGift] = await db
+    .update(walletsTable)
+    .set({ hiringBalance: sql`hiring_balance - ${giftAmount}` })
+    .where(and(eq(walletsTable.userId, user.id), gte(walletsTable.hiringBalance, giftAmount)))
+    .returning();
+  if (!deductedGift) {
+    res.status(400).json({ error: "Insufficient hiring wallet balance for gift" });
+    return;
   }
 
-  await recordTx(user.id, "hiring", "gift_sent", giftAmount, `Tip/gift sent for session: ${gameRequest.gameName}`);
-  await recordTx(acceptedBid.bidderId, "earnings", "gift_received", giftAmount, `Tip/gift received for session: ${gameRequest.gameName}`);
+  // Credit 90% to gamer atomically
+  await db
+    .update(walletsTable)
+    .set({ earningsBalance: sql`earnings_balance + ${gamerGift}` })
+    .where(eq(walletsTable.userId, acceptedBid.bidderId));
 
-  res.json({ success: true, message: `Gift of $${giftAmount.toFixed(2)} sent!` });
+  // Record all three transactions
+  await recordTx(user.id, "hiring", "gift_sent", giftAmount,
+    `Tip sent for ${gameRequest.gameName} — $${gamerGift.toFixed(2)} to gamer + $${giftFee.toFixed(2)} platform fee (10%)`);
+  await recordTx(acceptedBid.bidderId, "earnings", "gift_received", gamerGift,
+    `Tip received for ${gameRequest.gameName} — 90% of $${giftAmount.toFixed(2)} tip ($${giftFee.toFixed(2)} platform fee deducted)`);
+  await recordTx(user.id, "hiring", "platform_fee", giftFee,
+    `Platform fee (10%) on tip for ${gameRequest.gameName}: $${giftFee.toFixed(2)}`);
+
+  // Record in platform ledger
+  await db.insert(platformFeesTable).values({
+    requestId,
+    amount: String(giftFee),
+    type: "gift_fee",
+    description: `Tip: ${gameRequest.gameName} — $${giftAmount.toFixed(2)} × 10% (hirer #${user.id} → gamer #${acceptedBid.bidderId})`,
+  });
+
+  req.log.info({ userId: user.id, requestId, giftAmount, gamerGift, giftFee }, "Tip sent — 90% to gamer, 10% platform fee recorded");
+  res.json({
+    success: true,
+    message: `Tip of $${giftAmount.toFixed(2)} sent! Gamer receives $${gamerGift.toFixed(2)} (90%). Platform fee: $${giftFee.toFixed(2)} (10%).`,
+    giftAmount,
+    gamerGift,
+    giftFee,
+  });
 });
 
 export default router;

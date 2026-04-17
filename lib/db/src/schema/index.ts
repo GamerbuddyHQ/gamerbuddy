@@ -15,3 +15,4 @@ export * from "./gaming_accounts";
 export * from "./profile_votes";
 export * from "./suggestions";
 export * from "./tournaments";
+export * from "./platform_fees";

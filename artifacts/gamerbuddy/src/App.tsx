@@ -29,6 +29,7 @@ import MyTournaments from "@/pages/my-tournaments";
 import Roadmap from "@/pages/roadmap";
 import ComingSoon from "@/pages/coming-soon";
 import AdminSecurity from "@/pages/admin-security";
+import PlatformEarnings from "@/pages/platform-earnings";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -90,6 +91,7 @@ function Router() {
         <Route path="/roadmap" component={Roadmap} />
 
         <Route path="/admin/security"><AdminRoute component={AdminSecurity} /></Route>
+        <Route path="/admin/platform-earnings"><AdminRoute component={PlatformEarnings} /></Route>
 
         <Route component={NotFound} />
       </Switch>
