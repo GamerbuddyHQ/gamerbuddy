@@ -38,16 +38,16 @@ const RESPONSES: Array<{ patterns: RegExp; reply: string }> = [
     reply: `**Private Chat** 💬\n\nOnce a bid is accepted, a **private chat channel** opens between the hirer and the gamer.\n\n• Messages refresh in real time (polling every few seconds)\n• Use it to coordinate session details, agree on start time, and share your Discord tag\n• Chat is available on the **Request Detail** page\n\n**For voice coordination:** Since we don't have built-in voice yet, exchange your **Discord** details in the chat and connect there.\n\nChat history is preserved until the session closes — so no scrambling to find that Discord tag you shared earlier! 🎮`,
   },
 
-  /* ── BULK HIRING — Phase 3 ── */
+  /* ── BULK HIRING — Phase 2 ── */
   {
     patterns: /bulk|multiple.*gamer|hire.*team|squad.*hire|group.*hire|hire.*squad/i,
-    reply: `**Bulk Hiring** is coming in **Phase 3** — not yet available! 🔜\n\nWhen it drops, you'll be able to:\n• Set 2–100 slots in a single request\n• Approve each participant individually — full control\n• Pay per accepted gamer, each held in escrow separately\n• Perfect for raid teams, events & content creation\n\nFor now, post **individual requests** for each gamer you want to hire — works just as well for smaller sessions.\n\nCheck the **[Roadmap](/roadmap)** to stay updated on when Phase 3 goes live! 🗺️`,
+    reply: `**Bulk Hiring** is coming in **Phase 2** — not available yet! 🔜\n\nRight now in Phase 1, only **single 1-on-1 hiring requests** are supported. Bulk Hiring will let you:\n• Set 3–100 slots in a single request\n• Approve each participant individually — full control\n• Pay per accepted gamer, each held in escrow separately\n• Perfect for raid teams, events & content creation\n\nFor now, post **individual requests** for each gamer you need — works great for smaller sessions.\n\nCheck the **[Roadmap](/roadmap)** to see when Phase 2 goes live! 🗺️`,
   },
 
-  /* ── TOURNAMENTS — Phase 3 ── */
+  /* ── TOURNAMENTS — Phase 2 ── */
   {
     patterns: /tournament|host.*tourney|prize.*pool|compete.*tournament|championship/i,
-    reply: `**Tournaments** are coming in **Phase 3** — not yet live! 🏆\n\nHere's what's planned when they drop:\n• Free to enter for all participants\n• Hirers approve every participant — no randos\n• Prize pools from $100–$10,000\n• 10% platform fee on prize payouts\n• Nation/Gender filters for regional showdowns\n\nFor competitive play right now, post a request and hire an expert — it's the best way to level up your game in Phase 1!\n\nKeep an eye on the **[Roadmap](/roadmap)** for the Phase 3 launch date. 🗺️`,
+    reply: `**Tournaments** are coming in **Phase 2** — not live yet! 🏆\n\nPhase 1 supports only core 1-on-1 hiring sessions. When Tournaments drop in Phase 2:\n• Free to enter for all participants\n• Hirers approve every participant — no randos\n• Prize pools from $100–$10,000\n• 10% platform fee on prize payouts\n• Nation/Gender filters for regional showdowns\n\nFor competitive play right now, post a request and hire an expert — it's the best way to level up your game today!\n\nKeep an eye on the **[Roadmap](/roadmap)** for the Phase 2 launch. 🗺️`,
   },
 
   /* ── WALLETS ── */

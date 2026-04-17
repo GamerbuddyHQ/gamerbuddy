@@ -114,6 +114,7 @@ router.get("/requests", async (req, res): Promise<void> => {
     .orderBy(desc(gameRequestsTable.createdAt));
 
   const filtered = result.filter((r) => {
+    if (r.isBulkHiring) return false; // Phase 1: bulk hiring hidden
     if (platform && r.platform !== platform) return false;
     if (skillLevel && r.skillLevel !== skillLevel) return false;
     if (status && r.status !== status) return false;
@@ -208,6 +209,13 @@ router.post("/requests", requireAuth, validate(PostRequestSchema), async (req, r
     isBulkHiring: boolean; bulkGamersNeeded?: number;
     preferredCountry: string; preferredGender: string;
   };
+
+  if (isBulkHiring) {
+    res.status(400).json({
+      error: "Bulk Hiring is coming in Phase 2. For now, you can only post single hiring requests.",
+    });
+    return;
+  }
 
   const [gameRequest] = await db
     .insert(gameRequestsTable)

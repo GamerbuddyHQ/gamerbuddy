@@ -832,6 +832,9 @@ export default function Browse() {
           <p className="text-muted-foreground mt-2 text-sm">
             Find open missions and place your bid — no page reload needed.
           </p>
+          <p className="mt-1.5 text-[11px] font-semibold" style={{ color: "rgba(168,85,247,0.55)" }}>
+            Phase 1: Core 1-on-1 Hiring Only &nbsp;·&nbsp; Bulk Hiring &amp; Tournaments arriving in Phase 2
+          </p>
         </div>
 
         {/* Live counter */}
