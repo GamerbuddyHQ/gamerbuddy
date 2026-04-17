@@ -1,6 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
-const BASE = "/api";
+// In production, VITE_API_URL can point to a separate API server (e.g. Railway).
+// Falls back to "/api" for same-origin deployments or local dev.
+const BASE = (import.meta.env.VITE_API_URL ?? "/api").replace(/\/$/, "");
 
 export type Bid = {
   id: number;

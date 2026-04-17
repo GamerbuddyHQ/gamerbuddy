@@ -9,6 +9,7 @@ import {
   LogOut, FileText, Bell, CheckCheck, X, Swords, Star,
   Trophy, MessageSquare, Zap, CircleDollarSign, ChevronRight, Menu,
   ArrowLeft, Info, Shield, Users, Globe, Sun, Moon, Sparkles, Map, Heart,
+  FlaskConical,
 } from "lucide-react";
 import { useTheme } from "@/lib/theme";
 import { RegionalClock } from "@/components/regional-clock";
@@ -20,6 +21,51 @@ import {
 } from "@/lib/bids-api";
 import { useAuth as useAuthInner } from "@/lib/auth";
 import { formatDistanceToNow } from "date-fns";
+
+/* ── TEST MODE BANNER ─────────────────────────────────────────────────────── */
+const TEST_BANNER_KEY = "gb_test_banner_dismissed_v1";
+
+function TestModeBanner() {
+  const [dismissed, setDismissed] = useState(
+    () => localStorage.getItem(TEST_BANNER_KEY) === "true"
+  );
+
+  const dismiss = () => {
+    localStorage.setItem(TEST_BANNER_KEY, "true");
+    setDismissed(true);
+  };
+
+  if (dismissed) return null;
+
+  return (
+    <div
+      className="w-full border-b z-50 relative"
+      style={{
+        background: "linear-gradient(90deg, rgba(234,179,8,0.14) 0%, rgba(251,146,60,0.14) 100%)",
+        borderColor: "rgba(234,179,8,0.30)",
+      }}
+    >
+      <div className="container flex items-center justify-between gap-3 py-2 px-4">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <FlaskConical className="h-3.5 w-3.5 text-amber-400 shrink-0" />
+          <p className="text-[11px] font-bold text-amber-300/90 leading-tight">
+            <span className="font-black uppercase tracking-wider text-amber-300">Test Mode</span>
+            <span className="text-amber-200/60 font-normal ml-2">
+              Payments are in test mode — no real money moves. Razorpay test keys are active.
+            </span>
+          </p>
+        </div>
+        <button
+          onClick={dismiss}
+          className="shrink-0 rounded-full p-1 text-amber-400/60 hover:text-amber-300 hover:bg-amber-500/15 transition-colors"
+          aria-label="Dismiss test mode banner"
+        >
+          <X className="h-3.5 w-3.5" />
+        </button>
+      </div>
+    </div>
+  );
+}
 
 const NOTIF_ICONS: Record<string, React.ReactNode> = {
   new_bid:         <Swords className="h-4 w-4 text-primary" />,
@@ -724,6 +770,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
           </div>
         </div>
       )}
+
+      <TestModeBanner />
 
       <main className="flex-1 container py-6 md:py-8">
         {children}

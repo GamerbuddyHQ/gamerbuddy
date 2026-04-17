@@ -1,0 +1,10 @@
+{
+  "buildCommand": "pnpm --filter @workspace/gamerbuddy run build",
+  "outputDirectory": "artifacts/gamerbuddy/dist/public",
+  "installCommand": "pnpm install",
+  "framework": null,
+  "routes": [
+    { "handle": "filesystem" },
+    { "src": "/(.*)", "dest": "/index.html" }
+  ]
+}
