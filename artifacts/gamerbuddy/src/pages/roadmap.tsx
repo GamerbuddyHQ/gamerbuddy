@@ -12,7 +12,7 @@ const PHASES = [
   {
     id: 1,
     tag: "Now Live",
-    title: "Core Hiring",
+    title: "Core Hiring + Trust Features",
     status: "live" as const,
     accent: "#22c55e",
     bg: "rgba(34,197,94,0.07)",
@@ -21,7 +21,7 @@ const PHASES = [
     bar: "from-green-500 to-emerald-400",
     Icon: Gamepad2,
     description:
-      "The full core hiring experience — post, bid, pay, play, and review. Everything you need to hire a gamer or earn as one. Live right now.",
+      "The complete Phase 1 experience — core hiring, full PC and console account linking, identity verification, and safety protections. All live from day one.",
     items: [
       {
         icon: Zap,
@@ -39,14 +39,24 @@ const PHASES = [
         desc: "A 10% fee is deducted from the session escrow on completion. The remaining 90% goes straight to the gamer's Earnings Wallet.",
       },
       {
-        icon: Gift,
-        title: "Gift Button",
-        desc: "Send a tip or bonus to a gamer you loved playing with — right from the session page or their profile.",
+        icon: Link2,
+        title: "Full PC Account Linking",
+        desc: "Connect your Steam and Epic Games accounts — show verified platform credentials on your profile and every bid card.",
+      },
+      {
+        icon: Link2,
+        title: "Full Console Account Linking",
+        desc: "Link your PlayStation Network, Xbox, and Nintendo Switch accounts for verified console identity — visible on bids and your profile.",
       },
       {
         icon: Shield,
         title: "Account Verification",
-        desc: "Identity check for safety and trust — protects both hirers and gamers. Verification review takes 7–15 days.",
+        desc: "Users must link at least one gaming account to post requests or bid. Full identity review (7–15 days) unlocks the verified badge.",
+      },
+      {
+        icon: Gift,
+        title: "Gift Button",
+        desc: "Send a tip or bonus to a gamer you loved playing with — right from the session page or their profile.",
       },
       {
         icon: Radio,
@@ -60,15 +70,15 @@ const PHASES = [
       },
       {
         icon: AlertTriangle,
-        title: "Safety Rules & Warnings",
-        desc: "Never share account passwords. Sessions are played in-game — no outside service required. Violations lead to bans.",
+        title: "Safety Rules & Anti-Backdoor Protections",
+        desc: "Never share account passwords. Escrow-only payments. Safety warnings, AI chat guidance, and anti-off-platform protections built in.",
       },
     ],
   },
   {
     id: 2,
     tag: "Coming Soon",
-    title: "Platform Expansion",
+    title: "Tournaments & Bulk Hiring",
     status: "next" as const,
     accent: "#22d3ee",
     bg: "rgba(34,211,238,0.07)",
@@ -77,17 +87,17 @@ const PHASES = [
     bar: "from-cyan-400 to-sky-400",
     Icon: Trophy,
     description:
-      "Expand to more gaming platforms, run competitive tournaments, and unlock bulk hiring for group raids and team sessions.",
+      "Expand the platform with competitive tournaments, bulk group hiring, and mobile account linking. Shaped by what the community wants most.",
     items: [
       {
-        icon: Link2,
-        title: "Console Account Linking",
-        desc: "Link your PlayStation Network, Xbox, and Nintendo Switch accounts to your Gamerbuddy profile for verified console identity.",
+        icon: Swords,
+        title: "Tournaments",
+        desc: "Free to join, hirer approves every participant — competitive, fair, and open to all with country, region, and gender filters.",
       },
       {
-        icon: Link2,
-        title: "PC Platform Linking",
-        desc: "Connect your Steam and Epic Games accounts directly — automatically verify your library and gaming history.",
+        icon: Users,
+        title: "Bulk Hiring",
+        desc: "Hire between 3 and 100 gamers in a single request — perfect for group raids, events, and large team sessions.",
       },
       {
         icon: Smartphone,
@@ -95,24 +105,9 @@ const PHASES = [
         desc: "Link your Google Play and iOS Game Center accounts for verified mobile gaming credentials.",
       },
       {
-        icon: Users,
-        title: "Bulk Hiring",
-        desc: "Hire between 2 and 100 gamers in a single request for group raids or large team sessions.",
-      },
-      {
-        icon: Swords,
-        title: "Tournaments",
-        desc: "Free to join, hirer approves every participant — competitive, fair, and open to all with country, region, and gender filters.",
-      },
-      {
-        icon: Star,
-        title: "Quest System",
-        desc: "Challenges on user profiles — complete quests to earn bonus points and exclusive profile badges.",
-      },
-      {
         icon: Sparkles,
-        title: "Promoted Games",
-        desc: "Select games get spotlighted with bonus point rewards for sessions played in them.",
+        title: "Advanced Features",
+        desc: "More platform features shaped directly by Community suggestions and votes — your ideas drive what gets built next.",
       },
     ],
   },
@@ -239,10 +234,10 @@ export default function Roadmap() {
           </span>
         </div>
         <p className="text-sm sm:text-[15px] text-foreground/80 leading-[1.75]">
-          <strong className="text-foreground">Phase 1 — Core Hiring — is fully live.</strong> The platform is open: wallets, escrow payments, a 10% fee, verification, streaming channel linking, safety rules, and a simplified social strategy with one central hub via the Social tab.
+          <strong className="text-foreground">Phase 1 — Core Hiring + Trust Features — is fully live.</strong> The platform is open: core hiring, dual wallets, escrow, 10% fee, reviews, full PC account linking (Steam &amp; Epic), full console account linking (PlayStation, Xbox &amp; Switch), identity verification, streaming channels, safety protections, and a simplified social hub.
         </p>
         <p className="text-sm text-muted-foreground/60 leading-[1.75]">
-          We're now building Phase 2 — console & PC account linking, tournaments, and bulk hiring. Your Community votes directly shape what gets prioritised next. 🚀
+          We're now building Phase 2 — tournaments with country/region/gender filters, bulk hiring (3–100 gamers), and mobile account linking. Your Community votes directly shape what gets prioritised next. 🚀
         </p>
       </div>
 

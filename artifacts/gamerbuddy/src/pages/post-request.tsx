@@ -442,25 +442,25 @@ export default function PostRequest() {
                 </div>
               </div>
 
-              {/* Bulk Hiring — Phase 3 Coming Soon */}
+              {/* Bulk Hiring — Phase 2 Coming Soon */}
               <div
                 className="rounded-xl border p-5 flex items-center gap-4 opacity-60"
-                style={{ borderColor: "rgba(168,85,247,0.18)", background: "rgba(168,85,247,0.04)" }}
+                style={{ borderColor: "rgba(34,211,238,0.15)", background: "rgba(34,211,238,0.03)" }}
               >
-                <div className="h-9 w-9 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(168,85,247,0.12)", border: "1px solid rgba(168,85,247,0.22)" }}>
-                  <Users className="h-4 w-4" style={{ color: "rgba(168,85,247,0.7)" }} />
+                <div className="h-9 w-9 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(34,211,238,0.10)", border: "1px solid rgba(34,211,238,0.20)" }}>
+                  <Users className="h-4 w-4" style={{ color: "rgba(34,211,238,0.6)" }} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-sm font-bold text-foreground/60">Bulk Hiring</span>
                     <span
                       className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full"
-                      style={{ background: "rgba(168,85,247,0.12)", color: "rgba(192,132,252,0.70)" }}
+                      style={{ background: "rgba(34,211,238,0.10)", color: "rgba(34,211,238,0.65)" }}
                     >
-                      Phase 3 · Coming Soon
+                      Phase 2 · Coming Soon
                     </span>
                   </div>
-                  <p className="text-[11px] text-muted-foreground/45 mt-0.5">Hire 3–100 gamers for raids, events &amp; content creation — unlocking in Phase 3.</p>
+                  <p className="text-[11px] text-muted-foreground/45 mt-0.5">Hire 3–100 gamers for raids, events &amp; content creation — unlocking in Phase 2.</p>
                 </div>
               </div>
 
