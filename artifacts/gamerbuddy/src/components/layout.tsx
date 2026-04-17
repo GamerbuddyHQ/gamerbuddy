@@ -180,14 +180,92 @@ function NotificationBell() {
   );
 }
 
+/* ── Languages shown in selector (English live, others coming soon) ── */
+const SELECTOR_LANGS = ["en", "hi", "es", "fr", "de", "pt"] as const;
+const COMING_SOON_SET = new Set(["hi", "es", "fr", "de", "pt"]);
+
+/* ── Coming Soon Modal ── */
+function LangComingSoonModal({ onClose }: { onClose: () => void }) {
+  useEffect(() => {
+    const fn = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    document.addEventListener("keydown", fn);
+    return () => document.removeEventListener("keydown", fn);
+  }, [onClose]);
+
+  return (
+    <div
+      className="fixed inset-0 z-[300] flex items-center justify-center p-4"
+      style={{ background: "rgba(0,0,0,0.65)", backdropFilter: "blur(4px)" }}
+      onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div
+        className="relative w-full max-w-sm rounded-2xl overflow-hidden shadow-2xl"
+        style={{
+          background: "linear-gradient(160deg, #0d0620 0%, #080415 100%)",
+          border: "1px solid rgba(168,85,247,0.30)",
+          boxShadow: "0 0 60px rgba(168,85,247,0.20), 0 20px 60px rgba(0,0,0,0.8)",
+        }}
+      >
+        <div className="h-1 w-full" style={{ background: "linear-gradient(90deg, #22d3ee, #a855f7, #7c3aed)" }} />
+        <div className="p-6">
+          <div className="flex items-center gap-3 mb-4">
+            <div
+              className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0"
+              style={{ background: "rgba(168,85,247,0.15)", border: "1px solid rgba(168,85,247,0.30)" }}
+            >
+              <Globe className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <h3 className="text-base font-extrabold text-white uppercase tracking-tight leading-none">Multi-language support</h3>
+              <p className="text-[11px] text-muted-foreground mt-0.5">Coming soon to Gamerbuddy</p>
+            </div>
+          </div>
+          <p className="text-sm text-muted-foreground leading-relaxed mb-4">
+            We're working hard to add <span className="text-white font-semibold">Hindi, Spanish, French, German, Portuguese</span> and more languages to Gamerbuddy.
+          </p>
+          <p className="text-xs text-muted-foreground/70 leading-relaxed mb-5">
+            Thank you for your patience! The site is currently available in <span className="text-primary font-semibold">English</span>.
+          </p>
+          <div className="flex gap-2 flex-wrap mb-4">
+            {[
+              { flag: "🇮🇳", label: "हिन्दी" },
+              { flag: "🇪🇸", label: "Español" },
+              { flag: "🇫🇷", label: "Français" },
+              { flag: "🇩🇪", label: "Deutsch" },
+              { flag: "🇵🇹", label: "Português" },
+            ].map((l) => (
+              <span
+                key={l.label}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold"
+                style={{ background: "rgba(168,85,247,0.10)", border: "1px solid rgba(168,85,247,0.25)", color: "rgba(192,132,252,0.80)" }}
+              >
+                {l.flag} {l.label}
+              </span>
+            ))}
+          </div>
+          <button
+            onClick={onClose}
+            className="w-full py-2.5 rounded-xl font-black uppercase tracking-widest text-sm text-white transition-all hover:brightness-110"
+            style={{ background: "linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)", boxShadow: "0 4px 16px rgba(147,51,234,0.30)" }}
+          >
+            Got it!
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ── Language Selector ── */
 function LangSelector() {
-  const { lang, setLang, t } = useI18n();
+  const { lang, t } = useI18n();
   const { isDark } = useTheme();
   const [open, setOpen] = useState(false);
+  const [showComingSoon, setShowComingSoon] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
-  const current = LANGUAGES.find((l) => l.code === lang) ?? LANGUAGES[0];
+  const displayLangs = LANGUAGES.filter((l) => (SELECTOR_LANGS as readonly string[]).includes(l.code));
+  const current = displayLangs.find((l) => l.code === lang) ?? displayLangs[0];
 
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
@@ -197,74 +275,109 @@ function LangSelector() {
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
-  return (
-    <div className="relative" ref={ref}>
-      <button
-        onClick={() => setOpen((o) => !o)}
-        className="h-9 flex items-center gap-1.5 px-2.5 rounded-xl border border-border/60 bg-background/60 hover:border-primary/50 hover:bg-primary/10 transition-all"
-        title={t.nav.selectLanguage}
-        aria-label={t.nav.selectLanguage}
-      >
-        <span className="text-base leading-none">{current.flag}</span>
-        <span className="hidden sm:block text-[11px] font-bold text-muted-foreground/70">{current.code.toUpperCase()}</span>
-        <Globe className="h-3.5 w-3.5 text-muted-foreground/50 hidden sm:block" />
-      </button>
+  function handleSelect(code: string) {
+    setOpen(false);
+    if (COMING_SOON_SET.has(code)) {
+      setShowComingSoon(true);
+    }
+  }
 
-      {open && (
-        <div
-          className="absolute right-0 top-11 rounded-2xl border border-border bg-card shadow-2xl z-[200] overflow-hidden py-1.5"
-          style={{
-            width: "min(220px, calc(100vw - 24px))",
-            boxShadow: "0 20px 60px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.05)",
-          }}
+  return (
+    <>
+      {showComingSoon && <LangComingSoonModal onClose={() => setShowComingSoon(false)} />}
+      <div className="relative" ref={ref}>
+        <button
+          onClick={() => setOpen((o) => !o)}
+          className="h-9 flex items-center gap-1.5 px-2.5 rounded-xl border border-border/60 bg-background/60 hover:border-primary/50 hover:bg-primary/10 transition-all"
+          title={t.nav.selectLanguage}
+          aria-label={t.nav.selectLanguage}
         >
-          <div className="h-0.5 bg-gradient-to-r from-transparent via-primary to-transparent mb-1" />
-          <div className="px-3 pb-1">
-            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">{t.nav.selectLanguage}</p>
+          <span className="text-base leading-none">{current.flag}</span>
+          <span className="hidden sm:block text-[11px] font-bold text-muted-foreground/70">EN</span>
+          <Globe className="h-3.5 w-3.5 text-muted-foreground/50 hidden sm:block" />
+        </button>
+
+        {open && (
+          <div
+            className="absolute right-0 top-11 rounded-2xl border border-border bg-card shadow-2xl z-[200] overflow-hidden py-1.5"
+            style={{
+              width: "min(240px, calc(100vw - 24px))",
+              boxShadow: "0 20px 60px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.05)",
+            }}
+          >
+            <div className="h-0.5 bg-gradient-to-r from-transparent via-primary to-transparent mb-1" />
+            <div className="px-3 pb-1">
+              <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">{t.nav.selectLanguage}</p>
+            </div>
+            <div>
+              {displayLangs.map((l) => {
+                const isActive = l.code === lang || (l.code === "en" && !COMING_SOON_SET.has(lang));
+                const isComingSoon = COMING_SOON_SET.has(l.code);
+                return (
+                  <button
+                    key={l.code}
+                    onClick={() => handleSelect(l.code)}
+                    className="w-full flex items-center gap-3 px-3 py-2.5 text-left transition-colors hover:bg-primary/10"
+                    style={isActive ? { color: "#c084fc" } : { color: isDark ? "rgba(255,255,255,0.70)" : "rgba(0,0,0,0.65)" }}
+                  >
+                    <span className="text-lg w-6 text-center leading-none">{l.flag}</span>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-[12px] font-bold leading-tight">{l.nativeLabel}</div>
+                      <div className="text-[10px] text-muted-foreground/50">{l.label}</div>
+                    </div>
+                    {isComingSoon ? (
+                      <span
+                        className="text-[9px] font-black uppercase tracking-wide px-1.5 py-0.5 rounded-full shrink-0"
+                        style={{ background: "rgba(168,85,247,0.15)", color: "rgba(192,132,252,0.80)", border: "1px solid rgba(168,85,247,0.25)" }}
+                      >
+                        Soon
+                      </span>
+                    ) : isActive ? (
+                      <span className="h-1.5 w-1.5 rounded-full bg-primary shrink-0" />
+                    ) : null}
+                  </button>
+                );
+              })}
+            </div>
+            <div className="mx-3 mt-1.5 mb-1 pt-1.5 border-t border-border/30">
+              <p className="text-[10px] text-muted-foreground/40 text-center">More languages coming soon 🌍</p>
+            </div>
           </div>
-          <div className="max-h-72 overflow-y-auto">
-            {LANGUAGES.map((l) => {
-              const isActive = l.code === lang;
-              return (
-                <button
-                  key={l.code}
-                  onClick={() => { setLang(l.code); setOpen(false); }}
-                  className="w-full flex items-center gap-3 px-3 py-2 text-left transition-colors hover:bg-primary/10"
-                  style={isActive ? { color: "#c084fc" } : { color: isDark ? "rgba(255,255,255,0.70)" : "rgba(0,0,0,0.65)" }}
-                >
-                  <span className="text-lg w-6 text-center leading-none">{l.flag}</span>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-[12px] font-bold leading-tight">{l.nativeLabel}</div>
-                    <div className="text-[10px] text-muted-foreground/50">{l.label}</div>
-                  </div>
-                  {isActive && (
-                    <span className="h-1.5 w-1.5 rounded-full bg-primary shrink-0" />
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
+    </>
   );
 }
 
 /* ── Mobile Language Picker (standalone so hooks aren't inside a map) ── */
 function MobileLangPicker({ onPick }: { onPick: () => void }) {
-  const { lang, setLang, t } = useI18n();
+  const { lang, t } = useI18n();
   const { isDark } = useTheme();
+  const [showComingSoon, setShowComingSoon] = useState(false);
+
+  const displayLangs = LANGUAGES.filter((l) => (SELECTOR_LANGS as readonly string[]).includes(l.code));
+
+  function handleSelect(code: string) {
+    if (COMING_SOON_SET.has(code)) {
+      setShowComingSoon(true);
+    } else {
+      onPick();
+    }
+  }
+
   return (
     <div className="pt-3">
+      {showComingSoon && <LangComingSoonModal onClose={() => { setShowComingSoon(false); onPick(); }} />}
       <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40 px-1 mb-2">{t.nav.selectLanguage}</p>
       <div className="grid grid-cols-2 gap-2">
-        {LANGUAGES.map((l) => {
-          const isActive = l.code === lang;
+        {displayLangs.map((l) => {
+          const isActive = l.code === lang || (l.code === "en" && !COMING_SOON_SET.has(lang));
+          const isComingSoon = COMING_SOON_SET.has(l.code);
           return (
             <button
               key={l.code}
-              onClick={() => { setLang(l.code); onPick(); }}
-              className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl border text-left transition-colors"
+              onClick={() => handleSelect(l.code)}
+              className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl border text-left transition-colors relative"
               style={isActive ? {
                 background: "rgba(168,85,247,0.15)",
                 borderColor: "rgba(168,85,247,0.40)",
@@ -280,11 +393,17 @@ function MobileLangPicker({ onPick }: { onPick: () => void }) {
               }}
             >
               <span className="text-xl leading-none">{l.flag}</span>
-              <span className="text-[12px] font-bold truncate">{l.nativeLabel}</span>
+              <div className="flex-1 min-w-0">
+                <span className="text-[12px] font-bold truncate block">{l.nativeLabel}</span>
+                {isComingSoon && (
+                  <span className="text-[9px] font-black uppercase tracking-wide" style={{ color: "rgba(192,132,252,0.70)" }}>Soon</span>
+                )}
+              </div>
             </button>
           );
         })}
       </div>
+      <p className="text-[10px] text-muted-foreground/30 text-center mt-2">More languages coming soon 🌍</p>
     </div>
   );
 }
@@ -443,6 +562,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
           <div className="flex items-center gap-2 shrink-0">
             <NotificationBell />
+
+            {/* Language selector */}
+            <LangSelector />
 
             {/* Theme toggle */}
             <button

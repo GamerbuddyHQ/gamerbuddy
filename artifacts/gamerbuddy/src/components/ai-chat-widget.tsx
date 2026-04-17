@@ -134,9 +134,15 @@ const RESPONSES: Array<{ patterns: RegExp; reply: string }> = [
     reply: `**Regional Clock** is coming in **Phase 2** — not yet live! 🕒\n\nWhen it drops, you'll see a live timezone clock in the navbar showing your pinned region — great for scheduling cross-region sessions.\n\nFor now, a quick tip: **mention your timezone in your bid pitch** and private chat so you and your hirer can agree on a session time without confusion 🌍\n\nCheck the **[Roadmap](/roadmap)** for the Phase 2 release. 🗺️`,
   },
 
+  /* ── MULTI-LANGUAGE / LANGUAGE SUPPORT ── */
+  {
+    patterns: /language|multi.?lang|hindi|spanish|french|german|portuguese|español|deutsch|français|português|हिन्दी|translate|translation|other.*language|language.*support|change.*language|switch.*language/i,
+    reply: `🌍 **Multi-language support is coming to Gamerbuddy!**\n\nWe're actively working on adding full support for:\n\n• 🇮🇳 **Hindi** — हिन्दी\n• 🇪🇸 **Spanish** — Español\n• 🇫🇷 **French** — Français\n• 🇩🇪 **German** — Deutsch\n• 🇵🇹 **Portuguese** — Português\n• ...and more!\n\n**Right now**, the site is available in **English only** — but we've already built the language selector into the navbar (top right, globe icon 🌐). Click any language to see what's coming!\n\n**Why it matters:** Gamerbuddy is a global platform with players from every corner of the world — we want everyone to feel at home. Multi-language support is a top priority for Phase 2.\n\nThank you for your patience! We'll announce when each language goes live in the **[Community](/community)** tab 💬`,
+  },
+
   /* ── PHASE 2+ FEATURES — accurate catch-all ── */
   {
-    patterns: /community.*suggest|suggest.*feature|feature.*request|emoji.*comment|gif.*comment|light.*dark|dark.*light|theme.*toggle|multi.*lang|language.*select/i,
+    patterns: /community.*suggest|suggest.*feature|feature.*request|emoji.*comment|gif.*comment|light.*dark|dark.*light|theme.*toggle/i,
     reply: `That feature is part of our phased rollout — coming soon! 🔜\n\nWe're building Gamerbuddy phase by phase to make sure everything works perfectly before unlocking more.\n\n**Right now — Phase 1 (Live):**\n✅ Core hiring: post, bid, accept, play, review\n✅ Dual wallets, 10% platform fee, escrow\n✅ Gaming account linking — Steam, Epic, PSN, Xbox, Nintendo Switch (24-hour review)\n✅ Private chat + Gift/Tip button\n✅ Nation & Gender filtering\n✅ Points shop & profile customisation\n✅ Streaming channel linking (Twitch, YouTube, Kick, Facebook Gaming, TikTok Live)\n✅ Superr.bio as single social hub\n\n**Phase 2 (Coming Soon):**\n🔜 Mobile account linking — Google Play & iOS Game Center\n🔜 Bulk Hiring (2–100 gamers)\n🔜 Tournaments with filters\n🔜 Quest System & Promoted Games\n\n**Phase 3 (Future):**\n🔵 Full mobile app enhancements\n🔵 Game dev & publisher partnerships\n🔵 Advanced AI, stronger security\n\nCheck the **[Roadmap](/roadmap)** for all the details! 🗺️`,
   },
 
