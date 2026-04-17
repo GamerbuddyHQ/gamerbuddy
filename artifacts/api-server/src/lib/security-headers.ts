@@ -2,7 +2,6 @@
  * Security headers middleware — applied to every API response.
  *
  * Configured to allow exactly the third-party services Gamerbuddy integrates:
- *   • Stripe.js + card-element iframes   (js.stripe.com / hooks.stripe.com)
  *   • Razorpay checkout modal            (checkout.razorpay.com)
  *   • Tenor GIF API + CDN                (api.tenor.com / media.tenor.com)
  *   • Google Fonts                       (fonts.googleapis.com / fonts.gstatic.com)
@@ -22,19 +21,15 @@ const isProd = process.env.NODE_ENV === "production";
 //   default-src 'self'
 //     Baseline: everything not explicitly listed falls back to same-origin only.
 //
-//   script-src 'self' js.stripe.com checkout.razorpay.com
-//     Stripe.js and Razorpay inject their own scripts that must load from
-//     their CDNs. 'unsafe-inline' is intentionally absent — it would defeat
-//     XSS protection. Vite builds output separate .js files, not inline scripts.
+//   script-src 'self' checkout.razorpay.com
+//     Razorpay injects its own checkout.js from its CDN.
+//     'unsafe-inline' is intentionally absent — it would defeat XSS protection.
+//     Vite builds output separate .js files, not inline scripts.
 //
-//   connect-src 'self' api.stripe.com api.razorpay.com api.tenor.com
-//     Stripe and Razorpay make XHR/fetch calls to their APIs from the browser.
+//   connect-src 'self' api.razorpay.com api.tenor.com
+//     Razorpay makes XHR/fetch calls to its API from the browser.
 //     Tenor search is queried from the community page.
-//     wss: allows WebSocket connections for Socket.io live-chat.
-//
-//   frame-src js.stripe.com hooks.stripe.com
-//     Stripe Elements renders the card input inside a sandboxed iframe hosted
-//     on js.stripe.com/hooks.stripe.com. Without this the card form breaks.
+//     wss: allows WebSocket connections for live-chat polling.
 //
 //   img-src 'self' data: blob: media.tenor.com
 //     data: is required for SVG inlining and some UI libraries.
@@ -66,9 +61,9 @@ const isProd = process.env.NODE_ENV === "production";
 
 const cspDirectives: Parameters<typeof helmet.contentSecurityPolicy>[0]["directives"] = {
   defaultSrc:  ["'self'"],
-  scriptSrc:   ["'self'", "https://js.stripe.com", "https://checkout.razorpay.com"],
-  connectSrc:  ["'self'", "https://api.stripe.com", "https://api.razorpay.com", "https://api.tenor.com", "wss:"],
-  frameSrc:    ["'self'", "https://js.stripe.com", "https://hooks.stripe.com"],
+  scriptSrc:   ["'self'", "https://checkout.razorpay.com"],
+  connectSrc:  ["'self'", "https://api.razorpay.com", "https://api.tenor.com", "wss:"],
+  frameSrc:    ["'self'"],
   imgSrc:      ["'self'", "data:", "blob:", "https://media.tenor.com"],
   fontSrc:     ["'self'", "https://fonts.gstatic.com"],
   styleSrc:    ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
@@ -118,9 +113,8 @@ export const securityHeaders: RequestHandler = helmet({
   xXssProtection: false,
 
   // ── Cross-Origin-Embedder-Policy: disabled ────────────────────────────────
-  // Stripe card elements load from a cross-origin iframe. COEP would block
-  // cross-origin iframes unless they opt in with CORP headers — Stripe doesn't.
-  // We disable COEP to keep Stripe Elements working.
+  // Razorpay checkout opens in a popup that may load cross-origin resources.
+  // Keeping COEP disabled avoids blocking the Razorpay flow.
   crossOriginEmbedderPolicy: false,
 
   // ── Cross-Origin-Opener-Policy: same-origin-allow-popups ─────────────────

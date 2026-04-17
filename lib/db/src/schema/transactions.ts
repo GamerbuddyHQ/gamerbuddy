@@ -8,7 +8,7 @@ export const walletTransactionsTable = pgTable("wallet_transactions", {
   type: text("type").notNull(),
   amount: numeric("amount", { precision: 10, scale: 2 }).notNull(),
   description: text("description").notNull(),
-  // External payment ID (Razorpay paymentId / Stripe paymentIntentId).
+  // External payment ID (Razorpay paymentId).
   // A partial unique index (WHERE reference_id IS NOT NULL) is applied at the
   // DB level — the same external payment can never credit the wallet twice.
   referenceId: text("reference_id"),

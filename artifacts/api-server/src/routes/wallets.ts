@@ -35,8 +35,8 @@ export function formatWallets(wallet: {
 /**
  * Record a wallet transaction in the audit log.
  *
- * @param referenceId  Optional external payment ID (Razorpay paymentId or
- *                     Stripe paymentIntentId). When provided, the DB's partial
+ * @param referenceId  Optional external payment ID (Razorpay paymentId).
+ *                     When provided, the DB's partial
  *                     unique index prevents the same external payment from ever
  *                     being recorded twice, even on retried requests.
  */

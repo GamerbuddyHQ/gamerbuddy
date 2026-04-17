@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import { useLocation } from "wouter";
 import {
   useGetWallets,
@@ -8,10 +8,9 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { loadStripe, type Stripe, type StripeCardElement } from "@stripe/stripe-js";
 import {
-  ArrowLeft, CreditCard, Lock, CheckCircle2, Zap, ShieldCheck,
-  Smartphone, AlertCircle, RefreshCw, Wifi, BadgeCheck, Globe,
+  ArrowLeft, Lock, CheckCircle2, Zap, ShieldCheck,
+  Smartphone, AlertCircle, RefreshCw, Wifi, BadgeCheck,
   Wallet, Loader2,
 } from "lucide-react";
 import { apiFetch } from "@/lib/bids-api";
@@ -46,7 +45,6 @@ declare global {
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 type Step = "amount" | "payment" | "success" | "error";
-type PayMethod = "razorpay" | "stripe";
 
 const PRESETS = [10.75, 25, 50, 100, 250, 500];
 
@@ -76,14 +74,11 @@ function loadRazorpayScript(): Promise<void> {
 }
 
 // ─── Processing Overlay ──────────────────────────────────────────────────────
-function ProcessingOverlay({ method }: { method: PayMethod }) {
-  const stages =
-    method === "razorpay"
-      ? ["Opening Razorpay…", "Verifying transaction…", "Crediting your wallet…"]
-      : ["Contacting Stripe…", "Authorising payment…", "Crediting your wallet…"];
+function ProcessingOverlay() {
+  const stages = ["Opening Razorpay…", "Verifying transaction…", "Crediting your wallet…"];
   const [stage, setStage] = useState(0);
 
-  useEffect(() => {
+  React.useEffect(() => {
     const t1 = setTimeout(() => setStage(1), 700);
     const t2 = setTimeout(() => setStage(2), 1500);
     return () => { clearTimeout(t1); clearTimeout(t2); };
@@ -100,7 +95,7 @@ function ProcessingOverlay({ method }: { method: PayMethod }) {
           <div className="absolute inset-0 rounded-full border-4 border-primary/20" />
           <div className="absolute inset-0 rounded-full border-4 border-t-primary animate-spin" />
           <div className="absolute inset-0 flex items-center justify-center">
-            {method === "razorpay" ? <Smartphone className="h-8 w-8 text-primary" /> : <CreditCard className="h-8 w-8 text-primary" />}
+            <Smartphone className="h-8 w-8 text-primary" />
           </div>
         </div>
         <div>
@@ -122,19 +117,17 @@ function ProcessingOverlay({ method }: { method: PayMethod }) {
 
 // ─── Success Screen ──────────────────────────────────────────────────────────
 function SuccessScreen({
-  amount, payMethod, newBalance, txnRef, onViewWallet, onPostRequest,
+  amount, newBalance, txnRef, onViewWallet, onPostRequest,
 }: {
-  amount: number; payMethod: PayMethod; newBalance: number;
+  amount: number; newBalance: number;
   txnRef: string; onViewWallet: () => void; onPostRequest: () => void;
 }) {
   const [visible, setVisible] = useState(false);
-  useEffect(() => { setTimeout(() => setVisible(true), 50); }, []);
+  React.useEffect(() => { setTimeout(() => setVisible(true), 50); }, []);
 
   const now = new Date();
   const dateStr = now.toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" });
   const timeStr = now.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
-
-  const methodLabel = payMethod === "razorpay" ? "Razorpay (UPI / Mobile Wallet)" : "Stripe (Visa / Mastercard / PayPal)";
 
   return (
     <div className={`max-w-md mx-auto transition-all duration-700 ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}>
@@ -164,7 +157,7 @@ function SuccessScreen({
         <div className="px-5 py-4 space-y-3">
           {[
             { label: "Amount",          value: `$${amount.toFixed(2)}`,       cls: "text-white font-bold" },
-            { label: "Payment via",     value: methodLabel,                   cls: "text-white" },
+            { label: "Payment via",     value: "Razorpay (UPI / Wallet / Card)", cls: "text-white" },
             { label: "Wallet credited", value: "Hiring Wallet",               cls: "text-white" },
             { label: "New balance",     value: `$${newBalance.toFixed(2)}`,   cls: "text-primary font-bold" },
             { label: "Date",            value: `${dateStr}, ${timeStr}`,      cls: "text-muted-foreground" },
@@ -250,7 +243,6 @@ function ErrorScreen({ error, onRetry, onBack }: { error: string; onRetry: () =>
 }
 
 // ─── Razorpay Panel ──────────────────────────────────────────────────────────
-// Opens the Razorpay Checkout modal (handles UPI + all Indian cards internally)
 function RazorpayPanel({
   amount, userEmail, onSuccess, onError, onProcessing,
 }: {
@@ -266,7 +258,6 @@ function RazorpayPanel({
     setLoading(true);
     onProcessing(true);
     try {
-      // 1. Create Razorpay order on backend
       const order = await apiFetch<{
         orderId: string; amountInr: number; amountUsd: number;
         currency: string; keyId: string;
@@ -275,15 +266,13 @@ function RazorpayPanel({
         body: JSON.stringify({ amount }),
       });
 
-      // 2. Load Razorpay checkout.js if not already loaded
       await loadRazorpayScript();
 
       onProcessing(false);
 
-      // 3. Open Razorpay checkout modal
       const rzp = new window.Razorpay({
         key: order.keyId,
-        amount: Math.round(order.amountInr * 100), // paise
+        amount: Math.round(order.amountInr * 100),
         currency: order.currency,
         name: "Gamerbuddy",
         description: `Hiring Wallet — $${amount.toFixed(2)} top-up`,
@@ -297,7 +286,6 @@ function RazorpayPanel({
           },
         },
         handler: async (response) => {
-          // 4. Verify signature on backend and credit wallet
           onProcessing(true);
           try {
             const wallets = await apiFetch("/api/payments/razorpay/verify", {
@@ -370,12 +358,12 @@ function RazorpayPanel({
         </div>
       </div>
 
-      {/* What to expect */}
+      {/* How it works */}
       <div className="space-y-2.5">
         <div className="text-xs text-muted-foreground uppercase tracking-widest font-bold">How it works</div>
         {[
-          { icon: <Smartphone className="h-4 w-4 text-primary" />, text: "Click Pay — secure checkout opens" },
-          { icon: <Wallet className="h-4 w-4 text-primary" />, text: "Choose your payment method" },
+          { icon: <Smartphone className="h-4 w-4 text-primary" />, text: "Click Pay — secure Razorpay checkout opens" },
+          { icon: <Wallet className="h-4 w-4 text-primary" />, text: "Choose UPI, wallet, card, or net banking" },
           { icon: <CheckCircle2 className="h-4 w-4 text-green-400" />, text: "Complete payment — wallet is credited instantly" },
         ].map(({ icon, text }, i) => (
           <div key={i} className="flex items-center gap-3">
@@ -397,7 +385,7 @@ function RazorpayPanel({
       >
         <div className="flex items-center justify-center gap-2.5">
           {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Smartphone className="h-5 w-5" />}
-          {loading ? "Opening Razorpay…" : `Pay $${amount.toFixed(2)} via UPI / Wallet`}
+          {loading ? "Opening Razorpay…" : `Pay $${amount.toFixed(2)} via Razorpay`}
         </div>
         {!loading && (
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full animate-[shimmer_2.5s_infinite]" />
@@ -412,226 +400,6 @@ function RazorpayPanel({
   );
 }
 
-// ─── Stripe Card Panel ───────────────────────────────────────────────────────
-// Mounts a Stripe CardElement for international credit/debit cards
-function StripeCardPanel({
-  amount, onSuccess, onError, onProcessing,
-}: {
-  amount: number;
-  onSuccess: (wallets: any) => void;
-  onError: (msg: string) => void;
-  onProcessing: (v: boolean) => void;
-}) {
-  const cardRef = useRef<HTMLDivElement>(null);
-  const stripeRef = useRef<Stripe | null>(null);
-  const cardElRef = useRef<StripeCardElement | null>(null);
-  const [cardReady, setCardReady] = useState(false);
-  const [cardError, setCardError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [initError, setInitError] = useState<string | null>(null);
-
-  // Initialise Stripe Elements when component mounts
-  useEffect(() => {
-    let cancelled = false;
-
-    const init = async () => {
-      try {
-        // 1. Fetch publishable key from the lightweight config endpoint
-        //    (does NOT create a PaymentIntent — just returns public config)
-        const config = await apiFetch<{ stripeEnabled: boolean; stripePublishableKey: string | null }>(
-          "/api/payments/config",
-        );
-
-        if (!config.stripeEnabled || !config.stripePublishableKey) {
-          setInitError("Stripe is not configured. Please add your Stripe keys to use this payment method.");
-          return;
-        }
-
-        const publishableKey = config.stripePublishableKey;
-
-        if (cancelled) return;
-
-        // 2. Load Stripe.js
-        const stripe = await loadStripe(publishableKey);
-        if (!stripe || cancelled) return;
-        stripeRef.current = stripe;
-
-        // 3. Create and mount the card element with dark theme
-        const elements = stripe.elements({
-          fonts: [{ cssSrc: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500" }],
-        });
-
-        const card = elements.create("card", {
-          style: {
-            base: {
-              color: "#ffffff",
-              fontFamily: "'Inter', system-ui, sans-serif",
-              fontSize: "15px",
-              fontSmoothing: "antialiased",
-              "::placeholder": { color: "#6b7280" },
-              iconColor: "#a855f7",
-            },
-            invalid: {
-              color: "#f87171",
-              iconColor: "#f87171",
-            },
-          },
-          hidePostalCode: true,
-        });
-
-        if (cardRef.current && !cancelled) {
-          card.mount(cardRef.current);
-          cardElRef.current = card;
-
-          card.on("ready", () => { if (!cancelled) setCardReady(true); });
-          card.on("change", (e) => {
-            setCardError(e.error ? e.error.message : null);
-          });
-        }
-      } catch (err: any) {
-        if (!cancelled) {
-          setInitError(err?.error ?? err?.message ?? "Failed to initialise Stripe. Please try again.");
-        }
-      }
-    };
-
-    init();
-    return () => {
-      cancelled = true;
-      cardElRef.current?.destroy();
-      cardElRef.current = null;
-    };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const handlePay = useCallback(async () => {
-    if (!stripeRef.current || !cardElRef.current) return;
-    setLoading(true);
-    onProcessing(true);
-
-    try {
-      // 1. Create PaymentIntent on backend for the real amount
-      const { clientSecret, intentId } = await apiFetch<{
-        clientSecret: string; intentId: string; publishableKey: string;
-      }>("/api/payments/stripe/create-intent", {
-        method: "POST",
-        body: JSON.stringify({ amount }),
-      });
-
-      // 2. Confirm the card payment with Stripe.js
-      const { paymentIntent, error } = await stripeRef.current.confirmCardPayment(clientSecret, {
-        payment_method: { card: cardElRef.current },
-      });
-
-      if (error) {
-        setLoading(false);
-        onProcessing(false);
-        onError(error.message ?? "Card payment failed. Please check your details and try again.");
-        return;
-      }
-
-      if (paymentIntent?.status === "succeeded") {
-        // 3. Server-side verify + credit wallet
-        const wallets = await apiFetch("/api/payments/stripe/confirm", {
-          method: "POST",
-          body: JSON.stringify({ paymentIntentId: intentId, amountUsd: amount }),
-        });
-        onProcessing(false);
-        onSuccess(wallets);
-      } else {
-        onProcessing(false);
-        setLoading(false);
-        onError(`Payment status: ${paymentIntent?.status ?? "unknown"}. Please contact support.`);
-      }
-    } catch (err: any) {
-      setLoading(false);
-      onProcessing(false);
-      onError(err?.error ?? err?.message ?? "An unexpected error occurred. Please try again.");
-    }
-  }, [amount, onSuccess, onError, onProcessing]);
-
-  if (initError) {
-    return (
-      <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-4 flex items-start gap-3">
-        <AlertCircle className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
-        <div>
-          <div className="text-xs font-bold text-amber-400 uppercase tracking-widest mb-1">Stripe Not Configured</div>
-          <div className="text-sm text-muted-foreground">{initError}</div>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="space-y-5">
-      {/* Test card hint — REMOVE THIS BLOCK FOR PRODUCTION */}
-      <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-3 flex items-start gap-3">
-        <AlertCircle className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
-        <div>
-          <div className="text-xs font-bold text-amber-400 uppercase tracking-widest mb-1">Test Mode · Stripe</div>
-          <div className="text-xs text-muted-foreground font-mono">4242 4242 4242 4242 · Any future date · Any 3-digit CVC</div>
-        </div>
-      </div>
-
-      {/* Amount display */}
-      <div className="rounded-xl border border-cyan-500/30 bg-cyan-500/5 p-4 flex items-center justify-between">
-        <div>
-          <div className="text-xs text-muted-foreground uppercase tracking-widest mb-1">Charge amount</div>
-          <div className="text-3xl font-black text-white">${amount.toFixed(2)}</div>
-          <div className="text-xs text-muted-foreground mt-0.5">USD · All major international cards</div>
-        </div>
-        <Globe className="h-10 w-10 text-cyan-400/40" />
-      </div>
-
-      {/* Stripe card element */}
-      <div className="space-y-1.5">
-        <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Card Details</label>
-        <div
-          className="rounded-xl border transition-colors px-4 py-3.5 bg-background/60 min-h-[52px] flex items-center"
-          style={{
-            borderColor: cardError ? "rgba(248,113,113,0.6)" : cardReady ? "rgba(34,211,238,0.4)" : "rgba(255,255,255,0.1)",
-          }}
-        >
-          {!cardReady && !initError && (
-            <div className="flex items-center gap-2 text-muted-foreground text-sm">
-              <Loader2 className="h-4 w-4 animate-spin" /> Loading secure card form…
-            </div>
-          )}
-          <div ref={cardRef} className={`w-full ${cardReady ? "" : "hidden"}`} />
-        </div>
-        {cardError && (
-          <p className="text-xs text-red-400 flex items-center gap-1">
-            <AlertCircle className="h-3 w-3" /> {cardError}
-          </p>
-        )}
-      </div>
-
-      {/* Pay button */}
-      <button
-        onClick={handlePay}
-        disabled={loading || !cardReady || !!cardError}
-        className={`w-full relative overflow-hidden rounded-xl py-4 font-extrabold text-base uppercase tracking-widest transition-all ${
-          loading || !cardReady || !!cardError
-            ? "bg-cyan-500/20 text-white/40 cursor-not-allowed"
-            : "bg-cyan-600 text-white hover:bg-cyan-500 shadow-[0_0_28px_rgba(34,211,238,0.3)]"
-        }`}
-      >
-        <div className="flex items-center justify-center gap-2.5">
-          {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Lock className="h-5 w-5" />}
-          {loading ? "Processing…" : `Pay $${amount.toFixed(2)} Securely`}
-        </div>
-        {!loading && cardReady && (
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full animate-[shimmer_2.5s_infinite]" />
-        )}
-      </button>
-
-      <div className="flex items-center justify-center gap-1.5 text-[10px] text-muted-foreground/60">
-        <Lock className="h-3 w-3 text-green-500" />
-        <span>Secured by Stripe · PCI-DSS Level 1 · Your card data never touches our servers</span>
-      </div>
-    </div>
-  );
-}
-
 // ─── Trust Badges ────────────────────────────────────────────────────────────
 function TrustBadges() {
   return (
@@ -640,7 +408,7 @@ function TrustBadges() {
         { icon: <Lock className="h-3.5 w-3.5 text-green-400" />,     label: "SSL Secure" },
         { icon: <ShieldCheck className="h-3.5 w-3.5 text-blue-400" />, label: "PCI DSS" },
         { icon: <BadgeCheck className="h-3.5 w-3.5 text-primary" />,   label: "Razorpay" },
-        { icon: <Globe className="h-3.5 w-3.5 text-cyan-400" />,       label: "Stripe" },
+        { icon: <CheckCircle2 className="h-3.5 w-3.5 text-green-400" />, label: "Escrow Protected" },
       ].map((b) => (
         <div key={b.label} className="flex items-center gap-1.5 text-[10px] text-muted-foreground/50 uppercase tracking-wider font-semibold">
           {b.icon} {b.label}
@@ -656,7 +424,6 @@ export default function AddFunds() {
   const queryClient = useQueryClient();
 
   const [step, setStep] = useState<Step>("amount");
-  const [payMethod, setPayMethod] = useState<PayMethod>("razorpay");
   const [amount, setAmount] = useState<string>("");
   const [customAmount, setCustomAmount] = useState<string>("");
   const [processing, setProcessing] = useState(false);
@@ -692,7 +459,6 @@ export default function AddFunds() {
       <div className="max-w-md mx-auto mt-6">
         <SuccessScreen
           amount={selectedAmount}
-          payMethod={payMethod}
           newBalance={newBalance}
           txnRef={txnRef}
           onViewWallet={() => setLocation("/wallets")}
@@ -719,7 +485,7 @@ export default function AddFunds() {
   if (step === "payment") {
     return (
       <div className="max-w-md mx-auto space-y-5">
-        {processing && <ProcessingOverlay method={payMethod} />}
+        {processing && <ProcessingOverlay />}
 
         {/* Header */}
         <div className="flex items-center gap-3">
@@ -731,7 +497,7 @@ export default function AddFunds() {
           </button>
           <div>
             <div className="font-extrabold text-foreground flex items-center gap-2">
-              <Lock className="h-4 w-4 text-green-400" /> Secure Checkout
+              <Lock className="h-4 w-4 text-green-400" /> Secure Checkout — Razorpay
             </div>
             <div className="text-xs text-muted-foreground">
               Depositing <span className="text-foreground font-semibold">${selectedAmount.toFixed(2)}</span> to Hiring Wallet
@@ -739,56 +505,15 @@ export default function AddFunds() {
           </div>
         </div>
 
-        {/* Method tabs */}
-        <div className="grid grid-cols-2 gap-2 p-1 rounded-xl border border-border/60 bg-background/40">
-          <button
-            onClick={() => setPayMethod("razorpay")}
-            className={`flex flex-col items-center justify-center gap-1 py-3.5 rounded-lg font-bold text-sm transition-all ${
-              payMethod === "razorpay"
-                ? "bg-primary text-white shadow-[0_0_20px_rgba(168,85,247,0.3)]"
-                : "text-muted-foreground hover:text-white"
-            }`}
-          >
-            <Smartphone className="h-4 w-4" />
-            <span className="text-xs">UPI & Wallets</span>
-            {payMethod === "razorpay" && (
-              <span className="text-[9px] bg-white/20 rounded px-1.5 py-0.5 uppercase tracking-wider font-black">Razorpay</span>
-            )}
-          </button>
-          <button
-            onClick={() => setPayMethod("stripe")}
-            className={`flex flex-col items-center justify-center gap-1 py-3.5 rounded-lg font-bold text-sm transition-all ${
-              payMethod === "stripe"
-                ? "bg-cyan-600 text-white shadow-[0_0_20px_rgba(34,211,238,0.3)]"
-                : "text-muted-foreground hover:text-white"
-            }`}
-          >
-            <Globe className="h-4 w-4" />
-            <span className="text-xs">Visa / Mastercard / PayPal</span>
-            {payMethod === "stripe" && (
-              <span className="text-[9px] bg-white/20 rounded px-1.5 py-0.5 uppercase tracking-wider font-black">Stripe</span>
-            )}
-          </button>
-        </div>
-
         {/* Panel */}
         <div className="rounded-2xl border border-border/60 p-5 bg-card/80">
-          {payMethod === "razorpay" ? (
-            <RazorpayPanel
-              amount={selectedAmount}
-              userEmail={undefined}
-              onSuccess={handleSuccess}
-              onError={handleError}
-              onProcessing={setProcessing}
-            />
-          ) : (
-            <StripeCardPanel
-              amount={selectedAmount}
-              onSuccess={handleSuccess}
-              onError={handleError}
-              onProcessing={setProcessing}
-            />
-          )}
+          <RazorpayPanel
+            amount={selectedAmount}
+            userEmail={undefined}
+            onSuccess={handleSuccess}
+            onError={handleError}
+            onProcessing={setProcessing}
+          />
         </div>
 
         <TrustBadges />
@@ -899,25 +624,14 @@ export default function AddFunds() {
         )}
       </div>
 
-      {/* Method preview */}
-      <div className="grid grid-cols-2 gap-3">
-        <div className="rounded-xl border border-primary/30 bg-primary/5 p-3.5 flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl bg-primary/20 border border-primary/30 flex items-center justify-center shrink-0">
-            <Smartphone className="h-5 w-5 text-primary" />
-          </div>
-          <div>
-            <div className="text-sm font-bold text-foreground">UPI & Wallets</div>
-            <div className="text-[10px] text-muted-foreground">GPay · PhonePe · Paytm · More</div>
-          </div>
+      {/* Payment method info */}
+      <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 flex items-center gap-4">
+        <div className="h-12 w-12 rounded-xl bg-primary/20 border border-primary/30 flex items-center justify-center shrink-0">
+          <Smartphone className="h-6 w-6 text-primary" />
         </div>
-        <div className="rounded-xl border border-cyan-500/20 bg-cyan-500/5 p-3.5 flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl bg-cyan-500/15 border border-cyan-500/25 flex items-center justify-center shrink-0">
-            <Globe className="h-5 w-5 text-cyan-400" />
-          </div>
-          <div>
-            <div className="text-sm font-bold text-foreground">Visa / Mastercard</div>
-            <div className="text-[10px] text-muted-foreground">PayPal · Amex · All major cards</div>
-          </div>
+        <div>
+          <div className="text-sm font-bold text-foreground">Razorpay — All Payment Methods</div>
+          <div className="text-[11px] text-muted-foreground mt-0.5">UPI (GPay, PhonePe, Paytm, BHIM) · Debit/Credit Cards · Net Banking · Wallets</div>
         </div>
       </div>
 
@@ -929,18 +643,15 @@ export default function AddFunds() {
       </div>
 
       <button
-        disabled={!isValidAmount}
         onClick={() => setStep("payment")}
-        className={`w-full relative overflow-hidden rounded-xl py-4 font-extrabold text-base uppercase tracking-widest transition-all ${
+        disabled={!isValidAmount}
+        className={`w-full rounded-xl py-4 font-extrabold text-base uppercase tracking-widest transition-all ${
           isValidAmount
-            ? "bg-primary text-white shadow-[0_0_24px_rgba(168,85,247,0.35)] hover:bg-primary/90"
+            ? "bg-primary text-white hover:bg-primary/90 shadow-[0_0_24px_rgba(168,85,247,0.35)]"
             : "bg-primary/20 text-white/30 cursor-not-allowed"
         }`}
       >
-        Continue to Payment · ${isValidAmount ? selectedAmount.toFixed(2) : "0.00"}
-        {isValidAmount && (
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full animate-[shimmer_2.5s_infinite]" />
-        )}
+        Continue to Checkout — ${isValidAmount ? selectedAmount.toFixed(2) : "0.00"}
       </button>
     </div>
   );
