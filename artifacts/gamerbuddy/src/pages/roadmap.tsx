@@ -2,10 +2,10 @@ import React from "react";
 import { Link } from "wouter";
 import {
   CheckCircle2, Clock, Rocket, Zap, Users, Trophy,
-  Gamepad2, Wallet, Star, Shield, Globe, MessageSquare,
-  Swords, Bot, Sparkles, Map, Lightbulb, ChevronRight,
-  Lock, AlertTriangle, CircleDollarSign, Gift, BadgeDollarSign,
-  Radio, Smartphone, Link2, Handshake,
+  Gamepad2, Wallet, Shield, Globe, MessageSquare,
+  Swords, Bot, Map, Lightbulb, ChevronRight,
+  Lock, AlertTriangle,
+  Smartphone, Link2, Handshake,
 } from "lucide-react";
 
 const PHASES = [
@@ -21,27 +21,22 @@ const PHASES = [
     bar: "from-green-500 to-emerald-400",
     Icon: Gamepad2,
     description:
-      "The complete Phase 1 experience — core hiring, full PC and console account linking, identity verification, and safety protections. All live from day one.",
+      "The full Phase 1 experience — core hiring, full PC and console account linking, an active community, identity verification, and safety protections. Everything live from day one.",
     items: [
       {
         icon: Zap,
-        title: "Core Hiring System",
+        title: "Core 1-on-1 Hiring",
         desc: "Post requests, place bids, accept sessions, play together, and complete payments — with mandatory reviews on completion.",
       },
       {
         icon: Wallet,
-        title: "Dual Wallets + Escrow",
-        desc: "Hiring Wallet for posting sessions and an Earnings Wallet for receiving payouts. Funds held in escrow until both players approve.",
-      },
-      {
-        icon: CircleDollarSign,
-        title: "10% Platform Fee",
-        desc: "A 10% fee is deducted from the session escrow on completion. The remaining 90% goes straight to the gamer's Earnings Wallet.",
+        title: "Secure Escrow Payments",
+        desc: "Hiring Wallet for posting sessions and an Earnings Wallet for payouts. Funds held in escrow until both players approve. 10% platform fee on completion.",
       },
       {
         icon: Link2,
         title: "Full PC Account Linking",
-        desc: "Connect your Steam and Epic Games accounts — show verified platform credentials on your profile and every bid card.",
+        desc: "Connect your Steam and Epic Games accounts — verified platform credentials shown on your profile and every bid card.",
       },
       {
         icon: Link2,
@@ -49,24 +44,19 @@ const PHASES = [
         desc: "Link your PlayStation Network, Xbox, and Nintendo Switch accounts for verified console identity — visible on bids and your profile.",
       },
       {
+        icon: MessageSquare,
+        title: "Active Community",
+        desc: "Post suggestions, vote on ideas, and leave comments with GIF and emoji support. Your votes directly shape what gets built next — live now in the Community tab.",
+      },
+      {
         icon: Shield,
-        title: "Account Verification",
-        desc: "Users must link at least one gaming account to post requests or bid. Full identity review (7–15 days) unlocks the verified badge.",
-      },
-      {
-        icon: Gift,
-        title: "Gift Button",
-        desc: "Send a tip or bonus to a gamer you loved playing with — right from the session page or their profile.",
-      },
-      {
-        icon: Radio,
-        title: "Streaming Channel Linking",
-        desc: "Link your Twitch, YouTube Gaming, Kick, Facebook Gaming, or TikTok Live channels. They show on your profile and bid cards.",
+        title: "Verification & Trust Factor",
+        desc: "Link at least one gaming account to post or bid. Full ID review (7–15 days) unlocks the verified badge. Trust Factor updates live based on behaviour and reviews.",
       },
       {
         icon: Globe,
-        title: "Superr.bio Social Hub",
-        desc: "All community links, Discord, and social platforms are unified at one place — the 'Social' tab in navigation.",
+        title: "Simplified Social Hub",
+        desc: "All community links, Discord, and social platforms are unified in one place — the 'Social' tab links directly to Superr.bio.",
       },
       {
         icon: AlertTriangle,
@@ -102,12 +92,7 @@ const PHASES = [
       {
         icon: Smartphone,
         title: "Mobile Account Linking",
-        desc: "Link your Google Play and iOS Game Center accounts for verified mobile gaming credentials.",
-      },
-      {
-        icon: Sparkles,
-        title: "Advanced Features",
-        desc: "More platform features shaped directly by Community suggestions and votes — your ideas drive what gets built next.",
+        desc: "Link your Google Play Store and iOS Game Center accounts for verified mobile gaming credentials.",
       },
     ],
   },
@@ -123,22 +108,17 @@ const PHASES = [
     bar: "from-amber-400 to-orange-400",
     Icon: Rocket,
     description:
-      "The long-term vision — smarter AI, deeper mobile support, game developer partnerships, and a platform shaped entirely by the community.",
+      "The long-term vision — smarter AI, deeper mobile support, game developer partnerships, and stronger security.",
     items: [
-      {
-        icon: Smartphone,
-        title: "Full Mobile Enhancements",
-        desc: "Native mobile app improvements with push notifications, deeper platform integrations, and mobile-first UI.",
-      },
-      {
-        icon: Handshake,
-        title: "Game Dev Partnerships",
-        desc: "Partner with game developers and publishers for sponsored sessions, exclusive content, and in-game rewards.",
-      },
       {
         icon: Bot,
         title: "Advanced AI Support",
         desc: "Smarter AI replies, proactive suggestions, and deeper answers for every platform question.",
+      },
+      {
+        icon: Handshake,
+        title: "Game Dev Partnerships",
+        desc: "Partner with game developers and publishers for sponsored sessions, exclusive content, in-game rewards, and promoted games.",
       },
       {
         icon: Lock,
@@ -146,9 +126,9 @@ const PHASES = [
         desc: "Advanced fraud detection, enhanced account protection, and expanded admin moderation controls.",
       },
       {
-        icon: Lightbulb,
-        title: "Community-Driven Enhancements",
-        desc: "More platform features shaped directly by your Community suggestions and votes.",
+        icon: Smartphone,
+        title: "Full Mobile Enhancements",
+        desc: "Native mobile app improvements with push notifications, deeper platform integrations, and mobile-first UI.",
       },
     ],
   },
@@ -234,10 +214,10 @@ export default function Roadmap() {
           </span>
         </div>
         <p className="text-sm sm:text-[15px] text-foreground/80 leading-[1.75]">
-          <strong className="text-foreground">Phase 1 — Core Hiring + Trust Features — is fully live.</strong> The platform is open: core hiring, dual wallets, escrow, 10% fee, reviews, full PC account linking (Steam &amp; Epic), full console account linking (PlayStation, Xbox &amp; Switch), identity verification, streaming channels, safety protections, and a simplified social hub.
+          <strong className="text-foreground">Phase 1 is fully live.</strong> The platform is open: core 1-on-1 hiring, secure escrow payments, full PC account linking (Steam &amp; Epic), full console account linking (PlayStation, Xbox &amp; Switch), an active Community tab for suggestions and voting, identity verification &amp; Trust Factor system, a simplified social hub via Superr.bio, and strong safety &amp; anti-backdoor protections.
         </p>
         <p className="text-sm text-muted-foreground/60 leading-[1.75]">
-          We're now building Phase 2 — tournaments with country/region/gender filters, bulk hiring (3–100 gamers), and mobile account linking. Your Community votes directly shape what gets prioritised next. 🚀
+          We're now building Phase 2 — tournaments, bulk hiring (3–100 gamers), and mobile account linking. Your Community votes directly shape what gets prioritised next. 🚀
         </p>
       </div>
 
