@@ -1120,7 +1120,7 @@ function SuggestionCard({ suggestion, isAdmin }: { suggestion: Suggestion; isAdm
       return r.json();
     },
     onSuccess: (data) => {
-      qc.setQueryData<Suggestion[]>(["suggestions"], (old) =>
+      qc.setQueriesData<Suggestion[]>({ queryKey: ["suggestions"] }, (old) =>
         old?.map((s) => {
           if (s.id !== suggestion.id) return s;
           const prev = suggestion.myVote;

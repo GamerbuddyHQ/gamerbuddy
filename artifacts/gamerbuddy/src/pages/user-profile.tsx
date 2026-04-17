@@ -2,7 +2,7 @@ import React from "react";
 import { useParams, Link, useLocation } from "wouter";
 import { useAuth } from "@/lib/auth";
 import {
-  useUserProfile, useProfileVotes, useVoteOnProfile,
+  useUserProfile, useProfileVotes, useVoteOnProfile, GAMING_PLATFORM_META, type GamingAccount,
 } from "@/lib/bids-api";
 import { useToast } from "@/hooks/use-toast";
 import { VerifiedBadge } from "@/components/verified-badge";
@@ -318,6 +318,7 @@ export default function UserProfilePage() {
 
   const avgRating = profile.avgRating;
   const streamingAccounts = profile.streamingAccounts ?? [];
+  const gamingAccounts = profile.gamingAccounts ?? [];
 
   return (
     <div className="max-w-2xl mx-auto space-y-4">
@@ -423,6 +424,44 @@ export default function UserProfilePage() {
           </div>
         </div>
       </div>
+
+      {/* Gaming accounts */}
+      {gamingAccounts.length > 0 && (
+        <div
+          className="rounded-2xl overflow-hidden border"
+          style={{ borderColor: "rgba(168,85,247,0.20)", background: "rgba(8,6,18,0.65)" }}
+        >
+          <div
+            className="flex items-center gap-2.5 px-5 py-3.5 border-b"
+            style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(168,85,247,0.05)" }}
+          >
+            <span className="text-[11px] font-extrabold uppercase tracking-widest text-white/70">🎮 Gaming Accounts</span>
+          </div>
+          <div className="px-5 py-4 flex flex-wrap gap-2">
+            {gamingAccounts.map((acc: GamingAccount) => {
+              const meta = GAMING_PLATFORM_META[acc.platform] ?? { label: acc.platform, emoji: "🎮", color: "#a855f7", bg: "rgba(168,85,247,0.12)", border: "rgba(168,85,247,0.30)" };
+              const href = meta.profileUrl?.replace("{username}", acc.username);
+              const inner = (
+                <div
+                  className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold"
+                  style={{ background: meta.bg, border: `1px solid ${meta.border}`, color: meta.color }}
+                >
+                  <span>{meta.emoji}</span>
+                  <span className="text-white/80 text-xs font-bold uppercase tracking-wide">{meta.label}</span>
+                  <span style={{ color: meta.color }}>{acc.username}</span>
+                </div>
+              );
+              return href ? (
+                <a key={acc.platform} href={href} target="_blank" rel="noopener noreferrer" className="hover:opacity-80 transition-opacity">
+                  {inner}
+                </a>
+              ) : (
+                <div key={acc.platform}>{inner}</div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Streaming accounts */}
       <StreamingAccountsDisplay accounts={streamingAccounts} />
