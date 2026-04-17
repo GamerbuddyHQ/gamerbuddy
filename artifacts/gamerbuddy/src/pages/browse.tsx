@@ -640,33 +640,48 @@ function HowItWorksSection() {
   ];
 
   return (
-    <div className="space-y-3">
-      <div className="flex items-center gap-3">
-        <div className="flex-1 h-px" style={{ background: "rgba(168,85,247,0.10)" }} />
-        <span className="text-[10px] text-muted-foreground/30 uppercase tracking-[0.20em] font-black shrink-0">How it works</span>
-        <div className="flex-1 h-px" style={{ background: "rgba(168,85,247,0.10)" }} />
+    <div
+      className="rounded-2xl border p-5 sm:p-6 space-y-4"
+      style={{
+        borderColor: isDark ? "rgba(168,85,247,0.18)" : "rgba(168,85,247,0.20)",
+        background: isDark
+          ? "linear-gradient(135deg, rgba(168,85,247,0.05) 0%, rgba(34,211,238,0.03) 100%)"
+          : "linear-gradient(135deg, rgba(168,85,247,0.04) 0%, rgba(34,211,238,0.02) 100%)",
+        boxShadow: isDark
+          ? "0 0 40px rgba(168,85,247,0.08), 0 0 80px rgba(34,211,238,0.04)"
+          : "0 0 32px rgba(168,85,247,0.07), 0 2px 16px rgba(0,0,0,0.04)",
+      }}
+    >
+      {/* Heading */}
+      <div>
+        <h2 className="text-base sm:text-lg font-extrabold text-foreground tracking-tight">
+          New here? Here's how it works 👋
+        </h2>
+        <p className="text-xs text-muted-foreground/55 mt-0.5 font-medium">3 simple steps to get started</p>
       </div>
 
+      {/* Step cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {steps.map((s, i) => (
           <div
             key={i}
-            className="flex items-center gap-4 sm:flex-col sm:items-start sm:gap-3 rounded-xl border border-border/35 px-4 py-4"
+            className="flex items-center gap-4 sm:flex-col sm:items-start sm:gap-3 rounded-xl border px-4 py-4"
             style={{
-              background: isDark ? "rgba(255,255,255,0.018)" : "rgba(0,0,0,0.018)",
+              borderColor: isDark ? `${s.color}18` : `${s.color}22`,
+              background: isDark ? `${s.color}08` : `${s.color}05`,
             }}
           >
             {/* Icon + step number */}
             <div className="flex items-center gap-3 shrink-0">
               <div
                 className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
-                style={{ background: `${s.color}16`, border: `1px solid ${s.color}32`, color: s.color }}
+                style={{ background: `${s.color}18`, border: `1px solid ${s.color}38`, color: s.color }}
               >
                 {s.icon}
               </div>
               <span
                 className="font-black tabular-nums leading-none sm:hidden"
-                style={{ fontSize: 22, color: isDark ? `${s.color}28` : `${s.color}55`, letterSpacing: "-0.04em" }}
+                style={{ fontSize: 22, color: isDark ? `${s.color}35` : `${s.color}60`, letterSpacing: "-0.04em" }}
               >
                 {s.num}
               </span>
@@ -676,13 +691,13 @@ function HowItWorksSection() {
               <div className="flex items-baseline gap-2 mb-1">
                 <span
                   className="hidden sm:inline font-black tabular-nums leading-none shrink-0"
-                  style={{ fontSize: 20, color: isDark ? `${s.color}25` : `${s.color}50`, letterSpacing: "-0.04em" }}
+                  style={{ fontSize: 20, color: isDark ? `${s.color}30` : `${s.color}55`, letterSpacing: "-0.04em" }}
                 >
                   {s.num}
                 </span>
                 <p className="text-sm font-extrabold text-foreground tracking-tight leading-tight">{s.title}</p>
               </div>
-              <p className="text-xs text-muted-foreground/50 leading-relaxed">{s.desc}</p>
+              <p className="text-xs text-muted-foreground/55 leading-relaxed">{s.desc}</p>
             </div>
           </div>
         ))}
@@ -882,6 +897,9 @@ export default function Browse() {
       </div>
 
       <SafetyBanner showSelfHire={false} storageKey="gb_safety_browse" />
+
+      {/* ── How it works (above filter for new users) ── */}
+      <HowItWorksSection />
 
       {/* ── Filter panel ── */}
       <div
@@ -1183,9 +1201,6 @@ export default function Browse() {
           </div>
         )}
       </div>
-
-      {/* ── How it works ── */}
-      <HowItWorksSection />
 
       {/* ── Content ── */}
       {isLoading ? (
