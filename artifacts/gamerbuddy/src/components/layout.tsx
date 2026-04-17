@@ -8,7 +8,7 @@ import {
   Gamepad2, Compass, LayoutDashboard, Wallet, User as UserIcon,
   LogOut, FileText, Bell, CheckCheck, X, Swords, Star,
   Trophy, MessageSquare, Zap, CircleDollarSign, ChevronRight, Menu,
-  ArrowLeft, Info, Shield, Users, Globe, Sun, Moon, Sparkles, Map,
+  ArrowLeft, Info, Shield, Users, Globe, Sun, Moon, Sparkles, Map, Heart,
 } from "lucide-react";
 import { useTheme } from "@/lib/theme";
 import { RegionalClock } from "@/components/regional-clock";
@@ -319,7 +319,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
           { href: "/profile",     label: t.nav.profile,     icon: UserIcon        },
         ]
       : []),
-    { href: "/roadmap",  label: "Roadmap", icon: Map   },
+    { href: "/roadmap",  label: "Roadmap",   icon: Map   },
+    { href: "/our-story", label: "Our Story", icon: Heart },
     { href: "https://www.superr.bio/gamerbuddy", label: "Social", icon: Globe },
     { href: "/about",    label: t.nav.about, icon: Info },
   ];
@@ -370,6 +371,32 @@ export function Layout({ children }: { children: React.ReactNode }) {
                       background: "rgba(168,85,247,0.06)",
                       border: "1px solid rgba(168,85,247,0.28)",
                       color: "rgba(192,132,252,0.70)",
+                    }}
+                  >
+                    <item.icon className="h-3.5 w-3.5 shrink-0" />
+                    {item.label}
+                  </Link>
+                );
+              }
+
+              const isOurStory = item.href === "/our-story";
+              if (isOurStory) {
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="flex items-center gap-1.5 text-sm font-black whitespace-nowrap transition-all duration-200 px-3 py-1.5 rounded-full text-white"
+                    style={{
+                      background: isActive
+                        ? "linear-gradient(135deg, #a855f7 0%, #7c3aed 60%, #22d3ee 100%)"
+                        : "linear-gradient(135deg, rgba(168,85,247,0.18) 0%, rgba(34,211,238,0.18) 100%)",
+                      border: isActive
+                        ? "1px solid rgba(168,85,247,0.70)"
+                        : "1px solid rgba(168,85,247,0.40)",
+                      color: isActive ? "#fff" : "rgba(192,132,252,0.90)",
+                      boxShadow: isActive
+                        ? "0 0 18px rgba(168,85,247,0.40), 0 0 6px rgba(34,211,238,0.20)"
+                        : "0 0 10px rgba(168,85,247,0.18)",
                     }}
                   >
                     <item.icon className="h-3.5 w-3.5 shrink-0" />
@@ -463,6 +490,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
             {navItems.map((item) => {
               const isActive = location.startsWith(item.href);
               const isCommunity = item.href === "/community";
+              const isOurStoryMobile = item.href === "/our-story";
               const isExternal = item.href.startsWith("http");
 
               if (isExternal) {
@@ -500,6 +528,30 @@ export function Layout({ children }: { children: React.ReactNode }) {
                       background: "rgba(168,85,247,0.05)",
                       borderColor: "rgba(168,85,247,0.30)",
                       color: "rgba(192,132,252,0.75)",
+                    }}
+                  >
+                    <item.icon className="h-5 w-5 shrink-0" />
+                    {item.label}
+                  </Link>
+                );
+              }
+
+              if (isOurStoryMobile) {
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="flex items-center gap-3 px-4 py-3.5 rounded-xl border font-black text-base transition-all duration-200"
+                    style={isActive ? {
+                      background: "linear-gradient(135deg, #a855f7 0%, #7c3aed 60%, #22d3ee 100%)",
+                      borderColor: "rgba(168,85,247,0.70)",
+                      color: "#fff",
+                      boxShadow: "0 0 24px rgba(168,85,247,0.35), 0 0 8px rgba(34,211,238,0.20)",
+                    } : {
+                      background: "linear-gradient(135deg, rgba(168,85,247,0.10) 0%, rgba(34,211,238,0.10) 100%)",
+                      borderColor: "rgba(168,85,247,0.40)",
+                      color: "rgba(192,132,252,0.90)",
+                      boxShadow: "0 0 12px rgba(168,85,247,0.15)",
                     }}
                   >
                     <item.icon className="h-5 w-5 shrink-0" />
@@ -575,9 +627,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
             <div className="flex flex-col gap-4">
               <div className="flex flex-wrap gap-x-6 gap-y-2">
                 {[
-                  { href: "/browse",   label: t.footer.browse,         icon: Compass },
-                  { href: "/roadmap",  label: "Roadmap",                icon: Map     },
-                  { href: "/about",    label: t.footer.aboutDisclaimer, icon: Shield  },
+                  { href: "/browse",     label: t.footer.browse,         icon: Compass },
+                  { href: "/roadmap",   label: "Roadmap",                icon: Map     },
+                  { href: "/our-story", label: "Our Story",              icon: Heart   },
+                  { href: "/about",     label: t.footer.aboutDisclaimer, icon: Shield  },
                 ].map(({ href, label, icon: Icon }) => (
                   <Link
                     key={href}

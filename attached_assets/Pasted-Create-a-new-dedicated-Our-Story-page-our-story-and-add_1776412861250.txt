@@ -1,0 +1,41 @@
+Create a new dedicated "Our Story" page (/our-story) and add a special glowing button for it.
+
+1. **New Page (/our-story)**:
+   - Title: Our Story
+   - Use this exact content:
+
+**Our Story**
+
+Hi, I'm Suryakant — known as Dualshot66 in the gaming world.
+
+When I was in 9th grade, I was going through a very dark time. I felt completely alone and depressed, and had decided to end my life. I had even planned exactly how I would do it.
+
+The night before, a neighbor kid asked me to install Assassin's Creed (2007) on his PC. I installed it on mine first… and ended up playing for 6 straight hours. That game gave me something to look forward to — the next mission, the next story.
+
+That small moment changed everything. Instead of going through with my plan, I stayed up playing. Gaming became my escape, my joy, and eventually my strongest friend. It pulled me out of depression and gave me a reason to keep going.
+
+Years later, I still see so many gamers who feel lonely or frustrated with random matchmaking. That’s why I created Gamerbuddy — to make it easier and safer for players to find reliable teammates for co-op, ranked practice, or casual sessions.
+
+Gaming saved me once. My hope is that this platform can help others feel less alone and create meaningful friendships through play.
+
+You can find me here:  
+• [Steam Profile](https://steamcommunity.com/profiles/76561198800662709/)  
+• [YouTube – Dualshot66](https://www.youtube.com/@Dualshot66)
+
+Thank you for being part of this journey.  
+Let’s build a better gaming community together.
+
+— Suryakant Ojha  
+Just a random not so special gamer that believes gaming has the power to unite all of us no matter what nation, religion, colour etc.
+
+2. **Add a glowing button**:
+   - Add a new button in the navigation or on the About page called **"Our Story"**.
+   - Give it a **special cyan/purple glow** (matching the brand) to make it stand out nicely.
+   - Link it to /our-story.
+
+3. **Link from About page**:
+   - Add a prominent link to "Our Story" on the main About page.
+
+Make the new page clean, dark-themed, and emotionally warm. Ensure the glowing button looks premium and attractive in both dark and light modes.
+
+Apply the changes and test the new page + button.

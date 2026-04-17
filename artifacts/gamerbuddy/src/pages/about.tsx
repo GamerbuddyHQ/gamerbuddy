@@ -1,4 +1,5 @@
-import { Shield, Info, Gamepad2, AlertTriangle, CheckCircle2, Users, Lock, Star, Zap } from "lucide-react";
+import { Shield, Info, Gamepad2, AlertTriangle, CheckCircle2, Users, Lock, Star, Zap, Heart } from "lucide-react";
+import { Link } from "wouter";
 
 const SECTIONS = [
   {
@@ -112,6 +113,43 @@ export default function About() {
 
         {/* Thin accent bar */}
         <div className="h-px bg-gradient-to-r from-primary/60 via-secondary/40 to-transparent" />
+
+        {/* Our Story CTA */}
+        <div
+          className="rounded-2xl border p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4"
+          style={{
+            background: "linear-gradient(135deg, rgba(168,85,247,0.07) 0%, rgba(34,211,238,0.07) 100%)",
+            borderColor: "rgba(168,85,247,0.25)",
+          }}
+        >
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            <div
+              className="h-10 w-10 rounded-xl flex items-center justify-center shrink-0"
+              style={{ background: "rgba(168,85,247,0.15)", border: "1px solid rgba(168,85,247,0.30)" }}
+            >
+              <Heart className="h-5 w-5" style={{ color: "#c084fc" }} />
+            </div>
+            <div>
+              <p className="text-xs font-black uppercase tracking-widest mb-0.5" style={{ color: "#a855f7" }}>
+                Founder's Note
+              </p>
+              <p className="text-sm text-muted-foreground leading-snug">
+                Learn why this platform exists — and the game that quite literally saved the founder's life.
+              </p>
+            </div>
+          </div>
+          <Link
+            href="/our-story"
+            className="shrink-0 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-black text-white whitespace-nowrap transition-all hover:scale-105 active:scale-95"
+            style={{
+              background: "linear-gradient(135deg, #a855f7 0%, #7c3aed 60%, #22d3ee 100%)",
+              boxShadow: "0 4px 20px rgba(168,85,247,0.35), 0 0 0 1px rgba(168,85,247,0.20)",
+            }}
+          >
+            <Heart className="h-4 w-4" />
+            Our Story
+          </Link>
+        </div>
 
         {/* About paragraphs */}
         <div className="space-y-4 text-foreground/80 leading-relaxed">
