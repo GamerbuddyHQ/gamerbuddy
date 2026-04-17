@@ -170,10 +170,16 @@ const RESPONSES: Array<{ patterns: RegExp; reply: string }> = [
     reply: `**Recording Sessions** 📹\n\nRecording is **entirely optional** and the responsibility of the person doing it.\n\n• Gamerbuddy does not record sessions on your behalf\n• If you plan to record or stream, **tell the other party before starting** — consent is key\n• Surprise recording without consent is a violation of the Code of Conduct and can be reported\n\nSimple rule: communicate first, record second. ✅`,
   },
 
+  /* ── OFF-PLATFORM / DIRECT DEALS ── */
+  {
+    patterns: /off.platform|outside.*platform|pay.*directly|direct.*pay|pay.*outside|deal.*outside|outside.*deal|skip.*escrow|bypass.*platform|move.*deal|cash.*deal|bank.*transfer.*direct|avoid.*fee|direct.*transfer/i,
+    reply: `💡 **Staying on Gamerbuddy is always the safest and simplest choice!**\n\nAll payments here go through our secure **escrow system** — it protects both hirers and gamers throughout the session.\n\nWe recommend keeping all arrangements and payments on the platform because:\n• 🛡️ Your funds are held safely in escrow until the session is properly completed\n• ✅ Both parties have clear protections, a full chat history, and a review process\n• 💬 Everything — chat, session flow, and payment — is in one place, making it simple and stress-free\n\nIf someone suggests moving money or arrangements off the platform, it's generally best to politely decline and use Gamerbuddy's built-in tools instead. It's the easiest and safest path for everyone involved 😊\n\nIf you feel pressured by another user, tap the 🚩 **Report** button on their profile — our team will look into it.`,
+  },
+
   /* ── SAFETY / PASSWORDS ── */
   {
     patterns: /password|account.*shar|never.*share|security|scam|phish|login.*detail/i,
-    reply: `🚨 **Hard stop — this is the #1 safety rule on Gamerbuddy:**\n\n**NEVER share your account password.** Not Steam. Not Epic. Not PlayStation. Not Xbox. Not your Gamerbuddy account. Nothing.\n\nReal verified gamers will **never** ask for your login. If anyone does:\n1. Say no\n2. Hit the 🚩 **Report** button and flag them immediately\n\n**Also watch out for:**\n• Anyone asking to move money outside Gamerbuddy (PayPal, gift cards, bank transfer) — instant scam, you lose your escrow protection\n• Fake profiles with no verification badge\n• Suspiciously low bids with pressure to "pay me directly"\n\nAll payments on Gamerbuddy are protected by escrow. If it's not going through the platform, it's not safe. 🛡️`,
+    reply: `🚨 **Hard stop — this is the #1 safety rule on Gamerbuddy:**\n\n**NEVER share your account password.** Not Steam. Not Epic. Not PlayStation. Not Xbox. Not your Gamerbuddy account. Nothing.\n\nReal verified gamers will **never** ask for your login. If anyone does:\n1. Say no\n2. Hit the 🚩 **Report** button and flag them immediately\n\n**Also watch out for:**\n• Anyone suggesting payment outside Gamerbuddy (PayPal, gift cards, bank transfer) — you'd lose your escrow protection\n• Fake profiles with no verification badge\n• Suspiciously low bids with pressure to "pay me directly"\n\nAll payments on Gamerbuddy are protected by escrow. Staying on the platform is always the safest choice for everyone 🛡️`,
   },
 
   /* ── YOU CANNOT HIRE YOURSELF ── */

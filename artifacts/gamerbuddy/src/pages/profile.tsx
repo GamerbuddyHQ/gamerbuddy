@@ -494,8 +494,14 @@ const GAMER_RULES = [
   {
     n: 8,
     title: "Understand the 10% Platform Fee",
-    body: "Gamerbuddy deducts a 10% platform fee from every completed Quest/Job. You keep 90% of your agreed price. This is clearly shown before every payment release. Do not try to move payments off-platform to avoid this fee — it results in an instant ban.",
+    body: "Gamerbuddy deducts a 10% platform fee from every completed Quest/Job. You keep 90% of your agreed price. This is clearly shown before every payment release.",
     icon: "💸",
+  },
+  {
+    n: 9,
+    title: "Keep All Payments Through Gamerbuddy",
+    body: "For everyone's protection, we encourage all transactions to happen through Gamerbuddy's escrow system. Staying on the platform is the safest and most secure option for both hirers and gamers — and it's the simplest way too.",
+    icon: "🔐",
   },
 ];
 

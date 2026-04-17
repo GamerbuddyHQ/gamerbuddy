@@ -238,6 +238,12 @@ function ChatPanel({
         </div>
       )}
 
+      {/* Safety tip */}
+      <div className="px-4 py-2 border-b border-border/30 bg-amber-500/3 flex items-start gap-2">
+        <span className="text-[13px] shrink-0 leading-none mt-px">💡</span>
+        <span className="text-[11px] text-amber-300/65 leading-snug">Please keep all arrangements on Gamerbuddy. Using our escrow system is the safest and simplest way for everyone.</span>
+      </div>
+
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-3 space-y-2 min-h-[220px] max-h-72">
         {isLoading ? (
@@ -526,7 +532,7 @@ function AcceptModal({
             placeholder="e.g. GamerBuddy#1234"
             className="bg-background"
           />
-          <p className="text-xs text-muted-foreground">Share your Discord to coordinate your session outside the platform. Never share account passwords.</p>
+          <p className="text-xs text-muted-foreground">Share your Discord to coordinate session details like timing and voice chat. All payments stay safely inside Gamerbuddy's escrow — never share account passwords.</p>
         </div>
 
         <Button
@@ -1138,10 +1144,8 @@ function BidCard({
             <div className="flex-1 min-w-0 space-y-1">
               {/* Row 1: Name + verified */}
               <div className="flex items-center gap-2 flex-wrap">
-                <Link href={`/users/${bid.bidderId}`}>
-                  <a className="font-extrabold text-white text-base leading-none hover:text-primary transition-colors">
-                    {bid.bidderName}
-                  </a>
+                <Link href={`/users/${bid.bidderId}`} className="font-extrabold text-white text-base leading-none hover:text-primary transition-colors">
+                  {bid.bidderName}
                 </Link>
                 <VerifiedBadge idVerified={bid.bidderIdVerified ?? false} variant="compact" />
                 {isMe && <span className="text-xs text-secondary font-semibold">(You)</span>}
@@ -2625,6 +2629,16 @@ export default function RequestDetail() {
                 )}
               </div>
             </div>
+
+            {/* ── Safety tip for hirers viewing bids ── */}
+            {isHirer && !loadingBids && bids.length > 0 && (
+              <div className="flex items-start gap-2 rounded-xl border border-blue-500/18 bg-blue-500/5 px-3.5 py-2.5">
+                <span className="text-[13px] shrink-0 leading-none mt-0.5">💡</span>
+                <p className="text-[11px] text-blue-300/70 leading-snug">
+                  For your safety, we recommend completing all payments through Gamerbuddy's secure escrow system. Making deals outside the platform can carry risks, so it's best to stay on the website.
+                </p>
+              </div>
+            )}
 
             {/* ── Filter panel (sticky desktop-only) ── */}
             {!loadingBids && bids.length > 1 && (

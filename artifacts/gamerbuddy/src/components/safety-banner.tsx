@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { ShieldAlert, X, ChevronDown, ChevronUp, Lock, Video, UserX } from "lucide-react";
+import { ShieldAlert, X, ChevronDown, ChevronUp, Lock, Video, UserX, ShieldCheck } from "lucide-react";
 
 type Variant = "full" | "compact";
 
@@ -14,6 +14,11 @@ const WARNINGS = [
     icon: Lock,
     title: "Never share account passwords",
     body: "Do not give anyone your Steam, Epic Games, PlayStation, Xbox, or any other game account password — not even your session partner.",
+  },
+  {
+    icon: ShieldCheck,
+    title: "Keep all payments through Gamerbuddy",
+    body: "We suggest completing all hires and payments through the Gamerbuddy platform. Using our built-in escrow system is the safest and simplest option for everyone — it protects both hirers and gamers.",
   },
   {
     icon: Video,
@@ -58,7 +63,7 @@ export function SafetyBanner({ variant = "full", showSelfHire = true, storageKey
         <ShieldAlert className="h-4 w-4 shrink-0 mt-0.5 text-amber-400" />
         <span className="text-amber-300/90 flex-1">
           <strong className="text-amber-300">Safety reminder:</strong>{" "}
-          Never share your Steam, Epic, or any game account passwords. All activity stays on-platform.
+          Never share account passwords, and keep all payments through Gamerbuddy's secure escrow — it's the safest and simplest choice for everyone.
         </span>
         <button onClick={handleDismiss} className="text-amber-400/50 hover:text-amber-400 transition-colors shrink-0 mt-0.5">
           <X className="h-4 w-4" />
@@ -94,6 +99,7 @@ export function SafetyBanner({ variant = "full", showSelfHire = true, storageKey
       {!expanded && (
         <div className="px-4 pb-3 text-xs text-amber-300/70 border-t border-amber-500/20 pt-2.5 flex flex-wrap gap-x-4 gap-y-1">
           <span className="flex items-center gap-1.5"><Lock className="h-3 w-3 text-amber-400/70" /> Never share account passwords</span>
+          <span className="flex items-center gap-1.5"><ShieldCheck className="h-3 w-3 text-amber-400/70" /> Keep payments through Gamerbuddy</span>
           <span className="flex items-center gap-1.5"><Video className="h-3 w-3 text-amber-400/70" /> Recording is your responsibility</span>
           {showSelfHire && <span className="flex items-center gap-1.5"><UserX className="h-3 w-3 text-amber-400/70" /> You cannot hire yourself</span>}
         </div>
