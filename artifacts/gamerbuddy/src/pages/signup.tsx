@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { Link, useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -17,7 +17,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Gamepad2, ShieldCheck, Upload, Clock, Info } from "lucide-react";
+import { Gamepad2, ShieldCheck, Gamepad } from "lucide-react";
 
 const signupSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -31,7 +31,6 @@ export default function Signup() {
   const { login } = useAuth();
   const { toast } = useToast();
   const signupMutation = useSignup();
-  const [idFile, setIdFile] = useState<File | null>(null);
 
   const form = useForm<z.infer<typeof signupSchema>>({
     resolver: zodResolver(signupSchema),
@@ -44,18 +43,8 @@ export default function Signup() {
   });
 
   function onSubmit(values: z.infer<typeof signupSchema>) {
-    if (!idFile) {
-      toast({ title: "Official ID Required", description: "Please upload an official ID for verification.", variant: "destructive" });
-      return;
-    }
-
     signupMutation.mutate(
-      {
-        data: {
-          ...values,
-          officialId: idFile,
-        } as any,
-      },
+      { data: values as any },
       {
         onSuccess: (data) => {
           login(data.user);
@@ -96,7 +85,7 @@ export default function Signup() {
             </div>
           </div>
           <CardTitle className="text-2xl font-extrabold uppercase tracking-tight text-white">Join Gamerbuddy</CardTitle>
-          <CardDescription>Create your account and start playing or earning</CardDescription>
+          <CardDescription>Create your free account — no ID upload needed</CardDescription>
         </CardHeader>
 
         <CardContent className="px-6">
@@ -180,46 +169,20 @@ export default function Signup() {
                 )}
               />
 
-              {/* ID Upload */}
-              <div className="space-y-2">
-                <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground block">
-                  Official ID Upload{" "}
-                  <span className="text-primary normal-case tracking-normal font-semibold">(Required for verification)</span>
-                </label>
-                <label
-                  className={`flex items-center gap-3 cursor-pointer rounded-xl border px-4 py-3 transition-all ${
-                    idFile
-                      ? "border-green-500/40 bg-green-500/5 text-green-400"
-                      : "border-border/60 bg-background/60 text-muted-foreground hover:border-primary/40 hover:text-white"
-                  }`}
-                >
-                  <Upload className="h-4 w-4 shrink-0" />
-                  <span className="text-sm truncate">
-                    {idFile ? idFile.name : "Click to upload image or PDF"}
-                  </span>
-                  <Input
-                    type="file"
-                    accept="image/*,.pdf"
-                    onChange={(e) => setIdFile(e.target.files?.[0] || null)}
-                    className="hidden"
-                  />
-                </label>
-                <p className="text-[11px] text-muted-foreground">We need this to verify you are a real gamer. Your ID is stored securely.</p>
-              </div>
-
-              {/* Verification timeline notice */}
+              {/* Gaming account verification notice */}
               <div
-                className="flex items-start gap-3 rounded-xl px-4 py-3"
+                className="flex items-start gap-3 rounded-xl px-4 py-3.5"
                 style={{
                   background: "rgba(168,85,247,0.07)",
                   border: "1px solid rgba(168,85,247,0.2)",
                 }}
               >
-                <Clock className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                <Gamepad className="h-4 w-4 text-primary mt-0.5 shrink-0" />
                 <div>
-                  <p className="text-xs font-semibold text-white mb-0.5">Verification helps keep Gamerbuddy safe</p>
+                  <p className="text-xs font-semibold text-white mb-1">Verification for full access</p>
                   <p className="text-[11px] text-muted-foreground leading-relaxed">
-                    It usually takes 7–15 days. You can browse requests right away — posting and hiring unlock once you're verified.
+                    To post requests or place bids, connect your Steam, Epic, PlayStation, Xbox, or Nintendo Switch account on your profile.
+                    We review within 24 hours. Keeping the account Public during review helps us verify real gaming activity.
                   </p>
                 </div>
               </div>
