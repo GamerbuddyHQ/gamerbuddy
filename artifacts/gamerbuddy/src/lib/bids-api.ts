@@ -16,6 +16,7 @@ export type Bid = {
   bidderHasQuestForGame?: boolean;
   bidderCountry?: string | null;
   bidderGender?: string | null;
+  bidderGamingAccounts?: { platform: string; username: string }[];
   price: number;
   message: string;
   status: string;
@@ -73,13 +74,13 @@ export type GamingAccount = {
 
 export const GAMING_PLATFORM_META: Record<
   string,
-  { label: string; color: string; bg: string; border: string; emoji: string; profileUrl?: string }
+  { label: string; shortLabel: string; color: string; bg: string; border: string; emoji: string; profileUrl?: string }
 > = {
-  steam:  { label: "Steam",             color: "#1b2838", bg: "rgba(102,192,244,0.12)", border: "rgba(102,192,244,0.3)",  emoji: "🖥️",  profileUrl: "https://steamcommunity.com/id/{username}" },
-  epic:   { label: "Epic Games",        color: "#2f2f2f", bg: "rgba(255,255,255,0.08)", border: "rgba(255,255,255,0.22)", emoji: "🎮" },
-  psn:    { label: "PlayStation",       color: "#003087", bg: "rgba(0,70,174,0.14)",   border: "rgba(0,70,174,0.35)",    emoji: "🎮",  profileUrl: "https://my.playstation.com/profile/{username}" },
-  xbox:   { label: "Xbox",             color: "#107c10", bg: "rgba(16,124,16,0.14)",  border: "rgba(16,124,16,0.35)",   emoji: "🎮",  profileUrl: "https://www.xbox.com/en-US/play/user/{username}" },
-  switch: { label: "Nintendo Switch",  color: "#e4000f", bg: "rgba(228,0,15,0.12)",   border: "rgba(228,0,15,0.30)",    emoji: "🎮" },
+  steam:  { label: "Steam",            shortLabel: "Steam",  color: "#66c0f4", bg: "rgba(102,192,244,0.13)", border: "rgba(102,192,244,0.32)", emoji: "🖥️",  profileUrl: "https://steamcommunity.com/id/{username}" },
+  epic:   { label: "Epic Games",       shortLabel: "Epic",   color: "#e5e5e5", bg: "rgba(255,255,255,0.08)", border: "rgba(255,255,255,0.22)", emoji: "⚡" },
+  psn:    { label: "PlayStation",      shortLabel: "PSN",    color: "#0096fe", bg: "rgba(0,100,220,0.13)",   border: "rgba(0,100,220,0.32)",   emoji: "🎮",  profileUrl: "https://my.playstation.com/profile/{username}" },
+  xbox:   { label: "Xbox",             shortLabel: "Xbox",   color: "#52b043", bg: "rgba(16,124,16,0.13)",   border: "rgba(16,124,16,0.32)",   emoji: "🟢",  profileUrl: "https://www.xbox.com/en-US/play/user/{username}" },
+  switch: { label: "Nintendo Switch",  shortLabel: "Switch", color: "#ff6666", bg: "rgba(228,0,15,0.12)",    border: "rgba(228,0,15,0.30)",    emoji: "🔴" },
 };
 
 export const STREAMING_PLATFORM_META: Record<

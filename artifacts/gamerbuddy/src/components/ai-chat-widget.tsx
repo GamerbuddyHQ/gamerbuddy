@@ -92,6 +92,12 @@ const RESPONSES: Array<{ patterns: RegExp; reply: string }> = [
     reply: `**My Quest** is your gamer showcase on your profile — live in Phase 1! 🎯\n\nAdd entries to show hirers exactly what you offer:\n• The **game** you play\n• **How you help** (e.g. "Carry to Platinum", "Raid leader", "Coach beginners")\n• Your **playstyle** (e.g. "patient, chill, mic optional")\n\nA detailed Quest section massively improves your bid acceptance rate — it's the difference between being scrolled past and getting hired immediately. Edit it from your **[Profile](/profile)** page.\n\n⚠️ Note: The upcoming **Quest System** (challenges with bonus points & badges) is a different feature arriving in **Phase 3**.`,
   },
 
+  /* ── GAMING ACCOUNT CONNECTIONS — Phase 1 LIVE ── */
+  {
+    patterns: /gaming.*account|connected.*account|link.*steam|link.*epic|link.*psn|link.*xbox|link.*switch|steam.*connect|epic.*connect|psn.*connect|xbox.*connect|nintendo.*connect|verify.*gaming|gaming.*profile.*trust|connect.*gaming|account.*badge|platform.*badge|bid.*trust|trust.*bid/i,
+    reply: `**Connected Gaming Accounts** are live on Gamerbuddy right now! 🎮✅\n\nAs a gamer, linking your accounts builds instant trust with hirers — they can see at a glance which platforms you actually play on.\n\n**Platforms you can connect:**\n• 🖥️ **Steam** — links to your Steam profile\n• ⚡ **Epic Games**\n• 🎮 **PlayStation Network (PSN)**\n• 🟢 **Xbox**\n• 🔴 **Nintendo Switch**\n\n**How it shows up:**\n• Small coloured badges appear on your **bid card** — every hirer reviewing bids can see them instantly\n• They also appear on your **full profile** page\n• Hirers browsing bids immediately see which platforms you're verified on\n\n**Why it matters:**\nConnected accounts prove you're a real, active gamer — not just an account. Hirers feel far more confident accepting a bid from someone with a linked Steam or PSN profile.\n\n**How to connect:**\n1. Go to your **[Profile](/profile)** page\n2. Scroll to **"Gaming Accounts"**\n3. Click any platform → enter your username → hit Connect ✔️\n\n🌟 Linking a gaming account also adds **40 points** to your Profile Power score. Don't skip it — it's one of the biggest trust signals on your bid card!`,
+  },
+
   /* ── STREAMING CONNECTIONS — Phase 1 LIVE ── */
   {
     patterns: /twitch|youtube.*gaming|kick.*stream|stream.*connect|connect.*account|link.*stream|streaming.*platform|streaming.*channel|link.*channel|connect.*channel|facebook.*gaming|tiktok.*live/i,

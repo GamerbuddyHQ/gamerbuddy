@@ -18,6 +18,7 @@ import {
   useReportUser,
   useUserProfile,
   STREAMING_PLATFORM_META,
+  GAMING_PLATFORM_META,
   type Bid,
   type ChatMessage,
 } from "@/lib/bids-api";
@@ -671,6 +672,77 @@ function BidderStreamingBadges({ bidderId, compact = false }: { bidderId: number
   );
 }
 
+function BidderGamingBadges({
+  accounts,
+  compact = false,
+}: {
+  accounts?: { platform: string; username: string }[];
+  compact?: boolean;
+}) {
+  if (!accounts || accounts.length === 0) return null;
+
+  if (compact) {
+    return (
+      <>
+        {accounts.map((ga) => {
+          const meta = GAMING_PLATFORM_META[ga.platform];
+          if (!meta) return null;
+          const url = meta.profileUrl?.replace("{username}", ga.username);
+          const Tag = url ? "a" : "span";
+          const linkProps = url
+            ? { href: url, target: "_blank", rel: "noopener noreferrer", onClick: (e: React.MouseEvent) => e.stopPropagation() }
+            : {};
+          return (
+            <Tag
+              key={ga.platform}
+              {...linkProps}
+              className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[9px] font-bold transition-all hover:brightness-110"
+              style={{ background: meta.bg, border: `1px solid ${meta.border}`, color: meta.color }}
+              title={`${meta.label}: ${ga.username}`}
+            >
+              <span className="leading-none">{meta.emoji}</span>
+              <span className="hidden sm:inline">{meta.shortLabel}</span>
+              <span className="opacity-60 text-[8px]">✓</span>
+            </Tag>
+          );
+        })}
+      </>
+    );
+  }
+
+  return (
+    <div className="rounded-xl border border-border/30 bg-background/20 p-3">
+      <div className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/60 mb-2 flex items-center gap-1">
+        <span>🎮</span> Connected Gaming Accounts
+      </div>
+      <div className="flex flex-wrap gap-1.5">
+        {accounts.map((ga) => {
+          const meta = GAMING_PLATFORM_META[ga.platform];
+          if (!meta) return null;
+          const url = meta.profileUrl?.replace("{username}", ga.username);
+          const Tag = url ? "a" : "span";
+          const linkProps = url
+            ? { href: url, target: "_blank", rel: "noopener noreferrer" }
+            : {};
+          return (
+            <Tag
+              key={ga.platform}
+              {...linkProps}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-bold transition-all hover:brightness-110 hover:scale-[1.03]"
+              style={{ background: meta.bg, border: `1px solid ${meta.border}`, color: meta.color }}
+            >
+              <span className="text-sm leading-none">{meta.emoji}</span>
+              <span>{meta.label}</span>
+              <span className="opacity-55 font-mono text-[10px]">{ga.username}</span>
+              <span className="text-emerald-400 text-[10px] font-extrabold">✓</span>
+            </Tag>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function BulkProgressCard({
   acceptedBidsCount,
   bulkSlotsNeeded,
@@ -1156,7 +1228,7 @@ function BidCard({
                 )}
               </div>
 
-              {/* Row 2: Trust + reputation + compact streaming */}
+              {/* Row 2: Trust + reputation + compact streaming + compact gaming */}
               <div className="flex items-center gap-1.5 flex-wrap">
                 <TrustChip value={bid.bidderTrustFactor ?? 50} />
                 <ReputationBadges
@@ -1169,6 +1241,7 @@ function BidCard({
                     beginnerFriendly: false,
                   }).filter((b) => b.id !== "verified")}
                 />
+                <BidderGamingBadges accounts={bid.bidderGamingAccounts} compact />
                 <BidderStreamingBadges bidderId={bid.bidderId} compact />
               </div>
 
@@ -1317,7 +1390,8 @@ function BidCard({
             </p>
           </div>
 
-          {/* ── Streaming + Quest ── */}
+          {/* ── Gaming Accounts + Streaming + Quest ── */}
+          <BidderGamingBadges accounts={bid.bidderGamingAccounts} />
           <BidderStreamingBadges bidderId={bid.bidderId} />
           {!isMe && <BidderQuestSummary bidderId={bid.bidderId} gameName={gameName} />}
 

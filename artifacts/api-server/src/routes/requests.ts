@@ -258,6 +258,7 @@ function formatBid(
   bidderHasQuestForGame?: boolean,
   bidderCountry?: string | null,
   bidderGender?: string | null,
+  bidderGamingAccounts?: { platform: string; username: string }[],
 ) {
   return {
     id: bid.id,
@@ -273,6 +274,7 @@ function formatBid(
     bidderHasQuestForGame: bidderHasQuestForGame ?? false,
     bidderCountry: bidderCountry ?? null,
     bidderGender: bidderGender ?? null,
+    bidderGamingAccounts: bidderGamingAccounts ?? [],
     price: parseFloat(bid.price),
     message: bid.message,
     status: bid.status,
@@ -321,7 +323,7 @@ router.get("/requests/:id/bids", async (req, res): Promise<void> => {
   const bidderIds = [...new Set(rows.map((r) => r.bidderId).filter(Boolean))] as number[];
 
   // Batch queries — all run in parallel
-  const [sessionCounts, ratingRows, streamingRows, questRows] = await Promise.all([
+  const [sessionCounts, ratingRows, streamingRows, questRows, gamingRows] = await Promise.all([
     // Completed session counts
     bidderIds.length > 0
       ? db.select({ bidderId: bidsTable.bidderId, count: sql<string>`COUNT(*)::int` })
@@ -352,6 +354,12 @@ router.get("/requests/:id/bids", async (req, res): Promise<void> => {
           .from(questEntriesTable)
           .where(and(inArray(questEntriesTable.userId, bidderIds), sql`LOWER(${questEntriesTable.gameName}) = LOWER(${gameName})`))
       : Promise.resolve([]),
+    // Gaming accounts for each bidder
+    bidderIds.length > 0
+      ? db.select({ userId: gamingAccountsTable.userId, platform: gamingAccountsTable.platform, username: gamingAccountsTable.username })
+          .from(gamingAccountsTable)
+          .where(inArray(gamingAccountsTable.userId, bidderIds))
+      : Promise.resolve([]),
   ]);
 
   const sessMap: Record<number, number> = {};
@@ -362,6 +370,12 @@ router.get("/requests/:id/bids", async (req, res): Promise<void> => {
 
   const streamingSet = new Set((streamingRows as { userId: number }[]).map((r) => r.userId));
   const questSet = new Set((questRows as { userId: number }[]).map((r) => r.userId));
+
+  const gamingMap: Record<number, { platform: string; username: string }[]> = {};
+  for (const g of gamingRows as { userId: number; platform: string; username: string }[]) {
+    if (!gamingMap[g.userId]) gamingMap[g.userId] = [];
+    gamingMap[g.userId].push({ platform: g.platform, username: g.username });
+  }
 
   res.json(
     rows.map((r) =>
@@ -377,6 +391,7 @@ router.get("/requests/:id/bids", async (req, res): Promise<void> => {
         questSet.has(r.bidderId),
         r.bidderCountry ?? null,
         r.bidderGender ?? null,
+        gamingMap[r.bidderId] ?? [],
       ),
     ),
   );
