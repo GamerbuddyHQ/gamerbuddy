@@ -111,6 +111,8 @@ const VALID_PLATFORMS    = ["PC", "PS5", "Xbox", "Mobile", "Switch", "PS4", "Xbo
 const VALID_SKILL_LEVELS = ["Beginner-Friendly", "Intermediate", "Expert", "Chill"] as const;
 const VALID_GEO_GENDERS  = ["any", "male", "female", "non_binary", "no_say"] as const;
 
+const VALID_EXPIRY_OPTIONS = ["forever", "24h", "48h", "7d"] as const;
+
 export const PostRequestSchema = z.object({
   gameName:         trimmedStr(1, 80, "Game name"),
   platform:         z.enum(VALID_PLATFORMS,    { errorMap: () => ({ message: "Invalid platform" }) }),
@@ -120,6 +122,7 @@ export const PostRequestSchema = z.object({
   bulkGamersNeeded: z.number().int().min(3).max(100).optional(),
   preferredCountry: z.string().max(60).optional().default("any"),
   preferredGender:  z.enum(VALID_GEO_GENDERS).optional().default("any"),
+  expiryOption:     z.enum(VALID_EXPIRY_OPTIONS).optional().default("forever"),
 }).refine(
   (d) => !d.isBulkHiring || (d.bulkGamersNeeded !== undefined && d.bulkGamersNeeded >= 3),
   { message: "Bulk hiring requires 3–100 gamers", path: ["bulkGamersNeeded"] },

@@ -19,7 +19,10 @@ const STATUS_STYLE: Record<string, string> = {
   in_progress: "border-primary/40 text-primary bg-primary/10",
   completed: "border-secondary/40 text-secondary bg-secondary/10",
   cancelled: "border-border text-muted-foreground",
+  expired: "border-orange-500/40 text-orange-400 bg-orange-500/10",
 };
+
+const TWENTY_FOUR_H = 24 * 60 * 60 * 1000;
 
 function RequestBidsPanel({ requestId, requestStatus }: { requestId: number; requestStatus: string }) {
   const { toast } = useToast();
@@ -197,6 +200,30 @@ export default function MyRequests() {
       </div>
 
       <SafetyBanner showSelfHire={false} storageKey="gb_safety_my" />
+
+      {/* 24h open with no activity nudge */}
+      {requests && requests.filter(r =>
+        r.status === "open" &&
+        (Date.now() - new Date(r.createdAt).getTime()) > TWENTY_FOUR_H
+      ).length > 0 && (
+        <div
+          className="flex items-start gap-3 rounded-xl border px-5 py-4 text-sm"
+          style={{
+            background: "rgba(251,191,36,0.07)",
+            borderColor: "rgba(251,191,36,0.25)",
+            color: "rgba(251,191,36,0.85)",
+          }}
+        >
+          <Clock className="h-4 w-4 mt-0.5 shrink-0 opacity-80" />
+          <div>
+            <span className="font-bold">Heads up!</span> You have{" "}
+            {requests.filter(r => r.status === "open" && (Date.now() - new Date(r.createdAt).getTime()) > TWENTY_FOUR_H).length}{" "}
+            request{requests.filter(r => r.status === "open" && (Date.now() - new Date(r.createdAt).getTime()) > TWENTY_FOUR_H).length > 1 ? "s" : ""} open
+            for over 24 hours. Try refining the objectives or sharing on the{" "}
+            <a href="/community" className="underline font-semibold">Community tab</a> to attract more bids! 🎮
+          </div>
+        </div>
+      )}
 
       {/* Content */}
       {isLoading ? (

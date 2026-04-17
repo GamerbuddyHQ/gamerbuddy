@@ -24,6 +24,15 @@ const VALID_PLATFORMS = [
 
 const VALID_SKILL_LEVELS = ["Beginner", "Intermediate", "Expert", "Chill"];
 
+/* ── Expiry helpers ──────────────────────────────────────────────────────── */
+function calcExpiresAt(option: string): Date | null {
+  const now = new Date();
+  if (option === "24h") return new Date(now.getTime() + 24 * 60 * 60 * 1000);
+  if (option === "48h") return new Date(now.getTime() + 48 * 60 * 60 * 1000);
+  if (option === "7d")  return new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+  return null; // "forever"
+}
+
 function formatRequest(
   req: {
     id: number;
@@ -47,6 +56,7 @@ function formatRequest(
     hasQuestBidder?: boolean | null;
     preferredCountry?: string | null;
     preferredGender?: string | null;
+    expiresAt?: Date | null;
   },
   userName?: string,
   userIdVerified?: boolean,
@@ -75,15 +85,31 @@ function formatRequest(
     hasQuestBidder: req.hasQuestBidder ?? false,
     preferredCountry: req.preferredCountry ?? "any",
     preferredGender: req.preferredGender ?? "any",
+    expiresAt: req.expiresAt ? req.expiresAt.toISOString() : null,
   };
 }
 
 router.get("/requests", async (req, res): Promise<void> => {
-  const { platform, skillLevel, status } = req.query as {
+  const { platform, skillLevel, status, includeExpired } = req.query as {
     platform?: string;
     skillLevel?: string;
     status?: string;
+    includeExpired?: string;
   };
+
+  // Auto-expire: mark open requests whose expiresAt has passed and have 0 bids
+  const now = new Date();
+  await db
+    .update(gameRequestsTable)
+    .set({ status: "expired" })
+    .where(
+      and(
+        eq(gameRequestsTable.status, "open"),
+        sql`${gameRequestsTable.expiresAt} IS NOT NULL`,
+        sql`${gameRequestsTable.expiresAt} <= ${now}`,
+        sql`(SELECT COUNT(*) FROM bids WHERE bids.request_id = ${gameRequestsTable.id}) = 0`,
+      ),
+    );
 
   const result = await db
     .select({
@@ -99,6 +125,7 @@ router.get("/requests", async (req, res): Promise<void> => {
       bulkGamersNeeded: gameRequestsTable.bulkGamersNeeded,
       preferredCountry: gameRequestsTable.preferredCountry,
       preferredGender: gameRequestsTable.preferredGender,
+      expiresAt: gameRequestsTable.expiresAt,
       userName: usersTable.name,
       userIdVerified: usersTable.idVerified,
       bidCount: sql<number>`(SELECT COUNT(*) FROM bids WHERE bids.request_id = ${gameRequestsTable.id})`.mapWith(Number),
@@ -113,8 +140,11 @@ router.get("/requests", async (req, res): Promise<void> => {
     .leftJoin(usersTable, eq(gameRequestsTable.userId, usersTable.id))
     .orderBy(desc(gameRequestsTable.createdAt));
 
+  const showExpired = includeExpired === "true";
+
   const filtered = result.filter((r) => {
     if (r.isBulkHiring) return false; // Phase 1: bulk hiring hidden
+    if (!showExpired && r.status === "expired") return false; // hide expired by default
     if (platform && r.platform !== platform) return false;
     if (skillLevel && r.skillLevel !== skillLevel) return false;
     if (status && r.status !== status) return false;
@@ -126,6 +156,21 @@ router.get("/requests", async (req, res): Promise<void> => {
 
 router.get("/requests/my", requireAuth, async (req, res): Promise<void> => {
   const user = req.user!;
+
+  // Auto-expire open requests with passed expiresAt and 0 bids before returning
+  const now = new Date();
+  await db
+    .update(gameRequestsTable)
+    .set({ status: "expired" })
+    .where(
+      and(
+        eq(gameRequestsTable.userId, user.id),
+        eq(gameRequestsTable.status, "open"),
+        sql`${gameRequestsTable.expiresAt} IS NOT NULL`,
+        sql`${gameRequestsTable.expiresAt} <= ${now}`,
+        sql`(SELECT COUNT(*) FROM bids WHERE bids.request_id = ${gameRequestsTable.id}) = 0`,
+      ),
+    );
 
   const result = await db
     .select()
@@ -161,6 +206,7 @@ router.get("/requests/:id", async (req, res): Promise<void> => {
       bulkGamersNeeded: gameRequestsTable.bulkGamersNeeded,
       preferredCountry: gameRequestsTable.preferredCountry,
       preferredGender: gameRequestsTable.preferredGender,
+      expiresAt: gameRequestsTable.expiresAt,
       userName: usersTable.name,
       acceptedBidsCount: sql<number>`(SELECT COUNT(*) FROM bids WHERE bids.request_id = ${gameRequestsTable.id} AND bids.status = 'accepted')`.mapWith(Number),
     })
@@ -204,10 +250,11 @@ router.post("/requests", requireAuth, validate(PostRequestSchema), async (req, r
     return;
   }
 
-  const { gameName, platform, skillLevel, objectives, isBulkHiring, bulkGamersNeeded, preferredCountry, preferredGender } = req.body as {
+  const { gameName, platform, skillLevel, objectives, isBulkHiring, bulkGamersNeeded, preferredCountry, preferredGender, expiryOption } = req.body as {
     gameName: string; platform: string; skillLevel: string; objectives: string;
     isBulkHiring: boolean; bulkGamersNeeded?: number;
     preferredCountry: string; preferredGender: string;
+    expiryOption?: string;
   };
 
   if (isBulkHiring) {
@@ -216,6 +263,8 @@ router.post("/requests", requireAuth, validate(PostRequestSchema), async (req, r
     });
     return;
   }
+
+  const expiresAt = calcExpiresAt(expiryOption ?? "forever");
 
   const [gameRequest] = await db
     .insert(gameRequestsTable)
@@ -230,6 +279,7 @@ router.post("/requests", requireAuth, validate(PostRequestSchema), async (req, r
       bulkGamersNeeded: isBulkHiring ? Number(bulkGamersNeeded) : null,
       preferredCountry: preferredCountry || "any",
       preferredGender:  preferredGender  || "any",
+      expiresAt,
     })
     .returning();
 

@@ -26,6 +26,12 @@ const RESPONSES: Array<{ patterns: RegExp; reply: string }> = [
     reply: `Easy! Here's how to post a request and get skilled gamers knocking on your door 🎮\n\n**Requirements first:**\n• You need at least **$10.75 in your Hiring Wallet** to post\n• Your wallet is capped at **$1,000 max**\n\n**Steps:**\n1. Head to your **Dashboard** or click **"Post Request"**\n2. Fill in:\n   • **Game** — what you're playing\n   • **Platform** — PC, PS5, Xbox, Switch, Steam Deck, Mobile\n   • **Skill Level** — Beginner-Friendly, Decent, Best/Expert, Chill\n   • **Objectives** — be specific! (e.g. "Carry me to Diamond in Apex")\n   • **Preferred Nation** — any country or "Any / Worldwide"\n   • **Preferred Gender** — or "No preference"\n3. Submit — verified gamers start bidding immediately! 💥\n\n💡 **Pro tip:** Clear objectives = better bids. The more detail, the better players you attract!`,
   },
 
+  /* ── REQUEST EXPIRY ── */
+  {
+    patterns: /expir|how long.*open|request.*close|close.*request|no.*bid.*why|why.*no.*bid|request.*expire|time.*left|auto.*close/i,
+    reply: `**Request Expiry** ⏰\n\nWhen you post a request, you choose how long it stays open if nobody bids:\n\n• **♾️ Forever** (default) — stays open until you cancel it manually\n• **⏰ 24 Hours** — auto-closes after 24h with zero bids\n• **⏰ 48 Hours** — auto-closes after 48h with zero bids\n• **📅 7 Days** — auto-closes after 7 days with zero bids\n\n**Key rules:**\n• Expiry only triggers if there are **zero bids** — if even one gamer bids, it stays open!\n• Expired requests show as **"expired"** in your My Requests page\n• Browse hides expired requests by default (toggle **"Show Expired"** to see them)\n• You can always cancel manually before expiry\n\n💡 **Pro tip:** If your request has been open 24h+ with no bids, try improving your objectives description or refreshing interest on the Community tab!`,
+  },
+
   /* ── BIDDING / GETTING HIRED ── */
   {
     patterns: /bid|apply.*request|get hired|become.*gamer|earn.*money|hired|place.*bid/i,

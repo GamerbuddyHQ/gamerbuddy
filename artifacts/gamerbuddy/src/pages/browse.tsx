@@ -366,6 +366,17 @@ function GameAvatar({ name, bar }: { name: string; bar: string }) {
 }
 
 /* ── REQUEST CARD ────────────────────────────────────────────────────────── */
+function formatTimeLeft(expiresAt: string): string {
+  const diff = new Date(expiresAt).getTime() - Date.now();
+  if (diff <= 0) return "Expired";
+  const totalMinutes = Math.floor(diff / 60000);
+  const h = Math.floor(totalMinutes / 60);
+  const d = Math.floor(h / 24);
+  if (d >= 1) return `${d}d left`;
+  if (h >= 1) return `${h}h left`;
+  return `${totalMinutes}m left`;
+}
+
 function RequestCard({ req }: { req: GameRequest }) {
   const [expanded, setExpanded] = useState(false);
   const [, setLocation] = useLocation();
@@ -499,6 +510,21 @@ function RequestCard({ req }: { req: GameRequest }) {
                     {GENDER_MAP[req.preferredGender!].icon} {GENDER_MAP[req.preferredGender!].label}
                   </span>
                 )}
+                {req.status === "expired" ? (
+                  <span
+                    className="inline-flex items-center gap-1.5 text-xs rounded-full px-4 py-2 font-bold"
+                    style={{ background: "rgba(239,68,68,0.09)", border: "1px solid rgba(239,68,68,0.25)", color: "rgba(239,68,68,0.80)" }}
+                  >
+                    <Clock className="h-3 w-3 shrink-0" /> Expired
+                  </span>
+                ) : req.expiresAt ? (
+                  <span
+                    className="inline-flex items-center gap-1.5 text-xs rounded-full px-4 py-2 font-bold"
+                    style={{ background: "rgba(251,191,36,0.09)", border: "1px solid rgba(251,191,36,0.25)", color: "rgba(251,191,36,0.85)" }}
+                  >
+                    <Clock className="h-3 w-3 shrink-0" /> {formatTimeLeft(req.expiresAt)}
+                  </span>
+                ) : null}
               </div>
 
               {/* Row 4: Bid stats */}
@@ -729,8 +755,12 @@ export default function Browse() {
   const [hasQuestFilter, setHasQuestFilter]   = useState(false);
   const [countryFilter, setCountryFilter]     = useState("any");
   const [genderFilter, setGenderFilter]       = useState("any");
+  const [showExpired, setShowExpired]         = useState(false);
 
-  const { data: allRequests, isLoading, isError } = useBrowseRequests({ status: "open" });
+  const { data: allRequests, isLoading, isError } = useBrowseRequests({
+    status: showExpired ? undefined : "open",
+    includeExpired: showExpired,
+  });
 
   /* ── Client-side filter + sort ── */
   const requests = allRequests
@@ -749,6 +779,7 @@ export default function Browse() {
       if (hasQuestFilter && !r.hasQuestBidder) return false;
       if (countryFilter !== "any" && r.preferredCountry !== "any" && r.preferredCountry !== countryFilter) return false;
       if (genderFilter !== "any" && r.preferredGender !== "any" && r.preferredGender !== genderFilter) return false;
+      if (showExpired && r.status !== "open" && r.status !== "expired") return false;
       return true;
     })
     ?.sort((a, b) => {
@@ -783,15 +814,16 @@ export default function Browse() {
   if (hasQuestFilter)          activeTags.push({ id: "quest",     label: "Quest Bids",                                                                                                       onRemove: () => setHasQuestFilter(false),     rgb: "251,191,36",  Icon: Sparkles     });
   if (countryFilter !== "any") activeTags.push({ id: "country",   label: `${COUNTRY_MAP[countryFilter]?.flag ?? "🌍"} ${COUNTRY_MAP[countryFilter]?.label ?? countryFilter}`,              onRemove: () => setCountryFilter("any"),      rgb: "252,211,77",  Icon: Globe        });
   if (genderFilter !== "any")  activeTags.push({ id: "gender",    label: `${GENDER_MAP[genderFilter]?.icon ?? ""} ${GENDER_MAP[genderFilter]?.label ?? genderFilter}`.trim(),              onRemove: () => setGenderFilter("any"),       rgb: "236,72,153",  Icon: UserRound    });
+  if (showExpired)             activeTags.push({ id: "expired",   label: "Showing Expired",                                                                                                      onRemove: () => setShowExpired(false),        rgb: "239,68,68",   Icon: Clock        });
 
   const hasFilters = activeTags.length > 0;
   const clearFilters = () => {
     setSearch(""); setPlatform("all"); setSort("newest"); setLevelFilter("all");
     setVerifiedPosterOnly(false); setBulkOnly(false); setNoBidsOnly(false);
     setHasStreamingFilter(false); setHasQuestFilter(false);
-    setCountryFilter("any"); setGenderFilter("any");
+    setCountryFilter("any"); setGenderFilter("any"); setShowExpired(false);
   };
-  const filterKey = `${sort}|${levelFilter}|${platform}|${+verifiedPosterOnly}|${+bulkOnly}|${+noBidsOnly}|${+hasStreamingFilter}|${+hasQuestFilter}|${countryFilter}|${genderFilter}|${search}`;
+  const filterKey = `${sort}|${levelFilter}|${platform}|${+verifiedPosterOnly}|${+bulkOnly}|${+noBidsOnly}|${+hasStreamingFilter}|${+hasQuestFilter}|${countryFilter}|${genderFilter}|${+showExpired}|${search}`;
   const showFiller = !isLoading && !isError && requests && requests.length > 0 && requests.length <= 3;
 
   return (
@@ -1048,6 +1080,7 @@ export default function Browse() {
             {([
               { label: "Verified Poster", Icon: Shield, on: verifiedPosterOnly, set: () => setVerifiedPosterOnly(v => !v), activeStyle: { bg: "rgba(34,197,94,0.18)",   border: "rgba(34,197,94,0.50)",   color: "#4ade80", glow: "rgba(34,197,94,0.16)"   } },
               { label: "Easy Wins",       Icon: Flame,  on: noBidsOnly,         set: () => setNoBidsOnly(v => !v),         activeStyle: { bg: "rgba(34,211,238,0.15)", border: "rgba(34,211,238,0.45)", color: "#22d3ee", glow: "rgba(34,211,238,0.14)" } },
+              { label: "Show Expired",    Icon: Clock,  on: showExpired,        set: () => setShowExpired(v => !v),        activeStyle: { bg: "rgba(239,68,68,0.15)",  border: "rgba(239,68,68,0.45)",  color: "#f87171", glow: "rgba(239,68,68,0.14)"  } },
             ] as const).map(({ label, Icon, on, set, activeStyle }) => (
               <button
                 key={label}

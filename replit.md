@@ -95,7 +95,7 @@ A full-stack gaming marketplace web app where users can hire other gamers to pla
 Core hiring MVP is live. All non-core features are locked and redirect to Coming Soon pages.
 
 **Active (Phase 1):**
-- Post Request, Browse, Bid (verified users only), Accept, Escrow, Session flow, Reviews, Wallets, Verification, Nation/Gender filtering
+- Post Request, Browse, Bid (verified users only), Accept, Escrow, Session flow, Reviews, Wallets, Verification, Nation/Gender filtering, Request Expiry (forever / 24h / 48h / 7d; auto-closes at 0 bids; browse "Show Expired" toggle; 24h soft nudge on My Requests)
 - Rate limiting: `bidLimiter` enforced on `POST /requests/:id/bids` (5 bids/min)
 - Verified-only bidding: enforced server-side via `idVerified` check before bid insertion
 - Payment keys: 100% env-based via `process.env` (RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET, STRIPE_SECRET_KEY, STRIPE_PUBLISHABLE_KEY) — add-funds page shows "Payments Not Yet Active" preview banner since no keys are configured yet

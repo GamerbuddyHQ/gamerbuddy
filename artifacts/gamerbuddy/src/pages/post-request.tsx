@@ -37,6 +37,7 @@ import {
   Users,
   Globe,
   UserRound,
+  Clock,
 } from "lucide-react";
 import { SafetyBanner } from "@/components/safety-banner";
 import { usePostRequest } from "@/lib/bids-api";
@@ -108,6 +109,7 @@ export default function PostRequest() {
   const [bulkError, setBulkError] = useState("");
   const [preferredCountry, setPreferredCountry] = useState("any");
   const [preferredGender, setPreferredGender] = useState("any");
+  const [expiryOption, setExpiryOption] = useState<"forever" | "24h" | "48h" | "7d">("forever");
 
   const { data: wallets, isLoading: isLoadingWallets } = useGetWallets({
     query: { queryKey: getGetWalletsQueryKey() },
@@ -152,6 +154,7 @@ export default function PostRequest() {
         bulkGamersNeeded: isBulkHiring ? bulkGamersNeeded : undefined,
         preferredCountry,
         preferredGender,
+        expiryOption,
       },
       {
         onSuccess: () => {
@@ -439,6 +442,38 @@ export default function PostRequest() {
                       disabled={!canPost}
                     />
                   </div>
+                </div>
+              </div>
+
+              {/* Request Expiry */}
+              <div className="rounded-xl border border-border/50 bg-background/30 p-5 space-y-3">
+                <div className="flex items-center gap-2 mb-1">
+                  <Clock className="h-4 w-4 text-primary/70" />
+                  <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Request Expiry</span>
+                  <span className="text-[10px] text-muted-foreground/50">(auto-close if 0 bids)</span>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  {([
+                    { value: "forever", label: "♾️ Forever",  desc: "Never auto-closes" },
+                    { value: "24h",     label: "⏰ 24 Hours", desc: "Closes if no bids" },
+                    { value: "48h",     label: "⏰ 48 Hours", desc: "Closes if no bids" },
+                    { value: "7d",      label: "📅 7 Days",   desc: "Closes if no bids" },
+                  ] as const).map(({ value, label, desc }) => (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => setExpiryOption(value)}
+                      disabled={!canPost}
+                      className={`flex flex-col items-start gap-0.5 p-3 rounded-xl border text-left text-xs font-semibold transition-all duration-200 ${
+                        expiryOption === value
+                          ? "border-primary/60 bg-primary/10 text-primary"
+                          : "border-border/40 bg-background/20 text-muted-foreground hover:border-primary/30"
+                      }`}
+                    >
+                      <span className="text-sm leading-tight">{label}</span>
+                      <span className="text-[10px] font-normal opacity-60">{desc}</span>
+                    </button>
+                  ))}
                 </div>
               </div>
 

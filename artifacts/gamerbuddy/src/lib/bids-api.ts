@@ -156,6 +156,7 @@ export type GameRequest = {
   avgBidderRating?: number | null;
   hasStreamingBidder?: boolean;
   hasQuestBidder?: boolean;
+  expiresAt?: string | null;
 };
 
 export const bidKeys = {
@@ -166,11 +167,12 @@ export const bidKeys = {
   requests: (params: Record<string, string>) => ["browse-requests", params] as const,
 };
 
-export function useBrowseRequests(params: { platform?: string; skillLevel?: string; status?: string } = {}) {
+export function useBrowseRequests(params: { platform?: string; skillLevel?: string; status?: string; includeExpired?: boolean } = {}) {
   const filtered: Record<string, string> = {};
   if (params.platform) filtered.platform = params.platform;
   if (params.skillLevel) filtered.skillLevel = params.skillLevel;
   if (params.status) filtered.status = params.status;
+  if (params.includeExpired) filtered.includeExpired = "true";
   const qs = new URLSearchParams(filtered).toString();
   return useQuery<GameRequest[]>({
     queryKey: bidKeys.requests(filtered),
@@ -271,7 +273,7 @@ export function usePostRequest() {
   return useMutation<
     any,
     any,
-    { gameName: string; platform: string; skillLevel: string; objectives: string; isBulkHiring?: boolean; bulkGamersNeeded?: number; preferredCountry?: string; preferredGender?: string }
+    { gameName: string; platform: string; skillLevel: string; objectives: string; isBulkHiring?: boolean; bulkGamersNeeded?: number; preferredCountry?: string; preferredGender?: string; expiryOption?: string }
   >({
     mutationFn: (body) =>
       apiFetch(`${BASE}/requests`, { method: "POST", body: JSON.stringify(body) }),
