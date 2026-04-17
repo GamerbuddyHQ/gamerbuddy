@@ -683,7 +683,8 @@ function BidderGamingBadges({
 
   if (compact) {
     return (
-      <>
+      <div className="flex items-center gap-1.5 flex-wrap">
+        <span className="text-[9px] font-semibold text-muted-foreground/50 shrink-0">Connected Accounts:</span>
         {accounts.map((ga) => {
           const meta = GAMING_PLATFORM_META[ga.platform];
           if (!meta) return null;
@@ -700,13 +701,12 @@ function BidderGamingBadges({
               style={{ background: meta.bg, border: `1px solid ${meta.border}`, color: meta.color }}
               title={`${meta.label}: ${ga.username}`}
             >
-              <span className="leading-none">{meta.emoji}</span>
               <span className="hidden sm:inline">{meta.shortLabel}</span>
-              <span className="opacity-60 text-[8px]">✓</span>
+              <span className="opacity-75 text-[9px]">✓</span>
             </Tag>
           );
         })}
-      </>
+      </div>
     );
   }
 
@@ -1228,7 +1228,7 @@ function BidCard({
                 )}
               </div>
 
-              {/* Row 2: Trust + reputation + compact streaming + compact gaming */}
+              {/* Row 2: Trust + reputation + compact streaming */}
               <div className="flex items-center gap-1.5 flex-wrap">
                 <TrustChip value={bid.bidderTrustFactor ?? 50} />
                 <ReputationBadges
@@ -1241,9 +1241,11 @@ function BidCard({
                     beginnerFriendly: false,
                   }).filter((b) => b.id !== "verified")}
                 />
-                <BidderGamingBadges accounts={bid.bidderGamingAccounts} compact />
                 <BidderStreamingBadges bidderId={bid.bidderId} compact />
               </div>
+
+              {/* Row 2b: Connected gaming accounts with label */}
+              <BidderGamingBadges accounts={bid.bidderGamingAccounts} compact />
 
               {/* Row 3: Geo pills + timestamp */}
               <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
