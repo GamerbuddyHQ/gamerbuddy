@@ -37,9 +37,15 @@ app.use(
   }),
 );
 
+// In production, FRONTEND_URL must be set to the Vercel domain so cookies work
+// correctly across origins. In dev, origin:true reflects the request origin.
+const corsOrigin = process.env.FRONTEND_URL
+  ? process.env.FRONTEND_URL.split(",").map((s) => s.trim())
+  : true;
+
 app.use(
   cors({
-    origin: true,
+    origin: corsOrigin,
     credentials: true,
   }),
 );

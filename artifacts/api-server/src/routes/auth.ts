@@ -12,6 +12,19 @@ const router: IRouter = Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
 const SESSION_DURATION_MS = 7 * 24 * 60 * 60 * 1000;
+const isProd = process.env.NODE_ENV === "production";
+
+// Cross-origin split deployment (Vercel frontend ↔ Railway backend) requires
+// SameSite=None; Secure so the browser sends the cookie across origins.
+// In development (same origin) SameSite=Lax is correct and doesn't need HTTPS.
+function sessionCookieOptions(expiresAt: Date) {
+  return {
+    httpOnly: true,
+    sameSite: (isProd ? "none" : "lax") as "none" | "lax",
+    secure: isProd,
+    expires: expiresAt,
+  };
+}
 
 function formatUser(user: {
   id: number;
@@ -92,12 +105,7 @@ router.post(
     const expiresAt = new Date(Date.now() + SESSION_DURATION_MS);
     await db.insert(sessionsTable).values({ userId: user.id, token, expiresAt });
 
-    res.cookie("session_token", token, {
-      httpOnly: true,
-      sameSite: "lax",
-      expires: expiresAt,
-      secure: process.env.NODE_ENV === "production",
-    });
+    res.cookie("session_token", token, sessionCookieOptions(expiresAt));
 
     req.log.info({ userId: user.id }, "User signed up");
     res.status(201).json({
@@ -181,12 +189,7 @@ router.post("/auth/login", loginLimiter, validate(LoginSchema), async (req, res)
   const expiresAt = new Date(Date.now() + SESSION_DURATION_MS);
   await db.insert(sessionsTable).values({ userId: user.id, token, expiresAt });
 
-  res.cookie("session_token", token, {
-    httpOnly: true,
-    sameSite: "lax",
-    expires: expiresAt,
-    secure: process.env.NODE_ENV === "production",
-  });
+  res.cookie("session_token", token, sessionCookieOptions(expiresAt));
 
   req.log.info({ userId: user.id }, "User logged in");
   res.json({
@@ -200,7 +203,13 @@ router.post("/auth/logout", async (req, res): Promise<void> => {
   if (token) {
     await db.delete(sessionsTable).where(eq(sessionsTable.token, token));
   }
-  res.clearCookie("session_token");
+  // Must pass matching SameSite/Secure options so browser actually clears the
+  // cross-origin cookie in production. Without these, logout silently fails.
+  res.clearCookie("session_token", {
+    httpOnly: true,
+    sameSite: (isProd ? "none" : "lax") as "none" | "lax",
+    secure: isProd,
+  });
   res.json({ success: true, message: "Logged out" });
 });
 

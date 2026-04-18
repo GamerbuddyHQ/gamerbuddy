@@ -121,3 +121,35 @@ Core hiring MVP is live. All non-core features are locked and redirect to Coming
 - `/community` → Coming Soon (Phase 2)
 - `/tournaments` + `/my-tournaments` + `/tournaments/:id` → Coming Soon (Phase 3)
 - `/socials` → Coming Soon (Phase 2)
+
+## Production Deployment
+
+Split deployment: **Vercel (frontend) + Railway (backend)**. Socket.io requires a persistent server — not compatible with Vercel serverless functions.
+
+### Frontend → Vercel
+- `vercel.json` at project root configures build + SPA routing
+- Build: `pnpm --filter @workspace/gamerbuddy run build` → output at `artifacts/gamerbuddy/dist/public`
+- Env vars required on Vercel:
+  - `VITE_API_URL` — full Railway backend URL (e.g. `https://gamerbuddy-api.up.railway.app`)
+  - `NODE_ENV=production`
+
+### Backend → Railway
+- `artifacts/api-server/railway.json` configures Railway build + health check
+- Set **Root Directory** to `artifacts/api-server` in Railway project settings
+- Env vars required on Railway:
+  - `DATABASE_URL` — PostgreSQL connection string
+  - `SESSION_SECRET` — long random string
+  - `RAZORPAY_KEY_ID` / `RAZORPAY_KEY_SECRET` — use test keys until go-live
+  - `FRONTEND_URL` — Vercel app URL (e.g. `https://gamerbuddy.vercel.app`), comma-separated for multiple origins
+  - `NODE_ENV=production`
+  - `PORT` — auto-provided by Railway
+
+### Cross-Origin Auth Notes
+- Session cookies use `SameSite=None; Secure` in production (set in `auth.ts` via `isProd` flag)
+- CORS uses `FRONTEND_URL` env var in production; falls back to `origin:true` in dev
+- Both Express CORS and Socket.io CORS updated to read `FRONTEND_URL`
+- `clearCookie` on logout passes matching `SameSite/Secure` options so browser actually clears the cross-origin cookie
+
+### Test Mode
+- Test Mode banner visible on every page (below navbar, dismissible, persists via localStorage key `gb_test_banner_dismissed_v1`)
+- Razorpay is in test mode — switch `RAZORPAY_KEY_ID` / `RAZORPAY_KEY_SECRET` to `rzp_live_` keys when ready to go live

@@ -5,9 +5,13 @@ import { logger } from "./lib/logger";
 let io: SocketIO | null = null;
 
 export function createSocketServer(httpServer: HttpServer): SocketIO {
+  const corsOrigin = process.env.FRONTEND_URL
+    ? process.env.FRONTEND_URL.split(",").map((s) => s.trim())
+    : true;
+
   io = new SocketIO(httpServer, {
     cors: {
-      origin: true,
+      origin: corsOrigin,
       credentials: true,
     },
     path: "/api/socket.io",
