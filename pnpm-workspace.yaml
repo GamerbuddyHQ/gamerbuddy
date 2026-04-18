@@ -18,7 +18,7 @@ catalog:
   '@vitejs/plugin-react': ^5.0.4
   class-variance-authority: ^0.7.1
   clsx: ^2.1.1
-  drizzle-orm: ^0.45.1
+  drizzle-orm: ^0.45.2
   framer-motion: ^12.23.24
   lucide-react: ^0.545.0
   react: 19.1.0
@@ -26,7 +26,7 @@ catalog:
   tailwind-merge: ^3.3.1
   tailwindcss: ^4.1.14
   tsx: ^4.21.0
-  vite: ^7.3.0
+  vite: ^7.3.2
   zod: 3.25.76
 
 minimumReleaseAge: 1440
@@ -123,3 +123,19 @@ overrides:
   rollup>@rollup/rollup-win32-ia32-msvc: '-'
   rollup>@rollup/rollup-win32-x64-gnu: '-'
   rollup>@rollup/rollup-win32-x64-msvc: '-'
+
+  # ── Security patches ─────────────────────────────────────────────────────
+  # picomatch v4 ReDoS (GHSA-c2c7-rcm5-vvqj) — used by vite directly
+  vite>picomatch: ^4.0.4
+  # picomatch v2 ReDoS — used by fast-glob>micromatch (scoped to avoid clash with v4 above)
+  micromatch>picomatch: ^2.3.2
+  # path-to-regexp ReDoS via optional groups + wildcards (CVE-2026-4926, CVE-2026-4923)
+  path-to-regexp: ^8.4.2
+  # lodash code injection via template + prototype pollution (GHSA-35jh, GHSA-f23m)
+  lodash: ^4.18.1
+  # follow-redirects leaks auth headers cross-domain (GHSA-r4q5-vmmm-2653)
+  follow-redirects: ^1.16.0
+  # brace-expansion ReDoS (advisory 1115541)
+  brace-expansion: ^2.1.0
+  # yaml stack overflow via deeply nested collections (GHSA-48c2-rrv3-qjmp)
+  yaml: ^2.8.3
