@@ -185,36 +185,53 @@ export default function Home() {
       </div>
 
       {/* ═══════════════════ HERO ═══════════════════ */}
-      <section className="relative flex flex-col items-center justify-center text-center px-4 pt-16 pb-20 lg:pt-24 lg:pb-28 overflow-hidden">
+      <section className="relative flex flex-col items-center justify-center text-center px-4 pt-16 pb-24 lg:pt-28 lg:pb-32 overflow-hidden">
         {/* animated canvas particles */}
         <ParticleCanvas />
 
-        {/* background orbs — softened, warmer */}
+        {/* Wide cinematic backdrop gradient */}
         <div
-          className="absolute top-[-5%] left-[-8%] w-[50vw] h-[50vw] max-w-[600px] max-h-[600px] rounded-full pointer-events-none"
+          className="absolute inset-0 pointer-events-none"
           style={{
-            background: "radial-gradient(circle, rgba(168,85,247,0.13) 0%, transparent 65%)",
+            background: "radial-gradient(ellipse 100% 80% at 50% 0%, rgba(124,58,237,0.18) 0%, rgba(168,85,247,0.08) 40%, transparent 70%)",
+            zIndex: 0,
+          }}
+        />
+
+        {/* background orbs — large and wide for cinematic feel */}
+        <div
+          className="absolute top-[-10%] left-[-10%] w-[70vw] h-[70vw] rounded-full pointer-events-none"
+          style={{
+            background: "radial-gradient(circle, rgba(168,85,247,0.16) 0%, transparent 60%)",
             animation: "float-slow 10s ease-in-out infinite",
             zIndex: 0,
           }}
         />
         <div
-          className="absolute bottom-[0%] right-[-5%] w-[40vw] h-[40vw] max-w-[500px] max-h-[500px] rounded-full pointer-events-none"
+          className="absolute bottom-[-5%] right-[-8%] w-[55vw] h-[55vw] rounded-full pointer-events-none"
           style={{
-            background: "radial-gradient(circle, rgba(34,211,238,0.09) 0%, transparent 65%)",
+            background: "radial-gradient(circle, rgba(34,211,238,0.10) 0%, transparent 60%)",
             animation: "float-slow-reverse 12s ease-in-out infinite",
             zIndex: 0,
           }}
         />
+        {/* Extra centre-top glow for purple depth */}
+        <div
+          className="absolute top-0 left-1/2 -translate-x-1/2 w-[60vw] h-[40vw] pointer-events-none"
+          style={{
+            background: "radial-gradient(ellipse 80% 60% at 50% 0%, rgba(147,51,234,0.22) 0%, transparent 65%)",
+            zIndex: 0,
+          }}
+        />
 
-        {/* dot grid overlay */}
+        {/* dot grid overlay — wider mask */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            backgroundImage: "radial-gradient(circle, rgba(168,85,247,0.09) 1px, transparent 1px)",
-            backgroundSize: "44px 44px",
+            backgroundImage: "radial-gradient(circle, rgba(168,85,247,0.10) 1px, transparent 1px)",
+            backgroundSize: "40px 40px",
             zIndex: 0,
-            maskImage: "radial-gradient(ellipse 70% 60% at 50% 40%, black 20%, transparent 100%)",
+            maskImage: "radial-gradient(ellipse 90% 70% at 50% 35%, black 10%, transparent 100%)",
           }}
         />
 
@@ -222,30 +239,31 @@ export default function Home() {
         <div className="relative max-w-5xl mx-auto w-full" style={{ zIndex: 2 }}>
 
           {/* eyebrow badge */}
-          <div className="flex justify-center mb-6">
+          <div className="flex justify-center mb-7">
             <div
-              className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-medium"
+              className="inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-semibold"
               style={{
-                background: "rgba(168,85,247,0.12)",
-                border: "1px solid rgba(168,85,247,0.28)",
+                background: "rgba(168,85,247,0.15)",
+                border: "1px solid rgba(168,85,247,0.35)",
                 color: "hsl(var(--primary))",
+                boxShadow: "0 0 20px rgba(168,85,247,0.15)",
               }}
             >
-              <Gamepad2 className="h-3.5 w-3.5" />
+              <Gamepad2 className="h-4 w-4" />
               {t.home.badge}
             </div>
           </div>
 
           {/* headline */}
-          <h1 className="font-black tracking-tight leading-tight mb-5">
-            <span className="block text-foreground text-4xl sm:text-6xl md:text-7xl lg:text-8xl">
+          <h1 className="font-black tracking-tight leading-[1.05] mb-6">
+            <span className="block text-foreground text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl">
               {t.home.headline1}
             </span>
             <span
-              className="block text-4xl sm:text-6xl md:text-7xl lg:text-8xl"
+              className="block text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl"
               style={{
                 color: "hsl(var(--primary))",
-                textShadow: "0 0 40px rgba(168,85,247,0.45), 0 2px 12px rgba(168,85,247,0.25)",
+                textShadow: "0 0 60px rgba(168,85,247,0.55), 0 0 20px rgba(168,85,247,0.30)",
               }}
             >
               {t.home.headline2}
@@ -253,24 +271,25 @@ export default function Home() {
           </h1>
 
           {/* subheadline */}
-          <p className="text-base sm:text-lg lg:text-xl leading-relaxed mb-8 mx-auto max-w-3xl"
+          <p className="text-base sm:text-lg lg:text-xl leading-relaxed mb-10 mx-auto max-w-2xl"
             style={{ color: "var(--text-subdued)" }}
           >
             {t.home.subheadline}
           </p>
 
-          {/* CTA buttons */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-8">
+          {/* CTA buttons — larger, better spaced */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 mb-10">
             <Link href="/signup">
               <button
-                className="group w-full sm:w-auto px-8 py-3.5 rounded-2xl font-bold text-base text-white transition-all duration-200 hover:brightness-110 active:scale-[0.98]"
+                className="group w-full sm:w-auto px-10 py-4 sm:px-12 sm:py-4.5 rounded-2xl font-bold text-base lg:text-lg text-white transition-all duration-200 hover:brightness-110 hover:scale-[1.03] active:scale-[0.98]"
                 style={{
                   background: "linear-gradient(135deg, #9333ea 0%, #7c3aed 100%)",
-                  boxShadow: "0 4px 20px rgba(147,51,234,0.4), 0 1px 4px rgba(0,0,0,0.3)",
+                  boxShadow: "0 6px 28px rgba(147,51,234,0.50), 0 2px 8px rgba(0,0,0,0.30)",
+                  minWidth: "200px",
                 }}
               >
-                <span className="flex items-center justify-center gap-2">
-                  <Users className="h-4 w-4" />
+                <span className="flex items-center justify-center gap-2.5">
+                  <Users className="h-5 w-5" />
                   {t.home.cta1}
                 </span>
               </button>
@@ -278,15 +297,18 @@ export default function Home() {
 
             <Link href="/browse">
               <button
-                className="group w-full sm:w-auto px-8 py-3.5 rounded-2xl font-semibold text-base transition-all duration-200 hover:brightness-110 active:scale-[0.98]"
+                className="group w-full sm:w-auto px-10 py-4 sm:px-12 rounded-2xl font-semibold text-base lg:text-lg transition-all duration-200 hover:brightness-110 hover:scale-[1.03] active:scale-[0.98]"
                 style={{
-                  background: "var(--glass-btn-bg)",
-                  border: "1.5px solid var(--glass-btn-border)",
+                  background: "rgba(255,255,255,0.05)",
+                  border: "1.5px solid rgba(255,255,255,0.15)",
                   color: "var(--text-subdued)",
+                  backdropFilter: "blur(8px)",
+                  boxShadow: "0 2px 12px rgba(0,0,0,0.20)",
+                  minWidth: "200px",
                 }}
               >
-                <span className="flex items-center justify-center gap-2">
-                  <Gamepad2 className="h-4 w-4" />
+                <span className="flex items-center justify-center gap-2.5">
+                  <Gamepad2 className="h-5 w-5" />
                   {t.home.cta2}
                 </span>
               </button>
@@ -294,16 +316,16 @@ export default function Home() {
           </div>
 
           {/* verification note */}
-          <p className="text-center text-[11px]" style={{ color: "var(--text-dim)" }}>
+          <p className="text-center text-xs mb-4" style={{ color: "var(--text-dim)" }}>
             Verification helps keep Gamerbuddy safe — it usually takes 24–48 hours
           </p>
 
           {/* trust bar */}
-          <div className="space-y-2">
+          <div className="space-y-2.5">
             <div className="flex items-center justify-center gap-2">
               <div className="flex items-center gap-0.5">
                 {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                  <Star key={i} className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
                 ))}
               </div>
               <span className="text-sm text-muted-foreground">
@@ -325,7 +347,7 @@ export default function Home() {
 
         {/* bottom fade into next section */}
         <div
-          className="absolute bottom-0 left-0 right-0 h-24 pointer-events-none"
+          className="absolute bottom-0 left-0 right-0 h-32 pointer-events-none"
           style={{
             background: "linear-gradient(to bottom, transparent, hsl(var(--background)))",
             zIndex: 2,
