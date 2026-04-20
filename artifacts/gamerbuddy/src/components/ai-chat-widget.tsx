@@ -74,6 +74,12 @@ const RESPONSES: Array<{ patterns: RegExp; reply: string }> = [
     reply: `**Tournaments** are coming in **Phase 2** — not live yet! 🏆\n\nPhase 1 supports only core 1-on-1 hiring sessions. When Tournaments drop in Phase 2:\n• Free to enter for all participants\n• Hirers approve every participant — no randos\n• Prize pools from $100–$10,000\n• 10% platform fee on prize payouts\n• Nation/Gender filters for regional showdowns\n\nFor competitive play right now, post a request and hire an expert — it's the best way to level up your game today!\n\nKeep an eye on the **[Roadmap](/roadmap)** for the Phase 2 launch. 🗺️`,
   },
 
+  /* ── FUNDS CUSTODY / WHERE IS MY MONEY ── */
+  {
+    patterns: /where.*money|where.*fund|where.*held|who hold|hold.*fund|custody|custod|gamerbuddy.*hold|hold.*earn|earn.*held|safe.*money|money.*safe|trust.*money|platform.*hold/i,
+    reply: `🔒 **Where Are Your Funds Held?**\n\nGreat question — here's the full transparency:\n\n**Hiring Wallet (Hirers)**\nFunds you deposit are held by Gamerbuddy in our own account. When you post a request and a bid is accepted, those funds are locked in escrow — still with us, but ring-fenced for that specific session.\n\n**Earnings Wallet (Gamers)**\nYour earned balance is held by Gamerbuddy and represents amounts owed to you. The balance in your Earnings Wallet is not a bank account — it's a record of what we owe you. Funds sit with us until you request a withdrawal and we process it.\n\n**When are funds released?**\n• Escrow is released automatically when both parties complete reviews\n• Earnings are credited immediately after session completion + reviews\n• Withdrawals are processed **every Monday** by our team\n\n**Settlement times after Monday processing:**\n🇮🇳 India (UPI / Bank Transfer): **1–2 business days**\n🌍 International (Bank Transfer): **5–7 business days**\n\n**Gamerbuddy is not a bank** and does not pay interest on held funds. Full details in our **[Disclaimer, Section 5](/about)**. 📋`,
+  },
+
   /* ── PAYOUT TIMING / WITHDRAWAL SCHEDULE ── */
   {
     patterns: /payout|pay.?out|when.*get paid|when.*paid|withdrawal.*time|time.*withdraw|how long.*withdraw|how long.*pay|when.*money|monday.*payout|weekly.*payout|payout.*week|5.7.*day|5-7.*business|international.*withdraw|india.*withdraw|upi.*withdraw|bank.*transfer.*time|instant.*pay|same.?day.*pay|difference.*payout|indian.*payout|global.*payout/i,

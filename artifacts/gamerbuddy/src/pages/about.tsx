@@ -1,4 +1,4 @@
-import { Shield, Info, Gamepad2, AlertTriangle, CheckCircle2, Users, Lock, Star, Zap, Heart, CalendarDays } from "lucide-react";
+import { Shield, Info, Gamepad2, AlertTriangle, CheckCircle2, Users, Lock, Star, Zap, Heart, CalendarDays, Banknote } from "lucide-react";
 import { Link } from "wouter";
 
 const SECTIONS = [
@@ -36,6 +36,14 @@ const SECTIONS = [
   },
   {
     number: "5",
+    title: "Funds Holding and Payouts",
+    icon: Banknote,
+    iconColor: "text-cyan-400",
+    content:
+      "Gamerbuddy holds funds deposited by Hirers and amounts owed to Gamers in its own account. Funds shown in a Gamer's Earnings Wallet represent balances owed to that Gamer but are custodied by the Platform until a withdrawal request is made and manually processed. We process all payouts every Monday. Gamerbuddy is not a bank and does not pay interest on held funds. Users acknowledge that they are relying on the Platform to process payouts in a timely manner after the $100 USD threshold is reached and a withdrawal is requested. Gamerbuddy will make every reasonable effort to process payouts on schedule, but does not guarantee specific settlement dates, as these are subject to third-party banking and payment provider timelines beyond our control.",
+  },
+  {
+    number: "6",
     title: "Password and Account Security",
     icon: Lock,
     iconColor: "text-red-400",
@@ -43,7 +51,7 @@ const SECTIONS = [
       "Users are strictly prohibited from sharing their Steam, Epic Games, PlayStation, Xbox, Nintendo Switch, or any other gaming account passwords or login credentials with any other user on the Platform, irrespective of any offers or assurances provided. Gamerbuddy will never request such credentials under any circumstances. Any solicitation of passwords or login details constitutes a serious violation and will result in immediate account suspension.",
   },
   {
-    number: "6",
+    number: "7",
     title: "Voice Communication",
     icon: Info,
     iconColor: "text-cyan-400",
@@ -51,7 +59,7 @@ const SECTIONS = [
       "Gamers must obtain explicit consent from the Hirer before initiating any form of voice communication, whether through Discord or in-game VoIP. Voice chat is never mandatory. Hirers retain absolute discretion to decline voice interaction or prefer text-only communication.",
   },
   {
-    number: "7",
+    number: "8",
     title: "Account Verification",
     icon: CheckCircle2,
     iconColor: "text-purple-400",
@@ -59,7 +67,7 @@ const SECTIONS = [
       "Following submission of identification documents, phone number, and email address, the verification process may require between seven (7) and fifteen (15) days for completion. During this period, certain Platform features, including the ability to post requests or engage in hiring activities, may remain restricted until full verification is approved. We reserve the sole right to approve, request additional documentation, or reject verification applications.",
   },
   {
-    number: "8",
+    number: "9",
     title: "Bulk Hiring",
     icon: Users,
     iconColor: "text-purple-400",
@@ -67,7 +75,7 @@ const SECTIONS = [
       "Bulk Hiring requests are permitted with a minimum of three (3) and a maximum of one hundred (100) gamers per session. All rules, fees, responsibilities, and safety protocols apply individually to each participant.",
   },
   {
-    number: "9",
+    number: "10",
     title: "Promoted Games and Rewards",
     icon: Star,
     iconColor: "text-amber-400",
@@ -75,7 +83,7 @@ const SECTIONS = [
       "Participation in sessions involving Promoted or Spotlight Games may qualify users for additional rewards, including bonus points, free game keys, or complimentary session credits, subject to successful completion and Platform verification.",
   },
   {
-    number: "10",
+    number: "11",
     title: "Limitation of Liability",
     icon: Shield,
     iconColor: "text-red-400",
@@ -83,7 +91,7 @@ const SECTIONS = [
       "To the maximum extent permitted by applicable law, Gamerbuddy, its owners, operators, affiliates, and representatives shall not be liable for any direct, indirect, incidental, consequential, special, or punitive damages arising from the use of the Platform, including but not limited to disputes between users, in-game losses, account penalties, technical failures, or any actions or omissions by individual users.",
   },
   {
-    number: "11",
+    number: "12",
     title: "Platform Rights and Enforcement",
     icon: Shield,
     iconColor: "text-purple-400",
@@ -91,7 +99,7 @@ const SECTIONS = [
       "In any and all scenarios, Gamerbuddy reserves the absolute and unrestricted right to act as it deems necessary to protect the integrity, safety, security, and quality of the Platform. This includes, without limitation, the right to review reports, suspend or permanently terminate accounts, remove content, withhold funds, impose restrictions, or take any other measures we consider appropriate. We will strictly enforce our rules and policies without exception.",
   },
   {
-    number: "12",
+    number: "13",
     title: "Minimum Hiring Fee",
     icon: Zap,
     iconColor: "text-green-400",
@@ -99,7 +107,7 @@ const SECTIONS = [
       "Gamerbuddy enforces a regional minimum hiring rate to ensure fair compensation for all Gamers. For Hirers based in India, the minimum fee is ₹350 (Indian Rupees) per hour of session time. For all other users — including those based in Europe, the United States, Canada, Australia, and all other countries — the minimum fee is $8 USD per hour. The minimum total for a session is calculated as: Number of Hours × Minimum Hourly Rate. Hirers are required to select their region (India or International) and specify session duration when posting a request. This minimum is displayed clearly on all request listings and in the bid panel. These rates are non-negotiable platform minimums designed to protect Gamers against exploitatively low offers and ensure that their time, skill, and effort are always fairly valued.",
   },
   {
-    number: "13",
+    number: "14",
     title: "Profile Photos & Identity",
     icon: Heart,
     iconColor: "text-pink-400",
@@ -107,7 +115,7 @@ const SECTIONS = [
       "All users are required to upload a minimum of one (1) main profile picture and a minimum of two (2) additional photos on their profile. All photos must be genuine, real solo photographs of the account holder only. Group photos are strictly prohibited. AI-generated, digitally altered, fake, or stolen images are strictly prohibited and constitute a serious violation of Platform policy. Duplicate photo uploads (the same image submitted more than once) are blocked automatically. Profile photos are reviewed by our moderation team and must be submitted in good faith. Failure to comply — including the use of fake, AI-generated, or deceptive photos — may result in immediate account suspension and forfeiture of any pending earnings. Profile photos are displayed on bid cards, public profiles, and request listings to build trust and transparency between all users.",
   },
   {
-    number: "14",
+    number: "15",
     title: "Earnings Wallet & Payout Policy",
     icon: CalendarDays,
     iconColor: "text-cyan-400",

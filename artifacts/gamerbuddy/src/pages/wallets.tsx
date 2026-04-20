@@ -310,6 +310,24 @@ export default function WalletsPage() {
               )}
             </div>
 
+            {/* Funds custody disclaimer */}
+            <div className="rounded-lg border border-cyan-500/15 bg-cyan-500/[0.03] px-4 py-3 text-xs space-y-1.5">
+              <div className="flex items-center gap-1.5 font-semibold text-cyan-300/80 uppercase tracking-wide text-[10px]">
+                <Info className="h-3 w-3 shrink-0" /> Where Your Funds Are Held
+              </div>
+              <p className="text-muted-foreground/70 leading-relaxed">
+                Funds in your Earnings Wallet are held by <strong className="text-foreground/80">Gamerbuddy</strong> and represent amounts owed to you. These funds remain in our account until you request a withdrawal and we manually process the payout.
+              </p>
+              <ul className="space-y-0.5 text-muted-foreground/60">
+                <li>📅 <strong className="text-foreground/70">Payouts processed:</strong> Every Monday</li>
+                <li>🇮🇳 <strong className="text-foreground/70">India (UPI / Bank Transfer):</strong> 1–2 business days</li>
+                <li>🌍 <strong className="text-foreground/70">International (Bank Transfer):</strong> 5–7 business days</li>
+              </ul>
+              <p className="text-muted-foreground/45 leading-relaxed pt-0.5 border-t border-border/20">
+                Gamerbuddy is not a bank and does not pay interest on held funds. See our <a href="/about" className="text-cyan-400/60 hover:text-cyan-400 underline underline-offset-2 transition-colors">Disclaimer (Section 5)</a> for the full funds holding and payout policy.
+              </p>
+            </div>
+
             {/* Progress bar — shown when below threshold */}
             {!wallets.canWithdraw && (
               <div className="space-y-1.5">
