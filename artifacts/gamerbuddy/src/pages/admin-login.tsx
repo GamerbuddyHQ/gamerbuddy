@@ -44,15 +44,24 @@ export default function AdminLogin() {
       });
       navigate("/admin/dashboard");
     } catch (err: unknown) {
-      const raw = err instanceof Error ? err.message : String(err);
-      if (raw.toLowerCase().includes("invalid") || raw.toLowerCase().includes("401")) {
-        setError("Login failed — check your email and password.");
+      const raw =
+        err instanceof Error
+          ? err.message
+          : typeof (err as any)?.error === "string"
+            ? (err as any).error
+            : typeof err === "string"
+              ? err
+              : "Login failed. Please try again.";
+      if (raw.toLowerCase().includes("invalid") || raw.toLowerCase().includes("incorrect") || raw.toLowerCase().includes("401")) {
+        setError("Invalid email or password. Please check your credentials.");
       } else if (raw.toLowerCase().includes("too many") || raw.toLowerCase().includes("429")) {
         setError("Too many login attempts. Please wait 15 minutes before trying again.");
       } else if (raw.toLowerCase().includes("503") || raw.toLowerCase().includes("not configured")) {
         setError("Admin auth is not configured on the server.");
+      } else if (raw.toLowerCase().includes("failed to fetch") || raw.toLowerCase().includes("networkerror") || raw.toLowerCase().includes("load failed")) {
+        setError("Cannot reach the server. Please check your connection and try again.");
       } else {
-        setError(raw || "Login failed. Please try again.");
+        setError(raw);
       }
     } finally {
       setLoading(false);
