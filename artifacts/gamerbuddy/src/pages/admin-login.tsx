@@ -74,7 +74,7 @@ export default function AdminLogin() {
         }}
       />
 
-      <div className="w-full max-w-md relative z-10">
+      <div className="w-full max-w-md lg:max-w-xl relative z-10">
         {/* Header */}
         <div className="text-center mb-8">
           <div className="relative inline-flex items-center justify-center mb-5">
