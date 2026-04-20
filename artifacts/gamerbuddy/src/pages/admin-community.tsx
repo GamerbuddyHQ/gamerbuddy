@@ -5,12 +5,14 @@ import { apiFetch, BASE } from "@/lib/bids-api";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDistanceToNow, format } from "date-fns";
 import {
   Shield, LogOut, Search, Eye, EyeOff, Trash2, Ban, CheckCircle2,
   RefreshCw, ArrowLeft, ThumbsUp, ThumbsDown, MessageSquare,
-  User, AlertTriangle, Tag, ShieldOff,
+  User, AlertTriangle, Tag, ShieldOff, Pin, PinOff, ChevronDown,
+  ChevronUp, Loader2, Send,
 } from "lucide-react";
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
@@ -31,6 +33,17 @@ type Post = {
   commentCount:    number;
 };
 
+type Comment = {
+  id:              number;
+  body:            string;
+  createdAt:       string;
+  isPinned:        boolean;
+  isAdminComment:  boolean;
+  authorName:      string | null;
+  authorGamerbuddyId: string | null;
+  replies:         Comment[];
+};
+
 const STATUS_COLORS: Record<string, string> = {
   visible: "text-green-400 bg-green-500/10 border-green-500/30",
   hidden:  "text-amber-400 bg-amber-500/10 border-amber-500/30",
@@ -45,6 +58,184 @@ function useAdminAuth() {
     retry:    false,
     staleTime: 30_000,
   });
+}
+
+/* ── Comment row ─────────────────────────────────────────────────────────── */
+function CommentRow({ comment, postId }: { comment: Comment; postId: number }) {
+  const { toast } = useToast();
+  const qc = useQueryClient();
+
+  const pinMutation = useMutation({
+    mutationFn: () => apiFetch(`${BASE}/admin/community/comments/${comment.id}/pin`, { method: "POST" }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin-post-comments", postId] });
+      toast({ title: comment.isPinned ? "Comment Unpinned" : "Comment Pinned" });
+    },
+    onError: () => toast({ title: "Error", description: "Could not toggle pin.", variant: "destructive" }),
+  });
+
+  return (
+    <div className={`rounded-lg border p-3 text-sm space-y-1 ${
+      comment.isPinned
+        ? "border-primary/40 bg-primary/5"
+        : comment.isAdminComment
+          ? "border-purple-500/30 bg-purple-500/5"
+          : "border-border/40 bg-muted/20"
+    }`}>
+      {/* Badges row */}
+      <div className="flex items-center gap-2 flex-wrap">
+        {comment.isPinned && (
+          <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-primary bg-primary/10 border border-primary/30 px-1.5 py-0.5 rounded-full">
+            <Pin className="w-2.5 h-2.5" /> Pinned by Admin
+          </span>
+        )}
+        {comment.isAdminComment && (
+          <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-purple-400 bg-purple-500/10 border border-purple-500/30 px-1.5 py-0.5 rounded-full">
+            <Shield className="w-2.5 h-2.5" /> Admin
+          </span>
+        )}
+        <span className="text-xs font-semibold text-foreground/70">
+          {comment.isAdminComment ? "Gamerbuddy Team" : (comment.authorName ?? "Unknown")}
+        </span>
+        {comment.authorGamerbuddyId && !comment.isAdminComment && (
+          <span className="text-[10px] font-mono text-muted-foreground/40">#{comment.authorGamerbuddyId}</span>
+        )}
+        <span className="text-[10px] text-muted-foreground/40 ml-auto">
+          {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
+        </span>
+      </div>
+
+      {/* Body */}
+      <p className="text-xs text-foreground/80 leading-relaxed whitespace-pre-wrap">{comment.body}</p>
+
+      {/* Pin button — only on top-level comments */}
+      <div className="flex justify-end pt-1">
+        <button
+          onClick={() => pinMutation.mutate()}
+          disabled={pinMutation.isPending}
+          className={`inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-md border transition-all ${
+            comment.isPinned
+              ? "border-primary/40 text-primary hover:bg-primary/10"
+              : "border-border/40 text-muted-foreground/50 hover:text-foreground hover:border-border"
+          }`}
+          title={comment.isPinned ? "Unpin this comment" : "Pin this comment to the top"}
+        >
+          {pinMutation.isPending
+            ? <Loader2 className="w-2.5 h-2.5 animate-spin" />
+            : comment.isPinned ? <PinOff className="w-2.5 h-2.5" /> : <Pin className="w-2.5 h-2.5" />
+          }
+          {comment.isPinned ? "Unpin" : "Pin Comment"}
+        </button>
+      </div>
+
+      {/* Replies (read-only, no pin on replies) */}
+      {comment.replies?.length > 0 && (
+        <div className="ml-4 space-y-2 border-l-2 border-border/30 pl-3 pt-1">
+          {comment.replies.map(r => (
+            <div key={r.id} className="text-xs text-foreground/60 space-y-0.5">
+              <span className="font-semibold text-foreground/50">{r.isAdminComment ? "Gamerbuddy Team" : (r.authorName ?? "Unknown")}</span>
+              <p className="leading-relaxed">{r.body}</p>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ── Post comments panel (renders inside expanded post) ───────────────────── */
+function PostCommentsPanel({ post }: { post: Post }) {
+  const { toast } = useToast();
+  const qc = useQueryClient();
+  const [adminText, setAdminText] = useState("");
+
+  const { data, isLoading } = useQuery<{ comments: Comment[] }>({
+    queryKey: ["admin-post-comments", post.id],
+    queryFn:  () => apiFetch(`${BASE}/community/suggestions/${post.id}/comments`),
+    staleTime: 15_000,
+  });
+
+  const adminCommentMutation = useMutation({
+    mutationFn: (body: string) =>
+      apiFetch(`${BASE}/admin/community/suggestions/${post.id}/comment`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ body }),
+      }),
+    onSuccess: () => {
+      setAdminText("");
+      qc.invalidateQueries({ queryKey: ["admin-post-comments", post.id] });
+      qc.invalidateQueries({ queryKey: ["admin-community-posts"] });
+      toast({ title: "Admin Comment Posted", description: "Visible to all users as 'Gamerbuddy Team'." });
+    },
+    onError: () => toast({ title: "Error", description: "Could not post admin comment.", variant: "destructive" }),
+  });
+
+  const comments = data?.comments ?? [];
+
+  return (
+    <div className="px-4 pb-4 space-y-4">
+
+      {/* ── Add Admin Comment ── */}
+      <div className="rounded-xl border border-purple-500/30 bg-purple-500/5 p-3 space-y-2">
+        <div className="flex items-center gap-2">
+          <Shield className="w-3.5 h-3.5 text-purple-400" />
+          <span className="text-xs font-bold text-purple-300 uppercase tracking-widest">Add Admin Comment</span>
+          <span className="text-[10px] text-purple-400/60 font-normal normal-case tracking-normal">— appears as "Gamerbuddy Team" to all users</span>
+        </div>
+        <Textarea
+          value={adminText}
+          onChange={e => setAdminText(e.target.value)}
+          placeholder="Write an official admin response…"
+          className="bg-background/50 border-purple-500/20 text-sm min-h-[80px] resize-none focus-visible:ring-purple-500/30"
+          onKeyDown={e => {
+            if (e.key === "Enter" && (e.ctrlKey || e.metaKey) && adminText.trim()) {
+              adminCommentMutation.mutate(adminText.trim());
+            }
+          }}
+        />
+        <div className="flex justify-end">
+          <Button
+            size="sm"
+            onClick={() => { if (adminText.trim()) adminCommentMutation.mutate(adminText.trim()); }}
+            disabled={!adminText.trim() || adminCommentMutation.isPending}
+            className="gap-1.5 bg-purple-600 hover:bg-purple-700 text-white text-xs"
+          >
+            {adminCommentMutation.isPending
+              ? <Loader2 className="w-3 h-3 animate-spin" />
+              : <Send className="w-3 h-3" />
+            }
+            Post as Admin
+          </Button>
+        </div>
+      </div>
+
+      {/* ── Comments list ── */}
+      <div>
+        <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/40 mb-2">
+          Comments ({comments.length})
+          <span className="font-normal normal-case tracking-normal ml-2">— click "Pin Comment" to pin to top for all users</span>
+        </p>
+
+        {isLoading ? (
+          <div className="space-y-2">
+            {[1,2,3].map(i => <Skeleton key={i} className="h-16 w-full rounded-lg" />)}
+          </div>
+        ) : comments.length === 0 ? (
+          <div className="rounded-lg border border-border/30 bg-muted/10 p-4 text-center">
+            <MessageSquare className="w-5 h-5 mx-auto mb-1.5 text-muted-foreground/30" />
+            <p className="text-xs text-muted-foreground/50">No comments yet on this post.</p>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {comments.map(c => (
+              <CommentRow key={c.id} comment={c} postId={post.id} />
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }
 
 /* ── Main Component ─────────────────────────────────────────────────────── */
@@ -76,31 +267,31 @@ export default function AdminCommunity() {
   /* ── Mutations ── */
   const hidePost = useMutation({
     mutationFn: (id: number) => apiFetch(`${BASE}/admin/community/posts/${id}/hide`, { method: "POST" }),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["admin-community-posts"] }); toast({ title: "Post Hidden", description: "Post is now hidden from users." }); },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["admin-community-posts"] }); toast({ title: "Post Hidden" }); },
     onError: (e: Error) => toast({ title: "Error", description: e.message, variant: "destructive" }),
   });
 
   const restorePost = useMutation({
     mutationFn: (id: number) => apiFetch(`${BASE}/admin/community/posts/${id}/restore`, { method: "POST" }),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["admin-community-posts"] }); toast({ title: "Post Restored", description: "Post is now visible to users." }); },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["admin-community-posts"] }); toast({ title: "Post Restored" }); },
     onError: (e: Error) => toast({ title: "Error", description: e.message, variant: "destructive" }),
   });
 
   const deletePost = useMutation({
     mutationFn: (id: number) => apiFetch(`${BASE}/admin/community/posts/${id}`, { method: "DELETE" }),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["admin-community-posts"] }); toast({ title: "Post Deleted", description: "Post permanently removed." }); },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["admin-community-posts"] }); toast({ title: "Post Deleted" }); },
     onError: (e: Error) => toast({ title: "Error", description: e.message, variant: "destructive" }),
   });
 
   const banUser = useMutation({
     mutationFn: (userId: number) => apiFetch(`${BASE}/admin/community/users/${userId}/ban`, { method: "POST" }),
-    onSuccess: (_, userId) => { qc.invalidateQueries({ queryKey: ["admin-community-posts"] }); toast({ title: "User Banned", description: `User ID ${userId} banned from community.` }); },
+    onSuccess: (_, userId) => { qc.invalidateQueries({ queryKey: ["admin-community-posts"] }); toast({ title: "User Banned" }); },
     onError: (e: Error) => toast({ title: "Error", description: e.message, variant: "destructive" }),
   });
 
   const unbanUser = useMutation({
     mutationFn: (userId: number) => apiFetch(`${BASE}/admin/community/users/${userId}/unban`, { method: "POST" }),
-    onSuccess: (_, userId) => { qc.invalidateQueries({ queryKey: ["admin-community-posts"] }); toast({ title: "User Unbanned", description: `User ID ${userId} can post again.` }); },
+    onSuccess: (_, userId) => { qc.invalidateQueries({ queryKey: ["admin-community-posts"] }); toast({ title: "User Unbanned" }); },
     onError: (e: Error) => toast({ title: "Error", description: e.message, variant: "destructive" }),
   });
 
@@ -175,7 +366,7 @@ export default function AdminCommunity() {
         </Button>
       </div>
 
-      <div className="space-y-5 max-w-[1400px] mx-auto">
+      <div className="space-y-5 max-w-[1400px] mx-auto px-4 py-6">
 
         {/* ── Stats row ── */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -293,24 +484,32 @@ export default function AdminCommunity() {
                   <button
                     onClick={() => setExpandedId(expandedId === post.id ? null : post.id)}
                     className="shrink-0 text-muted-foreground/40 hover:text-foreground transition-colors p-1"
-                    title="View full post"
+                    title={expandedId === post.id ? "Collapse" : "Expand post & comments"}
                   >
-                    {expandedId === post.id ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    {expandedId === post.id ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                   </button>
                 </div>
 
-                {/* Expanded body */}
+                {/* Expanded: full content + comments panel */}
                 {expandedId === post.id && (
-                  <div className="px-4 pb-3 border-t border-border/40 pt-3">
-                    <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground/40 mb-1">Full Content</p>
-                    <p className="text-sm text-foreground/80 bg-muted/30 rounded-lg p-3 leading-relaxed whitespace-pre-wrap">{post.body}</p>
-                    <div className="mt-2 text-xs text-muted-foreground/40 flex gap-4">
-                      <span>Post ID: #{post.id}</span>
-                      <span>User ID: #{post.userId}</span>
-                      <span>Email: {post.authorEmail ?? "—"}</span>
-                      <span>Posted: {format(new Date(post.createdAt), "dd MMM yyyy, HH:mm")}</span>
+                  <>
+                    {/* Full post body */}
+                    <div className="px-4 pb-3 border-t border-border/40 pt-3">
+                      <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground/40 mb-1">Full Content</p>
+                      <p className="text-sm text-foreground/80 bg-muted/30 rounded-lg p-3 leading-relaxed whitespace-pre-wrap">{post.body}</p>
+                      <div className="mt-2 text-xs text-muted-foreground/40 flex gap-4 flex-wrap">
+                        <span>Post ID: #{post.id}</span>
+                        <span>User ID: #{post.userId}</span>
+                        <span>Email: {post.authorEmail ?? "—"}</span>
+                        <span>Posted: {format(new Date(post.createdAt), "dd MMM yyyy, HH:mm")}</span>
+                      </div>
                     </div>
-                  </div>
+
+                    {/* Comments & admin comment box */}
+                    <div className="border-t border-border/40">
+                      <PostCommentsPanel post={post} />
+                    </div>
+                  </>
                 )}
 
                 {/* Action bar */}
@@ -386,9 +585,12 @@ export default function AdminCommunity() {
             <div className="space-y-1">
               <p className="font-semibold text-amber-300">Moderation Guide</p>
               <ul className="list-disc list-inside text-xs text-amber-300/70 space-y-0.5">
+                <li><strong>Expand a post</strong> — click the chevron icon to see full content, comments, and admin controls.</li>
+                <li><strong>Add Admin Comment</strong> — posts as "Gamerbuddy Team" and is visible to all users immediately.</li>
+                <li><strong>Pin Comment</strong> — pinned comments appear at the very top of the comment list for all users.</li>
                 <li><strong>Hide Post</strong> — soft delete, invisible to users but kept in database. Reversible.</li>
                 <li><strong>Delete Post</strong> — permanent, removes all comments and votes. Irreversible.</li>
-                <li><strong>Ban Author</strong> — prevents the user from creating new community posts. Does not hide existing posts.</li>
+                <li><strong>Ban Author</strong> — prevents the user from creating new community posts.</li>
               </ul>
             </div>
           </div>
