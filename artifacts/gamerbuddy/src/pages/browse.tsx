@@ -449,7 +449,17 @@ function RequestCard({ req }: { req: GameRequest }) {
                 </div>
                 <div className="flex items-center gap-2.5 flex-wrap">
                   <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground/60">
-                    <User className="h-3 w-3 shrink-0" />
+                    {req.userProfilePhotoUrl ? (
+                      <img
+                        src={`/api/storage${req.userProfilePhotoUrl}`}
+                        alt={req.userName}
+                        className="h-4 w-4 rounded-full object-cover shrink-0"
+                        style={{ border: "1px solid rgba(168,85,247,0.35)" }}
+                        onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                      />
+                    ) : (
+                      <User className="h-3 w-3 shrink-0" />
+                    )}
                     <span className="text-primary/90 font-bold">{req.userName}</span>
                     <VerifiedBadge idVerified={req.userIdVerified ?? false} variant="icon" />
                     <ReportButton userId={req.userId} userName={req.userName} variant="icon" />

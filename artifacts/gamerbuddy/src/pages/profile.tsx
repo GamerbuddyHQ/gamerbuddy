@@ -40,11 +40,13 @@ function computeProfileCompletion(profile: any): {
   items: Array<{ label: string; pts: number; done: boolean; section: string; icon: string }>;
 } {
   const items = [
-    { label: "Write your bio",             pts: 30, done: !!(profile?.bio?.trim()),                                         section: "bio",       icon: "✍️" },
-    { label: "Set your region / country",  pts: 15, done: !!(profile?.country && profile.country !== "any"),                section: "basics",    icon: "🌍" },
-    { label: "Set your gender",            pts: 15, done: !!(profile?.gender && profile.gender !== "any"),                  section: "basics",    icon: "👤" },
-    { label: "Connect a gaming account",   pts: 40, done: (profile?.gamingAccounts?.length ?? 0) > 0,                    section: "gaming",    icon: "🎮" },
-    { label: "Connect a streaming channel", pts: 20, done: (profile?.streamingAccounts?.length ?? 0) > 0,                  section: "streaming", icon: "📡" },
+    { label: "Add profile picture",        pts: 20, done: !!profile?.profilePhotoUrl,                                      section: "photos",    icon: "📸" },
+    { label: "Add 2+ additional photos",   pts: 25, done: (profile?.galleryPhotoUrls?.length ?? 0) >= 2,                   section: "photos",    icon: "🖼️" },
+    { label: "Write your bio",             pts: 25, done: !!(profile?.bio?.trim()),                                         section: "bio",       icon: "✍️" },
+    { label: "Set your region / country",  pts: 10, done: !!(profile?.country && profile.country !== "any"),                section: "basics",    icon: "🌍" },
+    { label: "Set your gender",            pts: 10, done: !!(profile?.gender && profile.gender !== "any"),                  section: "basics",    icon: "👤" },
+    { label: "Connect a gaming account",   pts: 35, done: (profile?.gamingAccounts?.length ?? 0) > 0,                    section: "gaming",    icon: "🎮" },
+    { label: "Connect a streaming channel", pts: 15, done: (profile?.streamingAccounts?.length ?? 0) > 0,                  section: "streaming", icon: "📡" },
   ];
   const score = items.filter((i) => i.done).reduce((a, i) => a + i.pts, 0);
   return { score, items };
@@ -84,6 +86,8 @@ const BIO_TEMPLATES: { archetype: string; emoji: string; color: string; border: 
 ];
 
 const COMPLETION_BENEFITS: Record<string, string> = {
+  "Add profile picture":       "Shown on every bid card and your profile",
+  "Add 2+ additional photos":  "Builds trust — hirers see real solo photos",
   "Write your bio":            "Hirers read this before accepting bids",
   "Set your region / country": "Appears on every bid you place",
   "Set your gender":           "Enables gender-preference matching",
@@ -1644,6 +1648,9 @@ function VerificationSection({ idVerified, gamingAccountCount, onJustVerified }:
               </div>
               <p className="text-xs text-emerald-300/70 leading-relaxed">
                 Your green Verified badge is active on your profile and all your bids — hirers trust you more.
+              </p>
+              <p className="text-xs text-emerald-300/50 leading-relaxed mt-1">
+                📸 Remember: profile photos must be real solo photos of you only — no AI-generated or group images.
               </p>
             </div>
           </div>

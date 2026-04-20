@@ -60,12 +60,14 @@ function formatRequest(
   },
   userName?: string,
   userIdVerified?: boolean,
+  userProfilePhotoUrl?: string | null,
 ) {
   return {
     id: req.id,
     userId: req.userId,
     userName: userName ?? "Unknown",
     userIdVerified: userIdVerified ?? false,
+    userProfilePhotoUrl: userProfilePhotoUrl ?? null,
     gameName: req.gameName,
     platform: req.platform,
     skillLevel: req.skillLevel,
@@ -128,6 +130,7 @@ router.get("/requests", async (req, res): Promise<void> => {
       expiresAt: gameRequestsTable.expiresAt,
       userName: usersTable.name,
       userIdVerified: usersTable.idVerified,
+      userProfilePhotoUrl: usersTable.profilePhotoUrl,
       bidCount: sql<number>`(SELECT COUNT(*) FROM bids WHERE bids.request_id = ${gameRequestsTable.id})`.mapWith(Number),
       lowestBid: sql<string | null>`(SELECT MIN(price) FROM bids WHERE bids.request_id = ${gameRequestsTable.id} AND bids.status = 'pending')`,
       acceptedBidsCount: sql<number>`(SELECT COUNT(*) FROM bids WHERE bids.request_id = ${gameRequestsTable.id} AND bids.status = 'accepted')`.mapWith(Number),
@@ -151,7 +154,7 @@ router.get("/requests", async (req, res): Promise<void> => {
     return true;
   });
 
-  res.json(filtered.map((r) => formatRequest(r, r.userName ?? "Unknown", r.userIdVerified ?? false)));
+  res.json(filtered.map((r) => formatRequest(r, r.userName ?? "Unknown", r.userIdVerified ?? false, r.userProfilePhotoUrl)));
 });
 
 router.get("/requests/my", requireAuth, async (req, res): Promise<void> => {
@@ -208,6 +211,8 @@ router.get("/requests/:id", async (req, res): Promise<void> => {
       preferredGender: gameRequestsTable.preferredGender,
       expiresAt: gameRequestsTable.expiresAt,
       userName: usersTable.name,
+      userIdVerified: usersTable.idVerified,
+      userProfilePhotoUrl: usersTable.profilePhotoUrl,
       acceptedBidsCount: sql<number>`(SELECT COUNT(*) FROM bids WHERE bids.request_id = ${gameRequestsTable.id} AND bids.status = 'accepted')`.mapWith(Number),
     })
     .from(gameRequestsTable)
@@ -219,7 +224,7 @@ router.get("/requests/:id", async (req, res): Promise<void> => {
     return;
   }
 
-  res.json(formatRequest(result, result.userName ?? "Unknown"));
+  res.json(formatRequest(result, result.userName ?? "Unknown", result.userIdVerified ?? false, result.userProfilePhotoUrl));
 });
 
 router.post("/requests", requireAuth, validate(PostRequestSchema), async (req, res): Promise<void> => {

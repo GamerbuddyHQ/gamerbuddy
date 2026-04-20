@@ -90,6 +90,14 @@ const SECTIONS = [
     content:
       "In any and all scenarios, Gamerbuddy reserves the absolute and unrestricted right to act as it deems necessary to protect the integrity, safety, security, and quality of the Platform. This includes, without limitation, the right to review reports, suspend or permanently terminate accounts, remove content, withhold funds, impose restrictions, or take any other measures we consider appropriate. We will strictly enforce our rules and policies without exception.",
   },
+  {
+    number: "12",
+    title: "Profile Photos & Identity",
+    icon: Heart,
+    iconColor: "text-pink-400",
+    content:
+      "All users are required to upload a minimum of one (1) main profile picture and a minimum of two (2) additional photos on their profile. All photos must be genuine, real solo photographs of the account holder only. Group photos are strictly prohibited. AI-generated, digitally altered, fake, or stolen images are strictly prohibited and constitute a serious violation of Platform policy. Duplicate photo uploads (the same image submitted more than once) are blocked automatically. Profile photos are reviewed by our moderation team and must be submitted in good faith. Failure to comply — including the use of fake, AI-generated, or deceptive photos — may result in immediate account suspension and forfeiture of any pending earnings. Profile photos are displayed on bid cards, public profiles, and request listings to build trust and transparency between all users.",
+  },
 ];
 
 export default function About() {

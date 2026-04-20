@@ -142,6 +142,7 @@ export type GameRequest = {
   userId: number;
   userName: string;
   userIdVerified?: boolean;
+  userProfilePhotoUrl?: string | null;
   gameName: string;
   platform: string;
   skillLevel: string;
