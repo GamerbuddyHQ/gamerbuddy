@@ -106,7 +106,7 @@ export default function Login() {
   ];
 
   return (
-    <div className="w-full max-w-6xl mx-auto px-4 mt-8 mb-16 lg:mt-14">
+    <div className="w-full max-w-[1400px] mx-auto px-4 mt-8 mb-16 lg:mt-14">
       <div className="grid lg:grid-cols-2 gap-8 lg:gap-14 items-center">
 
         {/* ── Left: Login Form ── */}

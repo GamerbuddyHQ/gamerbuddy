@@ -379,7 +379,7 @@ export default function Home() {
 
       {/* ═══════════════════ FEATURES ═══════════════════ */}
       <section className="relative px-4 pt-2 pb-12">
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-[1400px] mx-auto">
 
           {/* Section header */}
           <div className="text-center mb-10">
@@ -431,7 +431,7 @@ export default function Home() {
       {/* ═══════════════════ HOW IT WORKS ═══════════════════ */}
       <section className="px-4 py-8 lg:py-12">
         <div
-          className="max-w-7xl mx-auto rounded-3xl p-8 sm:p-10 lg:p-14 relative overflow-hidden"
+          className="max-w-[1400px] mx-auto rounded-3xl p-8 sm:p-10 lg:p-14 relative overflow-hidden"
           style={{
             background: "linear-gradient(135deg, rgba(139,92,246,0.09) 0%, rgba(34,211,238,0.05) 100%)",
             border: "1px solid rgba(168,85,247,0.22)",
@@ -513,7 +513,7 @@ export default function Home() {
 
       {/* ═══════════════════ TRUST STRIP ═══════════════════ */}
       <section className="px-4 py-8">
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-[1400px] mx-auto">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             {[
               { icon: <Shield className="h-5 w-5 text-green-400" />, label: "Escrow Protected", sub: "Funds held until session complete", bg: "rgba(34,197,94,0.08)", border: "rgba(34,197,94,0.20)" },

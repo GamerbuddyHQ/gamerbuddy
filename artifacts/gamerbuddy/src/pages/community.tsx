@@ -1763,7 +1763,7 @@ export default function CommunityPage() {
   const visibleSuggestions = isAdmin ? suggestions.filter((s) => s.status === "visible") : suggestions;
 
   return (
-    <div className="max-w-4xl mx-auto space-y-5">
+    <div className="max-w-[1400px] mx-auto space-y-5">
       {/* Subtle bg glow */}
       <div
         className="pointer-events-none fixed inset-0 -z-10 opacity-30"
