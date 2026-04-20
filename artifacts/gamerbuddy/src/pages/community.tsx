@@ -7,6 +7,7 @@ import {
   Flame, Clock, CornerDownRight, Shield, EyeOff, Trash2,
   CheckCircle2, AlertOctagon, Eye, ShieldAlert, Sparkles,
   CircleDashed, Loader2, Zap, Bug, Palette, HelpCircle, ChevronDown as ChevDown,
+  Pin, PinOff,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
@@ -34,6 +35,20 @@ function checkIsAdmin(user: { id: number; email?: string } | null): boolean {
   if (user.id === 1) return true;
   if (user.email && ADMIN_EMAILS.includes(user.email.toLowerCase())) return true;
   return false;
+}
+
+/* ── Admin session check (via admin auth cookie) ── */
+function useAdminStatus(): boolean {
+  const { data } = useQuery({
+    queryKey: ["adminMe"],
+    queryFn: async () => {
+      const r = await fetch(`${BASE}/admin/auth/me`, { credentials: "include" });
+      return r.ok ? r.json() : null;
+    },
+    retry: false,
+    staleTime: 60_000,
+  });
+  return !!data?.isAdmin;
 }
 
 /* ── Link stripping ── */
@@ -89,6 +104,8 @@ type Comment = {
   userId: number;
   parentId: number | null;
   body: string;
+  isAdminComment: boolean;
+  isPinned: boolean;
   createdAt: string;
   authorName: string;
   authorCountry: string | null;
@@ -746,7 +763,7 @@ function CommentMeta({ authorName, authorCountry, createdAt, compact = false }: 
 }
 
 /* ── Comment thread ── */
-function CommentItem({ comment, suggestionId, depth = 0 }: { comment: Comment; suggestionId: number; depth?: number }) {
+function CommentItem({ comment, suggestionId, depth = 0, isAdmin = false }: { comment: Comment; suggestionId: number; depth?: number; isAdmin?: boolean }) {
   const { user } = useAuth();
   const { toast } = useToast();
   const qc = useQueryClient();
@@ -766,32 +783,85 @@ function CommentItem({ comment, suggestionId, depth = 0 }: { comment: Comment; s
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["comments", suggestionId] });
-      setReplyText("");
       setReplying(false);
+    },
+    onError: (e: Error) => toast({ title: "Error", description: e.message, variant: "destructive" }),
+  });
+
+  const pinMutation = useMutation({
+    mutationFn: async () => {
+      const r = await fetch(`${BASE}/admin/community/comments/${comment.id}/pin`, {
+        method: "POST",
+        credentials: "include",
+      });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.error ?? "Failed to toggle pin");
+      return data;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["comments", suggestionId] });
     },
     onError: (e: Error) => toast({ title: "Error", description: e.message, variant: "destructive" }),
   });
 
   return (
     <div className={depth > 0 ? "pl-4 border-l border-border/25" : ""}>
+      {comment.isPinned && depth === 0 && (
+        <div className="flex items-center gap-1.5 pt-2.5 pb-0.5 text-[10px] font-semibold" style={{ color: "rgba(168,85,247,0.75)" }}>
+          <Pin className="h-3 w-3" /> Pinned by Admin
+        </div>
+      )}
       <div className="flex gap-3 py-3">
-        <Avatar name={comment.authorName} size={26} />
+        {comment.isAdminComment ? (
+          <div
+            className="rounded-full flex items-center justify-center shrink-0"
+            style={{ width: 26, height: 26, background: "rgba(168,85,247,0.18)", border: "1px solid rgba(168,85,247,0.35)" }}
+          >
+            <Shield className="h-3.5 w-3.5" style={{ color: "rgba(168,85,247,0.9)" }} />
+          </div>
+        ) : (
+          <Avatar name={comment.authorName} size={26} />
+        )}
         <div className="flex-1 min-w-0">
-          <CommentMeta
-            authorName={comment.authorName}
-            authorCountry={comment.authorCountry}
-            createdAt={comment.createdAt}
-            compact={depth > 0}
-          />
+          <div className="flex items-center gap-2 flex-wrap">
+            <CommentMeta
+              authorName={comment.isAdminComment ? "Gamerbuddy Team" : comment.authorName}
+              authorCountry={comment.isAdminComment ? null : comment.authorCountry}
+              createdAt={comment.createdAt}
+              compact={depth > 0}
+            />
+            {comment.isAdminComment && (
+              <span
+                className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full"
+                style={{ background: "rgba(168,85,247,0.18)", color: "rgba(168,85,247,0.9)", border: "1px solid rgba(168,85,247,0.3)" }}
+              >
+                Official
+              </span>
+            )}
+          </div>
           <CommentBody body={comment.body} />
-          {user && depth === 0 && (
-            <button
-              onClick={() => setReplying((v) => !v)}
-              className="flex items-center gap-1 mt-1.5 text-[10px] font-semibold text-primary/50 hover:text-primary transition-colors"
-            >
-              <CornerDownRight className="h-3 w-3" /> Reply
-            </button>
-          )}
+          <div className="flex items-center gap-3 mt-1.5">
+            {user && depth === 0 && (
+              <button
+                onClick={() => setReplying((v) => !v)}
+                className="flex items-center gap-1 text-[10px] font-semibold text-primary/50 hover:text-primary transition-colors"
+              >
+                <CornerDownRight className="h-3 w-3" /> Reply
+              </button>
+            )}
+            {isAdmin && depth === 0 && (
+              <button
+                onClick={() => pinMutation.mutate()}
+                disabled={pinMutation.isPending}
+                className="flex items-center gap-1 text-[10px] font-semibold transition-colors"
+                style={{ color: comment.isPinned ? "rgba(168,85,247,0.8)" : "rgba(255,255,255,0.3)" }}
+                title={comment.isPinned ? "Unpin comment" : "Pin comment"}
+              >
+                {comment.isPinned ? <PinOff className="h-3 w-3" /> : <Pin className="h-3 w-3" />}
+                {comment.isPinned ? "Unpin" : "Pin"}
+              </button>
+            )}
+          </div>
           {replying && (
             <ReplyBox
               onSubmit={(body) => replyMutation.mutate(body)}
@@ -804,7 +874,7 @@ function CommentItem({ comment, suggestionId, depth = 0 }: { comment: Comment; s
       {comment.replies?.length > 0 && (
         <div className="ml-8 space-y-0">
           {comment.replies.map((r) => (
-            <CommentItem key={r.id} comment={r} suggestionId={suggestionId} depth={depth + 1} />
+            <CommentItem key={r.id} comment={r} suggestionId={suggestionId} depth={depth + 1} isAdmin={isAdmin} />
           ))}
         </div>
       )}
@@ -817,8 +887,10 @@ function CommentsPanel({ suggestion }: { suggestion: Suggestion }) {
   const { user } = useAuth();
   const { toast } = useToast();
   const qc = useQueryClient();
+  const isAdmin = useAdminStatus();
   const [commentText, setCommentText] = useState("");
   const [selectedGif, setSelectedGif] = useState<TenorGif | null>(null);
+  const [adminCommentText, setAdminCommentText] = useState("");
 
   const { data: comments = [], isLoading } = useQuery({
     queryKey: ["comments", suggestion.id],
@@ -846,6 +918,27 @@ function CommentsPanel({ suggestion }: { suggestion: Suggestion }) {
     onError: (e: Error) => toast({ title: "Error", description: e.message, variant: "destructive" }),
   });
 
+  const adminCommentMutation = useMutation({
+    mutationFn: async (body: string) => {
+      const r = await fetch(`${BASE}/admin/community/suggestions/${suggestion.id}/comment`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ body }),
+      });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.error ?? "Failed to post admin comment");
+      return data;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["comments", suggestion.id] });
+      qc.invalidateQueries({ queryKey: ["suggestions"] });
+      setAdminCommentText("");
+      toast({ title: "Official comment posted", description: "Visible to all users." });
+    },
+    onError: (e: Error) => toast({ title: "Error", description: e.message, variant: "destructive" }),
+  });
+
   const handlePost = () => {
     let body = commentText.trim();
     if (selectedGif) body = (body ? body + "\n" : "") + `[gif:${selectedGif.url}]`;
@@ -855,6 +948,46 @@ function CommentsPanel({ suggestion }: { suggestion: Suggestion }) {
 
   return (
     <div className="border-t px-4 sm:px-5 py-4 space-y-4" style={{ borderColor: "rgba(168,85,247,0.12)", background: "rgba(0,0,0,0.25)" }}>
+      {isAdmin && (
+        <div
+          className="rounded-lg p-3 space-y-2"
+          style={{ background: "rgba(168,85,247,0.07)", border: "1px solid rgba(168,85,247,0.25)" }}
+        >
+          <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider" style={{ color: "rgba(168,85,247,0.8)" }}>
+            <Shield className="h-3 w-3" /> Official Admin Comment
+          </div>
+          <textarea
+            value={adminCommentText}
+            onChange={(e) => setAdminCommentText(e.target.value)}
+            placeholder="Post an official response from Gamerbuddy Team…"
+            rows={2}
+            className="w-full rounded-md px-3 py-2 text-[12px] resize-none bg-background/50 border text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1"
+            style={{ borderColor: "rgba(168,85,247,0.3)", focusRingColor: "rgba(168,85,247,0.5)" }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+                const body = adminCommentText.trim();
+                if (body) adminCommentMutation.mutate(body);
+              }
+            }}
+          />
+          <div className="flex justify-end">
+            <Button
+              size="sm"
+              disabled={!adminCommentText.trim() || adminCommentMutation.isPending}
+              onClick={() => {
+                const body = adminCommentText.trim();
+                if (body) adminCommentMutation.mutate(body);
+              }}
+              className="h-7 text-[11px] gap-1.5"
+              style={{ background: "rgba(168,85,247,0.8)" }}
+            >
+              {adminCommentMutation.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Shield className="h-3 w-3" />}
+              Post as Official
+            </Button>
+          </div>
+        </div>
+      )}
+
       {user && (
         <CommentInputBox
           value={commentText}
@@ -868,7 +1001,7 @@ function CommentsPanel({ suggestion }: { suggestion: Suggestion }) {
         />
       )}
 
-      {!user && (
+      {!user && !isAdmin && (
         <p className="text-[12px] text-muted-foreground/50 text-center py-1">
           <Link href="/login" className="text-primary hover:underline">Log in</Link> to leave a comment.
         </p>
@@ -882,7 +1015,7 @@ function CommentsPanel({ suggestion }: { suggestion: Suggestion }) {
 
       {comments.length > 0 && (
         <div className="divide-y divide-border/15 -mt-1">
-          {comments.map((c) => <CommentItem key={c.id} comment={c} suggestionId={suggestion.id} />)}
+          {comments.map((c) => <CommentItem key={c.id} comment={c} suggestionId={suggestion.id} isAdmin={isAdmin} />)}
         </div>
       )}
     </div>

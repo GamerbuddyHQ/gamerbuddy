@@ -11,7 +11,7 @@ import {
   suggestionCommentsTable,
   usersTable,
 } from "@workspace/db";
-import { eq, sql, ilike, or, desc } from "drizzle-orm";
+import { eq, sql, ilike, or, desc, not } from "drizzle-orm";
 import { requireAdminAuth } from "./admin-auth";
 
 const router = Router();
@@ -133,6 +133,73 @@ router.delete("/admin/community/posts/:id", requireAdminAuth, async (req, res): 
   await db.delete(suggestionsTable).where(eq(suggestionsTable.id, id));
   req.log?.info({ action: "admin_delete_post", postId: id }, "Post permanently deleted by admin");
   res.json({ success: true });
+});
+
+/* ── POST /admin/community/suggestions/:id/comment — admin posts a comment */
+router.post("/admin/community/suggestions/:id/comment", requireAdminAuth, async (req, res): Promise<void> => {
+  const suggestionId = parseInt(req.params.id, 10);
+  if (isNaN(suggestionId)) { res.status(400).json({ error: "Invalid suggestion ID" }); return; }
+
+  const body = (req.body?.body as string | undefined)?.trim();
+  if (!body) { res.status(400).json({ error: "Comment body is required" }); return; }
+
+  const [suggestion] = await db.select({ id: suggestionsTable.id }).from(suggestionsTable).where(eq(suggestionsTable.id, suggestionId));
+  if (!suggestion) { res.status(404).json({ error: "Post not found" }); return; }
+
+  // Look up the admin user by email, fall back to user ID 1 if not registered yet
+  let [adminUser] = await db
+    .select({ id: usersTable.id, name: usersTable.name })
+    .from(usersTable)
+    .where(eq(usersTable.email, "gamerbuddyhq@gmail.com"));
+
+  if (!adminUser) {
+    // Fall back to the earliest registered user as the "system" author
+    [adminUser] = await db
+      .select({ id: usersTable.id, name: usersTable.name })
+      .from(usersTable)
+      .orderBy(usersTable.id)
+      .limit(1);
+  }
+
+  if (!adminUser) { res.status(500).json({ error: "No users exist yet — cannot post comment" }); return; }
+
+  const [comment] = await db
+    .insert(suggestionCommentsTable)
+    .values({
+      suggestionId,
+      userId: adminUser.id,
+      parentId: null,
+      body,
+      isAdminComment: true,
+      isPinned: false,
+    })
+    .returning();
+
+  req.log?.info({ action: "admin_comment", suggestionId }, "Admin posted a comment");
+  res.status(201).json({ ...comment, authorName: "Gamerbuddy Team", authorCountry: null, replies: [] });
+});
+
+/* ── POST /admin/community/comments/:commentId/pin — toggle pin ────────── */
+router.post("/admin/community/comments/:commentId/pin", requireAdminAuth, async (req, res): Promise<void> => {
+  const commentId = parseInt(req.params.commentId, 10);
+  if (isNaN(commentId)) { res.status(400).json({ error: "Invalid comment ID" }); return; }
+
+  const [existing] = await db
+    .select({ id: suggestionCommentsTable.id, isPinned: suggestionCommentsTable.isPinned })
+    .from(suggestionCommentsTable)
+    .where(eq(suggestionCommentsTable.id, commentId));
+
+  if (!existing) { res.status(404).json({ error: "Comment not found" }); return; }
+
+  const newPinned = !existing.isPinned;
+  const [updated] = await db
+    .update(suggestionCommentsTable)
+    .set({ isPinned: newPinned })
+    .where(eq(suggestionCommentsTable.id, commentId))
+    .returning({ id: suggestionCommentsTable.id, isPinned: suggestionCommentsTable.isPinned });
+
+  req.log?.info({ action: newPinned ? "admin_pin_comment" : "admin_unpin_comment", commentId }, "Admin toggled comment pin");
+  res.json({ success: true, id: updated.id, isPinned: updated.isPinned });
 });
 
 /* ── POST /admin/community/users/:id/ban — set communityBanned = true ─── */

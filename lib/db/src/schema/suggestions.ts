@@ -1,4 +1,4 @@
-import { pgTable, text, serial, timestamp, integer } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, timestamp, integer, boolean } from "drizzle-orm/pg-core";
 import { usersTable } from "./users";
 
 export const suggestionsTable = pgTable("suggestions", {
@@ -25,6 +25,8 @@ export const suggestionCommentsTable = pgTable("suggestion_comments", {
   userId: integer("user_id").notNull().references(() => usersTable.id),
   parentId: integer("parent_id"),
   body: text("body").notNull(),
+  isAdminComment: boolean("is_admin_comment").notNull().default(false),
+  isPinned: boolean("is_pinned").notNull().default(false),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

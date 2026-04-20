@@ -228,6 +228,8 @@ router.get("/community/suggestions/:id/comments", async (req, res): Promise<void
       userId: suggestionCommentsTable.userId,
       parentId: suggestionCommentsTable.parentId,
       body: suggestionCommentsTable.body,
+      isAdminComment: suggestionCommentsTable.isAdminComment,
+      isPinned: suggestionCommentsTable.isPinned,
       createdAt: suggestionCommentsTable.createdAt,
       authorName: usersTable.name,
       authorCountry: usersTable.country,
@@ -239,6 +241,13 @@ router.get("/community/suggestions/:id/comments", async (req, res): Promise<void
 
   const topLevel = rows.filter((r) => !r.parentId);
   const replies = rows.filter((r) => !!r.parentId);
+
+  // Pinned comments first, then chronological
+  topLevel.sort((a, b) => {
+    if (a.isPinned && !b.isPinned) return -1;
+    if (!a.isPinned && b.isPinned) return 1;
+    return 0;
+  });
 
   const threaded = topLevel.map((c) => ({
     ...c,
