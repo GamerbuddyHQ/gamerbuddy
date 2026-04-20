@@ -92,6 +92,14 @@ const SECTIONS = [
   },
   {
     number: "12",
+    title: "Minimum Hiring Fee",
+    icon: Zap,
+    iconColor: "text-green-400",
+    content:
+      "Gamerbuddy enforces a regional minimum hiring rate to ensure fair compensation for all Gamers. For Hirers based in India, the minimum fee is ₹350 (Indian Rupees) per hour of session time. For all other users — including those based in Europe, the United States, Canada, Australia, and all other countries — the minimum fee is $8 USD per hour. The minimum total for a session is calculated as: Number of Hours × Minimum Hourly Rate. Hirers are required to select their region (India or International) and specify session duration when posting a request. This minimum is displayed clearly on all request listings and in the bid panel. These rates are non-negotiable platform minimums designed to protect Gamers against exploitatively low offers and ensure that their time, skill, and effort are always fairly valued.",
+  },
+  {
+    number: "13",
     title: "Profile Photos & Identity",
     icon: Heart,
     iconColor: "text-pink-400",

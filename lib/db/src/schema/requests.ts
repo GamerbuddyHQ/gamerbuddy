@@ -20,6 +20,8 @@ export const gameRequestsTable = pgTable("game_requests", {
   preferredCountry: text("preferred_country").default("any"),
   preferredGender: text("preferred_gender").default("any"),
   expiresAt: timestamp("expires_at", { withTimezone: true }),
+  hirerRegion: text("hirer_region").notNull().default("international"),
+  sessionHours: integer("session_hours"),
 });
 
 export const insertGameRequestSchema = createInsertSchema(gameRequestsTable).omit({

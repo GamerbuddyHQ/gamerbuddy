@@ -38,6 +38,11 @@ import {
   Globe,
   UserRound,
   Clock,
+  IndianRupee,
+  DollarSign,
+  MapPin,
+  Timer,
+  Info,
 } from "lucide-react";
 import { SafetyBanner } from "@/components/safety-banner";
 import { usePostRequest } from "@/lib/bids-api";
@@ -99,6 +104,11 @@ const SKILL_META: Record<
 
 const OBJECTIVES_MAX = 500;
 
+const MIN_RATES = {
+  india: { perHour: 350, currency: "INR", symbol: "₹", label: "₹350/hr" },
+  international: { perHour: 8, currency: "USD", symbol: "$", label: "$8/hr" },
+} as const;
+
 export default function PostRequest() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
@@ -110,6 +120,11 @@ export default function PostRequest() {
   const [preferredCountry, setPreferredCountry] = useState("any");
   const [preferredGender, setPreferredGender] = useState("any");
   const [expiryOption, setExpiryOption] = useState<"forever" | "24h" | "48h" | "7d">("forever");
+  const [hirerRegion, setHirerRegion] = useState<"india" | "international">("international");
+  const [sessionHours, setSessionHours] = useState<number>(1);
+
+  const minRate = MIN_RATES[hirerRegion];
+  const minTotal = minRate.perHour * sessionHours;
 
   const { data: wallets, isLoading: isLoadingWallets } = useGetWallets({
     query: { queryKey: getGetWalletsQueryKey() },
@@ -155,6 +170,8 @@ export default function PostRequest() {
         preferredCountry,
         preferredGender,
         expiryOption,
+        hirerRegion,
+        sessionHours,
       },
       {
         onSuccess: () => {
@@ -413,6 +430,103 @@ export default function PostRequest() {
                   </FormItem>
                 )}
               />
+
+              {/* ── Minimum Hiring Fee ── */}
+              <div
+                className="rounded-xl border p-5 space-y-4"
+                style={{ borderColor: "rgba(168,85,247,0.30)", background: "rgba(168,85,247,0.04)" }}
+              >
+                <div className="flex items-center gap-2">
+                  {hirerRegion === "india" ? (
+                    <IndianRupee className="h-4 w-4 text-amber-400" />
+                  ) : (
+                    <DollarSign className="h-4 w-4 text-green-400" />
+                  )}
+                  <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Minimum Hiring Fee</span>
+                  <span className="text-[10px] text-muted-foreground/50">(required)</span>
+                </div>
+
+                {/* Region selector */}
+                <div className="space-y-2">
+                  <label className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground flex items-center gap-1.5">
+                    <MapPin className="h-3 w-3 text-primary" /> Your Region
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {([
+                      { value: "india", label: "🇮🇳 India", sub: "Min ₹350/hr" },
+                      { value: "international", label: "🌍 International", sub: "Min $8/hr" },
+                    ] as const).map(({ value, label, sub }) => (
+                      <button
+                        key={value}
+                        type="button"
+                        disabled={!canPost}
+                        onClick={() => setHirerRegion(value)}
+                        className={`flex flex-col items-start gap-0.5 p-3.5 rounded-xl border text-left text-xs font-semibold transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed ${
+                          hirerRegion === value
+                            ? "border-primary/60 bg-primary/10 text-primary"
+                            : "border-border/40 bg-background/20 text-muted-foreground hover:border-primary/30"
+                        }`}
+                      >
+                        <span className="text-sm leading-tight">{label}</span>
+                        <span className="text-[10px] font-bold opacity-70">{sub}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Session hours */}
+                <div className="space-y-2">
+                  <label className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground flex items-center gap-1.5">
+                    <Timer className="h-3 w-3 text-cyan-400" /> Session Duration
+                  </label>
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      disabled={!canPost || sessionHours <= 1}
+                      onClick={() => setSessionHours((h) => Math.max(1, h - 1))}
+                      className="h-9 w-9 rounded-lg border border-border/60 bg-background/40 text-muted-foreground font-bold text-base hover:border-primary/40 hover:text-white transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                    >
+                      −
+                    </button>
+                    <span className="text-lg font-black text-white min-w-[3rem] text-center">
+                      {sessionHours}h
+                    </span>
+                    <button
+                      type="button"
+                      disabled={!canPost || sessionHours >= 24}
+                      onClick={() => setSessionHours((h) => Math.min(24, h + 1))}
+                      className="h-9 w-9 rounded-lg border border-border/60 bg-background/40 text-muted-foreground font-bold text-base hover:border-primary/40 hover:text-white transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                    >
+                      +
+                    </button>
+                    <span className="text-xs text-muted-foreground/60 ml-1">hour{sessionHours > 1 ? "s" : ""}</span>
+                  </div>
+                </div>
+
+                {/* Minimum fee banner */}
+                <div
+                  className="rounded-lg p-3.5 flex items-start gap-3"
+                  style={{
+                    background: hirerRegion === "india" ? "rgba(245,158,11,0.08)" : "rgba(34,197,94,0.08)",
+                    border: hirerRegion === "india" ? "1px solid rgba(245,158,11,0.25)" : "1px solid rgba(34,197,94,0.25)",
+                  }}
+                >
+                  <Info className={`h-4 w-4 shrink-0 mt-0.5 ${hirerRegion === "india" ? "text-amber-400" : "text-green-400"}`} />
+                  <div className="space-y-1 text-xs">
+                    <div className={`font-bold ${hirerRegion === "india" ? "text-amber-300" : "text-green-300"}`}>
+                      {hirerRegion === "india"
+                        ? `Minimum fee is ₹350 per hour to ensure fair compensation for the Gamer's time and effort.`
+                        : `Minimum fee is $8 USD per hour to ensure fair pay for the Gamer.`}
+                    </div>
+                    <div className="text-muted-foreground/70">
+                      For a <span className="text-white font-bold">{sessionHours}-hour</span> session:{" "}
+                      <span className={`font-black ${hirerRegion === "india" ? "text-amber-300" : "text-green-300"}`}>
+                        {minRate.symbol}{minTotal.toLocaleString()} {minRate.currency} minimum
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
               {/* Nation & Gender Preferences */}
               <div className="rounded-xl border border-border/50 bg-background/30 p-5 space-y-4">

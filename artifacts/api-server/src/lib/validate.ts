@@ -113,6 +113,8 @@ const VALID_GEO_GENDERS  = ["any", "male", "female", "non_binary", "no_say"] as 
 
 const VALID_EXPIRY_OPTIONS = ["forever", "24h", "48h", "7d"] as const;
 
+const VALID_HIRER_REGIONS = ["india", "international"] as const;
+
 export const PostRequestSchema = z.object({
   gameName:         trimmedStr(1, 80, "Game name"),
   platform:         z.enum(VALID_PLATFORMS,    { errorMap: () => ({ message: "Invalid platform" }) }),
@@ -123,6 +125,8 @@ export const PostRequestSchema = z.object({
   preferredCountry: z.string().max(60).optional().default("any"),
   preferredGender:  z.enum(VALID_GEO_GENDERS).optional().default("any"),
   expiryOption:     z.enum(VALID_EXPIRY_OPTIONS).optional().default("forever"),
+  hirerRegion:      z.enum(VALID_HIRER_REGIONS).optional().default("international"),
+  sessionHours:     z.number().int().min(1).max(24).optional().nullable(),
 }).refine(
   (d) => !d.isBulkHiring || (d.bulkGamersNeeded !== undefined && d.bulkGamersNeeded >= 3),
   { message: "Bulk hiring requires 3–100 gamers", path: ["bulkGamersNeeded"] },

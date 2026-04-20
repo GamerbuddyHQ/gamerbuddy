@@ -244,6 +244,24 @@ function QuickBidPanel({ req, onClose }: { req: GameRequest; onClose: () => void
           <span className="text-muted-foreground ml-1">— bid lower to stand out</span>
         </div>
       )}
+      {req.minBidPerHour && (
+        <div
+          className="flex items-center gap-2 text-xs rounded-lg px-3 py-2"
+          style={{
+            background: req.hirerRegion === "india" ? "rgba(245,158,11,0.07)" : "rgba(34,197,94,0.07)",
+            border: req.hirerRegion === "india" ? "1px solid rgba(245,158,11,0.22)" : "1px solid rgba(34,197,94,0.20)",
+          }}
+        >
+          <span className={req.hirerRegion === "india" ? "text-amber-400 font-bold" : "text-green-400 font-bold"}>
+            {req.hirerRegion === "india" ? "₹" : "$"}
+          </span>
+          <span className={req.hirerRegion === "india" ? "text-amber-300/80" : "text-green-300/80"}>
+            {req.hirerRegion === "india"
+              ? `Min ₹350/hr${req.sessionHours ? ` · ${req.sessionHours}h → ₹${(350 * req.sessionHours).toLocaleString()} total min` : ""}`
+              : `Min $8/hr${req.sessionHours ? ` · ${req.sessionHours}h → $${(8 * req.sessionHours).toFixed(2)} total min` : ""}`}
+          </span>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-1.5">
@@ -555,6 +573,25 @@ function RequestCard({ req }: { req: GameRequest }) {
                     <span className="text-muted-foreground/60">
                       Lowest <span className="font-bold text-foreground/80">${req.lowestBid.toFixed(2)}</span>
                     </span>
+                  </div>
+                )}
+                {req.minBidPerHour && (
+                  <div
+                    className="inline-flex items-center gap-1.5 rounded-xl border px-3.5 py-2.5 text-xs"
+                    style={{
+                      borderColor: req.hirerRegion === "india" ? "rgba(245,158,11,0.25)" : "rgba(34,197,94,0.22)",
+                      background: req.hirerRegion === "india" ? "rgba(245,158,11,0.07)" : "rgba(34,197,94,0.06)",
+                    }}
+                  >
+                    <span className={req.hirerRegion === "india" ? "text-amber-400" : "text-green-400"}>
+                      {req.hirerRegion === "india" ? "₹" : "$"}
+                    </span>
+                    <span className={`font-bold ${req.hirerRegion === "india" ? "text-amber-300/80" : "text-green-300/80"}`}>
+                      Min {req.hirerRegion === "india" ? `₹${req.minBidPerHour}/hr` : `$${req.minBidPerHour}/hr`}
+                    </span>
+                    {req.sessionHours && (
+                      <span className="text-muted-foreground/50">· {req.sessionHours}h</span>
+                    )}
                   </div>
                 )}
               </div>

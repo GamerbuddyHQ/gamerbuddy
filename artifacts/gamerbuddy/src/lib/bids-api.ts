@@ -163,6 +163,11 @@ export type GameRequest = {
   hasStreamingBidder?: boolean;
   hasQuestBidder?: boolean;
   expiresAt?: string | null;
+  hirerRegion?: string;
+  sessionHours?: number | null;
+  minBidPerHour?: number;
+  minBidCurrency?: string;
+  minBidTotal?: number | null;
 };
 
 export const bidKeys = {
@@ -279,7 +284,7 @@ export function usePostRequest() {
   return useMutation<
     any,
     any,
-    { gameName: string; platform: string; skillLevel: string; objectives: string; isBulkHiring?: boolean; bulkGamersNeeded?: number; preferredCountry?: string; preferredGender?: string; expiryOption?: string }
+    { gameName: string; platform: string; skillLevel: string; objectives: string; isBulkHiring?: boolean; bulkGamersNeeded?: number; preferredCountry?: string; preferredGender?: string; expiryOption?: string; hirerRegion?: string; sessionHours?: number | null }
   >({
     mutationFn: (body) =>
       apiFetch(`${BASE}/requests`, { method: "POST", body: JSON.stringify(body) }),

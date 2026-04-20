@@ -2516,6 +2516,37 @@ export default function RequestDetail() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            {request.minBidPerHour && (
+              <div
+                className="flex items-start gap-2.5 rounded-lg p-3 text-xs"
+                style={{
+                  background: request.hirerRegion === "india" ? "rgba(245,158,11,0.07)" : "rgba(34,197,94,0.07)",
+                  border: request.hirerRegion === "india" ? "1px solid rgba(245,158,11,0.22)" : "1px solid rgba(34,197,94,0.20)",
+                }}
+              >
+                <span className={`text-base leading-none mt-0.5 ${request.hirerRegion === "india" ? "text-amber-400" : "text-green-400"}`}>
+                  {request.hirerRegion === "india" ? "₹" : "$"}
+                </span>
+                <div className="space-y-0.5">
+                  <div className={`font-bold ${request.hirerRegion === "india" ? "text-amber-300" : "text-green-300"}`}>
+                    Minimum rate: {request.hirerRegion === "india" ? `₹${request.minBidPerHour}/hr` : `$${request.minBidPerHour}/hr`}
+                    {request.sessionHours && (
+                      <span className="text-muted-foreground font-normal ml-1">
+                        · {request.sessionHours}h session →{" "}
+                        <span className={request.hirerRegion === "india" ? "text-amber-300 font-bold" : "text-green-300 font-bold"}>
+                          {request.hirerRegion === "india" ? `₹${(request.minBidPerHour * request.sessionHours).toLocaleString()}` : `$${(request.minBidPerHour * request.sessionHours).toFixed(2)}`} minimum
+                        </span>
+                      </span>
+                    )}
+                  </div>
+                  <div className="text-muted-foreground/70">
+                    {request.hirerRegion === "india"
+                      ? "Minimum fee is ₹350/hr to ensure fair compensation for the Gamer."
+                      : "Minimum fee is $8/hr to ensure fair pay for the Gamer."}
+                  </div>
+                </div>
+              </div>
+            )}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <label className="text-xs uppercase tracking-widest text-muted-foreground">Your Price ($)</label>

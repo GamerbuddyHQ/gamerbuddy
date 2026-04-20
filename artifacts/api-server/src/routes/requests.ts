@@ -57,11 +57,19 @@ function formatRequest(
     preferredCountry?: string | null;
     preferredGender?: string | null;
     expiresAt?: Date | null;
+    hirerRegion?: string | null;
+    sessionHours?: number | null;
   },
   userName?: string,
   userIdVerified?: boolean,
   userProfilePhotoUrl?: string | null,
 ) {
+  const hirerRegion = req.hirerRegion ?? "international";
+  const sessionHours = req.sessionHours ?? null;
+  const minBidPerHour = hirerRegion === "india" ? 350 : 8;
+  const minBidCurrency = hirerRegion === "india" ? "INR" : "USD";
+  const minBidTotal = sessionHours ? minBidPerHour * sessionHours : null;
+
   return {
     id: req.id,
     userId: req.userId,
@@ -88,6 +96,11 @@ function formatRequest(
     preferredCountry: req.preferredCountry ?? "any",
     preferredGender: req.preferredGender ?? "any",
     expiresAt: req.expiresAt ? req.expiresAt.toISOString() : null,
+    hirerRegion,
+    sessionHours,
+    minBidPerHour,
+    minBidCurrency,
+    minBidTotal,
   };
 }
 
@@ -128,6 +141,8 @@ router.get("/requests", async (req, res): Promise<void> => {
       preferredCountry: gameRequestsTable.preferredCountry,
       preferredGender: gameRequestsTable.preferredGender,
       expiresAt: gameRequestsTable.expiresAt,
+      hirerRegion: gameRequestsTable.hirerRegion,
+      sessionHours: gameRequestsTable.sessionHours,
       userName: usersTable.name,
       userIdVerified: usersTable.idVerified,
       userProfilePhotoUrl: usersTable.profilePhotoUrl,
@@ -213,6 +228,8 @@ router.get("/requests/:id", async (req, res): Promise<void> => {
       userName: usersTable.name,
       userIdVerified: usersTable.idVerified,
       userProfilePhotoUrl: usersTable.profilePhotoUrl,
+      hirerRegion: gameRequestsTable.hirerRegion,
+      sessionHours: gameRequestsTable.sessionHours,
       acceptedBidsCount: sql<number>`(SELECT COUNT(*) FROM bids WHERE bids.request_id = ${gameRequestsTable.id} AND bids.status = 'accepted')`.mapWith(Number),
     })
     .from(gameRequestsTable)
@@ -255,11 +272,13 @@ router.post("/requests", requireAuth, validate(PostRequestSchema), async (req, r
     return;
   }
 
-  const { gameName, platform, skillLevel, objectives, isBulkHiring, bulkGamersNeeded, preferredCountry, preferredGender, expiryOption } = req.body as {
+  const { gameName, platform, skillLevel, objectives, isBulkHiring, bulkGamersNeeded, preferredCountry, preferredGender, expiryOption, hirerRegion, sessionHours } = req.body as {
     gameName: string; platform: string; skillLevel: string; objectives: string;
     isBulkHiring: boolean; bulkGamersNeeded?: number;
     preferredCountry: string; preferredGender: string;
     expiryOption?: string;
+    hirerRegion?: string;
+    sessionHours?: number | null;
   };
 
   if (isBulkHiring) {
@@ -270,6 +289,7 @@ router.post("/requests", requireAuth, validate(PostRequestSchema), async (req, r
   }
 
   const expiresAt = calcExpiresAt(expiryOption ?? "forever");
+  const resolvedRegion = hirerRegion === "india" ? "india" : "international";
 
   const [gameRequest] = await db
     .insert(gameRequestsTable)
@@ -285,6 +305,8 @@ router.post("/requests", requireAuth, validate(PostRequestSchema), async (req, r
       preferredCountry: preferredCountry || "any",
       preferredGender:  preferredGender  || "any",
       expiresAt,
+      hirerRegion: resolvedRegion,
+      sessionHours: sessionHours ? Number(sessionHours) : null,
     })
     .returning();
 
