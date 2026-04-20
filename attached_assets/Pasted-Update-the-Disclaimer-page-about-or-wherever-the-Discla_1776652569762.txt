@@ -1,0 +1,25 @@
+Update the Disclaimer page (/about or wherever the Disclaimer is displayed) with this new, balanced, and professional version:
+
+**Disclaimer**  
+**Last Updated: April 2026**
+
+This Disclaimer forms an integral and binding part of the Terms of Service governing the use of the Gamerbuddy platform ("Platform", "we", "us", or "our").
+
+Gamerbuddy operates solely as an online intermediary marketplace that facilitates connections between Hirers seeking skilled gamers and Gamers offering co-op and multiplayer gaming sessions across various platforms.
+
+**1. Early Development Phase**  
+The Platform is currently in its early development stage. Features, functionality, security measures, and overall performance may be limited or subject to ongoing refinement. We make no representations or warranties regarding uninterrupted availability, completeness, or error-free operation. Users acknowledge and accept that technical issues or delays may occur as we continue to improve the service.
+
+**2. No Guarantee of Individual Performance**  
+Gamerbuddy is a matching platform only. We do not supervise, endorse, or guarantee the skill, reliability, punctuality, behavior, or performance of any Gamer or Hirer.  
+
+All interactions and gaming sessions occur directly between the Hirer and the Gamer. We strongly encourage users to carefully review profiles, ratings, Trust Factor, past reviews, and Quest details before engaging with any individual. Users are solely responsible for their own due diligence and conduct during sessions.
+
+**3. Session Recording**  
+The Platform does not record any gaming sessions, including gameplay footage or voice communications. The responsibility for recording sessions lies entirely with the users. In the event of any dispute, complaint, or allegation arising from a session, if no recording has been made by the users, Gamerbuddy shall not be obligated or able to investigate, verify claims, mediate, or provide any form of resolution. Users are strongly advised to record their sessions using their own tools and software for their own protection.
+
+Apply this updated Disclaimer to the About page and any other place where the Disclaimer is shown. Make sure the formatting looks clean and professional with proper headings and spacing.
+
+Also update the AI Assistant so that when users ask about disclaimers, liability, or guarantees, it refers to this balanced version.
+
+After updating, test the About page and give a summary.

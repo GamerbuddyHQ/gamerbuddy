@@ -8,15 +8,15 @@ const SECTIONS = [
     icon: Zap,
     iconColor: "text-amber-400",
     content:
-      "The Platform is currently in its early developmental stage. Features, functionality, security measures, and overall performance may be limited, subject to modification, or still under refinement. We make no representations or warranties regarding the completeness, reliability, or uninterrupted availability of the Platform. Users acknowledge and accept that technical issues, delays, or incomplete features may occur.",
+      "The Platform is currently in its early development stage. Features, functionality, security measures, and overall performance may be limited or subject to ongoing refinement. We make no representations or warranties regarding uninterrupted availability, completeness, or error-free operation. Users acknowledge and accept that technical issues or delays may occur as we continue to improve the service.",
   },
   {
     number: "2",
-    title: "No Guarantee of Service Quality",
+    title: "No Guarantee of Individual Performance",
     icon: Shield,
     iconColor: "text-purple-400",
     content:
-      "Gamerbuddy does not provide, supervise, endorse, or guarantee any gaming services. We act solely as a facilitator and bear no responsibility for the skill, competence, reliability, punctuality, behavior, or performance of any Gamer. All interactions, agreements, and sessions occur directly between the Hirer and the Gamer. Hirers are solely responsible for conducting their own due diligence, including reviewing profiles, Quest details, ratings, Trust Factor, and session history prior to engaging with any Gamer.",
+      "Gamerbuddy is a matching platform only. We do not supervise, endorse, or guarantee the skill, reliability, punctuality, behavior, or performance of any Gamer or Hirer. All interactions and gaming sessions occur directly between the Hirer and the Gamer. We strongly encourage users to carefully review profiles, ratings, Trust Factor, past reviews, and Quest details before engaging with any individual. Users are solely responsible for their own due diligence and conduct during sessions.",
   },
   {
     number: "3",
@@ -216,9 +216,9 @@ export default function About() {
           className="rounded-2xl border border-amber-500/20 p-5 text-sm text-foreground/75 leading-relaxed"
           style={{ background: "rgba(245,158,11,0.04)" }}
         >
-          This Disclaimer constitutes an integral and binding part of the Terms of Service governing the access and use of the Gamerbuddy platform (hereinafter referred to as the "Platform", "Gamerbuddy", "we", "us", or "our"). By accessing, registering an account, posting requests, placing bids, engaging in sessions, or otherwise using any services provided by the Platform, you expressly acknowledge that you have read, fully understood, and unconditionally agreed to be bound by this Disclaimer in its entirety.
+          This Disclaimer forms an integral and binding part of the Terms of Service governing the use of the Gamerbuddy platform ("Platform", "we", "us", or "our").
           <br /><br />
-          Gamerbuddy operates solely as an online intermediary marketplace that facilitates connections between individuals seeking to hire gamers ("Hirers") and individuals offering gaming services ("Gamers") for cooperative and multiplayer gaming sessions across various platforms.
+          Gamerbuddy operates solely as an online intermediary marketplace that facilitates connections between Hirers seeking skilled gamers and Gamers offering co-op and multiplayer gaming sessions across various platforms.
         </div>
       </div>
 
