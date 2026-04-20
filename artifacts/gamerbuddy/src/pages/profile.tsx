@@ -9,6 +9,9 @@ import {
   useMyStreamingAccounts, useConnectStreaming, useDisconnectStreaming,
   useMyGamingAccounts, useConnectGaming, useDisconnectGaming,
   useProfileVotes,
+  useConfirmProfilePhoto, useDeleteProfilePhoto,
+  useConfirmGalleryPhoto, useDeleteGalleryPhoto,
+  requestPhotoUploadUrl, uploadFileToPut,
   STREAMING_PLATFORM_META, GAMING_PLATFORM_META,
   type ShopItem, type QuestEntry,
 } from "@/lib/bids-api";
@@ -26,6 +29,7 @@ import {
   Star, Trophy, Swords, Edit3, Check, X, Palette, Tag,
   Sparkles, Lock, CheckCircle2, Plus, Trash2, Gamepad2,
   Zap, Target, ChevronDown, ChevronUp, Users, Globe, UserRound,
+  Camera, ImagePlus, AlertTriangle,
 } from "lucide-react";
 import { TrustMeter, ReputationBadges, computeBadges } from "@/components/reputation-badges";
 import { StreamingAccountsDisplay } from "@/components/streaming-accounts-display";
@@ -1734,6 +1738,47 @@ export default function Profile() {
   const [editingBio, setEditingBio] = useState(false);
   const [draftBio, setDraftBio] = useState("");
   const [showSetupModal, setShowSetupModal] = useState(false);
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const [galleryUploading, setGalleryUploading] = useState(false);
+  const [confirmDeleteGallery, setConfirmDeleteGallery] = useState<number | null>(null);
+  const [confirmDeleteAvatar, setConfirmDeleteAvatar] = useState(false);
+
+  const confirmProfilePhoto = useConfirmProfilePhoto();
+  const deleteProfilePhoto = useDeleteProfilePhoto();
+  const confirmGalleryPhoto = useConfirmGalleryPhoto();
+  const deleteGalleryPhoto = useDeleteGalleryPhoto();
+
+  const handleAvatarUpload = async (file: File) => {
+    if (!file.type.startsWith("image/")) { toast({ title: "Images only", variant: "destructive" }); return; }
+    if (file.size > 8 * 1024 * 1024) { toast({ title: "Max 8 MB", variant: "destructive" }); return; }
+    setAvatarUploading(true);
+    try {
+      const { uploadURL, objectPath } = await requestPhotoUploadUrl("profile", file);
+      await uploadFileToPut(uploadURL, file);
+      await confirmProfilePhoto.mutateAsync(objectPath);
+      toast({ title: "Profile photo updated!", description: "It will be reviewed by our team shortly." });
+    } catch (e: any) {
+      toast({ title: "Upload failed", description: e?.error || "Please try again.", variant: "destructive" });
+    } finally {
+      setAvatarUploading(false);
+    }
+  };
+
+  const handleGalleryUpload = async (file: File) => {
+    if (!file.type.startsWith("image/")) { toast({ title: "Images only", variant: "destructive" }); return; }
+    if (file.size > 8 * 1024 * 1024) { toast({ title: "Max 8 MB", variant: "destructive" }); return; }
+    setGalleryUploading(true);
+    try {
+      const { uploadURL, objectPath } = await requestPhotoUploadUrl("gallery", file);
+      await uploadFileToPut(uploadURL, file);
+      await confirmGalleryPhoto.mutateAsync(objectPath);
+      toast({ title: "Gallery photo added!", description: "It will be reviewed by our team shortly." });
+    } catch (e: any) {
+      toast({ title: "Upload failed", description: e?.error || "Please try again.", variant: "destructive" });
+    } finally {
+      setGalleryUploading(false);
+    }
+  };
 
   if (!user) return null;
   if (isLoading) return (
@@ -1837,19 +1882,67 @@ export default function Profile() {
           {/* Mobile: centered column. Desktop: side-by-side aligned at bottom. */}
           <div className="flex flex-col items-center sm:flex-row sm:items-end gap-4 sm:gap-5 -translate-y-10 sm:-translate-y-12 mb-0">
 
-            {/* Avatar with glow ring + verified dot */}
-            <div className="relative shrink-0">
-              <div
-                className="h-24 w-24 sm:h-28 sm:w-28 rounded-full border-4 border-card flex items-center justify-center"
+            {/* Avatar with glow ring + upload overlay + verified dot */}
+            <div className="relative shrink-0 group/avatar">
+              {/* Hidden file input */}
+              <input
+                id="avatar-file-input"
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => { const f = e.target.files?.[0]; if (f) handleAvatarUpload(f); e.target.value = ""; }}
+              />
+
+              {/* Avatar circle — clickable to upload */}
+              <button
+                type="button"
+                onClick={() => document.getElementById("avatar-file-input")?.click()}
+                disabled={avatarUploading}
+                className="h-24 w-24 sm:h-28 sm:w-28 rounded-full border-4 border-card flex items-center justify-center overflow-hidden transition-all duration-200 relative"
+                title="Click to change profile photo"
                 style={{
-                  background: `linear-gradient(135deg, ${bgAccent.replace("0.6", "0.4")}, rgba(0,0,0,0.85))`,
+                  background: profile?.profilePhotoUrl
+                    ? "transparent"
+                    : `linear-gradient(135deg, ${bgAccent.replace("0.6", "0.4")}, rgba(0,0,0,0.85))`,
                   boxShadow: `0 0 0 3px ${bgAccent.replace("0.6", "0.18")}, 0 0 36px ${bgAccent}`,
                 }}
               >
-                <span className="text-4xl sm:text-5xl font-black text-white uppercase select-none">
-                  {user.name.charAt(0)}
-                </span>
-              </div>
+                {profile?.profilePhotoUrl ? (
+                  <img
+                    src={`/api/storage${profile.profilePhotoUrl}`}
+                    alt={user.name}
+                    className="w-full h-full object-cover"
+                    onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                  />
+                ) : (
+                  <span className="text-4xl sm:text-5xl font-black text-white uppercase select-none">
+                    {user.name.charAt(0)}
+                  </span>
+                )}
+
+                {/* Hover overlay */}
+                <div className="absolute inset-0 bg-black/0 group-hover/avatar:bg-black/55 transition-all duration-200 flex items-center justify-center rounded-full">
+                  {avatarUploading ? (
+                    <div className="opacity-100 h-6 w-6 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                  ) : (
+                    <Camera className="h-6 w-6 text-white opacity-0 group-hover/avatar:opacity-100 transition-opacity duration-200" />
+                  )}
+                </div>
+              </button>
+
+              {/* Delete avatar button — only if photo set */}
+              {profile?.profilePhotoUrl && !avatarUploading && (
+                <button
+                  type="button"
+                  onClick={() => setConfirmDeleteAvatar(true)}
+                  className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-600 border border-card flex items-center justify-center hover:bg-red-500 transition-colors z-10"
+                  title="Remove photo"
+                >
+                  <X className="h-2.5 w-2.5 text-white" />
+                </button>
+              )}
+
+              {/* Verified badge */}
               {user.idVerified && (
                 <div
                   className="absolute -bottom-0.5 -right-0.5 h-7 w-7 rounded-full bg-emerald-500 border-2 border-card flex items-center justify-center"
@@ -1860,6 +1953,37 @@ export default function Profile() {
                 </div>
               )}
             </div>
+
+            {/* Delete avatar confirmation */}
+            {confirmDeleteAvatar && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+                <div className="bg-card border border-border rounded-2xl p-6 max-w-sm w-full shadow-2xl space-y-4">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-xl bg-red-500/15 border border-red-500/30 flex items-center justify-center shrink-0">
+                      <Trash2 className="h-5 w-5 text-red-400" />
+                    </div>
+                    <div>
+                      <div className="font-bold text-foreground text-sm">Remove profile photo?</div>
+                      <p className="text-xs text-muted-foreground">Your initial letter will be shown instead.</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" className="flex-1" onClick={() => setConfirmDeleteAvatar(false)}>Cancel</Button>
+                    <Button size="sm" className="flex-1 bg-red-600 hover:bg-red-500 text-white border-none"
+                      disabled={deleteProfilePhoto.isPending}
+                      onClick={() => {
+                        deleteProfilePhoto.mutate(undefined, {
+                          onSuccess: () => { toast({ title: "Photo removed" }); setConfirmDeleteAvatar(false); },
+                          onError: () => toast({ title: "Failed to remove", variant: "destructive" }),
+                        });
+                      }}
+                    >
+                      {deleteProfilePhoto.isPending ? "Removing…" : "Remove"}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Name + rank + rating + votes */}
             <div className="flex-1 min-w-0 sm:pb-2 sm:translate-y-8 text-center sm:text-left">
@@ -2242,6 +2366,166 @@ export default function Profile() {
           </div>
         );
       })()}
+
+      {/* ── PHOTO GALLERY ── */}
+      <div
+        className="rounded-2xl overflow-hidden border"
+        style={{ borderColor: "rgba(255,255,255,0.07)", background: "rgba(8,6,18,0.65)" }}
+      >
+        {/* Header */}
+        <div
+          className="flex items-center justify-between gap-2 px-4 sm:px-5 py-3 border-b"
+          style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.02)" }}
+        >
+          <div className="flex items-center gap-2 min-w-0">
+            <Camera className="h-3.5 w-3.5 shrink-0" style={{ color: "rgba(168,85,247,0.55)" }} />
+            <span className="text-[11px] font-extrabold uppercase tracking-widest text-white/65">Photo Gallery</span>
+            <span className="text-[9px] text-muted-foreground/40 ml-1">
+              ({(profile?.galleryPhotoUrls?.length ?? 0)}/4 photos)
+            </span>
+          </div>
+          {(profile?.galleryPhotoUrls?.length ?? 0) < 4 && (
+            <label
+              className="shrink-0 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg cursor-pointer transition-all duration-150 hover:brightness-110 hover:scale-[1.02]"
+              style={{
+                background: galleryUploading ? "rgba(100,100,100,0.10)" : "rgba(168,85,247,0.10)",
+                border: "1px solid rgba(168,85,247,0.28)",
+                color: galleryUploading ? "#888" : "#c084fc",
+              }}
+            >
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                disabled={galleryUploading}
+                onChange={(e) => { const f = e.target.files?.[0]; if (f) handleGalleryUpload(f); e.target.value = ""; }}
+              />
+              {galleryUploading ? (
+                <><div className="h-3 w-3 rounded-full border border-white/20 border-t-white/70 animate-spin" />Uploading…</>
+              ) : (
+                <><ImagePlus className="h-3 w-3" />Add Photo</>
+              )}
+            </label>
+          )}
+        </div>
+
+        {/* Anti-fake disclaimer */}
+        <div
+          className="flex items-start gap-2 px-4 sm:px-5 py-2.5 border-b"
+          style={{ background: "rgba(245,158,11,0.04)", borderColor: "rgba(245,158,11,0.12)" }}
+        >
+          <AlertTriangle className="h-3 w-3 text-amber-400 shrink-0 mt-0.5" />
+          <p className="text-[10px] text-amber-300/70 leading-relaxed">
+            Upload only <span className="font-semibold text-amber-300/90">genuine photos of yourself</span>. AI-generated, stolen, or fake images will result in account suspension. All photos are reviewed by our moderation team.
+          </p>
+        </div>
+
+        {/* Gallery grid */}
+        <div className="p-4 sm:p-5">
+          {(profile?.galleryPhotoUrls?.length ?? 0) === 0 ? (
+            <div className="flex flex-col items-center justify-center py-8 gap-3 text-center">
+              <div
+                className="h-12 w-12 rounded-2xl flex items-center justify-center"
+                style={{
+                  background: "linear-gradient(135deg, rgba(168,85,247,0.12), rgba(168,85,247,0.04))",
+                  border: "1.5px dashed rgba(168,85,247,0.28)",
+                }}
+              >
+                <Camera className="h-5 w-5" style={{ color: "#a855f7", opacity: 0.6 }} />
+              </div>
+              <div className="space-y-1 max-w-xs">
+                <p className="text-sm font-semibold" style={{ color: "rgba(255,255,255,0.40)" }}>No gallery photos yet</p>
+                <p className="text-[11px] leading-relaxed" style={{ color: "rgba(255,255,255,0.22)" }}>
+                  Add up to 4 real photos of yourself to build trust with hirers.
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {(profile?.galleryPhotoUrls ?? []).map((url, i) => (
+                <div key={i} className="relative group/gphoto aspect-square rounded-xl overflow-hidden"
+                  style={{ border: "1px solid rgba(168,85,247,0.20)", background: "rgba(0,0,0,0.4)" }}
+                >
+                  <img
+                    src={`/api/storage${url}`}
+                    alt={`Gallery ${i + 1}`}
+                    className="w-full h-full object-cover"
+                  />
+                  {/* Needs review badge */}
+                  <div
+                    className="absolute top-1.5 left-1.5 text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full"
+                    style={{ background: "rgba(245,158,11,0.85)", color: "#fff" }}
+                  >
+                    Under Review
+                  </div>
+                  {/* Delete overlay */}
+                  <button
+                    type="button"
+                    onClick={() => setConfirmDeleteGallery(i)}
+                    className="absolute inset-0 bg-black/0 hover:bg-black/55 transition-all duration-200 flex items-center justify-center opacity-0 group-hover/gphoto:opacity-100"
+                  >
+                    <div className="h-8 w-8 rounded-full bg-red-600/90 flex items-center justify-center">
+                      <Trash2 className="h-4 w-4 text-white" />
+                    </div>
+                  </button>
+                </div>
+              ))}
+              {/* Add more slot — if under 4 */}
+              {(profile?.galleryPhotoUrls?.length ?? 0) < 4 && (
+                <label
+                  className="aspect-square rounded-xl flex flex-col items-center justify-center gap-2 cursor-pointer transition-all duration-150 hover:brightness-125"
+                  style={{
+                    border: "1.5px dashed rgba(168,85,247,0.28)",
+                    background: "rgba(168,85,247,0.04)",
+                  }}
+                >
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    disabled={galleryUploading}
+                    onChange={(e) => { const f = e.target.files?.[0]; if (f) handleGalleryUpload(f); e.target.value = ""; }}
+                  />
+                  <ImagePlus className="h-5 w-5" style={{ color: "rgba(168,85,247,0.5)" }} />
+                  <span className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: "rgba(168,85,247,0.5)" }}>Add</span>
+                </label>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Gallery delete confirmation modal */}
+      {confirmDeleteGallery !== null && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-card border border-border rounded-2xl p-6 max-w-sm w-full shadow-2xl space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-xl bg-red-500/15 border border-red-500/30 flex items-center justify-center shrink-0">
+                <Trash2 className="h-5 w-5 text-red-400" />
+              </div>
+              <div>
+                <div className="font-bold text-foreground text-sm">Remove this gallery photo?</div>
+                <p className="text-xs text-muted-foreground">This action cannot be undone.</p>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" className="flex-1" onClick={() => setConfirmDeleteGallery(null)}>Cancel</Button>
+              <Button size="sm" className="flex-1 bg-red-600 hover:bg-red-500 text-white border-none"
+                disabled={deleteGalleryPhoto.isPending}
+                onClick={() => {
+                  const idx = confirmDeleteGallery;
+                  deleteGalleryPhoto.mutate(idx, {
+                    onSuccess: () => { toast({ title: "Photo removed" }); setConfirmDeleteGallery(null); },
+                    onError: () => toast({ title: "Failed to remove", variant: "destructive" }),
+                  });
+                }}
+              >
+                {deleteGalleryPhoto.isPending ? "Removing…" : "Remove"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── LOCATION & IDENTITY ── */}
       <span id="profile-basics-section" className="scroll-mt-24" />

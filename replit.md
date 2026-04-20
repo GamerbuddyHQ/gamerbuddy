@@ -54,10 +54,32 @@ A full-stack gaming marketplace web app where users can hire other gamers to pla
 12. **Gift/Tip**: send tips to gamers after sessions
 13. **Safety Banner**: platform safety warnings on request pages
 14. **Multi-Language Support**: 10 languages (EN/HI/ES/FR/DE/PT/AR/JA/KO/ZH), persisted via localStorage, auto-detected from browser, RTL support for Arabic, language selector in navbar
+15. **Photo Uploads**: Profile picture (avatar) + 4-slot gallery grid; GCS object storage (8MB max, images only); moderation flow — all uploads logged as `needs_review` in `user_photos` table; anti-AI disclaimer banner; avatar shown on bid cards in request detail view; gallery shown on public user profile pages
+
+## Object Storage
+
+- **Provider**: Google Cloud Storage (replit-objstore-f1e34354-... bucket)
+- **Library**: `@google-cloud/storage` + `google-auth-library` (injected via Replit secrets)
+- **Module**: `artifacts/api-server/src/lib/objectStorage.ts`
+- **Serving**: `GET /api/storage/objects/*` (public read, no auth required)
+- **Upload flow**: request signed PUT URL → client PUTs to GCS → confirm endpoint saves path to DB
+- **Limits**: 8MB per file, images only (jpeg/png/webp/gif)
+- **Photo routes**: `POST /api/profile/photo` (upload-url + confirm), `DELETE /api/profile/photo`, `POST /api/profile/gallery`, `DELETE /api/profile/gallery/:index`
+- **Moderation**: every upload logged in `user_photos` table with `status=needs_review`
+
+## Deployment Prep
+
+- **Frontend (Vercel)**: `vercel.json` at `artifacts/gamerbuddy/vercel.json` — SPA rewrites + API proxy
+- **Backend (Railway)**: `railway.json` at `artifacts/api-server/railway.json` — healthcheck + restart policy
+- **Test Mode banner**: yellow warning strip in frontend when `VITE_TEST_MODE=true`
+- **CORS**: production origins locked to Vercel domain via `CORS_ORIGIN` env var
+- **Session cookie**: `sameSite: none, secure: true` in production for cross-origin cookie handling
+- **Vulnerabilities**: 0 (fixed via pnpm catalog overrides in `pnpm-workspace.yaml`)
 
 ## Database Schema
 
-- `users` — accounts + points, trustFactor, bio, profileBackground, profileTitle
+- `users` — accounts + points, trustFactor, bio, profileBackground, profileTitle, `profilePhotoUrl`, `galleryPhotoUrls` (text[])
+- `user_photos` — moderation log: userId, objectPath, photoType (profile|gallery), status (needs_review|approved|rejected), uploadedAt
 - `wallets` — hiringBalance, earningsBalance (doublePrecision)
 - `wallet_transactions` — all money movements (type, amount, description)
 - `sessions` — session tokens (7-day expiry)

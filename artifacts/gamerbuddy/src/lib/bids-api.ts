@@ -19,6 +19,7 @@ export type Bid = {
   bidderCountry?: string | null;
   bidderGender?: string | null;
   bidderGamingAccounts?: { platform: string; username: string }[];
+  bidderProfilePhotoUrl?: string | null;
   price: number;
   message: string;
   status: string;
@@ -107,6 +108,8 @@ export type UserProfile = {
   idVerified: boolean;
   profileBackground: string | null;
   profileTitle: string | null;
+  profilePhotoUrl: string | null;
+  galleryPhotoUrls: string[];
   createdAt: string;
   avgRating: number | null;
   reviewCount: number;
@@ -610,6 +613,69 @@ export function useVoteOnProfile(userId: number | null) {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["profile-votes", userId] });
       qc.invalidateQueries({ queryKey: ["user-profile", userId] });
+    },
+  });
+}
+
+/* ── Photo Upload ── */
+
+export async function requestPhotoUploadUrl(type: "profile" | "gallery", file: File): Promise<{ uploadURL: string; objectPath: string }> {
+  const endpoint = type === "profile" ? "/profile/photo/upload-url" : "/profile/gallery/upload-url";
+  return apiFetch(`${BASE}${endpoint}`, {
+    method: "POST",
+    body: JSON.stringify({ name: file.name, size: file.size, contentType: file.type }),
+  });
+}
+
+export async function uploadFileToPut(uploadURL: string, file: File): Promise<void> {
+  const res = await fetch(uploadURL, {
+    method: "PUT",
+    headers: { "Content-Type": file.type },
+    body: file,
+  });
+  if (!res.ok) throw new Error(`Upload failed: ${res.status}`);
+}
+
+export function useConfirmProfilePhoto() {
+  const qc = useQueryClient();
+  return useMutation<{ success: boolean; profilePhotoUrl: string }, any, string>({
+    mutationFn: (objectPath) =>
+      apiFetch(`${BASE}/profile/photo`, { method: "POST", body: JSON.stringify({ objectPath }) }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["user-profile"] });
+      qc.invalidateQueries({ queryKey: ["auth-me"] });
+    },
+  });
+}
+
+export function useDeleteProfilePhoto() {
+  const qc = useQueryClient();
+  return useMutation<{ success: boolean }, any, void>({
+    mutationFn: () => apiFetch(`${BASE}/profile/photo`, { method: "DELETE" }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["user-profile"] });
+      qc.invalidateQueries({ queryKey: ["auth-me"] });
+    },
+  });
+}
+
+export function useConfirmGalleryPhoto() {
+  const qc = useQueryClient();
+  return useMutation<{ success: boolean; galleryPhotoUrls: string[] }, any, string>({
+    mutationFn: (objectPath) =>
+      apiFetch(`${BASE}/profile/gallery`, { method: "POST", body: JSON.stringify({ objectPath }) }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["user-profile"] });
+    },
+  });
+}
+
+export function useDeleteGalleryPhoto() {
+  const qc = useQueryClient();
+  return useMutation<{ success: boolean; galleryPhotoUrls: string[] }, any, number>({
+    mutationFn: (index) => apiFetch(`${BASE}/profile/gallery/${index}`, { method: "DELETE" }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["user-profile"] });
     },
   });
 }

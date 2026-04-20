@@ -16,3 +16,4 @@ export * from "./profile_votes";
 export * from "./suggestions";
 export * from "./tournaments";
 export * from "./platform_fees";
+export * from "./user_photos";

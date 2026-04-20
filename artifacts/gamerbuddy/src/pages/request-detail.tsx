@@ -1201,16 +1201,28 @@ function BidCard({
               </button>
             )}
 
-            {/* Avatar */}
+            {/* Avatar — shows profile photo if available, falls back to initial */}
             <div
-              className="h-10 w-10 sm:h-12 sm:w-12 rounded-2xl shrink-0 flex items-center justify-center text-base sm:text-lg font-black select-none"
+              className="h-10 w-10 sm:h-12 sm:w-12 rounded-2xl shrink-0 flex items-center justify-center text-base sm:text-lg font-black select-none overflow-hidden"
               style={{
                 background: isAccepted ? "rgba(34,197,94,0.15)" : isMe ? "rgba(34,211,238,0.15)" : "rgba(168,85,247,0.15)",
                 border: `1.5px solid ${isAccepted ? "rgba(34,197,94,0.35)" : isMe ? "rgba(34,211,238,0.35)" : "rgba(168,85,247,0.35)"}`,
                 color: isAccepted ? "#4ade80" : isMe ? "#22d3ee" : "#c084fc",
               }}
             >
-              {bid.bidderName.trim()[0]?.toUpperCase() ?? "G"}
+              {bid.bidderProfilePhotoUrl ? (
+                <img
+                  src={`/api/storage${bid.bidderProfilePhotoUrl}`}
+                  alt={bid.bidderName}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).style.display = "none";
+                    (e.target as HTMLImageElement).parentElement!.dataset.initial = "true";
+                  }}
+                />
+              ) : (
+                bid.bidderName.trim()[0]?.toUpperCase() ?? "G"
+              )}
             </div>
 
             {/* Name + badges block */}

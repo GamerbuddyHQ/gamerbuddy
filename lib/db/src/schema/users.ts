@@ -19,6 +19,8 @@ export const usersTable = pgTable("users", {
   gender: text("gender"),
   loginAttempts: integer("login_attempts").notNull().default(0),
   lockedUntil:   timestamp("locked_until", { withTimezone: true }),
+  profilePhotoUrl: text("profile_photo_url"),
+  galleryPhotoUrls: text("gallery_photo_urls").array().notNull().default([]),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

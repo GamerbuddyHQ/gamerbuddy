@@ -1,10 +1,13 @@
 import { Router, type IRouter } from "express";
 import multer from "multer";
-import { db, usersTable, reviewsTable, gameRequestsTable, bidsTable, profilePurchasesTable, questEntriesTable, streamingAccountsTable, gamingAccountsTable, profileVotesTable, STREAMING_PLATFORMS, GAMING_PLATFORMS } from "@workspace/db";
+import { db, usersTable, reviewsTable, gameRequestsTable, bidsTable, profilePurchasesTable, questEntriesTable, streamingAccountsTable, gamingAccountsTable, profileVotesTable, userPhotosTable, STREAMING_PLATFORMS, GAMING_PLATFORMS } from "@workspace/db";
 import { eq, desc, and, ne, sql, or } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
 import { recalculateTrustFactor } from "../trust-factor";
 import { validate, sanitize, UpdateProfileSchema, PostQuestSchema } from "../lib/validate";
+import { ObjectStorageService } from "../lib/objectStorage";
+
+const objectStorageService = new ObjectStorageService();
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -42,6 +45,8 @@ router.get("/users/:id", async (req, res): Promise<void> => {
     idVerified: usersTable.idVerified,
     profileBackground: usersTable.profileBackground,
     profileTitle: usersTable.profileTitle,
+    profilePhotoUrl: usersTable.profilePhotoUrl,
+    galleryPhotoUrls: usersTable.galleryPhotoUrls,
     createdAt: usersTable.createdAt,
   }).from(usersTable).where(eq(usersTable.id, userId));
 
@@ -139,6 +144,8 @@ router.get("/users/:id", async (req, res): Promise<void> => {
   res.json({
     ...user,
     createdAt: user.createdAt.toISOString(),
+    profilePhotoUrl: user.profilePhotoUrl ?? null,
+    galleryPhotoUrls: user.galleryPhotoUrls ?? [],
     avgRating,
     reviewCount: reviews.length,
     wouldPlayAgainPercent,
@@ -229,6 +236,103 @@ router.patch("/profile", requireAuth, validate(UpdateProfileSchema), async (req,
   await db.update(usersTable).set(updates).where(eq(usersTable.id, user.id));
   res.json({ success: true, ...updates });
 });
+
+/* ── PHOTO ROUTES ─────────────────────────────────────────────── */
+
+router.post("/profile/photo/upload-url", requireAuth, async (req, res): Promise<void> => {
+  const { name, size, contentType } = req.body as { name?: string; size?: number; contentType?: string };
+  if (!contentType || !contentType.startsWith("image/")) {
+    res.status(400).json({ error: "Only image uploads are allowed" });
+    return;
+  }
+  if (!size || size > 8 * 1024 * 1024) {
+    res.status(400).json({ error: "File too large. Maximum 8 MB." });
+    return;
+  }
+  try {
+    const uploadURL = await objectStorageService.getObjectEntityUploadURL();
+    const objectPath = objectStorageService.normalizeObjectEntityPath(uploadURL);
+    res.json({ uploadURL, objectPath });
+  } catch {
+    res.status(500).json({ error: "Failed to generate upload URL" });
+  }
+});
+
+router.post("/profile/photo", requireAuth, async (req, res): Promise<void> => {
+  const user = req.user!;
+  const { objectPath } = req.body as { objectPath?: string };
+  if (!objectPath || typeof objectPath !== "string" || !objectPath.startsWith("/objects/")) {
+    res.status(400).json({ error: "Invalid objectPath" });
+    return;
+  }
+  await db.update(usersTable).set({ profilePhotoUrl: objectPath }).where(eq(usersTable.id, user.id));
+  await db.insert(userPhotosTable).values({ userId: user.id, objectPath, photoType: "profile", status: "needs_review" });
+  res.json({ success: true, profilePhotoUrl: objectPath });
+});
+
+router.delete("/profile/photo", requireAuth, async (req, res): Promise<void> => {
+  const user = req.user!;
+  await db.update(usersTable).set({ profilePhotoUrl: null }).where(eq(usersTable.id, user.id));
+  res.json({ success: true });
+});
+
+router.post("/profile/gallery/upload-url", requireAuth, async (req, res): Promise<void> => {
+  const user = req.user!;
+  const { name, size, contentType } = req.body as { name?: string; size?: number; contentType?: string };
+  if (!contentType || !contentType.startsWith("image/")) {
+    res.status(400).json({ error: "Only image uploads are allowed" });
+    return;
+  }
+  if (!size || size > 8 * 1024 * 1024) {
+    res.status(400).json({ error: "File too large. Maximum 8 MB." });
+    return;
+  }
+  const [currentUser] = await db.select({ galleryPhotoUrls: usersTable.galleryPhotoUrls }).from(usersTable).where(eq(usersTable.id, user.id));
+  if ((currentUser?.galleryPhotoUrls?.length ?? 0) >= 4) {
+    res.status(400).json({ error: "Maximum 4 gallery photos allowed" });
+    return;
+  }
+  try {
+    const uploadURL = await objectStorageService.getObjectEntityUploadURL();
+    const objectPath = objectStorageService.normalizeObjectEntityPath(uploadURL);
+    res.json({ uploadURL, objectPath });
+  } catch {
+    res.status(500).json({ error: "Failed to generate upload URL" });
+  }
+});
+
+router.post("/profile/gallery", requireAuth, async (req, res): Promise<void> => {
+  const user = req.user!;
+  const { objectPath } = req.body as { objectPath?: string };
+  if (!objectPath || typeof objectPath !== "string" || !objectPath.startsWith("/objects/")) {
+    res.status(400).json({ error: "Invalid objectPath" });
+    return;
+  }
+  const [currentUser] = await db.select({ galleryPhotoUrls: usersTable.galleryPhotoUrls }).from(usersTable).where(eq(usersTable.id, user.id));
+  const current = currentUser?.galleryPhotoUrls ?? [];
+  if (current.length >= 4) {
+    res.status(400).json({ error: "Maximum 4 gallery photos allowed" });
+    return;
+  }
+  const updated = [...current, objectPath];
+  await db.update(usersTable).set({ galleryPhotoUrls: updated }).where(eq(usersTable.id, user.id));
+  await db.insert(userPhotosTable).values({ userId: user.id, objectPath, photoType: "gallery", status: "needs_review" });
+  res.json({ success: true, galleryPhotoUrls: updated });
+});
+
+router.delete("/profile/gallery/:index", requireAuth, async (req, res): Promise<void> => {
+  const user = req.user!;
+  const index = parseInt(req.params.index);
+  if (isNaN(index) || index < 0) { res.status(400).json({ error: "Invalid index" }); return; }
+  const [currentUser] = await db.select({ galleryPhotoUrls: usersTable.galleryPhotoUrls }).from(usersTable).where(eq(usersTable.id, user.id));
+  const current = currentUser?.galleryPhotoUrls ?? [];
+  if (index >= current.length) { res.status(404).json({ error: "Photo not found" }); return; }
+  const updated = current.filter((_, i) => i !== index);
+  await db.update(usersTable).set({ galleryPhotoUrls: updated }).where(eq(usersTable.id, user.id));
+  res.json({ success: true, galleryPhotoUrls: updated });
+});
+
+/* ─────────────────────────────────────────────────────────────── */
 
 router.post("/profile/verify", requireAuth, upload.single("idDocument"), async (req, res): Promise<void> => {
   const user = req.user!;

@@ -317,6 +317,7 @@ function formatBid(
   bidderCountry?: string | null,
   bidderGender?: string | null,
   bidderGamingAccounts?: { platform: string; username: string }[],
+  bidderProfilePhotoUrl?: string | null,
 ) {
   return {
     id: bid.id,
@@ -333,6 +334,7 @@ function formatBid(
     bidderCountry: bidderCountry ?? null,
     bidderGender: bidderGender ?? null,
     bidderGamingAccounts: bidderGamingAccounts ?? [],
+    bidderProfilePhotoUrl: bidderProfilePhotoUrl ?? null,
     price: parseFloat(bid.price),
     message: bid.message,
     status: bid.status,
@@ -372,6 +374,7 @@ router.get("/requests/:id/bids", async (req, res): Promise<void> => {
       bidderBio: usersTable.bio,
       bidderCountry: usersTable.country,
       bidderGender: usersTable.gender,
+      bidderProfilePhotoUrl: usersTable.profilePhotoUrl,
     })
     .from(bidsTable)
     .leftJoin(usersTable, eq(bidsTable.bidderId, usersTable.id))
@@ -450,6 +453,7 @@ router.get("/requests/:id/bids", async (req, res): Promise<void> => {
         r.bidderCountry ?? null,
         r.bidderGender ?? null,
         gamingMap[r.bidderId] ?? [],
+        r.bidderProfilePhotoUrl ?? null,
       ),
     ),
   );

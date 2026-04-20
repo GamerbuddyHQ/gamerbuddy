@@ -342,10 +342,19 @@ export default function UserProfilePage() {
           {/* Avatar row */}
           <div className="flex items-end gap-4 -mt-8 mb-4">
             <div
-              className="h-16 w-16 sm:h-20 sm:w-20 rounded-2xl border-2 border-primary/40 flex items-center justify-center shrink-0 text-2xl font-black text-primary uppercase"
-              style={{ background: "rgba(168,85,247,0.15)", backdropFilter: "blur(8px)" }}
+              className="h-16 w-16 sm:h-20 sm:w-20 rounded-2xl border-2 border-primary/40 flex items-center justify-center shrink-0 text-2xl font-black text-primary uppercase overflow-hidden"
+              style={{ background: profile.profilePhotoUrl ? "transparent" : "rgba(168,85,247,0.15)", backdropFilter: "blur(8px)" }}
             >
-              {profile.name.charAt(0)}
+              {profile.profilePhotoUrl ? (
+                <img
+                  src={`/api/storage${profile.profilePhotoUrl}`}
+                  alt={profile.name}
+                  className="w-full h-full object-cover"
+                  onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                />
+              ) : (
+                profile.name.charAt(0)
+              )}
             </div>
             <div className="pb-1 min-w-0">
               {/* Name + verified */}
@@ -578,6 +587,34 @@ export default function UserProfilePage() {
           )}
         </div>
       </div>
+
+      {/* Gallery photos — only show if the user has any */}
+      {(profile.galleryPhotoUrls?.length ?? 0) > 0 && (
+        <div
+          className="rounded-2xl overflow-hidden border"
+          style={{ borderColor: "rgba(255,255,255,0.07)", background: "rgba(8,6,18,0.65)" }}
+        >
+          <div
+            className="flex items-center gap-2 px-4 sm:px-5 py-3 border-b"
+            style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.02)" }}
+          >
+            <span className="text-[11px] font-extrabold uppercase tracking-widest text-white/65">📷 Photo Gallery</span>
+          </div>
+          <div className="p-4 grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {profile.galleryPhotoUrls.map((url, i) => (
+              <div key={i} className="aspect-square rounded-xl overflow-hidden"
+                style={{ border: "1px solid rgba(168,85,247,0.20)", background: "rgba(0,0,0,0.4)" }}
+              >
+                <img
+                  src={`/api/storage${url}`}
+                  alt={`${profile.name} gallery ${i + 1}`}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Reviews */}
       {profile.reviews.length > 0 && (
