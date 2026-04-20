@@ -6,46 +6,85 @@ import { useAuth } from "@/lib/auth";
 export const CLOCK_NATIONS: {
   id: string; label: string; flag: string; tz: string;
 }[] = [
-  { id: "local",        label: "My Local Time",  flag: "🌐", tz: ""                         },
-  { id: "india",        label: "India",          flag: "🇮🇳", tz: "Asia/Kolkata"             },
-  { id: "usa",          label: "USA",            flag: "🇺🇸", tz: "America/New_York"         },
-  { id: "uk",           label: "United Kingdom", flag: "🇬🇧", tz: "Europe/London"            },
-  { id: "canada",       label: "Canada",         flag: "🇨🇦", tz: "America/Toronto"          },
-  { id: "australia",    label: "Australia",      flag: "🇦🇺", tz: "Australia/Sydney"         },
-  { id: "germany",      label: "Germany",        flag: "🇩🇪", tz: "Europe/Berlin"            },
-  { id: "france",       label: "France",         flag: "🇫🇷", tz: "Europe/Paris"             },
-  { id: "japan",        label: "Japan",          flag: "🇯🇵", tz: "Asia/Tokyo"               },
-  { id: "south_korea",  label: "South Korea",    flag: "🇰🇷", tz: "Asia/Seoul"               },
-  { id: "brazil",       label: "Brazil",         flag: "🇧🇷", tz: "America/Sao_Paulo"        },
-  { id: "singapore",    label: "Singapore",      flag: "🇸🇬", tz: "Asia/Singapore"           },
-  { id: "uae",          label: "UAE",            flag: "🇦🇪", tz: "Asia/Dubai"               },
-  { id: "russia",       label: "Russia",         flag: "🇷🇺", tz: "Europe/Moscow"            },
-  { id: "china",        label: "China",          flag: "🇨🇳", tz: "Asia/Shanghai"            },
-  { id: "pakistan",     label: "Pakistan",       flag: "🇵🇰", tz: "Asia/Karachi"             },
-  { id: "bangladesh",   label: "Bangladesh",     flag: "🇧🇩", tz: "Asia/Dhaka"               },
-  { id: "sri_lanka",    label: "Sri Lanka",      flag: "🇱🇰", tz: "Asia/Colombo"             },
-  { id: "nepal",        label: "Nepal",          flag: "🇳🇵", tz: "Asia/Kathmandu"           },
-  { id: "indonesia",    label: "Indonesia",      flag: "🇮🇩", tz: "Asia/Jakarta"             },
-  { id: "malaysia",     label: "Malaysia",       flag: "🇲🇾", tz: "Asia/Kuala_Lumpur"        },
-  { id: "philippines",  label: "Philippines",    flag: "🇵🇭", tz: "Asia/Manila"              },
-  { id: "vietnam",      label: "Vietnam",        flag: "🇻🇳", tz: "Asia/Ho_Chi_Minh"         },
-  { id: "thailand",     label: "Thailand",       flag: "🇹🇭", tz: "Asia/Bangkok"             },
-  { id: "mexico",       label: "Mexico",         flag: "🇲🇽", tz: "America/Mexico_City"      },
-  { id: "south_africa", label: "South Africa",   flag: "🇿🇦", tz: "Africa/Johannesburg"      },
-  { id: "nigeria",      label: "Nigeria",        flag: "🇳🇬", tz: "Africa/Lagos"             },
-  { id: "kenya",        label: "Kenya",          flag: "🇰🇪", tz: "Africa/Nairobi"           },
-  { id: "egypt",        label: "Egypt",          flag: "🇪🇬", tz: "Africa/Cairo"             },
-  { id: "turkey",       label: "Turkey",         flag: "🇹🇷", tz: "Europe/Istanbul"          },
-  { id: "italy",        label: "Italy",          flag: "🇮🇹", tz: "Europe/Rome"              },
-  { id: "spain",        label: "Spain",          flag: "🇪🇸", tz: "Europe/Madrid"            },
-  { id: "netherlands",  label: "Netherlands",    flag: "🇳🇱", tz: "Europe/Amsterdam"         },
-  { id: "sweden",       label: "Sweden",         flag: "🇸🇪", tz: "Europe/Stockholm"         },
-  { id: "norway",       label: "Norway",         flag: "🇳🇴", tz: "Europe/Oslo"              },
-  { id: "poland",       label: "Poland",         flag: "🇵🇱", tz: "Europe/Warsaw"            },
-  { id: "ukraine",      label: "Ukraine",        flag: "🇺🇦", tz: "Europe/Kyiv"              },
+  { id: "local",        label: "My Local Time",  flag: "🌐", tz: "" },
+  // Asia & Pacific
+  { id: "india",        label: "India",          flag: "🇮🇳", tz: "Asia/Kolkata"                   },
+  { id: "usa",          label: "United States",  flag: "🇺🇸", tz: "America/New_York"               },
+  { id: "uk",           label: "United Kingdom", flag: "🇬🇧", tz: "Europe/London"                  },
+  { id: "canada",       label: "Canada",         flag: "🇨🇦", tz: "America/Toronto"                },
+  { id: "australia",    label: "Australia",      flag: "🇦🇺", tz: "Australia/Sydney"               },
+  { id: "germany",      label: "Germany",        flag: "🇩🇪", tz: "Europe/Berlin"                  },
+  { id: "france",       label: "France",         flag: "🇫🇷", tz: "Europe/Paris"                   },
+  { id: "japan",        label: "Japan",          flag: "🇯🇵", tz: "Asia/Tokyo"                     },
+  { id: "south_korea",  label: "South Korea",    flag: "🇰🇷", tz: "Asia/Seoul"                     },
+  { id: "brazil",       label: "Brazil",         flag: "🇧🇷", tz: "America/Sao_Paulo"              },
+  { id: "singapore",    label: "Singapore",      flag: "🇸🇬", tz: "Asia/Singapore"                 },
+  { id: "uae",          label: "UAE",            flag: "🇦🇪", tz: "Asia/Dubai"                     },
+  { id: "russia",       label: "Russia",         flag: "🇷🇺", tz: "Europe/Moscow"                  },
+  { id: "china",        label: "China",          flag: "🇨🇳", tz: "Asia/Shanghai"                  },
+  { id: "pakistan",     label: "Pakistan",       flag: "🇵🇰", tz: "Asia/Karachi"                   },
+  { id: "bangladesh",   label: "Bangladesh",     flag: "🇧🇩", tz: "Asia/Dhaka"                     },
+  { id: "sri_lanka",    label: "Sri Lanka",      flag: "🇱🇰", tz: "Asia/Colombo"                   },
+  { id: "nepal",        label: "Nepal",          flag: "🇳🇵", tz: "Asia/Kathmandu"                 },
+  { id: "indonesia",    label: "Indonesia",      flag: "🇮🇩", tz: "Asia/Jakarta"                   },
+  { id: "malaysia",     label: "Malaysia",       flag: "🇲🇾", tz: "Asia/Kuala_Lumpur"              },
+  { id: "philippines",  label: "Philippines",    flag: "🇵🇭", tz: "Asia/Manila"                    },
+  { id: "vietnam",      label: "Vietnam",        flag: "🇻🇳", tz: "Asia/Ho_Chi_Minh"               },
+  { id: "thailand",     label: "Thailand",       flag: "🇹🇭", tz: "Asia/Bangkok"                   },
+  { id: "mexico",       label: "Mexico",         flag: "🇲🇽", tz: "America/Mexico_City"            },
+  // Africa
+  { id: "south_africa", label: "South Africa",   flag: "🇿🇦", tz: "Africa/Johannesburg"            },
+  { id: "nigeria",      label: "Nigeria",        flag: "🇳🇬", tz: "Africa/Lagos"                   },
+  { id: "kenya",        label: "Kenya",          flag: "🇰🇪", tz: "Africa/Nairobi"                 },
+  { id: "egypt",        label: "Egypt",          flag: "🇪🇬", tz: "Africa/Cairo"                   },
+  // Europe
+  { id: "turkey",       label: "Turkey",         flag: "🇹🇷", tz: "Europe/Istanbul"                },
+  { id: "italy",        label: "Italy",          flag: "🇮🇹", tz: "Europe/Rome"                    },
+  { id: "spain",        label: "Spain",          flag: "🇪🇸", tz: "Europe/Madrid"                  },
+  { id: "netherlands",  label: "Netherlands",    flag: "🇳🇱", tz: "Europe/Amsterdam"               },
+  { id: "sweden",       label: "Sweden",         flag: "🇸🇪", tz: "Europe/Stockholm"               },
+  { id: "norway",       label: "Norway",         flag: "🇳🇴", tz: "Europe/Oslo"                    },
+  { id: "denmark",      label: "Denmark",        flag: "🇩🇰", tz: "Europe/Copenhagen"              },
+  { id: "poland",       label: "Poland",         flag: "🇵🇱", tz: "Europe/Warsaw"                  },
+  { id: "ukraine",      label: "Ukraine",        flag: "🇺🇦", tz: "Europe/Kyiv"                    },
+  { id: "belgium",      label: "Belgium",        flag: "🇧🇪", tz: "Europe/Brussels"                },
+  { id: "switzerland",  label: "Switzerland",    flag: "🇨🇭", tz: "Europe/Zurich"                  },
+  { id: "austria",      label: "Austria",        flag: "🇦🇹", tz: "Europe/Vienna"                  },
+  { id: "portugal",     label: "Portugal",       flag: "🇵🇹", tz: "Europe/Lisbon"                  },
+  { id: "greece",       label: "Greece",         flag: "🇬🇷", tz: "Europe/Athens"                  },
+  { id: "ireland",      label: "Ireland",        flag: "🇮🇪", tz: "Europe/Dublin"                  },
+  { id: "finland",      label: "Finland",        flag: "🇫🇮", tz: "Europe/Helsinki"                },
+  // Oceania
+  { id: "new_zealand",  label: "New Zealand",    flag: "🇳🇿", tz: "Pacific/Auckland"               },
+  // Latin America
+  { id: "argentina",    label: "Argentina",      flag: "🇦🇷", tz: "America/Argentina/Buenos_Aires" },
+  { id: "chile",        label: "Chile",          flag: "🇨🇱", tz: "America/Santiago"               },
+  { id: "colombia",     label: "Colombia",       flag: "🇨🇴", tz: "America/Bogota"                 },
+  { id: "peru",         label: "Peru",           flag: "🇵🇪", tz: "America/Lima"                   },
+  // Middle East
+  { id: "saudi_arabia", label: "Saudi Arabia",   flag: "🇸🇦", tz: "Asia/Riyadh"                    },
+  { id: "qatar",        label: "Qatar",          flag: "🇶🇦", tz: "Asia/Qatar"                     },
+  { id: "israel",       label: "Israel",         flag: "🇮🇱", tz: "Asia/Jerusalem"                 },
+  { id: "jordan",       label: "Jordan",         flag: "🇯🇴", tz: "Asia/Amman"                     },
+  { id: "lebanon",      label: "Lebanon",        flag: "🇱🇧", tz: "Asia/Beirut"                    },
+  // North Africa
+  { id: "morocco",      label: "Morocco",        flag: "🇲🇦", tz: "Africa/Casablanca"              },
+  { id: "algeria",      label: "Algeria",        flag: "🇩🇿", tz: "Africa/Algiers"                 },
+  { id: "tunisia",      label: "Tunisia",        flag: "🇹🇳", tz: "Africa/Tunis"                   },
+  // Sub-Saharan Africa
+  { id: "ghana",        label: "Ghana",          flag: "🇬🇭", tz: "Africa/Accra"                   },
+  { id: "ethiopia",     label: "Ethiopia",       flag: "🇪🇹", tz: "Africa/Addis_Ababa"             },
+  { id: "uganda",       label: "Uganda",         flag: "🇺🇬", tz: "Africa/Kampala"                 },
+  { id: "tanzania",     label: "Tanzania",       flag: "🇹🇿", tz: "Africa/Dar_es_Salaam"           },
+  { id: "zimbabwe",     label: "Zimbabwe",       flag: "🇿🇼", tz: "Africa/Harare"                  },
+  { id: "angola",       label: "Angola",         flag: "🇦🇴", tz: "Africa/Luanda"                  },
+  { id: "ivory_coast",  label: "Ivory Coast",    flag: "🇨🇮", tz: "Africa/Abidjan"                 },
+  { id: "cameroon",     label: "Cameroon",       flag: "🇨🇲", tz: "Africa/Douala"                  },
+  { id: "senegal",      label: "Senegal",        flag: "🇸🇳", tz: "Africa/Dakar"                   },
+  { id: "zambia",       label: "Zambia",         flag: "🇿🇲", tz: "Africa/Lusaka"                  },
 ];
 
-/* ── IANA timezone → nation ID (covers all major zones) ──────────────── */
+/* ── IANA timezone → nation ID ────────────────────────────────────────── */
 const TZ_TO_NATION: Record<string, string> = {
   // India
   "Asia/Kolkata": "india", "Asia/Calcutta": "india",
@@ -130,31 +169,104 @@ const TZ_TO_NATION: Record<string, string> = {
   "Europe/Stockholm": "sweden",
   // Norway
   "Europe/Oslo": "norway",
+  // Denmark
+  "Europe/Copenhagen": "denmark",
   // Poland
   "Europe/Warsaw": "poland",
   // Ukraine
   "Europe/Kyiv": "ukraine", "Europe/Kiev": "ukraine",
+  // Belgium
+  "Europe/Brussels": "belgium",
+  // Switzerland
+  "Europe/Zurich": "switzerland",
+  // Austria
+  "Europe/Vienna": "austria",
+  // Portugal
+  "Europe/Lisbon": "portugal", "Atlantic/Azores": "portugal",
+  // Greece
+  "Europe/Athens": "greece",
+  // Ireland
+  "Europe/Dublin": "ireland",
+  // Finland
+  "Europe/Helsinki": "finland",
+  // New Zealand
+  "Pacific/Auckland": "new_zealand", "Pacific/Chatham": "new_zealand",
+  // Argentina
+  "America/Argentina/Buenos_Aires": "argentina", "America/Argentina/Cordoba": "argentina",
+  "America/Argentina/Mendoza": "argentina",
+  // Chile
+  "America/Santiago": "chile",
+  // Colombia
+  "America/Bogota": "colombia",
+  // Peru
+  "America/Lima": "peru",
+  // Saudi Arabia
+  "Asia/Riyadh": "saudi_arabia",
+  // Qatar
+  "Asia/Qatar": "qatar",
+  // Israel
+  "Asia/Jerusalem": "israel", "Asia/Tel_Aviv": "israel",
+  // Jordan
+  "Asia/Amman": "jordan",
+  // Lebanon
+  "Asia/Beirut": "lebanon",
+  // Morocco
+  "Africa/Casablanca": "morocco",
+  // Algeria
+  "Africa/Algiers": "algeria",
+  // Tunisia
+  "Africa/Tunis": "tunisia",
+  // Ghana
+  "Africa/Accra": "ghana",
+  // Ethiopia
+  "Africa/Addis_Ababa": "ethiopia",
+  // Uganda
+  "Africa/Kampala": "uganda",
+  // Tanzania
+  "Africa/Dar_es_Salaam": "tanzania",
+  // Zimbabwe
+  "Africa/Harare": "zimbabwe",
+  // Angola
+  "Africa/Luanda": "angola",
+  // Ivory Coast
+  "Africa/Abidjan": "ivory_coast",
+  // Cameroon
+  "Africa/Douala": "cameroon",
+  // Senegal
+  "Africa/Dakar": "senegal",
+  // Zambia
+  "Africa/Lusaka": "zambia",
 };
 
-/* ── user.country string → nation ID (exact + aliases) ───────────────── */
+/* ── user.country string → nation ID ─────────────────────────────────── */
 function countryToNationId(country: string | null | undefined): string | null {
   if (!country) return null;
   const norm = country.toLowerCase().trim();
-  // Direct match against label
+  // Direct match against label (case-insensitive)
   const direct = CLOCK_NATIONS.find((n) => n.label.toLowerCase() === norm);
   if (direct && direct.id !== "local") return direct.id;
-  // Known aliases / alternate names
+  // Aliases: handle alternate names and short codes stored in user.country
   const aliases: Record<string, string> = {
+    // from geo-options values that differ from clock labels
+    "usa": "usa", "u.s.a.": "usa", "us": "usa",
+    "united states of america": "usa",
+    "uk": "uk", "u.k.": "uk",
     "united kingdom": "uk", "great britain": "uk",
-    "england": "uk", "scotland": "uk", "wales": "uk", "northern ireland": "uk",
-    "united states": "usa", "united states of america": "usa", "us": "usa",
+    "england": "uk", "scotland": "uk", "wales": "uk",
     "korea": "south_korea", "republic of korea": "south_korea",
     "united arab emirates": "uae", "emirates": "uae",
+    "ivory coast": "ivory_coast", "côte d'ivoire": "ivory_coast",
+    "cote d'ivoire": "ivory_coast",
+    "new zealand": "new_zealand",
+    "south africa": "south_africa",
+    "south korea": "south_korea",
+    "sri lanka": "sri_lanka",
+    "saudi arabia": "saudi_arabia",
   };
   return aliases[norm] ?? null;
 }
 
-/* ── Derive a nation ID without needing localStorage ─────────────────── */
+/* ── Browser timezone → nation ID ─────────────────────────────────────── */
 function detectNationFromBrowser(): string {
   try {
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -164,29 +276,21 @@ function detectNationFromBrowser(): string {
   }
 }
 
-const LS_KEY        = "gb_clock_primary";   // manual choice
-const LS_MANUAL_KEY = "gb_clock_manual";    // "1" if user has manually picked
+/* ── localStorage helpers ─────────────────────────────────────────────── */
+const LS_KEY        = "gb_clock_primary";
+const LS_MANUAL_KEY = "gb_clock_manual";
 
 function readManualChoice(): string | null {
   try {
-    const isManual = localStorage.getItem(LS_MANUAL_KEY) === "1";
-    if (!isManual) return null;
+    if (localStorage.getItem(LS_MANUAL_KEY) !== "1") return null;
     return localStorage.getItem(LS_KEY);
   } catch { return null; }
 }
-
 function saveManualChoice(id: string) {
-  try {
-    localStorage.setItem(LS_KEY, id);
-    localStorage.setItem(LS_MANUAL_KEY, "1");
-  } catch {}
+  try { localStorage.setItem(LS_KEY, id); localStorage.setItem(LS_MANUAL_KEY, "1"); } catch {}
 }
-
 function clearManualChoice() {
-  try {
-    localStorage.removeItem(LS_KEY);
-    localStorage.removeItem(LS_MANUAL_KEY);
-  } catch {}
+  try { localStorage.removeItem(LS_KEY); localStorage.removeItem(LS_MANUAL_KEY); } catch {}
 }
 
 /* ── Per-minute timer ─────────────────────────────────────────────────── */
@@ -224,20 +328,18 @@ export function RegionalClock() {
   const ref                       = useRef<HTMLDivElement>(null);
   const searchRef                 = useRef<HTMLInputElement>(null);
 
-  /* ── Smart default: manual > user.country > browser TZ ── */
+  /* Smart default: manual > user.country > browser TZ */
   const [primaryId, setPrimaryId] = useState<string>(() => {
     const manual = readManualChoice();
     if (manual) return manual;
     return detectNationFromBrowser();
   });
 
-  /* When user logs in or changes, auto-set if no manual override */
+  /* When user logs in / profile loads, auto-set if no manual override */
   useEffect(() => {
-    if (readManualChoice()) return; // respect manual choice
+    if (readManualChoice()) return;
     const fromCountry = countryToNationId(user?.country);
-    if (fromCountry) {
-      setPrimaryId(fromCountry);
-    }
+    if (fromCountry) setPrimaryId(fromCountry);
   }, [user?.country]);
 
   const localTz       = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -252,18 +354,18 @@ export function RegionalClock() {
 
   const isManuallySet = !!readManualChoice();
 
-  /* Filtered list */
+  /* Filtered + sorted list (My Local Time always first) */
   const q       = query.trim().toLowerCase();
-  const visible = q
-    ? CLOCK_NATIONS.filter((n) => n.label.toLowerCase().includes(q))
-    : CLOCK_NATIONS;
+  const rest    = CLOCK_NATIONS.slice(1); // skip "local" from filtering
+  const filtered = q ? rest.filter((n) => n.label.toLowerCase().includes(q)) : rest;
+  const visible  = q ? filtered : [CLOCK_NATIONS[0], ...filtered];
 
   function selectPrimary(id: string) {
     setPrimaryId(id);
     if (id === "local") {
-      clearManualChoice();         // "My Local Time" resets auto-detection
+      clearManualChoice();
     } else {
-      saveManualChoice(id);        // manual pick persists
+      saveManualChoice(id);
     }
     setQuery("");
     setOpen(false);
@@ -279,18 +381,18 @@ export function RegionalClock() {
     return () => document.removeEventListener("mousedown", h);
   }, [open]);
 
-  /* Focus search when opened */
   useEffect(() => {
     if (open) setTimeout(() => searchRef.current?.focus(), 60);
     else setQuery("");
   }, [open]);
 
-  /* Source label for the hero area */
   const sourceLabel = isManuallySet
     ? "Manually pinned"
     : user?.country
-      ? `Auto · from your profile`
+      ? "Auto · from your profile"
       : "Auto · from your browser";
+
+  const nationCount = CLOCK_NATIONS.length - 1; // exclude "My Local Time"
 
   return (
     <div ref={ref} className="relative">
@@ -326,8 +428,8 @@ export function RegionalClock() {
       {/* ── Dropdown ─────────────────────────────────────────────── */}
       {open && (
         <div
-          className="absolute right-0 top-full mt-2 w-[272px] rounded-2xl border border-border/70 bg-popover z-[200] flex flex-col overflow-hidden"
-          style={{ boxShadow: "0 16px 48px rgba(0,0,0,0.32), 0 0 0 1px rgba(168,85,247,0.12)", maxHeight: "min(560px, 85dvh)" }}
+          className="absolute right-0 top-full mt-2 w-[280px] rounded-2xl border border-border/70 bg-popover z-[200] flex flex-col overflow-hidden"
+          style={{ boxShadow: "0 16px 48px rgba(0,0,0,0.32), 0 0 0 1px rgba(168,85,247,0.12)", maxHeight: "min(580px, 88dvh)" }}
         >
           {/* Header */}
           <div className="flex items-center justify-between px-3.5 py-2.5 border-b border-border/60 bg-primary/5 shrink-0">
@@ -350,7 +452,11 @@ export function RegionalClock() {
               <span>{sourceLabel}</span>
               {isManuallySet && (
                 <button
-                  onClick={() => { clearManualChoice(); const auto = countryToNationId(user?.country) ?? detectNationFromBrowser(); setPrimaryId(auto); }}
+                  onClick={() => {
+                    clearManualChoice();
+                    const auto = countryToNationId(user?.country) ?? detectNationFromBrowser();
+                    setPrimaryId(auto);
+                  }}
                   className="ml-auto flex items-center gap-0.5 text-[8px] text-muted-foreground/50 hover:text-primary/70 transition-colors font-semibold"
                   title="Reset to auto-detected country"
                 >
@@ -390,7 +496,7 @@ export function RegionalClock() {
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search nation…"
+                placeholder={`Search ${nationCount} nations…`}
                 className="w-full bg-muted/30 border border-border/40 rounded-lg pl-7 pr-7 py-1.5 text-[12px] text-foreground placeholder:text-muted-foreground/40 outline-none focus:border-primary/40 focus:bg-primary/[0.04] transition-colors"
               />
               {query && (
@@ -454,7 +560,7 @@ export function RegionalClock() {
             <div className="px-3.5 py-2 border-t border-border/30 bg-muted/10 flex items-center justify-between shrink-0">
               <div className="flex items-center gap-1.5">
                 <div className="h-1.5 w-1.5 rounded-full bg-green-400 animate-pulse shrink-0" />
-                <span className="text-[9px] text-muted-foreground/60 font-medium">Live · {CLOCK_NATIONS.length - 1} nations</span>
+                <span className="text-[9px] text-muted-foreground/60 font-medium">Live · {nationCount} nations</span>
               </div>
               <span className="text-[9px] text-muted-foreground/40">
                 {isManuallySet ? "📌 Pinned manually" : user?.country ? "🤖 Auto · profile" : "🌐 Auto · browser"}
