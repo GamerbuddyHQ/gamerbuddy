@@ -102,6 +102,17 @@ export const postRequestLimiter = rateLimit({
   handler: jsonMessage("You're posting requests too quickly. Please wait a minute."),
 });
 
+// ── Verification submission ────────────────────────────────────────────────
+// 3 per hour per user — prevents flooding admin review queue.
+export const verifyLimiter = rateLimit({
+  windowMs: 60 * 60_000,
+  max: 3,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: userOrIpKey,
+  handler: jsonMessage("Too many verification requests. Please wait an hour before trying again."),
+});
+
 // ── Withdrawal ─────────────────────────────────────────────────────────────
 // 3 per 10-minute window per user — prevents DoS spam on the withdrawal route.
 // The atomic SQL guard in the route already prevents actual double-deduction,

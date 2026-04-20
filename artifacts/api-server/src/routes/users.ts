@@ -5,11 +5,33 @@ import { eq, desc, and, ne, sql, or } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
 import { recalculateTrustFactor } from "../trust-factor";
 import { validate, sanitize, UpdateProfileSchema, PostQuestSchema } from "../lib/validate";
+import { verifyLimiter } from "../lib/rate-limit";
 import { ObjectStorageService } from "../lib/objectStorage";
 
 const objectStorageService = new ObjectStorageService();
 
-const upload = multer({ storage: multer.memoryStorage() });
+const ALLOWED_ID_MIMETYPES = new Set([
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+  "image/webp",
+  "image/heic",
+  "image/heif",
+  "application/pdf",
+]);
+const MAX_ID_SIZE_BYTES = 8 * 1024 * 1024; // 8 MB
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: MAX_ID_SIZE_BYTES },
+  fileFilter: (_req, file, cb) => {
+    if (ALLOWED_ID_MIMETYPES.has(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only image files (JPEG, PNG, WebP, HEIC) or PDF are accepted for identity documents."));
+    }
+  },
+});
 
 const router: IRouter = Router();
 
@@ -367,7 +389,7 @@ router.delete("/profile/gallery/:index", requireAuth, async (req, res): Promise<
 
 /* ─────────────────────────────────────────────────────────────── */
 
-router.post("/profile/verify", requireAuth, upload.single("idDocument"), async (req, res): Promise<void> => {
+router.post("/profile/verify", requireAuth, verifyLimiter, upload.single("idDocument"), async (req, res): Promise<void> => {
   const user = req.user!;
 
   const hasFile = !!req.file;
@@ -378,14 +400,27 @@ router.post("/profile/verify", requireAuth, upload.single("idDocument"), async (
     return;
   }
 
-  const officialIdPath = req.file ? `uploads/${Date.now()}_${req.file.originalname}` : `submitted/${Date.now()}`;
+  // Sanitise the filename: strip any path separators or non-printable characters.
+  const safeFilename = req.file
+    ? req.file.originalname.replace(/[^a-zA-Z0-9._\-]/g, "_").slice(0, 120)
+    : null;
+  const officialIdPath = safeFilename
+    ? `pending/${Date.now()}_${safeFilename}`
+    : `pending/${Date.now()}`;
 
+  // Security: idVerified is intentionally NOT set here.
+  // The verification request is queued for admin review (24–48 hrs).
+  // Admin approves via POST /admin/users/:id/set-verified.
   await db.update(usersTable).set({
     officialIdPath,
-    idVerified: true,
   }).where(eq(usersTable.id, user.id));
 
-  res.json({ success: true, idVerified: true, message: "Identity verified successfully." });
+  res.json({
+    success: true,
+    idVerified: false,
+    verificationPending: true,
+    message: "Your verification request has been submitted. Our team will review it within 24–48 hours and your Verified badge will appear once approved.",
+  });
 });
 
 router.get("/profile/shop", (_req, res): void => {

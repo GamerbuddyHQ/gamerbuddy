@@ -5,7 +5,7 @@
 
 import { Router, type IRouter, type RequestHandler } from "express";
 import { db, usersTable, walletTransactionsTable, reportsTable, walletsTable, withdrawalRequestsTable } from "@workspace/db";
-import { eq, desc, gt, or, isNotNull, sql, and, gte, inArray } from "drizzle-orm";
+import { eq, desc, gt, or, isNotNull, sql, and, gte, inArray, not } from "drizzle-orm";
 import { round2, recordTransaction } from "./wallets";
 import { requireAuth } from "../middlewares/auth";
 
@@ -390,6 +390,91 @@ router.post(
     const succeeded = results.filter((r) => r.success).length;
     req.log.info({ adminId: req.user!.id, processed: succeeded, failed: results.length - succeeded }, "Admin bulk-processed withdrawal requests");
     res.json({ processed: succeeded, failed: results.length - succeeded, results });
+  },
+);
+
+// ── GET /admin/pending-verifications ──────────────────────────────────────
+// Lists users who submitted a verification request (officialIdPath is set)
+// but have not yet been approved (idVerified = false).
+router.get(
+  "/admin/pending-verifications",
+  requireAuth,
+  requireAdmin,
+  async (_req, res): Promise<void> => {
+    const pending = await db
+      .select({
+        id:             usersTable.id,
+        name:           usersTable.name,
+        email:          usersTable.email,
+        gamerbuddyId:   usersTable.gamerbuddyId,
+        country:        usersTable.country,
+        idVerified:     usersTable.idVerified,
+        officialIdPath: usersTable.officialIdPath,
+        createdAt:      usersTable.createdAt,
+      })
+      .from(usersTable)
+      .where(
+        and(
+          isNotNull(usersTable.officialIdPath),
+          not(usersTable.idVerified),
+        ),
+      )
+      .orderBy(desc(usersTable.createdAt))
+      .limit(200);
+
+    res.json({
+      generatedAt: new Date().toISOString(),
+      pendingCount: pending.length,
+      verifications: pending.map((u) => ({
+        ...u,
+        createdAt: u.createdAt.toISOString(),
+      })),
+    });
+  },
+);
+
+// ── POST /admin/users/:id/set-verified ────────────────────────────────────
+// Approves or revokes the Verified badge for a user.
+// Body: { verified: true | false }
+router.post(
+  "/admin/users/:id/set-verified",
+  requireAuth,
+  requireAdmin,
+  async (req, res): Promise<void> => {
+    const userId = parseInt(req.params.id, 10);
+    if (isNaN(userId)) {
+      res.status(400).json({ error: "Invalid userId" });
+      return;
+    }
+
+    const { verified } = req.body as { verified?: boolean };
+    if (typeof verified !== "boolean") {
+      res.status(400).json({ error: "Body must contain { verified: true | false }" });
+      return;
+    }
+
+    const [updated] = await db
+      .update(usersTable)
+      .set({ idVerified: verified })
+      .where(eq(usersTable.id, userId))
+      .returning({ id: usersTable.id, idVerified: usersTable.idVerified, name: usersTable.name });
+
+    if (!updated) {
+      res.status(404).json({ error: "User not found" });
+      return;
+    }
+
+    req.log.info(
+      { adminId: req.user!.id, targetUserId: userId, verified },
+      `Admin ${verified ? "approved" : "revoked"} verification for user ${userId}`,
+    );
+
+    res.json({
+      success: true,
+      userId: updated.id,
+      name: updated.name,
+      idVerified: updated.idVerified,
+    });
   },
 );
 
