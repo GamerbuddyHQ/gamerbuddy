@@ -129,10 +129,7 @@ export default function WalletsPage() {
       return;
     }
     if (!withdrawDetails.trim()) {
-      const hint = withdrawalMethod === "upi"
-        ? "Please enter your UPI ID (e.g. name@upi)"
-        : "Please enter your bank account details";
-      toast({ title: "Details Required", description: hint, variant: "destructive" });
+      toast({ title: "Details Required", description: "Please enter your bank account details (Account No, IFSC/SWIFT, Bank Name).", variant: "destructive" });
       return;
     }
     withdrawMutation.mutate({ amount, withdrawalMethod, details: withdrawDetails });

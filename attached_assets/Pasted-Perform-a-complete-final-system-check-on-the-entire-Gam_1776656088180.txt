@@ -1,0 +1,38 @@
+Perform a complete final system check on the entire Gamerbuddy website.
+
+Verify and confirm that ALL features and changes we have added/edited are properly implemented and updated everywhere:
+
+**Core Features to Check:**
+- Photo system: 1 main Profile Picture + minimum 2 additional solo photos (max 4), duplicate prevention, anti-AI/fake photo warning, solo photo rule.
+- Regional minimum hiring fee: ₹350/hour for India, $8/hour for global users, enforced on request creation with clear warnings.
+- Dual Wallets (Hiring Wallet vs Earnings Wallet) with correct restrictions.
+- 10% platform fee on every completed Quest/Job.
+- Payout system (Global-first):
+  - Immediate credit to Earnings Wallet after session + both reviews.
+  - $100 USD minimum withdrawal threshold.
+  - Global payouts processed every Monday via Razorpay Export.
+  - Clear messages and notification when user hits $100 ("next Monday's batch, arrive within 5-7 business days").
+- Disclaimer page with the new balanced & professional version we created.
+- Gender preference filter (optional) on requests.
+- Trust Factor, reviews, verified badge, connected gaming accounts (Steam, Epic, PSN, Xbox, Nintendo).
+- All safety rules (no off-platform payment, record your own sessions, etc.).
+
+**Update Everywhere:**
+- Make sure every page (profile, bid cards, request creation, wallet, About, Disclaimer, Community, etc.) reflects the latest changes.
+- Update the AI Assistant completely so it knows all current rules, payout timing (Monday batches), photo requirements, minimum fees, and answers consistently and accurately.
+- Check navigation, mobile responsiveness, dark/light theme consistency.
+
+**Final Testing Instructions:**
+- Test end-to-end flows: Create request → Bid → Accept session → Complete session → Submit reviews → Payment release → Wallet update → Notification when $100 is hit.
+- Test photo upload (minimum enforcement, duplicate block, warning).
+- Test minimum fee enforcement for both Indian and global users.
+- Ask the AI Assistant several questions about payouts, photos, fees, and verification to confirm it is fully updated.
+- Fix any inconsistencies found.
+
+After the full check, provide a detailed summary:
+- What is working correctly
+- Any issues found and fixed
+- Confirmation that the AI Assistant is updated with all new features and rules
+- Overall readiness status
+
+Be thorough. This is the final verification before deployment.
