@@ -1,0 +1,56 @@
+Perform a final update to the Roadmap and Disclaimer based on all changes made so far.
+
+**1. Update Roadmap Page:**
+Replace the current roadmap with this accurate Phase 1 list:
+
+**Phase 1 - Live Now**
+- Account creation with gaming account linking (Steam, Epic, PSN, Xbox, Nintendo Switch) + 24-48 hour verification
+- Unique User ID (GB-XXXXXX format with copy button)
+- Profile photos: 1 main profile picture + minimum 2 additional solo photos (max 4), duplicate prevention, anti-AI/fake photo warning
+- Regional minimum hiring fee (₹350 per hour for India, $8 USD per hour for global)
+- Request posting, bidding, session management, and simple in-app messaging (for Discord exchange)
+- Dual Wallets (Hiring Wallet & Earnings Wallet) with $100 USD withdrawal threshold
+- 10% platform fee on every completed Quest/Job
+- Manual payout system (Request Withdrawal button + admin "Mark as Paid")
+- Reviews, Trust Factor, Verified badge, and connected gaming accounts
+- Optional gender preference filter when posting requests
+- Community tab with posting, likes/dislikes, and moderation
+- Full Community Guidelines & Behavior Rules (be polite, respect, no nudes/explicit content)
+- Updated professional Disclaimer with funds holding note
+
+Mark all other features (real-time chat, automatic payouts, bulk hiring, tournaments, etc.) as Phase 2 / Coming Soon.
+
+**2. Update the Main Disclaimer Page:**
+Replace the current Disclaimer with this updated, professional version that reflects all changes:
+
+**Disclaimer**  
+**Last Updated: April 2026**
+
+This Disclaimer forms an integral and binding part of the Terms of Service.
+
+Gamerbuddy operates solely as an online intermediary marketplace that connects Hirers seeking gamers with Gamers offering co-op and multiplayer sessions.
+
+**1. Early Development Phase**  
+The Platform is in its early stage. Features and performance may be limited or under refinement. We make no warranties regarding uninterrupted service or error-free operation.
+
+**2. No Guarantee of Individual Performance**  
+Gamerbuddy is a matching platform only. We do not supervise, endorse, or guarantee the skill, reliability, punctuality, behavior, or performance of any Gamer or Hirer. All sessions occur directly between users. We strongly encourage reviewing profiles, ratings, Trust Factor, photos, and past reviews before engaging.
+
+**3. Funds Holding and Payouts**  
+Funds deposited by Hirers and amounts owed to Gamers are held in Gamerbuddy's account. Earnings shown in the Earnings Wallet represent balances owed to users but remain in our custody until a withdrawal request is made and manually processed. We process payouts manually every Monday. Indian users typically receive funds faster (1-2 business days), while international transfers may take 5-7 business days. Gamerbuddy is not a bank and does not pay interest on held funds.
+
+**4. Session Recording and Disputes**  
+We do not record sessions. Users are responsible for recording their own gameplay and voice chat for their protection. In case of disputes without recordings, our ability to investigate is limited.
+
+**5. Community Guidelines**  
+Users must follow our rules: Be polite and respectful, no harassment, no nudes or explicit content, maintain professional communication, and respect privacy. Violations may result in suspension or ban.
+
+**6. Verification**  
+Accounts are verified within 24-48 hours after submitting required gaming account links. During this period, some features may be limited.
+
+Users acknowledge and accept these terms by using the Platform.
+
+After updating both Roadmap and Disclaimer:
+- Confirm verification time is changed to 24-48 hours everywhere
+- Ensure the Disclaimer now includes funds holding, manual payouts, photo rules, and Community Guidelines
+- Give a clean final summary of changes made

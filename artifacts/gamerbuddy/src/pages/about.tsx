@@ -8,7 +8,7 @@ const SECTIONS = [
     icon: Zap,
     iconColor: "text-amber-400",
     content:
-      "The Platform is currently in its early development stage. Features, functionality, security measures, and overall performance may be limited or subject to ongoing refinement. We make no representations or warranties regarding uninterrupted availability, completeness, or error-free operation. Users acknowledge and accept that technical issues or delays may occur as we continue to improve the service.",
+      "The Platform is in its early stage. Features and performance may be limited or under refinement. We make no warranties regarding uninterrupted service or error-free operation. Users acknowledge and accept that technical issues or delays may occur as we continue to improve the service.",
   },
   {
     number: "2",
@@ -16,111 +16,39 @@ const SECTIONS = [
     icon: Shield,
     iconColor: "text-purple-400",
     content:
-      "Gamerbuddy is a matching platform only. We do not supervise, endorse, or guarantee the skill, reliability, punctuality, behavior, or performance of any Gamer or Hirer. All interactions and gaming sessions occur directly between the Hirer and the Gamer. We strongly encourage users to carefully review profiles, ratings, Trust Factor, past reviews, and Quest details before engaging with any individual. Users are solely responsible for their own due diligence and conduct during sessions.",
+      "Gamerbuddy is a matching platform only. We do not supervise, endorse, or guarantee the skill, reliability, punctuality, behavior, or performance of any Gamer or Hirer. All sessions occur directly between users. We strongly encourage reviewing profiles, ratings, Trust Factor, photos, and past reviews before engaging.",
   },
   {
     number: "3",
-    title: "Session Recording",
-    icon: AlertTriangle,
-    iconColor: "text-amber-400",
-    content:
-      "The Platform does not record any gaming sessions, including gameplay footage or voice communications. The responsibility for recording sessions lies entirely with the users. In the event of any dispute, complaint, or allegation arising from a session, if no recording has been made by the users, Gamerbuddy shall not be obligated or able to investigate, verify claims, mediate, or provide any form of resolution. Users are strongly advised to record their sessions using their own tools and software.",
-  },
-  {
-    number: "4",
-    title: "Platform Fee",
-    icon: CheckCircle2,
-    iconColor: "text-green-400",
-    content:
-      "A platform fee of ten percent (10%) shall be automatically deducted from the total amount of every successfully completed Quest or Job. The remaining ninety percent (90%) shall be credited to the Earnings Wallet of the hired Gamer. This fee is non-negotiable and supports the operation, maintenance, development, and security of the Platform.",
-  },
-  {
-    number: "5",
     title: "Funds Holding and Payouts",
     icon: Banknote,
     iconColor: "text-cyan-400",
     content:
-      "Gamerbuddy holds funds deposited by Hirers and amounts owed to Gamers in its own account. Funds shown in a Gamer's Earnings Wallet represent balances owed to that Gamer but are custodied by the Platform until a withdrawal request is made and manually processed. We process all payouts every Monday. Gamerbuddy is not a bank and does not pay interest on held funds. Users acknowledge that they are relying on the Platform to process payouts in a timely manner after the $100 USD threshold is reached and a withdrawal is requested. Gamerbuddy will make every reasonable effort to process payouts on schedule, but does not guarantee specific settlement dates, as these are subject to third-party banking and payment provider timelines beyond our control.",
+      "Funds deposited by Hirers and amounts owed to Gamers are held in Gamerbuddy's account. Earnings shown in the Earnings Wallet represent balances owed to users but remain in our custody until a withdrawal request is made and manually processed. We process payouts manually every Monday. Indian users typically receive funds faster (1–2 business days), while international transfers may take 5–7 business days. Gamerbuddy is not a bank and does not pay interest on held funds.",
+  },
+  {
+    number: "4",
+    title: "Session Recording and Disputes",
+    icon: AlertTriangle,
+    iconColor: "text-amber-400",
+    content:
+      "We do not record sessions. Users are responsible for recording their own gameplay and voice chat for their protection. In case of disputes without recordings, our ability to investigate is limited. We strongly advise all users to record their sessions using their own tools and software.",
+  },
+  {
+    number: "5",
+    title: "Community Guidelines",
+    icon: Handshake,
+    iconColor: "text-green-400",
+    content:
+      "Users must follow our rules: be polite and respectful, no harassment, no nudes or explicit content, maintain professional communication, and respect privacy. Violations may result in warnings, temporary suspension, or permanent ban. Full rules are detailed below and on every user profile.",
   },
   {
     number: "6",
-    title: "Password and Account Security",
-    icon: Lock,
-    iconColor: "text-red-400",
-    content:
-      "Users are strictly prohibited from sharing their Steam, Epic Games, PlayStation, Xbox, Nintendo Switch, or any other gaming account passwords or login credentials with any other user on the Platform, irrespective of any offers or assurances provided. Gamerbuddy will never request such credentials under any circumstances. Any solicitation of passwords or login details constitutes a serious violation and will result in immediate account suspension.",
-  },
-  {
-    number: "7",
-    title: "Voice Communication",
-    icon: Info,
-    iconColor: "text-cyan-400",
-    content:
-      "Gamers must obtain explicit consent from the Hirer before initiating any form of voice communication, whether through Discord or in-game VoIP. Voice chat is never mandatory. Hirers retain absolute discretion to decline voice interaction or prefer text-only communication.",
-  },
-  {
-    number: "8",
-    title: "Account Verification",
+    title: "Verification",
     icon: CheckCircle2,
     iconColor: "text-purple-400",
     content:
-      "Following submission of identification documents, phone number, and email address, the verification process typically completes within 24 to 48 hours. During this period, certain Platform features, including the ability to post requests or engage in hiring activities, may remain restricted until full verification is approved. We reserve the sole right to approve, request additional documentation, or reject verification applications.",
-  },
-  {
-    number: "9",
-    title: "Bulk Hiring",
-    icon: Users,
-    iconColor: "text-purple-400",
-    content:
-      "Bulk Hiring requests are permitted with a minimum of three (3) and a maximum of one hundred (100) gamers per session. All rules, fees, responsibilities, and safety protocols apply individually to each participant.",
-  },
-  {
-    number: "10",
-    title: "Promoted Games and Rewards",
-    icon: Star,
-    iconColor: "text-amber-400",
-    content:
-      "Participation in sessions involving Promoted or Spotlight Games may qualify users for additional rewards, including bonus points, free game keys, or complimentary session credits, subject to successful completion and Platform verification.",
-  },
-  {
-    number: "11",
-    title: "Limitation of Liability",
-    icon: Shield,
-    iconColor: "text-red-400",
-    content:
-      "To the maximum extent permitted by applicable law, Gamerbuddy, its owners, operators, affiliates, and representatives shall not be liable for any direct, indirect, incidental, consequential, special, or punitive damages arising from the use of the Platform, including but not limited to disputes between users, in-game losses, account penalties, technical failures, or any actions or omissions by individual users.",
-  },
-  {
-    number: "12",
-    title: "Platform Rights and Enforcement",
-    icon: Shield,
-    iconColor: "text-purple-400",
-    content:
-      "In any and all scenarios, Gamerbuddy reserves the absolute and unrestricted right to act as it deems necessary to protect the integrity, safety, security, and quality of the Platform. This includes, without limitation, the right to review reports, suspend or permanently terminate accounts, remove content, withhold funds, impose restrictions, or take any other measures we consider appropriate. We will strictly enforce our rules and policies without exception.",
-  },
-  {
-    number: "13",
-    title: "Minimum Hiring Fee",
-    icon: Zap,
-    iconColor: "text-green-400",
-    content:
-      "Gamerbuddy enforces a regional minimum hiring rate to ensure fair compensation for all Gamers. For Hirers based in India, the minimum fee is ₹350 (Indian Rupees) per hour of session time. For all other users — including those based in Europe, the United States, Canada, Australia, and all other countries — the minimum fee is $8 USD per hour. The minimum total for a session is calculated as: Number of Hours × Minimum Hourly Rate. Hirers are required to select their region (India or International) and specify session duration when posting a request. This minimum is displayed clearly on all request listings and in the bid panel. These rates are non-negotiable platform minimums designed to protect Gamers against exploitatively low offers and ensure that their time, skill, and effort are always fairly valued.",
-  },
-  {
-    number: "14",
-    title: "Profile Photos & Identity",
-    icon: Heart,
-    iconColor: "text-pink-400",
-    content:
-      "All users are required to upload a minimum of one (1) main profile picture and a minimum of two (2) additional photos on their profile. All photos must be genuine, real solo photographs of the account holder only. Group photos are strictly prohibited. AI-generated, digitally altered, fake, or stolen images are strictly prohibited and constitute a serious violation of Platform policy. Duplicate photo uploads (the same image submitted more than once) are blocked automatically. Profile photos are reviewed by our moderation team and must be submitted in good faith. Failure to comply — including the use of fake, AI-generated, or deceptive photos — may result in immediate account suspension and forfeiture of any pending earnings. Profile photos are displayed on bid cards, public profiles, and request listings to build trust and transparency between all users.",
-  },
-  {
-    number: "15",
-    title: "Earnings Wallet & Payout Policy",
-    icon: CalendarDays,
-    iconColor: "text-cyan-400",
-    content:
-      "Earnings are credited to a Gamer's Earnings Wallet immediately upon session completion and once both parties have submitted their mandatory reviews. All payouts are processed in a single weekly batch every Monday via Razorpay / International Bank Transfer and apply equally to all users regardless of location. The minimum withdrawal threshold is $100 USD. Once a withdrawal request is submitted and the $100 threshold is met, funds are included in the next Monday weekly batch and typically arrive in the user's bank account within 5–7 business days after the Monday processing date. Gamerbuddy does not guarantee specific settlement times as these are subject to third-party banking and payment provider timelines beyond our control. The Hiring Wallet is a deposit-only wallet and cannot be withdrawn under any circumstances — funds therein may only be used to fund game session requests.",
+      "Accounts are verified within 24–48 hours after submitting the required gaming account links. During this period, some features — including posting requests and placing bids — may be limited. We reserve the sole right to approve, request additional information, or reject verification applications.",
   },
 ];
 
@@ -240,9 +168,9 @@ export default function About() {
           className="rounded-2xl border border-amber-500/20 p-5 text-sm text-foreground/75 leading-relaxed"
           style={{ background: "rgba(245,158,11,0.04)" }}
         >
-          This Disclaimer forms an integral and binding part of the Terms of Service governing the use of the Gamerbuddy platform ("Platform", "we", "us", or "our").
+          This Disclaimer forms an integral and binding part of the Terms of Service.
           <br /><br />
-          Gamerbuddy operates solely as an online intermediary marketplace that facilitates connections between Hirers seeking skilled gamers and Gamers offering co-op and multiplayer gaming sessions across various platforms.
+          Gamerbuddy operates solely as an online intermediary marketplace that connects Hirers seeking gamers with Gamers offering co-op and multiplayer sessions.
         </div>
       </div>
 
@@ -285,18 +213,17 @@ export default function About() {
         style={{ background: "rgba(34,211,238,0.03)", borderColor: "rgba(34,211,238,0.15)" }}
       >
         <div className="flex items-start gap-4">
-          {/* Number + icon */}
+          {/* Icon */}
           <div className="flex flex-col items-center gap-1.5 shrink-0 pt-0.5">
             <div
-              className="h-8 w-8 rounded-xl flex items-center justify-center border border-cyan-400/30 font-black text-sm text-cyan-400"
+              className="h-8 w-8 rounded-xl flex items-center justify-center border border-cyan-400/30"
               style={{ background: "rgba(34,211,238,0.1)" }}
             >
-              16
+              <BookOpen className="h-4 w-4 text-cyan-400" />
             </div>
-            <BookOpen className="h-3.5 w-3.5 text-cyan-400" />
           </div>
           <div className="space-y-1 flex-1">
-            <h3 className="font-black text-white text-base leading-tight">Community Guidelines & Behavior Rules</h3>
+            <h3 className="font-black text-white text-base leading-tight">Full Community Rules</h3>
             <p className="text-sm text-foreground/60 leading-relaxed">
               All users — both Hirers and Gamers — are expected to follow these rules. Violations may result in warnings, suspension, or permanent removal.
             </p>
