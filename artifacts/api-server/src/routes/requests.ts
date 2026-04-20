@@ -5,7 +5,7 @@ import { requireAuth } from "../middlewares/auth";
 import { createNotification, sendEmailNotification } from "../notifications-helper";
 import { recalculateTrustFactor } from "../trust-factor";
 import { validate, sanitize, PostRequestSchema, PlaceBidSchema } from "../lib/validate";
-import { bidLimiter } from "../lib/rate-limit";
+import { bidLimiter, postRequestLimiter } from "../lib/rate-limit";
 import { round2, recordTransaction as recordTx, checkBidAnomaly } from "./wallets";
 
 const router: IRouter = Router();
@@ -244,7 +244,7 @@ router.get("/requests/:id", async (req, res): Promise<void> => {
   res.json(formatRequest(result, result.userName ?? "Unknown", result.userIdVerified ?? false, result.userProfilePhotoUrl));
 });
 
-router.post("/requests", requireAuth, validate(PostRequestSchema), async (req, res): Promise<void> => {
+router.post("/requests", requireAuth, postRequestLimiter, validate(PostRequestSchema), async (req, res): Promise<void> => {
   const user = req.user!;
 
   const [wallet] = await db

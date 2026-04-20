@@ -90,3 +90,27 @@ export const tournamentLimiter = rateLimit({
   keyGenerator: userOrIpKey,
   handler: jsonMessage("You're creating tournaments too quickly. Please wait a minute."),
 });
+
+// ── Request creation ───────────────────────────────────────────────────────
+// 5 per minute per user — prevents spamming the marketplace with fake requests
+export const postRequestLimiter = rateLimit({
+  windowMs: 60_000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: userOrIpKey,
+  handler: jsonMessage("You're posting requests too quickly. Please wait a minute."),
+});
+
+// ── Withdrawal ─────────────────────────────────────────────────────────────
+// 3 per 10-minute window per user — prevents DoS spam on the withdrawal route.
+// The atomic SQL guard in the route already prevents actual double-deduction,
+// but rate limiting reduces unnecessary DB load and log noise.
+export const withdrawLimiter = rateLimit({
+  windowMs: 10 * 60_000,
+  max: 3,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: userOrIpKey,
+  handler: jsonMessage("Too many withdrawal attempts. Please wait 10 minutes before trying again."),
+});

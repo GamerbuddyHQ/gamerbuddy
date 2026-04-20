@@ -2,6 +2,7 @@ import { Router, type IRouter } from "express";
 import { db, walletsTable, walletTransactionsTable, gameRequestsTable, platformFeesTable } from "@workspace/db";
 import { eq, desc, sql, and, gte, sum } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
+import { withdrawLimiter } from "../lib/rate-limit";
 
 const router: IRouter = Router();
 
@@ -140,8 +141,15 @@ router.get("/wallets", requireAuth, async (req, res): Promise<void> => {
 
 // ── GET /admin/platform-earnings ─────────────────────────────────────────────
 // Shows the platform owner's accumulated fee earnings.
-// In test mode this is accessible to any authenticated user.
+// Protected: only accessible to the admin user ID defined in ADMIN_USER_ID env var.
+// Falls back to user ID 1 if the env var is not set.
+const ADMIN_USER_ID = parseInt(process.env.ADMIN_USER_ID ?? "1", 10);
+
 router.get("/admin/platform-earnings", requireAuth, async (req, res): Promise<void> => {
+  if (req.user!.id !== ADMIN_USER_ID) {
+    res.status(403).json({ error: "Access denied." });
+    return;
+  }
   const fees = await db
     .select()
     .from(platformFeesTable)
@@ -240,11 +248,12 @@ router.post("/wallets/deposit", requireAuth, async (req, res): Promise<void> => 
 });
 
 // ── POST /wallets/withdraw ──────────────────────────────────────────────────
-router.post("/wallets/withdraw", requireAuth, async (req, res): Promise<void> => {
+// Global-first policy: all users withdraw via international bank transfer.
+// Rate limited: 3 attempts per 10-minute window per user.
+router.post("/wallets/withdraw", requireAuth, withdrawLimiter, async (req, res): Promise<void> => {
   const user = req.user!;
-  const { amount, withdrawalMethod, details } = req.body as {
+  const { amount, details } = req.body as {
     amount?: number;
-    withdrawalMethod?: string;
     details?: string;
   };
 
@@ -260,28 +269,12 @@ router.post("/wallets/withdraw", requireAuth, async (req, res): Promise<void> =>
     return;
   }
 
-  // Determine expected withdrawal method based on country
-  const isIndian = user.country === "India";
-  const expectedMethod = isIndian ? "upi" : "bank_transfer";
-  const effectiveMethod = withdrawalMethod ?? expectedMethod;
+  // Global-first unified payout: all users use bank transfer (Razorpay International)
+  const effectiveMethod = "bank_transfer";
 
-  // Validate the method matches the user's country
-  if (isIndian && effectiveMethod !== "upi") {
-    res.status(400).json({ error: "Indian accounts must withdraw via UPI." });
-    return;
-  }
-  if (!isIndian && effectiveMethod === "upi") {
-    res.status(400).json({ error: "UPI is only available for Indian accounts. Please use bank transfer." });
-    return;
-  }
-
-  // Validate details
-  if (effectiveMethod === "upi" && !details?.trim()) {
-    res.status(400).json({ error: "Please enter your UPI ID (e.g. yourname@upi)" });
-    return;
-  }
-  if (effectiveMethod === "bank_transfer" && !details?.trim()) {
-    res.status(400).json({ error: "Please enter your bank account details" });
+  // Validate bank details are provided
+  if (!details?.trim()) {
+    res.status(400).json({ error: "Please enter your bank account details (Account No, IFSC/SWIFT, Bank Name)" });
     return;
   }
 
@@ -326,9 +319,7 @@ router.post("/wallets/withdraw", requireAuth, async (req, res): Promise<void> =>
     return;
   }
 
-  const methodLabel = effectiveMethod === "upi"
-    ? `UPI (${details?.trim()})`
-    : `Bank Transfer (${details?.trim()})`;
+  const methodLabel = `Bank Transfer (${details?.trim()})`;
 
   await recordTransaction(
     user.id,

@@ -1,0 +1,50 @@
+Perform a **final security-focused verification** on the entire Gamerbuddy website.
+
+Focus specifically on finding and fixing any security-related issues, vulnerabilities, or risks:
+
+**Security Areas to Check Thoroughly:**
+
+1. **Photo Upload System**
+   - File type validation (only images allowed)
+   - File size limits
+   - Protection against malicious file uploads
+   - Duplicate detection is secure (not bypassable)
+   - Anti-AI/fake photo warning is clearly enforced
+
+2. **Payment & Wallet Security**
+   - Hiring Wallet vs Earnings Wallet separation is strict (no cross-use)
+   - $100 threshold cannot be bypassed
+   - 10% platform fee is always deducted correctly
+   - No way to withdraw from Hiring Wallet
+   - Razorpay integration uses environment variables / secrets (no hard-coded keys)
+
+3. **Authentication & Authorization**
+   - Users cannot hire themselves
+   - Unverified users cannot post requests or place bids
+   - Session management is secure
+   - No privilege escalation possible
+
+4. **Input Validation & XSS/SQL Injection Protection**
+   - All forms (request creation, bids, reviews, profile, chat) properly sanitize input
+   - No raw user input rendered without escaping
+   - Community tab properly strips external links and prevents malicious content
+
+5. **General Security Best Practices**
+   - All sensitive keys (Razorpay, database, session secret) are stored in Replit Secrets / environment variables, never hard-coded
+   - Rate limiting on critical actions (login, request creation, withdrawals)
+   - Proper error handling that doesn't leak sensitive information
+   - HTTPS enforcement
+
+**Actions:**
+- Scan for any remaining vulnerabilities or insecure code patterns
+- Fix any security issues found immediately
+- After fixes, re-test the affected areas
+- Update the AI Assistant if any security-related rules changed
+
+After the security check, provide a **clear security summary**:
+- List of security areas checked
+- Any vulnerabilities found and fixed
+- Final security status (e.g., "No critical or medium vulnerabilities remaining")
+- Overall readiness for deployment from a security perspective
+
+Be strict and thorough. This is the last security check before deployment.
