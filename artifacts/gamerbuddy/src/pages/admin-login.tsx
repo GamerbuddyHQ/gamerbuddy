@@ -3,7 +3,7 @@ import { useLocation } from "wouter";
 import { apiFetch, BASE } from "@/lib/bids-api";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Shield, Eye, EyeOff, Lock, Mail, KeyRound, Zap, AlertCircle } from "lucide-react";
+import { Shield, Eye, EyeOff, Lock, Mail, Zap, AlertCircle } from "lucide-react";
 
 function GlowOrb({ className }: { className?: string }) {
   return (
@@ -17,13 +17,11 @@ function GlowOrb({ className }: { className?: string }) {
 export default function AdminLogin() {
   const [, navigate] = useLocation();
 
-  const [email,     setEmail]     = useState("gamerbuddyhq@gmail.com");
-  const [password,  setPassword]  = useState("");
-  const [secretKey, setSecretKey] = useState("");
-  const [showPwd,   setShowPwd]   = useState(false);
-  const [showKey,   setShowKey]   = useState(false);
-  const [loading,   setLoading]   = useState(false);
-  const [error,     setError]     = useState("");
+  const [email,    setEmail]    = useState("gamerbuddyhq@gmail.com");
+  const [password, setPassword] = useState("");
+  const [showPwd,  setShowPwd]  = useState(false);
+  const [loading,  setLoading]  = useState(false);
+  const [error,    setError]    = useState("");
 
   /* Redirect if already logged in */
   useEffect(() => {
@@ -37,24 +35,22 @@ export default function AdminLogin() {
     e.preventDefault();
     setError("");
     if (!password) { setError("Password is required."); return; }
-    if (!secretKey) { setError("Secret key is required."); return; }
     setLoading(true);
     try {
       await apiFetch(`${BASE}/admin/auth/login`, {
         method:  "POST",
         headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({ email, password, secretKey }),
+        body:    JSON.stringify({ email, password }),
       });
       navigate("/admin/dashboard");
     } catch (err: unknown) {
       const raw = err instanceof Error ? err.message : String(err);
-      // Map common API errors to friendly messages
-      if (raw.toLowerCase().includes("invalid credentials") || raw.toLowerCase().includes("401")) {
-        setError("Login failed — check your password and secret key. Make sure you're copying them exactly with no extra spaces.");
+      if (raw.toLowerCase().includes("invalid") || raw.toLowerCase().includes("401")) {
+        setError("Login failed — check your email and password.");
       } else if (raw.toLowerCase().includes("too many") || raw.toLowerCase().includes("429")) {
         setError("Too many login attempts. Please wait 15 minutes before trying again.");
       } else if (raw.toLowerCase().includes("503") || raw.toLowerCase().includes("not configured")) {
-        setError("Admin auth is not configured on the server. Contact your system administrator.");
+        setError("Admin auth is not configured on the server.");
       } else {
         setError(raw || "Login failed. Please try again.");
       }
@@ -173,39 +169,6 @@ export default function AdminLogin() {
                   {showPwd ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
-            </div>
-
-            {/* Secret Key */}
-            <div className="space-y-1.5">
-              <Label htmlFor="secretKey" className="text-xs font-bold uppercase tracking-widest text-muted-foreground/70">
-                Secret Key
-              </Label>
-              <div className="relative">
-                <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary/60" />
-                <Input
-                  id="secretKey"
-                  type={showKey ? "text" : "password"}
-                  value={secretKey}
-                  onChange={e => setSecretKey(e.target.value)}
-                  className="pl-10 pr-10 bg-background/40 border-border/50 focus:border-primary/60 focus:ring-1 focus:ring-primary/30 font-mono text-sm tracking-wider"
-                  required
-                  autoComplete="off"
-                  placeholder="ADMIN_SECRET_KEY value"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowKey(v => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/50 hover:text-foreground transition-colors"
-                  tabIndex={-1}
-                  aria-label={showKey ? "Hide key" : "Show key"}
-                >
-                  {showKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
-              </div>
-              <p className="text-[11px] text-muted-foreground/40 flex items-center gap-1">
-                <KeyRound className="w-3 h-3 shrink-0" />
-                The <span className="font-mono text-primary/60 mx-0.5">ADMIN_SECRET_KEY</span> from your Replit / Vercel secrets.
-              </p>
             </div>
 
             {/* Error */}

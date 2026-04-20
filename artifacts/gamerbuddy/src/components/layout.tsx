@@ -639,16 +639,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
               </div>
             )}
 
-            {/* Admin panel link — subtle shield icon */}
-            <Link
-              href="/admin/login"
-              className="h-9 w-9 flex items-center justify-center rounded-xl border border-border/40 bg-background/40 hover:border-primary/50 hover:bg-primary/10 transition-all text-muted-foreground/40 hover:text-primary/80"
-              title="Admin Panel"
-              aria-label="Admin Panel"
-            >
-              <Shield className="h-4 w-4" />
-            </Link>
-
             {/* Hamburger */}
             <button
               className="md:hidden h-9 w-9 flex items-center justify-center rounded-xl border border-border/60 bg-background/60 hover:border-primary/50 transition-all"
@@ -777,16 +767,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 </div>
               )}
 
-              {/* Admin panel link — subtle, for operators */}
-              <div className="mt-4 pt-3 border-t border-border/20">
-                <Link
-                  href="/admin/login"
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium text-muted-foreground/40 hover:text-primary/70 hover:bg-primary/5 transition-all"
-                >
-                  <Shield className="h-3.5 w-3.5 shrink-0" />
-                  Admin Panel
-                </Link>
-              </div>
             </div>
           </div>
         </div>

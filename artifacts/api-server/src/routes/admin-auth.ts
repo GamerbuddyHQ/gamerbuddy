@@ -1,6 +1,6 @@
 /**
  * Admin authentication — separate from regular user sessions.
- * Requires: email + bcrypt password + ADMIN_SECRET_KEY (all three must match).
+ * Requires: email + bcrypt password (two factors).
  * Session stored as an HMAC-signed cookie — no DB table needed.
  */
 
@@ -12,12 +12,10 @@ import { adminLoginLimiter } from "../lib/rate-limit";
 const router = Router();
 const isProd = process.env.NODE_ENV === "production";
 
-const ADMIN_EMAIL      = "gamerbuddyhq@gmail.com";
-// ADMIN_PWD_HASH env var stores the bcrypt hash (set as a regular env var, not a secret)
-// Falls back to ADMIN_PASSWORD_HASH for backwards compatibility
-const ADMIN_PWD_HASH   = process.env.ADMIN_PWD_HASH ?? process.env.ADMIN_PASSWORD_HASH ?? "";
-const ADMIN_SECRET_KEY = process.env.ADMIN_SECRET_KEY    ?? "";
-const SESSION_HOURS    = 8;
+const ADMIN_EMAIL    = "gamerbuddyhq@gmail.com";
+const ADMIN_PWD_HASH = process.env.ADMIN_PWD_HASH ?? process.env.ADMIN_PASSWORD_HASH ?? "";
+const SIGNING_KEY    = process.env.ADMIN_SECRET_KEY ?? "fallback-signing-key-change-in-prod";
+const SESSION_HOURS  = 8;
 
 /* ── Token helpers ──────────────────────────────────────────────────────── */
 
@@ -25,20 +23,19 @@ function signAdminToken(): string {
   const exp     = Date.now() + SESSION_HOURS * 3_600_000;
   const payload = `admin.${exp}`;
   const sig     = crypto
-    .createHmac("sha256", ADMIN_SECRET_KEY)
+    .createHmac("sha256", SIGNING_KEY)
     .update(payload)
     .digest("hex");
   return `${payload}.${sig}`;
 }
 
 export function verifyAdminToken(token: string): boolean {
-  if (!ADMIN_SECRET_KEY) return false;
   const parts = token.split(".");
   if (parts.length !== 3) return false;
   const [prefix, expStr, sig] = parts;
   const payload  = `${prefix}.${expStr}`;
   const expected = crypto
-    .createHmac("sha256", ADMIN_SECRET_KEY)
+    .createHmac("sha256", SIGNING_KEY)
     .update(payload)
     .digest("hex");
   try {
@@ -78,33 +75,28 @@ function adminCookieOpts(expiresAt: Date) {
 /* ── POST /admin/auth/login ─────────────────────────────────────────────── */
 
 router.post("/admin/auth/login", adminLoginLimiter, async (req, res): Promise<void> => {
-  const { email, password, secretKey } = req.body as {
-    email?:     string;
-    password?:  string;
-    secretKey?: string;
+  const { email, password } = req.body as {
+    email?:    string;
+    password?: string;
   };
 
-  if (!ADMIN_PWD_HASH || !ADMIN_SECRET_KEY) {
+  if (!ADMIN_PWD_HASH) {
     res.status(503).json({
-      error:
-        "Admin authentication is not configured. " +
-        "Set ADMIN_PASSWORD_HASH and ADMIN_SECRET_KEY environment secrets.",
+      error: "Admin authentication is not configured. Set ADMIN_PWD_HASH environment variable.",
     });
     return;
   }
 
-  // Evaluate all three factors — never short-circuit to avoid timing leaks.
-  const emailOk  = (email?.toLowerCase().trim() ?? "") === ADMIN_EMAIL;
-  const secretOk = (secretKey ?? "") === ADMIN_SECRET_KEY;
-  let   pwdOk    = false;
+  const emailOk = (email?.toLowerCase().trim() ?? "") === ADMIN_EMAIL;
+  let   pwdOk   = false;
   try {
     pwdOk = await bcryptjs.compare(password ?? "", ADMIN_PWD_HASH);
   } catch {
     // leave pwdOk = false
   }
 
-  if (!emailOk || !secretOk || !pwdOk) {
-    res.status(401).json({ error: "Invalid credentials. Please check your email, password, and secret key." });
+  if (!emailOk || !pwdOk) {
+    res.status(401).json({ error: "Invalid email or password." });
     return;
   }
 
