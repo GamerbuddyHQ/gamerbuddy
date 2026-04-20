@@ -24,7 +24,7 @@ const SECTIONS = [
     icon: Banknote,
     iconColor: "text-cyan-400",
     content:
-      "Funds deposited by Hirers and amounts owed to Gamers are held in Gamerbuddy's account. Earnings shown in the Earnings Wallet represent balances owed to users but remain in our custody until a withdrawal request is made and manually processed. We process payouts manually every Monday. Indian users typically receive funds faster (1–2 business days), while international transfers may take 5–7 business days. Gamerbuddy is not a bank and does not pay interest on held funds.",
+      "Funds in a Gamer's Earnings Wallet are held by Gamerbuddy until a withdrawal is requested and manually processed every Monday. Indian users usually receive payment within 1–2 business days after processing. International users should expect 5–7 business days. Gamerbuddy is not a bank, does not pay interest on held funds, and cannot guarantee specific settlement dates due to third-party banking timelines.",
   },
   {
     number: "4",
@@ -40,7 +40,7 @@ const SECTIONS = [
     icon: Handshake,
     iconColor: "text-green-400",
     content:
-      "Users must follow our rules: be polite and respectful, no harassment, no nudes or explicit content, maintain professional communication, and respect privacy. Violations may result in warnings, temporary suspension, or permanent ban. Full rules are detailed below and on every user profile.",
+      "All users must follow these rules: (1) Be respectful and polite — no harassment, hate speech, or toxicity. (2) No nudes, explicit images, or NSFW content of any kind — immediate suspension applies. (3) Professional communication only — no personal questions, romantic behaviour, or requests for photos beyond the profile gallery. (4) Respect privacy — never share another user's Discord, Steam, or personal details without consent, and never share or request gaming account passwords. (5) Consequences: violations result in a warning, temporary suspension, or permanent ban at Gamerbuddy's discretion. Full illustrated rules are shown below and on every user profile.",
   },
   {
     number: "6",

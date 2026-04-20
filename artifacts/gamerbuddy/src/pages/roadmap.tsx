@@ -36,8 +36,8 @@ const PHASES = [
       },
       {
         icon: Camera,
-        title: "Profile Photos",
-        desc: "1 main profile picture + minimum 2 additional solo photos (max 4). Duplicate prevention enforced automatically. Anti-AI and fake photo warning shown on upload.",
+        title: "Profile Photos with Trust Verification",
+        desc: "1 main profile picture + minimum 2 additional real solo photos (max 4 total). Anti-AI and fake photo warning enforced on upload. Duplicate image detection prevents re-use.",
       },
       {
         icon: Globe,
@@ -47,7 +47,12 @@ const PHASES = [
       {
         icon: Gamepad2,
         title: "Request Posting, Bidding & Session Management",
-        desc: "Post requests, receive bids, accept sessions, and manage the full lifecycle in-app. Simple in-app messaging opens on bid acceptance — primarily used to exchange Discord details.",
+        desc: "Post requests with game, platform, region, and objectives. Gamers bid competitively. Accept, start, complete, and review — the full session lifecycle managed in-app.",
+      },
+      {
+        icon: MessageSquare,
+        title: "Simple In-App Messaging",
+        desc: "A private chat opens between hirer and gamer once a bid is accepted — used to exchange Discord usernames and voice chat details before the session begins.",
       },
       {
         icon: Wallet,
@@ -62,7 +67,7 @@ const PHASES = [
       {
         icon: Banknote,
         title: "Manual Payout System",
-        desc: "Gamers click 'Request Withdrawal' once the $100 threshold is met. Admin manually processes payouts and marks them as Paid — processed every Monday.",
+        desc: "Gamers click 'Request Withdrawal' once the $100 USD threshold is met. Admin reviews and approves each request, marks it as Paid, and processes every Monday.",
       },
       {
         icon: Star,
@@ -94,7 +99,7 @@ const PHASES = [
   {
     id: 2,
     tag: "Coming Soon",
-    title: "Tournaments & Bulk Hiring",
+    title: "Tournaments, Payouts & Real-Time",
     status: "next" as const,
     accent: "#22d3ee",
     bg: "rgba(34,211,238,0.07)",
@@ -103,7 +108,7 @@ const PHASES = [
     bar: "from-cyan-400 to-sky-400",
     Icon: Trophy,
     description:
-      "Expand the platform with competitive tournaments, bulk group hiring, and mobile account linking. Shaped by what the community wants most.",
+      "Competitive tournaments, bulk group hiring, automatic payouts, and real-time platform features. Shaped by what the community votes for most.",
     items: [
       {
         icon: Swords,
@@ -113,12 +118,17 @@ const PHASES = [
       {
         icon: Users,
         title: "Bulk Hiring",
-        desc: "Hire between 3 and 100 gamers in a single request — perfect for group raids, events, and large team sessions.",
+        desc: "Hire between 3 and 100 gamers in a single request — perfect for group raids, large events, and team sessions.",
       },
       {
-        icon: Smartphone,
-        title: "Mobile Account Linking",
-        desc: "Link your Google Play Store and iOS Game Center accounts for verified mobile gaming credentials.",
+        icon: Banknote,
+        title: "Automatic Payouts",
+        desc: "Instant payout processing the moment the $100 threshold is hit — no manual request needed. Faster settlements for active gamers.",
+      },
+      {
+        icon: Zap,
+        title: "Advanced Real-Time Features",
+        desc: "Live notifications, real-time bid updates, session status pings, and instant messaging improvements — making every interaction feel instant.",
       },
     ],
   },
