@@ -62,8 +62,15 @@ export default function Login() {
     defaultValues: { email: "", password: "" },
   });
 
+  const ADMIN_EMAIL = "gamerbuddyhq@gmail.com";
+
   function onSubmit(values: z.infer<typeof loginSchema>) {
     if (isLocked) return;
+
+    if (values.email.toLowerCase().trim() === ADMIN_EMAIL) {
+      setLocation("/admin/login");
+      return;
+    }
 
     loginMutation.mutate(
       { data: values },
@@ -76,7 +83,7 @@ export default function Login() {
           setLocation("/dashboard");
         },
         onError: (err) => {
-          const body = err.error as { error?: string; lockedUntil?: string; attemptsRemaining?: number } | undefined;
+          const body = err as { error?: string; lockedUntil?: string; attemptsRemaining?: number } | undefined;
 
           if (body?.lockedUntil) {
             setLockedUntil(body.lockedUntil);
@@ -89,7 +96,7 @@ export default function Login() {
           } else {
             toast({
               title: "Login failed",
-              description: body?.error ?? "Unknown error occurred",
+              description: body?.error ?? "Invalid email or password.",
               variant: "destructive",
             });
           }
