@@ -85,7 +85,7 @@ export default function WalletsPage() {
   const [txFilter, setTxFilter] = useState<"all" | "hiring" | "earnings">("all");
 
   const isIndian = user?.country === "India";
-  const withdrawalMethod = isIndian ? "upi" : "bank_transfer";
+  const withdrawalMethod = "bank_transfer";
 
   const { data: wallets, isLoading, isError } = useGetWallets({
     query: { queryKey: getGetWalletsQueryKey() },
@@ -104,12 +104,9 @@ export default function WalletsPage() {
       queryClient.invalidateQueries({ queryKey: ["wallet-transactions"] });
       setWithdrawAmount("");
       setWithdrawDetails("");
-      const isIn = withdrawalMethod === "upi";
       toast({
         title: "Withdrawal Requested 🎉",
-        description: isIn
-          ? `Your withdrawal is being processed instantly via UPI. Funds usually arrive same-day.`
-          : `Your request has been queued. International payouts are processed every Monday — funds arrive within 5–7 business days.`,
+        description: `Your request has been queued for the next weekly payout batch (every Monday). Funds typically arrive within 5–7 business days after processing.`,
       });
     },
     onError: (err: any) => {
@@ -257,8 +254,8 @@ export default function WalletsPage() {
               )}
             </div>
 
-            {/* ── Congratulations banner — non-Indian users who hit $100 ── */}
-            {!isIndian && wallets.canWithdraw && (
+            {/* ── Congratulations / threshold banner — all users who hit $100 ── */}
+            {wallets.canWithdraw && (
               <div
                 className="rounded-xl border p-4 space-y-2"
                 style={{
@@ -272,7 +269,7 @@ export default function WalletsPage() {
                   <span className="font-black text-sm text-green-300 uppercase tracking-wide">Payout Threshold Reached!</span>
                 </div>
                 <p className="text-xs text-green-200/80 leading-relaxed">
-                  Congratulations! Your earnings have reached the <strong className="text-green-300">$100 threshold</strong>. Your payout will be processed in the next weekly batch — <strong className="text-green-300">every Monday</strong> — and should arrive in your bank account within <strong className="text-green-300">5–7 business days</strong> after the batch runs.
+                  Congratulations! Your earnings have reached the <strong className="text-green-300">$100 threshold</strong>. Your payout is scheduled for the next weekly batch — <strong className="text-green-300">every Monday</strong> — and should arrive in your account within <strong className="text-green-300">5–7 business days</strong> after processing.
                 </p>
                 <div className="flex items-center gap-1.5 text-[10px] text-cyan-300/70 font-medium pt-0.5">
                   <CalendarDays className="h-3 w-3 text-cyan-400 shrink-0" />
@@ -281,6 +278,7 @@ export default function WalletsPage() {
               </div>
             )}
 
+            {/* Progress bar — shown when below threshold */}
             {!wallets.canWithdraw && (
               <div className="space-y-1.5">
                 <div className="flex justify-between text-xs text-muted-foreground">
@@ -300,38 +298,21 @@ export default function WalletsPage() {
               </div>
             )}
 
-            {/* Payout Policy banner — always visible */}
-            <div
-              className="rounded-lg border p-3 text-xs space-y-2"
-              style={{
-                background: isIndian ? "rgba(34,197,94,0.04)" : "rgba(34,211,238,0.04)",
-                borderColor: isIndian ? "rgba(34,197,94,0.20)" : "rgba(34,211,238,0.20)",
-              }}
-            >
-              <div className="flex items-center gap-2 font-bold text-[11px] uppercase tracking-widest"
-                style={{ color: isIndian ? "rgb(134,239,172)" : "rgb(103,232,249)" }}>
-                {isIndian
-                  ? <Smartphone className="h-3.5 w-3.5 shrink-0 text-green-400" />
-                  : <CalendarDays className="h-3.5 w-3.5 shrink-0 text-cyan-400" />
-                }
-                {isIndian ? "India Payout Policy" : "International Payout Policy"}
+            {/* Payout Policy — always visible, global unified policy */}
+            <div className="rounded-lg border border-cyan-500/20 bg-cyan-500/[0.03] p-3 text-xs space-y-2">
+              <div className="flex items-center gap-2 font-bold text-[11px] uppercase tracking-widest text-cyan-300">
+                <CalendarDays className="h-3.5 w-3.5 shrink-0 text-cyan-400" />
+                Payout Policy
               </div>
-              {isIndian ? (
-                <ul className="space-y-1 text-green-200/70 leading-relaxed pl-1">
-                  <li>✅ Earnings credited to wallet <strong className="text-green-300">immediately</strong> after session completion + both reviews submitted</li>
-                  <li>⚡ Withdrawals processed <strong className="text-green-300">instantly or same-day</strong> via Razorpay → UPI (GPay, PhonePe, Paytm, bank)</li>
-                  <li>💰 Minimum threshold: <strong className="text-green-300">₹8,300 (~$100 USD)</strong></li>
-                </ul>
-              ) : (
-                <ul className="space-y-1 text-cyan-200/70 leading-relaxed pl-1">
-                  <li>✅ Earnings credited to wallet <strong className="text-cyan-300">immediately</strong> after session completion + both reviews submitted</li>
-                  <li>📅 Withdrawals processed <strong className="text-cyan-300">once per week — every Monday</strong> via Razorpay International Bank Transfer</li>
-                  <li>⏱️ Funds arrive <strong className="text-cyan-300">within 5–7 business days</strong> after the weekly Monday payout batch</li>
-                  <li>💰 Minimum threshold: <strong className="text-cyan-300">$100 USD</strong></li>
-                </ul>
-              )}
+              <ul className="space-y-1.5 text-cyan-200/70 leading-relaxed pl-1">
+                <li>✅ Earnings credited to wallet <strong className="text-cyan-300">immediately</strong> after session completion and both reviews are submitted</li>
+                <li>📅 Payouts to bank accounts are processed in the <strong className="text-cyan-300">weekly batch (every Monday)</strong> via Razorpay / Bank Transfer</li>
+                <li>⏱️ Once your balance reaches $100, your payout will be sent within <strong className="text-cyan-300">5–7 business days</strong> after the weekly processing</li>
+                <li>💰 Minimum withdrawal threshold: <strong className="text-cyan-300">$100 USD</strong></li>
+              </ul>
             </div>
 
+            {/* Withdrawal form */}
             {wallets.canWithdraw && (
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
@@ -344,12 +325,9 @@ export default function WalletsPage() {
                       <Info className="h-3.5 w-3.5" />
                       <span className="hidden sm:inline">Payout info</span>
                     </button>
-                    <div className="absolute right-0 bottom-6 z-20 hidden group-hover:block w-60 rounded-lg border border-border/60 bg-card p-3 text-xs text-muted-foreground shadow-xl leading-relaxed">
-                      <p className="font-semibold text-foreground mb-1">Payout Schedule</p>
-                      {isIndian
-                        ? <p>🇮🇳 <strong className="text-green-400">Indian payouts</strong> are processed <strong>instantly or same-day</strong> via UPI once you submit your request.</p>
-                        : <p>🌍 <strong className="text-cyan-400">Global payouts</strong> are batched <strong>once per week every Monday</strong> via Bank Transfer, arriving in <strong>5–7 business days</strong>. Indian payouts are instant.</p>
-                      }
+                    <div className="absolute right-0 bottom-6 z-20 hidden group-hover:block w-64 rounded-lg border border-border/60 bg-card p-3 text-xs text-muted-foreground shadow-xl leading-relaxed">
+                      <p className="font-semibold text-foreground mb-1.5">📅 Payout Schedule</p>
+                      <p>Payouts are processed in a <strong className="text-cyan-400">weekly batch every Monday</strong> via Bank Transfer. Funds arrive in your account within <strong className="text-cyan-400">5–7 business days</strong> after the Monday processing.</p>
                     </div>
                   </div>
                 </div>
@@ -375,33 +353,25 @@ export default function WalletsPage() {
                   </button>
                 </div>
 
-                {/* UPI / Bank Transfer details field */}
                 <div className="space-y-1.5">
-                  <Label className="text-xs uppercase tracking-widest text-muted-foreground">
-                    {isIndian ? "UPI ID" : "Bank Account Details"}
-                  </Label>
+                  <Label className="text-xs uppercase tracking-widest text-muted-foreground">Bank Account Details</Label>
                   <Input
-                    placeholder={isIndian ? "e.g. yourname@okaxis" : "Account No · IFSC · Bank Name"}
+                    placeholder="Account No · IFSC / SWIFT · Bank Name"
                     className="bg-background"
                     value={withdrawDetails}
                     onChange={(e) => setWithdrawDetails(e.target.value)}
                   />
                   <p className="text-[10px] text-muted-foreground/50">
-                    {isIndian
-                      ? "Enter the UPI ID to receive funds instantly. Double-check before submitting."
-                      : "Enter your bank account number, IFSC/SWIFT code, and bank name."
-                    }
+                    Enter your bank account number, IFSC / SWIFT code, and bank name. Double-check before submitting.
                   </p>
                 </div>
 
-                {!isIndian && (
-                  <div className="flex items-start gap-2 rounded-lg border border-amber-500/25 bg-amber-500/5 p-3 text-xs text-amber-200/75">
-                    <Clock className="h-3.5 w-3.5 shrink-0 mt-0.5 text-amber-400" />
-                    <span>
-                      <strong className="text-amber-300">International payout notice:</strong> Payouts to international bank accounts are processed within <strong className="text-amber-300">5–7 business days</strong> after the weekly payout batch (runs every <strong className="text-amber-300">Monday</strong>), once the $100 threshold is reached.
-                    </span>
-                  </div>
-                )}
+                <div className="flex items-start gap-2 rounded-lg border border-amber-500/25 bg-amber-500/5 p-3 text-xs text-amber-200/75">
+                  <Clock className="h-3.5 w-3.5 shrink-0 mt-0.5 text-amber-400" />
+                  <span>
+                    <strong className="text-amber-300">Payout notice:</strong> Payouts are processed every <strong className="text-amber-300">Monday</strong> and typically arrive within <strong className="text-amber-300">5–7 business days</strong> after the weekly batch runs.
+                  </span>
+                </div>
 
                 <Button
                   onClick={handleWithdraw}
@@ -411,11 +381,6 @@ export default function WalletsPage() {
                 >
                   {withdrawMutation.isPending ? (
                     <span className="flex items-center gap-2">Processing…</span>
-                  ) : isIndian ? (
-                    <span className="flex items-center gap-2">
-                      <Smartphone className="h-4 w-4" />
-                      Withdraw via UPI
-                    </span>
                   ) : (
                     <span className="flex items-center gap-2">
                       <Building2 className="h-4 w-4" />
@@ -430,7 +395,7 @@ export default function WalletsPage() {
               <div className="flex items-start gap-2.5 rounded-lg bg-secondary/5 border border-secondary/20 p-3 text-xs text-secondary/70">
                 <ArrowUpFromLine className="h-4 w-4 shrink-0 mt-0.5 text-secondary/50" />
                 <span>
-                  Keep earning by fulfilling requests. Once you reach <strong className="text-secondary">$100.00</strong>, you can withdraw your earnings.
+                  Keep earning by fulfilling requests. Once you reach <strong className="text-secondary">$100.00</strong>, you can request a weekly payout via Bank Transfer.
                 </span>
               </div>
             )}
