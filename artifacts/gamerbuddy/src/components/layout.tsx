@@ -612,6 +612,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
             {/* Language selector */}
             <LangSelector />
 
+            {/* Regional clock */}
+            <RegionalClock />
+
             {/* Theme toggle */}
             <button
               onClick={toggleTheme}
