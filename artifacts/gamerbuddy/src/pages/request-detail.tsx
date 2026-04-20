@@ -172,10 +172,26 @@ function ChatPanel({
         </div>
       )}
 
-      {/* Safety tip */}
-      <div className="px-4 py-2 border-b border-border/30 bg-amber-500/3 flex items-start gap-2">
-        <span className="text-[13px] shrink-0 leading-none mt-px">💡</span>
-        <span className="text-[11px] text-amber-300/65 leading-snug">Please keep all arrangements on Gamerbuddy. Using our escrow system is the safest and simplest way for everyone.</span>
+      {/* Prominent Discord + safety instructions */}
+      <div className="border-b border-indigo-500/20 bg-indigo-500/[0.06] px-4 py-3 space-y-2">
+        <div className="flex items-start gap-2">
+          <MessageCircle className="h-3.5 w-3.5 text-indigo-400 shrink-0 mt-0.5" />
+          <p className="text-[11px] text-indigo-200/80 leading-snug">
+            <strong className="text-indigo-300">Exchange your Discord username here</strong> so you can coordinate the session. We recommend using Discord for voice communication during gameplay.
+          </p>
+        </div>
+        <div className="flex items-start gap-2">
+          <ShieldCheck className="h-3.5 w-3.5 text-amber-400 shrink-0 mt-0.5" />
+          <p className="text-[11px] text-amber-300/75 leading-snug">
+            <strong className="text-amber-300">Never share</strong> your Steam, Epic Games, PSN, or any account passwords with anyone.
+          </p>
+        </div>
+        <div className="flex items-start gap-2">
+          <Lock className="h-3.5 w-3.5 text-green-400 shrink-0 mt-0.5" />
+          <p className="text-[11px] text-green-300/70 leading-snug">
+            Stay within Gamerbuddy until payment is released after both reviews are submitted.
+          </p>
+        </div>
       </div>
 
       {/* Messages */}
@@ -189,9 +205,11 @@ function ChatPanel({
             ))}
           </div>
         ) : allMessages.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-32 gap-2 text-center">
+          <div className="flex flex-col items-center justify-center h-32 gap-2 text-center px-4">
             <MessageSquare className="h-8 w-8 text-muted-foreground/15" />
-            <div className="text-xs text-muted-foreground/40">No messages yet. Say hi!</div>
+            <div className="text-xs text-muted-foreground/50 leading-relaxed">
+              Start the conversation — share your Discord username so you can coordinate voice chat during the session.
+            </div>
           </div>
         ) : (
           allMessages.map((msg: ChatMessage) => {
@@ -1032,7 +1050,8 @@ function BidCard({
   preferredCountry?: string | null;
   preferredGender?: string | null;
 }) {
-  const [chatOpen, setChatOpen] = useState(false);
+  // Auto-open the chat when the bid is already accepted (active session)
+  const [chatOpen, setChatOpen] = useState(bid.status === "accepted");
   const [showAcceptModal, setShowAcceptModal] = useState(false);
   const [showReport, setShowReport] = useState(false);
   const { toast } = useToast();
@@ -2174,14 +2193,41 @@ export default function RequestDetail() {
             </div>
           )}
 
-          {/* Accepted bid discord info (shown to hirer) */}
-          {isHirer && !isBulkRequest && request.status === "in_progress" && acceptedBid?.discordUsername && (
-            <div className="flex items-center gap-3 rounded-xl border border-indigo-500/30 bg-indigo-500/5 px-4 py-3 text-sm">
-              <MessageCircle className="h-4 w-4 text-indigo-400 shrink-0" />
-              <div>
-                <div className="text-xs text-muted-foreground mb-0.5">Gamer's Discord</div>
-                <div className="font-bold text-indigo-300">{acceptedBid.discordUsername}</div>
+          {/* Prominent session chat instruction — shown to both parties when session is active */}
+          {(isHirer || isGamer) && (request.status === "in_progress" || request.status === "awaiting_reviews") && (
+            <div className="rounded-xl border border-secondary/30 bg-secondary/[0.04] p-4 space-y-3">
+              <div className="flex items-center gap-2 font-bold text-secondary text-sm uppercase tracking-wide">
+                <MessageSquare className="h-4 w-4" />
+                Session Chat
               </div>
+              <div className="space-y-2 text-xs">
+                <div className="flex items-start gap-2">
+                  <MessageCircle className="h-3.5 w-3.5 text-indigo-400 shrink-0 mt-0.5" />
+                  <span className="text-indigo-200/80">
+                    <strong className="text-indigo-300">Share your Discord username</strong> in the chat below to coordinate voice communication during the session.
+                  </span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <ShieldCheck className="h-3.5 w-3.5 text-amber-400 shrink-0 mt-0.5" />
+                  <span className="text-amber-300/75">
+                    <strong className="text-amber-300">Never share</strong> your Steam, Epic Games, PSN, or any account passwords with anyone.
+                  </span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <Lock className="h-3.5 w-3.5 text-green-400 shrink-0 mt-0.5" />
+                  <span className="text-green-300/70">Stay within Gamerbuddy until payment is released after both reviews are submitted.</span>
+                </div>
+              </div>
+              {acceptedBid?.discordUsername && (
+                <div className="flex items-center gap-2 rounded-lg border border-indigo-500/25 bg-indigo-500/8 px-3 py-2">
+                  <MessageCircle className="h-3.5 w-3.5 text-indigo-400 shrink-0" />
+                  <span className="text-xs text-muted-foreground">Gamer's Discord:</span>
+                  <span className="text-xs font-bold text-indigo-300">{acceptedBid.discordUsername}</span>
+                </div>
+              )}
+              <p className="text-[10px] text-muted-foreground/40">
+                Chat refreshes every 10 seconds automatically. Messages are only visible to you and your session partner.
+              </p>
             </div>
           )}
 
