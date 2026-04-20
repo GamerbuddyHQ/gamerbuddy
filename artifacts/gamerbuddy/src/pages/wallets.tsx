@@ -269,11 +269,11 @@ export default function WalletsPage() {
                   <span className="font-black text-sm text-green-300 uppercase tracking-wide">Payout Threshold Reached!</span>
                 </div>
                 <p className="text-xs text-green-200/80 leading-relaxed">
-                  Congratulations! Your earnings have reached the <strong className="text-green-300">$100 threshold</strong>. Your payout is scheduled for the next weekly batch — <strong className="text-green-300">every Monday</strong> — and should arrive in your account within <strong className="text-green-300">5–7 business days</strong> after processing.
+                  Congratulations! Your earnings have reached the <strong className="text-green-300">$100 threshold</strong>. Your payout is scheduled for the next Monday's weekly batch and should arrive in your account within <strong className="text-green-300">5–7 business days</strong>.
                 </p>
                 <div className="flex items-center gap-1.5 text-[10px] text-cyan-300/70 font-medium pt-0.5">
                   <CalendarDays className="h-3 w-3 text-cyan-400 shrink-0" />
-                  Submit your withdrawal request below to join the next Monday batch.
+                  Fill in your bank details below and submit your withdrawal request to join the next Monday batch.
                 </div>
               </div>
             )}
@@ -299,17 +299,26 @@ export default function WalletsPage() {
             )}
 
             {/* Payout Policy — always visible, global unified policy */}
-            <div className="rounded-lg border border-cyan-500/20 bg-cyan-500/[0.03] p-3 text-xs space-y-2">
+            <div className="rounded-lg border border-cyan-500/20 bg-cyan-500/[0.03] p-4 text-xs space-y-3">
               <div className="flex items-center gap-2 font-bold text-[11px] uppercase tracking-widest text-cyan-300">
                 <CalendarDays className="h-3.5 w-3.5 shrink-0 text-cyan-400" />
-                Payout Policy
+                How Payouts Work
               </div>
-              <ul className="space-y-1.5 text-cyan-200/70 leading-relaxed pl-1">
-                <li>✅ Earnings credited to wallet <strong className="text-cyan-300">immediately</strong> after session completion and both reviews are submitted</li>
-                <li>📅 Payouts to bank accounts are processed in the <strong className="text-cyan-300">weekly batch (every Monday)</strong> via Razorpay / Bank Transfer</li>
-                <li>⏱️ Once your balance reaches $100, your payout will be sent within <strong className="text-cyan-300">5–7 business days</strong> after the weekly processing</li>
-                <li>💰 Minimum withdrawal threshold: <strong className="text-cyan-300">$100 USD</strong></li>
-              </ul>
+              <div className="space-y-2 text-cyan-200/70 leading-relaxed">
+                <p>
+                  💚 Earnings are added <strong className="text-cyan-300">instantly</strong> after session completion and both the Hirer and Gamer submit their reviews.
+                </p>
+                <p>
+                  📅 Global payouts are processed <strong className="text-cyan-300">every Monday</strong> via Razorpay International Bank Transfer.
+                </p>
+                <p>
+                  💰 When your balance reaches <strong className="text-cyan-300">$100 USD</strong>, your money will be sent via international bank transfer and should arrive within <strong className="text-cyan-300">5–7 business days</strong> after the Monday processing.
+                </p>
+              </div>
+              <div className="pt-0.5 border-t border-cyan-500/10 flex items-center gap-2 text-[10px] text-cyan-400/50 font-medium">
+                <Info className="h-3 w-3 shrink-0" />
+                Minimum withdrawal threshold: $100 USD · Payout method: International Bank Transfer
+              </div>
             </div>
 
             {/* Withdrawal form */}
