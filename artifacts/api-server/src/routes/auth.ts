@@ -34,6 +34,7 @@ function formatUser(user: {
   idVerified: boolean;
   officialIdPath?: string | null;
   points: number;
+  trustScore?: number;
   profileBackground?: string | null;
   profileTitle?: string | null;
   country?: string | null;
@@ -49,6 +50,7 @@ function formatUser(user: {
     idVerified: user.idVerified,
     officialIdPath: user.officialIdPath ?? null,
     points: user.points,
+    trustScore: user.trustScore ?? 0,
     profileBackground: user.profileBackground ?? null,
     profileTitle: user.profileTitle ?? null,
     country: user.country ?? null,

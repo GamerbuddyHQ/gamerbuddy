@@ -306,6 +306,7 @@ export default function UserProfilePage() {
   const bgId = profile.profileBackground;
   const bgGrad = bgId ? (BG_STYLES[bgId] ?? "from-primary/15 via-secondary/10 to-background") : "from-primary/15 via-secondary/10 to-background";
   const points = profile.points;
+  const trustScore = (profile as { trustScore?: number }).trustScore ?? 0;
   const currentRank = RANK_BADGES.filter((b) => points >= b.min).pop() ?? RANK_BADGES[0];
   const trustFactor = Math.min(100, profile.trustFactor);
   const repBadges = computeBadges({
@@ -416,6 +417,17 @@ export default function UserProfilePage() {
           {/* Reputation */}
           <div className="space-y-4">
             {repBadges.length > 0 && <ReputationBadges badges={repBadges} />}
+            {/* Trust Score */}
+            <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-primary/8 border border-primary/20 cursor-default" title="Earn +5 points for every successful quest, good review, photo upload, and more. There is no limit — the more you contribute, the higher your score becomes.">
+              <span className="text-[16px]">🛡️</span>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-baseline gap-1.5">
+                  <span className="text-base font-black text-primary leading-none">{trustScore}</span>
+                  <span className="text-[10px] font-bold text-primary/60 uppercase tracking-widest">Trust Score</span>
+                </div>
+                <div className="text-[10px] text-muted-foreground/60">No maximum · +5 per quest, review &amp; account</div>
+              </div>
+            </div>
             <TrustMeter value={trustFactor} />
 
             {/* Stats */}

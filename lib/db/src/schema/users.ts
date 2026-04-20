@@ -23,6 +23,7 @@ export const usersTable = pgTable("users", {
   galleryPhotoUrls: text("gallery_photo_urls").array().notNull().default([]),
   gamerbuddyId: text("gamerbuddy_id").unique(),
   communityBanned: boolean("community_banned").notNull().default(false),
+  trustScore: integer("trust_score").notNull().default(0),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

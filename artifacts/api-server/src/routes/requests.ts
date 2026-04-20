@@ -1,5 +1,6 @@
 import { Router, type IRouter } from "express";
 import { db, gameRequestsTable, walletsTable, usersTable, bidsTable, reviewsTable, streamingAccountsTable, gamingAccountsTable, questEntriesTable, platformFeesTable } from "@workspace/db";
+import { awardTrustPoints } from "../trust-score";
 import { eq, desc, and, sql, inArray, gte } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
 import { createNotification, sendEmailNotification } from "../notifications-helper";
@@ -1066,6 +1067,13 @@ router.post("/requests/:id/reviews", requireAuth, async (req, res): Promise<void
   // Recalculate trust factor from scratch (rating quality + session experience +
   // review volume + vote sentiment) — votes are now a permanent formula component
   await recalculateTrustFactor(revieweeId);
+
+  // Award Trust Score: +5 for completing a session and receiving a review
+  await awardTrustPoints(revieweeId, "session_complete_review");
+  // Award an additional +5 for a high rating (9–10)
+  if (rating >= 9) {
+    await awardTrustPoints(revieweeId, "high_rating");
+  }
 
   // Notify the reviewee about the new review
   void createNotification({

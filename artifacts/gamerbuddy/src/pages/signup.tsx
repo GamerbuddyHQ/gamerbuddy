@@ -48,7 +48,10 @@ export default function Signup() {
       {
         onSuccess: (data) => {
           login(data.user);
-          toast({ title: "Account created", description: "Welcome to Gamerbuddy." });
+          toast({
+            title: "Welcome to Gamerbuddy! 🎮",
+            description: "Build your Trust Score by completing quests, getting great reviews, and keeping your profile complete. There is no maximum — the higher your score, the more hirers choose you.",
+          });
           setLocation("/dashboard");
         },
         onError: (error) => {

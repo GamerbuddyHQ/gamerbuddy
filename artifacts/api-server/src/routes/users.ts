@@ -4,6 +4,7 @@ import { db, usersTable, reviewsTable, gameRequestsTable, bidsTable, profilePurc
 import { eq, desc, and, ne, sql, or } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
 import { recalculateTrustFactor } from "../trust-factor";
+import { awardTrustPoints } from "../trust-score";
 import { validate, sanitize, UpdateProfileSchema, PostQuestSchema } from "../lib/validate";
 import { verifyLimiter } from "../lib/rate-limit";
 import { ObjectStorageService } from "../lib/objectStorage";
@@ -63,6 +64,7 @@ router.get("/users/:id", async (req, res): Promise<void> => {
     country: usersTable.country,
     gender: usersTable.gender,
     trustFactor: usersTable.trustFactor,
+    trustScore: usersTable.trustScore,
     points: usersTable.points,
     idVerified: usersTable.idVerified,
     profileBackground: usersTable.profileBackground,
@@ -304,8 +306,13 @@ router.post("/profile/photo", requireAuth, async (req, res): Promise<void> => {
       return;
     }
   }
+  const [currentPhoto] = await db.select({ profilePhotoUrl: usersTable.profilePhotoUrl }).from(usersTable).where(eq(usersTable.id, user.id));
+  const isFirstPhoto = !currentPhoto?.profilePhotoUrl;
   await db.update(usersTable).set({ profilePhotoUrl: objectPath }).where(eq(usersTable.id, user.id));
   await db.insert(userPhotosTable).values({ userId: user.id, objectPath, photoType: "profile", status: "needs_review", photoHash: fileHash ?? null });
+  if (isFirstPhoto) {
+    await awardTrustPoints(user.id, "profile_photo_uploaded");
+  }
   res.json({ success: true, profilePhotoUrl: objectPath });
 });
 
@@ -559,6 +566,9 @@ router.post("/gaming-accounts", requireAuth, async (req, res): Promise<void> => 
     return;
   }
 
+  const existingAccounts = await db.select({ id: gamingAccountsTable.userId }).from(gamingAccountsTable).where(eq(gamingAccountsTable.userId, user.id));
+  const isFirstGamingAccount = existingAccounts.length === 0;
+
   await db.delete(gamingAccountsTable)
     .where(and(eq(gamingAccountsTable.userId, user.id), eq(gamingAccountsTable.platform, platform)));
 
@@ -567,6 +577,10 @@ router.post("/gaming-accounts", requireAuth, async (req, res): Promise<void> => 
     platform,
     username: username.trim(),
   }).returning({ platform: gamingAccountsTable.platform, username: gamingAccountsTable.username });
+
+  if (isFirstGamingAccount) {
+    await awardTrustPoints(user.id, "gaming_account_linked");
+  }
 
   res.status(201).json({ success: true, account });
 });

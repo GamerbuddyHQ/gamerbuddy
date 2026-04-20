@@ -42,6 +42,7 @@ export interface User {
   country: string | null;
   gender: string | null;
   gamerbuddyId: string | null;
+  trustScore?: number;
   createdAt: string;
 }
 
