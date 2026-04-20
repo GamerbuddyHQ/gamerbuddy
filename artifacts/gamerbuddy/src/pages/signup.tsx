@@ -70,7 +70,7 @@ export default function Signup() {
   ];
 
   return (
-    <div className="w-full max-w-5xl mx-auto px-4 mt-6 mb-16 lg:mt-12">
+    <div className="w-full max-w-6xl mx-auto px-4 mt-6 mb-16 lg:mt-12">
       <div className="grid lg:grid-cols-2 gap-8 lg:gap-14 items-start">
 
         {/* ── Right: Branding Panel on desktop, shown above form on mobile ── */}

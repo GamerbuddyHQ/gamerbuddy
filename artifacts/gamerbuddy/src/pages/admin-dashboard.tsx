@@ -171,7 +171,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* ── Content wrapper ── */}
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-7xl mx-auto">
 
       {/* ── Summary Cards ── */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 md:p-6 md:pb-0">

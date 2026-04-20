@@ -198,7 +198,7 @@ export default function WalletsPage() {
 
   if (isLoading) {
     return (
-      <div className="max-w-4xl mx-auto space-y-8">
+      <div className="max-w-6xl mx-auto space-y-8">
         <Skeleton className="h-10 w-60" />
         <div className="grid md:grid-cols-2 gap-6">
           <Skeleton className="h-72" />
@@ -221,7 +221,7 @@ export default function WalletsPage() {
   );
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 md:space-y-8">
+    <div className="max-w-6xl mx-auto space-y-6 md:space-y-8">
       <div>
         <h1 className="text-2xl md:text-3xl font-extrabold uppercase tracking-tight text-foreground flex items-center gap-3">
           <Wallet className="h-7 w-7 md:h-8 md:w-8 text-primary" />

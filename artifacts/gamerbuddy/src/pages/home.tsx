@@ -185,7 +185,7 @@ export default function Home() {
       </div>
 
       {/* ═══════════════════ HERO ═══════════════════ */}
-      <section className="relative flex flex-col items-center justify-center text-center px-4 pt-16 pb-20 overflow-hidden">
+      <section className="relative flex flex-col items-center justify-center text-center px-4 pt-16 pb-20 lg:pt-24 lg:pb-28 overflow-hidden">
         {/* animated canvas particles */}
         <ParticleCanvas />
 
@@ -219,7 +219,7 @@ export default function Home() {
         />
 
         {/* content */}
-        <div className="relative max-w-3xl mx-auto w-full" style={{ zIndex: 2 }}>
+        <div className="relative max-w-5xl mx-auto w-full" style={{ zIndex: 2 }}>
 
           {/* eyebrow badge */}
           <div className="flex justify-center mb-6">
@@ -238,11 +238,11 @@ export default function Home() {
 
           {/* headline */}
           <h1 className="font-black tracking-tight leading-tight mb-5">
-            <span className="block text-foreground text-4xl sm:text-6xl md:text-7xl">
+            <span className="block text-foreground text-4xl sm:text-6xl md:text-7xl lg:text-8xl">
               {t.home.headline1}
             </span>
             <span
-              className="block text-4xl sm:text-6xl md:text-7xl"
+              className="block text-4xl sm:text-6xl md:text-7xl lg:text-8xl"
               style={{
                 color: "hsl(var(--primary))",
                 textShadow: "0 0 40px rgba(168,85,247,0.45), 0 2px 12px rgba(168,85,247,0.25)",
@@ -253,7 +253,7 @@ export default function Home() {
           </h1>
 
           {/* subheadline */}
-          <p className="text-base sm:text-lg leading-relaxed mb-8 mx-auto max-w-2xl"
+          <p className="text-base sm:text-lg lg:text-xl leading-relaxed mb-8 mx-auto max-w-3xl"
             style={{ color: "var(--text-subdued)" }}
           >
             {t.home.subheadline}
@@ -335,7 +335,7 @@ export default function Home() {
 
       {/* ═══════════════════ FEATURES ═══════════════════ */}
       <section className="relative px-4 pb-16 pt-4">
-        <div className="max-w-5xl mx-auto">
+        <div className="max-w-7xl mx-auto">
           {/* section label */}
           <div className="text-center mb-8 px-2">
             <div className="inline-flex items-center gap-3 text-[11px] font-bold uppercase tracking-[0.2em] text-primary/70 mb-4">
@@ -386,7 +386,7 @@ export default function Home() {
       {/* ═══════════════════ HOW IT WORKS ═══════════════════ */}
       <section className="px-4 py-14">
         <div
-          className="max-w-5xl mx-auto rounded-3xl p-8 sm:p-12 relative overflow-hidden"
+          className="max-w-7xl mx-auto rounded-3xl p-8 sm:p-12 lg:p-16 relative overflow-hidden"
           style={{
             background: "linear-gradient(135deg, rgba(168,85,247,0.07) 0%, rgba(34,211,238,0.04) 100%)",
             border: "1px solid rgba(168,85,247,0.2)",
@@ -458,7 +458,7 @@ export default function Home() {
 
       {/* ═══════════════════ TRUST STRIP ═══════════════════ */}
       <section className="px-4 py-10">
-        <div className="max-w-5xl mx-auto">
+        <div className="max-w-7xl mx-auto">
           <div
             className="grid grid-cols-2 sm:grid-cols-4 gap-4"
           >
@@ -486,7 +486,7 @@ export default function Home() {
       {/* ═══════════════════ BOTTOM CTA ═══════════════════ */}
       <section className="px-4 pb-20 pt-8">
         <div
-          className="relative max-w-3xl mx-auto rounded-3xl text-center overflow-hidden px-8 py-14 sm:py-16"
+          className="relative max-w-5xl mx-auto rounded-3xl text-center overflow-hidden px-8 py-14 sm:py-16 lg:py-20"
           style={{
             background: "linear-gradient(135deg, rgba(147,51,234,0.25) 0%, rgba(124,58,237,0.12) 50%, rgba(34,211,238,0.08) 100%)",
             border: "1px solid rgba(168,85,247,0.3)",
