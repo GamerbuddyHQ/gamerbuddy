@@ -99,6 +99,13 @@ router.get("/community/suggestions", loadUser, async (req, res): Promise<void> =
 ────────────────────────────────────────────────────────────── */
 router.post("/community/suggestions", requireAuth, suggestionLimiter, validate(PostSuggestionSchema), async (req, res): Promise<void> => {
   const user = req.user!;
+
+  // Check if user is banned from community posting
+  if ((user as { communityBanned?: boolean }).communityBanned) {
+    res.status(403).json({ error: "You have been banned from posting in the community." });
+    return;
+  }
+
   const { title, body, category } = req.body as { title: string; body: string; category: string };
 
   const cleanTitle = sanitizeSuggestionText(title);

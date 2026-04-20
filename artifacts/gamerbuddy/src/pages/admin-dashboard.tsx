@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useLocation } from "wouter";
+import { useLocation, Link } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "@/lib/bids-api";
 import { useToast } from "@/hooks/use-toast";
@@ -9,7 +9,7 @@ import { format, formatDistanceToNow } from "date-fns";
 import {
   Shield, LogOut, DollarSign, CheckCircle2, Clock, User,
   Globe, RefreshCw, AlertTriangle, ChevronDown, ChevronUp,
-  BadgeCheck, Eye, XCircle, Wallet,
+  BadgeCheck, Eye, XCircle, Wallet, Users,
 } from "lucide-react";
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
@@ -129,24 +129,45 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* ── Topbar ── */}
-      <div className="sticky top-0 z-20 bg-card border-b border-border px-4 md:px-8 h-14 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Shield className="w-5 h-5 text-primary" />
-          <span className="font-bold tracking-tight text-foreground">Gamerbuddy Admin</span>
-          <span className="hidden sm:inline text-xs text-muted-foreground/50 ml-2">
-            {new Date().toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
-          </span>
+      <div className="sticky top-0 z-20 bg-card border-b border-border">
+        <div className="px-4 md:px-8 h-14 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Shield className="w-5 h-5 text-primary" />
+            <span className="font-bold tracking-tight text-foreground">Gamerbuddy Admin</span>
+            <span className="hidden sm:inline text-xs text-muted-foreground/50 ml-2">
+              {new Date().toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
+            </span>
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => logout.mutate()}
+            disabled={logout.isPending}
+            className="gap-1.5 text-muted-foreground hover:text-destructive"
+          >
+            <LogOut className="w-4 h-4" />
+            <span className="hidden sm:inline">Logout</span>
+          </Button>
         </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => logout.mutate()}
-          disabled={logout.isPending}
-          className="gap-1.5 text-muted-foreground hover:text-destructive"
-        >
-          <LogOut className="w-4 h-4" />
-          <span className="hidden sm:inline">Logout</span>
-        </Button>
+
+        {/* ── Admin nav links ── */}
+        <div className="px-4 md:px-8 py-2 border-t border-border/40 flex gap-1 overflow-x-auto">
+          {[
+            { href: "/admin/dashboard",         label: "Payouts & Verifications", icon: DollarSign },
+            { href: "/admin/community",          label: "Community Moderation",    icon: Users      },
+            { href: "/admin/platform-earnings",  label: "Platform Earnings",       icon: Wallet     },
+            { href: "/admin/security",           label: "Security",                icon: Shield     },
+          ].map(item => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all text-muted-foreground hover:text-foreground hover:bg-muted/50"
+            >
+              <item.icon className="w-3.5 h-3.5" />
+              {item.label}
+            </Link>
+          ))}
+        </div>
       </div>
 
       {/* ── Summary Cards ── */}

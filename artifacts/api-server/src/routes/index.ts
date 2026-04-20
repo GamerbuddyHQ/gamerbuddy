@@ -14,6 +14,7 @@ import communityRouter from "./community";
 import tournamentsRouter from "./tournaments";
 import adminRouter from "./admin";
 import adminAuthRouter from "./admin-auth";
+import adminCommunityRouter from "./admin-community";
 
 const router: IRouter = Router();
 
@@ -32,5 +33,6 @@ router.use(communityRouter);
 router.use(tournamentsRouter);
 router.use(adminRouter);
 router.use(adminAuthRouter);
+router.use(adminCommunityRouter);
 
 export default router;
