@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { Link } from "wouter";
-import { Gamepad2, Users, Coins, Zap, Shield, Star } from "lucide-react";
+import { Gamepad2, Users, Coins, Zap, Shield, Star, Trophy, ChevronRight } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 
 /* ── floating particles canvas ─────────────────────────────── */
@@ -26,16 +26,16 @@ function ParticleCanvas() {
     resize();
     window.addEventListener("resize", resize);
 
-    const COLORS = ["rgba(168,85,247,", "rgba(34,211,238,", "rgba(124,58,237,"];
+    const COLORS = ["rgba(168,85,247,", "rgba(34,211,238,", "rgba(124,58,237,", "rgba(192,132,252,"];
 
-    for (let i = 0; i < 55; i++) {
+    for (let i = 0; i < 70; i++) {
       particles.push({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        size: Math.random() * 1.8 + 0.4,
-        vx: (Math.random() - 0.5) * 0.25,
-        vy: -(Math.random() * 0.4 + 0.15),
-        alpha: Math.random() * 0.5 + 0.15,
+        x: Math.random() * (canvas.width || 1280),
+        y: Math.random() * (canvas.height || 700),
+        size: Math.random() * 2 + 0.3,
+        vx: (Math.random() - 0.5) * 0.22,
+        vy: -(Math.random() * 0.35 + 0.12),
+        alpha: Math.random() * 0.55 + 0.10,
         color: COLORS[Math.floor(Math.random() * COLORS.length)],
       });
     }
@@ -45,13 +45,13 @@ function ParticleCanvas() {
       particles.forEach((p) => {
         p.x += p.vx;
         p.y += p.vy;
-        p.alpha -= 0.0008;
+        p.alpha -= 0.0006;
         if (p.y < 0 || p.alpha <= 0) {
           p.x = Math.random() * canvas.width;
           p.y = canvas.height + 10;
-          p.alpha = Math.random() * 0.5 + 0.15;
-          p.vy = -(Math.random() * 0.4 + 0.15);
-          p.vx = (Math.random() - 0.5) * 0.25;
+          p.alpha = Math.random() * 0.55 + 0.10;
+          p.vy = -(Math.random() * 0.35 + 0.12);
+          p.vx = (Math.random() - 0.5) * 0.22;
         }
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
@@ -97,40 +97,51 @@ function FeatureCard({
 }) {
   return (
     <div
-      className="relative group rounded-2xl border border-border bg-card p-6 flex flex-col gap-4 transition-all duration-300 overflow-hidden hover:border-primary/40 hover:shadow-[0_8px_32px_rgba(168,85,247,0.12)]"
+      className="relative group rounded-2xl border border-border/60 bg-card p-7 flex flex-col gap-5 transition-all duration-300 overflow-hidden hover:border-primary/50"
+      style={{ boxShadow: "0 2px 16px rgba(0,0,0,0.12)" }}
+      onMouseEnter={(e) => {
+        (e.currentTarget as HTMLDivElement).style.boxShadow = `0 8px 40px rgba(0,0,0,0.18), 0 0 0 1px ${glowColor}28, 0 0 60px ${glowColor}10`;
+      }}
+      onMouseLeave={(e) => {
+        (e.currentTarget as HTMLDivElement).style.boxShadow = "0 2px 16px rgba(0,0,0,0.12)";
+      }}
     >
-      {/* subtle corner accent */}
+      {/* top gradient line */}
       <div
-        className="absolute top-0 right-0 w-28 h-28 rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
-        style={{ background: `radial-gradient(circle, ${glowColor}18 0%, transparent 70%)` }}
+        className="absolute top-0 left-0 right-0 h-px opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+        style={{ background: `linear-gradient(90deg, transparent, ${glowColor}, transparent)` }}
+      />
+      {/* corner accent glow */}
+      <div
+        className="absolute top-0 right-0 w-36 h-36 rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+        style={{ background: `radial-gradient(circle, ${glowColor}20 0%, transparent 70%)` }}
       />
 
-      <div
-        className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${iconBg}`}
-        style={{ boxShadow: `0 0 16px ${glowColor}30` }}
-      >
-        <div className={iconColor}>{icon}</div>
-      </div>
-
-      <div className="space-y-2">
-        <div className="flex items-center gap-2">
-          <h3 className="font-extrabold text-foreground tracking-wide text-[15px]">{title}</h3>
-          <span
-            className="text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-full border"
-            style={{ color: glowColor, borderColor: `${glowColor}50`, background: `${glowColor}12` }}
-          >
-            {tag}
-          </span>
-        </div>
-        <p className="text-sm text-muted-foreground leading-relaxed">{desc}</p>
-      </div>
-
-      <div className="mt-auto pt-1">
+      <div className="flex items-start gap-4">
         <div
-          className="h-0.5 w-6 rounded-full group-hover:w-full transition-all duration-500"
-          style={{ background: `linear-gradient(90deg, ${glowColor}, transparent)` }}
-        />
+          className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${iconBg}`}
+          style={{ boxShadow: `0 0 20px ${glowColor}35` }}
+        >
+          <div className={iconColor}>{icon}</div>
+        </div>
+        <div className="pt-1">
+          <div className="flex items-center gap-2 mb-1.5">
+            <h3 className="font-extrabold text-foreground tracking-wide text-base">{title}</h3>
+            <span
+              className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full border"
+              style={{ color: glowColor, borderColor: `${glowColor}50`, background: `${glowColor}14` }}
+            >
+              {tag}
+            </span>
+          </div>
+          <p className="text-sm text-muted-foreground leading-relaxed">{desc}</p>
+        </div>
       </div>
+
+      <div
+        className="h-px w-8 rounded-full group-hover:w-full transition-all duration-500 mt-auto"
+        style={{ background: `linear-gradient(90deg, ${glowColor}, transparent)` }}
+      />
     </div>
   );
 }
@@ -138,20 +149,20 @@ function FeatureCard({
 /* ── step item ──────────────────────────────────────────────── */
 function Step({ n, title, desc }: { n: number; title: string; desc: string }) {
   return (
-    <div className="flex gap-4 items-start">
+    <div className="flex gap-4 items-start group">
       <div
-        className="shrink-0 w-9 h-9 rounded-xl flex items-center justify-center font-black text-sm text-primary-foreground"
+        className="shrink-0 w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm text-white transition-all duration-200 group-hover:scale-105"
         style={{
           background: "linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(272,90%,48%) 100%)",
           border: "1px solid hsl(var(--primary) / 0.5)",
-          boxShadow: "0 0 14px hsl(var(--primary) / 0.25)",
+          boxShadow: "0 0 18px hsl(var(--primary) / 0.30)",
         }}
       >
         {n}
       </div>
-      <div>
-        <div className="font-bold text-foreground text-sm uppercase tracking-wide">{title}</div>
-        <div className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{desc}</div>
+      <div className="pt-1">
+        <div className="font-bold text-foreground text-sm uppercase tracking-wide mb-0.5">{title}</div>
+        <div className="text-sm text-muted-foreground leading-relaxed">{desc}</div>
       </div>
     </div>
   );
@@ -185,68 +196,67 @@ export default function Home() {
       </div>
 
       {/* ═══════════════════ HERO ═══════════════════ */}
-      <section className="relative flex flex-col items-center justify-center text-center px-4 pt-16 pb-24 lg:pt-28 lg:pb-32 overflow-hidden">
-        {/* animated canvas particles */}
+      <section className="relative flex flex-col items-center justify-center text-center px-4 pt-14 pb-12 lg:pt-24 lg:pb-16 overflow-hidden min-h-[600px] lg:min-h-[720px]">
         <ParticleCanvas />
 
-        {/* Wide cinematic backdrop gradient */}
+        {/* Wide cinematic backdrop */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            background: "radial-gradient(ellipse 100% 80% at 50% 0%, rgba(124,58,237,0.18) 0%, rgba(168,85,247,0.08) 40%, transparent 70%)",
+            background: "radial-gradient(ellipse 110% 90% at 50% -5%, rgba(109,40,217,0.28) 0%, rgba(168,85,247,0.10) 35%, transparent 65%)",
+            zIndex: 0,
+          }}
+        />
+        {/* Left orb */}
+        <div
+          className="absolute top-[-15%] left-[-12%] w-[75vw] h-[75vw] rounded-full pointer-events-none"
+          style={{
+            background: "radial-gradient(circle, rgba(168,85,247,0.15) 0%, transparent 58%)",
+            animation: "float-slow 11s ease-in-out infinite",
+            zIndex: 0,
+          }}
+        />
+        {/* Right orb */}
+        <div
+          className="absolute bottom-[-10%] right-[-10%] w-[60vw] h-[60vw] rounded-full pointer-events-none"
+          style={{
+            background: "radial-gradient(circle, rgba(34,211,238,0.09) 0%, transparent 58%)",
+            animation: "float-slow-reverse 13s ease-in-out infinite",
+            zIndex: 0,
+          }}
+        />
+        {/* Centre crown glow */}
+        <div
+          className="absolute top-0 left-1/2 -translate-x-1/2 w-[80vw] h-[50vw] pointer-events-none"
+          style={{
+            background: "radial-gradient(ellipse 70% 55% at 50% 0%, rgba(139,92,246,0.25) 0%, transparent 60%)",
             zIndex: 0,
           }}
         />
 
-        {/* background orbs — large and wide for cinematic feel */}
-        <div
-          className="absolute top-[-10%] left-[-10%] w-[70vw] h-[70vw] rounded-full pointer-events-none"
-          style={{
-            background: "radial-gradient(circle, rgba(168,85,247,0.16) 0%, transparent 60%)",
-            animation: "float-slow 10s ease-in-out infinite",
-            zIndex: 0,
-          }}
-        />
-        <div
-          className="absolute bottom-[-5%] right-[-8%] w-[55vw] h-[55vw] rounded-full pointer-events-none"
-          style={{
-            background: "radial-gradient(circle, rgba(34,211,238,0.10) 0%, transparent 60%)",
-            animation: "float-slow-reverse 12s ease-in-out infinite",
-            zIndex: 0,
-          }}
-        />
-        {/* Extra centre-top glow for purple depth */}
-        <div
-          className="absolute top-0 left-1/2 -translate-x-1/2 w-[60vw] h-[40vw] pointer-events-none"
-          style={{
-            background: "radial-gradient(ellipse 80% 60% at 50% 0%, rgba(147,51,234,0.22) 0%, transparent 65%)",
-            zIndex: 0,
-          }}
-        />
-
-        {/* dot grid overlay — wider mask */}
+        {/* Dot grid */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            backgroundImage: "radial-gradient(circle, rgba(168,85,247,0.10) 1px, transparent 1px)",
-            backgroundSize: "40px 40px",
+            backgroundImage: "radial-gradient(circle, rgba(168,85,247,0.12) 1px, transparent 1px)",
+            backgroundSize: "38px 38px",
             zIndex: 0,
-            maskImage: "radial-gradient(ellipse 90% 70% at 50% 35%, black 10%, transparent 100%)",
+            maskImage: "radial-gradient(ellipse 95% 75% at 50% 30%, black 5%, transparent 100%)",
           }}
         />
 
-        {/* content */}
-        <div className="relative max-w-5xl mx-auto w-full" style={{ zIndex: 2 }}>
+        {/* Content */}
+        <div className="relative w-full max-w-5xl mx-auto" style={{ zIndex: 2 }}>
 
-          {/* eyebrow badge */}
-          <div className="flex justify-center mb-7">
+          {/* Badge */}
+          <div className="flex justify-center mb-6">
             <div
-              className="inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-semibold"
+              className="inline-flex items-center gap-2.5 rounded-full px-5 py-2 text-sm font-bold"
               style={{
-                background: "rgba(168,85,247,0.15)",
-                border: "1px solid rgba(168,85,247,0.35)",
+                background: "rgba(139,92,246,0.18)",
+                border: "1px solid rgba(168,85,247,0.40)",
                 color: "hsl(var(--primary))",
-                boxShadow: "0 0 20px rgba(168,85,247,0.15)",
+                boxShadow: "0 0 24px rgba(139,92,246,0.20), inset 0 1px 0 rgba(255,255,255,0.06)",
               }}
             >
               <Gamepad2 className="h-4 w-4" />
@@ -254,41 +264,50 @@ export default function Home() {
             </div>
           </div>
 
-          {/* headline */}
-          <h1 className="font-black tracking-tight leading-[1.05] mb-6">
-            <span className="block text-foreground text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl">
+          {/* Headline */}
+          <h1 className="font-black tracking-tight leading-[1.02] mb-5">
+            <span className="block text-white text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-[6rem] drop-shadow-sm">
               {t.home.headline1}
             </span>
             <span
-              className="block text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl"
+              className="block text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-[6rem]"
               style={{
-                color: "hsl(var(--primary))",
-                textShadow: "0 0 60px rgba(168,85,247,0.55), 0 0 20px rgba(168,85,247,0.30)",
+                background: "linear-gradient(135deg, #c084fc 0%, #a855f7 40%, #7c3aed 100%)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+                filter: "drop-shadow(0 0 32px rgba(168,85,247,0.60))",
               }}
             >
               {t.home.headline2}
             </span>
           </h1>
 
-          {/* subheadline */}
-          <p className="text-base sm:text-lg lg:text-xl leading-relaxed mb-10 mx-auto max-w-2xl"
-            style={{ color: "var(--text-subdued)" }}
+          {/* Subheadline */}
+          <p
+            className="text-base sm:text-lg lg:text-xl leading-relaxed mb-8 mx-auto max-w-xl"
+            style={{ color: "rgba(203,213,225,0.80)" }}
           >
             {t.home.subheadline}
           </p>
 
-          {/* CTA buttons — larger, better spaced */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 mb-10">
+          {/* CTA row */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-5 mb-6">
             <Link href="/signup">
               <button
-                className="group w-full sm:w-auto px-10 py-4 sm:px-12 sm:py-4.5 rounded-2xl font-bold text-base lg:text-lg text-white transition-all duration-200 hover:brightness-110 hover:scale-[1.03] active:scale-[0.98]"
+                className="relative overflow-hidden group w-full sm:w-auto px-10 py-4 rounded-2xl font-bold text-base lg:text-lg text-white transition-all duration-200 hover:brightness-110 hover:scale-[1.03] active:scale-[0.97]"
                 style={{
-                  background: "linear-gradient(135deg, #9333ea 0%, #7c3aed 100%)",
-                  boxShadow: "0 6px 28px rgba(147,51,234,0.50), 0 2px 8px rgba(0,0,0,0.30)",
-                  minWidth: "200px",
+                  background: "linear-gradient(135deg, #9333ea 0%, #7c3aed 50%, #6d28d9 100%)",
+                  boxShadow: "0 8px 32px rgba(124,58,237,0.55), 0 2px 8px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.12)",
+                  minWidth: "210px",
                 }}
               >
-                <span className="flex items-center justify-center gap-2.5">
+                {/* shimmer */}
+                <div
+                  className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 pointer-events-none"
+                  style={{ background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.14), transparent)" }}
+                />
+                <span className="relative flex items-center justify-center gap-2.5">
                   <Users className="h-5 w-5" />
                   {t.home.cta1}
                 </span>
@@ -297,14 +316,22 @@ export default function Home() {
 
             <Link href="/browse">
               <button
-                className="group w-full sm:w-auto px-10 py-4 sm:px-12 rounded-2xl font-semibold text-base lg:text-lg transition-all duration-200 hover:brightness-110 hover:scale-[1.03] active:scale-[0.98]"
+                className="group w-full sm:w-auto px-10 py-4 rounded-2xl font-semibold text-base lg:text-lg transition-all duration-200 hover:scale-[1.03] active:scale-[0.97]"
                 style={{
-                  background: "rgba(255,255,255,0.05)",
-                  border: "1.5px solid rgba(255,255,255,0.15)",
-                  color: "var(--text-subdued)",
-                  backdropFilter: "blur(8px)",
-                  boxShadow: "0 2px 12px rgba(0,0,0,0.20)",
-                  minWidth: "200px",
+                  background: "rgba(255,255,255,0.06)",
+                  border: "1.5px solid rgba(255,255,255,0.18)",
+                  color: "rgba(226,232,240,0.85)",
+                  backdropFilter: "blur(10px)",
+                  boxShadow: "0 2px 16px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.06)",
+                  minWidth: "210px",
+                }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,0.10)";
+                  (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(168,85,247,0.45)";
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,0.06)";
+                  (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(255,255,255,0.18)";
                 }}
               >
                 <span className="flex items-center justify-center gap-2.5">
@@ -315,13 +342,11 @@ export default function Home() {
             </Link>
           </div>
 
-          {/* verification note */}
-          <p className="text-center text-xs mb-4" style={{ color: "var(--text-dim)" }}>
-            Verification helps keep Gamerbuddy safe — it usually takes 24–48 hours
-          </p>
-
-          {/* trust bar */}
-          <div className="space-y-2.5">
+          {/* Trust cluster — tight to buttons */}
+          <div className="space-y-2">
+            <p className="text-center text-xs" style={{ color: "rgba(148,163,184,0.65)" }}>
+              Verification helps keep Gamerbuddy safe — it usually takes 24–48 hours
+            </p>
             <div className="flex items-center justify-center gap-2">
               <div className="flex items-center gap-0.5">
                 {[...Array(5)].map((_, i) => (
@@ -334,46 +359,44 @@ export default function Home() {
                 {" "}and counting
               </span>
             </div>
-            <div className="flex items-center justify-center gap-2 flex-wrap text-muted-foreground">
+            <div className="flex items-center justify-center gap-2 flex-wrap">
               {["PC", "PlayStation", "Xbox", "Switch", "Steam Deck", "Mobile"].map((p, i, arr) => (
                 <React.Fragment key={p}>
-                  <span className="text-xs">{p}</span>
-                  {i < arr.length - 1 && <span className="text-xs opacity-40">·</span>}
+                  <span className="text-xs text-muted-foreground/60">{p}</span>
+                  {i < arr.length - 1 && <span className="text-xs text-muted-foreground/30">·</span>}
                 </React.Fragment>
               ))}
             </div>
           </div>
         </div>
 
-        {/* bottom fade into next section */}
+        {/* bottom fade */}
         <div
-          className="absolute bottom-0 left-0 right-0 h-32 pointer-events-none"
-          style={{
-            background: "linear-gradient(to bottom, transparent, hsl(var(--background)))",
-            zIndex: 2,
-          }}
+          className="absolute bottom-0 left-0 right-0 h-28 pointer-events-none"
+          style={{ background: "linear-gradient(to bottom, transparent, hsl(var(--background)))", zIndex: 2 }}
         />
       </section>
 
       {/* ═══════════════════ FEATURES ═══════════════════ */}
-      <section className="relative px-4 pb-16 pt-4">
+      <section className="relative px-4 pt-2 pb-12">
         <div className="max-w-7xl mx-auto">
-          {/* section label */}
-          <div className="text-center mb-8 px-2">
-            <div className="inline-flex items-center gap-3 text-[11px] font-bold uppercase tracking-[0.2em] text-primary/70 mb-4">
-              <div className="h-px w-10 bg-gradient-to-r from-transparent to-purple-500/60" />
+
+          {/* Section header */}
+          <div className="text-center mb-10">
+            <div className="inline-flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.25em] text-primary/60 mb-3">
+              <div className="h-px w-12 bg-gradient-to-r from-transparent to-primary/50" />
               Core Features
-              <div className="h-px w-10 bg-gradient-to-l from-transparent to-purple-500/60" />
+              <div className="h-px w-12 bg-gradient-to-l from-transparent to-primary/50" />
             </div>
-            <h2 className="text-2xl sm:text-3xl font-black text-foreground leading-tight mb-3">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-foreground leading-tight mb-3">
               How Gamerbuddy Works
             </h2>
-            <p className="text-sm sm:text-base text-muted-foreground max-w-xl mx-auto leading-relaxed">
-              Post a request, get bids from verified gamers, play together — funds held in escrow until the session is complete.
+            <p className="text-sm sm:text-base text-muted-foreground max-w-lg mx-auto leading-relaxed">
+              Post a request, get bids from verified gamers, play together — funds held in escrow until your session is complete.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
             <FeatureCard
               icon={<Users className="h-6 w-6" />}
               iconBg="bg-cyan-500/15"
@@ -398,7 +421,7 @@ export default function Home() {
               iconColor="text-yellow-400"
               glowColor="rgba(234,179,8,0.8)"
               title="Instant Action"
-              desc="No waiting. Browse live requests, bid in seconds, and jump into the game. Real-time chat built right in."
+              desc="No waiting. Browse live requests, bid in seconds, and jump into the game. Real-time notifications built in."
               tag="Fast"
             />
           </div>
@@ -406,72 +429,82 @@ export default function Home() {
       </section>
 
       {/* ═══════════════════ HOW IT WORKS ═══════════════════ */}
-      <section className="px-4 py-14">
+      <section className="px-4 py-8 lg:py-12">
         <div
-          className="max-w-7xl mx-auto rounded-3xl p-8 sm:p-12 lg:p-16 relative overflow-hidden"
+          className="max-w-7xl mx-auto rounded-3xl p-8 sm:p-10 lg:p-14 relative overflow-hidden"
           style={{
-            background: "linear-gradient(135deg, rgba(168,85,247,0.07) 0%, rgba(34,211,238,0.04) 100%)",
-            border: "1px solid rgba(168,85,247,0.2)",
+            background: "linear-gradient(135deg, rgba(139,92,246,0.09) 0%, rgba(34,211,238,0.05) 100%)",
+            border: "1px solid rgba(168,85,247,0.22)",
+            boxShadow: "0 4px 40px rgba(0,0,0,0.20)",
           }}
         >
-          {/* corner glow */}
+          {/* top glow line */}
           <div
-            className="absolute top-0 left-0 w-64 h-64 rounded-full pointer-events-none"
-            style={{ background: "radial-gradient(circle, rgba(168,85,247,0.12) 0%, transparent 70%)" }}
+            className="absolute top-0 left-0 right-0 h-px pointer-events-none"
+            style={{ background: "linear-gradient(90deg, transparent, rgba(168,85,247,0.5), rgba(34,211,238,0.3), transparent)" }}
+          />
+          {/* corner glows */}
+          <div
+            className="absolute top-0 left-0 w-80 h-80 rounded-full pointer-events-none"
+            style={{ background: "radial-gradient(circle, rgba(168,85,247,0.10) 0%, transparent 65%)" }}
+          />
+          <div
+            className="absolute bottom-0 right-0 w-64 h-64 rounded-full pointer-events-none"
+            style={{ background: "radial-gradient(circle, rgba(34,211,238,0.07) 0%, transparent 65%)" }}
           />
 
-          <div className="relative grid grid-cols-1 md:grid-cols-2 gap-10">
-            {/* centre divider — absolute so it doesn't consume a grid cell */}
+          <div className="relative grid grid-cols-1 md:grid-cols-2 gap-10 lg:gap-16">
+            {/* Divider */}
             <div
               className="hidden md:block absolute left-1/2 top-0 bottom-0 w-px -translate-x-1/2 pointer-events-none"
-              style={{ background: "linear-gradient(to bottom, transparent, rgba(168,85,247,0.4), transparent)" }}
+              style={{ background: "linear-gradient(to bottom, transparent, rgba(168,85,247,0.35), rgba(34,211,238,0.20), transparent)" }}
             />
 
-            {/* left — hire side */}
+            {/* Left — Hirers */}
             <div className="space-y-6">
               <div>
                 <div
                   className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest px-3 py-1.5 rounded-full mb-3"
                   style={{
-                    background: "hsl(var(--secondary) / 0.12)",
-                    border: "1px solid hsl(var(--secondary) / 0.35)",
-                    color: "hsl(var(--secondary))",
+                    background: "rgba(34,211,238,0.10)",
+                    border: "1px solid rgba(34,211,238,0.30)",
+                    color: "rgb(34,211,238)",
                   }}
                 >
                   <Users className="h-3.5 w-3.5" /> For Hirers
                 </div>
-                <h3 className="text-xl font-extrabold text-foreground uppercase tracking-tight">
-                  Get a Gamer in Minutes
+                <h3 className="text-xl lg:text-2xl font-extrabold text-foreground uppercase tracking-tight leading-tight">
+                  Get a Gamer<br className="hidden lg:block" /> in Minutes
                 </h3>
               </div>
               <div className="space-y-5">
-                <Step n={1} title="Post Your Request" desc="Choose your game, platform, skill level needed, and budget." />
-                <Step n={2} title="Review Bids" desc="Skilled gamers place bids with their Discord and portfolio." />
-                <Step n={3} title="Play &amp; Review" desc="Lock funds in escrow — session completes, you approve, both sides review. A 10% platform fee applies on every completed Quest/Job." />
+                <Step n={1} title="Post Your Request" desc="Choose your game, platform, skill level needed, and set your budget." />
+                <Step n={2} title="Review Bids" desc="Skilled gamers place bids with their Discord handle and portfolio." />
+                <Step n={3} title="Play &amp; Review" desc="Lock funds in escrow — session completes, you approve, both sides review. A 10% platform fee applies." />
               </div>
             </div>
 
-            {/* right — earn side */}
+            {/* Right — Gamers */}
             <div className="space-y-6">
               <div>
                 <div
                   className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest px-3 py-1.5 rounded-full mb-3"
                   style={{
-                    background: "hsl(var(--primary) / 0.12)",
-                    border: "1px solid hsl(var(--primary) / 0.35)",
+                    background: "rgba(168,85,247,0.12)",
+                    border: "1px solid rgba(168,85,247,0.35)",
                     color: "hsl(var(--primary))",
                   }}
                 >
                   <Coins className="h-3.5 w-3.5" /> For Gamers
                 </div>
-                <h3 className="text-xl font-extrabold text-foreground uppercase tracking-tight">
-                  Earn While You Play
+                <h3 className="text-xl lg:text-2xl font-extrabold text-foreground uppercase tracking-tight leading-tight">
+                  Earn While<br className="hidden lg:block" /> You Play
                 </h3>
               </div>
               <div className="space-y-5">
                 <Step n={1} title="Set Up Your Profile" desc="List your games, ranks, and the type of help you can offer to hirers." />
                 <Step n={2} title="Bid on Requests" desc="Find requests that match your skills and place a competitive bid." />
-                <Step n={3} title="Complete &amp; Cash Out" desc="Session done — you keep 90% of your bid. Gamerbuddy takes a transparent 10% platform fee. Withdraw anytime." />
+                <Step n={3} title="Complete &amp; Cash Out" desc="Session done — you keep 90% of your bid. Withdraw to your bank anytime." />
               </div>
             </div>
           </div>
@@ -479,22 +512,24 @@ export default function Home() {
       </section>
 
       {/* ═══════════════════ TRUST STRIP ═══════════════════ */}
-      <section className="px-4 py-10">
+      <section className="px-4 py-8">
         <div className="max-w-7xl mx-auto">
-          <div
-            className="grid grid-cols-2 sm:grid-cols-4 gap-4"
-          >
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             {[
-              { icon: <Shield className="h-5 w-5 text-green-400" />, label: "Escrow Protected", sub: "Funds held until session complete" },
-              { icon: <Star className="h-5 w-5 text-yellow-400" />, label: "Verified Reviews", sub: "Both sides must review" },
-              { icon: <Zap className="h-5 w-5 text-cyan-400" />, label: "Instant Alerts", sub: "Real-time notifications for bids, session starts, and payments." },
-              { icon: <Coins className="h-5 w-5 text-amber-400" />, label: "Transparent 10% Fee", sub: "Gamers keep 90% of every job. No hidden charges." },
-            ].map(({ icon, label, sub }) => (
+              { icon: <Shield className="h-5 w-5 text-green-400" />, label: "Escrow Protected", sub: "Funds held until session complete", bg: "rgba(34,197,94,0.08)", border: "rgba(34,197,94,0.20)" },
+              { icon: <Star className="h-5 w-5 text-yellow-400" />, label: "Verified Reviews", sub: "Both sides must leave a review", bg: "rgba(234,179,8,0.08)", border: "rgba(234,179,8,0.20)" },
+              { icon: <Zap className="h-5 w-5 text-cyan-400" />, label: "Instant Alerts", sub: "Real-time bids, starts, and payments", bg: "rgba(34,211,238,0.08)", border: "rgba(34,211,238,0.20)" },
+              { icon: <Trophy className="h-5 w-5 text-amber-400" />, label: "Transparent 10% Fee", sub: "Gamers keep 90% — no hidden charges", bg: "rgba(245,158,11,0.08)", border: "rgba(245,158,11,0.20)" },
+            ].map(({ icon, label, sub, bg, border }) => (
               <div
                 key={label}
-                className="flex flex-col items-center text-center gap-2.5 p-5 rounded-2xl bg-card border border-border"
+                className="flex flex-col items-center text-center gap-3 p-5 rounded-2xl transition-all duration-200 hover:brightness-110"
+                style={{ background: bg, border: `1px solid ${border}` }}
               >
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-muted">
+                <div
+                  className="w-11 h-11 rounded-xl flex items-center justify-center"
+                  style={{ background: "rgba(255,255,255,0.05)" }}
+                >
                   {icon}
                 </div>
                 <div className="font-bold text-foreground text-sm">{label}</div>
@@ -506,64 +541,71 @@ export default function Home() {
       </section>
 
       {/* ═══════════════════ BOTTOM CTA ═══════════════════ */}
-      <section className="px-4 pb-20 pt-8">
+      <section className="px-4 pb-20 pt-6">
         <div
-          className="relative max-w-5xl mx-auto rounded-3xl text-center overflow-hidden px-8 py-14 sm:py-16 lg:py-20"
+          className="relative max-w-4xl mx-auto rounded-3xl text-center overflow-hidden px-8 py-14 sm:py-16 lg:py-20"
           style={{
-            background: "linear-gradient(135deg, rgba(147,51,234,0.25) 0%, rgba(124,58,237,0.12) 50%, rgba(34,211,238,0.08) 100%)",
-            border: "1px solid rgba(168,85,247,0.3)",
-            boxShadow: "0 0 60px rgba(168,85,247,0.12), inset 0 0 60px rgba(168,85,247,0.04)",
+            background: "linear-gradient(135deg, rgba(109,40,217,0.30) 0%, rgba(124,58,237,0.14) 50%, rgba(34,211,238,0.08) 100%)",
+            border: "1px solid rgba(168,85,247,0.30)",
+            boxShadow: "0 0 80px rgba(139,92,246,0.15), inset 0 0 60px rgba(139,92,246,0.05)",
           }}
         >
-          {/* glow orbs inside CTA */}
+          {/* top glow line */}
           <div
-            className="absolute top-0 right-0 w-60 h-60 rounded-full pointer-events-none"
-            style={{ background: "radial-gradient(circle, rgba(168,85,247,0.2) 0%, transparent 70%)" }}
+            className="absolute top-0 left-0 right-0 h-px pointer-events-none"
+            style={{ background: "linear-gradient(90deg, transparent, rgba(168,85,247,0.6), transparent)" }}
+          />
+          {/* orbs */}
+          <div
+            className="absolute top-0 right-0 w-72 h-72 rounded-full pointer-events-none"
+            style={{ background: "radial-gradient(circle, rgba(168,85,247,0.18) 0%, transparent 70%)" }}
           />
           <div
-            className="absolute bottom-0 left-0 w-48 h-48 rounded-full pointer-events-none"
-            style={{ background: "radial-gradient(circle, rgba(34,211,238,0.12) 0%, transparent 70%)" }}
+            className="absolute bottom-0 left-0 w-56 h-56 rounded-full pointer-events-none"
+            style={{ background: "radial-gradient(circle, rgba(34,211,238,0.10) 0%, transparent 70%)" }}
           />
 
           <div className="relative space-y-5">
-            <div className="text-xs font-black uppercase tracking-widest text-primary mb-1">
+            <div className="text-[10px] font-black uppercase tracking-[0.25em] text-primary/80 mb-1">
               {t.home.finalCta}
             </div>
-            <h2 className="text-3xl sm:text-4xl font-black text-foreground uppercase tracking-tight leading-tight">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-foreground uppercase tracking-tight leading-tight">
               Your Next Session<br />Starts Here
             </h2>
             <p className="text-muted-foreground text-base max-w-md mx-auto leading-relaxed">
               Join thousands of gamers worldwide already hiring and earning on Gamerbuddy. Free to sign up.
             </p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center pt-3">
               <Link href="/signup">
                 <button
-                  className="relative overflow-hidden group px-10 py-4 rounded-xl font-black text-sm uppercase tracking-widest text-white w-full sm:w-auto"
+                  className="relative overflow-hidden group px-10 py-4 rounded-xl font-black text-sm uppercase tracking-widest text-white w-full sm:w-auto transition-all hover:brightness-110 hover:scale-[1.03] active:scale-[0.97]"
                   style={{
                     background: "linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(272,72%,35%) 100%)",
-                    boxShadow: "0 0 28px rgba(168,85,247,0.4), 0 4px 16px rgba(0,0,0,0.2)",
+                    boxShadow: "0 0 32px rgba(168,85,247,0.45), 0 4px 16px rgba(0,0,0,0.25)",
                   }}
                 >
-                  <span className="flex items-center justify-center gap-2">
+                  <div
+                    className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 pointer-events-none"
+                    style={{ background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.14), transparent)" }}
+                  />
+                  <span className="relative flex items-center justify-center gap-2">
                     <Gamepad2 className="h-4 w-4" />
                     {t.home.finalCtaBtn}
                   </span>
-                  <div
-                    className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 pointer-events-none"
-                    style={{ background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent)" }}
-                  />
                 </button>
               </Link>
               <Link href="/browse">
                 <button
-                  className="px-10 py-4 rounded-xl font-bold text-sm uppercase tracking-widest transition-colors w-full sm:w-auto"
+                  className="px-10 py-4 rounded-xl font-bold text-sm uppercase tracking-widest transition-all hover:brightness-110 hover:scale-[1.03] active:scale-[0.97] w-full sm:w-auto flex items-center justify-center gap-2"
                   style={{
-                    border: "1.5px solid var(--glass-btn-border)",
-                    background: "var(--glass-btn-bg)",
-                    color: "var(--text-subdued)",
+                    border: "1.5px solid rgba(255,255,255,0.18)",
+                    background: "rgba(255,255,255,0.05)",
+                    color: "rgba(226,232,240,0.80)",
+                    backdropFilter: "blur(8px)",
                   }}
                 >
                   {t.home.cta2}
+                  <ChevronRight className="h-4 w-4 opacity-60" />
                 </button>
               </Link>
             </div>
