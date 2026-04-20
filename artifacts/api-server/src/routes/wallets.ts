@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { db, walletsTable, walletTransactionsTable, gameRequestsTable, platformFeesTable } from "@workspace/db";
+import { db, walletsTable, walletTransactionsTable, gameRequestsTable, platformFeesTable, withdrawalRequestsTable } from "@workspace/db";
 import { eq, desc, sql, and, gte, sum } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
 import { withdrawLimiter } from "../lib/rate-limit";
@@ -352,6 +352,92 @@ router.post("/wallets/withdraw", requireAuth, withdrawLimiter, async (req, res):
 
   req.log.info({ userId: user.id, amount: rounded, method: effectiveMethod }, "Withdrawal from earnings wallet");
   res.json({ ...formatWallets(updated), withdrawalMethod: effectiveMethod, details: details?.trim() });
+});
+
+// ── GET /wallets/withdrawal-request ─────────────────────────────────────────
+// Returns the user's most recent withdrawal request, or null if none.
+router.get("/wallets/withdrawal-request", requireAuth, async (req, res): Promise<void> => {
+  const user = req.user!;
+  const [latest] = await db
+    .select()
+    .from(withdrawalRequestsTable)
+    .where(eq(withdrawalRequestsTable.userId, user.id))
+    .orderBy(desc(withdrawalRequestsTable.createdAt))
+    .limit(1);
+
+  res.json(latest
+    ? {
+        id: latest.id,
+        amount: latest.amount,
+        status: latest.status,
+        country: latest.country,
+        createdAt: latest.createdAt.toISOString(),
+        paidAt: latest.paidAt ? latest.paidAt.toISOString() : null,
+      }
+    : null,
+  );
+});
+
+// ── POST /wallets/request-withdrawal ────────────────────────────────────────
+// Creates a pending withdrawal request for the full earnings balance.
+// Does NOT deduct the balance — admin marks as paid later (Monday batch).
+router.post("/wallets/request-withdrawal", requireAuth, withdrawLimiter, async (req, res): Promise<void> => {
+  const user = req.user!;
+  const { payoutDetails } = req.body as { payoutDetails?: string };
+
+  const [wallet] = await db
+    .select()
+    .from(walletsTable)
+    .where(eq(walletsTable.userId, user.id));
+
+  if (!wallet) {
+    res.status(404).json({ error: "Wallet not found" });
+    return;
+  }
+
+  const balance = round2(wallet.earningsBalance);
+
+  if (balance < MIN_WITHDRAWAL_BALANCE) {
+    res.status(400).json({
+      error: `You need at least $${MIN_WITHDRAWAL_BALANCE.toFixed(2)} in your Earnings Wallet to request a withdrawal.`,
+    });
+    return;
+  }
+
+  // Block duplicate pending requests
+  const [existing] = await db
+    .select()
+    .from(withdrawalRequestsTable)
+    .where(and(eq(withdrawalRequestsTable.userId, user.id), eq(withdrawalRequestsTable.status, "pending")))
+    .limit(1);
+
+  if (existing) {
+    res.status(400).json({
+      error: "You already have a pending withdrawal request. Please wait for it to be processed.",
+    });
+    return;
+  }
+
+  const [created] = await db
+    .insert(withdrawalRequestsTable)
+    .values({
+      userId: user.id,
+      amount: balance,
+      status: "pending",
+      country: user.country ?? null,
+      payoutDetails: payoutDetails?.trim() ?? null,
+    })
+    .returning();
+
+  req.log.info({ userId: user.id, amount: balance, requestId: created.id }, "Withdrawal request created");
+
+  res.json({
+    id: created.id,
+    amount: created.amount,
+    status: created.status,
+    createdAt: created.createdAt.toISOString(),
+    message: "Your withdrawal request has been submitted successfully. Payouts are processed manually every Monday. You will receive your money within 5–7 business days after processing.",
+  });
 });
 
 export default router;

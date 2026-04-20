@@ -39,6 +39,8 @@ import {
   CalendarDays,
   Users,
   ExternalLink,
+  Send,
+  XCircle,
 } from "lucide-react";
 
 const MIN_DEPOSIT = 10.75;
@@ -77,85 +79,119 @@ function useTransactions() {
   });
 }
 
+interface WithdrawalRequest {
+  id: number;
+  amount: number;
+  status: "pending" | "paid" | "cancelled";
+  country: string | null;
+  createdAt: string;
+  paidAt: string | null;
+}
+
+interface AdminWithdrawalRequest {
+  id: number;
+  userId: number;
+  userName: string | null;
+  email: string | null;
+  amount: number;
+  status: string;
+  country: string | null;
+  payoutDetails: string | null;
+  createdAt: string;
+  paidAt: string | null;
+  earningsBalance: number;
+}
+
 export default function WalletsPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { user } = useAuth();
 
-  const [withdrawAmount, setWithdrawAmount] = useState<string>("");
-  const [withdrawDetails, setWithdrawDetails] = useState<string>("");
+  const [payoutDetails, setPayoutDetails] = useState<string>("");
   const [txFilter, setTxFilter] = useState<"all" | "hiring" | "earnings">("all");
   const [showPayoutPanel, setShowPayoutPanel] = useState(false);
+  const [markingPaidId, setMarkingPaidId] = useState<number | null>(null);
+  const [processingAll, setProcessingAll] = useState(false);
 
   const isAdmin = user?.id === 1;
-  const { data: payoutData, isLoading: payoutLoading, refetch: refetchPayouts } = useQuery<{
-    generatedAt: string;
-    count: number;
-    users: { userId: number; name: string; email: string; country: string; payoutMethod: string; earningsBalance: number }[];
-  }>({
-    queryKey: ["admin-payouts"],
-    queryFn: () => apiFetch("/api/admin/process-payouts"),
-    enabled: isAdmin && showPayoutPanel,
-    staleTime: 0,
-  });
-
   const isIndian = user?.country === "India";
-  const withdrawalMethod = isIndian ? "upi" : "bank_transfer";
 
   const { data: wallets, isLoading, isError } = useGetWallets({
     query: { queryKey: getGetWalletsQueryKey() },
   });
   const { data: transactions, isLoading: txLoading } = useTransactions();
 
-  const withdrawMutation = useMutation({
-    mutationFn: (body: { amount: number; withdrawalMethod: string; details: string }) =>
-      apiFetch("/api/wallets/withdraw", {
+  // User's current withdrawal request status
+  const { data: withdrawalRequest, isLoading: wrLoading, refetch: refetchWR } = useQuery<WithdrawalRequest | null>({
+    queryKey: ["withdrawal-request"],
+    queryFn: () => apiFetch<WithdrawalRequest | null>("/api/wallets/withdrawal-request"),
+    staleTime: 15_000,
+    enabled: !!user,
+  });
+
+  // Admin: all withdrawal requests
+  const { data: adminRequests, isLoading: adminLoading, refetch: refetchAdminRequests } = useQuery<{
+    generatedAt: string;
+    pendingCount: number;
+    requests: AdminWithdrawalRequest[];
+  }>({
+    queryKey: ["admin-withdrawal-requests"],
+    queryFn: () => apiFetch("/api/admin/withdrawal-requests"),
+    enabled: isAdmin && showPayoutPanel,
+    staleTime: 0,
+  });
+
+  // Request withdrawal mutation
+  const requestWithdrawalMutation = useMutation({
+    mutationFn: (body: { payoutDetails?: string }) =>
+      apiFetch("/api/wallets/request-withdrawal", {
         method: "POST",
         body: JSON.stringify(body),
       }),
-    onSuccess: (updated: any) => {
-      queryClient.setQueryData(getGetWalletsQueryKey(), updated);
-      queryClient.invalidateQueries({ queryKey: getGetDashboardSummaryQueryKey() });
-      queryClient.invalidateQueries({ queryKey: ["wallet-transactions"] });
-      setWithdrawAmount("");
-      setWithdrawDetails("");
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["withdrawal-request"] });
+      setPayoutDetails("");
       toast({
-        title: "Withdrawal Requested 🎉",
-        description: isIndian
-          ? `Your UPI payout is being processed via Razorpay. Funds typically arrive within minutes to a few hours.`
-          : `Your withdrawal request has been saved. The admin team will process it via Razorpay International Bank Transfer. Funds typically arrive within 5–7 business days.`,
+        title: "Withdrawal Request Submitted! 🎉",
+        description: "Your withdrawal request has been submitted successfully. Payouts are processed manually every Monday. You will receive your money within 5–7 business days after processing.",
       });
     },
     onError: (err: any) => {
-      toast({ title: "Withdrawal Failed", description: err?.error || "Unknown error", variant: "destructive" });
+      toast({ title: "Request Failed", description: err?.error || "Unknown error", variant: "destructive" });
     },
   });
 
-  const handleWithdraw = () => {
-    const amount = parseFloat(withdrawAmount);
-    if (isNaN(amount) || amount <= 0) {
-      toast({ title: "Invalid Amount", description: "Please enter a valid withdrawal amount.", variant: "destructive" });
-      return;
+  // Admin: mark a single request as paid
+  const handleMarkPaid = async (requestId: number) => {
+    setMarkingPaidId(requestId);
+    try {
+      await apiFetch(`/api/admin/withdrawal-requests/${requestId}/mark-paid`, { method: "POST" });
+      queryClient.invalidateQueries({ queryKey: ["admin-withdrawal-requests"] });
+      queryClient.invalidateQueries({ queryKey: getGetWalletsQueryKey() });
+      toast({ title: "Marked as Paid ✓", description: `Request #${requestId} has been processed and balance deducted.` });
+    } catch (err: any) {
+      toast({ title: "Failed", description: err?.error || "Unknown error", variant: "destructive" });
+    } finally {
+      setMarkingPaidId(null);
     }
-    if (!wallets?.canWithdraw) {
-      toast({ title: "Cannot Withdraw", description: `You need at least $${WITHDRAWAL_THRESHOLD} in earnings to withdraw.`, variant: "destructive" });
-      return;
-    }
-    if (amount > (wallets?.earningsBalance ?? 0)) {
-      toast({ title: "Insufficient Balance", description: "Amount exceeds your earnings balance.", variant: "destructive" });
-      return;
-    }
-    if (!withdrawDetails.trim()) {
+  };
+
+  // Admin: process all pending requests
+  const handleProcessAll = async () => {
+    setProcessingAll(true);
+    try {
+      const result = await apiFetch<{ processed: number; failed: number }>("/api/admin/withdrawal-requests/process-all", { method: "POST" });
+      queryClient.invalidateQueries({ queryKey: ["admin-withdrawal-requests"] });
+      queryClient.invalidateQueries({ queryKey: getGetWalletsQueryKey() });
       toast({
-        title: "Details Required",
-        description: isIndian
-          ? "Please enter your UPI ID (e.g. yourname@paytm)."
-          : "Please enter your bank account details (Account No, IFSC/SWIFT, Bank Name).",
-        variant: "destructive",
+        title: `Processed ${result.processed} requests`,
+        description: result.failed > 0 ? `${result.failed} failed (insufficient balance).` : "All pending requests have been paid and balances deducted.",
       });
-      return;
+    } catch (err: any) {
+      toast({ title: "Process All Failed", description: err?.error || "Unknown error", variant: "destructive" });
+    } finally {
+      setProcessingAll(false);
     }
-    withdrawMutation.mutate({ amount, withdrawalMethod, details: withdrawDetails });
   };
 
   if (isLoading) {
@@ -274,45 +310,12 @@ export default function WalletsPage() {
               )}
             </div>
 
-            {/* ── Congratulations / threshold banner ── */}
-            {wallets.canWithdraw && (
-              <div
-                className="rounded-xl border p-4 space-y-2"
-                style={{
-                  background: "linear-gradient(135deg, rgba(34,197,94,0.08) 0%, rgba(34,211,238,0.08) 100%)",
-                  borderColor: "rgba(34,197,94,0.35)",
-                  boxShadow: "0 0 20px rgba(34,197,94,0.10)",
-                }}
-              >
-                <div className="flex items-center gap-2">
-                  <span className="text-xl">🎉</span>
-                  <span className="font-black text-sm text-green-300 uppercase tracking-wide">Payout Threshold Reached!</span>
-                </div>
-                {isIndian ? (
-                  <p className="text-xs text-green-200/80 leading-relaxed">
-                    Congratulations! Your earnings have reached the <strong className="text-green-300">$100 threshold</strong>. As an Indian user you can withdraw instantly via <strong className="text-green-300">UPI (Razorpay)</strong>. Funds typically arrive within minutes to a few hours.
-                  </p>
-                ) : (
-                  <p className="text-xs text-green-200/80 leading-relaxed">
-                    Congratulations! Your earnings have reached the <strong className="text-green-300">$100 threshold</strong>. Submit your bank details below and the admin team will process your payout via Razorpay International Bank Transfer. Funds typically arrive within <strong className="text-green-300">5–7 business days</strong>.
-                  </p>
-                )}
-                <div className="flex items-center gap-1.5 text-[10px] text-cyan-300/70 font-medium pt-0.5">
-                  {isIndian ? (
-                    <><Smartphone className="h-3 w-3 text-cyan-400 shrink-0" /> Enter your UPI ID below to request your instant payout.</>
-                  ) : (
-                    <><Building2 className="h-3 w-3 text-cyan-400 shrink-0" /> Fill in your bank details below and submit your withdrawal request.</>
-                  )}
-                </div>
-              </div>
-            )}
-
             {/* Progress bar — shown when below threshold */}
             {!wallets.canWithdraw && (
               <div className="space-y-1.5">
                 <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>Withdrawal progress</span>
-                  <span className="font-medium text-foreground">${wallets.earningsBalance.toFixed(2)} / ${WITHDRAWAL_THRESHOLD}</span>
+                  <span>Payout progress</span>
+                  <span className="font-medium text-foreground">${wallets.earningsBalance.toFixed(2)} / $100.00</span>
                 </div>
                 <div className="h-2 rounded-full bg-muted/40 overflow-hidden">
                   <div
@@ -322,143 +325,102 @@ export default function WalletsPage() {
                 </div>
                 <div className="flex items-center gap-1.5 text-xs text-amber-300/70">
                   <AlertTriangle className="h-3 w-3 text-amber-400" />
-                  Minimum $100.00 balance required to withdraw
+                  ${remaining.toFixed(2)} more needed to unlock withdrawals
                 </div>
               </div>
             )}
 
-            {/* Payout Policy — regional */}
-            <div className="rounded-lg border border-cyan-500/20 bg-cyan-500/[0.03] p-4 text-xs space-y-3">
-              <div className="flex items-center gap-2 font-bold text-[11px] uppercase tracking-widest text-cyan-300">
-                {isIndian
-                  ? <><Smartphone className="h-3.5 w-3.5 shrink-0 text-cyan-400" /> How Payouts Work (India)</>
-                  : <><CalendarDays className="h-3.5 w-3.5 shrink-0 text-cyan-400" /> How Payouts Work</>
-                }
-              </div>
-              <div className="space-y-2 text-cyan-200/70 leading-relaxed">
-                <p>
-                  💚 Earnings are added <strong className="text-cyan-300">instantly</strong> after session completion and both the Hirer and Gamer submit their reviews.
-                </p>
-                {isIndian ? (
-                  <>
-                    <p>
-                      ⚡ Indian payouts are processed via <strong className="text-cyan-300">Razorpay UPI</strong> — the fastest way to receive your earnings.
-                    </p>
-                    <p>
-                      💰 Once your balance reaches <strong className="text-cyan-300">$100 USD</strong>, you can request a payout instantly. Funds typically arrive within <strong className="text-cyan-300">minutes to a few hours</strong> in your UPI-linked account.
-                    </p>
-                  </>
-                ) : (
-                  <>
-                    <p>
-                      🏦 International payouts are processed <strong className="text-cyan-300">manually by the admin team</strong> via Razorpay International Bank Transfer. Submit your request and the team will process it promptly.
-                    </p>
-                    <p>
-                      💰 Once your balance reaches <strong className="text-cyan-300">$100 USD</strong>, submit your bank details to request a payout. Funds typically arrive within <strong className="text-cyan-300">5–7 business days</strong> after processing.
-                    </p>
-                  </>
-                )}
-              </div>
-              <div className="pt-0.5 border-t border-cyan-500/10 flex items-center gap-2 text-[10px] text-cyan-400/50 font-medium">
-                <Info className="h-3 w-3 shrink-0" />
-                {isIndian
-                  ? "Minimum withdrawal threshold: $100 USD · Payout method: UPI (Razorpay)"
-                  : "Minimum withdrawal threshold: $100 USD · Payout method: International Bank Transfer"
-                }
-              </div>
-            </div>
-
-            {/* Withdrawal form */}
+            {/* ── Payout section — canWithdraw ── */}
             {wallets.canWithdraw && (
               <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <Label className="text-xs uppercase tracking-widest text-muted-foreground">Withdraw Amount</Label>
-                  <div className="relative group">
-                    <button
-                      type="button"
-                      className="flex items-center gap-1 text-[10px] text-muted-foreground/60 hover:text-cyan-400 transition-colors"
-                    >
-                      <Info className="h-3.5 w-3.5" />
-                      <span className="hidden sm:inline">Payout info</span>
-                    </button>
-                    <div className="absolute right-0 bottom-6 z-20 hidden group-hover:block w-64 rounded-lg border border-border/60 bg-card p-3 text-xs text-muted-foreground shadow-xl leading-relaxed">
-                      <p className="font-semibold text-foreground mb-1.5">📅 Payout Schedule</p>
-                      <p>Payouts are processed in a <strong className="text-cyan-400">weekly batch every Monday</strong> via Bank Transfer. Funds arrive in your account within <strong className="text-cyan-400">5–7 business days</strong> after the Monday processing.</p>
+                {/* Pending request status */}
+                {wrLoading ? (
+                  <Skeleton className="h-16 w-full" />
+                ) : withdrawalRequest?.status === "pending" ? (
+                  <div className="rounded-xl border border-amber-500/40 bg-amber-500/[0.06] p-4 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Clock className="h-4 w-4 text-amber-400 shrink-0" />
+                      <span className="font-bold text-amber-300 text-sm uppercase tracking-wide">Withdrawal Requested</span>
+                    </div>
+                    <p className="text-xs text-amber-200/80 leading-relaxed">
+                      Your withdrawal request for <strong className="text-amber-300">${withdrawalRequest.amount.toFixed(2)}</strong> has been submitted successfully. Payouts are processed manually every Monday. You will receive your money within <strong className="text-amber-300">5–7 business days</strong> after processing.
+                    </p>
+                    <div className="flex items-center gap-2 text-[10px] text-muted-foreground/50">
+                      <CalendarDays className="h-3 w-3" />
+                      Submitted {new Date(withdrawalRequest.createdAt).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })}
+                      &nbsp;· Request #{withdrawalRequest.id}
                     </div>
                   </div>
-                </div>
-                <div className="flex flex-col sm:flex-row gap-2">
-                  <div className="relative flex-1">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">$</span>
-                    <Input
-                      type="number"
-                      min={1}
-                      max={wallets.earningsBalance}
-                      step={0.01}
-                      placeholder="0.00"
-                      className="pl-8 bg-background"
-                      value={withdrawAmount}
-                      onChange={(e) => setWithdrawAmount(e.target.value)}
-                    />
+                ) : withdrawalRequest?.status === "paid" ? (
+                  <div className="rounded-xl border border-green-500/40 bg-green-500/[0.06] p-4 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-green-400 shrink-0" />
+                      <span className="font-bold text-green-300 text-sm uppercase tracking-wide">Last Payout Completed</span>
+                    </div>
+                    <p className="text-xs text-green-200/80">
+                      Your last withdrawal of <strong className="text-green-300">${withdrawalRequest.amount.toFixed(2)}</strong> was processed on {withdrawalRequest.paidAt ? new Date(withdrawalRequest.paidAt).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" }) : "—"}. If your balance has grown again, you can request another withdrawal.
+                    </p>
                   </div>
-                  <button
-                    className="text-xs text-secondary hover:text-secondary/70 transition-colors whitespace-nowrap"
-                    onClick={() => setWithdrawAmount(String(wallets.earningsBalance))}
-                  >
-                    Max (${wallets.earningsBalance.toFixed(2)})
-                  </button>
-                </div>
+                ) : null}
 
-                <div className="space-y-1.5">
-                  <Label className="text-xs uppercase tracking-widest text-muted-foreground">
-                    {isIndian ? "UPI ID" : "Bank Account Details"}
-                  </Label>
-                  <Input
-                    placeholder={isIndian ? "yourname@paytm / yourname@upi" : "Account No · IFSC / SWIFT · Bank Name"}
-                    className="bg-background"
-                    value={withdrawDetails}
-                    onChange={(e) => setWithdrawDetails(e.target.value)}
-                  />
-                  <p className="text-[10px] text-muted-foreground/50">
-                    {isIndian
-                      ? "Enter your UPI ID (e.g. name@paytm, name@okicici, name@ybl). Double-check before submitting."
-                      : "Enter your bank account number, IFSC / SWIFT code, and bank name. Double-check before submitting."}
-                  </p>
-                </div>
+                {/* Request withdrawal button — only if no pending request */}
+                {!wrLoading && withdrawalRequest?.status !== "pending" && (
+                  <div className="space-y-3">
+                    <div
+                      className="rounded-xl border p-4 space-y-2"
+                      style={{
+                        background: "linear-gradient(135deg, rgba(34,197,94,0.07) 0%, rgba(34,211,238,0.07) 100%)",
+                        borderColor: "rgba(34,197,94,0.30)",
+                      }}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg">🎉</span>
+                        <span className="font-black text-sm text-green-300 uppercase tracking-wide">Payout Threshold Reached!</span>
+                      </div>
+                      <p className="text-xs text-green-200/75 leading-relaxed">
+                        Your balance of <strong className="text-green-300">${wallets.earningsBalance.toFixed(2)}</strong> is ready for withdrawal. Click below to submit your request — the full balance will be paid out.
+                      </p>
+                    </div>
 
-                <div className="flex items-start gap-2 rounded-lg border border-amber-500/25 bg-amber-500/5 p-3 text-xs text-amber-200/75">
-                  <Clock className="h-3.5 w-3.5 shrink-0 mt-0.5 text-amber-400" />
-                  {isIndian ? (
-                    <span>
-                      <strong className="text-amber-300">Fast payout:</strong> UPI payouts via Razorpay are processed quickly. Funds typically arrive within <strong className="text-amber-300">minutes to a few hours</strong> of your request.
-                    </span>
-                  ) : (
-                    <span>
-                      <strong className="text-amber-300">Payout notice:</strong> Your request will be manually processed by the admin team via <strong className="text-amber-300">Razorpay International Bank Transfer</strong>. Funds typically arrive within <strong className="text-amber-300">5–7 business days</strong>.
-                    </span>
-                  )}
-                </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-xs uppercase tracking-widest text-muted-foreground">
+                        {isIndian ? "UPI ID (optional)" : "Bank Details (optional)"}
+                      </Label>
+                      <Input
+                        placeholder={isIndian ? "yourname@paytm / yourname@upi" : "Account No · IFSC / SWIFT · Bank Name"}
+                        className="bg-background"
+                        value={payoutDetails}
+                        onChange={(e) => setPayoutDetails(e.target.value)}
+                      />
+                      <p className="text-[10px] text-muted-foreground/40">
+                        Optional — helps the admin process your payout faster. We will contact you via email if more details are needed.
+                      </p>
+                    </div>
 
-                <Button
-                  onClick={handleWithdraw}
-                  disabled={withdrawMutation.isPending || !withdrawAmount || !withdrawDetails}
-                  variant="outline"
-                  className="w-full border-secondary text-secondary hover:bg-secondary hover:text-black font-bold uppercase tracking-wider"
-                >
-                  {withdrawMutation.isPending ? (
-                    <span className="flex items-center gap-2">Processing…</span>
-                  ) : isIndian ? (
-                    <span className="flex items-center gap-2">
-                      <Smartphone className="h-4 w-4" />
-                      Request UPI Payout
-                    </span>
-                  ) : (
-                    <span className="flex items-center gap-2">
-                      <Building2 className="h-4 w-4" />
-                      Request Bank Transfer
-                    </span>
-                  )}
-                </Button>
+                    <div className="flex items-start gap-2 rounded-lg border border-cyan-500/20 bg-cyan-500/[0.04] p-3 text-xs text-cyan-200/70">
+                      <CalendarDays className="h-3.5 w-3.5 shrink-0 mt-0.5 text-cyan-400" />
+                      <span>
+                        <strong className="text-cyan-300">Global payouts</strong> are handled manually every Monday for security and accuracy. Funds arrive within 5–7 business days after processing.
+                      </span>
+                    </div>
+
+                    <Button
+                      onClick={() => requestWithdrawalMutation.mutate({ payoutDetails: payoutDetails.trim() || undefined })}
+                      disabled={requestWithdrawalMutation.isPending}
+                      variant="outline"
+                      className="w-full border-secondary text-secondary hover:bg-secondary hover:text-black font-bold uppercase tracking-wider"
+                    >
+                      {requestWithdrawalMutation.isPending ? (
+                        <span className="flex items-center gap-2"><RefreshCcw className="h-4 w-4 animate-spin" /> Submitting…</span>
+                      ) : (
+                        <span className="flex items-center gap-2">
+                          <Send className="h-4 w-4" />
+                          Request Withdrawal — ${wallets.earningsBalance.toFixed(2)}
+                        </span>
+                      )}
+                    </Button>
+                  </div>
+                )}
               </div>
             )}
 
@@ -466,10 +428,7 @@ export default function WalletsPage() {
               <div className="flex items-start gap-2.5 rounded-lg bg-secondary/5 border border-secondary/20 p-3 text-xs text-secondary/70">
                 <ArrowUpFromLine className="h-4 w-4 shrink-0 mt-0.5 text-secondary/50" />
                 <span>
-                  {isIndian
-                    ? <>Keep earning by fulfilling requests. Once you reach <strong className="text-secondary">$100.00</strong>, you can request an instant UPI payout via Razorpay.</>
-                    : <>Keep earning by fulfilling requests. Once you reach <strong className="text-secondary">$100.00</strong>, you can request a weekly payout via Bank Transfer.</>
-                  }
+                  Keep earning by fulfilling requests. Once you reach <strong className="text-secondary">$100.00</strong>, you can request a payout. Payouts are processed manually every Monday.
                 </span>
               </div>
             )}
@@ -613,29 +572,46 @@ export default function WalletsPage() {
         </CardContent>
       </Card>
 
-      {/* ── Admin: Process Payouts Panel ── */}
+      {/* ── Admin: Withdrawal Requests Panel ── */}
       {isAdmin && (
         <Card className="border-red-500/25 bg-red-500/[0.03]">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between flex-wrap gap-3">
               <CardTitle className="text-base uppercase tracking-wider flex items-center gap-2 text-red-400">
-                <Users className="h-4 w-4" /> Admin: Process Payouts
+                <Users className="h-4 w-4" /> Admin: Withdrawal Requests
+                {adminRequests && adminRequests.pendingCount > 0 && (
+                  <Badge className="bg-red-500 text-white text-xs ml-1">{adminRequests.pendingCount} pending</Badge>
+                )}
               </CardTitle>
-              <Button
-                size="sm"
-                variant="outline"
-                className="text-xs border-red-500/40 text-red-400 hover:bg-red-500/10 h-7 px-3"
-                onClick={() => {
-                  setShowPayoutPanel(true);
-                  refetchPayouts();
-                }}
-              >
-                <RefreshCcw className="h-3 w-3 mr-1.5" />
-                Refresh Eligible Users
-              </Button>
+              <div className="flex gap-2">
+                {showPayoutPanel && adminRequests && adminRequests.pendingCount > 0 && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="text-xs border-green-500/40 text-green-400 hover:bg-green-500/10 h-7 px-3 font-bold"
+                    onClick={handleProcessAll}
+                    disabled={processingAll}
+                  >
+                    {processingAll ? <RefreshCcw className="h-3 w-3 animate-spin mr-1.5" /> : <CheckCircle2 className="h-3 w-3 mr-1.5" />}
+                    Process All Pending
+                  </Button>
+                )}
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="text-xs border-red-500/40 text-red-400 hover:bg-red-500/10 h-7 px-3"
+                  onClick={() => {
+                    setShowPayoutPanel(true);
+                    refetchAdminRequests();
+                  }}
+                >
+                  <RefreshCcw className="h-3 w-3 mr-1.5" />
+                  Refresh
+                </Button>
+              </div>
             </div>
             <CardDescription className="text-xs text-muted-foreground/60">
-              Users with ≥ $100 in earnings. Process each payout manually via the Razorpay dashboard, then confirm.
+              Pending withdrawal requests from gamers. Process each payout manually via Razorpay, then click "Mark as Paid" — this deducts the balance and records the transaction.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -647,48 +623,86 @@ export default function WalletsPage() {
                   onClick={() => setShowPayoutPanel(true)}
                 >
                   <Users className="h-4 w-4 mr-2" />
-                  Show Payout-Eligible Users
+                  View Withdrawal Requests
                 </Button>
               </div>
-            ) : payoutLoading ? (
+            ) : adminLoading ? (
               <div className="space-y-2">
-                {[1, 2, 3].map((i) => <Skeleton key={i} className="h-14 w-full" />)}
+                {[1, 2, 3].map((i) => <Skeleton key={i} className="h-16 w-full" />)}
               </div>
-            ) : !payoutData || payoutData.count === 0 ? (
+            ) : !adminRequests || adminRequests.requests.length === 0 ? (
               <div className="text-center py-6 text-muted-foreground text-sm">
-                No users have reached the $100 payout threshold yet.
+                No withdrawal requests yet.
               </div>
             ) : (
               <div className="space-y-2">
                 <p className="text-xs text-muted-foreground/50 mb-3">
-                  {payoutData.count} user{payoutData.count !== 1 ? "s" : ""} eligible — generated {new Date(payoutData.generatedAt).toLocaleString()}
+                  {adminRequests.pendingCount} pending · {adminRequests.requests.length} total · refreshed {new Date(adminRequests.generatedAt).toLocaleString()}
                 </p>
-                {payoutData.users.map((u) => (
+                {adminRequests.requests.map((r) => (
                   <div
-                    key={u.userId}
-                    className="flex items-center gap-3 p-3 rounded-lg bg-background/40 border border-red-500/15 hover:border-red-500/30 transition-colors"
+                    key={r.id}
+                    className={`flex items-start gap-3 p-3 rounded-lg bg-background/40 border transition-colors ${
+                      r.status === "pending"
+                        ? "border-red-500/25 hover:border-red-500/50"
+                        : "border-green-500/15 opacity-60"
+                    }`}
                   >
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-sm font-semibold text-foreground">{u.name}</span>
-                        <Badge variant="outline" className="text-xs py-0 border-muted text-muted-foreground">{u.country}</Badge>
-                        <Badge variant="outline" className={`text-xs py-0 ${u.country === "India" ? "border-orange-500/40 text-orange-400" : "border-blue-500/40 text-blue-400"}`}>
-                          {u.country === "India" ? "UPI" : "Bank Transfer"}
+                        <span className="text-sm font-semibold text-foreground">{r.userName ?? "Unknown"}</span>
+                        <Badge variant="outline" className="text-xs py-0 border-muted text-muted-foreground">{r.country ?? "Unknown"}</Badge>
+                        <Badge
+                          variant="outline"
+                          className={`text-xs py-0 ${r.status === "pending" ? "border-amber-500/40 text-amber-400" : "border-green-500/40 text-green-400"}`}
+                        >
+                          {r.status === "pending" ? "Pending" : "Paid"}
                         </Badge>
+                        {r.country === "India" ? (
+                          <Badge variant="outline" className="text-xs py-0 border-orange-500/30 text-orange-400">UPI</Badge>
+                        ) : (
+                          <Badge variant="outline" className="text-xs py-0 border-blue-500/30 text-blue-400">Bank Transfer</Badge>
+                        )}
                       </div>
-                      <p className="text-xs text-muted-foreground mt-0.5">{u.email}</p>
-                      <p className="text-[10px] text-muted-foreground/50">{u.payoutMethod}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{r.email}</p>
+                      {r.payoutDetails && (
+                        <p className="text-xs text-cyan-300/70 mt-0.5 font-mono">{r.payoutDetails}</p>
+                      )}
+                      <div className="flex items-center gap-3 mt-1 text-[10px] text-muted-foreground/40">
+                        <span>Req #{r.id} · {new Date(r.createdAt).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}</span>
+                        {r.status === "paid" && r.paidAt && (
+                          <span className="text-green-400/60">Paid {new Date(r.paidAt).toLocaleDateString(undefined, { month: "short", day: "numeric" })}</span>
+                        )}
+                      </div>
                     </div>
-                    <div className="text-right flex-shrink-0">
-                      <div className="text-base font-bold tabular-nums text-red-400">${u.earningsBalance.toFixed(2)}</div>
-                      <a
-                        href="https://dashboard.razorpay.com"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-[10px] text-cyan-400/60 hover:text-cyan-400 flex items-center gap-1 justify-end mt-0.5"
-                      >
-                        <ExternalLink className="h-2.5 w-2.5" /> Razorpay
-                      </a>
+                    <div className="text-right flex-shrink-0 space-y-1.5">
+                      <div className="text-base font-bold tabular-nums text-red-400">${r.amount.toFixed(2)}</div>
+                      <div className="text-[10px] text-muted-foreground/40">Balance: ${r.earningsBalance.toFixed(2)}</div>
+                      {r.status === "pending" && (
+                        <div className="flex flex-col gap-1">
+                          <a
+                            href="https://dashboard.razorpay.com"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-[10px] text-cyan-400/60 hover:text-cyan-400 flex items-center gap-1 justify-end"
+                          >
+                            <ExternalLink className="h-2.5 w-2.5" /> Razorpay
+                          </a>
+                          <Button
+                            size="sm"
+                            className="h-7 px-3 text-xs bg-green-600 hover:bg-green-500 text-white font-bold"
+                            onClick={() => handleMarkPaid(r.id)}
+                            disabled={markingPaidId === r.id}
+                          >
+                            {markingPaidId === r.id ? (
+                              <RefreshCcw className="h-3 w-3 animate-spin mr-1" />
+                            ) : (
+                              <CheckCircle2 className="h-3 w-3 mr-1" />
+                            )}
+                            Mark Paid
+                          </Button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}

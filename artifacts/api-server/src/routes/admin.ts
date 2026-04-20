@@ -4,8 +4,9 @@
  */
 
 import { Router, type IRouter, type RequestHandler } from "express";
-import { db, usersTable, walletTransactionsTable, reportsTable, walletsTable } from "@workspace/db";
-import { eq, desc, gt, or, isNotNull, sql, and, gte } from "drizzle-orm";
+import { db, usersTable, walletTransactionsTable, reportsTable, walletsTable, withdrawalRequestsTable } from "@workspace/db";
+import { eq, desc, gt, or, isNotNull, sql, and, gte, inArray } from "drizzle-orm";
+import { round2, recordTransaction } from "./wallets";
 import { requireAuth } from "../middlewares/auth";
 
 const router: IRouter = Router();
@@ -217,6 +218,177 @@ router.get(
         earningsBalance: parseFloat(String(u.earningsBalance)),
       })),
     });
+  },
+);
+
+// ── GET /admin/withdrawal-requests ────────────────────────────────────────
+// Lists all withdrawal requests (pending first, then recent paid/cancelled).
+router.get(
+  "/admin/withdrawal-requests",
+  requireAuth,
+  requireAdmin,
+  async (_req, res): Promise<void> => {
+    const requests = await db
+      .select({
+        id:             withdrawalRequestsTable.id,
+        userId:         withdrawalRequestsTable.userId,
+        userName:       usersTable.name,
+        email:          usersTable.email,
+        amount:         withdrawalRequestsTable.amount,
+        status:         withdrawalRequestsTable.status,
+        country:        withdrawalRequestsTable.country,
+        payoutDetails:  withdrawalRequestsTable.payoutDetails,
+        createdAt:      withdrawalRequestsTable.createdAt,
+        paidAt:         withdrawalRequestsTable.paidAt,
+        adminNote:      withdrawalRequestsTable.adminNote,
+        earningsBalance: walletsTable.earningsBalance,
+      })
+      .from(withdrawalRequestsTable)
+      .leftJoin(usersTable, eq(withdrawalRequestsTable.userId, usersTable.id))
+      .leftJoin(walletsTable, eq(withdrawalRequestsTable.userId, walletsTable.userId))
+      .orderBy(
+        sql`CASE WHEN ${withdrawalRequestsTable.status} = 'pending' THEN 0 ELSE 1 END`,
+        desc(withdrawalRequestsTable.createdAt),
+      )
+      .limit(200);
+
+    res.json({
+      generatedAt: new Date().toISOString(),
+      pendingCount: requests.filter((r) => r.status === "pending").length,
+      requests: requests.map((r) => ({
+        ...r,
+        amount: round2(r.amount),
+        earningsBalance: round2(r.earningsBalance ?? 0),
+        createdAt: r.createdAt.toISOString(),
+        paidAt: r.paidAt ? r.paidAt.toISOString() : null,
+      })),
+    });
+  },
+);
+
+// ── POST /admin/withdrawal-requests/:id/mark-paid ─────────────────────────
+// Marks a pending withdrawal request as paid, deducts balance, records txn.
+router.post(
+  "/admin/withdrawal-requests/:id/mark-paid",
+  requireAuth,
+  requireAdmin,
+  async (req, res): Promise<void> => {
+    const requestId = parseInt(req.params.id, 10);
+    if (isNaN(requestId)) {
+      res.status(400).json({ error: "Invalid request ID" });
+      return;
+    }
+
+    const [wr] = await db
+      .select()
+      .from(withdrawalRequestsTable)
+      .where(eq(withdrawalRequestsTable.id, requestId))
+      .limit(1);
+
+    if (!wr) {
+      res.status(404).json({ error: "Withdrawal request not found" });
+      return;
+    }
+    if (wr.status !== "pending") {
+      res.status(400).json({ error: `Request is already ${wr.status}` });
+      return;
+    }
+
+    // Atomic deduction — guard against over-deduction
+    const [updatedWallet] = await db
+      .update(walletsTable)
+      .set({ earningsBalance: sql`earnings_balance - ${wr.amount}` })
+      .where(
+        and(
+          eq(walletsTable.userId, wr.userId),
+          gte(walletsTable.earningsBalance, wr.amount),
+        ),
+      )
+      .returning();
+
+    if (!updatedWallet) {
+      res.status(400).json({
+        error: `User's earnings balance ($${round2(
+          (await db.select({ b: walletsTable.earningsBalance }).from(walletsTable).where(eq(walletsTable.userId, wr.userId)).then(([r]) => r?.b ?? 0))
+        ).toFixed(2)}) is less than the requested amount ($${wr.amount.toFixed(2)}). Cannot mark as paid.`,
+      });
+      return;
+    }
+
+    // Mark as paid
+    const now = new Date();
+    await db
+      .update(withdrawalRequestsTable)
+      .set({ status: "paid", paidAt: now })
+      .where(eq(withdrawalRequestsTable.id, requestId));
+
+    // Record transaction in audit log
+    await recordTransaction(
+      wr.userId,
+      "earnings",
+      "withdrawal",
+      wr.amount,
+      `Withdrawal payout $${wr.amount.toFixed(2)} — processed by admin (Req #${requestId})`,
+    );
+
+    req.log.info({ adminId: req.user!.id, requestId, userId: wr.userId, amount: wr.amount }, "Admin marked withdrawal as paid");
+
+    res.json({
+      success: true,
+      requestId,
+      userId: wr.userId,
+      amount: wr.amount,
+      newEarningsBalance: round2(updatedWallet.earningsBalance),
+      paidAt: now.toISOString(),
+    });
+  },
+);
+
+// ── POST /admin/withdrawal-requests/process-all ───────────────────────────
+// Bulk mark ALL pending withdrawal requests as paid.
+router.post(
+  "/admin/withdrawal-requests/process-all",
+  requireAuth,
+  requireAdmin,
+  async (req, res): Promise<void> => {
+    const pending = await db
+      .select()
+      .from(withdrawalRequestsTable)
+      .where(eq(withdrawalRequestsTable.status, "pending"));
+
+    if (pending.length === 0) {
+      res.json({ processed: 0, failed: 0, results: [] });
+      return;
+    }
+
+    const results: { requestId: number; userId: number; amount: number; success: boolean; error?: string }[] = [];
+
+    for (const wr of pending) {
+      const [updatedWallet] = await db
+        .update(walletsTable)
+        .set({ earningsBalance: sql`earnings_balance - ${wr.amount}` })
+        .where(
+          and(
+            eq(walletsTable.userId, wr.userId),
+            gte(walletsTable.earningsBalance, wr.amount),
+          ),
+        )
+        .returning();
+
+      if (!updatedWallet) {
+        results.push({ requestId: wr.id, userId: wr.userId, amount: wr.amount, success: false, error: "Insufficient balance" });
+        continue;
+      }
+
+      const now = new Date();
+      await db.update(withdrawalRequestsTable).set({ status: "paid", paidAt: now }).where(eq(withdrawalRequestsTable.id, wr.id));
+      await recordTransaction(wr.userId, "earnings", "withdrawal", wr.amount, `Withdrawal payout $${wr.amount.toFixed(2)} — bulk processed by admin (Req #${wr.id})`);
+      results.push({ requestId: wr.id, userId: wr.userId, amount: wr.amount, success: true });
+    }
+
+    const succeeded = results.filter((r) => r.success).length;
+    req.log.info({ adminId: req.user!.id, processed: succeeded, failed: results.length - succeeded }, "Admin bulk-processed withdrawal requests");
+    res.json({ processed: succeeded, failed: results.length - succeeded, results });
   },
 );
 
