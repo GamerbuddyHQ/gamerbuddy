@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useLocation, Link } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiFetch } from "@/lib/bids-api";
+import { apiFetch, BASE } from "@/lib/bids-api";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -46,7 +46,7 @@ type PendingVerification = {
 function useAdminAuth() {
   return useQuery<{ isAdmin: boolean }>({
     queryKey: ["admin-auth-me"],
-    queryFn:  () => apiFetch("/admin/auth/me"),
+    queryFn:  () => apiFetch(`${BASE}/admin/auth/me`),
     retry:    false,
     staleTime: 30_000,
   });
@@ -70,14 +70,14 @@ export default function AdminDashboard() {
   /* ── data ── */
   const { data: wData, isLoading: wLoading, refetch: refetchW } = useQuery<{ pendingCount: number; requests: WithdrawalRequest[] }>({
     queryKey: ["admin-withdrawals"],
-    queryFn:  () => apiFetch("/admin/withdrawal-requests"),
+    queryFn:  () => apiFetch(`${BASE}/admin/withdrawal-requests`),
     enabled:  !!authData?.isAdmin,
     staleTime: 60_000,
   });
 
   const { data: vData, isLoading: vLoading, refetch: refetchV } = useQuery<{ pendingCount: number; verifications: PendingVerification[] }>({
     queryKey: ["admin-verifications"],
-    queryFn:  () => apiFetch("/admin/pending-verifications"),
+    queryFn:  () => apiFetch(`${BASE}/admin/pending-verifications`),
     enabled:  !!authData?.isAdmin,
     staleTime: 60_000,
   });
@@ -85,7 +85,7 @@ export default function AdminDashboard() {
   /* ── mutations ── */
   const markPaid = useMutation({
     mutationFn: (id: number) =>
-      apiFetch(`/admin/withdrawal-requests/${id}/mark-paid`, { method: "POST" }),
+      apiFetch(`${BASE}/admin/withdrawal-requests/${id}/mark-paid`, { method: "POST" }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["admin-withdrawals"] });
       toast({ title: "Marked as Paid", description: "Withdrawal request processed." });
@@ -95,7 +95,7 @@ export default function AdminDashboard() {
 
   const setVerified = useMutation({
     mutationFn: ({ userId, verified }: { userId: number; verified: boolean }) =>
-      apiFetch(`/admin/users/${userId}/set-verified`, {
+      apiFetch(`${BASE}/admin/users/${userId}/set-verified`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ verified }),
@@ -108,7 +108,7 @@ export default function AdminDashboard() {
   });
 
   const logout = useMutation({
-    mutationFn: () => apiFetch("/admin/auth/logout", { method: "POST" }),
+    mutationFn: () => apiFetch(`${BASE}/admin/auth/logout`, { method: "POST" }),
     onSuccess: () => { qc.clear(); navigate("/admin/login"); },
   });
 

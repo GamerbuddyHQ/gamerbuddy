@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useLocation, Link } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiFetch } from "@/lib/bids-api";
+import { apiFetch, BASE } from "@/lib/bids-api";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -41,7 +41,7 @@ const STATUS_COLORS: Record<string, string> = {
 function useAdminAuth() {
   return useQuery<{ isAdmin: boolean }>({
     queryKey: ["admin-auth-me"],
-    queryFn:  () => apiFetch("/admin/auth/me"),
+    queryFn:  () => apiFetch(`${BASE}/admin/auth/me`),
     retry:    false,
     staleTime: 30_000,
   });
@@ -68,44 +68,44 @@ export default function AdminCommunity() {
   /* ── Data ── */
   const { data, isLoading, refetch } = useQuery<{ total: number; posts: Post[] }>({
     queryKey: ["admin-community-posts"],
-    queryFn:  () => apiFetch("/admin/community/posts"),
+    queryFn:  () => apiFetch(`${BASE}/admin/community/posts`),
     enabled:  !!authData?.isAdmin,
     staleTime: 30_000,
   });
 
   /* ── Mutations ── */
   const hidePost = useMutation({
-    mutationFn: (id: number) => apiFetch(`/admin/community/posts/${id}/hide`, { method: "POST" }),
+    mutationFn: (id: number) => apiFetch(`${BASE}/admin/community/posts/${id}/hide`, { method: "POST" }),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["admin-community-posts"] }); toast({ title: "Post Hidden", description: "Post is now hidden from users." }); },
     onError: (e: Error) => toast({ title: "Error", description: e.message, variant: "destructive" }),
   });
 
   const restorePost = useMutation({
-    mutationFn: (id: number) => apiFetch(`/admin/community/posts/${id}/restore`, { method: "POST" }),
+    mutationFn: (id: number) => apiFetch(`${BASE}/admin/community/posts/${id}/restore`, { method: "POST" }),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["admin-community-posts"] }); toast({ title: "Post Restored", description: "Post is now visible to users." }); },
     onError: (e: Error) => toast({ title: "Error", description: e.message, variant: "destructive" }),
   });
 
   const deletePost = useMutation({
-    mutationFn: (id: number) => apiFetch(`/admin/community/posts/${id}`, { method: "DELETE" }),
+    mutationFn: (id: number) => apiFetch(`${BASE}/admin/community/posts/${id}`, { method: "DELETE" }),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["admin-community-posts"] }); toast({ title: "Post Deleted", description: "Post permanently removed." }); },
     onError: (e: Error) => toast({ title: "Error", description: e.message, variant: "destructive" }),
   });
 
   const banUser = useMutation({
-    mutationFn: (userId: number) => apiFetch(`/admin/community/users/${userId}/ban`, { method: "POST" }),
+    mutationFn: (userId: number) => apiFetch(`${BASE}/admin/community/users/${userId}/ban`, { method: "POST" }),
     onSuccess: (_, userId) => { qc.invalidateQueries({ queryKey: ["admin-community-posts"] }); toast({ title: "User Banned", description: `User ID ${userId} banned from community.` }); },
     onError: (e: Error) => toast({ title: "Error", description: e.message, variant: "destructive" }),
   });
 
   const unbanUser = useMutation({
-    mutationFn: (userId: number) => apiFetch(`/admin/community/users/${userId}/unban`, { method: "POST" }),
+    mutationFn: (userId: number) => apiFetch(`${BASE}/admin/community/users/${userId}/unban`, { method: "POST" }),
     onSuccess: (_, userId) => { qc.invalidateQueries({ queryKey: ["admin-community-posts"] }); toast({ title: "User Unbanned", description: `User ID ${userId} can post again.` }); },
     onError: (e: Error) => toast({ title: "Error", description: e.message, variant: "destructive" }),
   });
 
   const logout = useMutation({
-    mutationFn: () => apiFetch("/admin/auth/logout", { method: "POST" }),
+    mutationFn: () => apiFetch(`${BASE}/admin/auth/logout`, { method: "POST" }),
     onSuccess: () => { qc.clear(); navigate("/admin/login"); },
   });
 

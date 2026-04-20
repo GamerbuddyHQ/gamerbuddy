@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
-import { apiFetch } from "@/lib/bids-api";
+import { apiFetch, BASE } from "@/lib/bids-api";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Shield, Eye, EyeOff, Lock, Mail, KeyRound, Zap, AlertCircle } from "lucide-react";
@@ -27,8 +27,7 @@ export default function AdminLogin() {
 
   /* Redirect if already logged in */
   useEffect(() => {
-    const apiBase = (import.meta.env.VITE_API_URL ?? "/api").replace(/\/$/, "");
-    fetch(`${apiBase}/admin/auth/me`, { credentials: "include" })
+    fetch(`${BASE}/admin/auth/me`, { credentials: "include" })
       .then(r => r.json())
       .then(d => { if (d.isAdmin) navigate("/admin/dashboard"); })
       .catch(() => {});
@@ -41,7 +40,7 @@ export default function AdminLogin() {
     if (!secretKey) { setError("Secret key is required."); return; }
     setLoading(true);
     try {
-      await apiFetch("/admin/auth/login", {
+      await apiFetch(`${BASE}/admin/auth/login`, {
         method:  "POST",
         headers: { "Content-Type": "application/json" },
         body:    JSON.stringify({ email, password, secretKey }),
