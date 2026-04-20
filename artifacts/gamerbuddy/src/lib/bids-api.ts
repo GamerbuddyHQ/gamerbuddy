@@ -619,11 +619,22 @@ export function useVoteOnProfile(userId: number | null) {
 
 /* ── Photo Upload ── */
 
-export async function requestPhotoUploadUrl(type: "profile" | "gallery", file: File): Promise<{ uploadURL: string; objectPath: string }> {
+export async function computeFileHash(file: File): Promise<string> {
+  const buffer = await file.arrayBuffer();
+  const hashBuffer = await crypto.subtle.digest("SHA-256", buffer);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+export async function requestPhotoUploadUrl(
+  type: "profile" | "gallery",
+  file: File,
+  fileHash: string,
+): Promise<{ uploadURL: string; objectPath: string }> {
   const endpoint = type === "profile" ? "/profile/photo/upload-url" : "/profile/gallery/upload-url";
   return apiFetch(`${BASE}${endpoint}`, {
     method: "POST",
-    body: JSON.stringify({ name: file.name, size: file.size, contentType: file.type }),
+    body: JSON.stringify({ name: file.name, size: file.size, contentType: file.type, fileHash }),
   });
 }
 
@@ -638,9 +649,9 @@ export async function uploadFileToPut(uploadURL: string, file: File): Promise<vo
 
 export function useConfirmProfilePhoto() {
   const qc = useQueryClient();
-  return useMutation<{ success: boolean; profilePhotoUrl: string }, any, string>({
-    mutationFn: (objectPath) =>
-      apiFetch(`${BASE}/profile/photo`, { method: "POST", body: JSON.stringify({ objectPath }) }),
+  return useMutation<{ success: boolean; profilePhotoUrl: string }, any, { objectPath: string; fileHash: string }>({
+    mutationFn: ({ objectPath, fileHash }) =>
+      apiFetch(`${BASE}/profile/photo`, { method: "POST", body: JSON.stringify({ objectPath, fileHash }) }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["user-profile"] });
       qc.invalidateQueries({ queryKey: ["auth-me"] });
@@ -661,9 +672,9 @@ export function useDeleteProfilePhoto() {
 
 export function useConfirmGalleryPhoto() {
   const qc = useQueryClient();
-  return useMutation<{ success: boolean; galleryPhotoUrls: string[] }, any, string>({
-    mutationFn: (objectPath) =>
-      apiFetch(`${BASE}/profile/gallery`, { method: "POST", body: JSON.stringify({ objectPath }) }),
+  return useMutation<{ success: boolean; galleryPhotoUrls: string[] }, any, { objectPath: string; fileHash: string }>({
+    mutationFn: ({ objectPath, fileHash }) =>
+      apiFetch(`${BASE}/profile/gallery`, { method: "POST", body: JSON.stringify({ objectPath, fileHash }) }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["user-profile"] });
     },

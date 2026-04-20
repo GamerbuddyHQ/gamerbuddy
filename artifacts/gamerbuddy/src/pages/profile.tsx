@@ -11,7 +11,7 @@ import {
   useProfileVotes,
   useConfirmProfilePhoto, useDeleteProfilePhoto,
   useConfirmGalleryPhoto, useDeleteGalleryPhoto,
-  requestPhotoUploadUrl, uploadFileToPut,
+  requestPhotoUploadUrl, uploadFileToPut, computeFileHash,
   STREAMING_PLATFORM_META, GAMING_PLATFORM_META,
   type ShopItem, type QuestEntry,
 } from "@/lib/bids-api";
@@ -1750,15 +1750,20 @@ export default function Profile() {
 
   const handleAvatarUpload = async (file: File) => {
     if (!file.type.startsWith("image/")) { toast({ title: "Images only", variant: "destructive" }); return; }
-    if (file.size > 8 * 1024 * 1024) { toast({ title: "Max 8 MB", variant: "destructive" }); return; }
+    if (file.size > 8 * 1024 * 1024) { toast({ title: "Max 8 MB per photo", variant: "destructive" }); return; }
     setAvatarUploading(true);
     try {
-      const { uploadURL, objectPath } = await requestPhotoUploadUrl("profile", file);
+      const fileHash = await computeFileHash(file);
+      const { uploadURL, objectPath } = await requestPhotoUploadUrl("profile", file, fileHash);
       await uploadFileToPut(uploadURL, file);
-      await confirmProfilePhoto.mutateAsync(objectPath);
+      await confirmProfilePhoto.mutateAsync({ objectPath, fileHash });
       toast({ title: "Profile photo updated!", description: "It will be reviewed by our team shortly." });
     } catch (e: any) {
-      toast({ title: "Upload failed", description: e?.error || "Please try again.", variant: "destructive" });
+      if (e?.error === "duplicate") {
+        toast({ title: "Duplicate photo detected", description: "This photo has already been uploaded. Please use a unique, original photo of yourself.", variant: "destructive" });
+      } else {
+        toast({ title: "Upload failed", description: e?.message || e?.error || "Please try again.", variant: "destructive" });
+      }
     } finally {
       setAvatarUploading(false);
     }
@@ -1766,15 +1771,20 @@ export default function Profile() {
 
   const handleGalleryUpload = async (file: File) => {
     if (!file.type.startsWith("image/")) { toast({ title: "Images only", variant: "destructive" }); return; }
-    if (file.size > 8 * 1024 * 1024) { toast({ title: "Max 8 MB", variant: "destructive" }); return; }
+    if (file.size > 8 * 1024 * 1024) { toast({ title: "Max 8 MB per photo", variant: "destructive" }); return; }
     setGalleryUploading(true);
     try {
-      const { uploadURL, objectPath } = await requestPhotoUploadUrl("gallery", file);
+      const fileHash = await computeFileHash(file);
+      const { uploadURL, objectPath } = await requestPhotoUploadUrl("gallery", file, fileHash);
       await uploadFileToPut(uploadURL, file);
-      await confirmGalleryPhoto.mutateAsync(objectPath);
+      await confirmGalleryPhoto.mutateAsync({ objectPath, fileHash });
       toast({ title: "Gallery photo added!", description: "It will be reviewed by our team shortly." });
     } catch (e: any) {
-      toast({ title: "Upload failed", description: e?.error || "Please try again.", variant: "destructive" });
+      if (e?.error === "duplicate") {
+        toast({ title: "Duplicate photo detected", description: "This photo has already been uploaded. Please upload a unique solo photo of yourself.", variant: "destructive" });
+      } else {
+        toast({ title: "Upload failed", description: e?.message || e?.error || "Please try again.", variant: "destructive" });
+      }
     } finally {
       setGalleryUploading(false);
     }
@@ -2368,115 +2378,50 @@ export default function Profile() {
       })()}
 
       {/* ── PHOTO GALLERY ── */}
-      <div
-        className="rounded-2xl overflow-hidden border"
-        style={{ borderColor: "rgba(255,255,255,0.07)", background: "rgba(8,6,18,0.65)" }}
-      >
-        {/* Header */}
-        <div
-          className="flex items-center justify-between gap-2 px-4 sm:px-5 py-3 border-b"
-          style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.02)" }}
-        >
-          <div className="flex items-center gap-2 min-w-0">
-            <Camera className="h-3.5 w-3.5 shrink-0" style={{ color: "rgba(168,85,247,0.55)" }} />
-            <span className="text-[11px] font-extrabold uppercase tracking-widest text-white/65">Photo Gallery</span>
-            <span className="text-[9px] text-muted-foreground/40 ml-1">
-              ({(profile?.galleryPhotoUrls?.length ?? 0)}/4 photos)
-            </span>
-          </div>
-          {(profile?.galleryPhotoUrls?.length ?? 0) < 4 && (
-            <label
-              className="shrink-0 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg cursor-pointer transition-all duration-150 hover:brightness-110 hover:scale-[1.02]"
-              style={{
-                background: galleryUploading ? "rgba(100,100,100,0.10)" : "rgba(168,85,247,0.10)",
-                border: "1px solid rgba(168,85,247,0.28)",
-                color: galleryUploading ? "#888" : "#c084fc",
-              }}
+      {(() => {
+        const galleryCount = profile?.galleryPhotoUrls?.length ?? 0;
+        const meetsMinimum = galleryCount >= 2;
+        return (
+          <div
+            className="rounded-2xl overflow-hidden border"
+            style={{ borderColor: meetsMinimum ? "rgba(255,255,255,0.07)" : "rgba(245,158,11,0.25)", background: "rgba(8,6,18,0.65)" }}
+          >
+            {/* Header */}
+            <div
+              className="flex items-center justify-between gap-2 px-4 sm:px-5 py-3 border-b"
+              style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.02)" }}
             >
-              <input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                disabled={galleryUploading}
-                onChange={(e) => { const f = e.target.files?.[0]; if (f) handleGalleryUpload(f); e.target.value = ""; }}
-              />
-              {galleryUploading ? (
-                <><div className="h-3 w-3 rounded-full border border-white/20 border-t-white/70 animate-spin" />Uploading…</>
-              ) : (
-                <><ImagePlus className="h-3 w-3" />Add Photo</>
-              )}
-            </label>
-          )}
-        </div>
-
-        {/* Anti-fake disclaimer */}
-        <div
-          className="flex items-start gap-2 px-4 sm:px-5 py-2.5 border-b"
-          style={{ background: "rgba(245,158,11,0.04)", borderColor: "rgba(245,158,11,0.12)" }}
-        >
-          <AlertTriangle className="h-3 w-3 text-amber-400 shrink-0 mt-0.5" />
-          <p className="text-[10px] text-amber-300/70 leading-relaxed">
-            Upload only <span className="font-semibold text-amber-300/90">genuine photos of yourself</span>. AI-generated, stolen, or fake images will result in account suspension. All photos are reviewed by our moderation team.
-          </p>
-        </div>
-
-        {/* Gallery grid */}
-        <div className="p-4 sm:p-5">
-          {(profile?.galleryPhotoUrls?.length ?? 0) === 0 ? (
-            <div className="flex flex-col items-center justify-center py-8 gap-3 text-center">
-              <div
-                className="h-12 w-12 rounded-2xl flex items-center justify-center"
-                style={{
-                  background: "linear-gradient(135deg, rgba(168,85,247,0.12), rgba(168,85,247,0.04))",
-                  border: "1.5px dashed rgba(168,85,247,0.28)",
-                }}
-              >
-                <Camera className="h-5 w-5" style={{ color: "#a855f7", opacity: 0.6 }} />
-              </div>
-              <div className="space-y-1 max-w-xs">
-                <p className="text-sm font-semibold" style={{ color: "rgba(255,255,255,0.40)" }}>No gallery photos yet</p>
-                <p className="text-[11px] leading-relaxed" style={{ color: "rgba(255,255,255,0.22)" }}>
-                  Add up to 4 real photos of yourself to build trust with hirers.
-                </p>
-              </div>
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              {(profile?.galleryPhotoUrls ?? []).map((url, i) => (
-                <div key={i} className="relative group/gphoto aspect-square rounded-xl overflow-hidden"
-                  style={{ border: "1px solid rgba(168,85,247,0.20)", background: "rgba(0,0,0,0.4)" }}
-                >
-                  <img
-                    src={`/api/storage${url}`}
-                    alt={`Gallery ${i + 1}`}
-                    className="w-full h-full object-cover"
-                  />
-                  {/* Needs review badge */}
-                  <div
-                    className="absolute top-1.5 left-1.5 text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full"
-                    style={{ background: "rgba(245,158,11,0.85)", color: "#fff" }}
-                  >
-                    Under Review
-                  </div>
-                  {/* Delete overlay */}
-                  <button
-                    type="button"
-                    onClick={() => setConfirmDeleteGallery(i)}
-                    className="absolute inset-0 bg-black/0 hover:bg-black/55 transition-all duration-200 flex items-center justify-center opacity-0 group-hover/gphoto:opacity-100"
-                  >
-                    <div className="h-8 w-8 rounded-full bg-red-600/90 flex items-center justify-center">
-                      <Trash2 className="h-4 w-4 text-white" />
-                    </div>
-                  </button>
+              <div className="flex items-center gap-2 min-w-0 flex-wrap">
+                <Camera className="h-3.5 w-3.5 shrink-0" style={{ color: "rgba(168,85,247,0.55)" }} />
+                <span className="text-[11px] font-extrabold uppercase tracking-widest text-white/65">Additional Photos</span>
+                {/* Minimum progress indicator */}
+                <div className="flex items-center gap-1 ml-1">
+                  {[0, 1].map((slot) => (
+                    <div
+                      key={slot}
+                      className="h-1.5 w-4 rounded-full transition-colors duration-300"
+                      style={{ background: galleryCount > slot ? "#22c55e" : "rgba(245,158,11,0.40)" }}
+                    />
+                  ))}
+                  {[2, 3].map((slot) => (
+                    <div
+                      key={slot}
+                      className="h-1.5 w-4 rounded-full transition-colors duration-300"
+                      style={{ background: galleryCount > slot ? "#a855f7" : "rgba(255,255,255,0.10)" }}
+                    />
+                  ))}
+                  <span className={`text-[9px] font-bold ml-1 ${meetsMinimum ? "text-green-400" : "text-amber-400"}`}>
+                    {galleryCount}/4 {!meetsMinimum && `(min 2)`}
+                  </span>
                 </div>
-              ))}
-              {/* Add more slot — if under 4 */}
-              {(profile?.galleryPhotoUrls?.length ?? 0) < 4 && (
+              </div>
+              {galleryCount < 4 && (
                 <label
-                  className="aspect-square rounded-xl flex flex-col items-center justify-center gap-2 cursor-pointer transition-all duration-150 hover:brightness-125"
+                  className="shrink-0 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg cursor-pointer transition-all duration-150 hover:brightness-110 hover:scale-[1.02]"
                   style={{
-                    border: "1.5px dashed rgba(168,85,247,0.28)",
-                    background: "rgba(168,85,247,0.04)",
+                    background: galleryUploading ? "rgba(100,100,100,0.10)" : "rgba(168,85,247,0.10)",
+                    border: "1px solid rgba(168,85,247,0.28)",
+                    color: galleryUploading ? "#888" : "#c084fc",
                   }}
                 >
                   <input
@@ -2486,14 +2431,123 @@ export default function Profile() {
                     disabled={galleryUploading}
                     onChange={(e) => { const f = e.target.files?.[0]; if (f) handleGalleryUpload(f); e.target.value = ""; }}
                   />
-                  <ImagePlus className="h-5 w-5" style={{ color: "rgba(168,85,247,0.5)" }} />
-                  <span className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: "rgba(168,85,247,0.5)" }}>Add</span>
+                  {galleryUploading ? (
+                    <><div className="h-3 w-3 rounded-full border border-white/20 border-t-white/70 animate-spin" />Uploading…</>
+                  ) : (
+                    <><ImagePlus className="h-3 w-3" />Add Photo</>
+                  )}
                 </label>
               )}
             </div>
-          )}
-        </div>
-      </div>
+
+            {/* Minimum requirement notice */}
+            {!meetsMinimum && (
+              <div
+                className="flex items-start gap-2 px-4 sm:px-5 py-2.5 border-b"
+                style={{ background: "rgba(245,158,11,0.06)", borderColor: "rgba(245,158,11,0.18)" }}
+              >
+                <AlertTriangle className="h-3 w-3 text-amber-400 shrink-0 mt-0.5" />
+                <p className="text-[10px] text-amber-300/80 leading-relaxed font-medium">
+                  <span className="font-bold text-amber-300">Minimum 2 additional photos required.</span> Please upload real, unique solo photos of yourself. Group photos and duplicate images are not allowed.
+                </p>
+              </div>
+            )}
+
+            {/* Anti-AI / fake photo warning — always visible */}
+            <div
+              className="flex items-start gap-2 px-4 sm:px-5 py-2.5 border-b"
+              style={{ background: "rgba(239,68,68,0.04)", borderColor: "rgba(239,68,68,0.12)" }}
+            >
+              <AlertTriangle className="h-3 w-3 text-red-400 shrink-0 mt-0.5" />
+              <p className="text-[10px] text-red-300/75 leading-relaxed">
+                <span className="font-bold text-red-300/90">All photos must be real photos of yourself.</span> AI-generated, heavily edited, fake, or duplicate images are strictly prohibited. Using fake or duplicate photos may result in <span className="font-semibold">account suspension.</span>
+              </p>
+            </div>
+
+            {/* Gallery grid */}
+            <div className="p-4 sm:p-5">
+              {galleryCount === 0 ? (
+                <div className="flex flex-col items-center justify-center py-8 gap-3 text-center">
+                  <div
+                    className="h-12 w-12 rounded-2xl flex items-center justify-center"
+                    style={{
+                      background: "linear-gradient(135deg, rgba(245,158,11,0.15), rgba(168,85,247,0.04))",
+                      border: "1.5px dashed rgba(245,158,11,0.35)",
+                    }}
+                  >
+                    <Camera className="h-5 w-5 text-amber-400/60" />
+                  </div>
+                  <div className="space-y-1 max-w-xs">
+                    <p className="text-sm font-bold text-amber-400/70">2 photos required</p>
+                    <p className="text-[11px] leading-relaxed" style={{ color: "rgba(255,255,255,0.25)" }}>
+                      Upload a minimum of 2 solo photos of yourself (max 4). Solo photos only — no group shots. No duplicates.
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {(profile?.galleryPhotoUrls ?? []).map((url, i) => (
+                    <div key={i} className="relative group/gphoto aspect-square rounded-xl overflow-hidden"
+                      style={{ border: "1px solid rgba(168,85,247,0.20)", background: "rgba(0,0,0,0.4)" }}
+                    >
+                      <img
+                        src={`/api/storage${url}`}
+                        alt={`Gallery ${i + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                      {/* Needs review badge */}
+                      <div
+                        className="absolute top-1.5 left-1.5 text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full"
+                        style={{ background: "rgba(245,158,11,0.85)", color: "#fff" }}
+                      >
+                        Under Review
+                      </div>
+                      {/* Delete overlay */}
+                      <button
+                        type="button"
+                        onClick={() => setConfirmDeleteGallery(i)}
+                        className="absolute inset-0 bg-black/0 hover:bg-black/55 transition-all duration-200 flex items-center justify-center opacity-0 group-hover/gphoto:opacity-100"
+                      >
+                        <div className="h-8 w-8 rounded-full bg-red-600/90 flex items-center justify-center">
+                          <Trash2 className="h-4 w-4 text-white" />
+                        </div>
+                      </button>
+                    </div>
+                  ))}
+                  {/* Add more slot — if under 4 */}
+                  {galleryCount < 4 && (
+                    <label
+                      className="aspect-square rounded-xl flex flex-col items-center justify-center gap-2 cursor-pointer transition-all duration-150 hover:brightness-125"
+                      style={{
+                        border: `1.5px dashed ${galleryCount < 2 ? "rgba(245,158,11,0.40)" : "rgba(168,85,247,0.28)"}`,
+                        background: galleryCount < 2 ? "rgba(245,158,11,0.04)" : "rgba(168,85,247,0.04)",
+                      }}
+                    >
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        disabled={galleryUploading}
+                        onChange={(e) => { const f = e.target.files?.[0]; if (f) handleGalleryUpload(f); e.target.value = ""; }}
+                      />
+                      {galleryUploading ? (
+                        <div className="h-4 w-4 rounded-full border border-white/20 border-t-white/70 animate-spin" />
+                      ) : (
+                        <>
+                          <ImagePlus className="h-5 w-5" style={{ color: galleryCount < 2 ? "rgba(245,158,11,0.55)" : "rgba(168,85,247,0.5)" }} />
+                          <span className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: galleryCount < 2 ? "rgba(245,158,11,0.55)" : "rgba(168,85,247,0.5)" }}>
+                            {galleryCount < 2 ? "Required" : "Add"}
+                          </span>
+                        </>
+                      )}
+                    </label>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Gallery delete confirmation modal */}
       {confirmDeleteGallery !== null && (

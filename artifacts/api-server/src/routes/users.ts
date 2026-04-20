@@ -240,7 +240,8 @@ router.patch("/profile", requireAuth, validate(UpdateProfileSchema), async (req,
 /* ── PHOTO ROUTES ─────────────────────────────────────────────── */
 
 router.post("/profile/photo/upload-url", requireAuth, async (req, res): Promise<void> => {
-  const { name, size, contentType } = req.body as { name?: string; size?: number; contentType?: string };
+  const user = req.user!;
+  const { name, size, contentType, fileHash } = req.body as { name?: string; size?: number; contentType?: string; fileHash?: string };
   if (!contentType || !contentType.startsWith("image/")) {
     res.status(400).json({ error: "Only image uploads are allowed" });
     return;
@@ -248,6 +249,14 @@ router.post("/profile/photo/upload-url", requireAuth, async (req, res): Promise<
   if (!size || size > 8 * 1024 * 1024) {
     res.status(400).json({ error: "File too large. Maximum 8 MB." });
     return;
+  }
+  if (fileHash && typeof fileHash === "string") {
+    const [existing] = await db.select({ id: userPhotosTable.id }).from(userPhotosTable)
+      .where(and(eq(userPhotosTable.userId, user.id), eq(userPhotosTable.photoHash, fileHash)));
+    if (existing) {
+      res.status(409).json({ error: "duplicate", message: "This photo has already been uploaded. Please upload a unique photo." });
+      return;
+    }
   }
   try {
     const uploadURL = await objectStorageService.getObjectEntityUploadURL();
@@ -260,13 +269,21 @@ router.post("/profile/photo/upload-url", requireAuth, async (req, res): Promise<
 
 router.post("/profile/photo", requireAuth, async (req, res): Promise<void> => {
   const user = req.user!;
-  const { objectPath } = req.body as { objectPath?: string };
+  const { objectPath, fileHash } = req.body as { objectPath?: string; fileHash?: string };
   if (!objectPath || typeof objectPath !== "string" || !objectPath.startsWith("/objects/")) {
     res.status(400).json({ error: "Invalid objectPath" });
     return;
   }
+  if (fileHash && typeof fileHash === "string") {
+    const [existing] = await db.select({ id: userPhotosTable.id }).from(userPhotosTable)
+      .where(and(eq(userPhotosTable.userId, user.id), eq(userPhotosTable.photoHash, fileHash)));
+    if (existing) {
+      res.status(409).json({ error: "duplicate", message: "This photo has already been uploaded. Please upload a unique photo." });
+      return;
+    }
+  }
   await db.update(usersTable).set({ profilePhotoUrl: objectPath }).where(eq(usersTable.id, user.id));
-  await db.insert(userPhotosTable).values({ userId: user.id, objectPath, photoType: "profile", status: "needs_review" });
+  await db.insert(userPhotosTable).values({ userId: user.id, objectPath, photoType: "profile", status: "needs_review", photoHash: fileHash ?? null });
   res.json({ success: true, profilePhotoUrl: objectPath });
 });
 
@@ -278,7 +295,7 @@ router.delete("/profile/photo", requireAuth, async (req, res): Promise<void> => 
 
 router.post("/profile/gallery/upload-url", requireAuth, async (req, res): Promise<void> => {
   const user = req.user!;
-  const { name, size, contentType } = req.body as { name?: string; size?: number; contentType?: string };
+  const { name, size, contentType, fileHash } = req.body as { name?: string; size?: number; contentType?: string; fileHash?: string };
   if (!contentType || !contentType.startsWith("image/")) {
     res.status(400).json({ error: "Only image uploads are allowed" });
     return;
@@ -289,8 +306,16 @@ router.post("/profile/gallery/upload-url", requireAuth, async (req, res): Promis
   }
   const [currentUser] = await db.select({ galleryPhotoUrls: usersTable.galleryPhotoUrls }).from(usersTable).where(eq(usersTable.id, user.id));
   if ((currentUser?.galleryPhotoUrls?.length ?? 0) >= 4) {
-    res.status(400).json({ error: "Maximum 4 gallery photos allowed" });
+    res.status(400).json({ error: "Maximum 4 additional photos allowed" });
     return;
+  }
+  if (fileHash && typeof fileHash === "string") {
+    const [existing] = await db.select({ id: userPhotosTable.id }).from(userPhotosTable)
+      .where(and(eq(userPhotosTable.userId, user.id), eq(userPhotosTable.photoHash, fileHash)));
+    if (existing) {
+      res.status(409).json({ error: "duplicate", message: "This photo has already been uploaded. Please upload a unique photo." });
+      return;
+    }
   }
   try {
     const uploadURL = await objectStorageService.getObjectEntityUploadURL();
@@ -303,7 +328,7 @@ router.post("/profile/gallery/upload-url", requireAuth, async (req, res): Promis
 
 router.post("/profile/gallery", requireAuth, async (req, res): Promise<void> => {
   const user = req.user!;
-  const { objectPath } = req.body as { objectPath?: string };
+  const { objectPath, fileHash } = req.body as { objectPath?: string; fileHash?: string };
   if (!objectPath || typeof objectPath !== "string" || !objectPath.startsWith("/objects/")) {
     res.status(400).json({ error: "Invalid objectPath" });
     return;
@@ -311,12 +336,20 @@ router.post("/profile/gallery", requireAuth, async (req, res): Promise<void> => 
   const [currentUser] = await db.select({ galleryPhotoUrls: usersTable.galleryPhotoUrls }).from(usersTable).where(eq(usersTable.id, user.id));
   const current = currentUser?.galleryPhotoUrls ?? [];
   if (current.length >= 4) {
-    res.status(400).json({ error: "Maximum 4 gallery photos allowed" });
+    res.status(400).json({ error: "Maximum 4 additional photos allowed" });
     return;
+  }
+  if (fileHash && typeof fileHash === "string") {
+    const [existing] = await db.select({ id: userPhotosTable.id }).from(userPhotosTable)
+      .where(and(eq(userPhotosTable.userId, user.id), eq(userPhotosTable.photoHash, fileHash)));
+    if (existing) {
+      res.status(409).json({ error: "duplicate", message: "This photo has already been uploaded. Please upload a unique photo." });
+      return;
+    }
   }
   const updated = [...current, objectPath];
   await db.update(usersTable).set({ galleryPhotoUrls: updated }).where(eq(usersTable.id, user.id));
-  await db.insert(userPhotosTable).values({ userId: user.id, objectPath, photoType: "gallery", status: "needs_review" });
+  await db.insert(userPhotosTable).values({ userId: user.id, objectPath, photoType: "gallery", status: "needs_review", photoHash: fileHash ?? null });
   res.json({ success: true, galleryPhotoUrls: updated });
 });
 

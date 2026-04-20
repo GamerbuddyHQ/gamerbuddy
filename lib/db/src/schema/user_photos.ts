@@ -7,6 +7,7 @@ export const userPhotosTable = pgTable("user_photos", {
   objectPath: text("object_path").notNull(),
   photoType: text("photo_type").notNull(), // "profile" | "gallery"
   status: text("status").notNull().default("needs_review"), // needs_review | approved | rejected
+  photoHash: text("photo_hash"), // SHA-256 hex of file content — for duplicate detection
   uploadedAt: timestamp("uploaded_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
