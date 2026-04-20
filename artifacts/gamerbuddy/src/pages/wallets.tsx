@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "wouter";
+import { CopyId } from "@/components/copy-id";
 import {
   useGetWallets,
   getGetWalletsQueryKey,
@@ -93,6 +94,7 @@ interface AdminWithdrawalRequest {
   userId: number;
   userName: string | null;
   email: string | null;
+  gamerbuddyId: string | null;
   amount: number;
   status: string;
   country: string | null;
@@ -287,11 +289,14 @@ export default function WalletsPage() {
         <Card className="border-secondary/30 bg-card/60 overflow-hidden relative">
           <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-secondary/60 via-secondary to-secondary/60" />
           <CardHeader className="pb-2">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-2">
               <CardTitle className="uppercase tracking-wider text-secondary flex items-center gap-2 text-sm">
                 <TrendingUp className="h-4 w-4" /> Earnings Wallet
               </CardTitle>
-              <span className="text-xs uppercase tracking-widest text-muted-foreground bg-muted/30 px-2 py-0.5 rounded">Earn & Withdraw</span>
+              <div className="flex items-center gap-2 flex-wrap">
+                {user.gamerbuddyId && <CopyId id={user.gamerbuddyId} size="sm" />}
+                <span className="text-xs uppercase tracking-widest text-muted-foreground bg-muted/30 px-2 py-0.5 rounded">Earn & Withdraw</span>
+              </div>
             </div>
             <CardDescription>Money earned by fulfilling requests. You keep 90% of every job — 10% platform fee is deducted automatically on completion.</CardDescription>
           </CardHeader>
@@ -669,6 +674,7 @@ export default function WalletsPage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-sm font-semibold text-foreground">{r.userName ?? "Unknown"}</span>
+                        {r.gamerbuddyId && <CopyId id={r.gamerbuddyId} size="sm" />}
                         <Badge variant="outline" className="text-xs py-0 border-muted text-muted-foreground">{r.country ?? "Unknown"}</Badge>
                         <Badge
                           variant="outline"

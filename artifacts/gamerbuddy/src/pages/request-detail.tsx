@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useParams, useLocation, Link } from "wouter";
+import { CopyId } from "@/components/copy-id";
 import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -2127,6 +2128,14 @@ export default function RequestDetail() {
           </button>
         )}
       </div>
+
+      {/* User's own GB ID — visible so they can share it with their session partner */}
+      {user?.gamerbuddyId && (
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <span>Your User ID:</span>
+          <CopyId id={user.gamerbuddyId} size="sm" />
+        </div>
+      )}
 
       <SafetyBanner storageKey="gb_safety_detail" />
 

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useLocation } from "wouter";
+import { CopyId } from "@/components/copy-id";
 import { useAuth } from "@/lib/auth";
 import { COUNTRY_MAP, GENDER_MAP } from "@/lib/geo-options";
 import { CountryCombobox, GenderSelect } from "@/components/country-combobox";
@@ -2014,6 +2015,13 @@ export default function Profile() {
                   </span>
                 )}
               </div>
+
+              {/* GB User ID */}
+              {user.gamerbuddyId && (
+                <div className="flex justify-center sm:justify-start mb-2">
+                  <CopyId id={user.gamerbuddyId} />
+                </div>
+              )}
 
               {/* Status pills row */}
               <div className="flex flex-wrap justify-center sm:justify-start items-center gap-1.5">

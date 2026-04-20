@@ -74,6 +74,12 @@ const RESPONSES: Array<{ patterns: RegExp; reply: string }> = [
     reply: `**Tournaments** are coming in **Phase 2** — not live yet! 🏆\n\nPhase 1 supports only core 1-on-1 hiring sessions. When Tournaments drop in Phase 2:\n• Free to enter for all participants\n• Hirers approve every participant — no randos\n• Prize pools from $100–$10,000\n• 10% platform fee on prize payouts\n• Nation/Gender filters for regional showdowns\n\nFor competitive play right now, post a request and hire an expert — it's the best way to level up your game today!\n\nKeep an eye on the **[Roadmap](/roadmap)** for the Phase 2 launch. 🗺️`,
   },
 
+  /* ── USER ID / GB- ID ── */
+  {
+    patterns: /user.?id|gb.?\d{4,}|gamerbuddy.?id|my.?id|what.?is.?my.?id|share.?id|find.?my.?id|where.?is.?my.?id|id.?number|account.?id|profile.?id|gb-\d/i,
+    reply: `🪪 **Your Gamerbuddy User ID (GB-XXXXXX)**\n\nEvery account on Gamerbuddy has a unique **User ID** in the format **GB-000001**. It's permanent, public-friendly, and can never change.\n\n**Where to find your User ID:**\n• 👤 **Profile page** — shown below your username with a Copy button\n• 💰 **Wallets page** — shown in the Earnings Wallet card header\n• 🎮 **Session / Request Detail pages** — shown at the top so you can share it with your session partner\n• 🔧 **Admin payout panel** — shown on every withdrawal request\n\n**How to copy it:**\nClick the **GB-XXXXXX** badge on any of those pages — it will copy to your clipboard instantly and show a green **"Copied!"** confirmation.\n\n**Why use it?**\nShare your User ID with people you're gaming with so they can:\n• Identify you during live sessions\n• Reference you in payout or support queries\n• Find you on the platform by your ID\n\n📌 Your ID is shown on your profile page — navigate to **[My Profile](/profile)** to see it now!`,
+  },
+
   /* ── FUNDS CUSTODY / WHERE IS MY MONEY ── */
   {
     patterns: /where.*money|where.*fund|where.*held|who hold|hold.*fund|custody|custod|gamerbuddy.*hold|hold.*earn|earn.*held|safe.*money|money.*safe|trust.*money|platform.*hold/i,

@@ -38,6 +38,7 @@ function formatUser(user: {
   profileTitle?: string | null;
   country?: string | null;
   gender?: string | null;
+  gamerbuddyId?: string | null;
   createdAt: Date;
 }) {
   return {
@@ -52,6 +53,7 @@ function formatUser(user: {
     profileTitle: user.profileTitle ?? null,
     country: user.country ?? null,
     gender: user.gender ?? null,
+    gamerbuddyId: user.gamerbuddyId ?? null,
     createdAt: user.createdAt.toISOString(),
   };
 }
@@ -94,6 +96,11 @@ router.post(
         idVerified: false,
       })
       .returning();
+
+    // Generate deterministic GB-XXXXXX ID from the auto-incremented user id
+    const gamerbuddyId = `GB-${String(user.id).padStart(6, "0")}`;
+    await db.update(usersTable).set({ gamerbuddyId }).where(eq(usersTable.id, user.id));
+    user.gamerbuddyId = gamerbuddyId;
 
     await db.insert(walletsTable).values({
       userId: user.id,

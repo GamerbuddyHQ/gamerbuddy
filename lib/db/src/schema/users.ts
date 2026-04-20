@@ -21,6 +21,7 @@ export const usersTable = pgTable("users", {
   lockedUntil:   timestamp("locked_until", { withTimezone: true }),
   profilePhotoUrl: text("profile_photo_url"),
   galleryPhotoUrls: text("gallery_photo_urls").array().notNull().default([]),
+  gamerbuddyId: text("gamerbuddy_id").unique(),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

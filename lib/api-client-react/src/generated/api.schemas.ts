@@ -41,6 +41,7 @@ export interface User {
   idVerified: boolean;
   country: string | null;
   gender: string | null;
+  gamerbuddyId: string | null;
   createdAt: string;
 }
 

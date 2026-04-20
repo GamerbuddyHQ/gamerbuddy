@@ -234,6 +234,7 @@ router.get(
         userId:         withdrawalRequestsTable.userId,
         userName:       usersTable.name,
         email:          usersTable.email,
+        gamerbuddyId:   usersTable.gamerbuddyId,
         amount:         withdrawalRequestsTable.amount,
         status:         withdrawalRequestsTable.status,
         country:        withdrawalRequestsTable.country,
