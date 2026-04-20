@@ -85,7 +85,7 @@ export default function WalletsPage() {
   const [txFilter, setTxFilter] = useState<"all" | "hiring" | "earnings">("all");
 
   const isIndian = user?.country === "India";
-  const withdrawalMethod = "bank_transfer";
+  const withdrawalMethod = isIndian ? "upi" : "bank_transfer";
 
   const { data: wallets, isLoading, isError } = useGetWallets({
     query: { queryKey: getGetWalletsQueryKey() },
@@ -106,7 +106,9 @@ export default function WalletsPage() {
       setWithdrawDetails("");
       toast({
         title: "Withdrawal Requested 🎉",
-        description: `Your request has been queued for the next weekly payout batch (every Monday). Funds typically arrive within 5–7 business days after processing.`,
+        description: isIndian
+          ? `Your UPI payout is being processed via Razorpay. Funds typically arrive within minutes to a few hours.`
+          : `Your request has been queued for the next weekly payout batch (every Monday). Funds typically arrive within 5–7 business days after processing.`,
       });
     },
     onError: (err: any) => {
@@ -129,7 +131,13 @@ export default function WalletsPage() {
       return;
     }
     if (!withdrawDetails.trim()) {
-      toast({ title: "Details Required", description: "Please enter your bank account details (Account No, IFSC/SWIFT, Bank Name).", variant: "destructive" });
+      toast({
+        title: "Details Required",
+        description: isIndian
+          ? "Please enter your UPI ID (e.g. yourname@paytm)."
+          : "Please enter your bank account details (Account No, IFSC/SWIFT, Bank Name).",
+        variant: "destructive",
+      });
       return;
     }
     withdrawMutation.mutate({ amount, withdrawalMethod, details: withdrawDetails });
@@ -251,7 +259,7 @@ export default function WalletsPage() {
               )}
             </div>
 
-            {/* ── Congratulations / threshold banner — all users who hit $100 ── */}
+            {/* ── Congratulations / threshold banner ── */}
             {wallets.canWithdraw && (
               <div
                 className="rounded-xl border p-4 space-y-2"
@@ -265,12 +273,21 @@ export default function WalletsPage() {
                   <span className="text-xl">🎉</span>
                   <span className="font-black text-sm text-green-300 uppercase tracking-wide">Payout Threshold Reached!</span>
                 </div>
-                <p className="text-xs text-green-200/80 leading-relaxed">
-                  Congratulations! Your earnings have reached the <strong className="text-green-300">$100 threshold</strong>. Your payout is scheduled for the next Monday's weekly batch and should arrive in your account within <strong className="text-green-300">5–7 business days</strong>.
-                </p>
+                {isIndian ? (
+                  <p className="text-xs text-green-200/80 leading-relaxed">
+                    Congratulations! Your earnings have reached the <strong className="text-green-300">$100 threshold</strong>. As an Indian user you can withdraw instantly via <strong className="text-green-300">UPI (Razorpay)</strong>. Funds typically arrive within minutes to a few hours.
+                  </p>
+                ) : (
+                  <p className="text-xs text-green-200/80 leading-relaxed">
+                    Congratulations! Your earnings have reached the <strong className="text-green-300">$100 threshold</strong>. Your payout will be processed in the next <strong className="text-green-300">Monday's weekly batch</strong> and should arrive within <strong className="text-green-300">5–7 business days</strong>.
+                  </p>
+                )}
                 <div className="flex items-center gap-1.5 text-[10px] text-cyan-300/70 font-medium pt-0.5">
-                  <CalendarDays className="h-3 w-3 text-cyan-400 shrink-0" />
-                  Fill in your bank details below and submit your withdrawal request to join the next Monday batch.
+                  {isIndian ? (
+                    <><Smartphone className="h-3 w-3 text-cyan-400 shrink-0" /> Enter your UPI ID below to request your instant payout.</>
+                  ) : (
+                    <><CalendarDays className="h-3 w-3 text-cyan-400 shrink-0" /> Fill in your bank details below and submit your withdrawal request to join the next Monday batch.</>
+                  )}
                 </div>
               </div>
             )}
@@ -295,26 +312,44 @@ export default function WalletsPage() {
               </div>
             )}
 
-            {/* Payout Policy — always visible, global unified policy */}
+            {/* Payout Policy — regional */}
             <div className="rounded-lg border border-cyan-500/20 bg-cyan-500/[0.03] p-4 text-xs space-y-3">
               <div className="flex items-center gap-2 font-bold text-[11px] uppercase tracking-widest text-cyan-300">
-                <CalendarDays className="h-3.5 w-3.5 shrink-0 text-cyan-400" />
-                How Payouts Work
+                {isIndian
+                  ? <><Smartphone className="h-3.5 w-3.5 shrink-0 text-cyan-400" /> How Payouts Work (India)</>
+                  : <><CalendarDays className="h-3.5 w-3.5 shrink-0 text-cyan-400" /> How Payouts Work</>
+                }
               </div>
               <div className="space-y-2 text-cyan-200/70 leading-relaxed">
                 <p>
                   💚 Earnings are added <strong className="text-cyan-300">instantly</strong> after session completion and both the Hirer and Gamer submit their reviews.
                 </p>
-                <p>
-                  📅 Global payouts are processed <strong className="text-cyan-300">every Monday</strong> via Razorpay International Bank Transfer.
-                </p>
-                <p>
-                  💰 When your balance reaches <strong className="text-cyan-300">$100 USD</strong>, your money will be sent via international bank transfer and should arrive within <strong className="text-cyan-300">5–7 business days</strong> after the Monday processing.
-                </p>
+                {isIndian ? (
+                  <>
+                    <p>
+                      ⚡ Indian payouts are processed via <strong className="text-cyan-300">Razorpay UPI</strong> — the fastest way to receive your earnings.
+                    </p>
+                    <p>
+                      💰 Once your balance reaches <strong className="text-cyan-300">$100 USD</strong>, you can request a payout instantly. Funds typically arrive within <strong className="text-cyan-300">minutes to a few hours</strong> in your UPI-linked account.
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <p>
+                      📅 International payouts are processed <strong className="text-cyan-300">every Monday</strong> via Razorpay International Bank Transfer.
+                    </p>
+                    <p>
+                      💰 Once your balance reaches <strong className="text-cyan-300">$100 USD</strong>, your money will be sent via international bank transfer and should arrive within <strong className="text-cyan-300">5–7 business days</strong> after the Monday processing.
+                    </p>
+                  </>
+                )}
               </div>
               <div className="pt-0.5 border-t border-cyan-500/10 flex items-center gap-2 text-[10px] text-cyan-400/50 font-medium">
                 <Info className="h-3 w-3 shrink-0" />
-                Minimum withdrawal threshold: $100 USD · Payout method: International Bank Transfer
+                {isIndian
+                  ? "Minimum withdrawal threshold: $100 USD · Payout method: UPI (Razorpay)"
+                  : "Minimum withdrawal threshold: $100 USD · Payout method: International Bank Transfer"
+                }
               </div>
             </div>
 
@@ -360,23 +395,33 @@ export default function WalletsPage() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label className="text-xs uppercase tracking-widest text-muted-foreground">Bank Account Details</Label>
+                  <Label className="text-xs uppercase tracking-widest text-muted-foreground">
+                    {isIndian ? "UPI ID" : "Bank Account Details"}
+                  </Label>
                   <Input
-                    placeholder="Account No · IFSC / SWIFT · Bank Name"
+                    placeholder={isIndian ? "yourname@paytm / yourname@upi" : "Account No · IFSC / SWIFT · Bank Name"}
                     className="bg-background"
                     value={withdrawDetails}
                     onChange={(e) => setWithdrawDetails(e.target.value)}
                   />
                   <p className="text-[10px] text-muted-foreground/50">
-                    Enter your bank account number, IFSC / SWIFT code, and bank name. Double-check before submitting.
+                    {isIndian
+                      ? "Enter your UPI ID (e.g. name@paytm, name@okicici, name@ybl). Double-check before submitting."
+                      : "Enter your bank account number, IFSC / SWIFT code, and bank name. Double-check before submitting."}
                   </p>
                 </div>
 
                 <div className="flex items-start gap-2 rounded-lg border border-amber-500/25 bg-amber-500/5 p-3 text-xs text-amber-200/75">
                   <Clock className="h-3.5 w-3.5 shrink-0 mt-0.5 text-amber-400" />
-                  <span>
-                    <strong className="text-amber-300">Payout notice:</strong> Payouts are processed every <strong className="text-amber-300">Monday</strong> and typically arrive within <strong className="text-amber-300">5–7 business days</strong> after the weekly batch runs.
-                  </span>
+                  {isIndian ? (
+                    <span>
+                      <strong className="text-amber-300">Fast payout:</strong> UPI payouts via Razorpay are processed quickly. Funds typically arrive within <strong className="text-amber-300">minutes to a few hours</strong> of your request.
+                    </span>
+                  ) : (
+                    <span>
+                      <strong className="text-amber-300">Payout notice:</strong> Payouts are processed every <strong className="text-amber-300">Monday</strong> and typically arrive within <strong className="text-amber-300">5–7 business days</strong> after the weekly batch runs.
+                    </span>
+                  )}
                 </div>
 
                 <Button
@@ -387,6 +432,11 @@ export default function WalletsPage() {
                 >
                   {withdrawMutation.isPending ? (
                     <span className="flex items-center gap-2">Processing…</span>
+                  ) : isIndian ? (
+                    <span className="flex items-center gap-2">
+                      <Smartphone className="h-4 w-4" />
+                      Request UPI Payout
+                    </span>
                   ) : (
                     <span className="flex items-center gap-2">
                       <Building2 className="h-4 w-4" />
@@ -401,7 +451,10 @@ export default function WalletsPage() {
               <div className="flex items-start gap-2.5 rounded-lg bg-secondary/5 border border-secondary/20 p-3 text-xs text-secondary/70">
                 <ArrowUpFromLine className="h-4 w-4 shrink-0 mt-0.5 text-secondary/50" />
                 <span>
-                  Keep earning by fulfilling requests. Once you reach <strong className="text-secondary">$100.00</strong>, you can request a weekly payout via Bank Transfer.
+                  {isIndian
+                    ? <>Keep earning by fulfilling requests. Once you reach <strong className="text-secondary">$100.00</strong>, you can request an instant UPI payout via Razorpay.</>
+                    : <>Keep earning by fulfilling requests. Once you reach <strong className="text-secondary">$100.00</strong>, you can request a weekly payout via Bank Transfer.</>
+                  }
                 </span>
               </div>
             )}

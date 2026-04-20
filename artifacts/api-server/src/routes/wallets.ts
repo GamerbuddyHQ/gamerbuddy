@@ -248,12 +248,15 @@ router.post("/wallets/deposit", requireAuth, async (req, res): Promise<void> => 
 });
 
 // ── POST /wallets/withdraw ──────────────────────────────────────────────────
-// Global-first policy: all users withdraw via international bank transfer.
+// Regional payout policy:
+//   • India       → UPI (Razorpay instant payout), method = "upi"
+//   • International → Bank Transfer (Razorpay International, Monday batch), method = "bank_transfer"
 // Rate limited: 3 attempts per 10-minute window per user.
 router.post("/wallets/withdraw", requireAuth, withdrawLimiter, async (req, res): Promise<void> => {
   const user = req.user!;
-  const { amount, details } = req.body as {
+  const { amount, withdrawalMethod, details } = req.body as {
     amount?: number;
+    withdrawalMethod?: string;
     details?: string;
   };
 
@@ -269,11 +272,27 @@ router.post("/wallets/withdraw", requireAuth, withdrawLimiter, async (req, res):
     return;
   }
 
-  // Global-first unified payout: all users use bank transfer (Razorpay International)
-  const effectiveMethod = "bank_transfer";
+  // Determine the correct method based on the user's country
+  const isIndian = user.country === "India";
+  const expectedMethod = isIndian ? "upi" : "bank_transfer";
+  const effectiveMethod = withdrawalMethod ?? expectedMethod;
 
-  // Validate bank details are provided
-  if (!details?.trim()) {
+  // Enforce that the method matches the user's country
+  if (isIndian && effectiveMethod !== "upi") {
+    res.status(400).json({ error: "Indian accounts must withdraw via UPI. Please use your UPI ID." });
+    return;
+  }
+  if (!isIndian && effectiveMethod === "upi") {
+    res.status(400).json({ error: "UPI is only available for Indian accounts. Please use bank transfer." });
+    return;
+  }
+
+  // Validate payout details
+  if (effectiveMethod === "upi" && !details?.trim()) {
+    res.status(400).json({ error: "Please enter your UPI ID (e.g. yourname@paytm)" });
+    return;
+  }
+  if (effectiveMethod === "bank_transfer" && !details?.trim()) {
     res.status(400).json({ error: "Please enter your bank account details (Account No, IFSC/SWIFT, Bank Name)" });
     return;
   }
@@ -319,7 +338,9 @@ router.post("/wallets/withdraw", requireAuth, withdrawLimiter, async (req, res):
     return;
   }
 
-  const methodLabel = `Bank Transfer (${details?.trim()})`;
+  const methodLabel = effectiveMethod === "upi"
+    ? `UPI (${details?.trim()})`
+    : `Bank Transfer (${details?.trim()})`;
 
   await recordTransaction(
     user.id,
