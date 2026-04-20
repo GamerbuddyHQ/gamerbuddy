@@ -257,8 +257,8 @@ function QuickBidPanel({ req, onClose }: { req: GameRequest; onClose: () => void
           </span>
           <span className={req.hirerRegion === "india" ? "text-amber-300/80" : "text-green-300/80"}>
             {req.hirerRegion === "india"
-              ? `Min ₹350/hr${req.sessionHours ? ` · ${req.sessionHours}h → ₹${(350 * req.sessionHours).toLocaleString()} total min` : ""}`
-              : `Min $8/hr${req.sessionHours ? ` · ${req.sessionHours}h → $${(8 * req.sessionHours).toFixed(2)} total min` : ""}`}
+              ? `Min ₹200/hr${req.sessionHours ? ` · ${req.sessionHours}h → ₹${(200 * req.sessionHours).toLocaleString()} total min` : ""}`
+              : `Min $5/hr${req.sessionHours ? ` · ${req.sessionHours}h → $${(5 * req.sessionHours).toFixed(2)} total min` : ""}`}
           </span>
         </div>
       )}

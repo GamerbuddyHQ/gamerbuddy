@@ -105,8 +105,8 @@ const SKILL_META: Record<
 const OBJECTIVES_MAX = 500;
 
 const MIN_RATES = {
-  india: { perHour: 350, currency: "INR", symbol: "₹", label: "₹350/hr" },
-  international: { perHour: 8, currency: "USD", symbol: "$", label: "$8/hr" },
+  india: { perHour: 200, currency: "INR", symbol: "₹", label: "₹200/hr" },
+  international: { perHour: 5, currency: "USD", symbol: "$", label: "$5/hr" },
 } as const;
 
 export default function PostRequest() {
@@ -453,8 +453,8 @@ export default function PostRequest() {
                   </label>
                   <div className="grid grid-cols-2 gap-2">
                     {([
-                      { value: "india", label: "🇮🇳 India", sub: "Min ₹350/hr" },
-                      { value: "international", label: "🌍 International", sub: "Min $8/hr" },
+                      { value: "india", label: "🇮🇳 India", sub: "Min ₹200/hr" },
+                      { value: "international", label: "🌍 International", sub: "Min $5/hr" },
                     ] as const).map(({ value, label, sub }) => (
                       <button
                         key={value}
@@ -515,8 +515,8 @@ export default function PostRequest() {
                   <div className="space-y-1 text-xs">
                     <div className={`font-bold ${hirerRegion === "india" ? "text-amber-300" : "text-green-300"}`}>
                       {hirerRegion === "india"
-                        ? `Minimum fee is ₹350 per hour to ensure fair compensation for the Gamer's time and effort.`
-                        : `Minimum fee is $8 USD per hour to ensure fair pay for the Gamer.`}
+                        ? `Minimum fee is ₹200 per hour to ensure fair compensation for the Gamer's time and effort.`
+                        : `Minimum fee is $5 USD per hour to ensure fair pay for the Gamer.`}
                     </div>
                     <div className="text-muted-foreground/70">
                       For a <span className="text-white font-bold">{sessionHours}-hour</span> session:{" "}

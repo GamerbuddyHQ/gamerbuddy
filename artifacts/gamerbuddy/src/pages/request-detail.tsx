@@ -2519,8 +2519,8 @@ export default function RequestDetail() {
                   </div>
                   <div className="text-muted-foreground/70">
                     {request.hirerRegion === "india"
-                      ? "Minimum fee is ₹350/hr to ensure fair compensation for the Gamer."
-                      : "Minimum fee is $8/hr to ensure fair pay for the Gamer."}
+                      ? "Minimum fee is ₹200/hr to ensure fair compensation for the Gamer."
+                      : "Minimum fee is $5/hr to ensure fair pay for the Gamer."}
                   </div>
                 </div>
               </div>

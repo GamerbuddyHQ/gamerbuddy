@@ -66,7 +66,7 @@ function formatRequest(
 ) {
   const hirerRegion = req.hirerRegion ?? "international";
   const sessionHours = req.sessionHours ?? null;
-  const minBidPerHour = hirerRegion === "india" ? 350 : 8;
+  const minBidPerHour = hirerRegion === "india" ? 200 : 5;
   const minBidCurrency = hirerRegion === "india" ? "INR" : "USD";
   const minBidTotal = sessionHours ? minBidPerHour * sessionHours : null;
 

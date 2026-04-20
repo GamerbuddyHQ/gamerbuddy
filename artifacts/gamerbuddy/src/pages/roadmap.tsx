@@ -42,7 +42,7 @@ const PHASES = [
       {
         icon: Globe,
         title: "Regional Minimum Hiring Fee",
-        desc: "₹350 per hour for India, $8 USD per hour for global. Enforced on every request — gamers can bid at or above the floor, never below.",
+        desc: "₹200 per hour for India, $5 USD per hour for global. Enforced on every request — gamers can bid at or above the floor, never below.",
       },
       {
         icon: Gamepad2,
@@ -250,7 +250,7 @@ export default function Roadmap() {
           </span>
         </div>
         <p className="text-sm sm:text-[15px] text-foreground/80 leading-[1.75]">
-          <strong className="text-foreground">Phase 1 is fully live.</strong> User registration with 24–48hr verification, unique GB-XXXXXX IDs, profile photos with anti-AI enforcement, regional minimum fees (₹350/hr India · $8/hr global), request posting &amp; bidding, in-app messaging, dual wallets with 10% platform fee, manual payouts ($100 threshold), reviews &amp; Trust Factor, connected gaming accounts display, optional gender filter, Community tab with voting, full Community Guidelines, and a professional 6-section Disclaimer.
+          <strong className="text-foreground">Phase 1 is fully live.</strong> User registration with 24–48hr verification, unique GB-XXXXXX IDs, profile photos with anti-AI enforcement, regional minimum fees (₹200/hr India · $5/hr global), request posting &amp; bidding, in-app messaging, dual wallets with 10% platform fee, manual payouts ($100 threshold), reviews &amp; Trust Factor, connected gaming accounts display, optional gender filter, Community tab with voting, full Community Guidelines, and a professional 6-section Disclaimer.
         </p>
         <p className="text-sm text-muted-foreground/60 leading-[1.75]">
           We're now building Phase 2 — tournaments, bulk hiring (3–100 gamers), automatic payouts, and advanced real-time features. Your Community votes directly shape what gets prioritised next. 🚀
