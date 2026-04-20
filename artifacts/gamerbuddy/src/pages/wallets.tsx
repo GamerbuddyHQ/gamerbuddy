@@ -35,6 +35,8 @@ import {
   Building2,
   Globe,
   Info,
+  Clock,
+  CalendarDays,
 } from "lucide-react";
 
 const MIN_DEPOSIT = 10.75;
@@ -102,10 +104,12 @@ export default function WalletsPage() {
       queryClient.invalidateQueries({ queryKey: ["wallet-transactions"] });
       setWithdrawAmount("");
       setWithdrawDetails("");
-      const methodLabel = withdrawalMethod === "upi" ? "UPI" : "Bank Transfer";
+      const isIn = withdrawalMethod === "upi";
       toast({
-        title: "Withdrawal Initiated 🎉",
-        description: `$${parseFloat(withdrawAmount).toFixed(2)} is on its way via ${methodLabel}!`,
+        title: "Withdrawal Requested 🎉",
+        description: isIn
+          ? `Your withdrawal is being processed instantly via UPI. Funds usually arrive same-day.`
+          : `Your request has been queued. International payouts are processed every Monday — funds arrive within 5–7 business days.`,
       });
     },
     onError: (err: any) => {
@@ -272,25 +276,36 @@ export default function WalletsPage() {
               </div>
             )}
 
-            {/* Withdrawal method info banner — always visible */}
+            {/* Payout Policy banner — always visible */}
             <div
-              className="flex items-start gap-2.5 rounded-lg p-3 text-xs border"
+              className="rounded-lg border p-3 text-xs space-y-2"
               style={{
                 background: isIndian ? "rgba(34,197,94,0.04)" : "rgba(34,211,238,0.04)",
                 borderColor: isIndian ? "rgba(34,197,94,0.20)" : "rgba(34,211,238,0.20)",
-                color: isIndian ? "rgb(134,239,172)" : "rgb(103,232,249)",
               }}
             >
-              {isIndian
-                ? <Smartphone className="h-4 w-4 shrink-0 mt-0.5 text-green-400" />
-                : <Building2 className="h-4 w-4 shrink-0 mt-0.5 text-cyan-400" />
-              }
-              <span>
+              <div className="flex items-center gap-2 font-bold text-[11px] uppercase tracking-widest"
+                style={{ color: isIndian ? "rgb(134,239,172)" : "rgb(103,232,249)" }}>
                 {isIndian
-                  ? <><strong className="text-green-300">Indian users</strong> withdraw instantly via <strong className="text-green-300">UPI</strong> (GPay, PhonePe, Paytm, etc.).</>
-                  : <><strong className="text-cyan-300">International users</strong> withdraw via <strong className="text-cyan-300">Bank Transfer</strong>. Processing time: 3–5 business days.</>
+                  ? <Smartphone className="h-3.5 w-3.5 shrink-0 text-green-400" />
+                  : <CalendarDays className="h-3.5 w-3.5 shrink-0 text-cyan-400" />
                 }
-              </span>
+                {isIndian ? "India Payout Policy" : "International Payout Policy"}
+              </div>
+              {isIndian ? (
+                <ul className="space-y-1 text-green-200/70 leading-relaxed pl-1">
+                  <li>✅ Earnings credited to wallet <strong className="text-green-300">immediately</strong> after session completion + both reviews submitted</li>
+                  <li>⚡ Withdrawals processed <strong className="text-green-300">instantly or same-day</strong> via Razorpay → UPI (GPay, PhonePe, Paytm, bank)</li>
+                  <li>💰 Minimum threshold: <strong className="text-green-300">₹8,300 (~$100 USD)</strong></li>
+                </ul>
+              ) : (
+                <ul className="space-y-1 text-cyan-200/70 leading-relaxed pl-1">
+                  <li>✅ Earnings credited to wallet <strong className="text-cyan-300">immediately</strong> after session completion + both reviews submitted</li>
+                  <li>📅 Withdrawals processed <strong className="text-cyan-300">once per week — every Monday</strong> via Razorpay International Bank Transfer</li>
+                  <li>⏱️ Funds arrive <strong className="text-cyan-300">within 5–7 business days</strong> after the weekly Monday payout batch</li>
+                  <li>💰 Minimum threshold: <strong className="text-cyan-300">$100 USD</strong></li>
+                </ul>
+              )}
             </div>
 
             {wallets.canWithdraw && (
@@ -336,6 +351,15 @@ export default function WalletsPage() {
                     }
                   </p>
                 </div>
+
+                {!isIndian && (
+                  <div className="flex items-start gap-2 rounded-lg border border-amber-500/25 bg-amber-500/5 p-3 text-xs text-amber-200/75">
+                    <Clock className="h-3.5 w-3.5 shrink-0 mt-0.5 text-amber-400" />
+                    <span>
+                      <strong className="text-amber-300">International payout notice:</strong> Payouts to international bank accounts are processed within <strong className="text-amber-300">5–7 business days</strong> after the weekly payout batch (runs every <strong className="text-amber-300">Monday</strong>), once the $100 threshold is reached.
+                    </span>
+                  </div>
+                )}
 
                 <Button
                   onClick={handleWithdraw}

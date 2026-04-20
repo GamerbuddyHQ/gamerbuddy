@@ -1,4 +1,4 @@
-import { Shield, Info, Gamepad2, AlertTriangle, CheckCircle2, Users, Lock, Star, Zap, Heart } from "lucide-react";
+import { Shield, Info, Gamepad2, AlertTriangle, CheckCircle2, Users, Lock, Star, Zap, Heart, CalendarDays } from "lucide-react";
 import { Link } from "wouter";
 
 const SECTIONS = [
@@ -105,6 +105,14 @@ const SECTIONS = [
     iconColor: "text-pink-400",
     content:
       "All users are required to upload a minimum of one (1) main profile picture and a minimum of two (2) additional photos on their profile. All photos must be genuine, real solo photographs of the account holder only. Group photos are strictly prohibited. AI-generated, digitally altered, fake, or stolen images are strictly prohibited and constitute a serious violation of Platform policy. Duplicate photo uploads (the same image submitted more than once) are blocked automatically. Profile photos are reviewed by our moderation team and must be submitted in good faith. Failure to comply — including the use of fake, AI-generated, or deceptive photos — may result in immediate account suspension and forfeiture of any pending earnings. Profile photos are displayed on bid cards, public profiles, and request listings to build trust and transparency between all users.",
+  },
+  {
+    number: "14",
+    title: "Earnings Wallet & Payout Policy",
+    icon: CalendarDays,
+    iconColor: "text-cyan-400",
+    content:
+      "Earnings are credited to a Gamer's Earnings Wallet immediately upon session completion and once both parties have submitted their mandatory reviews. For users based in India: withdrawals are processed instantly or same-day via Razorpay to the user's UPI ID or Indian bank account (GPay, PhonePe, Paytm, etc.), subject to a minimum withdrawal threshold of ₹8,300 (approximately $100 USD). For users outside India (including Europe, the United States, Canada, Australia, and all other countries): withdrawals are processed in a single weekly batch every Monday via Razorpay International Bank Transfer; funds typically arrive within 5–7 business days after the Monday batch is processed, subject to a minimum withdrawal threshold of $100 USD. Gamerbuddy does not guarantee specific settlement times as these are subject to third-party banking and payment provider timelines. The Hiring Wallet is a deposit-only wallet and cannot be withdrawn under any circumstances — funds therein may only be used to fund game session requests.",
   },
 ];
 
