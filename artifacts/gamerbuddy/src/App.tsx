@@ -1,3 +1,4 @@
+import React from "react";
 import { Switch, Route, Router as WouterRouter, Redirect } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -31,6 +32,8 @@ import Roadmap from "@/pages/roadmap";
 import ComingSoon from "@/pages/coming-soon";
 import AdminSecurity from "@/pages/admin-security";
 import PlatformEarnings from "@/pages/platform-earnings";
+import AdminLogin from "@/pages/admin-login";
+import AdminDashboard from "@/pages/admin-dashboard";
 import SocialsPage from "@/pages/socials";
 
 const queryClient = new QueryClient({
@@ -66,6 +69,21 @@ function AdminRoute({ component: Component }: { component: React.ComponentType<a
   return <Component />;
 }
 
+function AdminCookieRoute({ component: Component }: { component: React.ComponentType<any> }) {
+  const [isAdmin, setIsAdmin] = React.useState<boolean | null>(null);
+  React.useEffect(() => {
+    fetch(`${(import.meta.env.VITE_API_URL ?? "/api").replace(/\/$/, "")}/admin/auth/me`, { credentials: "include" })
+      .then(r => r.json())
+      .then(d => setIsAdmin(!!d.isAdmin))
+      .catch(() => setIsAdmin(false));
+  }, []);
+  if (isAdmin === null) {
+    return <div className="min-h-[50vh] flex items-center justify-center"><div className="animate-pulse text-primary font-bold uppercase tracking-widest">Loading...</div></div>;
+  }
+  if (!isAdmin) return <Redirect to="/admin/login" />;
+  return <Component />;
+}
+
 function Router() {
   return (
     <Layout>
@@ -94,8 +112,10 @@ function Router() {
         <Route path="/socials" component={SocialsPage} />
         <Route path="/roadmap" component={Roadmap} />
 
-        <Route path="/admin/security"><AdminRoute component={AdminSecurity} /></Route>
-        <Route path="/admin/platform-earnings"><AdminRoute component={PlatformEarnings} /></Route>
+        <Route path="/admin/login" component={AdminLogin} />
+        <Route path="/admin/dashboard"><AdminCookieRoute component={AdminDashboard} /></Route>
+        <Route path="/admin/security"><AdminCookieRoute component={AdminSecurity} /></Route>
+        <Route path="/admin/platform-earnings"><AdminCookieRoute component={PlatformEarnings} /></Route>
 
         <Route component={NotFound} />
       </Switch>

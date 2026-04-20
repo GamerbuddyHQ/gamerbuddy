@@ -102,6 +102,16 @@ export const postRequestLimiter = rateLimit({
   handler: jsonMessage("You're posting requests too quickly. Please wait a minute."),
 });
 
+// ── Admin login ────────────────────────────────────────────────────────────
+// 5 per 15 minutes per IP — strict limit to block brute-force on admin panel.
+export const adminLoginLimiter = rateLimit({
+  windowMs: 15 * 60_000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: jsonMessage("Too many admin login attempts. Please wait 15 minutes and try again."),
+});
+
 // ── Verification submission ────────────────────────────────────────────────
 // 3 per hour per user — prevents flooding admin review queue.
 export const verifyLimiter = rateLimit({

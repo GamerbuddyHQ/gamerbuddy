@@ -1,24 +1,15 @@
 /**
- * Admin-only routes — all endpoints require the requesting user to be the
- * platform owner (userId === 1). Any other authenticated user gets a 403.
+ * Admin-only routes — all endpoints require a valid admin session cookie.
+ * Auth is handled by requireAdminAuth (email + password + secret key login).
  */
 
-import { Router, type IRouter, type RequestHandler } from "express";
+import { Router, type IRouter } from "express";
 import { db, usersTable, walletTransactionsTable, reportsTable, walletsTable, withdrawalRequestsTable } from "@workspace/db";
 import { eq, desc, gt, or, isNotNull, sql, and, gte, inArray, not } from "drizzle-orm";
 import { round2, recordTransaction } from "./wallets";
-import { requireAuth } from "../middlewares/auth";
+import { requireAdminAuth } from "./admin-auth";
 
 const router: IRouter = Router();
-
-// ── requireAdmin — must come after requireAuth ────────────────────────────
-const requireAdmin: RequestHandler = (req, res, next) => {
-  if (req.user?.id !== 1) {
-    res.status(403).json({ error: "Admin access required" });
-    return;
-  }
-  next();
-};
 
 // ── GET /admin/security ───────────────────────────────────────────────────
 // Returns three sections in one request to minimize round-trips:
@@ -27,8 +18,7 @@ const requireAdmin: RequestHandler = (req, res, next) => {
 //   • transactions   — most recent 100 wallet movements across all users
 router.get(
   "/admin/security",
-  requireAuth,
-  requireAdmin,
+  requireAdminAuth,
   async (_req, res): Promise<void> => {
     const now = new Date();
 
@@ -161,8 +151,7 @@ router.get(
 // Lets the admin manually reset a user's failed-login counter + lock.
 router.post(
   "/admin/security/clear-lockout/:userId",
-  requireAuth,
-  requireAdmin,
+  requireAdminAuth,
   async (req, res): Promise<void> => {
     const userId = parseInt(req.params.userId, 10);
     if (isNaN(userId)) {
@@ -175,7 +164,7 @@ router.post(
       .set({ loginAttempts: 0, lockedUntil: null })
       .where(eq(usersTable.id, userId));
 
-    req.log.info({ adminId: req.user!.id, targetUserId: userId }, "Admin cleared account lockout");
+    req.log.info({ adminId: "admin", targetUserId: userId }, "Admin cleared account lockout");
     res.json({ success: true });
   },
 );
@@ -187,8 +176,7 @@ router.post(
 // Serverless-safe: read-only query, no background processing.
 router.get(
   "/admin/process-payouts",
-  requireAuth,
-  requireAdmin,
+  requireAdminAuth,
   async (_req, res): Promise<void> => {
     const MIN_PAYOUT = 100;
 
@@ -225,8 +213,7 @@ router.get(
 // Lists all withdrawal requests (pending first, then recent paid/cancelled).
 router.get(
   "/admin/withdrawal-requests",
-  requireAuth,
-  requireAdmin,
+  requireAdminAuth,
   async (_req, res): Promise<void> => {
     const requests = await db
       .select({
@@ -271,8 +258,7 @@ router.get(
 // Marks a pending withdrawal request as paid, deducts balance, records txn.
 router.post(
   "/admin/withdrawal-requests/:id/mark-paid",
-  requireAuth,
-  requireAdmin,
+  requireAdminAuth,
   async (req, res): Promise<void> => {
     const requestId = parseInt(req.params.id, 10);
     if (isNaN(requestId)) {
@@ -332,7 +318,7 @@ router.post(
       `Withdrawal payout $${wr.amount.toFixed(2)} — processed by admin (Req #${requestId})`,
     );
 
-    req.log.info({ adminId: req.user!.id, requestId, userId: wr.userId, amount: wr.amount }, "Admin marked withdrawal as paid");
+    req.log.info({ adminId: "admin", requestId, userId: wr.userId, amount: wr.amount }, "Admin marked withdrawal as paid");
 
     res.json({
       success: true,
@@ -349,8 +335,7 @@ router.post(
 // Bulk mark ALL pending withdrawal requests as paid.
 router.post(
   "/admin/withdrawal-requests/process-all",
-  requireAuth,
-  requireAdmin,
+  requireAdminAuth,
   async (req, res): Promise<void> => {
     const pending = await db
       .select()
@@ -388,7 +373,7 @@ router.post(
     }
 
     const succeeded = results.filter((r) => r.success).length;
-    req.log.info({ adminId: req.user!.id, processed: succeeded, failed: results.length - succeeded }, "Admin bulk-processed withdrawal requests");
+    req.log.info({ adminId: "admin", processed: succeeded, failed: results.length - succeeded }, "Admin bulk-processed withdrawal requests");
     res.json({ processed: succeeded, failed: results.length - succeeded, results });
   },
 );
@@ -398,8 +383,7 @@ router.post(
 // but have not yet been approved (idVerified = false).
 router.get(
   "/admin/pending-verifications",
-  requireAuth,
-  requireAdmin,
+  requireAdminAuth,
   async (_req, res): Promise<void> => {
     const pending = await db
       .select({
@@ -438,8 +422,7 @@ router.get(
 // Body: { verified: true | false }
 router.post(
   "/admin/users/:id/set-verified",
-  requireAuth,
-  requireAdmin,
+  requireAdminAuth,
   async (req, res): Promise<void> => {
     const userId = parseInt(req.params.id, 10);
     if (isNaN(userId)) {
@@ -465,7 +448,7 @@ router.post(
     }
 
     req.log.info(
-      { adminId: req.user!.id, targetUserId: userId, verified },
+      { adminId: "admin", targetUserId: userId, verified },
       `Admin ${verified ? "approved" : "revoked"} verification for user ${userId}`,
     );
 
