@@ -30,7 +30,7 @@ import {
   Star, Trophy, Swords, Edit3, Check, X, Palette, Tag,
   Sparkles, Lock, CheckCircle2, Plus, Trash2, Gamepad2,
   Zap, Target, ChevronDown, ChevronUp, Users, Globe, UserRound,
-  Camera, ImagePlus, AlertTriangle,
+  Camera, ImagePlus, AlertTriangle, BookOpen,
 } from "lucide-react";
 import { TrustMeter, ReputationBadges, computeBadges } from "@/components/reputation-badges";
 import { StreamingAccountsDisplay } from "@/components/streaming-accounts-display";
@@ -449,6 +449,67 @@ function ProfileCompletionBanner({ profile }: { profile: any }) {
               <span className="opacity-50">+{item.pts}%</span>
             </span>
           ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── COMMUNITY GUIDELINES REMINDER ──────────────────────────── */
+const GUIDELINES_BANNER_KEY = "gb_community_guidelines_v1";
+const GUIDELINES_RULES = [
+  { icon: "🤝", title: "Be Respectful", text: "No harassment, toxicity, or hate speech." },
+  { icon: "🚫", title: "No NSFW Content", text: "Explicit images or sexual content = immediate ban." },
+  { icon: "💬", title: "Professional Comms", text: "Gaming only. No personal info requests or flirting." },
+  { icon: "🔒", title: "Respect Privacy", text: "Don't share other users' Discord/Steam outside the platform." },
+  { icon: "✅", title: "Fair Play", text: "No ghosting, trolling, or ruining sessions intentionally." },
+];
+
+function CommunityGuidelinesReminder() {
+  const [dismissed, setDismissed] = useState(() => localStorage.getItem(GUIDELINES_BANNER_KEY) === "1");
+
+  if (dismissed) return null;
+
+  return (
+    <div
+      className="rounded-2xl overflow-hidden"
+      style={{
+        border: "1px solid rgba(34,211,238,0.25)",
+        background: "linear-gradient(135deg, rgba(34,211,238,0.05), rgba(6,182,212,0.03))",
+      }}
+    >
+      <div className="h-1 bg-gradient-to-r from-cyan-600 via-cyan-400 to-cyan-600" />
+      <div className="px-5 py-4 space-y-3">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="h-9 w-9 rounded-xl bg-cyan-400/10 border border-cyan-400/25 flex items-center justify-center shrink-0">
+              <BookOpen className="h-4 w-4 text-cyan-400" />
+            </div>
+            <div>
+              <div className="text-sm font-black text-white">Community Guidelines</div>
+              <div className="text-xs text-muted-foreground">All users must follow these rules</div>
+            </div>
+          </div>
+          <button
+            onClick={() => { localStorage.setItem(GUIDELINES_BANNER_KEY, "1"); setDismissed(true); }}
+            className="h-7 w-7 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors shrink-0"
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          {GUIDELINES_RULES.map((r) => (
+            <div key={r.icon} className="flex items-start gap-2 text-xs text-foreground/60">
+              <span className="text-base leading-none mt-0.5 shrink-0">{r.icon}</span>
+              <span><strong className="text-foreground/80">{r.title}:</strong> {r.text}</span>
+            </div>
+          ))}
+        </div>
+        <div className="flex items-center justify-between pt-1 border-t border-cyan-500/10">
+          <p className="text-[10px] text-muted-foreground/50">Breaking rules may result in suspension or permanent ban.</p>
+          <a href="/about" className="text-[10px] text-cyan-400/70 hover:text-cyan-400 font-semibold transition-colors whitespace-nowrap">
+            Full Guidelines →
+          </a>
         </div>
       </div>
     </div>
@@ -1870,6 +1931,9 @@ export default function Profile() {
 
       {/* ── PROFILE COMPLETION BANNER (verified users only) ── */}
       {user.idVerified && profile && <ProfileCompletionBanner profile={profile} />}
+
+      {/* ── COMMUNITY GUIDELINES REMINDER ── */}
+      <CommunityGuidelinesReminder />
 
       {/* ── HERO CARD ─────────────────────────────────────────── */}
       <div className="rounded-2xl overflow-hidden border border-border/60">

@@ -1,4 +1,4 @@
-import { Shield, Info, Gamepad2, AlertTriangle, CheckCircle2, Users, Lock, Star, Zap, Heart, CalendarDays, Banknote } from "lucide-react";
+import { Shield, Info, Gamepad2, AlertTriangle, CheckCircle2, Users, Lock, Star, Zap, Heart, CalendarDays, Banknote, BookOpen, MessageSquare, Ban, EyeOff, Handshake, UserCheck } from "lucide-react";
 import { Link } from "wouter";
 
 const SECTIONS = [
@@ -277,6 +277,96 @@ export default function About() {
             </div>
           );
         })}
+      </div>
+
+      {/* ── Community Guidelines & Behavior Rules ── */}
+      <div
+        className="rounded-2xl border p-5 space-y-5"
+        style={{ background: "rgba(34,211,238,0.03)", borderColor: "rgba(34,211,238,0.15)" }}
+      >
+        <div className="flex items-start gap-4">
+          {/* Number + icon */}
+          <div className="flex flex-col items-center gap-1.5 shrink-0 pt-0.5">
+            <div
+              className="h-8 w-8 rounded-xl flex items-center justify-center border border-cyan-400/30 font-black text-sm text-cyan-400"
+              style={{ background: "rgba(34,211,238,0.1)" }}
+            >
+              16
+            </div>
+            <BookOpen className="h-3.5 w-3.5 text-cyan-400" />
+          </div>
+          <div className="space-y-1 flex-1">
+            <h3 className="font-black text-white text-base leading-tight">Community Guidelines & Behavior Rules</h3>
+            <p className="text-sm text-foreground/60 leading-relaxed">
+              All users — both Hirers and Gamers — are expected to follow these rules. Violations may result in warnings, suspension, or permanent removal.
+            </p>
+          </div>
+        </div>
+
+        <div className="space-y-3 pl-12">
+          {[
+            {
+              num: "1",
+              icon: <Handshake className="h-4 w-4 text-green-400 shrink-0 mt-0.5" />,
+              title: "Be Respectful and Polite",
+              text: "Treat every player with kindness and respect. No harassment, toxicity, hate speech, or personal attacks of any kind.",
+              color: "border-green-500/20 bg-green-500/[0.03]",
+            },
+            {
+              num: "2",
+              icon: <Ban className="h-4 w-4 text-red-400 shrink-0 mt-0.5" />,
+              title: "No Inappropriate Content",
+              text: "Sharing nudes, explicit images, sexual content, or any NSFW material is strictly prohibited. Violators will face immediate account suspension.",
+              color: "border-red-500/20 bg-red-500/[0.03]",
+            },
+            {
+              num: "3",
+              icon: <MessageSquare className="h-4 w-4 text-blue-400 shrink-0 mt-0.5" />,
+              title: "Maintain Professional Communication",
+              text: "Keep conversations focused on gaming sessions. Do not ask for personal information, request photos beyond the allowed profile gallery, or engage in romantic or flirting behaviour.",
+              color: "border-blue-500/20 bg-blue-500/[0.03]",
+            },
+            {
+              num: "4",
+              icon: <EyeOff className="h-4 w-4 text-purple-400 shrink-0 mt-0.5" />,
+              title: "Respect Privacy",
+              text: "Never share another user's Discord username, Steam profile, or personal details outside the platform without their explicit permission.",
+              color: "border-purple-500/20 bg-purple-500/[0.03]",
+            },
+            {
+              num: "5",
+              icon: <UserCheck className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />,
+              title: "Fair Play",
+              text: "Complete sessions honestly. Do not ghost, troll, or intentionally ruin the gaming experience for others.",
+              color: "border-amber-500/20 bg-amber-500/[0.03]",
+            },
+          ].map((rule) => (
+            <div
+              key={rule.num}
+              className={`rounded-xl border p-4 flex items-start gap-3 ${rule.color}`}
+            >
+              {rule.icon}
+              <div className="space-y-0.5">
+                <p className="text-sm font-bold text-white leading-snug">
+                  <span className="text-muted-foreground/50 font-normal mr-1.5">{rule.num}.</span>
+                  {rule.title}
+                </p>
+                <p className="text-xs text-foreground/60 leading-relaxed">{rule.text}</p>
+              </div>
+            </div>
+          ))}
+
+          {/* Consequences */}
+          <div className="rounded-xl border border-orange-500/20 bg-orange-500/[0.03] p-4 flex items-start gap-3">
+            <AlertTriangle className="h-4 w-4 text-orange-400 shrink-0 mt-0.5" />
+            <div className="space-y-0.5">
+              <p className="text-sm font-bold text-white leading-snug">Consequences</p>
+              <p className="text-xs text-foreground/60 leading-relaxed">
+                Breaking these rules may result in warnings, temporary suspension, or permanent ban. Gamerbuddy reserves the right to remove any user who makes others feel unsafe or uncomfortable — without prior notice.
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* ── Closing agreement ── */}
