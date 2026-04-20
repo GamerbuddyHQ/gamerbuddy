@@ -13,7 +13,9 @@ const router = Router();
 const isProd = process.env.NODE_ENV === "production";
 
 const ADMIN_EMAIL      = "gamerbuddyhq@gmail.com";
-const ADMIN_PWD_HASH   = process.env.ADMIN_PASSWORD_HASH ?? "";
+// ADMIN_PWD_HASH env var stores the bcrypt hash (set as a regular env var, not a secret)
+// Falls back to ADMIN_PASSWORD_HASH for backwards compatibility
+const ADMIN_PWD_HASH   = process.env.ADMIN_PWD_HASH ?? process.env.ADMIN_PASSWORD_HASH ?? "";
 const ADMIN_SECRET_KEY = process.env.ADMIN_SECRET_KEY    ?? "";
 const SESSION_HOURS    = 8;
 

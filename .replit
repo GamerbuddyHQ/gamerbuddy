@@ -41,3 +41,8 @@ externalPort = 3002
 
 [nix]
 channel = "stable-25_05"
+
+[userenv]
+
+[userenv.shared]
+ADMIN_PWD_HASH = "$2b$12$IjhFXUB7q1fsfyBeb35fIu6C/e9ts07ApNQiC/CpT9skzS4AzxNRW"
