@@ -58,7 +58,7 @@ export default function PlatformEarnings() {
     : "rgba(0,0,0,0.10)";
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
+    <div className="max-w-[1400px] mx-auto space-y-8">
       {/* Header */}
       <div className="flex items-center gap-4">
         <button

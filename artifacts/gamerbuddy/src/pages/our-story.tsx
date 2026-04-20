@@ -4,7 +4,7 @@ import { Link } from "wouter";
 export default function OurStory() {
   return (
     <div className="min-h-[80vh] py-12 px-4">
-      <div className="max-w-2xl mx-auto space-y-10">
+      <div className="max-w-4xl mx-auto space-y-10">
 
         {/* ── Header ── */}
         <div className="text-center space-y-4">

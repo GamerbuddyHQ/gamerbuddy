@@ -557,7 +557,7 @@ export default function AdminSecurity() {
   const txTotal = data?.transactions.length ?? 0;
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8">
+    <div className="max-w-[1400px] mx-auto space-y-8">
 
       {/* ── Header ── */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">

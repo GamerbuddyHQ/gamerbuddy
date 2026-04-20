@@ -1861,7 +1861,7 @@ export default function Profile() {
 
   if (!user) return null;
   if (isLoading) return (
-    <div className="max-w-3xl mx-auto space-y-4">
+    <div className="max-w-5xl mx-auto space-y-4">
       <Skeleton className="h-48 rounded-2xl" />
       <Skeleton className="h-32 rounded-2xl" />
       <Skeleton className="h-64 rounded-2xl" />
@@ -1913,7 +1913,7 @@ export default function Profile() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto space-y-5">
+    <div className="max-w-5xl mx-auto space-y-5">
 
       {/* ── POST-VERIFICATION MODAL ── */}
       {showSetupModal && (

@@ -184,7 +184,7 @@ const STATUS_ICON = {
 
 export default function Roadmap() {
   return (
-    <div className="max-w-3xl mx-auto space-y-14 pb-16">
+    <div className="max-w-4xl mx-auto space-y-14 pb-16">
 
       {/* ── Hero ── */}
       <div className="text-center space-y-4 pt-2">

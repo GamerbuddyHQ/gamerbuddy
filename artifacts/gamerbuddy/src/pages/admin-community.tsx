@@ -175,7 +175,7 @@ export default function AdminCommunity() {
         </Button>
       </div>
 
-      <div className="p-4 md:p-6 space-y-5 max-w-7xl mx-auto">
+      <div className="space-y-5 max-w-[1400px] mx-auto">
 
         {/* ── Stats row ── */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">

@@ -54,7 +54,7 @@ const SECTIONS = [
 
 export default function About() {
   return (
-    <div className="max-w-3xl mx-auto space-y-12 pb-16">
+    <div className="max-w-4xl mx-auto space-y-12 pb-16">
 
       {/* ── Hero ── */}
       <div className="space-y-6 pt-4">

@@ -2077,7 +2077,7 @@ export default function RequestDetail() {
   };
 
   if (loadingReq) return (
-    <div className="max-w-2xl mx-auto space-y-4">
+    <div className="max-w-5xl mx-auto space-y-4">
       <Skeleton className="h-10 w-48" />
       <Skeleton className="h-56" />
       <Skeleton className="h-40" />
@@ -2097,7 +2097,7 @@ export default function RequestDetail() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
+    <div className="max-w-5xl mx-auto space-y-6">
       {showReportHirer && (
         <ReportModal reportedUserId={request.userId} reportedName={request.userName} onClose={() => setShowReportHirer(false)} />
       )}

@@ -279,7 +279,7 @@ export default function UserProfilePage() {
 
   if (isNaN(profileId)) {
     return (
-      <div className="max-w-2xl mx-auto py-16 text-center text-muted-foreground">
+      <div className="max-w-4xl mx-auto py-16 text-center text-muted-foreground">
         Invalid profile link.
       </div>
     );
@@ -287,7 +287,7 @@ export default function UserProfilePage() {
 
   if (isLoading) {
     return (
-      <div className="max-w-2xl mx-auto space-y-4">
+      <div className="max-w-4xl mx-auto space-y-4">
         <Skeleton className="h-48 rounded-2xl" />
         <Skeleton className="h-32 rounded-2xl" />
         <Skeleton className="h-48 rounded-2xl" />
@@ -297,7 +297,7 @@ export default function UserProfilePage() {
 
   if (!profile) {
     return (
-      <div className="max-w-2xl mx-auto py-16 text-center text-muted-foreground">
+      <div className="max-w-4xl mx-auto py-16 text-center text-muted-foreground">
         User not found.
       </div>
     );
@@ -321,7 +321,7 @@ export default function UserProfilePage() {
   const gamingAccounts = profile.gamingAccounts ?? [];
 
   return (
-    <div className="max-w-2xl mx-auto space-y-4">
+    <div className="max-w-4xl mx-auto space-y-4">
       {/* Back */}
       <button
         onClick={() => window.history.back()}

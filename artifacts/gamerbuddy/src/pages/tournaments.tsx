@@ -889,7 +889,7 @@ export default function TournamentsPage() {
   ];
 
   return (
-    <div className="max-w-2xl mx-auto space-y-5">
+    <div className="max-w-4xl mx-auto space-y-5">
       <div className="pointer-events-none fixed inset-0 -z-10"
         style={{ background: "radial-gradient(ellipse 60% 40% at 50% 0%,rgba(251,191,36,0.06) 0%,transparent 60%)" }} />
 

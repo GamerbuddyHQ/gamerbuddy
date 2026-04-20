@@ -501,7 +501,7 @@ export default function TournamentDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="max-w-2xl mx-auto space-y-4 animate-pulse">
+      <div className="max-w-4xl mx-auto space-y-4 animate-pulse">
         <div className="h-8 w-48 rounded-xl bg-white/[0.04]" />
         <div className="h-56 rounded-3xl bg-white/[0.03] border border-border/10" />
         <div className="h-40 rounded-2xl bg-white/[0.02] border border-border/10" />
@@ -512,7 +512,7 @@ export default function TournamentDetailPage() {
 
   if (isError || !tournament) {
     return (
-      <div className="max-w-2xl mx-auto text-center py-20">
+      <div className="max-w-4xl mx-auto text-center py-20">
         <Trophy className="h-12 w-12 text-muted-foreground/20 mx-auto mb-4" strokeWidth={1} />
         <p className="text-[16px] font-bold text-white/60">Tournament not found</p>
         <p className="text-sm text-muted-foreground/40 mt-1">It may have been removed or the link is incorrect.</p>
@@ -572,7 +572,7 @@ export default function TournamentDetailPage() {
   const hasReqs = (tournament.country && tournament.country !== "any") || (tournament.region && tournament.region !== "any") || (tournament.genderPreference && tournament.genderPreference !== "any");
 
   return (
-    <div className="max-w-2xl mx-auto space-y-5 pb-12">
+    <div className="max-w-4xl mx-auto space-y-5 pb-12">
       <div className="pointer-events-none fixed inset-0 -z-10" style={{ background: "radial-gradient(ellipse 50% 30% at 50% 0%,rgba(168,85,247,0.08) 0%,transparent 60%)" }} />
 
       <Link href="/tournaments" className="inline-flex items-center gap-1.5 text-[12px] text-muted-foreground/50 hover:text-white/70 transition-colors">
