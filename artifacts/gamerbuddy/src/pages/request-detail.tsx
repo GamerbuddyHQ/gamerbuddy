@@ -24,7 +24,6 @@ import {
   type ChatMessage,
 } from "@/lib/bids-api";
 import { COUNTRY_MAP, GENDER_MAP } from "@/lib/geo-options";
-import { getSocket } from "@/lib/socket";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,7 +34,7 @@ import {
   ArrowLeft, Swords, Monitor, Layers, Gavel, MessageSquare,
   CheckCircle2, Send, Star, Trophy, AlertTriangle, User, Gift,
   Flag, X, MessageCircle, Gamepad2, Target, Zap, ChevronDown, ChevronUp,
-  Phone, PhoneOff, Wifi, WifiOff, Volume2, ShieldCheck, Users, Lock,
+  Phone, PhoneOff, Volume2, ShieldCheck, Users, Lock, RefreshCw,
   SlidersHorizontal, ArrowUpDown, ArrowUp, ArrowDown, Tv, Sparkles, ShieldAlert,
 } from "lucide-react";
 import { SafetyBanner } from "@/components/safety-banner";
@@ -117,85 +116,22 @@ function ChatPanel({
   discordUsername?: string | null;
 }) {
   const [draft, setDraft] = useState("");
-  const [liveMessages, setLiveMessages] = useState<ChatMessage[]>([]);
-  const [connected, setConnected] = useState(false);
-  const [typing, setTyping] = useState(false);
-  const [otherTyping, setOtherTyping] = useState(false);
-  const typingTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
-  const { data: fetched = [], isLoading } = useBidMessages(bidId);
+  // Messages are polled every 10 s via refetchInterval in useBidMessages
+  const { data: allMessages = [], isLoading } = useBidMessages(bidId);
   const send = useSendMessage();
   const { toast } = useToast();
 
   const jitsiUrl = `https://meet.jit.si/gamerbuddy-bid-${bidId}`;
 
   useEffect(() => {
-    const seenIds = new Set(fetched.map((m) => m.id));
-    setLiveMessages((prev) => {
-      const deduped = prev.filter((m) => !seenIds.has(m.id));
-      return deduped;
-    });
-  }, [fetched]);
-
-  const allMessages = [...fetched, ...liveMessages].sort(
-    (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-  );
-
-  useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [allMessages.length]);
-
-  useEffect(() => {
-    const socket = getSocket();
-
-    const onConnect = () => setConnected(true);
-    const onDisconnect = () => setConnected(false);
-    const onNewMessage = (msg: ChatMessage) => {
-      if (msg.senderId !== currentUserId) setOtherTyping(false);
-      setLiveMessages((prev) => {
-        if (prev.some((m) => m.id === msg.id)) return prev;
-        return [...prev, msg];
-      });
-    };
-    const onTyping = ({ userId }: { userId: number }) => {
-      if (userId !== currentUserId) {
-        setOtherTyping(true);
-        setTimeout(() => setOtherTyping(false), 3000);
-      }
-    };
-
-    socket.on("connect", onConnect);
-    socket.on("disconnect", onDisconnect);
-    socket.on("new_message", onNewMessage);
-    socket.on("typing", onTyping);
-
-    if (socket.connected) setConnected(true);
-    socket.emit("join_bid", bidId);
-
-    return () => {
-      socket.emit("leave_bid", bidId);
-      socket.off("connect", onConnect);
-      socket.off("disconnect", onDisconnect);
-      socket.off("new_message", onNewMessage);
-      socket.off("typing", onTyping);
-    };
-  }, [bidId, currentUserId]);
-
-  const handleTyping = () => {
-    const socket = getSocket();
-    if (!typing) {
-      setTyping(true);
-      socket.emit("typing", { bidId, userId: currentUserId });
-    }
-    if (typingTimeout.current) clearTimeout(typingTimeout.current);
-    typingTimeout.current = setTimeout(() => setTyping(false), 2000);
-  };
 
   const handleSend = () => {
     const content = draft.trim();
     if (!content) return;
     setDraft("");
-    setTyping(false);
     send.mutate({ bidId, content }, {
       onError: (err: any) =>
         toast({ title: "Failed to send", description: err?.error || "Error", variant: "destructive" }),
@@ -209,13 +145,9 @@ function ChatPanel({
         <div className="flex items-center gap-2">
           <MessageSquare className="h-3.5 w-3.5 text-secondary" />
           <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Private Chat</span>
-          <div className={`flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-full border ${
-            connected
-              ? "border-green-500/30 text-green-400 bg-green-500/10"
-              : "border-border/40 text-muted-foreground/50 bg-background/30"
-          }`}>
-            {connected ? <Wifi className="h-2.5 w-2.5" /> : <WifiOff className="h-2.5 w-2.5" />}
-            {connected ? "Live" : "Reconnecting…"}
+          <div className="flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-full border border-cyan-500/25 text-cyan-400/70 bg-cyan-500/5">
+            <RefreshCw className="h-2.5 w-2.5" />
+            Refreshes every 10s
           </div>
         </div>
         {/* Voice Chat */}
@@ -279,15 +211,6 @@ function ChatPanel({
             );
           })
         )}
-        {otherTyping && (
-          <div className="flex justify-start">
-            <div className="bg-card border border-border/50 rounded-2xl rounded-bl-none px-4 py-2.5 flex gap-1 items-center">
-              <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/50 animate-bounce [animation-delay:0ms]" />
-              <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/50 animate-bounce [animation-delay:150ms]" />
-              <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/50 animate-bounce [animation-delay:300ms]" />
-            </div>
-          </div>
-        )}
         <div ref={bottomRef} />
       </div>
 
@@ -295,7 +218,7 @@ function ChatPanel({
       <div className="border-t border-border/60 p-2 flex gap-2 bg-card/50">
         <Input
           value={draft}
-          onChange={(e) => { setDraft(e.target.value); handleTyping(); }}
+          onChange={(e) => setDraft(e.target.value)}
           placeholder="Type a message…"
           className="bg-background/80 text-sm h-9 border-border/50 focus:border-primary/50"
           maxLength={1000}

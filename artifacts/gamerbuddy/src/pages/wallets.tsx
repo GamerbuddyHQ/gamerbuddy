@@ -37,6 +37,8 @@ import {
   Info,
   Clock,
   CalendarDays,
+  Users,
+  ExternalLink,
 } from "lucide-react";
 
 const MIN_DEPOSIT = 10.75;
@@ -83,6 +85,19 @@ export default function WalletsPage() {
   const [withdrawAmount, setWithdrawAmount] = useState<string>("");
   const [withdrawDetails, setWithdrawDetails] = useState<string>("");
   const [txFilter, setTxFilter] = useState<"all" | "hiring" | "earnings">("all");
+  const [showPayoutPanel, setShowPayoutPanel] = useState(false);
+
+  const isAdmin = user?.id === 1;
+  const { data: payoutData, isLoading: payoutLoading, refetch: refetchPayouts } = useQuery<{
+    generatedAt: string;
+    count: number;
+    users: { userId: number; name: string; email: string; country: string; payoutMethod: string; earningsBalance: number }[];
+  }>({
+    queryKey: ["admin-payouts"],
+    queryFn: () => apiFetch("/api/admin/process-payouts"),
+    enabled: isAdmin && showPayoutPanel,
+    staleTime: 0,
+  });
 
   const isIndian = user?.country === "India";
   const withdrawalMethod = isIndian ? "upi" : "bank_transfer";
@@ -108,7 +123,7 @@ export default function WalletsPage() {
         title: "Withdrawal Requested 🎉",
         description: isIndian
           ? `Your UPI payout is being processed via Razorpay. Funds typically arrive within minutes to a few hours.`
-          : `Your request has been queued for the next weekly payout batch (every Monday). Funds typically arrive within 5–7 business days after processing.`,
+          : `Your withdrawal request has been saved. The admin team will process it via Razorpay International Bank Transfer. Funds typically arrive within 5–7 business days.`,
       });
     },
     onError: (err: any) => {
@@ -279,14 +294,14 @@ export default function WalletsPage() {
                   </p>
                 ) : (
                   <p className="text-xs text-green-200/80 leading-relaxed">
-                    Congratulations! Your earnings have reached the <strong className="text-green-300">$100 threshold</strong>. Your payout will be processed in the next <strong className="text-green-300">Monday's weekly batch</strong> and should arrive within <strong className="text-green-300">5–7 business days</strong>.
+                    Congratulations! Your earnings have reached the <strong className="text-green-300">$100 threshold</strong>. Submit your bank details below and the admin team will process your payout via Razorpay International Bank Transfer. Funds typically arrive within <strong className="text-green-300">5–7 business days</strong>.
                   </p>
                 )}
                 <div className="flex items-center gap-1.5 text-[10px] text-cyan-300/70 font-medium pt-0.5">
                   {isIndian ? (
                     <><Smartphone className="h-3 w-3 text-cyan-400 shrink-0" /> Enter your UPI ID below to request your instant payout.</>
                   ) : (
-                    <><CalendarDays className="h-3 w-3 text-cyan-400 shrink-0" /> Fill in your bank details below and submit your withdrawal request to join the next Monday batch.</>
+                    <><Building2 className="h-3 w-3 text-cyan-400 shrink-0" /> Fill in your bank details below and submit your withdrawal request.</>
                   )}
                 </div>
               </div>
@@ -336,10 +351,10 @@ export default function WalletsPage() {
                 ) : (
                   <>
                     <p>
-                      📅 International payouts are processed <strong className="text-cyan-300">every Monday</strong> via Razorpay International Bank Transfer.
+                      🏦 International payouts are processed <strong className="text-cyan-300">manually by the admin team</strong> via Razorpay International Bank Transfer. Submit your request and the team will process it promptly.
                     </p>
                     <p>
-                      💰 Once your balance reaches <strong className="text-cyan-300">$100 USD</strong>, your money will be sent via international bank transfer and should arrive within <strong className="text-cyan-300">5–7 business days</strong> after the Monday processing.
+                      💰 Once your balance reaches <strong className="text-cyan-300">$100 USD</strong>, submit your bank details to request a payout. Funds typically arrive within <strong className="text-cyan-300">5–7 business days</strong> after processing.
                     </p>
                   </>
                 )}
@@ -419,7 +434,7 @@ export default function WalletsPage() {
                     </span>
                   ) : (
                     <span>
-                      <strong className="text-amber-300">Payout notice:</strong> Payouts are processed every <strong className="text-amber-300">Monday</strong> and typically arrive within <strong className="text-amber-300">5–7 business days</strong> after the weekly batch runs.
+                      <strong className="text-amber-300">Payout notice:</strong> Your request will be manually processed by the admin team via <strong className="text-amber-300">Razorpay International Bank Transfer</strong>. Funds typically arrive within <strong className="text-amber-300">5–7 business days</strong>.
                     </span>
                   )}
                 </div>
@@ -597,6 +612,91 @@ export default function WalletsPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* ── Admin: Process Payouts Panel ── */}
+      {isAdmin && (
+        <Card className="border-red-500/25 bg-red-500/[0.03]">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between flex-wrap gap-3">
+              <CardTitle className="text-base uppercase tracking-wider flex items-center gap-2 text-red-400">
+                <Users className="h-4 w-4" /> Admin: Process Payouts
+              </CardTitle>
+              <Button
+                size="sm"
+                variant="outline"
+                className="text-xs border-red-500/40 text-red-400 hover:bg-red-500/10 h-7 px-3"
+                onClick={() => {
+                  setShowPayoutPanel(true);
+                  refetchPayouts();
+                }}
+              >
+                <RefreshCcw className="h-3 w-3 mr-1.5" />
+                Refresh Eligible Users
+              </Button>
+            </div>
+            <CardDescription className="text-xs text-muted-foreground/60">
+              Users with ≥ $100 in earnings. Process each payout manually via the Razorpay dashboard, then confirm.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {!showPayoutPanel ? (
+              <div className="text-center py-6">
+                <Button
+                  variant="outline"
+                  className="border-red-500/40 text-red-400 hover:bg-red-500/10 font-bold uppercase tracking-wider"
+                  onClick={() => setShowPayoutPanel(true)}
+                >
+                  <Users className="h-4 w-4 mr-2" />
+                  Show Payout-Eligible Users
+                </Button>
+              </div>
+            ) : payoutLoading ? (
+              <div className="space-y-2">
+                {[1, 2, 3].map((i) => <Skeleton key={i} className="h-14 w-full" />)}
+              </div>
+            ) : !payoutData || payoutData.count === 0 ? (
+              <div className="text-center py-6 text-muted-foreground text-sm">
+                No users have reached the $100 payout threshold yet.
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <p className="text-xs text-muted-foreground/50 mb-3">
+                  {payoutData.count} user{payoutData.count !== 1 ? "s" : ""} eligible — generated {new Date(payoutData.generatedAt).toLocaleString()}
+                </p>
+                {payoutData.users.map((u) => (
+                  <div
+                    key={u.userId}
+                    className="flex items-center gap-3 p-3 rounded-lg bg-background/40 border border-red-500/15 hover:border-red-500/30 transition-colors"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-sm font-semibold text-foreground">{u.name}</span>
+                        <Badge variant="outline" className="text-xs py-0 border-muted text-muted-foreground">{u.country}</Badge>
+                        <Badge variant="outline" className={`text-xs py-0 ${u.country === "India" ? "border-orange-500/40 text-orange-400" : "border-blue-500/40 text-blue-400"}`}>
+                          {u.country === "India" ? "UPI" : "Bank Transfer"}
+                        </Badge>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-0.5">{u.email}</p>
+                      <p className="text-[10px] text-muted-foreground/50">{u.payoutMethod}</p>
+                    </div>
+                    <div className="text-right flex-shrink-0">
+                      <div className="text-base font-bold tabular-nums text-red-400">${u.earningsBalance.toFixed(2)}</div>
+                      <a
+                        href="https://dashboard.razorpay.com"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[10px] text-cyan-400/60 hover:text-cyan-400 flex items-center gap-1 justify-end mt-0.5"
+                      >
+                        <ExternalLink className="h-2.5 w-2.5" /> Razorpay
+                      </a>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

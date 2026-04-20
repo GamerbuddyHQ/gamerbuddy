@@ -2,7 +2,6 @@ import { Router, type IRouter } from "express";
 import { db, bidsTable, messagesTable, usersTable, gameRequestsTable } from "@workspace/db";
 import { eq, asc } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
-import { emitNewMessage } from "../socket-server";
 import { validate, sanitize, PostMessageSchema } from "../lib/validate";
 import { messageLimiter } from "../lib/rate-limit";
 
@@ -86,8 +85,7 @@ router.post("/bids/:bidId/messages", requireAuth, messageLimiter, validate(PostM
     createdAt: msg.createdAt.toISOString(),
   };
 
-  emitNewMessage(bidId, payload);
-
+  // No real-time push — clients poll via refetchInterval
   res.status(201).json(payload);
 });
 

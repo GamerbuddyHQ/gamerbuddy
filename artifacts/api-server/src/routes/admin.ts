@@ -4,7 +4,7 @@
  */
 
 import { Router, type IRouter, type RequestHandler } from "express";
-import { db, usersTable, walletTransactionsTable, reportsTable } from "@workspace/db";
+import { db, usersTable, walletTransactionsTable, reportsTable, walletsTable } from "@workspace/db";
 import { eq, desc, gt, or, isNotNull, sql, and, gte } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
 
@@ -176,6 +176,47 @@ router.post(
 
     req.log.info({ adminId: req.user!.id, targetUserId: userId }, "Admin cleared account lockout");
     res.json({ success: true });
+  },
+);
+
+// ── GET /admin/process-payouts ────────────────────────────────────────────
+// Returns all users with an earnings balance >= $100 who are eligible for
+// payout. Admin uses this list to process transfers manually via the
+// Razorpay dashboard (UPI for India, bank transfer for international).
+// Serverless-safe: read-only query, no background processing.
+router.get(
+  "/admin/process-payouts",
+  requireAuth,
+  requireAdmin,
+  async (_req, res): Promise<void> => {
+    const MIN_PAYOUT = 100;
+
+    const eligible = await db
+      .select({
+        userId: walletsTable.userId,
+        userName: usersTable.name,
+        email: usersTable.email,
+        country: usersTable.country,
+        earningsBalance: walletsTable.earningsBalance,
+      })
+      .from(walletsTable)
+      .leftJoin(usersTable, eq(walletsTable.userId, usersTable.id))
+      .where(gte(walletsTable.earningsBalance, MIN_PAYOUT))
+      .orderBy(desc(walletsTable.earningsBalance));
+
+    res.json({
+      generatedAt: new Date().toISOString(),
+      minPayoutThreshold: MIN_PAYOUT,
+      count: eligible.length,
+      users: eligible.map((u) => ({
+        userId: u.userId,
+        name: u.userName ?? "Unknown",
+        email: u.email ?? "",
+        country: u.country ?? "Unknown",
+        payoutMethod: u.country === "India" ? "UPI (Razorpay)" : "Bank Transfer (Razorpay International)",
+        earningsBalance: parseFloat(String(u.earningsBalance)),
+      })),
+    });
   },
 );
 

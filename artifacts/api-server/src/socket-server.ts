@@ -1,60 +1,27 @@
-import { Server as SocketIO } from "socket.io";
-import type { Server as HttpServer } from "http";
-import { logger } from "./lib/logger";
+/**
+ * Socket.io has been removed for serverless/Vercel compatibility.
+ * All exports are stubs so that any existing import sites compile without changes.
+ * Messages are persisted to the database and clients poll for updates.
+ */
 
-let io: SocketIO | null = null;
-
-export function createSocketServer(httpServer: HttpServer): SocketIO {
-  const corsOrigin = process.env.FRONTEND_URL
-    ? process.env.FRONTEND_URL.split(",").map((s) => s.trim())
-    : true;
-
-  io = new SocketIO(httpServer, {
-    cors: {
-      origin: corsOrigin,
-      credentials: true,
-    },
-    path: "/api/socket.io",
-  });
-
-  io.on("connection", (socket) => {
-    logger.debug({ socketId: socket.id }, "Socket connected");
-
-    socket.on("join_bid", (bidId: number) => {
-      const room = `bid:${bidId}`;
-      socket.join(room);
-      logger.debug({ socketId: socket.id, room }, "Socket joined room");
-    });
-
-    socket.on("leave_bid", (bidId: number) => {
-      const room = `bid:${bidId}`;
-      socket.leave(room);
-    });
-
-    socket.on("typing", ({ bidId, userId }: { bidId: number; userId: number }) => {
-      socket.to(`bid:${bidId}`).emit("typing", { userId });
-    });
-
-    socket.on("disconnect", () => {
-      logger.debug({ socketId: socket.id }, "Socket disconnected");
-    });
-  });
-
-  return io;
+export function createSocketServer(_httpServer: unknown): void {
+  // No-op: WebSocket server not supported in serverless deployments
 }
 
-export function getIO(): SocketIO | null {
-  return io;
+export function getIO(): null {
+  return null;
 }
 
-export function emitNewMessage(bidId: number, message: {
-  id: number;
-  bidId: number;
-  senderId: number;
-  senderName: string;
-  content: string;
-  createdAt: string;
-}) {
-  if (!io) return;
-  io.to(`bid:${bidId}`).emit("new_message", message);
+export function emitNewMessage(
+  _bidId: number,
+  _message: {
+    id: number;
+    bidId: number;
+    senderId: number;
+    senderName: string;
+    content: string;
+    createdAt: string;
+  },
+): void {
+  // No-op: clients poll for new messages via REST
 }
