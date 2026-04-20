@@ -257,6 +257,30 @@ export default function WalletsPage() {
               )}
             </div>
 
+            {/* ── Congratulations banner — non-Indian users who hit $100 ── */}
+            {!isIndian && wallets.canWithdraw && (
+              <div
+                className="rounded-xl border p-4 space-y-2"
+                style={{
+                  background: "linear-gradient(135deg, rgba(34,197,94,0.08) 0%, rgba(34,211,238,0.08) 100%)",
+                  borderColor: "rgba(34,197,94,0.35)",
+                  boxShadow: "0 0 20px rgba(34,197,94,0.10)",
+                }}
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-xl">🎉</span>
+                  <span className="font-black text-sm text-green-300 uppercase tracking-wide">Payout Threshold Reached!</span>
+                </div>
+                <p className="text-xs text-green-200/80 leading-relaxed">
+                  Congratulations! Your earnings have reached the <strong className="text-green-300">$100 threshold</strong>. Your payout will be processed in the next weekly batch — <strong className="text-green-300">every Monday</strong> — and should arrive in your bank account within <strong className="text-green-300">5–7 business days</strong> after the batch runs.
+                </p>
+                <div className="flex items-center gap-1.5 text-[10px] text-cyan-300/70 font-medium pt-0.5">
+                  <CalendarDays className="h-3 w-3 text-cyan-400 shrink-0" />
+                  Submit your withdrawal request below to join the next Monday batch.
+                </div>
+              </div>
+            )}
+
             {!wallets.canWithdraw && (
               <div className="space-y-1.5">
                 <div className="flex justify-between text-xs text-muted-foreground">
@@ -310,7 +334,25 @@ export default function WalletsPage() {
 
             {wallets.canWithdraw && (
               <div className="space-y-3">
-                <Label className="text-xs uppercase tracking-widest text-muted-foreground">Withdraw Amount</Label>
+                <div className="flex items-center justify-between">
+                  <Label className="text-xs uppercase tracking-widest text-muted-foreground">Withdraw Amount</Label>
+                  <div className="relative group">
+                    <button
+                      type="button"
+                      className="flex items-center gap-1 text-[10px] text-muted-foreground/60 hover:text-cyan-400 transition-colors"
+                    >
+                      <Info className="h-3.5 w-3.5" />
+                      <span className="hidden sm:inline">Payout info</span>
+                    </button>
+                    <div className="absolute right-0 bottom-6 z-20 hidden group-hover:block w-60 rounded-lg border border-border/60 bg-card p-3 text-xs text-muted-foreground shadow-xl leading-relaxed">
+                      <p className="font-semibold text-foreground mb-1">Payout Schedule</p>
+                      {isIndian
+                        ? <p>🇮🇳 <strong className="text-green-400">Indian payouts</strong> are processed <strong>instantly or same-day</strong> via UPI once you submit your request.</p>
+                        : <p>🌍 <strong className="text-cyan-400">Global payouts</strong> are batched <strong>once per week every Monday</strong> via Bank Transfer, arriving in <strong>5–7 business days</strong>. Indian payouts are instant.</p>
+                      }
+                    </div>
+                  </div>
+                </div>
                 <div className="flex flex-col sm:flex-row gap-2">
                   <div className="relative flex-1">
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">$</span>
