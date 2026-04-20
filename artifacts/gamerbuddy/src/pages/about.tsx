@@ -64,7 +64,7 @@ const SECTIONS = [
     icon: CheckCircle2,
     iconColor: "text-purple-400",
     content:
-      "Following submission of identification documents, phone number, and email address, the verification process may require between seven (7) and fifteen (15) days for completion. During this period, certain Platform features, including the ability to post requests or engage in hiring activities, may remain restricted until full verification is approved. We reserve the sole right to approve, request additional documentation, or reject verification applications.",
+      "Following submission of identification documents, phone number, and email address, the verification process typically completes within 24 to 48 hours. During this period, certain Platform features, including the ability to post requests or engage in hiring activities, may remain restricted until full verification is approved. We reserve the sole right to approve, request additional documentation, or reject verification applications.",
   },
   {
     number: "9",

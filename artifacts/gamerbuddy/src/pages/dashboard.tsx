@@ -191,11 +191,11 @@ export default function Dashboard() {
                 className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full"
                 style={{ background: "rgba(245,158,11,0.15)", color: "#f59e0b", border: "1px solid rgba(245,158,11,0.3)" }}
               >
-                Expected: 7–15 days
+                Expected: 24–48 hours
               </span>
             </div>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              Verification is almost complete — usually takes 7–15 days. <span className="text-amber-400/90 font-semibold">Once verified, you'll be able to place bids, post requests, and hire gamers.</span> In the meantime, browse all open requests and get your strategy ready!
+              Verification is almost complete — usually takes 24–48 hours. <span className="text-amber-400/90 font-semibold">Once verified, you'll be able to place bids, post requests, and hire gamers.</span> In the meantime, browse all open requests and get your strategy ready!
             </p>
           </div>
           <ShieldAlert className="h-4 w-4 text-amber-400/60 shrink-0 mt-1 hidden sm:block" />

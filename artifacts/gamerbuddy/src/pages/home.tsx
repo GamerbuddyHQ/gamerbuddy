@@ -295,7 +295,7 @@ export default function Home() {
 
           {/* verification note */}
           <p className="text-center text-[11px]" style={{ color: "var(--text-dim)" }}>
-            Verification helps keep Gamerbuddy safe — it usually takes 7–15 days
+            Verification helps keep Gamerbuddy safe — it usually takes 24–48 hours
           </p>
 
           {/* trust bar */}

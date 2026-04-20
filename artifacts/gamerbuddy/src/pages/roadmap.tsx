@@ -6,6 +6,7 @@ import {
   Swords, Bot, Map, Lightbulb, ChevronRight,
   Lock, AlertTriangle,
   Smartphone, Link2, Handshake,
+  Star, Camera, SlidersHorizontal, FileText, Banknote, Hash,
 } from "lucide-react";
 
 const PHASES = [
@@ -21,47 +22,77 @@ const PHASES = [
     bar: "from-green-500 to-emerald-400",
     Icon: Gamepad2,
     description:
-      "The full Phase 1 experience — core hiring, full PC and console account linking, an active community, identity verification, and safety protections. Everything live from day one.",
+      "Everything currently live on Gamerbuddy — from user accounts and profiles to payments, messaging, community, and full safety protections.",
     items: [
       {
-        icon: Zap,
-        title: "Core 1-on-1 Hiring",
-        desc: "Post requests, place bids, accept sessions, play together, and complete payments — with mandatory reviews on completion.",
-      },
-      {
-        icon: Wallet,
-        title: "Secure Escrow Payments",
-        desc: "Hiring Wallet for posting sessions and an Earnings Wallet for payouts. Funds held in escrow until both players approve. 10% platform fee on completion.",
-      },
-      {
-        icon: Link2,
-        title: "Full PC Account Linking",
-        desc: "Connect your Steam and Epic Games accounts — verified platform credentials shown on your profile and every bid card.",
-      },
-      {
-        icon: Link2,
-        title: "Full Console Account Linking",
-        desc: "Link your PlayStation Network, Xbox, and Nintendo Switch accounts for verified console identity — visible on bids and your profile.",
-      },
-      {
-        icon: MessageSquare,
-        title: "Active Community",
-        desc: "Post suggestions, vote on ideas, and leave comments with GIF and emoji support. Your votes directly shape what gets built next — live now in the Community tab.",
-      },
-      {
         icon: Shield,
-        title: "Verification & Trust Factor",
-        desc: "Link at least one gaming account to post or bid. Full ID review (7–15 days) unlocks the verified badge. Trust Factor updates live based on behaviour and reviews.",
+        title: "User Registration + 24-48hr Verification",
+        desc: "Sign up, link a gaming account, and get reviewed within 24–48 hours. Verification unlocks posting, bidding, and hiring — with a visible green Verified badge.",
+      },
+      {
+        icon: Hash,
+        title: "Unique Gamerbuddy ID (GB-XXXXXX)",
+        desc: "Every user receives a permanent GB-XXXXXX identifier shown on their profile, earnings card, and admin payout list — with a one-click copy button.",
+      },
+      {
+        icon: Camera,
+        title: "Profile Photos",
+        desc: "1 avatar + minimum 2 solo photos required. Anti-AI content warning enforced. Duplicate image detection prevents re-upload of the same photo.",
       },
       {
         icon: Globe,
-        title: "Simplified Social Hub",
-        desc: "All community links, Discord, and social platforms are unified in one place — the 'Social' tab links directly to Superr.bio.",
+        title: "Regional Minimum Hiring Fee",
+        desc: "₹350/hr for India, $8/hr for international. Enforced on every request — gamers can bid at or above the floor, never below.",
       },
       {
-        icon: AlertTriangle,
-        title: "Safety Rules & Anti-Backdoor Protections",
-        desc: "Never share account passwords. Escrow-only payments. Safety warnings, AI chat guidance, and anti-off-platform protections built in.",
+        icon: Gamepad2,
+        title: "Request Posting, Bidding & Session Management",
+        desc: "Hirers post requests with game, platform, objectives, and region. Gamers bid competitively. Accept, start, complete, and review — full session lifecycle managed in-app.",
+      },
+      {
+        icon: MessageSquare,
+        title: "In-App Messaging",
+        desc: "Private chat opens between hirer and gamer once a bid is accepted. Coordinate sessions, share details, and stay connected without leaving the platform.",
+      },
+      {
+        icon: Wallet,
+        title: "Dual Wallets + 10% Platform Fee",
+        desc: "Hiring Wallet for funding sessions (escrow-held) and Earnings Wallet for receiving payouts. 10% platform fee deducted on session completion.",
+      },
+      {
+        icon: Banknote,
+        title: "Manual Payout System",
+        desc: "Gamers request withdrawals once their Earnings Wallet hits $100 / ₹8,000. Admin processes payouts manually — typically within 24–48 hours.",
+      },
+      {
+        icon: Star,
+        title: "Reviews, Trust Factor & Verified Badge",
+        desc: "Both parties leave mandatory reviews on session completion. Trust Factor score updates live. Verified badge visible on profiles and all bid cards.",
+      },
+      {
+        icon: Link2,
+        title: "Connected Gaming Accounts Display",
+        desc: "Steam, Epic, PlayStation, Xbox, Nintendo Switch accounts shown on every profile and bid card — proves real gaming identity with publicly verifiable credentials.",
+      },
+      {
+        icon: SlidersHorizontal,
+        title: "Optional Gender Preference Filter",
+        desc: "Hirers can optionally filter for Male, Female, Non-binary, or No preference when posting a request — fully optional, never required.",
+      },
+      {
+        icon: Users,
+        title: "Community Tab",
+        desc: "Post feature suggestions, vote on ideas, and leave GIF/emoji comments. Community votes directly shape what gets prioritised and built next.",
+      },
+      {
+        icon: Handshake,
+        title: "Community Guidelines & Behavior Rules",
+        desc: "Full rules covering respect, no NSFW content, professional communication, privacy, and fair play — with a clear consequences framework. Visible on the About page and every profile.",
+      },
+      {
+        icon: FileText,
+        title: "Professional Disclaimer with Funds Holding Note",
+        desc: "Updated 16-section disclaimer covering escrow, regional policy, verification, payouts, refunds, and funds-holding notice — legally clear and user-readable.",
       },
     ],
   },
@@ -214,10 +245,10 @@ export default function Roadmap() {
           </span>
         </div>
         <p className="text-sm sm:text-[15px] text-foreground/80 leading-[1.75]">
-          <strong className="text-foreground">Phase 1 is fully live.</strong> The platform is open: core 1-on-1 hiring, secure escrow payments, full PC account linking (Steam &amp; Epic), full console account linking (PlayStation, Xbox &amp; Switch), an active Community tab for suggestions and voting, identity verification &amp; Trust Factor system, a simplified social hub via Superr.bio, and strong safety &amp; anti-backdoor protections.
+          <strong className="text-foreground">Phase 1 is fully live.</strong> User registration with 24–48hr verification, unique GB-XXXXXX IDs, profile photos with anti-AI enforcement, regional minimum fees (₹350/hr India · $8/hr global), request posting &amp; bidding, in-app messaging, dual wallets with 10% platform fee, manual payouts ($100 threshold), reviews &amp; Trust Factor, connected gaming accounts display, optional gender filter, Community tab with voting, full Community Guidelines, and a professional 16-section Disclaimer.
         </p>
         <p className="text-sm text-muted-foreground/60 leading-[1.75]">
-          We're now building Phase 2 — tournaments, bulk hiring (3–100 gamers), and mobile account linking. Your Community votes directly shape what gets prioritised next. 🚀
+          We're now building Phase 2 — tournaments, bulk hiring (3–100 gamers), automatic payouts, and mobile account linking. Your Community votes directly shape what gets prioritised next. 🚀
         </p>
       </div>
 

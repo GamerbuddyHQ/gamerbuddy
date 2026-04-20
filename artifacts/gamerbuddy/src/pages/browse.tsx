@@ -168,7 +168,7 @@ function QuickBidPanel({ req, onClose }: { req: GameRequest; onClose: () => void
         </div>
         <div className="flex-1 text-center sm:text-left">
           <div className="font-bold text-amber-300 text-sm">Almost verified — hang tight! 🎮</div>
-          <div className="text-xs text-muted-foreground mt-0.5">Verification is almost complete! Once you're verified (usually 7–15 days), you'll be able to place bids and join epic sessions.</div>
+          <div className="text-xs text-muted-foreground mt-0.5">Verification is almost complete! Once you're verified (usually within 24–48 hours), you'll be able to place bids and join epic sessions.</div>
         </div>
         <Button size="sm" variant="outline" onClick={() => setLocation("/profile")} className="text-xs border-amber-500/40 text-amber-300 hover:bg-amber-500/10 shrink-0">
           Check Status

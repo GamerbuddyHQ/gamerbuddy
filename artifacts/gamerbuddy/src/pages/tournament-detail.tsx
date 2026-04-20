@@ -690,7 +690,7 @@ export default function TournamentDetailPage() {
                   <ShieldAlert className="h-4 w-4 shrink-0" /> Almost verified — hang tight! 🎮
                 </p>
                 <p className="text-[12px] text-amber-400/70 leading-relaxed">
-                  Verification is almost complete! Once you're verified (usually 7–15 days), you'll be able to join tournaments and compete for prizes.
+                  Verification is almost complete! Once you're verified (usually within 24–48 hours), you'll be able to join tournaments and compete for prizes.
                 </p>
                 <Link href="/profile" className="inline-block text-[11px] font-bold text-amber-400 underline mt-1.5">
                   Check verification status →
