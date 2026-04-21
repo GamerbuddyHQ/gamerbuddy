@@ -696,28 +696,25 @@ const GAMING_PLATFORM_SVG: Record<string, React.ReactNode> = {
 /* ── OAuth simulation steps ────────────────────────────────────────── */
 type OAuthStep = "idle" | "redirecting" | "connecting" | "success";
 
-const PLATFORM_OAUTH_COPY: Record<string, { provider: string; scope: string }> = {
-  steam:  { provider: "Steam",            scope: "Read your public profile and game library" },
-  epic:   { provider: "Epic Games",       scope: "Read your display name and account info" },
-  psn:    { provider: "PlayStation",      scope: "Read your PSN ID and trophy data" },
-  xbox:   { provider: "Xbox",             scope: "Read your Gamertag and gaming activity" },
-  switch: { provider: "Nintendo",         scope: "Read your Nintendo Account and friend info" },
+const PLATFORM_OAUTH_COPY: Record<string, { provider: string; officialUrl: string; scope: string }> = {
+  steam:  { provider: "Steam",       officialUrl: "store.steampowered.com",     scope: "Public profile, games list, playtime" },
+  epic:   { provider: "Epic Games",  officialUrl: "epicgames.com",              scope: "Display name, account info, game library" },
+  psn:    { provider: "PlayStation", officialUrl: "my.playstation.com",         scope: "PSN ID, trophies, friends list" },
+  xbox:   { provider: "Xbox",        officialUrl: "login.live.com",             scope: "Gamertag, gaming activity, achievements" },
+  switch: { provider: "Nintendo",    officialUrl: "accounts.nintendo.com",      scope: "Nintendo Account, friend list, game history" },
 };
 
-function generateSimulatedUsername(userName: string, platform: string): string {
-  const base = userName
-    .toLowerCase()
-    .replace(/\s+/g, "_")
-    .replace(/[^a-z0-9_]/g, "")
-    .slice(0, 14);
-  const suffixes: Record<string, string> = {
-    steam: "_gamer",
-    epic:  "_epic",
-    psn:   "_psn",
-    xbox:  "_xbl",
-    switch:"_sw",
-  };
-  return `${base}${suffixes[platform] ?? ""}`;
+const PLATFORM_EXAMPLE_USERNAMES: Record<string, string[]> = {
+  steam:  ["ProSniper_X", "DarkViper99", "NightWolf_GG", "IronFist_X", "CyberWolf99", "StormRaider_S"],
+  epic:   ["EpicViper_X", "StormBreakerX", "ShadowHunt3r", "NeonRaider99", "ProGamer_Epic", "CyberFalcon"],
+  psn:    ["DarkKnight_PS", "NeonBlade_PSN", "PS_Warrior_X", "CyberViper99", "ProGunner_PS", "NightFury_PS"],
+  xbox:   ["GhostRecon99", "IronClad_XBL", "NightHawk_XBL", "XblRaider_X", "ProPlayer99", "CyberBlast_X"],
+  switch: ["StarPlayer_SW", "PixelWarrior", "NintendoPro_X", "SwitchMaster99", "StarFox_SW", "ProLink_SW"],
+};
+
+function getSimulatedUsername(userId: number, platform: string): string {
+  const pool = PLATFORM_EXAMPLE_USERNAMES[platform] ?? ["ProGamer99"];
+  return pool[userId % pool.length];
 }
 
 function GamingAccountsSection() {
@@ -747,23 +744,23 @@ function GamingAccountsSection() {
   }
 
   async function simulateOAuth(platform: string) {
-    const uname = generateSimulatedUsername(user?.name ?? "gamer", platform);
+    const uname = getSimulatedUsername(user?.id ?? 0, platform);
     setSimulatedUsername(uname);
 
     setOauthStep("redirecting");
-    await new Promise(r => setTimeout(r, 1600));
+    await new Promise(r => setTimeout(r, 2000));
 
     setOauthStep("connecting");
-    await new Promise(r => setTimeout(r, 1600));
+    await new Promise(r => setTimeout(r, 2000));
 
     setOauthStep("success");
-    await new Promise(r => setTimeout(r, 900));
+    await new Promise(r => setTimeout(r, 2200));
 
     try {
       await connect.mutateAsync({ platform, username: uname });
       toast({
         title: `${GAMING_PLATFORM_META[platform].label} linked!`,
-        description: "Account submitted for review. We'll verify within 24 hours.",
+        description: "Account submitted for review. We'll verify your real gaming activity within 24 hours.",
       });
     } catch (err: any) {
       const msg = err?.error || err?.message || "Please try again.";
@@ -789,7 +786,6 @@ function GamingAccountsSection() {
         const meta    = GAMING_PLATFORM_META[oauthModal];
         const copy    = PLATFORM_OAUTH_COPY[oauthModal];
         const isLoading = oauthStep === "redirecting" || oauthStep === "connecting";
-        const isDone  = oauthStep === "success";
 
         return (
           <div
@@ -844,16 +840,22 @@ function GamingAccountsSection() {
                 {/* Content by step */}
                 {oauthStep === "idle" && (
                   <>
+                    {/* Redirect message */}
                     <div
-                      className="rounded-xl border p-4 mb-5 text-center"
+                      className="rounded-xl border p-4 mb-4"
                       style={{ borderColor: "rgba(34,211,238,0.15)", background: "rgba(34,211,238,0.04)" }}
                     >
-                      <p className="text-[12px] text-foreground/80 leading-relaxed">
-                        You will be redirected to <strong style={{ color: meta.color }}>{copy.provider}</strong> to log in
-                        and grant Gamerbuddy read-only access to verify your account.
+                      <p className="text-[12px] text-foreground/80 leading-relaxed text-center">
+                        You are being redirected to the official{" "}
+                        <strong style={{ color: meta.color }}>{copy.provider}</strong> login page to grant
+                        Gamerbuddy access to verify your gaming account.
                       </p>
-                      <p className="text-[11px] text-muted-foreground/50 mt-2">
-                        <strong className="text-muted-foreground/70">Access requested:</strong> {copy.scope}
+                      <div className="mt-3 pt-3 border-t flex items-center gap-2" style={{ borderColor: "rgba(255,255,255,0.07)" }}>
+                        <span className="text-[10px] shrink-0" style={{ color: "#22d3ee" }}>🌐</span>
+                        <span className="text-[10px] font-mono text-muted-foreground/50 truncate">{copy.officialUrl}</span>
+                      </div>
+                      <p className="text-[10px] text-muted-foreground/45 mt-2 text-center">
+                        <strong className="text-muted-foreground/60">Permissions:</strong> {copy.scope}
                       </p>
                     </div>
 
@@ -865,48 +867,92 @@ function GamingAccountsSection() {
                       Continue to {copy.provider} Login →
                     </button>
 
-                    <div className="flex items-center justify-center gap-2 mt-4">
-                      <span className="text-[10px] text-muted-foreground/35">🔒 Secure OAuth 2.0</span>
+                    {/* No fake accounts note */}
+                    <div
+                      className="mt-4 rounded-xl border px-3 py-2.5 flex items-start gap-2"
+                      style={{ borderColor: "rgba(251,191,36,0.2)", background: "rgba(251,191,36,0.05)" }}
+                    >
+                      <span className="text-[13px] shrink-0 mt-px">🛡️</span>
+                      <p className="text-[10px] text-amber-300/70 leading-relaxed">
+                        <strong className="text-amber-300/90">This is a secure connection via official OAuth.</strong>{" "}
+                        No fake accounts are accepted. All linked accounts are reviewed by our team within 24 hours.
+                      </p>
+                    </div>
+
+                    <div className="flex items-center justify-center gap-2 mt-3">
+                      <span className="text-[10px] text-muted-foreground/30">🔒 Secure OAuth 2.0</span>
                       <span className="text-muted-foreground/20">·</span>
-                      <span className="text-[10px] text-muted-foreground/35">No password shared</span>
+                      <span className="text-[10px] text-muted-foreground/30">No password shared</span>
                       <span className="text-muted-foreground/20">·</span>
-                      <span className="text-[10px] text-muted-foreground/35">Read-only access</span>
+                      <span className="text-[10px] text-muted-foreground/30">Read-only access</span>
                     </div>
                   </>
                 )}
 
                 {oauthStep === "redirecting" && (
-                  <div className="flex flex-col items-center gap-4 py-4">
-                    <div className="w-10 h-10 rounded-full border-2 border-cyan-400/30 border-t-cyan-400 animate-spin" />
+                  <div className="flex flex-col items-center gap-5 py-4">
+                    <div className="relative">
+                      <div className="w-12 h-12 rounded-full border-2 border-cyan-400/20 border-t-cyan-400 animate-spin" />
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="w-4 h-4" style={{ color: meta.color }}>{GAMING_PLATFORM_SVG[oauthModal]}</div>
+                      </div>
+                    </div>
                     <div className="text-center">
                       <p className="text-sm font-bold text-foreground">Redirecting to {copy.provider}…</p>
-                      <p className="text-[11px] text-muted-foreground/50 mt-1">Establishing secure connection</p>
+                      <p className="text-[11px] text-muted-foreground/50 mt-1">Establishing secure connection to {copy.officialUrl}</p>
+                    </div>
+                    <div className="w-full rounded-full overflow-hidden h-1" style={{ background: "rgba(255,255,255,0.07)" }}>
+                      <div className="h-1 rounded-full animate-pulse" style={{ width: "60%", background: `linear-gradient(90deg, ${meta.color}80, ${meta.color})` }} />
                     </div>
                   </div>
                 )}
 
                 {oauthStep === "connecting" && (
-                  <div className="flex flex-col items-center gap-4 py-4">
-                    <div className="w-10 h-10 rounded-full border-2 border-purple-400/30 border-t-purple-400 animate-spin" />
+                  <div className="flex flex-col items-center gap-5 py-4">
+                    <div className="relative">
+                      <div className="w-12 h-12 rounded-full border-2 border-purple-400/20 border-t-purple-400 animate-spin" />
+                      <div className="absolute inset-0 flex items-center justify-center text-lg">✅</div>
+                    </div>
                     <div className="text-center">
-                      <p className="text-sm font-bold text-foreground">Verifying account…</p>
-                      <p className="text-[11px] text-muted-foreground/50 mt-1">Reading public profile data</p>
+                      <p className="text-sm font-bold text-foreground">Verifying your {copy.provider} account…</p>
+                      <p className="text-[11px] text-muted-foreground/50 mt-1">Reading public profile and gaming activity</p>
+                    </div>
+                    <div className="w-full rounded-full overflow-hidden h-1" style={{ background: "rgba(255,255,255,0.07)" }}>
+                      <div className="h-1 rounded-full animate-pulse" style={{ width: "85%", background: "linear-gradient(90deg, rgba(168,85,247,0.6), #a855f7)" }} />
                     </div>
                   </div>
                 )}
 
                 {oauthStep === "success" && (
-                  <div className="flex flex-col items-center gap-4 py-2">
+                  <div className="flex flex-col items-center gap-4 py-1">
                     <div
-                      className="w-12 h-12 rounded-full flex items-center justify-center"
-                      style={{ background: "rgba(74,222,128,0.15)", border: "1.5px solid rgba(74,222,128,0.4)" }}
+                      className="w-14 h-14 rounded-full flex items-center justify-center"
+                      style={{ background: "rgba(74,222,128,0.15)", border: "2px solid rgba(74,222,128,0.5)", boxShadow: "0 0 24px -4px rgba(74,222,128,0.4)" }}
                     >
-                      <span className="text-2xl">✓</span>
+                      <span className="text-3xl">✅</span>
                     </div>
                     <div className="text-center">
-                      <p className="text-sm font-black text-green-400">Account Verified!</p>
-                      <p className="text-[11px] font-mono text-muted-foreground/70 mt-1">{simulatedUsername}</p>
-                      <p className="text-[11px] text-muted-foreground/50 mt-2">Submitting for admin review…</p>
+                      <p className="text-base font-black text-green-400">Successfully connected!</p>
+                      <p className="text-[12px] text-foreground/70 mt-1">
+                        Your <strong style={{ color: meta.color }}>{meta.label}</strong> account has been linked.
+                      </p>
+                      <div
+                        className="mt-3 inline-flex items-center gap-2 px-4 py-2 rounded-full"
+                        style={{ background: "rgba(74,222,128,0.10)", border: "1px solid rgba(74,222,128,0.3)" }}
+                      >
+                        <span className="w-3 h-3" style={{ color: "#4ade80" }}>{GAMING_PLATFORM_SVG[oauthModal]}</span>
+                        <span className="text-[12px] font-mono font-bold text-green-300">{simulatedUsername}</span>
+                      </div>
+                    </div>
+                    <div
+                      className="w-full rounded-xl border px-3 py-2.5 flex items-start gap-2 mt-1"
+                      style={{ borderColor: "rgba(251,191,36,0.2)", background: "rgba(251,191,36,0.05)" }}
+                    >
+                      <span className="text-sm shrink-0 mt-px">🕐</span>
+                      <p className="text-[10px] text-amber-300/70 leading-relaxed">
+                        <strong className="text-amber-300/90">Under Review</strong> — We'll verify your real gaming
+                        activity within 24 hours. Keep your profile <strong className="text-amber-300/90">Public</strong> during this time.
+                      </p>
                     </div>
                   </div>
                 )}
@@ -930,7 +976,7 @@ function GamingAccountsSection() {
               <span className="text-sm font-extrabold text-foreground uppercase tracking-widest">Gaming Accounts</span>
             </div>
             <p className="text-[11px] text-muted-foreground/60">
-              Connect via official OAuth — we verify your real gaming profile within 24 hours
+              Link via official OAuth — we verify your real gaming profile within 24 hours. No fake accounts accepted.
             </p>
           </div>
           {connectedCount > 0 && (
@@ -983,8 +1029,8 @@ function GamingAccountsSection() {
             >
               <span className="text-amber-400 mt-0.5 shrink-0">⚠️</span>
               <p className="text-[11px] text-amber-300/80 leading-relaxed">
-                <strong className="text-amber-300">Link a gaming account to unlock posting & bidding.</strong>{" "}
-                We verify via official OAuth — no fake accounts accepted. Keep your profile <strong className="text-amber-300">Public</strong> during review so we can confirm real gaming activity.
+                <strong className="text-amber-300">Link a gaming account via official OAuth</strong> — we verify your real gaming profile within 24 hours.{" "}
+                <strong className="text-amber-300">No fake accounts accepted.</strong> Keep your profile <strong className="text-amber-300">Public</strong> during review so we can confirm real gaming activity.
               </p>
             </div>
           )}
@@ -1064,7 +1110,7 @@ function GamingAccountsSection() {
                                 <span className="text-[11px] font-bold text-amber-400/90 uppercase tracking-wide">Under Review</span>
                               </div>
                               <div className="text-[10px] text-muted-foreground/40 mt-0.5 font-mono">{username}</div>
-                              <div className="text-[9px] text-amber-300/50 mt-0.5">We'll verify within 24 hrs · Keep profile public</div>
+                              <div className="text-[9px] text-amber-300/50 mt-0.5 leading-relaxed">We'll verify your real gaming activity within 24 hours · Keep your profile Public</div>
                             </div>
                           ) : (
                             <div className="flex items-center gap-1.5 mt-1">
