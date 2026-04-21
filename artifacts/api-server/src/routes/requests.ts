@@ -530,6 +530,21 @@ router.post("/requests/:id/bids", requireAuth, bidLimiter, validate(PlaceBidSche
 
   const { price, message } = req.body as { price: number; message: string };
 
+  // ── Regional minimum bid enforcement ────────────────────────────────────
+  // India: ₹200/hr minimum | International: $5/hr minimum
+  const hirerRegion = gameRequest.hirerRegion ?? "international";
+  const sessionHours = gameRequest.sessionHours ?? 1;
+  const minPerHour = hirerRegion === "india" ? 200 : 5;
+  const minTotal = minPerHour * sessionHours;
+  if (round2(price) < minTotal) {
+    const currency = hirerRegion === "india" ? "₹" : "$";
+    const regionLabel = hirerRegion === "india" ? "India" : "international";
+    res.status(400).json({
+      error: `Minimum bid for ${regionLabel} sessions is ${currency}${minTotal.toFixed(2)}${sessionHours > 1 ? ` (${currency}${minPerHour}/hr × ${sessionHours} hrs)` : `/hr`}. Your bid of ${currency}${round2(price).toFixed(2)} is too low.`,
+    });
+    return;
+  }
+
   const [existing] = await db
     .select()
     .from(bidsTable)
