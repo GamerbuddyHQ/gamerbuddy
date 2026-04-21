@@ -353,7 +353,7 @@ function AcceptModal({
           title: isBulkMode ? "Slot Reserved!" : "Bid Accepted!",
           description: isBulkMode
             ? data?.message ?? "Slot reserved. Payment will be collected when you lock the roster."
-            : "Funds moved to escrow. Session is now in progress.",
+            : "Funds moved to escrow. Quest is now in progress.",
         });
         onClose();
       },
@@ -460,7 +460,7 @@ function AcceptModal({
             </div>
             <div className="flex items-start gap-2 rounded-lg bg-amber-500/8 border border-amber-500/20 px-2.5 py-2 text-[11px] text-amber-300/80">
               <AlertTriangle className="h-3.5 w-3.5 text-amber-400 shrink-0 mt-0.5" />
-              10% platform fee is deducted at completion. Funds are held in escrow until the session is approved.
+              10% platform fee is deducted at completion. Funds are held in escrow until the quest is confirmed.
             </div>
           </div>
         )}
@@ -1770,7 +1770,7 @@ function ForcedReviewModal({
             <h2 className="text-lg sm:text-xl font-extrabold uppercase tracking-tight text-foreground">
               {alreadyReviewed || submitted
                 ? submitted && bothDone ? "🎉 Session Complete!" : "✅ Review Submitted"
-                : "⚡ Rate Your Gaming Session"
+                : "⚡ Rate Your Gaming Quest"
               }
             </h2>
             <p className="text-sm text-muted-foreground leading-relaxed max-w-sm mx-auto">
@@ -2060,7 +2060,7 @@ export default function RequestDetail() {
 
   const handleStartSession = () => {
     startSession.mutate(requestId, {
-      onSuccess: () => toast({ title: "Session Started! 🎮", description: "The hirer has been notified. Play on!" }),
+      onSuccess: () => toast({ title: "Quest Marked as Completed! 🎮", description: "The hirer has been notified and will confirm your payment." }),
       onError: (err: any) => toast({ title: "Error", description: err?.error || "Failed", variant: "destructive" }),
     });
   };
@@ -2069,7 +2069,7 @@ export default function RequestDetail() {
     completeRequest.mutate(requestId, {
       onSuccess: (data: any) => toast({
         title: "Payment Released!",
-        description: `${data?.gamerPayout ? `$${(data.gamerPayout as number).toFixed(2)} sent to gamer. ` : ""}Leave a review now to complete the session and earn 50 points!`,
+        description: `${data?.gamerPayout ? `$${(data.gamerPayout as number).toFixed(2)} sent to gamer. ` : ""}Leave a review now to complete the quest and earn 50 points!`,
         duration: 7000,
       }),
       onError: (err: any) => toast({ title: "Error", description: err?.error || "Failed", variant: "destructive" }),
@@ -2169,9 +2169,23 @@ export default function RequestDetail() {
             </span>
           </div>
 
-          <div className="bg-background/60 rounded-lg border border-border/50 p-4">
-            <div className="text-xs uppercase tracking-widest text-muted-foreground mb-2 font-bold">Objectives</div>
-            <p className="text-sm text-foreground/90 leading-relaxed">{request.objectives}</p>
+          <div className="bg-background/60 rounded-lg border border-border/50 p-4 space-y-3">
+            <div>
+              <div className="text-xs uppercase tracking-widest text-muted-foreground mb-2 font-bold">Main Quest Objective</div>
+              <p className="text-sm text-foreground/90 leading-relaxed">{request.objectives}</p>
+            </div>
+            {(request as any).additionalGoals && (
+              <div className="border-t border-border/40 pt-3">
+                <div className="text-xs uppercase tracking-widest text-muted-foreground mb-1.5 font-bold">Additional Goals</div>
+                <p className="text-sm text-foreground/70 leading-relaxed">{(request as any).additionalGoals}</p>
+              </div>
+            )}
+            {(request as any).expectedDuration && (
+              <div className="border-t border-border/40 pt-3 flex items-center gap-2">
+                <div className="text-xs uppercase tracking-widest text-muted-foreground font-bold">Expected Duration:</div>
+                <span className="text-sm text-cyan-400 font-semibold">{(request as any).expectedDuration}</span>
+              </div>
+            )}
           </div>
 
           {/* Bulk hiring info banner */}
@@ -2180,7 +2194,7 @@ export default function RequestDetail() {
               <div className="flex items-center justify-between gap-3 flex-wrap">
                 <div className="flex items-center gap-2 text-purple-400 font-bold text-sm">
                   <Users className="h-4 w-4" />
-                  Bulk Hiring Session
+                  Bulk Hiring Quest
                 </div>
                 <div className="text-xs font-black text-purple-300">
                   {acceptedBidsCount} / {bulkSlotsNeeded} slots filled
@@ -2299,15 +2313,15 @@ export default function RequestDetail() {
             </div>
           )}
 
-          {/* Gamer: Start Session button (single-gamer only) */}
+          {/* Gamer: Mark Quest as Completed (single-gamer only) */}
           {isGamer && !isBulkRequest && request.status === "in_progress" && !sessionStarted && (
             <div className="rounded-xl border border-primary/40 bg-primary/5 p-4 space-y-3">
               <div className="flex items-center gap-2 text-primary font-bold text-sm">
                 <Swords className="h-4 w-4" />
-                Your bid was accepted — ready to play?
+                Quest accepted — ready to begin?
               </div>
               <p className="text-xs text-muted-foreground">
-                Click <strong className="text-white">Start Session</strong> to let the hirer know you're online and beginning. They'll be able to approve payment once you're done.
+                Once you've completed the objectives, click <strong className="text-white">Mark Quest as Completed</strong> to notify the hirer. They'll confirm and release your payment.
               </p>
               <Button
                 className="bg-primary font-bold uppercase text-sm shadow-[0_0_16px_rgba(168,85,247,0.3)] hover:shadow-[0_0_24px_rgba(168,85,247,0.5)] transition-all"
@@ -2315,35 +2329,35 @@ export default function RequestDetail() {
                 disabled={startSession.isPending}
               >
                 <Swords className="h-4 w-4 mr-2" />
-                {startSession.isPending ? "Starting…" : "Start Session"}
+                {startSession.isPending ? "Marking…" : "Mark Quest as Completed"}
               </Button>
             </div>
           )}
 
-          {/* Gamer: session active */}
+          {/* Gamer: quest marked complete — awaiting hirer confirmation */}
           {isGamer && request.status === "in_progress" && (sessionStarted || isBulkRequest) && (
             <div className="rounded-xl border border-green-500/30 bg-green-500/5 p-4 flex items-center gap-3">
               <div className="h-2.5 w-2.5 rounded-full bg-green-400 animate-pulse shrink-0" />
               <div>
-                <div className="text-green-400 font-bold text-sm">Session Active{isBulkRequest ? " — Bulk Session" : ""}</div>
+                <div className="text-green-400 font-bold text-sm">Quest Marked as Completed{isBulkRequest ? " — Bulk Quest" : ""}</div>
                 <div className="text-xs text-muted-foreground mt-0.5">
                   {isBulkRequest
-                    ? `You're part of a bulk session with ${bulkSlotsNeeded} gamers. Payment will be released when the hirer approves completion.`
-                    : "Play hard! The hirer will approve payment when you've completed the objectives."}
+                    ? `You're part of a bulk quest with ${bulkSlotsNeeded} gamers. Payment will be released when the hirer confirms completion.`
+                    : "Objectives submitted! The hirer will confirm completion and release your payment."}
                 </div>
               </div>
             </div>
           )}
 
-          {/* Hirer: waiting for gamer to start (single-gamer only) */}
+          {/* Hirer: waiting for gamer to mark quest complete */}
           {isHirer && !isBulkRequest && request.status === "in_progress" && !sessionStarted && (
             <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-4 space-y-2">
               <div className="flex items-center gap-2 text-amber-400 font-bold text-sm">
                 <AlertTriangle className="h-4 w-4" />
-                Waiting for gamer to start
+                Waiting for gamer to mark quest as completed
               </div>
               <p className="text-xs text-muted-foreground">
-                The gamer needs to click <strong className="text-white">Start Session</strong> before you can approve payment. You'll see the approval button once they're ready.
+                The gamer needs to click <strong className="text-white">Mark Quest as Completed</strong> once they've finished the objectives. You'll then be able to confirm and release payment.
               </p>
             </div>
           )}
@@ -2354,21 +2368,21 @@ export default function RequestDetail() {
               <div className="flex items-center justify-between gap-3 flex-wrap">
                 <div className="flex items-center gap-2 text-green-400 font-bold text-sm">
                   <Trophy className="h-4 w-4" />
-                  {isBulkRequest ? `Bulk Session Active — ${acceptedBidsCount} Gamer${acceptedBidsCount !== 1 ? "s" : ""}` : "Session Active — Approve when objectives are met"}
+                  {isBulkRequest ? `Bulk Quest — ${acceptedBidsCount} Gamer${acceptedBidsCount !== 1 ? "s" : ""} Ready` : "Gamer marked quest as completed — confirm to release payment"}
                 </div>
                 <div className="flex items-center gap-1.5 text-xs text-green-400/60">
                   <div className="h-2 w-2 rounded-full bg-green-400 animate-pulse" />
-                  Live
+                  Ready
                 </div>
               </div>
               {isBulkRequest ? (
                 <p className="text-xs text-muted-foreground">
-                  Approving releases <strong className="text-white">90%</strong> of each gamer's bid to their Earnings wallet (10% platform fee per gamer).
+                  Confirming releases <strong className="text-white">90%</strong> of each gamer's bid to their Earnings wallet (10% platform fee per gamer).
                   Total escrow: <strong className="text-white">${((request as any).escrowAmount ?? 0).toFixed(2)}</strong>
                 </p>
               ) : (
                 <p className="text-xs text-muted-foreground">
-                  Approving releases <strong className="text-white">90%</strong> of escrow to the gamer (10% platform fee). Both players earn <strong className="text-white">50 points</strong> when they leave a review.
+                  Confirming releases <strong className="text-white">90%</strong> of escrow to the gamer (10% platform fee). Both players earn <strong className="text-white">50 points</strong> when they leave a review.
                 </p>
               )}
               {!isBulkRequest && (
@@ -2394,10 +2408,10 @@ export default function RequestDetail() {
               >
                 <Trophy className="h-4 w-4 mr-2" />
                 {completeRequest.isPending
-                  ? "Approving…"
+                  ? "Confirming…"
                   : isBulkRequest
-                  ? `Complete Bulk Session · Pay ${acceptedBidsCount} Gamer${acceptedBidsCount !== 1 ? "s" : ""}`
-                  : "Approve Payment & Complete Session"}
+                  ? `Confirm Quest Complete · Pay ${acceptedBidsCount} Gamer${acceptedBidsCount !== 1 ? "s" : ""}`
+                  : "Confirm Quest Completion & Release Payment"}
               </Button>
             </div>
           )}
@@ -2507,20 +2521,12 @@ export default function RequestDetail() {
                 </span>
                 <div className="space-y-0.5">
                   <div className={`font-bold ${request.hirerRegion === "india" ? "text-amber-300" : "text-green-300"}`}>
-                    Minimum rate: {request.hirerRegion === "india" ? `₹${request.minBidPerHour}/hr` : `$${request.minBidPerHour}/hr`}
-                    {request.sessionHours && (
-                      <span className="text-muted-foreground font-normal ml-1">
-                        · {request.sessionHours}h session →{" "}
-                        <span className={request.hirerRegion === "india" ? "text-amber-300 font-bold" : "text-green-300 font-bold"}>
-                          {request.hirerRegion === "india" ? `₹${(request.minBidPerHour * request.sessionHours).toLocaleString()}` : `$${(request.minBidPerHour * request.sessionHours).toFixed(2)}`} minimum
-                        </span>
-                      </span>
-                    )}
+                    Minimum bid: {request.hirerRegion === "india" ? `₹${request.minBidPerHour} per quest` : `$${request.minBidPerHour} per quest`}
                   </div>
                   <div className="text-muted-foreground/70">
                     {request.hirerRegion === "india"
-                      ? "Minimum fee is ₹200/hr to ensure fair compensation for the Gamer."
-                      : "Minimum fee is $5/hr to ensure fair pay for the Gamer."}
+                      ? "Minimum bid is ₹200 per quest to ensure fair compensation for the Gamer."
+                      : "Minimum bid is $5 per quest to ensure fair pay for the Gamer."}
                   </div>
                 </div>
               </div>

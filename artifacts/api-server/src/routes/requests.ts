@@ -66,10 +66,8 @@ function formatRequest(
   userProfilePhotoUrl?: string | null,
 ) {
   const hirerRegion = req.hirerRegion ?? "international";
-  const sessionHours = req.sessionHours ?? null;
-  const minBidPerHour = hirerRegion === "india" ? 200 : 5;
+  const minBidFlat = hirerRegion === "india" ? 200 : 5;
   const minBidCurrency = hirerRegion === "india" ? "INR" : "USD";
-  const minBidTotal = sessionHours ? minBidPerHour * sessionHours : null;
 
   return {
     id: req.id,
@@ -81,6 +79,8 @@ function formatRequest(
     platform: req.platform,
     skillLevel: req.skillLevel,
     objectives: req.objectives,
+    additionalGoals: (req as any).additionalGoals ?? null,
+    expectedDuration: (req as any).expectedDuration ?? null,
     status: req.status,
     escrowAmount: req.escrowAmount ? parseFloat(String(req.escrowAmount)) : null,
     startedAt: req.startedAt ? req.startedAt.toISOString() : null,
@@ -98,10 +98,10 @@ function formatRequest(
     preferredGender: req.preferredGender ?? "any",
     expiresAt: req.expiresAt ? req.expiresAt.toISOString() : null,
     hirerRegion,
-    sessionHours,
-    minBidPerHour,
+    minBidPerHour: minBidFlat,
     minBidCurrency,
-    minBidTotal,
+    minBidTotal: minBidFlat,
+    expectedDurationText: (req as any).expectedDuration ?? null,
   };
 }
 
@@ -273,13 +273,14 @@ router.post("/requests", requireAuth, postRequestLimiter, validate(PostRequestSc
     return;
   }
 
-  const { gameName, platform, skillLevel, objectives, isBulkHiring, bulkGamersNeeded, preferredCountry, preferredGender, expiryOption, hirerRegion, sessionHours } = req.body as {
+  const { gameName, platform, skillLevel, objectives, isBulkHiring, bulkGamersNeeded, preferredCountry, preferredGender, expiryOption, hirerRegion, additionalGoals, expectedDuration } = req.body as {
     gameName: string; platform: string; skillLevel: string; objectives: string;
     isBulkHiring: boolean; bulkGamersNeeded?: number;
     preferredCountry: string; preferredGender: string;
     expiryOption?: string;
     hirerRegion?: string;
-    sessionHours?: number | null;
+    additionalGoals?: string | null;
+    expectedDuration?: string | null;
   };
 
   if (isBulkHiring) {
@@ -307,7 +308,8 @@ router.post("/requests", requireAuth, postRequestLimiter, validate(PostRequestSc
       preferredGender:  preferredGender  || "any",
       expiresAt,
       hirerRegion: resolvedRegion,
-      sessionHours: sessionHours ? Number(sessionHours) : null,
+      additionalGoals: additionalGoals ? sanitize(additionalGoals) : null,
+      expectedDuration: expectedDuration ? sanitize(expectedDuration) : null,
     })
     .returning();
 
@@ -530,17 +532,15 @@ router.post("/requests/:id/bids", requireAuth, bidLimiter, validate(PlaceBidSche
 
   const { price, message } = req.body as { price: number; message: string };
 
-  // ── Regional minimum bid enforcement ────────────────────────────────────
-  // India: ₹200/hr minimum | International: $5/hr minimum
+  // ── Regional minimum bid enforcement ─────────────────────────────────────
+  // India: ₹200 flat minimum | International: $5 flat minimum (quest-based)
   const hirerRegion = gameRequest.hirerRegion ?? "international";
-  const sessionHours = gameRequest.sessionHours ?? 1;
-  const minPerHour = hirerRegion === "india" ? 200 : 5;
-  const minTotal = minPerHour * sessionHours;
+  const minTotal = hirerRegion === "india" ? 200 : 5;
   if (round2(price) < minTotal) {
     const currency = hirerRegion === "india" ? "₹" : "$";
     const regionLabel = hirerRegion === "india" ? "India" : "international";
     res.status(400).json({
-      error: `Minimum bid for ${regionLabel} sessions is ${currency}${minTotal.toFixed(2)}${sessionHours > 1 ? ` (${currency}${minPerHour}/hr × ${sessionHours} hrs)` : `/hr`}. Your bid of ${currency}${round2(price).toFixed(2)} is too low.`,
+      error: `Minimum bid for ${regionLabel} quests is ${currency}${minTotal.toFixed(2)}. Your bid of ${currency}${round2(price).toFixed(2)} is too low.`,
     });
     return;
   }

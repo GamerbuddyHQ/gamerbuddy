@@ -41,8 +41,8 @@ import {
   IndianRupee,
   DollarSign,
   MapPin,
-  Timer,
   Info,
+  ListChecks,
 } from "lucide-react";
 import { SafetyBanner } from "@/components/safety-banner";
 import { usePostRequest } from "@/lib/bids-api";
@@ -57,7 +57,9 @@ const requestSchema = z.object({
   }),
   objectives: z
     .string()
-    .min(10, "Describe your objectives clearly (min 10 characters)"),
+    .min(10, "Describe your main objective clearly (min 10 characters)"),
+  additionalGoals: z.string().optional(),
+  expectedDuration: z.string().optional(),
 });
 
 type FormValues = z.infer<typeof requestSchema>;
@@ -121,10 +123,8 @@ export default function PostRequest() {
   const [preferredGender, setPreferredGender] = useState("any");
   const [expiryOption, setExpiryOption] = useState<"forever" | "24h" | "48h" | "7d">("forever");
   const [hirerRegion, setHirerRegion] = useState<"india" | "international">("international");
-  const [sessionHours, setSessionHours] = useState<number>(1);
 
   const minRate = MIN_RATES[hirerRegion];
-  const minTotal = minRate.perHour * sessionHours;
 
   const { data: wallets, isLoading: isLoadingWallets } = useGetWallets({
     query: { queryKey: getGetWalletsQueryKey() },
@@ -132,7 +132,7 @@ export default function PostRequest() {
 
   const form = useForm<FormValues>({
     resolver: zodResolver(requestSchema),
-    defaultValues: { gameName: "", objectives: "" },
+    defaultValues: { gameName: "", objectives: "", additionalGoals: "", expectedDuration: "" },
   });
 
   const objectivesValue = form.watch("objectives") ?? "";
@@ -171,7 +171,8 @@ export default function PostRequest() {
         preferredGender,
         expiryOption,
         hirerRegion,
-        sessionHours,
+        additionalGoals: values.additionalGoals || undefined,
+        expectedDuration: values.expectedDuration || undefined,
       },
       {
         onSuccess: () => {
@@ -403,7 +404,7 @@ export default function PostRequest() {
                     <div className="flex items-center justify-between">
                       <FormLabel className="text-xs uppercase tracking-widest text-muted-foreground flex items-center gap-2">
                         <Target className="h-3.5 w-3.5 text-primary" />
-                        Clear Objectives <span className="text-destructive">*</span>
+                        Main Quest Objective <span className="text-destructive">*</span>
                       </FormLabel>
                       <span
                         className={`text-xs tabular-nums ${
@@ -423,6 +424,31 @@ export default function PostRequest() {
                         className="resize-none h-36 bg-background border-border focus-visible:border-primary transition-colors leading-relaxed"
                         disabled={!canPost}
                         maxLength={OBJECTIVES_MAX}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Additional Goals (optional) */}
+              <FormField
+                control={form.control}
+                name="additionalGoals"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-xs uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+                      <ListChecks className="h-3.5 w-3.5 text-cyan-400" />
+                      Additional Goals
+                      <span className="text-[10px] font-normal text-muted-foreground/50">(optional)</span>
+                    </FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder={`Any bonus objectives or extra context:\n• "Bonus if you can help me unlock X achievement"\n• "Would love tips on improving my aim"\n• "Flexible on strategy, just want to win"`}
+                        className="resize-none h-24 bg-background border-border focus-visible:border-primary transition-colors leading-relaxed"
+                        disabled={!canPost}
+                        maxLength={300}
                         {...field}
                       />
                     </FormControl>
@@ -474,36 +500,30 @@ export default function PostRequest() {
                   </div>
                 </div>
 
-                {/* Session hours */}
-                <div className="space-y-2">
-                  <label className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground flex items-center gap-1.5">
-                    <Timer className="h-3 w-3 text-cyan-400" /> Session Duration
-                  </label>
-                  <div className="flex items-center gap-3">
-                    <button
-                      type="button"
-                      disabled={!canPost || sessionHours <= 1}
-                      onClick={() => setSessionHours((h) => Math.max(1, h - 1))}
-                      className="h-9 w-9 rounded-lg border border-border/60 bg-background/40 text-muted-foreground font-bold text-base hover:border-primary/40 hover:text-white transition-all disabled:opacity-30 disabled:cursor-not-allowed"
-                    >
-                      −
-                    </button>
-                    <span className="text-lg font-black text-white min-w-[3rem] text-center">
-                      {sessionHours}h
-                    </span>
-                    <button
-                      type="button"
-                      disabled={!canPost || sessionHours >= 24}
-                      onClick={() => setSessionHours((h) => Math.min(24, h + 1))}
-                      className="h-9 w-9 rounded-lg border border-border/60 bg-background/40 text-muted-foreground font-bold text-base hover:border-primary/40 hover:text-white transition-all disabled:opacity-30 disabled:cursor-not-allowed"
-                    >
-                      +
-                    </button>
-                    <span className="text-xs text-muted-foreground/60 ml-1">hour{sessionHours > 1 ? "s" : ""}</span>
-                  </div>
-                </div>
+                {/* Expected Duration (optional, free text) */}
+                <FormField
+                  control={form.control}
+                  name="expectedDuration"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground flex items-center gap-1.5">
+                        <Clock className="h-3 w-3 text-cyan-400" /> Expected Duration
+                        <span className="text-[10px] font-normal text-muted-foreground/50">(optional)</span>
+                      </FormLabel>
+                      <FormControl>
+                        <input
+                          placeholder='e.g. "2–3 hours", "one evening", "until Diamond rank"'
+                          disabled={!canPost}
+                          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 border-border focus-visible:border-primary transition-colors"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-                {/* Minimum fee banner */}
+                {/* Minimum bid banner */}
                 <div
                   className="rounded-lg p-3.5 flex items-start gap-3"
                   style={{
@@ -515,13 +535,13 @@ export default function PostRequest() {
                   <div className="space-y-1 text-xs">
                     <div className={`font-bold ${hirerRegion === "india" ? "text-amber-300" : "text-green-300"}`}>
                       {hirerRegion === "india"
-                        ? `Minimum fee is ₹200 per hour to ensure fair compensation for the Gamer's time and effort.`
-                        : `Minimum fee is $5 USD per hour to ensure fair pay for the Gamer.`}
+                        ? "Minimum bid is ₹200 per quest to ensure fair compensation for the Gamer."
+                        : "Minimum bid is $5 USD per quest to ensure fair pay for the Gamer."}
                     </div>
                     <div className="text-muted-foreground/70">
-                      For a <span className="text-white font-bold">{sessionHours}-hour</span> session:{" "}
+                      Gamers bid a flat amount for completing your quest objectives.{" "}
                       <span className={`font-black ${hirerRegion === "india" ? "text-amber-300" : "text-green-300"}`}>
-                        {minRate.symbol}{minTotal.toLocaleString()} {minRate.currency} minimum
+                        {minRate.symbol}{minRate.perHour.toLocaleString()} {minRate.currency} minimum
                       </span>
                     </div>
                   </div>

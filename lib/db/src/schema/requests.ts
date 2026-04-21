@@ -22,6 +22,8 @@ export const gameRequestsTable = pgTable("game_requests", {
   expiresAt: timestamp("expires_at", { withTimezone: true }),
   hirerRegion: text("hirer_region").notNull().default("international"),
   sessionHours: integer("session_hours"),
+  additionalGoals: text("additional_goals"),
+  expectedDuration: text("expected_duration"),
 });
 
 export const insertGameRequestSchema = createInsertSchema(gameRequestsTable).omit({
