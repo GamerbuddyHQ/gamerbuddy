@@ -8,10 +8,9 @@ import {
   Gamepad2, Compass, LayoutDashboard, Wallet, User as UserIcon,
   LogOut, FileText, Bell, CheckCheck, X, Swords, Star,
   Trophy, MessageSquare, Zap, CircleDollarSign, ChevronRight, Menu,
-  ArrowLeft, Info, Shield, Users, Globe, Sun, Moon, Sparkles, Map, Heart,
+  ArrowLeft, Info, Shield, Users, Globe, Sparkles, Map, Heart,
   FlaskConical,
 } from "lucide-react";
-import { useTheme } from "@/lib/theme";
 import { RegionalClock } from "@/components/regional-clock";
 import { GamerbuddyLogo, GamerbuddyIcon } from "@/components/gamerbuddy-logo";
 import { Button } from "@/components/ui/button";
@@ -305,7 +304,6 @@ function LangComingSoonModal({ onClose }: { onClose: () => void }) {
 /* ── Language Selector ── */
 function LangSelector() {
   const { lang, t } = useI18n();
-  const { isDark } = useTheme();
   const [open, setOpen] = useState(false);
   const [showComingSoon, setShowComingSoon] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -364,7 +362,7 @@ function LangSelector() {
                     key={l.code}
                     onClick={() => handleSelect(l.code)}
                     className="w-full flex items-center gap-3 px-3 py-2.5 text-left transition-colors hover:bg-primary/10"
-                    style={isActive ? { color: "#c084fc" } : { color: isDark ? "rgba(255,255,255,0.70)" : "rgba(0,0,0,0.65)" }}
+                    style={isActive ? { color: "#c084fc" } : { color: "rgba(255,255,255,0.70)" }}
                   >
                     <span className="text-lg w-6 text-center leading-none">{l.flag}</span>
                     <div className="flex-1 min-w-0">
@@ -398,7 +396,6 @@ function LangSelector() {
 /* ── Mobile Language Picker (standalone so hooks aren't inside a map) ── */
 function MobileLangPicker({ onPick }: { onPick: () => void }) {
   const { lang, t } = useI18n();
-  const { isDark } = useTheme();
   const [showComingSoon, setShowComingSoon] = useState(false);
 
   const displayLangs = LANGUAGES.filter((l) => (SELECTOR_LANGS as readonly string[]).includes(l.code));
@@ -428,14 +425,10 @@ function MobileLangPicker({ onPick }: { onPick: () => void }) {
                 background: "rgba(168,85,247,0.15)",
                 borderColor: "rgba(168,85,247,0.40)",
                 color: "#c084fc",
-              } : isDark ? {
+              } : {
                 background: "rgba(255,255,255,0.03)",
                 borderColor: "rgba(255,255,255,0.08)",
                 color: "rgba(255,255,255,0.55)",
-              } : {
-                background: "rgba(0,0,0,0.04)",
-                borderColor: "rgba(0,0,0,0.10)",
-                color: "rgba(0,0,0,0.60)",
               }}
             >
               <span className="text-xl leading-none">{l.flag}</span>
@@ -462,7 +455,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const { t } = useI18n();
-  const { isDark, toggleTheme } = useTheme();
 
   useEffect(() => { setMobileOpen(false); setUserMenuOpen(false); }, [location]);
 
@@ -641,16 +633,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
             {/* Regional clock */}
             <RegionalClock />
-
-            {/* Theme toggle */}
-            <button
-              onClick={toggleTheme}
-              className="h-9 w-9 flex items-center justify-center rounded-xl border border-border/60 bg-background/60 hover:border-primary/50 hover:text-primary transition-all text-muted-foreground"
-              aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
-              title={isDark ? "Light mode" : "Dark mode"}
-            >
-              {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-            </button>
 
             {/* Desktop auth / user menu */}
             {user ? (
