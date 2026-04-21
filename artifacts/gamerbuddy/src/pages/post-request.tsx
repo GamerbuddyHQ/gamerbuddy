@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -45,6 +45,26 @@ import { SafetyBanner } from "@/components/safety-banner";
 import { usePostRequest } from "@/lib/bids-api";
 
 const OBJECTIVES_MAX = 500;
+
+const UNREALISTIC_PATTERNS = [
+  /world[\s-]?first/i,
+  /#\s*1\s*(global|rank|player|world|server|leaderboard)/i,
+  /rank\s*[#]?\s*1\s*(global|world|server|overall)/i,
+  /\bin\s+[12]\s*(hour|hr)s?\b/i,
+  /\bin\s+one\s+(hour|day)\b/i,
+  /\bin\s+1\s+(hour|hr|day)\b/i,
+  /\bundefeated\b/i,
+  /(immortal|radiant|challenger|grandmaster|predator|global[\s-]elite)\s+in\s+\d+\s*(day|hour)/i,
+  /(entire|whole|full)\s+game\s+in\s+\d+\s*(hour|day)/i,
+  /\bnever\s+die\b/i,
+  /\bperfect\s+game\b.*\bin\s+\d+/i,
+  /100%\s+in\s+\d+\s*(hour|day)/i,
+  /\baimbot\b/i,
+];
+
+function checkUnrealistic(text: string): boolean {
+  return UNREALISTIC_PATTERNS.some((p) => p.test(text));
+}
 
 const requestSchema = z.object({
   objectives: z
@@ -133,6 +153,11 @@ export default function PostRequest() {
   const selectedPlatform = form.watch("platform");
   const selectedPlayStyle = form.watch("playStyle");
   const gameNameValue = form.watch("gameName") ?? "";
+
+  const [unrealisticWarning, setUnrealisticWarning] = useState(false);
+  useEffect(() => {
+    setUnrealisticWarning(objectivesValue.length >= 10 && checkUnrealistic(objectivesValue));
+  }, [objectivesValue]);
 
   const canPost = wallets?.canPostRequest ?? false;
   const hiringBalance = wallets?.hiringBalance ?? 0;
@@ -256,6 +281,27 @@ export default function PostRequest() {
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-7">
 
+              {/* ── GUIDELINE BANNER ── */}
+              <div className="rounded-xl border border-blue-500/20 bg-blue-500/5 p-4 space-y-3">
+                <div className="flex items-start gap-2.5">
+                  <Info className="h-4 w-4 text-blue-400 shrink-0 mt-0.5" />
+                  <div className="space-y-2.5 w-full">
+                    <p className="text-sm font-semibold text-blue-300">Tips for a great quest</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1.5 text-[11px]">
+                      <div className="flex items-start gap-1.5 text-green-400/90"><span className="shrink-0">✅</span><span>Help me finish this boss / story</span></div>
+                      <div className="flex items-start gap-1.5 text-green-400/90"><span className="shrink-0">✅</span><span>Carry me to Platinum rank (5 games)</span></div>
+                      <div className="flex items-start gap-1.5 text-green-400/90"><span className="shrink-0">✅</span><span>Teach me a specific mechanic or strategy</span></div>
+                      <div className="flex items-start gap-1.5 text-green-400/90"><span className="shrink-0">✅</span><span>Play a few fun matches together</span></div>
+                      <div className="flex items-start gap-1.5 text-red-400/70"><span className="shrink-0">❌</span><span>Carry me to #1 global rank in 1 day</span></div>
+                      <div className="flex items-start gap-1.5 text-red-400/70"><span className="shrink-0">❌</span><span>Beat the entire game for me in 2 hours</span></div>
+                    </div>
+                    <p className="text-[11px] text-muted-foreground/50 leading-relaxed">
+                      Unrealistic or impossible requests may get no bids, or be flagged for review. Keep it achievable and gamers will love helping you!
+                    </p>
+                  </div>
+                </div>
+              </div>
+
               {/* ── PRIMARY: What do you need help with? ── */}
               <FormField
                 control={form.control}
@@ -281,7 +327,7 @@ export default function PostRequest() {
                     </div>
                     <FormControl>
                       <Textarea
-                        placeholder={`Be as specific as possible so gamers can bid accurately. Examples:\n• "Help me finish the main story of Elden Ring"\n• "Carry me to Ascendant rank in Valorant"\n• "Teach me how to speedrun this level"\n• "Play 5 ranked games with me in League of Legends"`}
+                        placeholder={`Be specific and realistic. Example: Help me defeat Malenia in Elden Ring, or Carry me to Platinum rank in Valorant (best of 5 games)`}
                         className="resize-none h-40 bg-background border-border focus-visible:border-primary transition-colors leading-relaxed"
                         disabled={!canPost}
                         maxLength={OBJECTIVES_MAX}
@@ -289,6 +335,16 @@ export default function PostRequest() {
                       />
                     </FormControl>
                     <FormMessage />
+
+                    {/* Soft unrealistic warning */}
+                    {unrealisticWarning && (
+                      <div className="flex items-start gap-2 rounded-lg border border-amber-500/30 bg-amber-500/5 px-3.5 py-3 text-xs text-amber-300">
+                        <AlertCircle className="h-4 w-4 shrink-0 mt-0.5 text-amber-400" />
+                        <p>
+                          <span className="font-semibold">Heads up!</span> This request looks quite challenging — gamers are less likely to bid on very difficult or impossible quests. Are you sure it's realistic? Even a small tweak (like adding a time range or scope limit) can get you a lot more interest!
+                        </p>
+                      </div>
+                    )}
 
                     {/* Example prompt chips */}
                     {!objectivesValue && (

@@ -21,7 +21,7 @@ import {
   CheckCircle2, AlertCircle, User, Clock, TrendingDown, TrendingUp,
   Zap, ExternalLink, LogIn, Trophy, Shield, Star,
   Flame, Target, Users, X, SlidersHorizontal, Tv, Sparkles,
-  ArrowDownUp, ArrowUp, ArrowDown, Globe, UserRound, ShieldAlert,
+  ArrowDownUp, ArrowUp, ArrowDown, Globe, UserRound, ShieldAlert, Info,
 } from "lucide-react";
 import { SafetyBanner } from "@/components/safety-banner";
 import { useToast } from "@/hooks/use-toast";
@@ -951,6 +951,15 @@ export default function Browse() {
 
       {/* ── How it works (above filter for new users) ── */}
       <HowItWorksSection />
+
+      {/* ── Quest guideline tip box ── */}
+      <div className="rounded-xl border border-blue-500/20 bg-blue-500/5 px-4 py-3.5 flex items-start gap-3">
+        <Info className="h-4 w-4 text-blue-400 shrink-0 mt-0.5" />
+        <div className="space-y-1.5 text-[11px] text-muted-foreground/80">
+          <p className="font-semibold text-blue-300 text-xs">Looking for good quests to bid on?</p>
+          <p>Great quests are <span className="text-green-400/90 font-medium">specific and realistic</span> — like "help me beat Malenia in Elden Ring" or "carry me to Platinum in Valorant (5 games)". Watch out for requests that sound impossible — they rarely get completed and can affect your rating.</p>
+        </div>
+      </div>
 
       {/* ── Filter panel ── */}
       <div
