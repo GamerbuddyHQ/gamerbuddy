@@ -10,8 +10,9 @@ import {
   suggestionVotesTable,
   suggestionCommentsTable,
   usersTable,
+  moderatorActionsTable,
 } from "@workspace/db";
-import { eq, sql, ilike, or, desc, not } from "drizzle-orm";
+import { eq, sql, ilike, or, desc } from "drizzle-orm";
 import { requireAdminAuth } from "./admin-auth";
 
 const router = Router();
@@ -269,6 +270,110 @@ router.post("/admin/community/users/:id/unban", requireAdminAuth, async (req, re
   if (!updated) { res.status(404).json({ error: "User not found" }); return; }
   req.log?.info({ action: "admin_community_unban", targetUserId: userId }, "User unbanned from community by admin");
   res.json({ success: true, user: updated });
+});
+
+/* ── GET /admin/community/moderators — list all moderators ─────────────── */
+router.get("/admin/community/moderators", requireAdminAuth, async (req, res): Promise<void> => {
+  const mods = await db
+    .select({
+      id:           usersTable.id,
+      name:         usersTable.name,
+      email:        usersTable.email,
+      gamerbuddyId: usersTable.gamerbuddyId,
+      createdAt:    usersTable.createdAt,
+    })
+    .from(usersTable)
+    .where(eq(usersTable.isModerator, true))
+    .orderBy(usersTable.createdAt);
+  res.json(mods);
+});
+
+/* ── GET /admin/community/users/search?q= — search users ──────────────── */
+router.get("/admin/community/users/search", requireAdminAuth, async (req, res): Promise<void> => {
+  const q = ((req.query.q as string | undefined) ?? "").trim();
+  if (!q || q.length < 2) { res.json([]); return; }
+
+  const users = await db
+    .select({
+      id:           usersTable.id,
+      name:         usersTable.name,
+      email:        usersTable.email,
+      gamerbuddyId: usersTable.gamerbuddyId,
+      isModerator:  usersTable.isModerator,
+    })
+    .from(usersTable)
+    .where(
+      or(
+        ilike(usersTable.name, `%${q}%`),
+        ilike(usersTable.gamerbuddyId, `%${q}%`),
+        ilike(usersTable.email, `%${q}%`),
+      )
+    )
+    .limit(10);
+
+  res.json(users);
+});
+
+/* ── POST /admin/community/moderators/:userId — appoint ────────────────── */
+router.post("/admin/community/moderators/:userId", requireAdminAuth, async (req, res): Promise<void> => {
+  const userId = parseInt(req.params.userId, 10);
+  if (isNaN(userId)) { res.status(400).json({ error: "Invalid user ID" }); return; }
+
+  const [user] = await db
+    .select({ id: usersTable.id, name: usersTable.name, email: usersTable.email })
+    .from(usersTable)
+    .where(eq(usersTable.id, userId));
+
+  if (!user) { res.status(404).json({ error: "User not found" }); return; }
+  if (user.email === "gamerbuddyhq@gmail.com") {
+    res.status(400).json({ error: "Cannot modify the main admin account" }); return;
+  }
+
+  const [updated] = await db
+    .update(usersTable)
+    .set({ isModerator: true })
+    .where(eq(usersTable.id, userId))
+    .returning({ id: usersTable.id, name: usersTable.name, isModerator: usersTable.isModerator });
+
+  req.log?.info({ action: "admin_appoint_moderator", targetUserId: userId }, `${user.name} appointed as moderator`);
+  res.json({ success: true, user: updated });
+});
+
+/* ── DELETE /admin/community/moderators/:userId — remove ───────────────── */
+router.delete("/admin/community/moderators/:userId", requireAdminAuth, async (req, res): Promise<void> => {
+  const userId = parseInt(req.params.userId, 10);
+  if (isNaN(userId)) { res.status(400).json({ error: "Invalid user ID" }); return; }
+
+  const [updated] = await db
+    .update(usersTable)
+    .set({ isModerator: false })
+    .where(eq(usersTable.id, userId))
+    .returning({ id: usersTable.id, name: usersTable.name, isModerator: usersTable.isModerator });
+
+  if (!updated) { res.status(404).json({ error: "User not found" }); return; }
+  req.log?.info({ action: "admin_remove_moderator", targetUserId: userId }, "Moderator removed");
+  res.json({ success: true, user: updated });
+});
+
+/* ── GET /admin/community/moderators/actions — action log ──────────────── */
+router.get("/admin/community/moderators/actions", requireAdminAuth, async (req, res): Promise<void> => {
+  const rows = await db
+    .select({
+      id:          moderatorActionsTable.id,
+      action:      moderatorActionsTable.action,
+      targetType:  moderatorActionsTable.targetType,
+      targetId:    moderatorActionsTable.targetId,
+      meta:        moderatorActionsTable.meta,
+      createdAt:   moderatorActionsTable.createdAt,
+      moderatorId: moderatorActionsTable.moderatorId,
+      modName:     usersTable.name,
+      modGbId:     usersTable.gamerbuddyId,
+    })
+    .from(moderatorActionsTable)
+    .leftJoin(usersTable, eq(moderatorActionsTable.moderatorId, usersTable.id))
+    .orderBy(desc(moderatorActionsTable.createdAt))
+    .limit(200);
+  res.json(rows);
 });
 
 export default router;

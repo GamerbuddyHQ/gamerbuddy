@@ -1,4 +1,4 @@
-import { pgTable, text, serial, timestamp, integer, boolean } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, timestamp, integer, boolean, jsonb } from "drizzle-orm/pg-core";
 import { usersTable } from "./users";
 
 export const suggestionsTable = pgTable("suggestions", {
@@ -27,10 +27,22 @@ export const suggestionCommentsTable = pgTable("suggestion_comments", {
   parentId: integer("parent_id"),
   body: text("body").notNull(),
   isAdminComment: boolean("is_admin_comment").notNull().default(false),
+  isModComment:  boolean("is_mod_comment").notNull().default(false),
   isPinned: boolean("is_pinned").notNull().default(false),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const moderatorActionsTable = pgTable("moderator_actions", {
+  id:          serial("id").primaryKey(),
+  moderatorId: integer("moderator_id").notNull().references(() => usersTable.id),
+  action:      text("action").notNull(), // hide_post | restore_post | delete_post | pin_post | ban_user | unban_user | mod_comment
+  targetType:  text("target_type").notNull(), // post | user | comment
+  targetId:    integer("target_id").notNull(),
+  meta:        jsonb("meta"),
+  createdAt:   timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 export type Suggestion = typeof suggestionsTable.$inferSelect;
 export type SuggestionVote = typeof suggestionVotesTable.$inferSelect;
 export type SuggestionComment = typeof suggestionCommentsTable.$inferSelect;
+export type ModeratorAction = typeof moderatorActionsTable.$inferSelect;

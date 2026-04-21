@@ -12,7 +12,8 @@ import {
   Shield, LogOut, Search, Eye, EyeOff, Trash2, Ban, CheckCircle2,
   RefreshCw, ArrowLeft, ThumbsUp, ThumbsDown, MessageSquare,
   User, AlertTriangle, Tag, ShieldOff, Pin, PinOff, ChevronDown,
-  ChevronUp, Loader2, Send,
+  ChevronUp, Loader2, Send, Users, UserCheck, UserX, Activity,
+  Clock, FileText,
 } from "lucide-react";
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
@@ -40,9 +41,38 @@ type Comment = {
   createdAt:       string;
   isPinned:        boolean;
   isAdminComment:  boolean;
+  isModComment:    boolean;
   authorName:      string | null;
   authorGamerbuddyId: string | null;
   replies:         Comment[];
+};
+
+type Moderator = {
+  id:           number;
+  name:         string;
+  email:        string;
+  gamerbuddyId: string | null;
+  createdAt:    string;
+};
+
+type UserSearchResult = {
+  id:           number;
+  name:         string;
+  email:        string;
+  gamerbuddyId: string | null;
+  isModerator:  boolean;
+};
+
+type ModAction = {
+  id:          number;
+  action:      string;
+  targetType:  string;
+  targetId:    number;
+  meta:        Record<string, unknown> | null;
+  createdAt:   string;
+  moderatorId: number;
+  modName:     string | null;
+  modGbId:     string | null;
 };
 
 const STATUS_COLORS: Record<string, string> = {
@@ -81,7 +111,9 @@ function CommentRow({ comment, postId }: { comment: Comment; postId: number }) {
         ? "border-primary/40 bg-primary/5"
         : comment.isAdminComment
           ? "border-purple-500/30 bg-purple-500/5"
-          : "border-border/40 bg-muted/20"
+          : comment.isModComment
+            ? "border-green-500/25 bg-green-500/5"
+            : "border-border/40 bg-muted/20"
     }`}>
       {/* Badges row */}
       <div className="flex items-center gap-2 flex-wrap">
@@ -93,6 +125,11 @@ function CommentRow({ comment, postId }: { comment: Comment; postId: number }) {
         {comment.isAdminComment && (
           <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-purple-400 bg-purple-500/10 border border-purple-500/30 px-1.5 py-0.5 rounded-full">
             <Shield className="w-2.5 h-2.5" /> Admin
+          </span>
+        )}
+        {comment.isModComment && (
+          <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-green-400 bg-green-500/10 border border-green-500/30 px-1.5 py-0.5 rounded-full">
+            <Shield className="w-2.5 h-2.5" /> Mod
           </span>
         )}
         <span className="text-xs font-semibold text-foreground/70">
@@ -249,6 +286,10 @@ export default function AdminCommunity() {
   const [authorFilter, setAuthorFilter] = useState("");
   const [expandedId,   setExpandedId]   = useState<number | null>(null);
   const [activeStatus, setActiveStatus] = useState<"all" | "visible" | "hidden" | "spam">("all");
+  const [activeView,   setActiveView]   = useState<"posts" | "moderators" | "actions">("posts");
+  const [modSearchQ,   setModSearchQ]   = useState("");
+  const [modSearchResults, setModSearchResults] = useState<UserSearchResult[]>([]);
+  const [modSearchLoading, setModSearchLoading] = useState(false);
 
   /* ── Auth gate ── */
   const { data: authData, isLoading: authLoading } = useAdminAuth();
@@ -310,6 +351,54 @@ export default function AdminCommunity() {
     onSuccess: () => { qc.clear(); navigate("/admin/login"); },
   });
 
+  /* ── Moderator data ── */
+  const { data: moderators, isLoading: modsLoading, refetch: refetchMods } = useQuery<Moderator[]>({
+    queryKey: ["admin-community-moderators"],
+    queryFn:  () => apiFetch(`${BASE}/admin/community/moderators`),
+    enabled:  !!authData?.isAdmin,
+    staleTime: 30_000,
+  });
+
+  const { data: actionLog, isLoading: actionsLoading, refetch: refetchActions } = useQuery<ModAction[]>({
+    queryKey: ["admin-community-actions"],
+    queryFn:  () => apiFetch(`${BASE}/admin/community/moderators/actions`),
+    enabled:  !!authData?.isAdmin && activeView === "actions",
+    staleTime: 15_000,
+  });
+
+  const appointMod = useMutation({
+    mutationFn: (userId: number) => apiFetch(`${BASE}/admin/community/moderators/${userId}`, { method: "POST" }),
+    onSuccess: (_, userId) => {
+      qc.invalidateQueries({ queryKey: ["admin-community-moderators"] });
+      setModSearchResults(prev => prev.map(u => u.id === userId ? { ...u, isModerator: true } : u));
+      toast({ title: "✅ Moderator Appointed", description: "User now has moderator powers on the community." });
+    },
+    onError: (e: Error) => toast({ title: "Error", description: e.message, variant: "destructive" }),
+  });
+
+  const removeMod = useMutation({
+    mutationFn: (userId: number) => apiFetch(`${BASE}/admin/community/moderators/${userId}`, { method: "DELETE" }),
+    onSuccess: (_, userId) => {
+      qc.invalidateQueries({ queryKey: ["admin-community-moderators"] });
+      setModSearchResults(prev => prev.map(u => u.id === userId ? { ...u, isModerator: false } : u));
+      toast({ title: "Moderator Removed", description: "User no longer has moderator powers." });
+    },
+    onError: (e: Error) => toast({ title: "Error", description: e.message, variant: "destructive" }),
+  });
+
+  async function searchUsers(q: string) {
+    if (!q.trim() || q.trim().length < 2) { setModSearchResults([]); return; }
+    setModSearchLoading(true);
+    try {
+      const results = await apiFetch(`${BASE}/admin/community/users/search?q=${encodeURIComponent(q)}`);
+      setModSearchResults(results);
+    } catch {
+      toast({ title: "Search failed", variant: "destructive" });
+    } finally {
+      setModSearchLoading(false);
+    }
+  }
+
   /* ── Loading ── */
   if (authLoading) {
     return (
@@ -338,11 +427,12 @@ export default function AdminCommunity() {
     posts = posts.filter(p => p.status === activeStatus);
   }
 
-  const totalAll     = data?.posts.length ?? 0;
-  const totalVisible = data?.posts.filter(p => p.status === "visible").length ?? 0;
-  const totalHidden  = data?.posts.filter(p => p.status === "hidden").length ?? 0;
-  const totalSpam    = data?.posts.filter(p => p.status === "spam").length ?? 0;
-  const totalPinned  = data?.posts.filter(p => p.isPinned).length ?? 0;
+  const totalAll        = data?.posts.length ?? 0;
+  const totalVisible    = data?.posts.filter(p => p.status === "visible").length ?? 0;
+  const totalHidden     = data?.posts.filter(p => p.status === "hidden").length ?? 0;
+  const totalSpam       = data?.posts.filter(p => p.status === "spam").length ?? 0;
+  const totalPinned     = data?.posts.filter(p => p.isPinned).length ?? 0;
+  const totalModerators = moderators?.length ?? 0;
 
   function confirmDelete(post: Post) {
     if (window.confirm(`Permanently delete "${post.title}"? This cannot be undone.`)) {
@@ -380,13 +470,14 @@ export default function AdminCommunity() {
       <div className="space-y-5 max-w-[1400px] mx-auto px-4 py-6">
 
         {/* ── Stats row ── */}
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+        <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
           {[
-            { label: "Total Posts",    value: totalAll,     color: "text-foreground",   bg: "bg-muted/40" },
-            { label: "Visible",        value: totalVisible, color: "text-green-400",    bg: "bg-green-500/8" },
-            { label: "Hidden",         value: totalHidden,  color: "text-amber-400",    bg: "bg-amber-500/8" },
-            { label: "Spam",           value: totalSpam,    color: "text-red-400",      bg: "bg-red-500/8" },
-            { label: "📌 Pinned",      value: totalPinned,  color: "text-yellow-400",   bg: "bg-yellow-500/8" },
+            { label: "Total Posts",    value: totalAll,        color: "text-foreground",   bg: "bg-muted/40" },
+            { label: "Visible",        value: totalVisible,    color: "text-green-400",    bg: "bg-green-500/8" },
+            { label: "Hidden",         value: totalHidden,     color: "text-amber-400",    bg: "bg-amber-500/8" },
+            { label: "Spam",           value: totalSpam,       color: "text-red-400",      bg: "bg-red-500/8" },
+            { label: "📌 Pinned",      value: totalPinned,     color: "text-yellow-400",   bg: "bg-yellow-500/8" },
+            { label: "🛡 Moderators",   value: totalModerators, color: "text-teal-400",     bg: "bg-teal-500/8" },
           ].map(s => (
             <div key={s.label} className={`${s.bg} border border-border/50 rounded-xl p-3`}>
               <p className="text-xs text-muted-foreground/60">{s.label}</p>
@@ -394,6 +485,36 @@ export default function AdminCommunity() {
             </div>
           ))}
         </div>
+
+        {/* ── Main view tabs ── */}
+        <div className="flex gap-1 bg-muted/30 p-1 rounded-xl w-fit border border-border/50">
+          {([
+            { key: "posts",      label: "Posts",       icon: FileText },
+            { key: "moderators", label: "Moderators",  icon: Users },
+            { key: "actions",    label: "Action Log",  icon: Activity },
+          ] as const).map(({ key, label, icon: Icon }) => (
+            <button
+              key={key}
+              onClick={() => setActiveView(key)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                activeView === key
+                  ? "bg-primary text-primary-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <Icon className="w-3.5 h-3.5" />
+              {label}
+              {key === "moderators" && totalModerators > 0 && (
+                <span className="ml-0.5 bg-teal-500/20 text-teal-400 text-[9px] font-bold px-1 py-0.5 rounded-full">{totalModerators}</span>
+              )}
+            </button>
+          ))}
+        </div>
+
+        {/* ══════════════════════════════════════════════════════════════════
+            POSTS VIEW
+        ══════════════════════════════════════════════════════════════════ */}
+        {activeView === "posts" && <>
 
         {/* ── Filters ── */}
         <div className="flex flex-col sm:flex-row gap-3">
@@ -632,6 +753,236 @@ export default function AdminCommunity() {
             </div>
           </div>
         </div>
+
+        {/* end posts view */}
+        </>}
+
+        {/* ══════════════════════════════════════════════════════════════════
+            MODERATORS VIEW
+        ══════════════════════════════════════════════════════════════════ */}
+        {activeView === "moderators" && (
+          <div className="space-y-6">
+            {/* ── Appoint new moderator ── */}
+            <div className="bg-card border border-border rounded-xl p-5 space-y-4">
+              <div className="flex items-center gap-2">
+                <UserCheck className="w-5 h-5 text-teal-400" />
+                <h2 className="font-bold text-base">Appoint Community Moderator</h2>
+              </div>
+              <p className="text-xs text-muted-foreground/70">
+                Search for a registered user by name, username, or GB-ID. Moderators can hide/unhide posts, delete posts, ban authors, pin/unpin posts, and post Mod comments.
+              </p>
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50" />
+                  <Input
+                    value={modSearchQ}
+                    onChange={e => setModSearchQ(e.target.value)}
+                    placeholder="Search by name, email, or GB-ID…"
+                    className="pl-9 bg-muted/30 border-border/50"
+                    onKeyDown={e => e.key === "Enter" && searchUsers(modSearchQ)}
+                  />
+                </div>
+                <Button
+                  onClick={() => searchUsers(modSearchQ)}
+                  disabled={modSearchLoading || modSearchQ.trim().length < 2}
+                  className="gap-1.5"
+                  size="sm"
+                >
+                  {modSearchLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
+                  Search
+                </Button>
+              </div>
+
+              {/* Search results */}
+              {modSearchResults.length > 0 && (
+                <div className="space-y-2 border border-border/50 rounded-xl p-3 bg-muted/20">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50 mb-2">Search Results</p>
+                  {modSearchResults.map(user => (
+                    <div key={user.id} className="flex items-center gap-3 p-2.5 rounded-lg bg-card border border-border/40 hover:border-border/70 transition-colors">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-semibold text-sm">{user.name}</span>
+                          {user.gamerbuddyId && <span className="text-[10px] font-mono text-muted-foreground/50">#{user.gamerbuddyId}</span>}
+                          {user.isModerator && (
+                            <span className="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider text-teal-400 bg-teal-500/10 border border-teal-500/30 px-1.5 py-0.5 rounded-full">
+                              <Shield className="w-2 h-2" /> Mod
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs text-muted-foreground/50 truncate">{user.email}</p>
+                      </div>
+                      {user.isModerator ? (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => removeMod.mutate(user.id)}
+                          disabled={removeMod.isPending}
+                          className="gap-1.5 text-xs border-red-500/30 text-red-400 hover:bg-red-500/10 shrink-0"
+                        >
+                          <UserX className="w-3.5 h-3.5" /> Remove Mod
+                        </Button>
+                      ) : (
+                        <Button
+                          size="sm"
+                          onClick={() => appointMod.mutate(user.id)}
+                          disabled={appointMod.isPending}
+                          className="gap-1.5 text-xs bg-teal-500/80 hover:bg-teal-500 text-white shrink-0"
+                        >
+                          <UserCheck className="w-3.5 h-3.5" /> Make Moderator
+                        </Button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {modSearchQ.length > 1 && modSearchResults.length === 0 && !modSearchLoading && (
+                <p className="text-xs text-muted-foreground/50 text-center py-2">No users found matching "{modSearchQ}"</p>
+              )}
+            </div>
+
+            {/* ── Current moderators list ── */}
+            <div className="bg-card border border-border rounded-xl p-5 space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Users className="w-5 h-5 text-teal-400" />
+                  <h2 className="font-bold text-base">Current Moderators</h2>
+                  <span className="text-xs font-mono bg-teal-500/10 text-teal-400 px-2 py-0.5 rounded-full border border-teal-500/30">{totalModerators}</span>
+                </div>
+                <Button variant="ghost" size="icon" onClick={() => refetchMods()} title="Refresh">
+                  <RefreshCw className="w-4 h-4" />
+                </Button>
+              </div>
+
+              {modsLoading ? (
+                <div className="space-y-2">{Array(3).fill(0).map((_, i) => <Skeleton key={i} className="h-16 w-full rounded-xl" />)}</div>
+              ) : !moderators || moderators.length === 0 ? (
+                <div className="text-center py-10 border border-dashed border-border/40 rounded-xl">
+                  <Users className="w-8 h-8 mx-auto mb-2 text-muted-foreground/30" />
+                  <p className="font-medium text-muted-foreground">No moderators appointed yet</p>
+                  <p className="text-xs text-muted-foreground/50 mt-1">Use the search above to find and appoint users as moderators.</p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {moderators.map(mod => (
+                    <div key={mod.id} className="flex items-center gap-3 p-3 rounded-xl bg-teal-500/5 border border-teal-500/20 hover:border-teal-500/40 transition-colors">
+                      <div className="w-9 h-9 rounded-full bg-teal-500/15 border border-teal-500/30 flex items-center justify-center shrink-0">
+                        <Shield className="w-4 h-4 text-teal-400" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-semibold text-sm">{mod.name}</span>
+                          {mod.gamerbuddyId && <span className="text-[10px] font-mono text-muted-foreground/50">#{mod.gamerbuddyId}</span>}
+                          <span className="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider text-teal-400 bg-teal-500/10 border border-teal-500/30 px-1.5 py-0.5 rounded-full">
+                            <Shield className="w-2 h-2" /> Moderator
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-3 mt-0.5 text-[10px] text-muted-foreground/50">
+                          <span>{mod.email}</span>
+                          <span className="flex items-center gap-1"><Clock className="w-2.5 h-2.5" /> Joined {format(new Date(mod.createdAt), "dd MMM yyyy")}</span>
+                        </div>
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          if (window.confirm(`Remove moderator status from ${mod.name}?`)) removeMod.mutate(mod.id);
+                        }}
+                        disabled={removeMod.isPending}
+                        className="gap-1.5 text-xs border-red-500/30 text-red-400 hover:bg-red-500/10 shrink-0"
+                      >
+                        <UserX className="w-3.5 h-3.5" /> Remove
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* ── Permissions info ── */}
+            <div className="bg-teal-500/5 border border-teal-500/20 rounded-xl p-4 text-sm text-teal-300/80">
+              <div className="flex items-start gap-2">
+                <Shield className="w-4 h-4 mt-0.5 shrink-0 text-teal-400" />
+                <div className="space-y-1">
+                  <p className="font-semibold text-teal-300">Moderator Permissions</p>
+                  <ul className="list-disc list-inside text-xs text-teal-300/70 space-y-0.5">
+                    <li><strong>Hide / Restore posts</strong> — soft-hide posts from public view; reversible.</li>
+                    <li><strong>Delete posts</strong> — permanently remove posts and all associated comments.</li>
+                    <li><strong>Pin / Unpin posts</strong> — promote posts to the top of the community feed (max 5).</li>
+                    <li><strong>Ban / Unban authors</strong> — prevent or allow users from creating new posts.</li>
+                    <li><strong>Post Mod comment</strong> — reply with a green "Moderator" badge, visible to all users.</li>
+                    <li><strong>Cannot appoint/remove moderators</strong> — only the main admin can manage moderators.</li>
+                    <li>All moderator actions are logged and visible in the <strong>Action Log</strong> tab.</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ══════════════════════════════════════════════════════════════════
+            ACTION LOG VIEW
+        ══════════════════════════════════════════════════════════════════ */}
+        {activeView === "actions" && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Activity className="w-5 h-5 text-primary" />
+                <h2 className="font-bold text-base">Moderator Action Log</h2>
+                <span className="text-xs text-muted-foreground/50">(last 200 actions)</span>
+              </div>
+              <Button variant="ghost" size="icon" onClick={() => refetchActions()} title="Refresh">
+                <RefreshCw className="w-4 h-4" />
+              </Button>
+            </div>
+
+            {actionsLoading ? (
+              <div className="space-y-2">{Array(8).fill(0).map((_, i) => <Skeleton key={i} className="h-14 w-full rounded-xl" />)}</div>
+            ) : !actionLog || actionLog.length === 0 ? (
+              <div className="text-center py-16 border border-dashed border-border/40 rounded-xl">
+                <Activity className="w-8 h-8 mx-auto mb-2 text-muted-foreground/30" />
+                <p className="font-medium text-muted-foreground">No moderator actions yet</p>
+                <p className="text-xs text-muted-foreground/50 mt-1">Actions taken by moderators will appear here.</p>
+              </div>
+            ) : (
+              <div className="space-y-1.5">
+                {actionLog.map(entry => {
+                  const ACTION_LABELS: Record<string, { label: string; color: string }> = {
+                    hide_post:    { label: "Hid post",          color: "text-amber-400" },
+                    restore_post: { label: "Restored post",     color: "text-green-400" },
+                    delete_post:  { label: "Deleted post",      color: "text-red-400" },
+                    pin_post:     { label: "Pinned post",       color: "text-yellow-400" },
+                    unpin_post:   { label: "Unpinned post",     color: "text-muted-foreground" },
+                    ban_user:     { label: "Banned user",       color: "text-red-400" },
+                    unban_user:   { label: "Unbanned user",     color: "text-green-400" },
+                    mod_comment:  { label: "Posted Mod comment","color": "text-teal-400" },
+                  };
+                  const meta = ACTION_LABELS[entry.action] ?? { label: entry.action, color: "text-foreground" };
+                  return (
+                    <div key={entry.id} className="flex items-center gap-3 px-4 py-2.5 bg-card border border-border/40 rounded-xl hover:border-border/70 transition-colors">
+                      <div className="w-8 h-8 rounded-full bg-muted/40 border border-border/50 flex items-center justify-center shrink-0">
+                        <Shield className="w-3.5 h-3.5 text-teal-400" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap text-sm">
+                          <span className="font-semibold">{entry.modName ?? `User #${entry.moderatorId}`}</span>
+                          {entry.modGbId && <span className="text-[10px] font-mono text-muted-foreground/40">#{entry.modGbId}</span>}
+                          <span className={`font-medium ${meta.color}`}>{meta.label}</span>
+                          <span className="text-muted-foreground/60">#{entry.targetId}</span>
+                        </div>
+                      </div>
+                      <span className="text-[10px] text-muted-foreground/40 shrink-0 flex items-center gap-1">
+                        <Clock className="w-2.5 h-2.5" />
+                        {formatDistanceToNow(new Date(entry.createdAt), { addSuffix: true })}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
       </div>
     </div>
   );

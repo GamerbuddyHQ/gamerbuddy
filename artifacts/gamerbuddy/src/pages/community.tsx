@@ -107,6 +107,7 @@ type Comment = {
   parentId: number | null;
   body: string;
   isAdminComment: boolean;
+  isModComment:   boolean;
   isPinned: boolean;
   createdAt: string;
   authorName: string;
@@ -821,6 +822,13 @@ function CommentItem({ comment, suggestionId, depth = 0, isAdmin = false }: { co
           >
             <Shield className="h-3.5 w-3.5" style={{ color: "rgba(168,85,247,0.9)" }} />
           </div>
+        ) : comment.isModComment ? (
+          <div
+            className="rounded-full flex items-center justify-center shrink-0"
+            style={{ width: 26, height: 26, background: "rgba(34,197,94,0.15)", border: "1px solid rgba(34,197,94,0.35)" }}
+          >
+            <Shield className="h-3.5 w-3.5" style={{ color: "rgba(34,197,94,0.9)" }} />
+          </div>
         ) : (
           <Avatar name={comment.authorName} size={26} />
         )}
@@ -828,7 +836,7 @@ function CommentItem({ comment, suggestionId, depth = 0, isAdmin = false }: { co
           <div className="flex items-center gap-2 flex-wrap">
             <CommentMeta
               authorName={comment.isAdminComment ? "Gamerbuddy Team" : comment.authorName}
-              authorCountry={comment.isAdminComment ? null : comment.authorCountry}
+              authorCountry={(comment.isAdminComment || comment.isModComment) ? null : comment.authorCountry}
               createdAt={comment.createdAt}
               compact={depth > 0}
             />
@@ -838,6 +846,14 @@ function CommentItem({ comment, suggestionId, depth = 0, isAdmin = false }: { co
                 style={{ background: "rgba(168,85,247,0.18)", color: "rgba(168,85,247,0.9)", border: "1px solid rgba(168,85,247,0.3)" }}
               >
                 Official
+              </span>
+            )}
+            {comment.isModComment && (
+              <span
+                className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full"
+                style={{ background: "rgba(34,197,94,0.15)", color: "rgba(34,197,94,0.9)", border: "1px solid rgba(34,197,94,0.3)" }}
+              >
+                Moderator
               </span>
             )}
           </div>

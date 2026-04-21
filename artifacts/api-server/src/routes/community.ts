@@ -242,6 +242,7 @@ router.get("/community/suggestions/:id/comments", async (req, res): Promise<void
       parentId: suggestionCommentsTable.parentId,
       body: suggestionCommentsTable.body,
       isAdminComment: suggestionCommentsTable.isAdminComment,
+      isModComment:   suggestionCommentsTable.isModComment,
       isPinned: suggestionCommentsTable.isPinned,
       createdAt: suggestionCommentsTable.createdAt,
       authorName: usersTable.name,
