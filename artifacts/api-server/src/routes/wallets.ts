@@ -139,45 +139,7 @@ router.get("/wallets", requireAuth, async (req, res): Promise<void> => {
   res.json(formatWallets({ ...wallet, escrowBalance }));
 });
 
-// ── GET /admin/platform-earnings ─────────────────────────────────────────────
-// Shows the platform owner's accumulated fee earnings.
-// Protected: only accessible to the admin user ID defined in ADMIN_USER_ID env var.
-// Falls back to user ID 1 if the env var is not set.
-const ADMIN_USER_ID = parseInt(process.env.ADMIN_USER_ID ?? "1", 10);
-
-router.get("/admin/platform-earnings", requireAuth, async (req, res): Promise<void> => {
-  if (req.user!.id !== ADMIN_USER_ID) {
-    res.status(403).json({ error: "Access denied." });
-    return;
-  }
-  const fees = await db
-    .select()
-    .from(platformFeesTable)
-    .orderBy(desc(platformFeesTable.createdAt))
-    .limit(200);
-
-  const [totals] = await db
-    .select({
-      total: sum(platformFeesTable.amount),
-      sessionTotal: sql<string>`sum(case when type = 'session_fee' then amount else 0 end)`,
-      bulkTotal: sql<string>`sum(case when type = 'bulk_session_fee' then amount else 0 end)`,
-      giftTotal: sql<string>`sum(case when type = 'gift_fee' then amount else 0 end)`,
-    })
-    .from(platformFeesTable);
-
-  res.json({
-    totalFees: round2(parseFloat(totals?.total ?? "0") || 0),
-    sessionFees: round2(parseFloat(totals?.sessionTotal ?? "0") || 0),
-    bulkFees: round2(parseFloat(totals?.bulkTotal ?? "0") || 0),
-    giftFees: round2(parseFloat(totals?.giftTotal ?? "0") || 0),
-    feeCount: fees.length,
-    fees: fees.map((f) => ({
-      ...f,
-      amount: round2(parseFloat(f.amount)),
-      createdAt: f.createdAt.toISOString(),
-    })),
-  });
-});
+// NOTE: /admin/platform-earnings route has been moved to admin.ts (uses admin cookie auth)
 
 // ── GET /wallets/transactions ───────────────────────────────────────────────
 router.get("/wallets/transactions", requireAuth, async (req, res): Promise<void> => {

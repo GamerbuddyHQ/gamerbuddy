@@ -1,16 +1,15 @@
-import React, { useState } from "react";
-import { useLocation } from "wouter";
-import { useAuth } from "@/lib/auth";
+import React, { useState, useEffect } from "react";
+import { useLocation, Link } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiFetch } from "@/lib/bids-api";
+import { apiFetch, BASE } from "@/lib/bids-api";
 import { format, formatDistanceToNow } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Shield, AlertTriangle, Activity, Lock, Unlock,
   RefreshCw, User, DollarSign, Flag, Clock, ChevronDown,
-  ChevronUp, Eye, Wallet, TrendingUp, Ban, CheckCircle2,
-  XCircle, ArrowLeft, FileText, Zap, Search,
+  ChevronUp, Wallet, TrendingUp, Ban, CheckCircle2,
+  XCircle, FileText, Search, Users, BadgeCheck, UserX, LogOut,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -63,6 +62,12 @@ type TxEntry = {
 
 type SecurityData = {
   generatedAt: string;
+  users: {
+    total:    number;
+    verified: number;
+    pending:  number;
+    banned:   number;
+  };
   loginAttempts: LoginAttemptEntry[];
   suspicious: {
     largeTransactions: LargeTransaction[];
@@ -71,12 +76,23 @@ type SecurityData = {
   transactions: TxEntry[];
 };
 
+/* ── Admin auth hook ─────────────────────────────────────────────────────── */
+function useAdminAuth() {
+  return useQuery<{ isAdmin: boolean }>({
+    queryKey: ["admin-auth-me"],
+    queryFn:  () => apiFetch(`${BASE}/admin/auth/me`),
+    retry:    false,
+    staleTime: 30_000,
+  });
+}
+
 /* ── Data hook ───────────────────────────────────────────────────────────── */
-function useSecurityData() {
+function useSecurityData(enabled: boolean) {
   return useQuery<SecurityData>({
     queryKey: ["admin-security"],
-    queryFn:  () => apiFetch("/api/admin/security"),
+    queryFn:  () => apiFetch(`${BASE}/admin/security`),
     refetchInterval: 60_000,
+    enabled,
   });
 }
 
@@ -524,40 +540,90 @@ function TransactionsLog({ rows }: { rows: TxEntry[] }) {
   );
 }
 
+/* ── Admin top nav ───────────────────────────────────────────────────────── */
+function AdminNav() {
+  const { toast } = useToast();
+  const [, navigate] = useLocation();
+  const logout = useMutation({
+    mutationFn: () => apiFetch(`${BASE}/admin/auth/logout`, { method: "POST" }),
+    onSuccess:  () => navigate("/admin/login"),
+    onError:    () => toast({ title: "Logout failed", variant: "destructive" }),
+  });
+  return (
+    <div className="sticky top-0 z-30 border-b border-border/40 bg-background/80 backdrop-blur-md">
+      <div className="max-w-[1400px] mx-auto px-4 md:px-8 h-12 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Shield className="w-5 h-5 text-primary" />
+          <span className="font-bold tracking-tight text-foreground">Gamerbuddy Admin</span>
+          <span className="hidden sm:inline text-xs text-muted-foreground/50 ml-2">
+            {new Date().toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
+          </span>
+        </div>
+        <Button
+          variant="ghost" size="sm"
+          onClick={() => logout.mutate()} disabled={logout.isPending}
+          className="gap-1.5 text-muted-foreground hover:text-destructive"
+        >
+          <LogOut className="w-4 h-4" /><span className="hidden sm:inline">Logout</span>
+        </Button>
+      </div>
+      <div className="max-w-[1400px] mx-auto px-4 md:px-8 py-2 border-t border-border/40 flex gap-1 overflow-x-auto">
+        {[
+          { href: "/admin/dashboard",        label: "Payouts & Verifications", icon: DollarSign },
+          { href: "/admin/community",         label: "Community Moderation",    icon: Users      },
+          { href: "/admin/platform-earnings", label: "Platform Earnings",       icon: Wallet     },
+          { href: "/admin/security",          label: "Security",                icon: Shield     },
+        ].map(item => (
+          <Link
+            key={item.href}
+            href={item.href}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${
+              item.href === "/admin/security"
+                ? "bg-red-500/15 text-red-400 border border-red-500/30"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+            }`}
+          >
+            <item.icon className="w-3.5 h-3.5" />
+            {item.label}
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 /* ── Page ────────────────────────────────────────────────────────────────── */
 export default function AdminSecurity() {
-  const { user, isLoading: authLoading } = useAuth();
-  const [, setLocation] = useLocation();
-  const qc = useQueryClient();
+  const { data: authData, isLoading: authLoading } = useAdminAuth();
+  const [, navigate] = useLocation();
+  const reportsRef = React.useRef<HTMLDivElement>(null);
 
-  const { data, isLoading, error, refetch, isFetching } = useSecurityData();
+  useEffect(() => {
+    if (!authLoading && !authData?.isAdmin) navigate("/admin/login");
+  }, [authData, authLoading, navigate]);
 
-  // Block non-admins immediately
-  if (!authLoading && (!user || user.id !== 1)) {
+  const { data, isLoading, error, refetch, isFetching } = useSecurityData(!!authData?.isAdmin);
+
+  if (authLoading) {
     return (
-      <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4 text-center">
-        <div className="w-16 h-16 rounded-full bg-red-500/10 border border-red-500/25 flex items-center justify-center">
-          <Ban className="h-8 w-8 text-red-400/70" />
-        </div>
-        <div>
-          <div className="text-lg font-extrabold text-white">Access Denied</div>
-          <div className="text-sm text-muted-foreground/60 mt-1">This page is restricted to the platform owner.</div>
-        </div>
-        <Button size="sm" variant="outline" onClick={() => setLocation("/dashboard")} className="gap-2">
-          <ArrowLeft className="h-3.5 w-3.5" /> Back to Dashboard
-        </Button>
+      <div className="min-h-screen bg-background flex items-center justify-center text-muted-foreground text-sm">
+        Loading…
       </div>
     );
   }
 
-  const lockedCount = data?.loginAttempts.filter((u) => u.isCurrentlyLocked).length ?? 0;
+  const lockedCount  = data?.loginAttempts.filter((u) => u.isCurrentlyLocked).length ?? 0;
   const warningCount = data?.loginAttempts.filter((u) => !u.isCurrentlyLocked && u.loginAttempts > 0).length ?? 0;
-  const reportCount = data?.suspicious.reports.length ?? 0;
+  const reportCount  = data?.suspicious.reports.length ?? 0;
   const largeTxCount = data?.suspicious.largeTransactions.length ?? 0;
-  const txTotal = data?.transactions.length ?? 0;
+  const txTotal      = data?.transactions.length ?? 0;
+  const hasSuspicious = lockedCount > 0 || largeTxCount > 0;
 
   return (
-    <div className="max-w-[1400px] mx-auto space-y-8">
+    <div className="min-h-screen bg-background">
+      <AdminNav />
+
+    <div className="max-w-[1400px] mx-auto px-4 md:px-8 py-8 space-y-8">
 
       {/* ── Header ── */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -566,7 +632,7 @@ export default function AdminSecurity() {
             <div className="w-9 h-9 rounded-xl bg-red-500/15 border border-red-500/30 flex items-center justify-center">
               <Shield className="h-5 w-5 text-red-400" />
             </div>
-            <h1 className="text-2xl font-extrabold uppercase tracking-tight text-white">
+            <h1 className="text-2xl font-extrabold uppercase tracking-tight text-foreground">
               Security Dashboard
             </h1>
             <span className="text-[10px] font-black text-red-400 bg-red-500/10 border border-red-500/25 px-2.5 py-1 rounded-full uppercase tracking-wider">
@@ -580,10 +646,8 @@ export default function AdminSecurity() {
           </p>
         </div>
         <Button
-          size="sm"
-          variant="outline"
-          onClick={() => refetch()}
-          disabled={isFetching}
+          size="sm" variant="outline"
+          onClick={() => refetch()} disabled={isFetching}
           className="gap-2 border-primary/30 text-primary hover:bg-primary/10 self-start sm:self-auto"
         >
           <RefreshCw className={`h-3.5 w-3.5 ${isFetching ? "animate-spin" : ""}`} />
@@ -604,31 +668,107 @@ export default function AdminSecurity() {
         </div>
       )}
 
-      {/* ── Stat cards ── */}
+      {/* ── User overview stat cards ── */}
       {isLoading ? (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-20 rounded-2xl" />)}
         </div>
       ) : data ? (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <StatCard icon={Lock}        label="Locked Accounts"   value={lockedCount}  sub={lockedCount ? "Currently locked out" : "All clear"} color="#ef4444" />
-          <StatCard icon={AlertTriangle} label="Failed Logins"   value={warningCount} sub="Accounts with attempts"  color="#f59e0b" />
-          <StatCard icon={Flag}          label="User Reports"    value={reportCount}  sub="Total reports filed"     color="#f97316" />
-          <StatCard icon={TrendingUp}    label="Large Txns"      value={largeTxCount} sub="Transactions ≥ $500"     color="#a855f7" />
-        </div>
+        <>
+          <div>
+            <div className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground/50 mb-3">User Overview</div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <StatCard icon={Users}      label="Total Users"         value={data.users.total}    sub="All registered accounts"   color="#22d3ee" />
+              <StatCard icon={BadgeCheck} label="Verified Users"      value={data.users.verified} sub="ID verified accounts"      color="#22c55e" />
+              <StatCard icon={User}       label="Pending Verification" value={data.users.pending} sub="Awaiting ID review"        color="#f59e0b" />
+              <StatCard icon={UserX}      label="Banned Users"        value={data.users.banned}   sub="Community banned accounts" color="#ef4444" />
+            </div>
+          </div>
+
+          <div>
+            <div className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground/50 mb-3">Security Signals</div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <StatCard icon={Lock}          label="Locked Accounts" value={lockedCount}  sub={lockedCount ? "Currently locked out" : "All clear"} color="#ef4444" />
+              <StatCard icon={AlertTriangle} label="Failed Logins"   value={warningCount} sub="Accounts with attempts"  color="#f59e0b" />
+              <StatCard icon={Flag}          label="User Reports"    value={reportCount}  sub="Total reports filed"     color="#f97316" />
+              <StatCard icon={TrendingUp}    label="Large Txns"      value={largeTxCount} sub="Transactions ≥ $500"     color="#a855f7" />
+            </div>
+          </div>
+        </>
       ) : null}
 
-      {/* ── Alert banner if any locked accounts ── */}
-      {!isLoading && lockedCount > 0 && (
-        <div className="rounded-xl border border-red-500/40 bg-red-500/8 px-5 py-4 flex items-center gap-3">
-          <AlertTriangle className="h-5 w-5 text-red-400 shrink-0" />
-          <div className="flex-1">
-            <span className="font-bold text-red-400 text-sm">
-              {lockedCount} account{lockedCount !== 1 ? "s" : ""} currently locked
-            </span>
-            <span className="text-muted-foreground/60 text-xs ml-2">
-              — check the Login Attempts section below and clear if legitimate.
-            </span>
+      {/* ── Quick actions ── */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div
+          className="rounded-2xl border px-5 py-4 flex items-center justify-between gap-4"
+          style={{ borderColor: "rgba(249,115,22,0.25)", background: "rgba(249,115,22,0.04)" }}
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-orange-500/15 border border-orange-500/25 flex items-center justify-center shrink-0">
+              <Flag className="h-4 w-4 text-orange-400" />
+            </div>
+            <div>
+              <div className="text-sm font-extrabold text-foreground">User Reports</div>
+              <div className="text-xs text-muted-foreground/55">
+                {reportCount > 0 ? `${reportCount} report${reportCount !== 1 ? "s" : ""} filed` : "No reports yet"} — review below
+              </div>
+            </div>
+          </div>
+          <Button
+            size="sm" variant="outline"
+            onClick={() => reportsRef.current?.scrollIntoView({ behavior: "smooth" })}
+            className="shrink-0 text-xs border-orange-500/30 text-orange-400 hover:bg-orange-500/10"
+          >
+            View All Reports
+          </Button>
+        </div>
+
+        <div
+          className="rounded-2xl border px-5 py-4 flex items-center justify-between gap-4"
+          style={{ borderColor: "rgba(239,68,68,0.25)", background: "rgba(239,68,68,0.04)" }}
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-red-500/15 border border-red-500/25 flex items-center justify-center shrink-0">
+              <Ban className="h-4 w-4 text-red-400" />
+            </div>
+            <div>
+              <div className="text-sm font-extrabold text-foreground">Banned Users</div>
+              <div className="text-xs text-muted-foreground/55">
+                {data?.users.banned ?? 0} account{(data?.users.banned ?? 0) !== 1 ? "s" : ""} community banned
+              </div>
+            </div>
+          </div>
+          <Button
+            size="sm" variant="outline"
+            onClick={() => navigate("/admin/community")}
+            className="shrink-0 text-xs border-red-500/30 text-red-400 hover:bg-red-500/10"
+          >
+            View Banned Users
+          </Button>
+        </div>
+      </div>
+
+      {/* ── Suspicious activity warning ── */}
+      {!isLoading && hasSuspicious && (
+        <div className="rounded-xl border border-amber-500/40 bg-amber-500/6 px-5 py-4 flex items-start gap-3">
+          <AlertTriangle className="h-5 w-5 text-amber-400 shrink-0 mt-0.5" />
+          <div>
+            <div className="font-bold text-amber-400 text-sm mb-1">⚠️ Suspicious Activity Detected</div>
+            <div className="text-xs text-muted-foreground/65 space-y-0.5">
+              {lockedCount > 0 && <div>• {lockedCount} account{lockedCount !== 1 ? "s" : ""} currently locked due to repeated failed logins</div>}
+              {largeTxCount > 0 && <div>• {largeTxCount} transaction{largeTxCount !== 1 ? "s" : ""} flagged as unusually large (≥ $500) — review below</div>}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── All clear banner ── */}
+      {!isLoading && data && !hasSuspicious && reportCount === 0 && (
+        <div className="rounded-xl border border-green-500/30 bg-green-500/5 px-5 py-4 flex items-center gap-3">
+          <CheckCircle2 className="h-5 w-5 text-green-400 shrink-0" />
+          <div>
+            <span className="font-bold text-green-400 text-sm">All Clear</span>
+            <span className="text-muted-foreground/60 text-xs ml-2">No suspicious activity or locked accounts detected.</span>
           </div>
         </div>
       )}
@@ -654,6 +794,7 @@ export default function AdminSecurity() {
       {isLoading ? (
         <Skeleton className="h-48 rounded-2xl" />
       ) : data ? (
+        <div ref={reportsRef}>
         <Section
           icon={AlertTriangle}
           title="Flagged Suspicious Activity"
@@ -694,6 +835,7 @@ export default function AdminSecurity() {
             <ReportsTable rows={data.suspicious.reports} />
           </div>
         </Section>
+        </div>
       ) : null}
 
       {/* ── Section 3: Transaction log ── */}
@@ -752,6 +894,7 @@ export default function AdminSecurity() {
         </p>
       </div>
 
+    </div>
     </div>
   );
 }

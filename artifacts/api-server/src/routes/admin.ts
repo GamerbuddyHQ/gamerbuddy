@@ -4,8 +4,8 @@
  */
 
 import { Router, type IRouter } from "express";
-import { db, usersTable, walletTransactionsTable, reportsTable, walletsTable, withdrawalRequestsTable } from "@workspace/db";
-import { eq, desc, gt, or, isNotNull, sql, and, gte, inArray, not } from "drizzle-orm";
+import { db, usersTable, walletTransactionsTable, reportsTable, walletsTable, withdrawalRequestsTable, platformFeesTable, gameRequestsTable } from "@workspace/db";
+import { eq, desc, gt, or, isNotNull, sql, and, gte, inArray, not, count, sum, lt } from "drizzle-orm";
 import { round2, recordTransaction } from "./wallets";
 import { requireAdminAuth } from "./admin-auth";
 
@@ -22,7 +22,7 @@ router.get(
   async (_req, res): Promise<void> => {
     const now = new Date();
 
-    const [loginAttempts, largeTransactions, reports, recentTransactions] =
+    const [loginAttempts, largeTransactions, reports, recentTransactions, userStats] =
       await Promise.all([
 
         // ── 1. Users with failed login attempts or active lock ────────────
@@ -105,6 +105,16 @@ router.get(
           .leftJoin(usersTable, eq(walletTransactionsTable.userId, usersTable.id))
           .orderBy(desc(walletTransactionsTable.createdAt))
           .limit(100),
+
+        // ── 4. Aggregate user stats ───────────────────────────────────────
+        Promise.all([
+          db.select({ total: count() }).from(usersTable),
+          db.select({ total: count() }).from(usersTable).where(eq(usersTable.idVerified, true)),
+          db.select({ total: count() }).from(usersTable).where(
+            and(isNotNull(usersTable.officialIdPath), not(usersTable.idVerified))
+          ),
+          db.select({ total: count() }).from(usersTable).where(eq(usersTable.communityBanned, true)),
+        ]),
       ]);
 
     // Annotate each login entry with computed lock status
@@ -124,8 +134,16 @@ router.get(
       };
     });
 
+    const [totalResult, verifiedResult, pendingResult, bannedResult] = userStats;
+
     res.json({
       generatedAt: now.toISOString(),
+      users: {
+        total:    Number(totalResult[0]?.total   ?? 0),
+        verified: Number(verifiedResult[0]?.total ?? 0),
+        pending:  Number(pendingResult[0]?.total  ?? 0),
+        banned:   Number(bannedResult[0]?.total   ?? 0),
+      },
       loginAttempts: annotatedLogins,
       suspicious: {
         largeTransactions: largeTransactions.map((t) => ({
@@ -166,6 +184,112 @@ router.post(
 
     req.log.info({ adminId: "admin", targetUserId: userId }, "Admin cleared account lockout");
     res.json({ success: true });
+  },
+);
+
+// ── GET /admin/platform-earnings ──────────────────────────────────────────
+// Returns platform fee stats with time breakdowns, geo split, and ledger.
+router.get(
+  "/admin/platform-earnings",
+  requireAdminAuth,
+  async (_req, res): Promise<void> => {
+    const now = new Date();
+    const todayStart  = new Date(now); todayStart.setHours(0, 0, 0, 0);
+    const weekStart   = new Date(now); weekStart.setDate(now.getDate() - 7);
+    const monthStart  = new Date(now); monthStart.setDate(1); monthStart.setHours(0, 0, 0, 0);
+
+    const [fees, completedStats, indiaFees, globalFees] = await Promise.all([
+      // Full ledger with user/request context — last 50 entries
+      db
+        .select({
+          id:            platformFeesTable.id,
+          requestId:     platformFeesTable.requestId,
+          amount:        platformFeesTable.amount,
+          type:          platformFeesTable.type,
+          description:   platformFeesTable.description,
+          createdAt:     platformFeesTable.createdAt,
+          hirerRegion:   gameRequestsTable.hirerRegion,
+          gameName:      gameRequestsTable.gameName,
+          hirerName:     usersTable.name,
+          hirerGbId:     usersTable.gamerbuddyId,
+        })
+        .from(platformFeesTable)
+        .leftJoin(gameRequestsTable, eq(platformFeesTable.requestId, gameRequestsTable.id))
+        .leftJoin(usersTable, eq(gameRequestsTable.userId, usersTable.id))
+        .orderBy(desc(platformFeesTable.createdAt))
+        .limit(50),
+
+      // Completed session / quest counts
+      db
+        .select({ total: count() })
+        .from(gameRequestsTable)
+        .where(eq(gameRequestsTable.status, "completed")),
+
+      // India fees (hirerRegion = 'india')
+      db
+        .select({ total: sum(platformFeesTable.amount), cnt: count() })
+        .from(platformFeesTable)
+        .leftJoin(gameRequestsTable, eq(platformFeesTable.requestId, gameRequestsTable.id))
+        .where(eq(gameRequestsTable.hirerRegion, "india")),
+
+      // Global/international fees
+      db
+        .select({ total: sum(platformFeesTable.amount), cnt: count() })
+        .from(platformFeesTable)
+        .leftJoin(gameRequestsTable, eq(platformFeesTable.requestId, gameRequestsTable.id))
+        .where(sql`${gameRequestsTable.hirerRegion} != 'india' OR ${gameRequestsTable.hirerRegion} IS NULL`),
+    ]);
+
+    // Time-bucket totals computed in JS from full ledger
+    function bucketTotal(since: Date) {
+      return fees
+        .filter((f) => f.createdAt >= since)
+        .reduce((s, f) => s + parseFloat(String(f.amount)), 0);
+    }
+    function typeTotal(t: string) {
+      return fees.filter((f) => f.type === t).reduce((s, f) => s + parseFloat(String(f.amount)), 0);
+    }
+
+    const totalFees   = fees.reduce((s, f) => s + parseFloat(String(f.amount)), 0);
+    const todayFees   = bucketTotal(todayStart);
+    const weekFees    = bucketTotal(weekStart);
+    const monthFees   = bucketTotal(monthStart);
+    const sessionFees = typeTotal("session_fee");
+    const bulkFees    = typeTotal("bulk_session_fee");
+    const giftFees    = typeTotal("gift_fee");
+
+    res.json({
+      generatedAt:       now.toISOString(),
+      totalFees:         round2(totalFees),
+      todayFees:         round2(todayFees),
+      weekFees:          round2(weekFees),
+      monthFees:         round2(monthFees),
+      sessionFees:       round2(sessionFees),
+      bulkFees:          round2(bulkFees),
+      giftFees:          round2(giftFees),
+      feeCount:          fees.length,
+      completedSessions: completedStats[0]?.total ?? 0,
+      india: {
+        total: round2(parseFloat(String(indiaFees[0]?.total ?? 0))),
+        count: Number(indiaFees[0]?.cnt ?? 0),
+      },
+      global: {
+        total: round2(parseFloat(String(globalFees[0]?.total ?? 0))),
+        count: Number(globalFees[0]?.cnt ?? 0),
+      },
+      fees: fees.map((f) => ({
+        id:          f.id,
+        requestId:   f.requestId,
+        amount:      parseFloat(String(f.amount)),
+        type:        f.type,
+        description: f.description,
+        createdAt:   f.createdAt.toISOString(),
+        hirerRegion: f.hirerRegion ?? "international",
+        gameName:    f.gameName ?? null,
+        hirerName:   f.hirerName ?? null,
+        hirerGbId:   f.hirerGbId ?? null,
+      })),
+    });
   },
 );
 

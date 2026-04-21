@@ -161,7 +161,11 @@ export default function AdminDashboard() {
             <Link
               key={item.href}
               href={item.href}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all text-muted-foreground hover:text-foreground hover:bg-muted/50"
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${
+                item.href === "/admin/dashboard"
+                  ? "bg-primary/15 text-primary border border-primary/30"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+              }`}
             >
               <item.icon className="w-3.5 h-3.5" />
               {item.label}
