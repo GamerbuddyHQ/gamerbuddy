@@ -11,7 +11,7 @@ import {
   Layers, Clock, BadgeCheck, Receipt, Globe, MapPin, CalendarDays,
   CalendarRange, Wallet, Users, Info, Zap, X, CheckCircle2,
   ExternalLink, Gamepad2, CreditCard, ArrowRight, AlertTriangle,
-  RefreshCw, User,
+  RefreshCw, User, Download,
 } from "lucide-react";
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
@@ -364,12 +364,34 @@ export default function PlatformEarnings() {
   const isSample = !raw || raw.feeCount === 0;
   const d = isSample ? SAMPLE : raw!;
 
-  const readyToPay    = d.fees.filter(f => !!f.pendingWithdrawalId);
-  const visibleFees   = d.fees.slice(0, 10);
-  const totalGross    = visibleFees.reduce((s, f) => s + f.grossAmount, 0);
-  const totalKeep     = visibleFees.reduce((s, f) => s + f.amount, 0);
-  const totalSend     = visibleFees.reduce((s, f) => s + f.netToGamer, 0);
-  const totalDueSend  = readyToPay.reduce((s, f) => s + f.netToGamer, 0);
+  const readyToPay       = d.fees.filter(f => !!f.pendingWithdrawalId);
+  const visibleFees      = d.fees.slice(0, 10);
+  const totalGross       = visibleFees.reduce((s, f) => s + f.grossAmount, 0);
+  const totalKeep        = visibleFees.reduce((s, f) => s + f.amount, 0);
+  const totalSend        = visibleFees.reduce((s, f) => s + f.netToGamer, 0);
+  const totalDueSend     = readyToPay.reduce((s, f) => s + f.netToGamer, 0);
+  const totalAllTimeKeep = d.totalFees;
+
+  function exportReadyToPayCSV() {
+    const headers = ["Gamer Name", "GB-ID", "Amount to Send (90%)", "Game", "Platform", "Date", "Payment Method"];
+    const rows = readyToPay.map(f => [
+      f.gamerName ?? "Unknown",
+      f.gamerGbId ?? "—",
+      f.netToGamer.toFixed(2),
+      f.gameName ?? "—",
+      f.platform ?? "—",
+      format(new Date(f.createdAt), "dd MMM yyyy HH:mm"),
+      f.hirerRegion === "india" ? "UPI (Razorpay)" : "Bank Transfer",
+    ]);
+    const csv = [headers, ...rows].map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `gamerbuddy-payouts-${format(new Date(), "yyyy-MM-dd")}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
 
   if (authLoading) {
     return <div className="min-h-screen flex items-center justify-center text-muted-foreground text-sm">Loading…</div>;
@@ -407,35 +429,85 @@ export default function PlatformEarnings() {
         </div>
 
         {/* ══════════════════════════════════════════════════
+            TOP SUMMARY BANNER
+        ══════════════════════════════════════════════════ */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {/* Total Ready to Send */}
+          <div className="rounded-2xl border border-green-500/30 flex items-center gap-4 px-6 py-4"
+            style={{ background: "rgba(34,197,94,0.06)" }}>
+            <div className="w-11 h-11 rounded-xl bg-green-500/15 border border-green-500/30 flex items-center justify-center shrink-0">
+              <CreditCard className="h-5 w-5 text-green-400" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[10px] font-black uppercase tracking-widest text-green-400/70">Total Ready to Send Now</p>
+              <p className="text-3xl font-black text-green-400 tabular-nums leading-tight">{fmtUSD(totalDueSend)}</p>
+              <p className="text-[11px] text-green-400/50 mt-0.5">
+                {readyToPay.length} gamer{readyToPay.length !== 1 ? "s" : ""} with pending withdrawal requests
+              </p>
+            </div>
+          </div>
+          {/* You Keep All-Time */}
+          <div className="rounded-2xl border flex items-center gap-4 px-6 py-4"
+            style={{ borderColor: "rgba(168,85,247,0.30)", background: "rgba(168,85,247,0.06)" }}>
+            <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0"
+              style={{ background: "rgba(168,85,247,0.15)", border: "1px solid rgba(168,85,247,0.30)" }}>
+              <Wallet className="h-5 w-5" style={{ color: "#a855f7" }} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[10px] font-black uppercase tracking-widest" style={{ color: "rgba(168,85,247,0.70)" }}>You Keep (All Time)</p>
+              <p className="text-3xl font-black tabular-nums leading-tight" style={{ color: "#a855f7" }}>{fmtUSD(totalAllTimeKeep)}</p>
+              <p className="text-[11px] mt-0.5" style={{ color: "rgba(168,85,247,0.50)" }}>
+                10% platform fee · transfer to <span className="font-mono font-bold">creedx112@okicici</span>
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* ══════════════════════════════════════════════════
             SECTION 1 — READY TO PAY (most urgent, always first)
         ══════════════════════════════════════════════════ */}
         <div className="rounded-2xl overflow-hidden" style={{ border: "1.5px solid rgba(34,197,94,0.30)", background: "rgba(34,197,94,0.025)" }}>
           {/* Section header */}
-          <div className="px-6 py-4 border-b flex items-center justify-between gap-4" style={{ borderColor: "rgba(34,197,94,0.20)", background: "rgba(34,197,94,0.06)" }}>
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-green-500/15 border border-green-500/30 flex items-center justify-center shrink-0">
-                <CreditCard className="w-4 h-4 text-green-400" />
-              </div>
-              <div>
-                <div className="flex items-center gap-2 flex-wrap">
-                  <h2 className="text-base font-extrabold uppercase tracking-wider text-green-300">Payouts Due</h2>
-                  {readyToPay.length > 0 && (
-                    <span className="text-[11px] font-black px-2 py-0.5 rounded-full text-green-400 bg-green-500/15 border border-green-500/30">
-                      {readyToPay.length} gamer{readyToPay.length !== 1 ? "s" : ""} waiting
-                    </span>
-                  )}
-                  {isSample && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full text-amber-400 bg-amber-500/10 border border-amber-500/25">Sample</span>}
+          <div className="px-6 py-4 border-b" style={{ borderColor: "rgba(34,197,94,0.20)", background: "rgba(34,197,94,0.06)" }}>
+            <div className="flex items-start sm:items-center justify-between gap-4 flex-col sm:flex-row">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-green-500/15 border border-green-500/30 flex items-center justify-center shrink-0">
+                  <CreditCard className="w-4 h-4 text-green-400" />
                 </div>
-                <p className="text-xs text-green-400/50 mt-0.5">Gamers with completed sessions who have requested withdrawal (≥ $100 min)</p>
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h2 className="text-lg font-black uppercase tracking-wide text-green-300">Ready to Pay (Manual Payouts)</h2>
+                    {readyToPay.length > 0 && (
+                      <span className="text-[11px] font-black px-2 py-0.5 rounded-full text-green-400 bg-green-500/15 border border-green-500/30">
+                        {readyToPay.length} waiting
+                      </span>
+                    )}
+                    {isSample && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full text-amber-400 bg-amber-500/10 border border-amber-500/25">Sample</span>}
+                  </div>
+                  <p className="text-xs text-green-400/50 mt-0.5">Gamers with completed sessions requesting withdrawal (≥ $100 min) — process these manually</p>
+                </div>
+              </div>
+              {/* Right side: total + CSV export */}
+              <div className="flex items-center gap-3 shrink-0">
+                {readyToPay.length > 0 && (
+                  <>
+                    <div className="text-right">
+                      <p className="text-[10px] font-black uppercase tracking-widest text-green-400/60">Total to Send</p>
+                      <p className="text-2xl font-black text-green-400 tabular-nums">{fmtUSD(totalDueSend)}</p>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={exportReadyToPayCSV}
+                      className="gap-2 border-green-500/30 text-green-400 hover:bg-green-500/10 hover:text-green-300 font-bold whitespace-nowrap"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                      Export CSV
+                    </Button>
+                  </>
+                )}
               </div>
             </div>
-            {/* Total due banner */}
-            {readyToPay.length > 0 && (
-              <div className="shrink-0 text-right">
-                <p className="text-[10px] font-black uppercase tracking-widest text-green-400/60">Total to Send</p>
-                <p className="text-2xl font-black text-green-400 tabular-nums">{fmtUSD(totalDueSend)}</p>
-              </div>
-            )}
           </div>
 
           {/* Cards */}
@@ -455,13 +527,16 @@ export default function PlatformEarnings() {
                     <div className="flex flex-col sm:flex-row sm:items-center gap-4">
                       <div className="flex-1 min-w-0">
                         {/* Primary action text */}
-                        <div className="flex items-baseline gap-2 flex-wrap mb-1">
-                          <span className="text-2xl font-black text-green-400 tabular-nums">{fmtUSD(fee.netToGamer)}</span>
-                          <span className="text-sm text-muted-foreground/70 font-medium">send to</span>
-                          <span className="text-lg font-extrabold text-foreground">{fee.gamerName ?? "Unknown Gamer"}</span>
-                          {fee.gamerGbId && (
-                            <span className="text-sm font-mono text-green-400/60 bg-green-500/8 px-2 py-0.5 rounded-lg border border-green-500/20">{fee.gamerGbId}</span>
-                          )}
+                        <div className="mb-2">
+                          <div className="text-[10px] font-black uppercase tracking-widest text-green-400/60 mb-0.5">You Must Send</div>
+                          <div className="flex items-baseline gap-2 flex-wrap">
+                            <span className="text-3xl font-black text-green-400 tabular-nums">{fmtUSD(fee.netToGamer)}</span>
+                            <span className="text-base text-muted-foreground/60 font-medium">to</span>
+                            <span className="text-xl font-extrabold text-foreground">{fee.gamerName ?? "Unknown Gamer"}</span>
+                            {fee.gamerGbId && (
+                              <span className="text-sm font-mono text-green-400/60 bg-green-500/8 px-2 py-0.5 rounded-lg border border-green-500/20">{fee.gamerGbId}</span>
+                            )}
+                          </div>
                         </div>
                         {/* Session info */}
                         <div className="flex items-center gap-2 text-xs text-muted-foreground/55 flex-wrap">
