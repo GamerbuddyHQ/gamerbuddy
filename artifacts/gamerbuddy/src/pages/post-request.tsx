@@ -66,6 +66,25 @@ function checkUnrealistic(text: string): boolean {
   return UNREALISTIC_PATTERNS.some((p) => p.test(text));
 }
 
+const CHALLENGING_PATTERNS = [
+  /\b(defeat|beat|kill|destroy)\b/i,
+  /\bcarry\b/i,
+  /\bboost\b/i,
+  /\b(rank\s*up|rank\s*grind|climb\s+rank|ranked)\b/i,
+  /\b(hard|difficult|challenging|tough)\b/i,
+  /\b(boss\s*fight|boss\s*kill|raid|dungeon|endgame|end\s*game)\b/i,
+  /\b(finish|complete)\s+the\s+(game|campaign|story|main|chapter)\b/i,
+  /\b(malenia|margit|radahn|maliketh|godfrey|godskin|rykard|morgott|maleniaEldenRing)\b/i,
+  /\b(platinum|diamond|ascendant|immortal|challenger|master|grandmaster|predator|radiant|global\s*elite)\b/i,
+  /\b(pvp|competitive|ranked\s*match|ranked\s*game)\b/i,
+  /\b(speedrun|100%|all\s*boss|all\s*achievement)\b/i,
+  /\b(no\s*death|deathless|hardcore)\b/i,
+];
+
+function checkChallenging(text: string): boolean {
+  return CHALLENGING_PATTERNS.some((p) => p.test(text));
+}
+
 const requestSchema = z.object({
   objectives: z
     .string()
@@ -155,8 +174,12 @@ export default function PostRequest() {
   const gameNameValue = form.watch("gameName") ?? "";
 
   const [unrealisticWarning, setUnrealisticWarning] = useState(false);
+  const [challengingHint, setChallengingHint] = useState(false);
   useEffect(() => {
-    setUnrealisticWarning(objectivesValue.length >= 10 && checkUnrealistic(objectivesValue));
+    const isUnrealistic = objectivesValue.length >= 10 && checkUnrealistic(objectivesValue);
+    const isChallenging = objectivesValue.length >= 10 && checkChallenging(objectivesValue);
+    setUnrealisticWarning(isUnrealistic);
+    setChallengingHint(isChallenging && !isUnrealistic);
   }, [objectivesValue]);
 
   const canPost = wallets?.canPostRequest ?? false;
@@ -285,7 +308,7 @@ export default function PostRequest() {
               <div className="rounded-xl border border-blue-500/20 bg-blue-500/5 p-4 space-y-3">
                 <div className="flex items-start gap-2.5">
                   <Info className="h-4 w-4 text-blue-400 shrink-0 mt-0.5" />
-                  <div className="space-y-2.5 w-full">
+                  <div className="space-y-3 w-full">
                     <p className="text-sm font-semibold text-blue-300">Tips for a great quest</p>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1.5 text-[11px]">
                       <div className="flex items-start gap-1.5 text-green-400/90"><span className="shrink-0">✅</span><span>Help me finish this boss / story</span></div>
@@ -295,9 +318,14 @@ export default function PostRequest() {
                       <div className="flex items-start gap-1.5 text-red-400/70"><span className="shrink-0">❌</span><span>Carry me to #1 global rank in 1 day</span></div>
                       <div className="flex items-start gap-1.5 text-red-400/70"><span className="shrink-0">❌</span><span>Beat the entire game for me in 2 hours</span></div>
                     </div>
-                    <p className="text-[11px] text-muted-foreground/50 leading-relaxed">
-                      Unrealistic or impossible requests may get no bids, or be flagged for review. Keep it achievable and gamers will love helping you!
-                    </p>
+                    <div className="border-t border-blue-500/15 pt-2.5 space-y-1">
+                      <p className="text-[11px] text-blue-200/70 leading-relaxed">
+                        <span className="font-semibold text-blue-300">Difficult quests are totally welcome!</span> If you're stuck on a hard boss, need to climb a tough rank, or want to finish a long campaign — post it. Just be clear about the scope and offer a fair reward so skilled gamers are motivated to help.
+                      </p>
+                      <p className="text-[11px] text-muted-foreground/50 leading-relaxed">
+                        Avoid impossible requests (e.g. "rank 1 globally in 1 day") — those rarely get bids and may be flagged.
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -325,6 +353,9 @@ export default function PostRequest() {
                         {objectivesValue.length} / {OBJECTIVES_MAX}
                       </span>
                     </div>
+                    <p className="text-[11px] text-muted-foreground/50 -mt-1">
+                      If your request is difficult or time-consuming, say so — harder quests attract higher bids from skilled gamers.
+                    </p>
                     <FormControl>
                       <Textarea
                         placeholder={`Be specific and realistic. Example: Help me defeat Malenia in Elden Ring, or Carry me to Platinum rank in Valorant (best of 5 games)`}
@@ -343,6 +374,21 @@ export default function PostRequest() {
                         <p>
                           <span className="font-semibold">Heads up!</span> This request looks quite challenging — gamers are less likely to bid on very difficult or impossible quests. Are you sure it's realistic? Even a small tweak (like adding a time range or scope limit) can get you a lot more interest!
                         </p>
+                      </div>
+                    )}
+
+                    {/* Positive challenging-quest hint */}
+                    {challengingHint && (
+                      <div className="flex items-start gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/5 px-3.5 py-3 text-xs text-emerald-300">
+                        <Sparkles className="h-4 w-4 shrink-0 mt-0.5 text-emerald-400" />
+                        <div className="space-y-0.5">
+                          <p>
+                            <span className="font-semibold">This sounds like a challenging quest!</span> That's great — skilled gamers love a real challenge. Consider offering a higher reward to attract top-tier help. The more difficult the quest, the more competitive the bids will be.
+                          </p>
+                          <p className="text-emerald-300/60">
+                            Tip: Mention the specific difficulty so gamers can bid accurately.
+                          </p>
+                        </div>
                       </div>
                     )}
 
