@@ -2,7 +2,7 @@ import { Router, type IRouter } from "express";
 import multer from "multer";
 import bcryptjs from "bcryptjs";
 import crypto from "crypto";
-import { db, usersTable, walletsTable, sessionsTable } from "@workspace/db";
+import { db, usersTable, walletsTable, sessionsTable, gamingAccountsTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { logger } from "../lib/logger";
 import { SignupSchema, LoginSchema, sanitize, validate } from "../lib/validate";
@@ -250,6 +250,78 @@ router.get("/auth/me", async (req, res): Promise<void> => {
   }
 
   res.json(formatUser(user));
+});
+
+// ── Dev-only test login ─────────────────────────────────────────────────────
+// Creates seeded test accounts on first call, then issues a session cookie.
+// Completely blocked in production.
+router.post("/auth/test-login", async (req, res): Promise<void> => {
+  if (process.env.NODE_ENV === "production") {
+    res.status(403).json({ error: "Test login is disabled in production" });
+    return;
+  }
+
+  const { role } = req.body as { role?: string };
+  if (role !== "hirer" && role !== "gamer") {
+    res.status(400).json({ error: "role must be 'hirer' or 'gamer'" });
+    return;
+  }
+
+  const isHirer = role === "hirer";
+  const email    = isHirer ? "tester.hirer@gamerbuddy.com" : "tester.gamer@gamerbuddy.com";
+  const name     = isHirer ? "Alex Rivera" : 'Jordan "Byte" Patel';
+
+  let [user] = await db.select().from(usersTable).where(eq(usersTable.email, email));
+
+  if (!user) {
+    const passwordHash = await bcryptjs.hash("test123", 10);
+    const [created] = await db
+      .insert(usersTable)
+      .values({
+        name,
+        email,
+        passwordHash,
+        phone: "",
+        idVerified: false,
+        gender: "male",
+        trustFactor: isHirer ? 50 : 92,
+        trustScore: isHirer ? 0 : 92,
+        points: isHirer ? 0 : 1500,
+        bio: isHirer
+          ? "Gaming enthusiast looking for skilled players to help me out."
+          : "Pro carry player. FPS, RPG, and Soulslike specialist. 15+ completed quests.",
+        profileTitle: isHirer ? "Gaming Enthusiast" : "Pro Carry | FPS & RPG Specialist",
+        country: "IN",
+      })
+      .returning();
+
+    const gamerbuddyId = `GB-${String(created.id).padStart(6, "0")}`;
+    await db.update(usersTable).set({ gamerbuddyId }).where(eq(usersTable.id, created.id));
+
+    await db.insert(walletsTable).values({
+      userId: created.id,
+      hiringBalance: isHirer ? 50 : 0,
+      earningsBalance: 0,
+    });
+
+    if (!isHirer) {
+      await db.insert(gamingAccountsTable).values([
+        { userId: created.id, platform: "steam", username: "BytePatel_Steam", status: "approved" },
+        { userId: created.id, platform: "epic",  username: "BytePatel_Epic",  status: "approved" },
+      ]);
+    }
+
+    [user] = await db.select().from(usersTable).where(eq(usersTable.id, created.id));
+  }
+
+  // Issue a fresh session
+  const token     = crypto.randomBytes(32).toString("hex");
+  const expiresAt = new Date(Date.now() + SESSION_DURATION_MS);
+  await db.insert(sessionsTable).values({ userId: user.id, token, expiresAt });
+  res.cookie("session_token", token, sessionCookieOptions(expiresAt));
+
+  req.log.info({ userId: user.id, role }, "Test login used");
+  res.json({ user: formatUser(user), message: "Test login successful" });
 });
 
 export default router;
