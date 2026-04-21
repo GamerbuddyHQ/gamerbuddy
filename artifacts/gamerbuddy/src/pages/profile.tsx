@@ -758,29 +758,47 @@ function GamingAccountsSection() {
               <span className="text-sm font-extrabold text-foreground uppercase tracking-widest">Gaming Accounts</span>
             </div>
             <p className="text-[11px] text-muted-foreground/60">
-              Submit your username — manually verified by admin within 24 hours
+              Link <strong className="text-cyan-400/80">at least ONE</strong> to unlock posting requests &amp; bidding
             </p>
           </div>
-          {connectedCount > 0 && (
-            <span
-              className="text-[11px] font-black px-3 py-1 rounded-full shrink-0 mt-0.5"
-              style={{ background: "rgba(34,211,238,0.12)", border: "1px solid rgba(34,211,238,0.3)", color: "#22d3ee" }}
-            >
-              {connectedCount} / {GAMING_PLATFORM_ORDER.length} Submitted
-            </span>
-          )}
+          <span
+            className="text-[11px] font-black px-3 py-1 rounded-full shrink-0 mt-0.5"
+            style={
+              connectedCount > 0
+                ? { background: "rgba(34,211,238,0.12)", border: "1px solid rgba(34,211,238,0.3)", color: "#22d3ee" }
+                : { background: "rgba(234,179,8,0.10)", border: "1px solid rgba(234,179,8,0.30)", color: "#fbbf24" }
+            }
+          >
+            {connectedCount} / {GAMING_PLATFORM_ORDER.length} Linked
+          </span>
         </div>
-        {/* Honest notice */}
+        {/* Requirement + verification notice */}
         <div
           className="mt-3 flex items-start gap-2.5 px-3 py-2.5 rounded-xl border"
-          style={{ borderColor: "rgba(34,211,238,0.12)", background: "rgba(34,211,238,0.04)" }}
+          style={
+            connectedCount === 0
+              ? { borderColor: "rgba(234,179,8,0.22)", background: "rgba(234,179,8,0.05)" }
+              : { borderColor: "rgba(34,211,238,0.12)", background: "rgba(34,211,238,0.04)" }
+          }
         >
-          <span className="text-[13px] shrink-0 mt-px">ℹ️</span>
-          <p className="text-[10px] text-cyan-300/60 leading-relaxed">
-            <strong className="text-cyan-300/80">Gaming accounts are manually verified by our admin team.</strong>{" "}
-            Enter your exact platform username or ID below. Keep your profile{" "}
-            <strong className="text-cyan-300/80">Public</strong> so we can confirm real gaming activity.
-            Streaming channel usernames are shown as-is — no verification required.
+          <span className="text-[13px] shrink-0 mt-px">{connectedCount === 0 ? "🔒" : "✅"}</span>
+          <p className="text-[10px] leading-relaxed" style={{ color: connectedCount === 0 ? "rgba(251,191,36,0.75)" : "rgba(103,232,249,0.65)" }}>
+            {connectedCount === 0 ? (
+              <>
+                <strong style={{ color: connectedCount === 0 ? "#fbbf24" : "#22d3ee" }}>
+                  Link at least ONE gaming account (Steam, Epic, PSN, Xbox, or Switch) to unlock posting requests and placing bids.
+                </strong>{" "}
+                Enter your exact username below — our team manually verifies within 24 hours. Keep your profile{" "}
+                <strong style={{ color: "#fbbf24" }}>Public</strong> during review.
+              </>
+            ) : (
+              <>
+                <strong style={{ color: "#22d3ee" }}>Gaming account submitted!</strong>{" "}
+                Our admin team will manually verify within 24 hours. Keep your profile{" "}
+                <strong style={{ color: "#22d3ee" }}>Public</strong> so we can confirm real gaming activity.
+                Linking more accounts boosts your <strong style={{ color: "#22d3ee" }}>Trust Factor</strong>.
+              </>
+            )}
           </p>
         </div>
       </div>
@@ -833,13 +851,12 @@ function GamingAccountsSection() {
         {connectedCount === 0 && !isLoading && (
           <div
             className="rounded-xl border px-4 py-3 mb-1 flex items-start gap-2.5"
-            style={{ borderColor: "rgba(234,179,8,0.3)", background: "rgba(234,179,8,0.06)" }}
+            style={{ borderColor: "rgba(234,179,8,0.35)", background: "rgba(234,179,8,0.07)" }}
           >
-            <span className="text-amber-400 mt-0.5 shrink-0">⚠️</span>
-            <p className="text-[11px] text-amber-300/80 leading-relaxed">
-              <strong className="text-amber-300">Link a gaming account to unlock posting & bidding.</strong>{" "}
-              Enter your real platform username — our team will verify within 24 hours.
-              Keep your profile <strong className="text-amber-300">Public</strong> so we can confirm real gaming activity.
+            <span className="text-amber-400 mt-0.5 shrink-0">🔒</span>
+            <p className="text-[11px] text-amber-300/85 leading-relaxed">
+              <strong className="text-amber-300">Posting requests and bidding are locked</strong> until you link at least ONE gaming account (Steam, Epic Games, PlayStation, Xbox, or Nintendo Switch).{" "}
+              Click <strong className="text-amber-300">Link</strong> on any platform below, enter your exact username, and submit — our team verifies within 24 hours.
             </p>
           </div>
         )}
@@ -1094,24 +1111,71 @@ function StreamingAccountsSection() {
       style={{ borderColor: "rgba(168,85,247,0.2)", background: "rgba(10,8,20,0.6)" }}
     >
       {/* ── Header ─────────────────────────────────────── */}
-      <div className="px-5 pt-5 pb-4 flex items-center justify-between border-b" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
-        <div>
-          <div className="flex items-center gap-2 mb-0.5">
-            <Zap className="h-4 w-4 text-purple-400" />
-            <span className="text-sm font-extrabold text-foreground uppercase tracking-widest">Streaming Channels</span>
+      <div className="px-5 pt-5 pb-4 border-b" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <div className="flex items-center gap-2 mb-0.5">
+              <Zap className="h-4 w-4 text-purple-400" />
+              <span className="text-sm font-extrabold text-foreground uppercase tracking-widest">Streaming Channels</span>
+            </div>
+            <p className="text-[11px] text-muted-foreground/60">
+              Link <strong className="text-purple-400/80">at least 2</strong> to boost your Trust Factor and stand out to hirers
+            </p>
           </div>
-          <p className="text-[11px] text-muted-foreground/60">
-            Add your channel usernames — shown as-is on your profile and bid cards, no verification needed
+          <span
+            className="text-[11px] font-black px-3 py-1 rounded-full shrink-0 mt-0.5"
+            style={
+              connectedCount >= 2
+                ? { background: "rgba(34,197,94,0.12)", border: "1px solid rgba(34,197,94,0.3)", color: "#4ade80" }
+                : connectedCount === 1
+                  ? { background: "rgba(251,191,36,0.10)", border: "1px solid rgba(251,191,36,0.28)", color: "#fbbf24" }
+                  : { background: "rgba(168,85,247,0.10)", border: "1px solid rgba(168,85,247,0.25)", color: "#c084fc" }
+            }
+          >
+            {connectedCount} / {PLATFORM_ORDER.length} {connectedCount >= 2 ? "✓" : "Linked"}
+          </span>
+        </div>
+
+        {/* Trust Factor callout */}
+        <div
+          className="mt-3 flex items-start gap-2.5 px-3 py-2.5 rounded-xl border"
+          style={
+            connectedCount >= 2
+              ? { borderColor: "rgba(34,197,94,0.15)", background: "rgba(34,197,94,0.05)" }
+              : { borderColor: "rgba(168,85,247,0.15)", background: "rgba(168,85,247,0.05)" }
+          }
+        >
+          <span className="text-[13px] shrink-0 mt-px">{connectedCount >= 2 ? "🏆" : "📡"}</span>
+          <p className="text-[10px] leading-relaxed" style={{ color: connectedCount >= 2 ? "rgba(134,239,172,0.75)" : "rgba(216,180,254,0.65)" }}>
+            {connectedCount >= 2 ? (
+              <>
+                <strong style={{ color: "#86efac" }}>Trust Factor boosted!</strong>{" "}
+                Your streaming presence makes hirers significantly more confident in choosing you.
+                Linking more accounts (gaming + streaming) further improves your Trust Factor.
+              </>
+            ) : (
+              <>
+                <strong style={{ color: "#c084fc" }}>
+                  Link at least 2 streaming/social accounts (YouTube, Twitch, Kick, etc.) to increase your Trust Factor
+                </strong>{" "}
+                and appear more credible to hirers. Profiles with 2+ streaming accounts get{" "}
+                <strong style={{ color: "#c084fc" }}>significantly more hire requests.</strong>
+              </>
+            )}
           </p>
         </div>
-        {connectedCount > 0 && (
-          <div className="shrink-0 flex flex-col items-end gap-1">
-            <span
-              className="text-[11px] font-black px-3 py-1 rounded-full"
-              style={{ background: "rgba(34,197,94,0.12)", border: "1px solid rgba(34,197,94,0.3)", color: "#4ade80" }}
-            >
-              {connectedCount} / {PLATFORM_ORDER.length} Live
-            </span>
+
+        {/* Soft warning when only 1 linked */}
+        {connectedCount === 1 && !isLoading && (
+          <div
+            className="mt-2 flex items-center gap-2 px-3 py-2 rounded-xl border"
+            style={{ borderColor: "rgba(251,191,36,0.20)", background: "rgba(251,191,36,0.05)" }}
+          >
+            <span className="text-[11px] shrink-0">⚡</span>
+            <p className="text-[10px] text-amber-300/70 leading-relaxed">
+              <strong className="text-amber-300/90">Almost there!</strong>{" "}
+              Add 1 more streaming account to unlock Trust Factor boost and stand out in search results.
+            </p>
           </div>
         )}
       </div>
@@ -1236,6 +1300,7 @@ function StreamingAccountsSection() {
                         <button
                           onClick={() => handleDisconnect(platform)}
                           disabled={disconnect.isPending}
+                          aria-label={`Remove ${meta.label}`}
                           className="text-[10px] font-bold uppercase tracking-widest px-2.5 py-1.5 rounded-xl transition-all hover:bg-red-500/15 hover:text-red-300 disabled:opacity-40"
                           style={{ color: "rgba(248,113,113,0.6)", border: "1px solid rgba(248,113,113,0.18)" }}
                         >
@@ -1247,6 +1312,7 @@ function StreamingAccountsSection() {
                             setConnecting(isThisConnecting ? null : platform);
                             setInputVal("");
                           }}
+                          aria-label={isThisConnecting ? `Cancel ${meta.label}` : `Connect ${meta.label}`}
                           className="text-[11px] font-extrabold uppercase tracking-wide px-3.5 py-1.5 rounded-xl transition-all hover:brightness-110 active:scale-95"
                           style={{
                             background: isThisConnecting
@@ -1292,6 +1358,7 @@ function StreamingAccountsSection() {
                     <button
                       onClick={() => handleConnect(platform)}
                       disabled={!inputVal.trim() || connect.isPending}
+                      aria-label={`Save ${meta.label} username`}
                       className="shrink-0 px-4 py-1.5 rounded-xl text-xs font-black uppercase tracking-widest text-white disabled:opacity-30 transition-all hover:brightness-110 active:scale-95"
                       style={{ background: `linear-gradient(135deg, ${meta.color}, ${meta.color}bb)` }}
                     >
