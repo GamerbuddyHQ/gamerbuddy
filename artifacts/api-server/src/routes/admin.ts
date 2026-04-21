@@ -198,26 +198,62 @@ router.get(
     const weekStart   = new Date(now); weekStart.setDate(now.getDate() - 7);
     const monthStart  = new Date(now); monthStart.setDate(1); monthStart.setHours(0, 0, 0, 0);
 
-    const [fees, completedStats, indiaFees, globalFees] = await Promise.all([
-      // Full ledger with user/request context — last 50 entries
-      db
-        .select({
-          id:            platformFeesTable.id,
-          requestId:     platformFeesTable.requestId,
-          amount:        platformFeesTable.amount,
-          type:          platformFeesTable.type,
-          description:   platformFeesTable.description,
-          createdAt:     platformFeesTable.createdAt,
-          hirerRegion:   gameRequestsTable.hirerRegion,
-          gameName:      gameRequestsTable.gameName,
-          hirerName:     usersTable.name,
-          hirerGbId:     usersTable.gamerbuddyId,
-        })
-        .from(platformFeesTable)
-        .leftJoin(gameRequestsTable, eq(platformFeesTable.requestId, gameRequestsTable.id))
-        .leftJoin(usersTable, eq(gameRequestsTable.userId, usersTable.id))
-        .orderBy(desc(platformFeesTable.createdAt))
-        .limit(50),
+    type FeeRow = {
+      id:                       number;
+      request_id:               number | null;
+      amount:                   string;
+      type:                     string;
+      description:              string;
+      created_at:               Date;
+      hirer_region:             string | null;
+      game_name:                string | null;
+      platform:                 string | null;
+      gross_amount:             string | null;
+      hirer_id:                 number | null;
+      hirer_name:               string | null;
+      hirer_gb_id:              string | null;
+      gamer_id:                 number | null;
+      gamer_name:               string | null;
+      gamer_gb_id:              string | null;
+      pending_withdrawal_id:    number | null;
+      pending_withdrawal_amount: string | null;
+    };
+
+    const [feeRows, completedStats, indiaFees, globalFees] = await Promise.all([
+      // Full ledger — joined with game_requests, hirer, gamer (via accepted bid), pending withdrawal
+      db.execute<FeeRow>(sql`
+        SELECT
+          pf.id,
+          pf.request_id,
+          pf.amount,
+          pf.type,
+          pf.description,
+          pf.created_at,
+          gr.hirer_region,
+          gr.game_name,
+          gr.platform,
+          gr.escrow_amount    AS gross_amount,
+          h.id                AS hirer_id,
+          h.name              AS hirer_name,
+          h.gamerbuddy_id     AS hirer_gb_id,
+          g.id                AS gamer_id,
+          g.name              AS gamer_name,
+          g.gamerbuddy_id     AS gamer_gb_id,
+          wr.id               AS pending_withdrawal_id,
+          wr.amount           AS pending_withdrawal_amount
+        FROM platform_fees pf
+        LEFT JOIN game_requests gr ON gr.id = pf.request_id
+        LEFT JOIN users h          ON h.id  = gr.user_id
+        LEFT JOIN bids  b          ON b.id  = gr.accepted_bid_id
+        LEFT JOIN users g          ON g.id  = b.bidder_id
+        LEFT JOIN LATERAL (
+          SELECT id, amount FROM withdrawal_requests
+          WHERE user_id = g.id AND status = 'pending'
+          ORDER BY created_at ASC LIMIT 1
+        ) wr ON TRUE
+        ORDER BY pf.created_at DESC
+        LIMIT 50
+      `),
 
       // Completed session / quest counts
       db
@@ -240,10 +276,12 @@ router.get(
         .where(sql`${gameRequestsTable.hirerRegion} != 'india' OR ${gameRequestsTable.hirerRegion} IS NULL`),
     ]);
 
+    const fees = feeRows.rows;
+
     // Time-bucket totals computed in JS from full ledger
     function bucketTotal(since: Date) {
       return fees
-        .filter((f) => f.createdAt >= since)
+        .filter((f) => f.created_at >= since)
         .reduce((s, f) => s + parseFloat(String(f.amount)), 0);
     }
     function typeTotal(t: string) {
@@ -277,18 +315,32 @@ router.get(
         total: round2(parseFloat(String(globalFees[0]?.total ?? 0))),
         count: Number(globalFees[0]?.cnt ?? 0),
       },
-      fees: fees.map((f) => ({
-        id:          f.id,
-        requestId:   f.requestId,
-        amount:      parseFloat(String(f.amount)),
-        type:        f.type,
-        description: f.description,
-        createdAt:   f.createdAt.toISOString(),
-        hirerRegion: f.hirerRegion ?? "international",
-        gameName:    f.gameName ?? null,
-        hirerName:   f.hirerName ?? null,
-        hirerGbId:   f.hirerGbId ?? null,
-      })),
+      fees: fees.map((f) => {
+        const fee      = parseFloat(String(f.amount));
+        const gross    = parseFloat(String(f.gross_amount ?? "0")) || 0;
+        const netToGamer = round2(gross - fee);
+        return {
+          id:                      f.id,
+          requestId:               f.request_id,
+          amount:                  round2(fee),
+          grossAmount:             round2(gross),
+          netToGamer:              netToGamer > 0 ? netToGamer : 0,
+          type:                    f.type,
+          description:             f.description,
+          createdAt:               f.created_at instanceof Date ? f.created_at.toISOString() : String(f.created_at),
+          hirerRegion:             f.hirer_region ?? "international",
+          gameName:                f.game_name    ?? null,
+          platform:                f.platform     ?? null,
+          hirerId:                 f.hirer_id     ?? null,
+          hirerName:               f.hirer_name   ?? null,
+          hirerGbId:               f.hirer_gb_id  ?? null,
+          gamerId:                 f.gamer_id     ?? null,
+          gamerName:               f.gamer_name   ?? null,
+          gamerGbId:               f.gamer_gb_id  ?? null,
+          pendingWithdrawalId:     f.pending_withdrawal_id    ?? null,
+          pendingWithdrawalAmount: round2(parseFloat(String(f.pending_withdrawal_amount ?? "0")) || 0),
+        };
+      }),
     });
   },
 );
