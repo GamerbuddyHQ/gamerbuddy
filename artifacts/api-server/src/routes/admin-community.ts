@@ -12,7 +12,7 @@ import {
   usersTable,
   moderatorActionsTable,
 } from "@workspace/db";
-import { eq, sql, ilike, or, desc } from "drizzle-orm";
+import { eq, sql, ilike, or, desc, and, gte } from "drizzle-orm";
 import { requireAdminAuth } from "./admin-auth";
 
 const router = Router();
@@ -276,15 +276,17 @@ router.post("/admin/community/users/:id/unban", requireAdminAuth, async (req, re
 router.get("/admin/community/moderators", requireAdminAuth, async (req, res): Promise<void> => {
   const mods = await db
     .select({
-      id:           usersTable.id,
-      name:         usersTable.name,
-      email:        usersTable.email,
-      gamerbuddyId: usersTable.gamerbuddyId,
-      createdAt:    usersTable.createdAt,
+      id:                   usersTable.id,
+      name:                 usersTable.name,
+      email:                usersTable.email,
+      gamerbuddyId:         usersTable.gamerbuddyId,
+      profilePhotoUrl:      usersTable.profilePhotoUrl,
+      moderatorAppointedAt: usersTable.moderatorAppointedAt,
+      createdAt:            usersTable.createdAt,
     })
     .from(usersTable)
     .where(eq(usersTable.isModerator, true))
-    .orderBy(usersTable.createdAt);
+    .orderBy(usersTable.moderatorAppointedAt);
   res.json(mods);
 });
 
@@ -331,7 +333,7 @@ router.post("/admin/community/moderators/:userId", requireAdminAuth, async (req,
 
   const [updated] = await db
     .update(usersTable)
-    .set({ isModerator: true })
+    .set({ isModerator: true, moderatorAppointedAt: new Date() })
     .where(eq(usersTable.id, userId))
     .returning({ id: usersTable.id, name: usersTable.name, isModerator: usersTable.isModerator });
 
@@ -357,6 +359,23 @@ router.delete("/admin/community/moderators/:userId", requireAdminAuth, async (re
 
 /* ── GET /admin/community/moderators/actions — action log ──────────────── */
 router.get("/admin/community/moderators/actions", requireAdminAuth, async (req, res): Promise<void> => {
+  const period = (req.query.period as string | undefined) ?? "all";
+  const search = ((req.query.search as string | undefined) ?? "").trim().toLowerCase();
+
+  const now = new Date();
+  let since: Date | null = null;
+  if (period === "today") {
+    since = new Date(now); since.setHours(0, 0, 0, 0);
+  } else if (period === "week") {
+    since = new Date(now); since.setDate(since.getDate() - 7);
+  } else if (period === "month") {
+    since = new Date(now); since.setDate(since.getDate() - 30);
+  }
+
+  const conditions = since
+    ? and(gte(moderatorActionsTable.createdAt, since))
+    : undefined;
+
   const rows = await db
     .select({
       id:          moderatorActionsTable.id,
@@ -371,9 +390,19 @@ router.get("/admin/community/moderators/actions", requireAdminAuth, async (req, 
     })
     .from(moderatorActionsTable)
     .leftJoin(usersTable, eq(moderatorActionsTable.moderatorId, usersTable.id))
+    .where(conditions)
     .orderBy(desc(moderatorActionsTable.createdAt))
-    .limit(200);
-  res.json(rows);
+    .limit(500);
+
+  const filtered = search
+    ? rows.filter(r =>
+        (r.modName ?? "").toLowerCase().includes(search) ||
+        (r.modGbId ?? "").toLowerCase().includes(search) ||
+        r.action.toLowerCase().includes(search)
+      )
+    : rows;
+
+  res.json(filtered);
 });
 
 export default router;

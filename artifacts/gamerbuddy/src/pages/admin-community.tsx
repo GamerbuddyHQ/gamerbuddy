@@ -467,6 +467,30 @@ export default function AdminCommunity() {
         </Button>
       </div>
 
+      {/* ── Admin tab bar ── */}
+      <div className="max-w-[1400px] mx-auto px-4 md:px-8 py-2 border-b border-border/40 flex gap-1 overflow-x-auto bg-card/50">
+        {([
+          { href: "/admin/dashboard",        label: "Payouts & Verifications", icon: Shield      },
+          { href: "/admin/community",         label: "Community Moderation",    icon: Users       },
+          { href: "/admin/platform-earnings", label: "Platform Earnings",       icon: Activity    },
+          { href: "/admin/security",          label: "Security",                icon: ShieldOff   },
+          { href: "/admin/moderators",        label: "Moderators",              icon: UserCheck   },
+        ] as { href: string; label: string; icon: (p: { className?: string }) => JSX.Element }[]).map(item => (
+          <Link
+            key={item.href}
+            href={item.href}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${
+              item.href === "/admin/community"
+                ? "bg-primary/15 text-primary border border-primary/30"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+            }`}
+          >
+            <item.icon className="w-3.5 h-3.5" />
+            {item.label}
+          </Link>
+        ))}
+      </div>
+
       <div className="space-y-5 max-w-[1400px] mx-auto px-4 py-6">
 
         {/* ── Stats row ── */}

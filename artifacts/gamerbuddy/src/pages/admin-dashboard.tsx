@@ -11,7 +11,7 @@ import {
   Globe, RefreshCw, AlertTriangle, ChevronDown, ChevronUp,
   BadgeCheck, Eye, XCircle, Wallet, Users, History, Search,
   Gamepad2, ArrowUpDown, TrendingUp, Activity, ExternalLink,
-  CreditCard, ArrowRight,
+  CreditCard, ArrowRight, UserCheck,
 } from "lucide-react";
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
@@ -275,6 +275,7 @@ export default function AdminDashboard() {
             { href: "/admin/community",         label: "Community Moderation",   icon: Users      },
             { href: "/admin/platform-earnings", label: "Platform Earnings",      icon: Wallet     },
             { href: "/admin/security",          label: "Security",               icon: Shield     },
+            { href: "/admin/moderators",        label: "Moderators",             icon: UserCheck  },
           ].map(item => (
             <Link key={item.href} href={item.href}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${

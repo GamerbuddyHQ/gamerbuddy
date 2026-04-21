@@ -24,6 +24,7 @@ export const usersTable = pgTable("users", {
   gamerbuddyId: text("gamerbuddy_id").unique(),
   communityBanned: boolean("community_banned").notNull().default(false),
   isModerator: boolean("is_moderator").notNull().default(false),
+  moderatorAppointedAt: timestamp("moderator_appointed_at", { withTimezone: true }),
   trustScore: integer("trust_score").notNull().default(0),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });

@@ -9,7 +9,7 @@ import {
   Shield, AlertTriangle, Activity, Lock, Unlock,
   RefreshCw, User, DollarSign, Flag, Clock, ChevronDown,
   ChevronUp, Wallet, TrendingUp, Ban, CheckCircle2,
-  XCircle, FileText, Search, Users, BadgeCheck, UserX, LogOut,
+  XCircle, FileText, Search, Users, BadgeCheck, UserX, LogOut, UserCheck,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -573,6 +573,7 @@ function AdminNav() {
           { href: "/admin/community",         label: "Community Moderation",    icon: Users      },
           { href: "/admin/platform-earnings", label: "Platform Earnings",       icon: Wallet     },
           { href: "/admin/security",          label: "Security",                icon: Shield     },
+          { href: "/admin/moderators",        label: "Moderators",              icon: UserCheck  },
         ].map(item => (
           <Link
             key={item.href}

@@ -35,6 +35,7 @@ import PlatformEarnings from "@/pages/platform-earnings";
 import AdminLogin from "@/pages/admin-login";
 import AdminDashboard from "@/pages/admin-dashboard";
 import AdminCommunity from "@/pages/admin-community";
+import AdminModerators from "@/pages/admin-moderators";
 import SocialsPage from "@/pages/socials";
 
 const queryClient = new QueryClient({
@@ -118,6 +119,7 @@ function Router() {
         <Route path="/admin/security"><AdminCookieRoute component={AdminSecurity} /></Route>
         <Route path="/admin/platform-earnings"><AdminCookieRoute component={PlatformEarnings} /></Route>
         <Route path="/admin/community"><AdminCookieRoute component={AdminCommunity} /></Route>
+        <Route path="/admin/moderators"><AdminCookieRoute component={AdminModerators} /></Route>
 
         <Route component={NotFound} />
       </Switch>

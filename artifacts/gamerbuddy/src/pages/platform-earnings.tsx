@@ -11,7 +11,7 @@ import {
   Layers, Clock, BadgeCheck, Receipt, Globe, MapPin, CalendarDays,
   CalendarRange, Wallet, Users, Info, Zap, X, CheckCircle2,
   ExternalLink, Gamepad2, CreditCard, ArrowRight, AlertTriangle,
-  RefreshCw, User, Download,
+  RefreshCw, User, Download, UserCheck,
 } from "lucide-react";
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
@@ -326,6 +326,7 @@ function AdminNav() {
           { href: "/admin/community",         label: "Community Moderation",    icon: Users      },
           { href: "/admin/platform-earnings", label: "Platform Earnings",       icon: Wallet     },
           { href: "/admin/security",          label: "Security",                icon: Shield     },
+          { href: "/admin/moderators",        label: "Moderators",              icon: UserCheck  },
         ].map(item => (
           <Link key={item.href} href={item.href}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${
