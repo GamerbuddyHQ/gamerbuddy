@@ -22,6 +22,7 @@ type Post = {
   body:            string;
   status:          string;
   category:        string;
+  isPinned:        boolean;
   createdAt:       string;
   userId:          number;
   authorName:      string | null;
@@ -149,7 +150,7 @@ function PostCommentsPanel({ post }: { post: Post }) {
   const qc = useQueryClient();
   const [adminText, setAdminText] = useState("");
 
-  const { data, isLoading } = useQuery<{ comments: Comment[] }>({
+  const { data, isLoading } = useQuery<Comment[]>({
     queryKey: ["admin-post-comments", post.id],
     queryFn:  () => apiFetch(`${BASE}/community/suggestions/${post.id}/comments`),
     staleTime: 15_000,
@@ -166,12 +167,12 @@ function PostCommentsPanel({ post }: { post: Post }) {
       setAdminText("");
       qc.invalidateQueries({ queryKey: ["admin-post-comments", post.id] });
       qc.invalidateQueries({ queryKey: ["admin-community-posts"] });
-      toast({ title: "Admin Comment Posted", description: "Visible to all users as 'Gamerbuddy Team'." });
+      toast({ title: "✅ Admin Comment Posted", description: "Visible to all users as 'Gamerbuddy Team'." });
     },
     onError: () => toast({ title: "Error", description: "Could not post admin comment.", variant: "destructive" }),
   });
 
-  const comments = data?.comments ?? [];
+  const comments = Array.isArray(data) ? data : [];
 
   return (
     <div className="px-4 pb-4 space-y-4">
@@ -283,6 +284,15 @@ export default function AdminCommunity() {
     onError: (e: Error) => toast({ title: "Error", description: e.message, variant: "destructive" }),
   });
 
+  const pinPost = useMutation({
+    mutationFn: (id: number) => apiFetch(`${BASE}/admin/community/posts/${id}/pin`, { method: "POST" }),
+    onSuccess: (data) => {
+      qc.invalidateQueries({ queryKey: ["admin-community-posts"] });
+      toast({ title: data.isPinned ? "📌 Post Pinned" : "Post Unpinned", description: data.isPinned ? "Appears at top of community page." : "Removed from pinned section." });
+    },
+    onError: (e: Error) => toast({ title: "Error", description: e.message, variant: "destructive" }),
+  });
+
   const banUser = useMutation({
     mutationFn: (userId: number) => apiFetch(`${BASE}/admin/community/users/${userId}/ban`, { method: "POST" }),
     onSuccess: (_, userId) => { qc.invalidateQueries({ queryKey: ["admin-community-posts"] }); toast({ title: "User Banned" }); },
@@ -332,6 +342,7 @@ export default function AdminCommunity() {
   const totalVisible = data?.posts.filter(p => p.status === "visible").length ?? 0;
   const totalHidden  = data?.posts.filter(p => p.status === "hidden").length ?? 0;
   const totalSpam    = data?.posts.filter(p => p.status === "spam").length ?? 0;
+  const totalPinned  = data?.posts.filter(p => p.isPinned).length ?? 0;
 
   function confirmDelete(post: Post) {
     if (window.confirm(`Permanently delete "${post.title}"? This cannot be undone.`)) {
@@ -369,12 +380,13 @@ export default function AdminCommunity() {
       <div className="space-y-5 max-w-[1400px] mx-auto px-4 py-6">
 
         {/* ── Stats row ── */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
           {[
             { label: "Total Posts",    value: totalAll,     color: "text-foreground",   bg: "bg-muted/40" },
             { label: "Visible",        value: totalVisible, color: "text-green-400",    bg: "bg-green-500/8" },
             { label: "Hidden",         value: totalHidden,  color: "text-amber-400",    bg: "bg-amber-500/8" },
             { label: "Spam",           value: totalSpam,    color: "text-red-400",      bg: "bg-red-500/8" },
+            { label: "📌 Pinned",      value: totalPinned,  color: "text-yellow-400",   bg: "bg-yellow-500/8" },
           ].map(s => (
             <div key={s.label} className={`${s.bg} border border-border/50 rounded-xl p-3`}>
               <p className="text-xs text-muted-foreground/60">{s.label}</p>
@@ -450,6 +462,11 @@ export default function AdminCommunity() {
                   {/* Content */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start gap-2 flex-wrap">
+                      {post.isPinned && (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-yellow-400 bg-yellow-500/10 border border-yellow-500/30 px-1.5 py-0.5 rounded-full">
+                          <Pin className="w-2.5 h-2.5" /> Pinned
+                        </span>
+                      )}
                       <span className="font-semibold text-sm leading-snug">{post.title}</span>
                       <span className="text-[10px] font-mono bg-muted/60 text-muted-foreground/60 px-1.5 py-0.5 rounded capitalize">{post.category}</span>
                     </div>
@@ -514,6 +531,25 @@ export default function AdminCommunity() {
 
                 {/* Action bar */}
                 <div className="border-t border-border/40 px-4 py-2.5 bg-muted/10 flex items-center gap-2 flex-wrap">
+                  {/* Pin / Unpin */}
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => pinPost.mutate(post.id)}
+                    disabled={pinPost.isPending}
+                    className={`gap-1.5 text-xs ${post.isPinned
+                      ? "border-yellow-500/40 text-yellow-400 hover:bg-yellow-500/10 hover:border-yellow-500/60"
+                      : "border-border/50 text-muted-foreground hover:text-yellow-400 hover:border-yellow-500/40"
+                    }`}
+                    title={post.isPinned ? "Remove from pinned (max 5 at once)" : "Pin to top of community (max 5 at once)"}
+                  >
+                    {pinPost.isPending
+                      ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      : post.isPinned ? <PinOff className="w-3.5 h-3.5" /> : <Pin className="w-3.5 h-3.5" />
+                    }
+                    {post.isPinned ? "Unpin" : "📌 Pin Post"}
+                  </Button>
+
                   {/* Hide / Restore */}
                   {post.status === "visible" || post.status === "spam" ? (
                     <Button
@@ -586,8 +622,9 @@ export default function AdminCommunity() {
               <p className="font-semibold text-amber-300">Moderation Guide</p>
               <ul className="list-disc list-inside text-xs text-amber-300/70 space-y-0.5">
                 <li><strong>Expand a post</strong> — click the chevron icon to see full content, comments, and admin controls.</li>
-                <li><strong>Add Admin Comment</strong> — posts as "Gamerbuddy Team" and is visible to all users immediately.</li>
-                <li><strong>Pin Comment</strong> — pinned comments appear at the very top of the comment list for all users.</li>
+                <li><strong>📌 Pin Post</strong> — post appears at the very top of the community feed for all users. Max 5 pinned at once.</li>
+                <li><strong>Add Admin Comment</strong> — posts as "Gamerbuddy Team" with an Official badge, visible to all users immediately.</li>
+                <li><strong>Pin Comment</strong> — pinned comments float to the top of the comment list for all users.</li>
                 <li><strong>Hide Post</strong> — soft delete, invisible to users but kept in database. Reversible.</li>
                 <li><strong>Delete Post</strong> — permanent, removes all comments and votes. Irreversible.</li>
                 <li><strong>Ban Author</strong> — prevents the user from creating new community posts.</li>

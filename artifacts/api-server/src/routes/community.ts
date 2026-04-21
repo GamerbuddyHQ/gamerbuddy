@@ -44,6 +44,7 @@ router.get("/community/suggestions", loadUser, async (req, res): Promise<void> =
       body: suggestionsTable.body,
       status: suggestionsTable.status,
       category: suggestionsTable.category,
+      isPinned: suggestionsTable.isPinned,
       createdAt: suggestionsTable.createdAt,
       userId: suggestionsTable.userId,
       authorName: usersTable.name,
@@ -84,11 +85,23 @@ router.get("/community/suggestions", loadUser, async (req, res): Promise<void> =
     }));
 
   if (sort === "liked") {
-    enriched.sort((a, b) => b.likes - a.likes || new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    enriched.sort((a, b) => {
+      if (a.isPinned && !b.isPinned) return -1;
+      if (!a.isPinned && b.isPinned) return 1;
+      return b.likes - a.likes || new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
   } else if (sort === "discussed") {
-    enriched.sort((a, b) => b.commentCount - a.commentCount || new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    enriched.sort((a, b) => {
+      if (a.isPinned && !b.isPinned) return -1;
+      if (!a.isPinned && b.isPinned) return 1;
+      return b.commentCount - a.commentCount || new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
   } else {
-    enriched.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    enriched.sort((a, b) => {
+      if (a.isPinned && !b.isPinned) return -1;
+      if (!a.isPinned && b.isPinned) return 1;
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
   }
 
   res.json(enriched);

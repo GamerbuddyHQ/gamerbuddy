@@ -89,9 +89,11 @@ type Suggestion = {
   body: string;
   status: SuggestionStatus;
   category: SuggestionCategory;
+  isPinned: boolean;
   createdAt: string;
   userId: number;
   authorName: string;
+  authorCountry?: string | null;
   likes: number;
   dislikes: number;
   commentCount: number;
@@ -1028,6 +1030,23 @@ function AdminToolbar({ suggestion }: { suggestion: Suggestion }) {
   const qc = useQueryClient();
   const [deleteOpen, setDeleteOpen] = useState(false);
 
+  const pinMutation = useMutation({
+    mutationFn: async () => {
+      const r = await fetch(`${BASE}/admin/community/posts/${suggestion.id}/pin`, {
+        method: "POST",
+        credentials: "include",
+      });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.error ?? "Failed to toggle pin");
+      return data;
+    },
+    onSuccess: (data) => {
+      qc.invalidateQueries({ queryKey: ["suggestions"] });
+      toast({ title: data.isPinned ? "📌 Post Pinned" : "Post Unpinned", description: data.isPinned ? "Now appears at the top for all users." : "Removed from pinned section." });
+    },
+    onError: (e: Error) => toast({ title: "Pin failed", description: e.message, variant: "destructive" }),
+  });
+
   const moderateMutation = useMutation({
     mutationFn: async (action: "approve" | "hide" | "spam") => {
       const r = await fetch(`${BASE}/community/suggestions/${suggestion.id}/moderate`, {
@@ -1098,16 +1117,35 @@ function AdminToolbar({ suggestion }: { suggestion: Suggestion }) {
     >
       {/* ── Header strip ── */}
       <div
-        className="flex items-center justify-between gap-3 px-4 py-2.5 border-b"
+        className="flex items-center justify-between gap-3 px-4 py-2.5 border-b flex-wrap"
         style={{ borderColor: "rgba(168,85,247,0.10)", background: "rgba(168,85,247,0.05)" }}
       >
         <div className="flex items-center gap-2">
           <Shield className="h-3.5 w-3.5 text-primary/70 shrink-0" />
           <span className="text-[10px] font-black uppercase tracking-[0.16em] text-primary/60">Admin Actions</span>
         </div>
-        <div className="flex items-center gap-1.5">
-          <span className="text-[10px] text-muted-foreground/35">Current:</span>
-          <AdminStatusPill status={cur} />
+        <div className="flex items-center gap-2 flex-wrap">
+          {/* Pin / Unpin button */}
+          <button
+            onClick={() => pinMutation.mutate()}
+            disabled={pinMutation.isPending}
+            className="flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1.5 rounded-lg transition-all duration-150 active:scale-95"
+            style={suggestion.isPinned
+              ? { background: "rgba(234,179,8,0.18)", border: "1px solid rgba(234,179,8,0.45)", color: "#fbbf24" }
+              : { background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.50)" }
+            }
+            title={suggestion.isPinned ? "Click to unpin post" : "Pin post to top of community page"}
+          >
+            {pinMutation.isPending
+              ? <Loader2 className="h-3 w-3 animate-spin" />
+              : suggestion.isPinned ? <PinOff className="h-3 w-3" /> : <Pin className="h-3 w-3" />
+            }
+            {suggestion.isPinned ? "Unpin" : "📌 Pin Post"}
+          </button>
+          <div className="flex items-center gap-1.5">
+            <span className="text-[10px] text-muted-foreground/35">Status:</span>
+            <AdminStatusPill status={cur} />
+          </div>
         </div>
       </div>
 
@@ -1275,7 +1313,9 @@ function SuggestionCard({ suggestion, isAdmin }: { suggestion: Suggestion; isAdm
   const scoreColor = score > 0 ? "text-emerald-400" : score < 0 ? "text-red-400" : "text-muted-foreground/60";
   const catCfg = CATEGORY_CONFIG[suggestion.category ?? "other"] ?? CATEGORY_CONFIG.other;
 
-  const borderColor = suggestion.status === "spam"
+  const borderColor = suggestion.isPinned
+    ? "rgba(234,179,8,0.50)"
+    : suggestion.status === "spam"
     ? "rgba(239,68,68,0.30)"
     : suggestion.status === "hidden"
     ? "rgba(234,179,8,0.25)"
@@ -1285,7 +1325,9 @@ function SuggestionCard({ suggestion, isAdmin }: { suggestion: Suggestion; isAdm
     ? "rgba(239,68,68,0.22)"
     : "rgba(255,255,255,0.08)";
 
-  const accentColor = suggestion.status === "spam"
+  const accentColor = suggestion.isPinned
+    ? "#fbbf24"
+    : suggestion.status === "spam"
     ? "#ef4444"
     : suggestion.status === "hidden"
     ? "#eab308"
@@ -1295,14 +1337,25 @@ function SuggestionCard({ suggestion, isAdmin }: { suggestion: Suggestion; isAdm
     <div
       className="rounded-2xl border overflow-hidden transition-all duration-200 hover:border-white/[0.13]"
       style={{
-        background: "rgba(10,5,20,0.94)",
+        background: suggestion.isPinned ? "rgba(15,10,3,0.97)" : "rgba(10,5,20,0.94)",
         borderColor,
-        boxShadow: "0 4px 24px rgba(0,0,0,0.45)",
-        borderLeft: `3px solid ${accentColor}55`,
+        boxShadow: suggestion.isPinned ? "0 4px 28px rgba(234,179,8,0.15), 0 4px 24px rgba(0,0,0,0.45)" : "0 4px 24px rgba(0,0,0,0.45)",
+        borderLeft: `3px solid ${accentColor}${suggestion.isPinned ? "bb" : "55"}`,
       }}
     >
+      {/* 📌 Pinned banner */}
+      {suggestion.isPinned && (
+        <div
+          className="flex items-center gap-2 px-4 py-1.5 text-[11px] font-black uppercase tracking-widest"
+          style={{ background: "rgba(234,179,8,0.12)", borderBottom: "1px solid rgba(234,179,8,0.25)", color: "#fbbf24" }}
+        >
+          <Pin className="h-3 w-3 shrink-0" />
+          Pinned Announcement
+        </div>
+      )}
+
       {/* Top accent line for non-visible */}
-      {suggestion.status !== "visible" && (
+      {suggestion.status !== "visible" && !suggestion.isPinned && (
         <div
           className="h-[2px]"
           style={{ background: suggestion.status === "spam" ? "linear-gradient(90deg,transparent,#ef4444,transparent)" : "linear-gradient(90deg,transparent,#eab308,transparent)" }}

@@ -8,6 +8,7 @@ export const suggestionsTable = pgTable("suggestions", {
   body: text("body").notNull(),
   status: text("status").notNull().default("visible"),
   category: text("category").notNull().default("other"),
+  isPinned: boolean("is_pinned").notNull().default(false),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

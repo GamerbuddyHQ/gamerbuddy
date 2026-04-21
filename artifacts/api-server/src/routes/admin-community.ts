@@ -31,6 +31,7 @@ router.get("/admin/community/posts", requireAdminAuth, async (req, res): Promise
       body:          suggestionsTable.body,
       status:        suggestionsTable.status,
       category:      suggestionsTable.category,
+      isPinned:      suggestionsTable.isPinned,
       createdAt:     suggestionsTable.createdAt,
       userId:        suggestionsTable.userId,
       authorName:    usersTable.name,
@@ -50,7 +51,7 @@ router.get("/admin/community/posts", requireAdminAuth, async (req, res): Promise
       usersTable.gamerbuddyId,
       usersTable.communityBanned,
     )
-    .orderBy(desc(suggestionsTable.createdAt));
+    .orderBy(desc(suggestionsTable.isPinned), desc(suggestionsTable.createdAt));
 
   // Comment counts
   const commentCounts = await db
@@ -133,6 +134,42 @@ router.delete("/admin/community/posts/:id", requireAdminAuth, async (req, res): 
   await db.delete(suggestionsTable).where(eq(suggestionsTable.id, id));
   req.log?.info({ action: "admin_delete_post", postId: id }, "Post permanently deleted by admin");
   res.json({ success: true });
+});
+
+/* ── POST /admin/community/posts/:id/pin — toggle pin on a post (max 5 pinned) */
+router.post("/admin/community/posts/:id/pin", requireAdminAuth, async (req, res): Promise<void> => {
+  const id = parseInt(req.params.id, 10);
+  if (isNaN(id)) { res.status(400).json({ error: "Invalid ID" }); return; }
+
+  const [existing] = await db
+    .select({ id: suggestionsTable.id, isPinned: suggestionsTable.isPinned })
+    .from(suggestionsTable)
+    .where(eq(suggestionsTable.id, id));
+
+  if (!existing) { res.status(404).json({ error: "Post not found" }); return; }
+
+  const newPinned = !existing.isPinned;
+
+  // Enforce max 5 pinned posts at a time
+  if (newPinned) {
+    const pinnedCount = await db
+      .select({ cnt: sql<number>`cast(count(*) as int)` })
+      .from(suggestionsTable)
+      .where(eq(suggestionsTable.isPinned, true));
+    if ((pinnedCount[0]?.cnt ?? 0) >= 5) {
+      res.status(400).json({ error: "Maximum 5 posts can be pinned at once. Unpin one first." });
+      return;
+    }
+  }
+
+  const [updated] = await db
+    .update(suggestionsTable)
+    .set({ isPinned: newPinned })
+    .where(eq(suggestionsTable.id, id))
+    .returning({ id: suggestionsTable.id, isPinned: suggestionsTable.isPinned });
+
+  req.log?.info({ action: newPinned ? "admin_pin_post" : "admin_unpin_post", postId: id }, "Admin toggled post pin");
+  res.json({ success: true, id: updated.id, isPinned: updated.isPinned });
 });
 
 /* ── POST /admin/community/suggestions/:id/comment — admin posts a comment */
