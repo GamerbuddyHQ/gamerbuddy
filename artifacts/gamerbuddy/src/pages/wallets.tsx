@@ -333,23 +333,60 @@ export default function WalletsPage() {
               </p>
             </div>
 
-            {/* Progress bar — shown when below threshold */}
+            {/* Progress bar + locked message — shown when below threshold */}
             {!wallets.canWithdraw && (
-              <div className="space-y-1.5">
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>Payout progress</span>
-                  <span className="font-medium text-foreground">${wallets.earningsBalance.toFixed(2)} / $100.00</span>
+              <div className="space-y-4">
+                {/* Progress bar */}
+                <div className="space-y-1.5">
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>Payout progress</span>
+                    <span className="font-medium text-foreground">${wallets.earningsBalance.toFixed(2)} / $100.00</span>
+                  </div>
+                  <div className="h-2.5 rounded-full bg-muted/40 overflow-hidden">
+                    <div
+                      className="h-full rounded-full bg-secondary transition-all duration-700"
+                      style={{ width: `${earningsPct}%` }}
+                    />
+                  </div>
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-amber-300/70 flex items-center gap-1"><AlertTriangle className="h-3 w-3 text-amber-400" />${remaining.toFixed(2)} more to unlock</span>
+                    <span className="text-muted-foreground/50">{earningsPct.toFixed(0)}% there</span>
+                  </div>
                 </div>
-                <div className="h-2 rounded-full bg-muted/40 overflow-hidden">
-                  <div
-                    className="h-full rounded-full bg-secondary transition-all duration-500"
-                    style={{ width: `${earningsPct}%` }}
-                  />
+
+                {/* Locked withdrawal panel — gamer tone */}
+                <div className="rounded-xl border border-amber-500/30 bg-amber-500/[0.05] p-4 space-y-3">
+                  <div className="flex items-center gap-2">
+                    <Lock className="h-4 w-4 text-amber-400 shrink-0" />
+                    <span className="font-black text-sm text-amber-300 uppercase tracking-wide">Withdrawal Locked 🔒</span>
+                  </div>
+                  <p className="text-xs text-amber-200/75 leading-relaxed">
+                    You need at least <strong className="text-amber-300">$100.00 USD</strong> in your Earnings Wallet to request a payout.
+                    Your current balance is <strong className="text-amber-300">${wallets.earningsBalance.toFixed(2)}</strong>.
+                    Keep grinding sessions — you're only <strong className="text-amber-300">${remaining.toFixed(2)}</strong> away from your first payout! 🎮
+                  </p>
+                  <div className="flex items-center gap-2 text-[10px] text-amber-300/50 border-t border-amber-500/15 pt-2">
+                    <Smartphone className="h-3 w-3 shrink-0" />
+                    <span>Minimum payout threshold: $100 USD · Payouts processed every Monday</span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-1.5 text-xs text-amber-300/70">
-                  <AlertTriangle className="h-3 w-3 text-amber-400" />
-                  ${remaining.toFixed(2)} more needed to unlock withdrawals
-                </div>
+
+                {/* Disabled "Request Withdrawal" button — visible but locked */}
+                <Button
+                  onClick={() => {
+                    /* already shown the locked panel above, but also fire a toast */
+                    toast({
+                      title: "💰 Withdrawal Not Yet Available",
+                      description: `You need at least $100.00 in your Earnings Wallet. Current balance: $${wallets.earningsBalance.toFixed(2)}. Keep completing sessions — you need $${remaining.toFixed(2)} more!`,
+                      variant: "destructive",
+                    });
+                  }}
+                  variant="outline"
+                  className="w-full border-amber-500/30 text-amber-400/60 hover:text-amber-300 hover:bg-amber-500/10 hover:border-amber-500/50 font-bold uppercase tracking-wider cursor-pointer transition-colors"
+                >
+                  <Lock className="h-4 w-4 mr-2 opacity-60" />
+                  Request Withdrawal — Locked ($100 min)
+                </Button>
               </div>
             )}
 
@@ -447,14 +484,6 @@ export default function WalletsPage() {
               </div>
             )}
 
-            {!wallets.canWithdraw && (
-              <div className="flex items-start gap-2.5 rounded-lg bg-secondary/5 border border-secondary/20 p-3 text-xs text-secondary/70">
-                <ArrowUpFromLine className="h-4 w-4 shrink-0 mt-0.5 text-secondary/50" />
-                <span>
-                  Keep earning by fulfilling requests. Once you reach <strong className="text-secondary">$100.00</strong>, you can request a payout. Payouts are processed manually every Monday.
-                </span>
-              </div>
-            )}
           </CardContent>
         </Card>
       </div>

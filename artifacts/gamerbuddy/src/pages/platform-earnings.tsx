@@ -424,9 +424,13 @@ export default function PlatformEarnings() {
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded-full text-amber-400 bg-amber-500/10 border border-amber-500/25">Sample</span>
               )}
             </div>
-            <p className="text-xs text-muted-foreground/50 mb-4 ml-9">
+            <p className="text-xs text-muted-foreground/50 mb-2 ml-9">
               Gamers who completed sessions and have submitted withdrawal requests — process these first.
             </p>
+            <div className="ml-9 mb-4 flex items-center gap-1.5 text-[11px] text-green-400/60">
+              <CheckCircle2 className="w-3 h-3 shrink-0" />
+              <span>Only requests meeting the <strong className="text-green-400/80">$100 minimum threshold</strong> are shown here. Sub-threshold requests are blocked server-side.</span>
+            </div>
 
             <div className="space-y-2">
               {readyToPay.map(fee => {

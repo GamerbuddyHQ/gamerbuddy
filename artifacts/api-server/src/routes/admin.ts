@@ -511,6 +511,8 @@ router.get(
   "/admin/withdrawal-requests",
   requireAdminAuth,
   async (_req, res): Promise<void> => {
+    const MIN_WR_AMOUNT = 100;
+
     const requests = await db
       .select({
         id:             withdrawalRequestsTable.id,
@@ -530,6 +532,7 @@ router.get(
       .from(withdrawalRequestsTable)
       .leftJoin(usersTable, eq(withdrawalRequestsTable.userId, usersTable.id))
       .leftJoin(walletsTable, eq(withdrawalRequestsTable.userId, walletsTable.userId))
+      .where(gte(withdrawalRequestsTable.amount, String(MIN_WR_AMOUNT)))
       .orderBy(
         sql`CASE WHEN ${withdrawalRequestsTable.status} = 'pending' THEN 0 ELSE 1 END`,
         desc(withdrawalRequestsTable.createdAt),
@@ -538,6 +541,7 @@ router.get(
 
     res.json({
       generatedAt: new Date().toISOString(),
+      minThreshold: MIN_WR_AMOUNT,
       pendingCount: requests.filter((r) => r.status === "pending").length,
       requests: requests.map((r) => ({
         ...r,

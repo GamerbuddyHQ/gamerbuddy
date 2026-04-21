@@ -384,10 +384,13 @@ export default function AdminDashboard() {
               {/* ─── Pending Withdrawal Requests ─── */}
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <h2 className="font-bold text-foreground flex items-center gap-2">
+                  <h2 className="font-bold text-foreground flex items-center gap-2 flex-wrap">
                     <Clock className="w-4 h-4 text-amber-400" />
                     Pending Withdrawal Requests
                     {pending.length > 0 && <span className="text-amber-400">({pending.length})</span>}
+                    <span className="text-[10px] font-bold text-green-400/60 bg-green-500/8 border border-green-500/20 px-2 py-0.5 rounded-full normal-case tracking-normal">
+                      ≥ $100 minimum only
+                    </span>
                   </h2>
                   <div className="flex items-center gap-2">
                     <button onClick={() => historyRef.current?.scrollIntoView({ behavior: "smooth" })}
