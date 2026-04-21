@@ -301,22 +301,24 @@ router.get(
   requireAdminAuth,
   async (_req, res): Promise<void> => {
     type RawRow = {
-      id:           number;
-      game_name:    string;
-      platform:     string;
-      status:       string;
-      escrow_amount: string | null;
-      hirer_region: string;
-      created_at:   Date;
-      started_at:   Date | null;
-      hirer_id:     number | null;
-      hirer_name:   string | null;
-      hirer_gb_id:  string | null;
-      bid_price:    string | null;
-      gamer_id:     number | null;
-      gamer_name:   string | null;
-      gamer_gb_id:  string | null;
-      fee_amount:   string | null;
+      id:                       number;
+      game_name:                string;
+      platform:                 string;
+      status:                   string;
+      escrow_amount:            string | null;
+      hirer_region:             string;
+      created_at:               Date;
+      started_at:               Date | null;
+      hirer_id:                 number | null;
+      hirer_name:               string | null;
+      hirer_gb_id:              string | null;
+      bid_price:                string | null;
+      gamer_id:                 number | null;
+      gamer_name:               string | null;
+      gamer_gb_id:              string | null;
+      fee_amount:               string | null;
+      pending_withdrawal_id:    number | null;
+      pending_withdrawal_amount: string | null;
     };
 
     const rawRows = await db.execute<RawRow>(sql`
@@ -329,44 +331,53 @@ router.get(
         gr.hirer_region,
         gr.created_at,
         gr.started_at,
-        h.id           AS hirer_id,
-        h.name         AS hirer_name,
+        h.id            AS hirer_id,
+        h.name          AS hirer_name,
         h.gamerbuddy_id AS hirer_gb_id,
-        b.price        AS bid_price,
-        g.id           AS gamer_id,
-        g.name         AS gamer_name,
+        b.price         AS bid_price,
+        g.id            AS gamer_id,
+        g.name          AS gamer_name,
         g.gamerbuddy_id AS gamer_gb_id,
-        pf.amount      AS fee_amount
+        pf.amount       AS fee_amount,
+        wr.id           AS pending_withdrawal_id,
+        wr.amount       AS pending_withdrawal_amount
       FROM game_requests gr
-      LEFT JOIN users h  ON h.id = gr.user_id
-      LEFT JOIN bids  b  ON b.id = gr.accepted_bid_id
-      LEFT JOIN users g  ON g.id = b.bidder_id
-      LEFT JOIN platform_fees pf ON pf.request_id = gr.id
+      LEFT JOIN users h              ON h.id  = gr.user_id
+      LEFT JOIN bids  b              ON b.id  = gr.accepted_bid_id
+      LEFT JOIN users g              ON g.id  = b.bidder_id
+      LEFT JOIN platform_fees pf     ON pf.request_id = gr.id
+      LEFT JOIN LATERAL (
+        SELECT id, amount FROM withdrawal_requests
+        WHERE user_id = g.id AND status = 'pending'
+        ORDER BY created_at ASC
+        LIMIT 1
+      ) wr ON TRUE
       ORDER BY gr.created_at DESC
       LIMIT 500
     `);
 
-    const [completedStats] = await db
-      .select({ total: count(gameRequestsTable.id) })
-      .from(gameRequestsTable)
-      .where(eq(gameRequestsTable.status, "completed"));
-
-    const [txStats] = await db
-      .select({ total: sum(gameRequestsTable.escrowAmount) })
-      .from(gameRequestsTable)
-      .where(inArray(gameRequestsTable.status, ["completed", "payment_released"]));
-
-    const [feeStats] = await db
-      .select({ total: sum(platformFeesTable.amount) })
-      .from(platformFeesTable);
+    const [completedStats, txStats, feeStats, pendingStats] = await Promise.all([
+      db.select({ total: count(gameRequestsTable.id) })
+        .from(gameRequestsTable)
+        .where(eq(gameRequestsTable.status, "completed")),
+      db.select({ total: sum(gameRequestsTable.escrowAmount) })
+        .from(gameRequestsTable)
+        .where(inArray(gameRequestsTable.status, ["completed", "payment_released"])),
+      db.select({ total: sum(platformFeesTable.amount) })
+        .from(platformFeesTable),
+      db.select({ total: sum(withdrawalRequestsTable.amount) })
+        .from(withdrawalRequestsTable)
+        .where(eq(withdrawalRequestsTable.status, "pending")),
+    ]);
 
     const rows = Array.isArray(rawRows) ? rawRows : (rawRows as { rows: RawRow[] }).rows;
 
     res.json({
       summary: {
-        completedSessions: Number(completedStats?.total ?? 0),
-        totalTransacted:   round2(parseFloat(String(txStats?.total ?? "0")) || 0),
-        platformEarnings:  round2(parseFloat(String(feeStats?.total ?? "0")) || 0),
+        completedSessions:   Number(completedStats[0]?.total ?? 0),
+        totalTransacted:     round2(parseFloat(String(txStats[0]?.total ?? "0")) || 0),
+        platformEarnings:    round2(parseFloat(String(feeStats[0]?.total ?? "0")) || 0),
+        pendingGamerPayouts: round2(parseFloat(String(pendingStats[0]?.total ?? "0")) || 0),
       },
       sessions: rows.map((s) => {
         const escrow   = round2(parseFloat(String(s.escrow_amount ?? "0")) || 0);
@@ -374,16 +385,18 @@ router.get(
         const bidAmt   = round2(parseFloat(String(s.bid_price     ?? "0")) || 0);
         const gamerAmt = bidAmt > 0 ? bidAmt : round2(escrow - fee);
         return {
-          id:           s.id,
-          gameName:     s.game_name,
-          platform:     s.platform,
-          status:       s.status,
-          escrowAmount: escrow,
-          platformFee:  fee,
-          gamerPayout:  gamerAmt,
-          hirerRegion:  s.hirer_region ?? "international",
-          createdAt:    s.created_at instanceof Date ? s.created_at.toISOString() : String(s.created_at),
-          startedAt:    s.started_at ? (s.started_at instanceof Date ? s.started_at.toISOString() : String(s.started_at)) : null,
+          id:                      s.id,
+          gameName:                s.game_name,
+          platform:                s.platform,
+          status:                  s.status,
+          escrowAmount:            escrow,
+          platformFee:             fee,
+          gamerPayout:             gamerAmt,
+          hirerRegion:             s.hirer_region ?? "international",
+          createdAt:               s.created_at instanceof Date ? s.created_at.toISOString() : String(s.created_at),
+          startedAt:               s.started_at ? (s.started_at instanceof Date ? s.started_at.toISOString() : String(s.started_at)) : null,
+          pendingWithdrawalId:     s.pending_withdrawal_id   ?? null,
+          pendingWithdrawalAmount: round2(parseFloat(String(s.pending_withdrawal_amount ?? "0")) || 0),
           hirer: {
             id:   s.hirer_id   ?? null,
             name: s.hirer_name ?? "Unknown",
