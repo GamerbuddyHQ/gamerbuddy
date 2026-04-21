@@ -206,7 +206,9 @@ function QuickBidPanel({ req, onClose }: { req: GameRequest; onClose: () => void
   }
 
   const priceNum = parseFloat(price);
-  const priceValid = !isNaN(priceNum) && priceNum >= 1 && priceNum <= 9999;
+  const minBid = req.minBidPerHour ?? (req.hirerRegion === "india" ? 200 : 5);
+  const bidSymbol = req.hirerRegion === "india" ? "₹" : "$";
+  const priceValid = !isNaN(priceNum) && priceNum >= minBid && priceNum <= 9999;
   const messageValid = message.trim().length >= 10;
   const canSubmit = priceValid && messageValid && state !== "submitting";
 
@@ -265,21 +267,24 @@ function QuickBidPanel({ req, onClose }: { req: GameRequest; onClose: () => void
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-1.5">
-          <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Your Price (USD) *</Label>
+          <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Your Price ({req.hirerRegion === "india" ? "INR" : "USD"}) *</Label>
           <div className="relative">
-            <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            {req.hirerRegion === "india"
+              ? <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-bold text-muted-foreground">₹</span>
+              : <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            }
             <Input
-              type="number" min="1" max="9999" step="0.01" placeholder="e.g. 15.00"
+              type="number" min={minBid} max="9999" step="0.01" placeholder={`e.g. ${minBid * 2}`}
               value={price}
               onChange={(e) => { setPrice(e.target.value); if (state === "error") setState("idle"); }}
               className={`pl-9 bg-background/60 font-mono text-sm ${price && !priceValid ? "border-red-500/50" : price && priceValid ? "border-green-500/40" : ""}`}
               required
             />
           </div>
-          {price && !priceValid && <p className="text-[10px] text-red-400">Enter a price between $1 and $9,999</p>}
+          {price && !priceValid && <p className="text-[10px] text-red-400">Minimum bid is {bidSymbol}{minBid} for this quest</p>}
           {price && priceValid && (
             <p className="text-[10px] text-muted-foreground">
-              You earn <span className="text-green-400 font-bold">${(priceNum * 0.9).toFixed(2)}</span> after 10% platform fee
+              You earn <span className="text-green-400 font-bold">{bidSymbol}{(priceNum * 0.9).toFixed(2)}</span> after 10% platform fee
             </p>
           )}
         </div>

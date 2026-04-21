@@ -114,6 +114,7 @@ function Router() {
         <Route path="/socials" component={SocialsPage} />
         <Route path="/roadmap" component={Roadmap} />
 
+        <Route path="/admin">{() => <Redirect to="/admin/dashboard" />}</Route>
         <Route path="/admin/login" component={AdminLogin} />
         <Route path="/admin/dashboard"><AdminCookieRoute component={AdminDashboard} /></Route>
         <Route path="/admin/security"><AdminCookieRoute component={AdminSecurity} /></Route>
