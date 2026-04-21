@@ -144,34 +144,47 @@ Core hiring MVP is live. All non-core features are locked and redirect to Coming
 - `/tournaments` + `/my-tournaments` + `/tournaments/:id` → Coming Soon (Phase 3)
 - `/socials` → Coming Soon (Phase 2)
 
-## Production Deployment
+## Production Deployment — Vercel (single platform)
 
-Split deployment: **Vercel (frontend) + Railway (backend)**. Socket.io requires a persistent server — not compatible with Vercel serverless functions.
+The app is configured for **Vercel-only** deployment. No Railway or separate backend server needed.
 
-### Frontend → Vercel
-- `vercel.json` at project root configures build + SPA routing
-- Build: `pnpm --filter @workspace/gamerbuddy run build` → output at `artifacts/gamerbuddy/dist/public`
-- Env vars required on Vercel:
-  - `VITE_API_URL` — full Railway backend URL (e.g. `https://gamerbuddy-api.up.railway.app`)
-  - `NODE_ENV=production`
+### Architecture
+- **Frontend**: Vite/React build → Vercel static hosting (`outputDirectory: artifacts/gamerbuddy/dist/public`)
+- **Backend**: Express app wrapped as a single Vercel Serverless Function (`api/index.ts`)
+- **Routing**: `vercel.json` rewrites `/api/*` → serverless function; everything else → SPA `index.html`
+- **Real-time**: Socket.io removed; chat and notifications use REST polling (`refetchInterval`)
 
-### Backend → Railway
-- `artifacts/api-server/railway.json` configures Railway build + health check
-- Set **Root Directory** to `artifacts/api-server` in Railway project settings
-- Env vars required on Railway:
-  - `DATABASE_URL` — PostgreSQL connection string
-  - `SESSION_SECRET` — long random string
-  - `RAZORPAY_KEY_ID` / `RAZORPAY_KEY_SECRET` — use test keys until go-live
-  - `FRONTEND_URL` — Vercel app URL (e.g. `https://gamerbuddy.vercel.app`), comma-separated for multiple origins
-  - `NODE_ENV=production`
-  - `PORT` — auto-provided by Railway
+### Deploying to Vercel
+1. Import the GitHub repo into Vercel
+2. Vercel auto-detects `vercel.json` — no framework preset needed
+3. Set all environment variables in Vercel dashboard (see below)
+4. Deploy — frontend and API are on the same `.vercel.app` domain (no CORS issues)
 
-### Cross-Origin Auth Notes
-- Session cookies use `SameSite=None; Secure` in production (set in `auth.ts` via `isProd` flag)
-- CORS uses `FRONTEND_URL` env var in production; falls back to `origin:true` in dev
-- Both Express CORS and Socket.io CORS updated to read `FRONTEND_URL`
-- `clearCookie` on logout passes matching `SameSite/Secure` options so browser actually clears the cross-origin cookie
+### Required Environment Variables (Vercel Dashboard)
+| Variable | Description |
+|---|---|
+| `DATABASE_URL` | Neon / Supabase / PlanetScale PostgreSQL connection string |
+| `SESSION_SECRET` | Random 64-char hex string for cookie signing |
+| `RAZORPAY_KEY_ID` | Razorpay key ID (use `rzp_test_` keys until go-live) |
+| `RAZORPAY_KEY_SECRET` | Razorpay key secret |
+| `ADMIN_SECRET_KEY` | Admin API secret |
+| `ADMIN_PASSWORD_HASH` | bcrypt hash of admin password |
+| `NODE_ENV` | `production` |
 
-### Test Mode
-- Test Mode banner visible on every page (below navbar, dismissible, persists via localStorage key `gb_test_banner_dismissed_v1`)
-- Razorpay is in test mode — switch `RAZORPAY_KEY_ID` / `RAZORPAY_KEY_SECRET` to `rzp_live_` keys when ready to go live
+### Optional Environment Variables
+| Variable | Description |
+|---|---|
+| `FRONTEND_URL` | Set if using a custom domain (not needed on `.vercel.app`) |
+| `DEFAULT_OBJECT_STORAGE_BUCKET_ID` | GCS bucket for photo uploads |
+| `PRIVATE_OBJECT_DIR` | GCS private directory prefix |
+| `PUBLIC_OBJECT_SEARCH_PATHS` | GCS public search paths |
+
+### Key Files
+- `vercel.json` — Vercel build config + routing rewrites
+- `api/index.ts` — Vercel serverless function wrapping Express app
+- `api/tsconfig.json` — TypeScript config for the serverless function
+
+### Beta Status
+- Beta banner on all pages (dismissible, purple/violet theme)
+- Notices: test-mode payments · real-time coming soon · simulated OAuth until post-launch
+- Razorpay in test mode — switch to `rzp_live_` keys when ready to go live
