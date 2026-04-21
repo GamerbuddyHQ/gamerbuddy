@@ -318,9 +318,12 @@ export default function PostRequest() {
                       <div className="flex items-start gap-1.5 text-red-400/70"><span className="shrink-0">❌</span><span>Carry me to #1 global rank in 1 day</span></div>
                       <div className="flex items-start gap-1.5 text-red-400/70"><span className="shrink-0">❌</span><span>Beat the entire game for me in 2 hours</span></div>
                     </div>
-                    <div className="border-t border-blue-500/15 pt-2.5 space-y-1">
+                    <div className="border-t border-blue-500/15 pt-2.5 space-y-2">
                       <p className="text-[11px] text-blue-200/70 leading-relaxed">
-                        <span className="font-semibold text-blue-300">Difficult quests are totally welcome!</span> If you're stuck on a hard boss, need to climb a tough rank, or want to finish a long campaign — post it. Just be clear about the scope and offer a fair reward so skilled gamers are motivated to help.
+                        <span className="font-semibold text-blue-300">Difficult quests are totally welcome!</span> If you're stuck on a hard boss, need to climb a tough rank, or want to finish a long campaign — post it. Just be clear about the scope, and be open to fair bids so skilled gamers are motivated to help.
+                      </p>
+                      <p className="text-[11px] text-purple-300/80 leading-relaxed">
+                        <span className="font-semibold">Better reward = better gamer.</span> The more competitive the reward, the more experienced, friendly, and serious gamers will bid on your quest. Don't just go for the lowest bid — it's worth paying a little more for someone reliable.
                       </p>
                       <p className="text-[11px] text-muted-foreground/50 leading-relaxed">
                         Avoid impossible requests (e.g. "rank 1 globally in 1 day") — those rarely get bids and may be flagged.
@@ -379,14 +382,17 @@ export default function PostRequest() {
 
                     {/* Positive challenging-quest hint */}
                     {challengingHint && (
-                      <div className="flex items-start gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/5 px-3.5 py-3 text-xs text-emerald-300">
-                        <Sparkles className="h-4 w-4 shrink-0 mt-0.5 text-emerald-400" />
-                        <div className="space-y-0.5">
+                      <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/5 px-3.5 py-3 text-xs text-emerald-300 space-y-2">
+                        <div className="flex items-start gap-2">
+                          <Sparkles className="h-4 w-4 shrink-0 mt-0.5 text-emerald-400" />
                           <p>
-                            <span className="font-semibold">This sounds like a challenging quest!</span> That's great — skilled gamers love a real challenge. Consider offering a higher reward to attract top-tier help. The more difficult the quest, the more competitive the bids will be.
+                            <span className="font-semibold">This sounds like a challenging quest!</span> That's great — skilled gamers love a real challenge. For tough quests, be open to higher bids. The better the reward, the more experienced and reliable the gamer you'll get.
                           </p>
-                          <p className="text-emerald-300/60">
-                            Tip: Mention the specific difficulty so gamers can bid accurately.
+                        </div>
+                        <div className="flex items-start gap-2 border-t border-emerald-500/15 pt-2">
+                          <Zap className="h-3.5 w-3.5 shrink-0 mt-0.5 text-emerald-400/70" />
+                          <p className="text-emerald-300/70">
+                            <span className="font-semibold text-emerald-300">Reward nudge:</span> This request seems challenging — consider accepting a mid-to-high bid rather than the lowest one. Experienced gamers are more likely to deliver great results on difficult quests.
                           </p>
                         </div>
                       </div>
@@ -649,6 +655,20 @@ export default function PostRequest() {
                         {minRate.symbol}{minRate.perHour.toLocaleString()} {minRate.currency} minimum
                       </span>
                     </div>
+                  </div>
+                </div>
+
+                {/* Pro Tip: reward quality */}
+                <div className="rounded-lg border border-primary/20 bg-primary/5 px-4 py-3 flex items-start gap-2.5">
+                  <Zap className="h-3.5 w-3.5 text-primary shrink-0 mt-0.5" />
+                  <div className="space-y-1 text-[11px]">
+                    <p className="font-semibold text-primary/90">Pro Tip: better reward = better gamer</p>
+                    <p className="text-muted-foreground/70 leading-relaxed">
+                      Gamers bid what they think your quest is worth. <span className="text-foreground/80 font-medium">Don't just pick the lowest bid</span> — experienced, friendly, and reliable gamers often bid higher because their time and skill is worth it. For the best experience, consider accepting a mid-to-high bid.
+                    </p>
+                    <p className="text-muted-foreground/50">
+                      Low-reward quests tend to attract fewer bids, or bids from less experienced players.
+                    </p>
                   </div>
                 </div>
               </div>
