@@ -24,6 +24,7 @@ export const gameRequestsTable = pgTable("game_requests", {
   sessionHours: integer("session_hours"),
   additionalGoals: text("additional_goals"),
   expectedDuration: text("expected_duration"),
+  playStyle: text("play_style"),
 });
 
 export const insertGameRequestSchema = createInsertSchema(gameRequestsTable).omit({

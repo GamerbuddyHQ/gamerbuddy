@@ -35,7 +35,7 @@ function RequestBidsPanel({ requestId, requestStatus }: { requestId: number; req
   const handleAccept = (bidId: number) => {
     accept.mutate({ requestId, bidId }, {
       onSuccess: () => {
-        toast({ title: "Bid Accepted!", description: "Session is now in progress." });
+        toast({ title: "Bid Accepted!", description: "Quest is now in progress." });
         qc.invalidateQueries({ queryKey: getGetMyRequestsQueryKey() });
       },
       onError: (err: any) => toast({ title: "Error", description: err?.error, variant: "destructive" }),
@@ -45,7 +45,7 @@ function RequestBidsPanel({ requestId, requestStatus }: { requestId: number; req
   const handleComplete = () => {
     complete.mutate(requestId, {
       onSuccess: (data: any) => {
-        toast({ title: "Session Complete! 🏆", description: data?.message || "50 points awarded!" });
+        toast({ title: "Quest Complete! 🏆", description: data?.message || "50 points awarded!" });
         qc.invalidateQueries({ queryKey: getGetMyRequestsQueryKey() });
       },
       onError: (err: any) => toast({ title: "Error", description: err?.error, variant: "destructive" }),

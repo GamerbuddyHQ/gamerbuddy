@@ -41,8 +41,9 @@ A full-stack gaming marketplace web app where users can hire other gamers to pla
    - Earnings Wallet: released on session completion — gamer gets 90%, platform gets 10%; withdrawal requires $100 min
    - **Withdrawal routing**: Indian users (country="India") withdraw via UPI (UPI ID required); all others via Bank Transfer (account details required)
    - **Platform Fee**: 10% collected on every session payout + every tip/gift; recorded in `platform_fees` table; visible at `/admin/platform-earnings`
-3. **Game Requests + Bidding**: Post requests → gamers bid → hirer accepts (escrow) → gamer starts → hirer approves → payout (90%/10% fee)
-4. **Session Flow**: open → bid accepted (Discord + escrow) → in_progress → gamer "Start Session" → hirer approves → completed → both review
+3. **Game Requests + Bidding (Quest-based)**: Hirers post open-ended quests (free-form "What do you need help with?" textarea) with optional game name, platform, skill level, play style. Gamers bid a flat amount (min ₹200 / $5 per quest, no hours). Hirer accepts → escrow held → gamer starts → hirer approves → payout.
+   - DB fields: `additionalGoals`, `expectedDuration`, `playStyle` nullable columns on `gameRequestsTable`; `gameName`/`platform`/`skillLevel` default to "Not specified"/"Any" when not provided
+4. **Quest Flow**: open → bid accepted (Discord + escrow) → in_progress → gamer "Mark Quest as Completed" → hirer "Confirm Quest Completion & Release Payment" → completed → both review
 5. **Bulk Hiring**: Post a request for 5–100 gamers at once; request stays `open` while hirer accepts multiple bids (each held in escrow individually); hirer locks roster (or auto-locks when all slots filled) → `in_progress`; on completion all accepted gamers paid 90% of their individual bid; purple badge + slot progress bar in browse/detail views
 6. **Reviews + Reputation**: 1–10 score system; trust factor fully recalculated after each review: `min(100, round(avgRating×10) + min(totalSessions×2, 20))`; +50 pts to reviewer
 7. **Private Chat**: per-bid chat polling every 4s

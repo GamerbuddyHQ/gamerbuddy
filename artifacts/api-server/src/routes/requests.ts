@@ -81,6 +81,7 @@ function formatRequest(
     objectives: req.objectives,
     additionalGoals: (req as any).additionalGoals ?? null,
     expectedDuration: (req as any).expectedDuration ?? null,
+    playStyle: (req as any).playStyle ?? null,
     status: req.status,
     escrowAmount: req.escrowAmount ? parseFloat(String(req.escrowAmount)) : null,
     startedAt: req.startedAt ? req.startedAt.toISOString() : null,
@@ -273,14 +274,15 @@ router.post("/requests", requireAuth, postRequestLimiter, validate(PostRequestSc
     return;
   }
 
-  const { gameName, platform, skillLevel, objectives, isBulkHiring, bulkGamersNeeded, preferredCountry, preferredGender, expiryOption, hirerRegion, additionalGoals, expectedDuration } = req.body as {
-    gameName: string; platform: string; skillLevel: string; objectives: string;
-    isBulkHiring: boolean; bulkGamersNeeded?: number;
-    preferredCountry: string; preferredGender: string;
+  const { gameName, platform, skillLevel, objectives, isBulkHiring, bulkGamersNeeded, preferredCountry, preferredGender, expiryOption, hirerRegion, additionalGoals, expectedDuration, playStyle } = req.body as {
+    gameName?: string; platform?: string; skillLevel?: string; objectives: string;
+    isBulkHiring?: boolean; bulkGamersNeeded?: number;
+    preferredCountry?: string; preferredGender?: string;
     expiryOption?: string;
     hirerRegion?: string;
     additionalGoals?: string | null;
     expectedDuration?: string | null;
+    playStyle?: string | null;
   };
 
   if (isBulkHiring) {
@@ -297,9 +299,9 @@ router.post("/requests", requireAuth, postRequestLimiter, validate(PostRequestSc
     .insert(gameRequestsTable)
     .values({
       userId: user.id,
-      gameName:     sanitize(gameName),
-      platform,
-      skillLevel,
+      gameName:     sanitize(gameName?.trim() || "Not specified"),
+      platform:     platform || "Any",
+      skillLevel:   skillLevel || "Any",
       objectives:   sanitize(objectives),
       status: "open",
       isBulkHiring: Boolean(isBulkHiring),
@@ -310,6 +312,7 @@ router.post("/requests", requireAuth, postRequestLimiter, validate(PostRequestSc
       hirerRegion: resolvedRegion,
       additionalGoals: additionalGoals ? sanitize(additionalGoals) : null,
       expectedDuration: expectedDuration ? sanitize(expectedDuration) : null,
+      playStyle: playStyle ? sanitize(playStyle) : null,
     })
     .returning();
 

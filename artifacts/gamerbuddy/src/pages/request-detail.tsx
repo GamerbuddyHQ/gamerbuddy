@@ -2164,9 +2164,16 @@ export default function RequestDetail() {
             <span className="text-xs border border-border rounded px-2.5 py-1 font-semibold text-muted-foreground bg-background">
               {PLATFORM_ICON[request.platform]} {request.platform}
             </span>
-            <span className={`text-xs border rounded px-2.5 py-1 font-semibold ${SKILL_COLOR[request.skillLevel] ?? "border-border text-muted-foreground"}`}>
-              <Layers className="inline h-3 w-3 mr-1" />{request.skillLevel}
-            </span>
+            {(request as any).playStyle && (request as any).playStyle !== "any" ? (
+              <span className="text-xs border border-cyan-500/30 bg-cyan-500/10 text-cyan-300 rounded px-2.5 py-1 font-semibold capitalize">
+                {(request as any).playStyle === "casual" ? "😎" : (request as any).playStyle === "competitive" ? "🏆" : (request as any).playStyle === "teaching" ? "📚" : (request as any).playStyle === "chill" ? "🌊" : (request as any).playStyle === "story" ? "📖" : "🎮"}{" "}
+                {(request as any).playStyle}
+              </span>
+            ) : (request.skillLevel && request.skillLevel !== "Any") ? (
+              <span className={`text-xs border rounded px-2.5 py-1 font-semibold ${SKILL_COLOR[request.skillLevel] ?? "border-border text-muted-foreground"}`}>
+                <Layers className="inline h-3 w-3 mr-1" />{request.skillLevel}
+              </span>
+            ) : null}
           </div>
 
           <div className="bg-background/60 rounded-lg border border-border/50 p-4 space-y-3">

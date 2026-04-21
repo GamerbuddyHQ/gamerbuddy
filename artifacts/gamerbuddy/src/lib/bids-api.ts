@@ -285,7 +285,7 @@ export function usePostRequest() {
   return useMutation<
     any,
     any,
-    { gameName: string; platform: string; skillLevel: string; objectives: string; isBulkHiring?: boolean; bulkGamersNeeded?: number; preferredCountry?: string; preferredGender?: string; expiryOption?: string; hirerRegion?: string; additionalGoals?: string; expectedDuration?: string }
+    { gameName?: string; platform?: string; skillLevel?: string; objectives: string; isBulkHiring?: boolean; bulkGamersNeeded?: number; preferredCountry?: string; preferredGender?: string; expiryOption?: string; hirerRegion?: string; additionalGoals?: string; expectedDuration?: string; playStyle?: string }
   >({
     mutationFn: (body) =>
       apiFetch(`${BASE}/requests`, { method: "POST", body: JSON.stringify(body) }),

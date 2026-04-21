@@ -62,7 +62,7 @@ const TX_META: Record<string, { label: string; icon: React.ReactNode; color: str
   request_fee:    { label: "Request Fee",     icon: <Gamepad2 className="h-3.5 w-3.5" />,       color: "text-red-400",     sign: "-" },
   escrow_held:    { label: "Escrow Held",     icon: <ShieldCheck className="h-3.5 w-3.5" />,    color: "text-blue-400",    sign: "-" },
   escrow_refund:  { label: "Escrow Refund",   icon: <RefreshCcw className="h-3.5 w-3.5" />,     color: "text-green-400",   sign: "+" },
-  session_payout: { label: "Session Payout (90%)", icon: <TrendingUp className="h-3.5 w-3.5" />,  color: "text-green-400",   sign: "+" },
+  session_payout: { label: "Quest Payout (90%)", icon: <TrendingUp className="h-3.5 w-3.5" />,  color: "text-green-400",   sign: "+" },
   platform_fee:   { label: "Platform Fee (10%)", icon: <Receipt className="h-3.5 w-3.5" />,       color: "text-amber-400",   sign: "-" },
   gift_sent:      { label: "Tip Sent",        icon: <Gift className="h-3.5 w-3.5" />,            color: "text-red-400",     sign: "-" },
   gift_received:  { label: "Tip Received",    icon: <Gift className="h-3.5 w-3.5" />,            color: "text-green-400",   sign: "+" },
@@ -363,7 +363,7 @@ export default function WalletsPage() {
                   <p className="text-xs text-amber-200/75 leading-relaxed">
                     You need at least <strong className="text-amber-300">$100.00 USD</strong> in your Earnings Wallet to request a payout.
                     Your current balance is <strong className="text-amber-300">${wallets.earningsBalance.toFixed(2)}</strong>.
-                    Keep grinding sessions — you're only <strong className="text-amber-300">${remaining.toFixed(2)}</strong> away from your first payout! 🎮
+                    Keep completing quests — you're only <strong className="text-amber-300">${remaining.toFixed(2)}</strong> away from your first payout! 🎮
                   </p>
                   <div className="flex items-center gap-2 text-[10px] text-amber-300/50 border-t border-amber-500/15 pt-2">
                     <Smartphone className="h-3 w-3 shrink-0" />
@@ -377,7 +377,7 @@ export default function WalletsPage() {
                     /* already shown the locked panel above, but also fire a toast */
                     toast({
                       title: "💰 Withdrawal Not Yet Available",
-                      description: `You need at least $100.00 in your Earnings Wallet. Current balance: $${wallets.earningsBalance.toFixed(2)}. Keep completing sessions — you need $${remaining.toFixed(2)} more!`,
+                      description: `You need at least $100.00 in your Earnings Wallet. Current balance: $${wallets.earningsBalance.toFixed(2)}. Keep completing quests — you need $${remaining.toFixed(2)} more!`,
                       variant: "destructive",
                     });
                   }}
@@ -504,11 +504,11 @@ export default function WalletsPage() {
                 <Lock className="h-4 w-4" /> In Escrow
               </CardTitle>
               <span className="text-xs uppercase tracking-widest text-muted-foreground bg-muted/30 px-2 py-0.5 rounded">
-                Locked in session
+                Locked in quest
               </span>
             </div>
             <CardDescription>
-              These funds are held safely while your session is in progress. On completion, 90% goes to your gamer
+              These funds are held safely while your quest is in progress. On completion, 90% goes to your gamer
               and 10% is the platform fee.
             </CardDescription>
           </CardHeader>
@@ -519,7 +519,7 @@ export default function WalletsPage() {
                 ${escrowBalance.toFixed(2)}
               </div>
               <div className="mt-2 text-xs text-muted-foreground/60">
-                Released automatically when the session completes ✓
+                Released automatically when the quest completes ✓
               </div>
             </div>
           </CardContent>
@@ -581,7 +581,7 @@ export default function WalletsPage() {
             </div>
           ) : filteredTxns.length === 0 ? (
             <div className="text-center py-10 text-muted-foreground text-sm">
-              No transactions yet. Deposit funds or complete a session to see history here.
+              No transactions yet. Deposit funds or complete a quest to see history here.
             </div>
           ) : (
             <div className="space-y-2">

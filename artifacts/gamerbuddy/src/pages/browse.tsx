@@ -49,7 +49,7 @@ const PLATFORM_ICON: Record<string, string> = {
 const BID_CONDUCT_HIGHLIGHTS = [
   { icon: "😊", text: "Be friendly and positive — no toxicity or negativity" },
   { icon: "🔒", text: "Never ask for account passwords — instant ban if you do" },
-  { icon: "✅", text: "Complete the session honestly and meet the agreed objectives" },
+  { icon: "✅", text: "Complete the quest honestly and meet the agreed objectives" },
 ];
 
 function BidConductReminder() {
@@ -257,8 +257,8 @@ function QuickBidPanel({ req, onClose }: { req: GameRequest; onClose: () => void
           </span>
           <span className={req.hirerRegion === "india" ? "text-amber-300/80" : "text-green-300/80"}>
             {req.hirerRegion === "india"
-              ? `Min ₹200/hr${req.sessionHours ? ` · ${req.sessionHours}h → ₹${(200 * req.sessionHours).toLocaleString()} total min` : ""}`
-              : `Min $5/hr${req.sessionHours ? ` · ${req.sessionHours}h → $${(5 * req.sessionHours).toFixed(2)} total min` : ""}`}
+              ? `Min ₹200 per quest`
+              : `Min $5 per quest`}
           </span>
         </div>
       )}
@@ -504,9 +504,16 @@ function RequestCard({ req }: { req: GameRequest }) {
                   <span className="text-sm leading-none">{PLATFORM_ICON[req.platform] ?? "🎮"}</span>
                   {req.platform}
                 </span>
-                <span className={`inline-flex items-center text-xs border rounded-full px-4 py-2 font-bold tracking-wide ${skill.border} ${skill.text} ${skill.bg}`}>
-                  {req.skillLevel}
-                </span>
+                {(req as any).playStyle && (req as any).playStyle !== "any" ? (
+                  <span className="inline-flex items-center text-xs border border-cyan-500/30 bg-cyan-500/10 text-cyan-300 rounded-full px-4 py-2 font-bold tracking-wide capitalize">
+                    {(req as any).playStyle === "casual" ? "😎" : (req as any).playStyle === "competitive" ? "🏆" : (req as any).playStyle === "teaching" ? "📚" : (req as any).playStyle === "chill" ? "🌊" : (req as any).playStyle === "story" ? "📖" : "🎮"}{" "}
+                    {(req as any).playStyle}
+                  </span>
+                ) : req.skillLevel && req.skillLevel !== "Any" ? (
+                  <span className={`inline-flex items-center text-xs border rounded-full px-4 py-2 font-bold tracking-wide ${skill.border} ${skill.text} ${skill.bg}`}>
+                    {req.skillLevel}
+                  </span>
+                ) : null}
                 {isZeroBids && (
                   <span className="inline-flex items-center gap-1.5 text-xs bg-green-500/10 border border-green-500/25 text-green-400 rounded-full px-4 py-2 font-bold">
                     <Flame className="h-3 w-3" /> First bid!
@@ -587,11 +594,8 @@ function RequestCard({ req }: { req: GameRequest }) {
                       {req.hirerRegion === "india" ? "₹" : "$"}
                     </span>
                     <span className={`font-bold ${req.hirerRegion === "india" ? "text-amber-300/80" : "text-green-300/80"}`}>
-                      Min {req.hirerRegion === "india" ? `₹${req.minBidPerHour}/hr` : `$${req.minBidPerHour}/hr`}
+                      {req.hirerRegion === "india" ? `Min ₹${req.minBidPerHour} per quest` : `Min $${req.minBidPerHour} per quest`}
                     </span>
-                    {req.sessionHours && (
-                      <span className="text-muted-foreground/50">· {req.sessionHours}h</span>
-                    )}
                   </div>
                 )}
               </div>
@@ -683,7 +687,7 @@ function HowItWorksSection() {
   const steps = [
     { num: "01", icon: <Search className="h-5 w-5" />, color: "#a855f7", title: "Browse Missions",  desc: "Find requests that match your skills, platform, and schedule. Filters help you zero in fast." },
     { num: "02", icon: <Gavel  className="h-5 w-5" />, color: "#22d3ee", title: "Place Your Bid",   desc: "Set your price and pitch yourself directly — no middlemen, no agency cuts." },
-    { num: "03", icon: <Trophy className="h-5 w-5" />, color: "#facc15", title: "Play & Get Paid",  desc: "Complete the session, collect your review, and withdraw your 90% earnings." },
+    { num: "03", icon: <Trophy className="h-5 w-5" />, color: "#facc15", title: "Play & Get Paid",  desc: "Complete the quest, collect your review, and withdraw your 90% earnings." },
   ];
 
   return (
@@ -766,7 +770,7 @@ function FillerSection() {
       <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-2.5 pb-2">
         {[
           { icon: <Shield className="h-3.5 w-3.5" style={{ color: "#4ade80" }} />, text: "Verified gamers only" },
-          { icon: <Star className="h-3.5 w-3.5" style={{ color: "#facc15" }} />, text: "Rated after every session" },
+          { icon: <Star className="h-3.5 w-3.5" style={{ color: "#facc15" }} />, text: "Rated after every quest" },
           { icon: <Users className="h-3.5 w-3.5 text-primary" />, text: "2,450+ gamers registered" },
           { icon: <Target className="h-3.5 w-3.5" style={{ color: "#22d3ee" }} />, text: "Escrow-secured payments" },
         ].map((t) => (

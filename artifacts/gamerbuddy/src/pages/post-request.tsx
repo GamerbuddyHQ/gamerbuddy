@@ -9,7 +9,6 @@ import {
   getGetWalletsQueryKey,
   getGetDashboardSummaryQueryKey,
   CreateRequestBodyPlatform,
-  CreateRequestBodySkillLevel,
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
@@ -32,9 +31,6 @@ import {
   Monitor,
   AlertCircle,
   CheckCircle2,
-  Layers,
-  Star,
-  Users,
   Globe,
   UserRound,
   Clock,
@@ -43,72 +39,66 @@ import {
   MapPin,
   Info,
   ListChecks,
+  Sparkles,
 } from "lucide-react";
 import { SafetyBanner } from "@/components/safety-banner";
 import { usePostRequest } from "@/lib/bids-api";
 
+const OBJECTIVES_MAX = 500;
+
 const requestSchema = z.object({
-  gameName: z.string().min(1, "Game name is required"),
-  platform: z.nativeEnum(CreateRequestBodyPlatform, {
-    required_error: "Select a platform",
-  }),
-  skillLevel: z.nativeEnum(CreateRequestBodySkillLevel, {
-    required_error: "Select a skill level",
-  }),
   objectives: z
     .string()
-    .min(10, "Describe your main objective clearly (min 10 characters)"),
+    .min(10, "Tell us what you need help with (min 10 characters)"),
+  gameName: z.string().optional(),
+  platform: z.string().optional(),
+  playStyle: z.string().optional(),
   additionalGoals: z.string().optional(),
   expectedDuration: z.string().optional(),
 });
 
 type FormValues = z.infer<typeof requestSchema>;
 
-const PLATFORM_META: Record<string, { icon: string; color: string }> = {
-  PC: { icon: "🖥️", color: "text-blue-400 border-blue-400/40 bg-blue-400/10" },
-  PlayStation: { icon: "🎮", color: "text-indigo-400 border-indigo-400/40 bg-indigo-400/10" },
-  Xbox: { icon: "🟩", color: "text-green-400 border-green-400/40 bg-green-400/10" },
-  "Nintendo Switch": { icon: "🕹️", color: "text-red-400 border-red-400/40 bg-red-400/10" },
-  "Steam Deck": { icon: "🎲", color: "text-teal-400 border-teal-400/40 bg-teal-400/10" },
-  iOS: { icon: "📱", color: "text-slate-300 border-slate-300/40 bg-slate-300/10" },
-  Android: { icon: "🤖", color: "text-emerald-400 border-emerald-400/40 bg-emerald-400/10" },
-};
+const PLATFORM_OPTIONS = [
+  { value: "any", label: "Any Platform", icon: "🎮" },
+  { value: CreateRequestBodyPlatform.PC, label: "PC", icon: "🖥️" },
+  { value: CreateRequestBodyPlatform.PlayStation, label: "PlayStation", icon: "🎮" },
+  { value: CreateRequestBodyPlatform.Xbox, label: "Xbox", icon: "🟩" },
+  { value: "Nintendo Switch", label: "Nintendo Switch", icon: "🕹️" },
+  { value: "Steam Deck", label: "Steam Deck", icon: "🎲" },
+  { value: "Mobile", label: "Mobile", icon: "📱" },
+] as const;
 
-const SKILL_META: Record<
-  string,
-  { label: string; desc: string; color: string; stars: number }
-> = {
-  Beginner: {
-    label: "Beginner",
-    desc: "New to the game — just learning the ropes.",
-    color: "text-green-400 border-green-400/40 bg-green-400/10",
-    stars: 1,
-  },
-  Intermediate: {
-    label: "Intermediate",
-    desc: "Comfortable with the basics, looking to improve.",
-    color: "text-yellow-400 border-yellow-400/40 bg-yellow-400/10",
-    stars: 2,
-  },
-  Expert: {
-    label: "Expert",
-    desc: "Highly skilled, competitive play required.",
-    color: "text-primary border-primary/40 bg-primary/10",
-    stars: 3,
-  },
-  Chill: {
-    label: "Chill",
-    desc: "No pressure — just vibes and good gameplay.",
-    color: "text-secondary border-secondary/40 bg-secondary/10",
-    stars: 0,
-  },
-};
+const PLAY_STYLE_OPTIONS = [
+  { value: "any", label: "Any Style", emoji: "🎮", desc: "No preference — all welcome", color: "border-border/50 bg-background/40" },
+  { value: "casual", label: "Casual", emoji: "😎", desc: "Relaxed, no pressure fun", color: "border-green-500/30 bg-green-500/5 text-green-300" },
+  { value: "competitive", label: "Competitive", emoji: "🏆", desc: "Win-focused, ranked grind", color: "border-amber-500/30 bg-amber-500/5 text-amber-300" },
+  { value: "teaching", label: "Teaching", emoji: "📚", desc: "Learn tips & strategies", color: "border-blue-500/30 bg-blue-500/5 text-blue-300" },
+  { value: "chill", label: "Chill", emoji: "🌊", desc: "Good vibes, good company", color: "border-cyan-500/30 bg-cyan-500/5 text-cyan-300" },
+  { value: "story", label: "Story Mode", emoji: "📖", desc: "Campaign & narrative games", color: "border-purple-500/30 bg-purple-500/5 text-purple-300" },
+] as const;
 
-const OBJECTIVES_MAX = 500;
+const EXAMPLE_PROMPTS = [
+  "Help me finish the main story of Elden Ring",
+  "Carry me to Ascendant rank in Valorant",
+  "Play 5 ranked games with me in League of Legends",
+  "Teach me how to speedrun this level",
+  "Co-op partner for Baldur's Gate 3 — new playthrough",
+  "Boost my KD ratio in Warzone — play 3 matches",
+];
+
+const POPULAR_GAMES = [
+  "Elden Ring", "Valorant", "League of Legends", "Apex Legends", "Fortnite",
+  "Cyberpunk 2077", "Call of Duty: Warzone", "Baldur's Gate 3", "Minecraft",
+  "World of Warcraft", "Counter-Strike 2", "Destiny 2", "GTA V", "FIFA 25",
+  "Diablo IV", "Overwatch 2", "PUBG", "Rocket League", "Dota 2", "Rainbow Six Siege",
+  "Dead by Daylight", "Helldivers 2", "Palworld", "Stardew Valley", "It Takes Two",
+  "Dark Souls III", "Sekiro", "God of War", "Spider-Man 2", "Hogwarts Legacy",
+];
 
 const MIN_RATES = {
-  india: { perHour: 200, currency: "INR", symbol: "₹", label: "₹200/hr" },
-  international: { perHour: 5, currency: "USD", symbol: "$", label: "$5/hr" },
+  india: { perHour: 200, currency: "INR", symbol: "₹" },
+  international: { perHour: 5, currency: "USD", symbol: "$" },
 } as const;
 
 export default function PostRequest() {
@@ -116,9 +106,6 @@ export default function PostRequest() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const postRequest = usePostRequest();
-  const [isBulkHiring, setIsBulkHiring] = useState(false);
-  const [bulkGamersNeeded, setBulkGamersNeeded] = useState(3);
-  const [bulkError, setBulkError] = useState("");
   const [preferredCountry, setPreferredCountry] = useState("any");
   const [preferredGender, setPreferredGender] = useState("any");
   const [expiryOption, setExpiryOption] = useState<"forever" | "24h" | "48h" | "7d">("forever");
@@ -132,12 +119,20 @@ export default function PostRequest() {
 
   const form = useForm<FormValues>({
     resolver: zodResolver(requestSchema),
-    defaultValues: { gameName: "", objectives: "", additionalGoals: "", expectedDuration: "" },
+    defaultValues: {
+      objectives: "",
+      gameName: "",
+      platform: "any",
+      playStyle: "any",
+      additionalGoals: "",
+      expectedDuration: "",
+    },
   });
 
   const objectivesValue = form.watch("objectives") ?? "";
   const selectedPlatform = form.watch("platform");
-  const selectedSkill = form.watch("skillLevel");
+  const selectedPlayStyle = form.watch("playStyle");
+  const gameNameValue = form.watch("gameName") ?? "";
 
   const canPost = wallets?.canPostRequest ?? false;
   const hiringBalance = wallets?.hiringBalance ?? 0;
@@ -151,37 +146,28 @@ export default function PostRequest() {
       });
       return;
     }
-    if (isBulkHiring) {
-      if (bulkGamersNeeded < 3) {
-        setBulkError("Minimum is 3 gamers");
-        return;
-      }
-      if (bulkGamersNeeded > 100) {
-        setBulkError("Maximum is 100 gamers");
-        return;
-      }
-    }
 
     postRequest.mutate(
       {
-        ...values,
-        isBulkHiring,
-        bulkGamersNeeded: isBulkHiring ? bulkGamersNeeded : undefined,
+        objectives: values.objectives,
+        gameName: values.gameName?.trim() || "Not specified",
+        platform: (values.platform && values.platform !== "any" ? values.platform : "Any") as any,
+        skillLevel: "Any" as any,
+        isBulkHiring: false,
         preferredCountry,
         preferredGender,
         expiryOption,
         hirerRegion,
         additionalGoals: values.additionalGoals || undefined,
         expectedDuration: values.expectedDuration || undefined,
+        playStyle: values.playStyle && values.playStyle !== "any" ? values.playStyle : undefined,
       },
       {
         onSuccess: () => {
           queryClient.invalidateQueries({ queryKey: getGetDashboardSummaryQueryKey() });
           toast({
-            title: isBulkHiring ? "Bulk Mission Posted!" : "Mission Posted!",
-            description: isBulkHiring
-              ? `Your bulk request for ${bulkGamersNeeded} gamers is live!`
-              : "Your game request is now live. Gamers will reach out.",
+            title: "Quest Posted!",
+            description: "Your quest is live — gamers will start bidding soon.",
           });
           setLocation("/my-requests");
         },
@@ -204,11 +190,11 @@ export default function PostRequest() {
       <div>
         <h1 className="text-3xl font-extrabold uppercase tracking-tight text-white flex items-center gap-3">
           <Gamepad2 className="h-8 w-8 text-primary" />
-          Post a Mission
+          Post a Quest
         </h1>
         <p className="text-muted-foreground mt-1 text-sm">
-          Hire a skilled gamer for your session. Each request costs{" "}
-          <span className="text-primary font-semibold">$10.75</span> from your Hiring Wallet.
+          Ask for almost anything gaming-related. Be specific so gamers can bid accurately.
+          Costs <span className="text-primary font-semibold">$10.75</span> from your Hiring Wallet.
         </p>
       </div>
 
@@ -230,11 +216,7 @@ export default function PostRequest() {
               <AlertCircle className="h-5 w-5 text-destructive shrink-0" />
             )}
             <div>
-              <div
-                className={`text-sm font-bold ${
-                  canPost ? "text-green-400" : "text-destructive"
-                }`}
-              >
+              <div className={`text-sm font-bold ${canPost ? "text-green-400" : "text-destructive"}`}>
                 {canPost ? "Hiring Wallet Ready" : "Insufficient Funds"}
               </div>
               <div className="text-xs text-muted-foreground">
@@ -261,13 +243,12 @@ export default function PostRequest() {
 
       {/* Form card */}
       <Card className="border-border bg-card/50 overflow-hidden">
-        {/* Glow bar top */}
         <div className="h-0.5 bg-gradient-to-r from-transparent via-primary to-transparent" />
 
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center gap-2 text-sm uppercase tracking-widest text-muted-foreground">
             <Target className="h-4 w-4 text-primary" />
-            Mission Details
+            Quest Details
           </CardTitle>
         </CardHeader>
 
@@ -275,127 +256,7 @@ export default function PostRequest() {
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-7">
 
-              {/* Game Name */}
-              <FormField
-                control={form.control}
-                name="gameName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-xs uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-                      <Gamepad2 className="h-3.5 w-3.5 text-primary" />
-                      Game Name <span className="text-destructive">*</span>
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="e.g. Apex Legends, Elden Ring, It Takes Two…"
-                        className="bg-background border-border focus-visible:border-primary transition-colors"
-                        disabled={!canPost}
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Platform — tile picker */}
-              <FormField
-                control={form.control}
-                name="platform"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-xs uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-                      <Monitor className="h-3.5 w-3.5 text-primary" />
-                      Platform <span className="text-destructive">*</span>
-                    </FormLabel>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                      {Object.values(CreateRequestBodyPlatform).map((p) => {
-                        const meta = PLATFORM_META[p] ?? { icon: "🎮", color: "text-muted-foreground border-border bg-background" };
-                        const isSelected = field.value === p;
-                        return (
-                          <button
-                            key={p}
-                            type="button"
-                            disabled={!canPost}
-                            onClick={() => field.onChange(p)}
-                            className={`relative flex flex-col items-center gap-1.5 rounded-lg border py-3 px-2 text-xs font-semibold transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed
-                              ${
-                                isSelected
-                                  ? `${meta.color} shadow-[0_0_12px_rgba(168,85,247,0.25)] scale-[1.03]`
-                                  : "border-border bg-background/60 text-muted-foreground hover:border-primary/40 hover:text-white"
-                              }`}
-                          >
-                            <span className="text-xl">{meta.icon}</span>
-                            <span>{p}</span>
-                            {isSelected && (
-                              <span className="absolute top-1.5 right-1.5 h-1.5 w-1.5 rounded-full bg-primary" />
-                            )}
-                          </button>
-                        );
-                      })}
-                    </div>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Skill Level — tile picker */}
-              <FormField
-                control={form.control}
-                name="skillLevel"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-xs uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-                      <Layers className="h-3.5 w-3.5 text-primary" />
-                      Desired Skill Level <span className="text-destructive">*</span>
-                    </FormLabel>
-                    <div className="grid grid-cols-2 gap-3">
-                      {Object.values(CreateRequestBodySkillLevel).map((s) => {
-                        const meta = SKILL_META[s];
-                        const isSelected = field.value === s;
-                        return (
-                          <button
-                            key={s}
-                            type="button"
-                            disabled={!canPost}
-                            onClick={() => field.onChange(s)}
-                            className={`flex flex-col gap-1 rounded-lg border p-3.5 text-left transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed
-                              ${
-                                isSelected
-                                  ? `${meta.color} shadow-[0_0_12px_rgba(168,85,247,0.2)] scale-[1.02]`
-                                  : "border-border bg-background/60 hover:border-primary/40"
-                              }`}
-                          >
-                            <div className="flex items-center justify-between">
-                              <span className={`text-sm font-bold ${isSelected ? "" : "text-white"}`}>
-                                {meta.label}
-                              </span>
-                              {meta.stars > 0 ? (
-                                <div className="flex gap-0.5">
-                                  {Array.from({ length: 3 }).map((_, i) => (
-                                    <Star
-                                      key={i}
-                                      className={`h-3 w-3 ${i < meta.stars ? "fill-current" : "opacity-20"}`}
-                                    />
-                                  ))}
-                                </div>
-                              ) : (
-                                <span className="text-xs">😎</span>
-                              )}
-                            </div>
-                            <p className={`text-xs leading-snug ${isSelected ? "opacity-80" : "text-muted-foreground"}`}>
-                              {meta.desc}
-                            </p>
-                          </button>
-                        );
-                      })}
-                    </div>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Objectives */}
+              {/* ── PRIMARY: What do you need help with? ── */}
               <FormField
                 control={form.control}
                 name="objectives"
@@ -404,7 +265,7 @@ export default function PostRequest() {
                     <div className="flex items-center justify-between">
                       <FormLabel className="text-xs uppercase tracking-widest text-muted-foreground flex items-center gap-2">
                         <Target className="h-3.5 w-3.5 text-primary" />
-                        Main Quest Objective <span className="text-destructive">*</span>
+                        What do you need help with? <span className="text-destructive">*</span>
                       </FormLabel>
                       <span
                         className={`text-xs tabular-nums ${
@@ -420,42 +281,207 @@ export default function PostRequest() {
                     </div>
                     <FormControl>
                       <Textarea
-                        placeholder={`Describe exactly what you need:\n• "Need someone to carry me to Diamond rank in Apex"\n• "Looking for a co-op partner for the new raid, I'm new to this one"\n• "Just want a chill partner to run story missions"`}
-                        className="resize-none h-36 bg-background border-border focus-visible:border-primary transition-colors leading-relaxed"
+                        placeholder={`Be as specific as possible so gamers can bid accurately. Examples:\n• "Help me finish the main story of Elden Ring"\n• "Carry me to Ascendant rank in Valorant"\n• "Teach me how to speedrun this level"\n• "Play 5 ranked games with me in League of Legends"`}
+                        className="resize-none h-40 bg-background border-border focus-visible:border-primary transition-colors leading-relaxed"
                         disabled={!canPost}
                         maxLength={OBJECTIVES_MAX}
                         {...field}
                       />
                     </FormControl>
                     <FormMessage />
+
+                    {/* Example prompt chips */}
+                    {!objectivesValue && (
+                      <div className="flex flex-wrap gap-2 pt-1">
+                        {EXAMPLE_PROMPTS.slice(0, 4).map((prompt) => (
+                          <button
+                            key={prompt}
+                            type="button"
+                            disabled={!canPost}
+                            onClick={() => form.setValue("objectives", prompt)}
+                            className="text-[11px] px-3 py-1.5 rounded-full border border-primary/25 bg-primary/5 text-primary/70 hover:bg-primary/15 hover:text-primary hover:border-primary/50 transition-all disabled:opacity-30"
+                          >
+                            {prompt}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </FormItem>
                 )}
               />
 
-              {/* Additional Goals (optional) */}
+              {/* ── OPTIONAL: Game & Platform ── */}
+              <div className="rounded-xl border border-border/50 bg-background/30 p-5 space-y-5">
+                <div className="flex items-center gap-2">
+                  <Gamepad2 className="h-4 w-4 text-primary/70" />
+                  <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Game & Platform</span>
+                  <span className="text-[10px] text-muted-foreground/50">(optional)</span>
+                </div>
+
+                {/* Game Name with datalist autocomplete */}
+                <FormField
+                  control={form.control}
+                  name="gameName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+                        Game Name
+                      </FormLabel>
+                      <FormControl>
+                        <>
+                          <Input
+                            list="game-suggestions"
+                            placeholder='e.g. Elden Ring, Valorant, Cyberpunk 2077…'
+                            className="bg-background border-border focus-visible:border-primary transition-colors"
+                            disabled={!canPost}
+                            {...field}
+                          />
+                          <datalist id="game-suggestions">
+                            {POPULAR_GAMES.map((g) => (
+                              <option key={g} value={g} />
+                            ))}
+                          </datalist>
+                        </>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Platform — tile picker with "Any" option */}
+                <FormField
+                  control={form.control}
+                  name="platform"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground flex items-center gap-1.5">
+                        <Monitor className="h-3 w-3 text-primary" /> Platform
+                      </FormLabel>
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        {PLATFORM_OPTIONS.map(({ value, label, icon }) => {
+                          const isSelected = field.value === value;
+                          return (
+                            <button
+                              key={value}
+                              type="button"
+                              disabled={!canPost}
+                              onClick={() => field.onChange(value)}
+                              className={`relative flex flex-col items-center gap-1.5 rounded-lg border py-3 px-2 text-xs font-semibold transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed
+                                ${isSelected
+                                  ? "border-primary/60 bg-primary/10 text-primary shadow-[0_0_12px_rgba(168,85,247,0.25)] scale-[1.03]"
+                                  : "border-border bg-background/60 text-muted-foreground hover:border-primary/40 hover:text-white"
+                                }`}
+                            >
+                              <span className="text-xl">{icon}</span>
+                              <span className="leading-tight text-center">{label}</span>
+                              {isSelected && (
+                                <span className="absolute top-1.5 right-1.5 h-1.5 w-1.5 rounded-full bg-primary" />
+                              )}
+                            </button>
+                          );
+                        })}
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              {/* ── OPTIONAL: Play Style ── */}
               <FormField
                 control={form.control}
-                name="additionalGoals"
+                name="playStyle"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-xs uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-                      <ListChecks className="h-3.5 w-3.5 text-cyan-400" />
-                      Additional Goals
+                      <Sparkles className="h-3.5 w-3.5 text-primary" />
+                      Preferred Play Style
                       <span className="text-[10px] font-normal text-muted-foreground/50">(optional)</span>
                     </FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder={`Any bonus objectives or extra context:\n• "Bonus if you can help me unlock X achievement"\n• "Would love tips on improving my aim"\n• "Flexible on strategy, just want to win"`}
-                        className="resize-none h-24 bg-background border-border focus-visible:border-primary transition-colors leading-relaxed"
-                        disabled={!canPost}
-                        maxLength={300}
-                        {...field}
-                      />
-                    </FormControl>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                      {PLAY_STYLE_OPTIONS.map(({ value, label, emoji, desc, color }) => {
+                        const isSelected = field.value === value;
+                        return (
+                          <button
+                            key={value}
+                            type="button"
+                            disabled={!canPost}
+                            onClick={() => field.onChange(value)}
+                            className={`flex items-start gap-2.5 rounded-lg border p-3 text-left transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed
+                              ${isSelected
+                                ? `${color} shadow-[0_0_10px_rgba(168,85,247,0.15)] scale-[1.02]`
+                                : "border-border bg-background/60 hover:border-primary/30"
+                              }`}
+                          >
+                            <span className="text-lg leading-none mt-0.5 shrink-0">{emoji}</span>
+                            <div>
+                              <div className={`text-xs font-bold ${isSelected ? "" : "text-white"}`}>{label}</div>
+                              <p className={`text-[10px] leading-snug mt-0.5 ${isSelected ? "opacity-80" : "text-muted-foreground"}`}>
+                                {desc}
+                              </p>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+
+              {/* ── OPTIONAL: Extra Details ── */}
+              <div className="rounded-xl border border-border/50 bg-background/30 p-5 space-y-4">
+                <div className="flex items-center gap-2">
+                  <ListChecks className="h-4 w-4 text-primary/70" />
+                  <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Extra Details</span>
+                  <span className="text-[10px] text-muted-foreground/50">(optional)</span>
+                </div>
+
+                {/* Additional Goals */}
+                <FormField
+                  control={form.control}
+                  name="additionalGoals"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+                        Any bonus objectives or requirements?
+                      </FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder={`Bonus goals or extra context:\n• "Bonus if you help me unlock the X achievement"\n• "Flexible on strategy, just want to win"\n• "Please be patient — I'm still learning"`}
+                          className="resize-none h-24 bg-background border-border focus-visible:border-primary transition-colors leading-relaxed"
+                          disabled={!canPost}
+                          maxLength={300}
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Expected Duration */}
+                <FormField
+                  control={form.control}
+                  name="expectedDuration"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground flex items-center gap-1.5">
+                        <Clock className="h-3 w-3 text-cyan-400" /> Expected Duration
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder='e.g. "2–3 hours", "one evening", "until we win"'
+                          disabled={!canPost}
+                          className="bg-background border-border focus-visible:border-primary transition-colors"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
 
               {/* ── Minimum Hiring Fee ── */}
               <div
@@ -468,7 +494,7 @@ export default function PostRequest() {
                   ) : (
                     <DollarSign className="h-4 w-4 text-green-400" />
                   )}
-                  <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Minimum Hiring Fee</span>
+                  <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Minimum Bid</span>
                   <span className="text-[10px] text-muted-foreground/50">(required)</span>
                 </div>
 
@@ -479,8 +505,8 @@ export default function PostRequest() {
                   </label>
                   <div className="grid grid-cols-2 gap-2">
                     {([
-                      { value: "india", label: "🇮🇳 India", sub: "Min ₹200/hr" },
-                      { value: "international", label: "🌍 International", sub: "Min $5/hr" },
+                      { value: "india", label: "🇮🇳 India", sub: "Min ₹200/quest" },
+                      { value: "international", label: "🌍 International", sub: "Min $5/quest" },
                     ] as const).map(({ value, label, sub }) => (
                       <button
                         key={value}
@@ -500,30 +526,7 @@ export default function PostRequest() {
                   </div>
                 </div>
 
-                {/* Expected Duration (optional, free text) */}
-                <FormField
-                  control={form.control}
-                  name="expectedDuration"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground flex items-center gap-1.5">
-                        <Clock className="h-3 w-3 text-cyan-400" /> Expected Duration
-                        <span className="text-[10px] font-normal text-muted-foreground/50">(optional)</span>
-                      </FormLabel>
-                      <FormControl>
-                        <input
-                          placeholder='e.g. "2–3 hours", "one evening", "until Diamond rank"'
-                          disabled={!canPost}
-                          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 border-border focus-visible:border-primary transition-colors"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {/* Minimum bid banner */}
+                {/* Minimum bid info */}
                 <div
                   className="rounded-lg p-3.5 flex items-start gap-3"
                   style={{
@@ -535,11 +538,11 @@ export default function PostRequest() {
                   <div className="space-y-1 text-xs">
                     <div className={`font-bold ${hirerRegion === "india" ? "text-amber-300" : "text-green-300"}`}>
                       {hirerRegion === "india"
-                        ? "Minimum bid is ₹200 per quest to ensure fair compensation for the Gamer."
+                        ? "Minimum bid is ₹200 per quest to ensure fair pay for the Gamer."
                         : "Minimum bid is $5 USD per quest to ensure fair pay for the Gamer."}
                     </div>
                     <div className="text-muted-foreground/70">
-                      Gamers bid a flat amount for completing your quest objectives.{" "}
+                      Gamers bid a flat amount to complete your quest.{" "}
                       <span className={`font-black ${hirerRegion === "india" ? "text-amber-300" : "text-green-300"}`}>
                         {minRate.symbol}{minRate.perHour.toLocaleString()} {minRate.currency} minimum
                       </span>
@@ -548,7 +551,7 @@ export default function PostRequest() {
                 </div>
               </div>
 
-              {/* Nation & Gender Preferences */}
+              {/* ── Gamer Preferences ── */}
               <div className="rounded-xl border border-border/50 bg-background/30 p-5 space-y-4">
                 <div className="flex items-center gap-2 mb-1">
                   <Globe className="h-4 w-4 text-primary/70" />
@@ -579,11 +582,11 @@ export default function PostRequest() {
                 </div>
               </div>
 
-              {/* Request Expiry */}
+              {/* ── Request Expiry ── */}
               <div className="rounded-xl border border-border/50 bg-background/30 p-5 space-y-3">
                 <div className="flex items-center gap-2 mb-1">
                   <Clock className="h-4 w-4 text-primary/70" />
-                  <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Request Expiry</span>
+                  <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Quest Expiry</span>
                   <span className="text-[10px] text-muted-foreground/50">(auto-close if 0 bids)</span>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -611,42 +614,27 @@ export default function PostRequest() {
                 </div>
               </div>
 
-              {/* Bulk Hiring — Phase 2 Coming Soon */}
-              <div
-                className="rounded-xl border p-5 flex items-center gap-4 opacity-60"
-                style={{ borderColor: "rgba(34,211,238,0.15)", background: "rgba(34,211,238,0.03)" }}
-              >
-                <div className="h-9 w-9 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(34,211,238,0.10)", border: "1px solid rgba(34,211,238,0.20)" }}>
-                  <Users className="h-4 w-4" style={{ color: "rgba(34,211,238,0.6)" }} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-sm font-bold text-foreground/60">Bulk Hiring</span>
-                    <span
-                      className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full"
-                      style={{ background: "rgba(34,211,238,0.10)", color: "rgba(34,211,238,0.65)" }}
-                    >
-                      Phase 2 · Coming Soon
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-muted-foreground/45 mt-0.5">Hire 3–100 gamers for raids, events &amp; content creation — unlocking in Phase 2.</p>
-                </div>
-              </div>
-
-              {/* Preview summary */}
-              {selectedPlatform && selectedSkill && form.watch("gameName") && (
+              {/* Quest preview summary */}
+              {objectivesValue.length >= 10 && (
                 <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 space-y-2">
-                  <div className="text-xs uppercase tracking-widest text-primary font-bold mb-2">Mission Preview</div>
-                  <div className="flex flex-wrap gap-2 text-sm">
-                    <span className="bg-background border border-border rounded px-2.5 py-1 font-semibold text-white">
-                      {PLATFORM_META[selectedPlatform]?.icon} {selectedPlatform}
-                    </span>
-                    <span className={`border rounded px-2.5 py-1 font-semibold text-xs ${SKILL_META[selectedSkill]?.color}`}>
-                      {selectedSkill}
-                    </span>
-                    <span className="bg-background border border-border rounded px-2.5 py-1 font-semibold text-white">
-                      {form.watch("gameName")}
-                    </span>
+                  <div className="text-xs uppercase tracking-widest text-primary font-bold mb-2">Quest Preview</div>
+                  <p className="text-sm text-foreground/80 leading-relaxed line-clamp-2">{objectivesValue}</p>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {gameNameValue && (
+                      <span className="bg-background border border-border rounded px-2.5 py-1 font-semibold text-white text-xs">
+                        🎮 {gameNameValue}
+                      </span>
+                    )}
+                    {selectedPlatform && selectedPlatform !== "any" && (
+                      <span className="bg-background border border-border rounded px-2.5 py-1 font-semibold text-muted-foreground text-xs">
+                        {PLATFORM_OPTIONS.find(p => p.value === selectedPlatform)?.icon} {selectedPlatform}
+                      </span>
+                    )}
+                    {selectedPlayStyle && selectedPlayStyle !== "any" && (
+                      <span className="bg-background border border-border rounded px-2.5 py-1 font-semibold text-cyan-400 text-xs">
+                        {PLAY_STYLE_OPTIONS.find(s => s.value === selectedPlayStyle)?.emoji} {selectedPlayStyle}
+                      </span>
+                    )}
                   </div>
                 </div>
               )}
@@ -654,7 +642,7 @@ export default function PostRequest() {
               {/* Cost notice + submit */}
               <div className="border-t border-border pt-5 space-y-3">
                 <div className="flex items-center justify-between text-sm text-muted-foreground">
-                  <span>Cost per request</span>
+                  <span>Cost per quest post</span>
                   <span className="font-bold text-white">$10.75</span>
                 </div>
                 <div className="flex items-center justify-between text-sm text-muted-foreground">
@@ -673,12 +661,12 @@ export default function PostRequest() {
                   {postRequest.isPending ? (
                     <span className="flex items-center gap-2">
                       <span className="h-4 w-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
-                      Deploying Mission…
+                      Posting Quest…
                     </span>
                   ) : (
                     <span className="flex items-center gap-2">
                       <Zap className="h-5 w-5" />
-                      Post Mission · $10.75
+                      Post Quest · $10.75
                     </span>
                   )}
                 </Button>
