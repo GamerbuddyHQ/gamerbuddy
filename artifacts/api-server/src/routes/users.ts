@@ -528,7 +528,11 @@ router.delete("/streaming-accounts/:platform", requireAuth, async (req, res): Pr
 
 router.get("/gaming-accounts", requireAuth, async (req, res): Promise<void> => {
   const user = req.user!;
-  const accounts = await db.select({ platform: gamingAccountsTable.platform, username: gamingAccountsTable.username })
+  const accounts = await db.select({
+    platform: gamingAccountsTable.platform,
+    username: gamingAccountsTable.username,
+    status: gamingAccountsTable.status,
+  })
     .from(gamingAccountsTable)
     .where(eq(gamingAccountsTable.userId, user.id));
   res.json(accounts);
@@ -576,7 +580,8 @@ router.post("/gaming-accounts", requireAuth, async (req, res): Promise<void> => 
     userId: user.id,
     platform,
     username: username.trim(),
-  }).returning({ platform: gamingAccountsTable.platform, username: gamingAccountsTable.username });
+    status: "pending_review",
+  }).returning({ platform: gamingAccountsTable.platform, username: gamingAccountsTable.username, status: gamingAccountsTable.status });
 
   if (isFirstGamingAccount) {
     await awardTrustPoints(user.id, "gaming_account_linked");

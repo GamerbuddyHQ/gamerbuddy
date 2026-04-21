@@ -9,6 +9,7 @@ export const gamingAccountsTable = pgTable("gaming_accounts", {
   userId: integer("user_id").notNull().references(() => usersTable.id, { onDelete: "cascade" }),
   platform: text("platform").notNull(),
   username: text("username").notNull(),
+  status: text("status").notNull().default("pending_review"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

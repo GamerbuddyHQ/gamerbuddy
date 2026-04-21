@@ -73,6 +73,7 @@ export type StreamingAccount = {
 export type GamingAccount = {
   platform: string;
   username: string;
+  status?: string;
 };
 
 export const GAMING_PLATFORM_META: Record<
