@@ -459,10 +459,20 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const [location, setLocation] = useLocation();
   const logoutMutation = useLogout();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
   const { t } = useI18n();
   const { isDark, toggleTheme } = useTheme();
 
-  useEffect(() => { setMobileOpen(false); }, [location]);
+  useEffect(() => { setMobileOpen(false); setUserMenuOpen(false); }, [location]);
+
+  useEffect(() => {
+    const h = (e: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) setUserMenuOpen(false);
+    };
+    document.addEventListener("mousedown", h);
+    return () => document.removeEventListener("mousedown", h);
+  }, []);
 
   const handleLogout = () => {
     logoutMutation.mutate(undefined, {
@@ -473,140 +483,157 @@ export function Layout({ children }: { children: React.ReactNode }) {
     });
   };
 
-  const navItems = [
-    { href: "/browse",     label: t.nav.browseRequests, icon: Compass },
-    { href: "/community",  label: "Community",           icon: Users   },
-    ...(user
-      ? [
-          { href: "/dashboard",   label: t.nav.dashboard,  icon: LayoutDashboard },
-          { href: "/my-requests", label: t.nav.myRequests,  icon: FileText        },
-          { href: "/wallets",     label: t.nav.wallets,     icon: Wallet          },
-          { href: "/profile",     label: t.nav.profile,     icon: UserIcon        },
-        ]
-      : []),
-    { href: "/roadmap",  label: "Roadmap",   icon: Map   },
-    { href: "/our-story", label: "Our Story", icon: Heart },
-    { href: "https://www.superr.bio/gamerbuddy", label: "Social", icon: Globe },
-    { href: "/about",    label: t.nav.about, icon: Info },
+  /* ── Public nav links — always shown in center desktop nav ── */
+  const publicNavItems = [
+    { href: "/browse",    label: t.nav.browseRequests, icon: Compass, style: "default"  },
+    { href: "/community", label: "Community",           icon: Users,   style: "purple"   },
+    { href: "/roadmap",   label: "Roadmap",             icon: Map,     style: "default"  },
+    { href: "/our-story", label: "Our Story",           icon: Heart,   style: "gradient" },
+    { href: "https://www.superr.bio/gamerbuddy", label: "Social", icon: Globe, style: "cyan" },
+    { href: "/about",     label: t.nav.about,           icon: Info,    style: "default"  },
   ];
+
+  /* ── User-specific links — shown in user dropdown (desktop) + mobile menu ── */
+  const userNavItems = user ? [
+    { href: "/dashboard",   label: t.nav.dashboard,  icon: LayoutDashboard },
+    { href: "/my-requests", label: t.nav.myRequests,  icon: FileText        },
+    { href: "/wallets",     label: t.nav.wallets,     icon: Wallet          },
+    { href: "/profile",     label: t.nav.profile,     icon: UserIcon        },
+  ] : [];
+
+  /* ── All items combined for mobile menu ── */
+  const allMobileItems = [...publicNavItems, ...userNavItems];
 
   return (
     <div className="min-h-[100dvh] flex flex-col bg-background text-foreground font-sans">
-      <header className="sticky top-0 z-50 w-full border-b border-border bg-background/80 backdrop-blur-sm">
-        <div className="container flex h-16 items-center justify-between gap-3">
+      <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-background/85 backdrop-blur-md">
+        {/* thin purple accent line at top */}
+        <div className="h-[2px] bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
+
+        <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 flex h-14 items-center gap-3">
+
+          {/* ── LEFT: Back + Logo ─────────────────────────────────── */}
           <div className="flex items-center gap-2 shrink-0">
             {location !== "/" && (
               <button
                 onClick={() => window.history.back()}
-                className="flex items-center gap-1.5 h-9 px-2.5 rounded-xl border border-border/60 bg-background/60 hover:border-primary/50 hover:bg-primary/10 hover:text-primary text-muted-foreground transition-all text-sm font-semibold"
+                className="flex items-center gap-1 h-8 px-2 rounded-lg border border-border/50 bg-background/50 hover:border-primary/50 hover:bg-primary/8 hover:text-primary text-muted-foreground/60 transition-all text-xs font-semibold"
                 aria-label={t.nav.back}
               >
-                <ArrowLeft className="h-4 w-4 shrink-0" />
+                <ArrowLeft className="h-3.5 w-3.5 shrink-0" />
                 <span className="hidden sm:inline">{t.nav.back}</span>
               </button>
             )}
-            <Link href="/" className="flex items-center">
+            <Link href="/" className="flex items-center group">
               <span className="sm:hidden">
-                <GamerbuddyLogo iconSize={22} textSize="base" />
+                <GamerbuddyLogo iconSize={20} textSize="sm" />
               </span>
               <span className="hidden sm:flex">
-                <GamerbuddyLogo iconSize={26} textSize="xl" />
+                <GamerbuddyLogo iconSize={24} textSize="lg" />
               </span>
             </Link>
           </div>
 
-          {/* Desktop nav */}
-          <nav className="hidden md:flex gap-5 flex-1 justify-center items-center">
-            {navItems.map((item) => {
-              const isActive = location.startsWith(item.href);
-              const isCommunity = item.href === "/community";
+          {/* thin vertical divider */}
+          <div className="hidden lg:block h-6 w-px bg-border/50 shrink-0" />
 
-              if (isCommunity) {
+          {/* ── CENTER: Main public nav ───────────────────────────── */}
+          <nav className="hidden lg:flex items-center gap-0.5 flex-1 min-w-0 justify-center">
+            {publicNavItems.map((item) => {
+              const isActive = !item.href.startsWith("http") && location.startsWith(item.href);
+              const isExternal = item.href.startsWith("http");
+
+              if (item.style === "gradient") {
+                const El = isExternal ? "a" : Link;
+                const elProps = isExternal
+                  ? { href: item.href, target: "_blank", rel: "noopener noreferrer" }
+                  : { href: item.href };
+                return (
+                  <El
+                    key={item.href}
+                    {...(elProps as any)}
+                    className="text-[13px] font-black whitespace-nowrap transition-all duration-200 px-3.5 py-1.5 rounded-full"
+                    style={isActive ? {
+                      background: "linear-gradient(135deg, #a855f7 0%, #7c3aed 60%, #22d3ee 100%)",
+                      border: "1px solid rgba(168,85,247,0.70)",
+                      color: "#fff",
+                      boxShadow: "0 0 16px rgba(168,85,247,0.35), 0 0 4px rgba(34,211,238,0.15)",
+                    } : {
+                      background: "linear-gradient(135deg, rgba(168,85,247,0.10) 0%, rgba(34,211,238,0.10) 100%)",
+                      border: "1px solid rgba(168,85,247,0.35)",
+                      color: "rgba(192,132,252,0.85)",
+                    }}
+                  >
+                    {item.label}
+                  </El>
+                );
+              }
+
+              if (item.style === "purple") {
                 return (
                   <Link
                     key={item.href}
                     href={item.href}
-                    className="flex items-center gap-1.5 text-sm font-semibold whitespace-nowrap transition-all duration-200 px-3 py-1.5 rounded-full"
+                    className="text-[13px] font-semibold whitespace-nowrap transition-all duration-200 px-3.5 py-1.5 rounded-full"
                     style={isActive ? {
                       background: "rgba(168,85,247,0.18)",
                       border: "1px solid rgba(168,85,247,0.55)",
                       color: "#c084fc",
-                      boxShadow: "0 0 14px rgba(168,85,247,0.25), inset 0 1px 0 rgba(168,85,247,0.15)",
+                      boxShadow: "0 0 12px rgba(168,85,247,0.20)",
                     } : {
                       background: "rgba(168,85,247,0.06)",
-                      border: "1px solid rgba(168,85,247,0.28)",
-                      color: "rgba(192,132,252,0.70)",
+                      border: "1px solid rgba(168,85,247,0.25)",
+                      color: "rgba(192,132,252,0.65)",
                     }}
                   >
-                    <item.icon className="h-3.5 w-3.5 shrink-0" />
                     {item.label}
                   </Link>
                 );
               }
 
-              const isOurStory = item.href === "/our-story";
-              if (isOurStory) {
+              if (item.style === "cyan") {
+                const El = isExternal ? "a" : Link;
+                const elProps = isExternal
+                  ? { href: item.href, target: "_blank", rel: "noopener noreferrer" }
+                  : { href: item.href };
                 return (
-                  <Link
+                  <El
                     key={item.href}
-                    href={item.href}
-                    className="flex items-center gap-1.5 text-sm font-black whitespace-nowrap transition-all duration-200 px-3 py-1.5 rounded-full text-white"
-                    style={{
-                      background: isActive
-                        ? "linear-gradient(135deg, #a855f7 0%, #7c3aed 60%, #22d3ee 100%)"
-                        : "linear-gradient(135deg, rgba(168,85,247,0.18) 0%, rgba(34,211,238,0.18) 100%)",
-                      border: isActive
-                        ? "1px solid rgba(168,85,247,0.70)"
-                        : "1px solid rgba(168,85,247,0.40)",
-                      color: isActive ? "#fff" : "rgba(192,132,252,0.90)",
-                      boxShadow: isActive
-                        ? "0 0 18px rgba(168,85,247,0.40), 0 0 6px rgba(34,211,238,0.20)"
-                        : "0 0 10px rgba(168,85,247,0.18)",
-                    }}
-                  >
-                    <item.icon className="h-3.5 w-3.5 shrink-0" />
-                    {item.label}
-                  </Link>
-                );
-              }
-
-              const isFollowUs = item.href.startsWith("https://www.superr.bio");
-              if (isFollowUs) {
-                return (
-                  <a
-                    key={item.href}
-                    href={item.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-1.5 text-sm font-bold whitespace-nowrap transition-all duration-200 px-3 py-1.5 rounded-full"
+                    {...(elProps as any)}
+                    className="text-[13px] font-bold whitespace-nowrap transition-all duration-200 px-3.5 py-1.5 rounded-full"
                     style={{
                       background: "rgba(34,211,238,0.07)",
-                      border: "1px solid rgba(34,211,238,0.30)",
-                      color: "rgba(34,211,238,0.80)",
+                      border: "1px solid rgba(34,211,238,0.28)",
+                      color: "rgba(34,211,238,0.75)",
                     }}
                   >
-                    <item.icon className="h-3.5 w-3.5 shrink-0" />
                     {item.label}
-                  </a>
+                  </El>
                 );
               }
 
+              /* default style */
               return (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex items-center gap-2 text-sm font-medium transition-colors hover:text-primary whitespace-nowrap ${
-                    isActive ? "text-primary" : "text-muted-foreground"
-                  }`}
+                  className={[
+                    "text-[13px] font-medium whitespace-nowrap px-3.5 py-1.5 rounded-full transition-all duration-200",
+                    isActive
+                      ? "text-primary bg-primary/10 border border-primary/30"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/50 border border-transparent",
+                  ].join(" ")}
                 >
-                  <item.icon className="h-4 w-4" />
                   {item.label}
                 </Link>
               );
             })}
           </nav>
 
-          <div className="flex items-center gap-2 shrink-0">
+          {/* ── RIGHT: Utilities + Auth ───────────────────────────── */}
+          <div className="flex items-center gap-1.5 shrink-0 ml-auto lg:ml-0">
+
+            {/* Notification bell (logged-in only) */}
             <NotificationBell />
 
             {/* Language selector */}
@@ -625,26 +652,89 @@ export function Layout({ children }: { children: React.ReactNode }) {
               {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </button>
 
-            {/* Desktop auth */}
+            {/* Desktop auth / user menu */}
             {user ? (
-              <Button variant="ghost" size="sm" onClick={handleLogout} className="hidden md:flex text-muted-foreground hover:text-destructive">
-                <LogOut className="h-4 w-4 mr-2" />
-                {t.nav.signOut}
-              </Button>
+              /* ── Logged-in: user avatar dropdown ── */
+              <div className="relative hidden md:block" ref={userMenuRef}>
+                <button
+                  onClick={() => setUserMenuOpen((o) => !o)}
+                  className={[
+                    "h-9 flex items-center gap-1.5 px-2.5 rounded-xl border transition-all duration-200",
+                    userMenuOpen
+                      ? "border-primary/60 bg-primary/10 text-primary"
+                      : "border-border/60 bg-background/60 text-foreground/70 hover:border-primary/50 hover:bg-primary/8",
+                  ].join(" ")}
+                  aria-label="User menu"
+                >
+                  <UserIcon className="h-4 w-4 shrink-0" />
+                  <span className="text-[13px] font-semibold max-w-[80px] truncate hidden lg:block">
+                    {user.name.split(" ")[0]}
+                  </span>
+                  <ChevronRight className={["h-3 w-3 shrink-0 opacity-50 transition-transform duration-200", userMenuOpen ? "rotate-90" : ""].join(" ")} />
+                </button>
+
+                {userMenuOpen && (
+                  <div
+                    className="absolute right-0 top-full mt-2 rounded-2xl border border-border/70 bg-popover z-[200] overflow-hidden"
+                    style={{ width: 200, boxShadow: "0 16px 48px rgba(0,0,0,0.32), 0 0 0 1px rgba(168,85,247,0.10)" }}
+                  >
+                    <div className="h-0.5 bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
+                    <div className="px-3 pt-2.5 pb-1">
+                      <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">{user.name}</p>
+                    </div>
+                    {userNavItems.map((item) => {
+                      const isActive = location.startsWith(item.href);
+                      return (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          className={[
+                            "flex items-center gap-2.5 px-3 py-2.5 text-[13px] font-medium transition-colors",
+                            isActive ? "text-primary bg-primary/8" : "text-foreground/75 hover:bg-muted/50 hover:text-foreground",
+                          ].join(" ")}
+                        >
+                          <item.icon className="h-4 w-4 shrink-0 opacity-70" />
+                          {item.label}
+                        </Link>
+                      );
+                    })}
+                    <div className="border-t border-border/40 mx-2 my-1" />
+                    <button
+                      onClick={handleLogout}
+                      className="flex items-center gap-2.5 w-full px-3 py-2.5 text-[13px] font-medium text-destructive/80 hover:text-destructive hover:bg-destructive/6 transition-colors"
+                    >
+                      <LogOut className="h-4 w-4 shrink-0 opacity-70" />
+                      {t.nav.signOut}
+                    </button>
+                    <div className="h-1" />
+                  </div>
+                )}
+              </div>
             ) : (
+              /* ── Logged-out: Log In + Sign Up ── */
               <div className="hidden md:flex items-center gap-2">
-                <Button variant="ghost" asChild>
-                  <Link href="/login">{t.nav.logIn}</Link>
-                </Button>
-                <Button asChild className="bg-primary text-primary-foreground hover:bg-primary/90">
-                  <Link href="/signup">{t.nav.signUp}</Link>
-                </Button>
+                <Link
+                  href="/login"
+                  className="h-9 px-4 flex items-center text-[13px] font-semibold text-muted-foreground hover:text-foreground rounded-xl border border-border/60 bg-background/60 hover:border-primary/40 hover:bg-primary/5 transition-all"
+                >
+                  {t.nav.logIn}
+                </Link>
+                <Link
+                  href="/signup"
+                  className="h-9 px-4 flex items-center text-[13px] font-bold text-white rounded-xl transition-all hover:brightness-110 active:scale-95"
+                  style={{
+                    background: "linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)",
+                    boxShadow: "0 4px 14px rgba(147,51,234,0.35)",
+                  }}
+                >
+                  {t.nav.signUp}
+                </Link>
               </div>
             )}
 
-            {/* Hamburger */}
+            {/* Hamburger — mobile only */}
             <button
-              className="md:hidden h-9 w-9 flex items-center justify-center rounded-xl border border-border/60 bg-background/60 hover:border-primary/50 transition-all"
+              className="lg:hidden h-9 w-9 flex items-center justify-center rounded-xl border border-border/60 bg-background/60 hover:border-primary/50 hover:bg-primary/8 transition-all"
               onClick={() => setMobileOpen((o) => !o)}
               aria-label="Toggle menu"
             >
@@ -654,29 +744,27 @@ export function Layout({ children }: { children: React.ReactNode }) {
         </div>
       </header>
 
-      {/* Mobile menu */}
+      {/* ── Mobile menu ────────────────────────────────────────────── */}
       {mobileOpen && (
-        <div className="md:hidden fixed inset-0 top-16 z-40 bg-background/98 backdrop-blur-md overflow-y-auto">
-          <div className="container py-6 space-y-2">
-            {navItems.map((item) => {
-              const isActive = location.startsWith(item.href);
-              const isCommunity = item.href === "/community";
-              const isOurStoryMobile = item.href === "/our-story";
-              const isExternal = item.href.startsWith("http");
+        <div className="lg:hidden fixed inset-0 top-[58px] z-40 bg-background/98 backdrop-blur-md overflow-y-auto">
+          <div className="w-full max-w-[1600px] mx-auto px-4 py-5 space-y-1.5">
 
-              if (isExternal) {
+            {allMobileItems.map((item) => {
+              const isActive = !item.href.startsWith("http") && location.startsWith(item.href);
+              const isExternal = item.href.startsWith("http");
+              const isGradient = (item as any).style === "gradient";
+              const isCyan = (item as any).style === "cyan";
+              const isPurple = (item as any).style === "purple";
+
+              if (isExternal || isCyan) {
                 return (
                   <a
                     key={item.href}
                     href={item.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-3 px-4 py-3.5 rounded-xl border font-bold text-base transition-all duration-200"
-                    style={{
-                      background: "rgba(34,211,238,0.07)",
-                      borderColor: "rgba(34,211,238,0.30)",
-                      color: "rgba(34,211,238,0.80)",
-                    }}
+                    className="flex items-center gap-3 px-4 py-3.5 rounded-xl border font-bold text-[15px] transition-all"
+                    style={{ background: "rgba(34,211,238,0.07)", borderColor: "rgba(34,211,238,0.28)", color: "rgba(34,211,238,0.80)" }}
                   >
                     <item.icon className="h-5 w-5 shrink-0" />
                     {item.label}
@@ -684,21 +772,19 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 );
               }
 
-              if (isCommunity) {
+              if (isGradient) {
                 return (
                   <Link
                     key={item.href}
                     href={item.href}
-                    className="flex items-center gap-3 px-4 py-3.5 rounded-xl border font-semibold text-base transition-all duration-200"
+                    className="flex items-center gap-3 px-4 py-3.5 rounded-xl border font-black text-[15px] transition-all"
                     style={isActive ? {
-                      background: "rgba(168,85,247,0.14)",
-                      borderColor: "rgba(168,85,247,0.55)",
-                      color: "#c084fc",
-                      boxShadow: "0 0 20px rgba(168,85,247,0.18), inset 0 1px 0 rgba(168,85,247,0.12)",
+                      background: "linear-gradient(135deg, #a855f7 0%, #7c3aed 60%, #22d3ee 100%)",
+                      borderColor: "rgba(168,85,247,0.70)", color: "#fff",
+                      boxShadow: "0 0 20px rgba(168,85,247,0.30)",
                     } : {
-                      background: "rgba(168,85,247,0.05)",
-                      borderColor: "rgba(168,85,247,0.30)",
-                      color: "rgba(192,132,252,0.75)",
+                      background: "linear-gradient(135deg, rgba(168,85,247,0.10) 0%, rgba(34,211,238,0.10) 100%)",
+                      borderColor: "rgba(168,85,247,0.35)", color: "rgba(192,132,252,0.90)",
                     }}
                   >
                     <item.icon className="h-5 w-5 shrink-0" />
@@ -707,22 +793,17 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 );
               }
 
-              if (isOurStoryMobile) {
+              if (isPurple) {
                 return (
                   <Link
                     key={item.href}
                     href={item.href}
-                    className="flex items-center gap-3 px-4 py-3.5 rounded-xl border font-black text-base transition-all duration-200"
+                    className="flex items-center gap-3 px-4 py-3.5 rounded-xl border font-semibold text-[15px] transition-all"
                     style={isActive ? {
-                      background: "linear-gradient(135deg, #a855f7 0%, #7c3aed 60%, #22d3ee 100%)",
-                      borderColor: "rgba(168,85,247,0.70)",
-                      color: "#fff",
-                      boxShadow: "0 0 24px rgba(168,85,247,0.35), 0 0 8px rgba(34,211,238,0.20)",
+                      background: "rgba(168,85,247,0.14)", borderColor: "rgba(168,85,247,0.55)", color: "#c084fc",
+                      boxShadow: "0 0 16px rgba(168,85,247,0.16)",
                     } : {
-                      background: "linear-gradient(135deg, rgba(168,85,247,0.10) 0%, rgba(34,211,238,0.10) 100%)",
-                      borderColor: "rgba(168,85,247,0.40)",
-                      color: "rgba(192,132,252,0.90)",
-                      boxShadow: "0 0 12px rgba(168,85,247,0.15)",
+                      background: "rgba(168,85,247,0.05)", borderColor: "rgba(168,85,247,0.28)", color: "rgba(192,132,252,0.75)",
                     }}
                   >
                     <item.icon className="h-5 w-5 shrink-0" />
@@ -735,11 +816,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex items-center gap-3 px-4 py-3.5 rounded-xl border font-semibold text-base transition-all ${
+                  className={[
+                    "flex items-center gap-3 px-4 py-3.5 rounded-xl border font-semibold text-[15px] transition-all",
                     isActive
                       ? "border-primary/40 bg-primary/10 text-primary"
-                      : "border-border/40 text-muted-foreground hover:border-primary/30 hover:text-primary hover:bg-card/60"
-                  }`}
+                      : "border-border/40 text-muted-foreground hover:border-primary/30 hover:text-primary hover:bg-card/60",
+                  ].join(" ")}
                 >
                   <item.icon className="h-5 w-5 shrink-0" />
                   {item.label}
@@ -750,26 +832,32 @@ export function Layout({ children }: { children: React.ReactNode }) {
             {/* Mobile language picker */}
             <MobileLangPicker onPick={() => setMobileOpen(false)} />
 
-            <div className="pt-4 border-t border-border/40 mt-2">
+            <div className="pt-4 border-t border-border/40 space-y-2">
               {user ? (
                 <button
                   onClick={handleLogout}
-                  className="flex items-center gap-3 w-full px-4 py-3.5 rounded-xl border border-destructive/30 text-destructive bg-destructive/5 font-semibold text-base transition-all hover:bg-destructive/10"
+                  className="flex items-center gap-3 w-full px-4 py-3.5 rounded-xl border border-destructive/30 text-destructive bg-destructive/5 font-semibold text-[15px] transition-all hover:bg-destructive/10"
                 >
                   <LogOut className="h-5 w-5 shrink-0" />
                   {t.nav.signOut}
                 </button>
               ) : (
-                <div className="flex flex-col gap-3">
-                  <Button asChild size="lg" className="w-full bg-primary text-primary-foreground font-bold text-base">
-                    <Link href="/signup">{t.nav.signUp}</Link>
-                  </Button>
-                  <Button asChild size="lg" variant="outline" className="w-full font-bold text-base">
-                    <Link href="/login">{t.nav.logIn}</Link>
-                  </Button>
-                </div>
+                <>
+                  <Link
+                    href="/signup"
+                    className="flex items-center justify-center w-full py-3.5 rounded-xl font-black text-[15px] text-white transition-all hover:brightness-110"
+                    style={{ background: "linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)", boxShadow: "0 4px 16px rgba(147,51,234,0.30)" }}
+                  >
+                    {t.nav.signUp}
+                  </Link>
+                  <Link
+                    href="/login"
+                    className="flex items-center justify-center w-full py-3.5 rounded-xl border border-border/60 font-bold text-[15px] text-muted-foreground hover:text-foreground hover:border-primary/40 transition-all"
+                  >
+                    {t.nav.logIn}
+                  </Link>
+                </>
               )}
-
             </div>
           </div>
         </div>
