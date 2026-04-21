@@ -693,478 +693,331 @@ const GAMING_PLATFORM_SVG: Record<string, React.ReactNode> = {
   ),
 };
 
-/* ── OAuth simulation steps ────────────────────────────────────────── */
-type OAuthStep = "idle" | "redirecting" | "connecting" | "success";
-
-const PLATFORM_OAUTH_COPY: Record<string, { provider: string; officialUrl: string; scope: string }> = {
-  steam:  { provider: "Steam",       officialUrl: "store.steampowered.com",     scope: "Public profile, games list, playtime" },
-  epic:   { provider: "Epic Games",  officialUrl: "epicgames.com",              scope: "Display name, account info, game library" },
-  psn:    { provider: "PlayStation", officialUrl: "my.playstation.com",         scope: "PSN ID, trophies, friends list" },
-  xbox:   { provider: "Xbox",        officialUrl: "login.live.com",             scope: "Gamertag, gaming activity, achievements" },
-  switch: { provider: "Nintendo",    officialUrl: "accounts.nintendo.com",      scope: "Nintendo Account, friend list, game history" },
-};
-
-const PLATFORM_EXAMPLE_USERNAMES: Record<string, string[]> = {
-  steam:  ["ProSniper_X", "DarkViper99", "NightWolf_GG", "IronFist_X", "CyberWolf99", "StormRaider_S"],
-  epic:   ["EpicViper_X", "StormBreakerX", "ShadowHunt3r", "NeonRaider99", "ProGamer_Epic", "CyberFalcon"],
-  psn:    ["DarkKnight_PS", "NeonBlade_PSN", "PS_Warrior_X", "CyberViper99", "ProGunner_PS", "NightFury_PS"],
-  xbox:   ["GhostRecon99", "IronClad_XBL", "NightHawk_XBL", "XblRaider_X", "ProPlayer99", "CyberBlast_X"],
-  switch: ["StarPlayer_SW", "PixelWarrior", "NintendoPro_X", "SwitchMaster99", "StarFox_SW", "ProLink_SW"],
-};
-
-function getSimulatedUsername(userId: number, platform: string): string {
-  const pool = PLATFORM_EXAMPLE_USERNAMES[platform] ?? ["ProGamer99"];
-  return pool[userId % pool.length];
-}
-
 function GamingAccountsSection() {
-  const { user } = useAuth();
   const { data: accounts = [], isLoading } = useMyGamingAccounts();
   const connect = useConnectGaming();
   const disconnect = useDisconnectGaming();
   const { toast } = useToast();
 
-  const [oauthModal, setOauthModal] = useState<string | null>(null);
-  const [oauthStep, setOauthStep] = useState<OAuthStep>("idle");
-  const [simulatedUsername, setSimulatedUsername] = useState("");
+  const [expanding, setExpanding] = useState<string | null>(null);
+  const [inputVals, setInputVals] = useState<Record<string, string>>({});
 
   const connectedMap = Object.fromEntries(accounts.map((a) => [a.platform, a]));
   const connectedCount = accounts.length;
 
-  function openModal(platform: string) {
-    setOauthModal(platform);
-    setOauthStep("idle");
-    setSimulatedUsername("");
+  function setInput(platform: string, value: string) {
+    setInputVals((prev) => ({ ...prev, [platform]: value }));
   }
 
-  function closeModal() {
-    if (oauthStep === "redirecting" || oauthStep === "connecting") return;
-    setOauthModal(null);
-    setOauthStep("idle");
-  }
-
-  async function simulateOAuth(platform: string) {
-    const uname = getSimulatedUsername(user?.id ?? 0, platform);
-    setSimulatedUsername(uname);
-
-    setOauthStep("redirecting");
-    await new Promise(r => setTimeout(r, 2000));
-
-    setOauthStep("connecting");
-    await new Promise(r => setTimeout(r, 2000));
-
-    setOauthStep("success");
-    await new Promise(r => setTimeout(r, 2200));
-
+  async function handleSubmit(platform: string) {
+    const username = (inputVals[platform] ?? "").trim();
+    if (!username) return;
     try {
-      await connect.mutateAsync({ platform, username: uname });
+      await connect.mutateAsync({ platform, username });
       toast({
-        title: `${GAMING_PLATFORM_META[platform].label} linked!`,
-        description: "Account submitted for review. We'll verify your real gaming activity within 24 hours.",
+        title: `${GAMING_PLATFORM_META[platform].label} submitted!`,
+        description: "Submitted for review — our team will verify within 24 hours.",
       });
+      setExpanding(null);
+      setInputVals((prev) => ({ ...prev, [platform]: "" }));
     } catch (err: any) {
       const msg = err?.error || err?.message || "Please try again.";
-      toast({ title: "Failed to link", description: msg, variant: "destructive" });
+      toast({ title: "Failed to submit", description: msg, variant: "destructive" });
     }
-    setOauthModal(null);
-    setOauthStep("idle");
   }
 
-  async function handleDisconnect(platform: string) {
+  async function handleRemove(platform: string) {
     try {
       await disconnect.mutateAsync(platform);
-      toast({ title: `${GAMING_PLATFORM_META[platform].label} unlinked` });
+      toast({ title: `${GAMING_PLATFORM_META[platform].label} removed` });
     } catch {
-      toast({ title: "Failed to unlink", variant: "destructive" });
+      toast({ title: "Failed to remove", variant: "destructive" });
     }
   }
 
+  const PLATFORM_HINTS: Record<string, { placeholder: string; hint: string }> = {
+    steam:  { placeholder: "e.g. YourSteamUsername", hint: "Your Steam custom URL or display name (found on your Steam profile page)" },
+    epic:   { placeholder: "e.g. YourEpicName", hint: "Your Epic Games display name (shown in Epic Games Launcher → account settings)" },
+    psn:    { placeholder: "e.g. YourPSN_ID", hint: "Your PlayStation Network ID (shown on your PS5 / PS4 profile)" },
+    xbox:   { placeholder: "e.g. YourGamertag", hint: "Your Xbox Gamertag (shown in Xbox app or xbox.com)" },
+    switch: { placeholder: "e.g. SW-1234-5678-9012", hint: "Your Nintendo Account display name or Switch friend code" },
+  };
+
   return (
-    <>
-      {/* ── OAuth Simulation Modal ─────────────────────────────────── */}
-      {oauthModal && (() => {
-        const meta    = GAMING_PLATFORM_META[oauthModal];
-        const copy    = PLATFORM_OAUTH_COPY[oauthModal];
-        const isLoading = oauthStep === "redirecting" || oauthStep === "connecting";
-
-        return (
-          <div
-            className="fixed inset-0 z-[200] flex items-center justify-center p-4"
-            style={{ background: "rgba(0,0,0,0.80)", backdropFilter: "blur(8px)" }}
-            onClick={closeModal}
-          >
-            <div
-              className="relative w-full max-w-sm rounded-2xl border overflow-hidden"
-              style={{
-                background: "linear-gradient(160deg, rgba(15,12,30,0.98) 0%, rgba(8,8,20,0.99) 100%)",
-                borderColor: "rgba(34,211,238,0.25)",
-                boxShadow: "0 0 60px -10px rgba(34,211,238,0.25)",
-              }}
-              onClick={e => e.stopPropagation()}
-            >
-              {/* Top bar */}
-              <div
-                className="px-5 py-3 flex items-center gap-2 border-b"
-                style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(34,211,238,0.04)" }}
-              >
-                <div className="flex gap-1.5">
-                  <div className="w-2.5 h-2.5 rounded-full bg-red-500/70" />
-                  <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/70" />
-                  <div className="w-2.5 h-2.5 rounded-full bg-green-500/70" />
-                </div>
-                <span className="flex-1 text-center text-[11px] text-muted-foreground/50 font-mono truncate">
-                  secure.gamerbuddy.com — OAuth 2.0
-                </span>
-                {!isLoading && (
-                  <button onClick={closeModal} className="text-muted-foreground/40 hover:text-foreground transition-colors text-lg leading-none">×</button>
-                )}
-              </div>
-
-              <div className="p-6">
-                {/* Platform icon + name */}
-                <div className="flex flex-col items-center gap-3 mb-6">
-                  <div
-                    className="w-16 h-16 rounded-2xl flex items-center justify-center"
-                    style={{ background: meta.bg, border: `1.5px solid ${meta.border}` }}
-                  >
-                    <div className="w-8 h-8" style={{ color: meta.color }}>
-                      {GAMING_PLATFORM_SVG[oauthModal]}
-                    </div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-base font-black text-foreground">{meta.label}</div>
-                    <div className="text-[11px] text-muted-foreground/60 mt-0.5">Account Verification</div>
-                  </div>
-                </div>
-
-                {/* Content by step */}
-                {oauthStep === "idle" && (
-                  <>
-                    {/* Redirect message */}
-                    <div
-                      className="rounded-xl border p-4 mb-4"
-                      style={{ borderColor: "rgba(34,211,238,0.15)", background: "rgba(34,211,238,0.04)" }}
-                    >
-                      <p className="text-[12px] text-foreground/80 leading-relaxed text-center">
-                        You are being redirected to the official{" "}
-                        <strong style={{ color: meta.color }}>{copy.provider}</strong> login page to grant
-                        Gamerbuddy access to verify your gaming account.
-                      </p>
-                      <div className="mt-3 pt-3 border-t flex items-center gap-2" style={{ borderColor: "rgba(255,255,255,0.07)" }}>
-                        <span className="text-[10px] shrink-0" style={{ color: "#22d3ee" }}>🌐</span>
-                        <span className="text-[10px] font-mono text-muted-foreground/50 truncate">{copy.officialUrl}</span>
-                      </div>
-                      <p className="text-[10px] text-muted-foreground/45 mt-2 text-center">
-                        <strong className="text-muted-foreground/60">Permissions:</strong> {copy.scope}
-                      </p>
-                    </div>
-
-                    <button
-                      onClick={() => simulateOAuth(oauthModal)}
-                      className="w-full py-3 rounded-xl text-sm font-extrabold uppercase tracking-wide transition-all hover:brightness-110 active:scale-98"
-                      style={{ background: `linear-gradient(135deg, ${meta.color}30, ${meta.color}18)`, border: `1.5px solid ${meta.border}`, color: meta.color }}
-                    >
-                      Continue to {copy.provider} Login →
-                    </button>
-
-                    {/* No fake accounts note */}
-                    <div
-                      className="mt-4 rounded-xl border px-3 py-2.5 flex items-start gap-2"
-                      style={{ borderColor: "rgba(251,191,36,0.2)", background: "rgba(251,191,36,0.05)" }}
-                    >
-                      <span className="text-[13px] shrink-0 mt-px">🛡️</span>
-                      <p className="text-[10px] text-amber-300/70 leading-relaxed">
-                        <strong className="text-amber-300/90">This is a secure connection via official OAuth.</strong>{" "}
-                        No fake accounts are accepted. All linked accounts are reviewed by our team within 24 hours.
-                      </p>
-                    </div>
-
-                    <div className="flex items-center justify-center gap-2 mt-3">
-                      <span className="text-[10px] text-muted-foreground/30">🔒 Secure OAuth 2.0</span>
-                      <span className="text-muted-foreground/20">·</span>
-                      <span className="text-[10px] text-muted-foreground/30">No password shared</span>
-                      <span className="text-muted-foreground/20">·</span>
-                      <span className="text-[10px] text-muted-foreground/30">Read-only access</span>
-                    </div>
-                  </>
-                )}
-
-                {oauthStep === "redirecting" && (
-                  <div className="flex flex-col items-center gap-5 py-4">
-                    <div className="relative">
-                      <div className="w-12 h-12 rounded-full border-2 border-cyan-400/20 border-t-cyan-400 animate-spin" />
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="w-4 h-4" style={{ color: meta.color }}>{GAMING_PLATFORM_SVG[oauthModal]}</div>
-                      </div>
-                    </div>
-                    <div className="text-center">
-                      <p className="text-sm font-bold text-foreground">Redirecting to {copy.provider}…</p>
-                      <p className="text-[11px] text-muted-foreground/50 mt-1">Establishing secure connection to {copy.officialUrl}</p>
-                    </div>
-                    <div className="w-full rounded-full overflow-hidden h-1" style={{ background: "rgba(255,255,255,0.07)" }}>
-                      <div className="h-1 rounded-full animate-pulse" style={{ width: "60%", background: `linear-gradient(90deg, ${meta.color}80, ${meta.color})` }} />
-                    </div>
-                  </div>
-                )}
-
-                {oauthStep === "connecting" && (
-                  <div className="flex flex-col items-center gap-5 py-4">
-                    <div className="relative">
-                      <div className="w-12 h-12 rounded-full border-2 border-purple-400/20 border-t-purple-400 animate-spin" />
-                      <div className="absolute inset-0 flex items-center justify-center text-lg">✅</div>
-                    </div>
-                    <div className="text-center">
-                      <p className="text-sm font-bold text-foreground">Verifying your {copy.provider} account…</p>
-                      <p className="text-[11px] text-muted-foreground/50 mt-1">Reading public profile and gaming activity</p>
-                    </div>
-                    <div className="w-full rounded-full overflow-hidden h-1" style={{ background: "rgba(255,255,255,0.07)" }}>
-                      <div className="h-1 rounded-full animate-pulse" style={{ width: "85%", background: "linear-gradient(90deg, rgba(168,85,247,0.6), #a855f7)" }} />
-                    </div>
-                  </div>
-                )}
-
-                {oauthStep === "success" && (
-                  <div className="flex flex-col items-center gap-4 py-1">
-                    <div
-                      className="w-14 h-14 rounded-full flex items-center justify-center"
-                      style={{ background: "rgba(74,222,128,0.15)", border: "2px solid rgba(74,222,128,0.5)", boxShadow: "0 0 24px -4px rgba(74,222,128,0.4)" }}
-                    >
-                      <span className="text-3xl">✅</span>
-                    </div>
-                    <div className="text-center">
-                      <p className="text-base font-black text-green-400">Successfully connected!</p>
-                      <p className="text-[12px] text-foreground/70 mt-1">
-                        Your <strong style={{ color: meta.color }}>{meta.label}</strong> account has been linked.
-                      </p>
-                      <div
-                        className="mt-3 inline-flex items-center gap-2 px-4 py-2 rounded-full"
-                        style={{ background: "rgba(74,222,128,0.10)", border: "1px solid rgba(74,222,128,0.3)" }}
-                      >
-                        <span className="w-3 h-3" style={{ color: "#4ade80" }}>{GAMING_PLATFORM_SVG[oauthModal]}</span>
-                        <span className="text-[12px] font-mono font-bold text-green-300">{simulatedUsername}</span>
-                      </div>
-                    </div>
-                    <div
-                      className="w-full rounded-xl border px-3 py-2.5 flex items-start gap-2 mt-1"
-                      style={{ borderColor: "rgba(251,191,36,0.2)", background: "rgba(251,191,36,0.05)" }}
-                    >
-                      <span className="text-sm shrink-0 mt-px">🕐</span>
-                      <p className="text-[10px] text-amber-300/70 leading-relaxed">
-                        <strong className="text-amber-300/90">Under Review</strong> — We'll verify your real gaming
-                        activity within 24 hours. Keep your profile <strong className="text-amber-300/90">Public</strong> during this time.
-                      </p>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        );
-      })()}
-
-      {/* ── Main card ──────────────────────────────────────────────── */}
-      <div
-        id="gaming-management"
-        className="rounded-2xl border overflow-hidden"
-        style={{ borderColor: "rgba(34,211,238,0.2)", background: "rgba(10,8,20,0.6)" }}
-      >
-        {/* Header */}
-        <div className="px-5 pt-5 pb-4 flex items-center justify-between border-b" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
+    <div
+      id="gaming-management"
+      className="rounded-2xl border overflow-hidden"
+      style={{ borderColor: "rgba(34,211,238,0.2)", background: "rgba(10,8,20,0.6)" }}
+    >
+      {/* Header */}
+      <div className="px-5 pt-5 pb-4 border-b" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
+        <div className="flex items-start justify-between gap-3">
           <div>
             <div className="flex items-center gap-2 mb-0.5">
               <Gamepad2 className="h-4 w-4 text-cyan-400" />
               <span className="text-sm font-extrabold text-foreground uppercase tracking-widest">Gaming Accounts</span>
             </div>
             <p className="text-[11px] text-muted-foreground/60">
-              Link via official OAuth — we verify your real gaming profile within 24 hours. No fake accounts accepted.
+              Submit your username — manually verified by admin within 24 hours
             </p>
           </div>
           {connectedCount > 0 && (
-            <div className="shrink-0 flex flex-col items-end gap-1">
-              <span
-                className="text-[11px] font-black px-3 py-1 rounded-full"
-                style={{ background: "rgba(34,211,238,0.12)", border: "1px solid rgba(34,211,238,0.3)", color: "#22d3ee" }}
-              >
-                {connectedCount} / {GAMING_PLATFORM_ORDER.length} Linked
-              </span>
-            </div>
+            <span
+              className="text-[11px] font-black px-3 py-1 rounded-full shrink-0 mt-0.5"
+              style={{ background: "rgba(34,211,238,0.12)", border: "1px solid rgba(34,211,238,0.3)", color: "#22d3ee" }}
+            >
+              {connectedCount} / {GAMING_PLATFORM_ORDER.length} Submitted
+            </span>
           )}
         </div>
+        {/* Honest notice */}
+        <div
+          className="mt-3 flex items-start gap-2.5 px-3 py-2.5 rounded-xl border"
+          style={{ borderColor: "rgba(34,211,238,0.12)", background: "rgba(34,211,238,0.04)" }}
+        >
+          <span className="text-[13px] shrink-0 mt-px">ℹ️</span>
+          <p className="text-[10px] text-cyan-300/60 leading-relaxed">
+            <strong className="text-cyan-300/80">Gaming accounts are manually verified by our admin team.</strong>{" "}
+            Enter your exact platform username or ID below. Keep your profile{" "}
+            <strong className="text-cyan-300/80">Public</strong> so we can confirm real gaming activity.
+            Streaming channel usernames are shown as-is — no verification required.
+          </p>
+        </div>
+      </div>
 
-        {/* Connected quick-links strip */}
-        {connectedCount > 0 && (
-          <div className="px-5 py-3 flex flex-wrap gap-2 border-b" style={{ borderColor: "rgba(255,255,255,0.05)", background: "rgba(255,255,255,0.02)" }}>
-            {accounts.map((a) => {
-              const meta = GAMING_PLATFORM_META[a.platform];
-              if (!meta) return null;
-              const isReview = a.status === "pending_review" || !a.status;
-              const url = !isReview ? meta.profileUrl?.replace("{username}", a.username) : undefined;
-              const el = (
-                <span
-                  className="inline-flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-full text-[11px] font-bold"
-                  style={{
-                    background: isReview ? "rgba(251,191,36,0.08)" : meta.bg,
-                    border: `1px solid ${isReview ? "rgba(251,191,36,0.25)" : meta.border}`,
-                    color: "#e2e8f0",
-                  }}
-                >
-                  <span className="w-3.5 h-3.5 shrink-0" style={{ color: isReview ? "#fbbf24" : "#22d3ee" }}>{GAMING_PLATFORM_SVG[a.platform]}</span>
-                  <span style={{ color: isReview ? "#fbbf24" : "#22d3ee" }}>{meta.label}</span>
-                  <span className="opacity-60 font-mono text-[10px]">{isReview ? "Under Review" : a.username}</span>
+      {/* Connected quick-links strip */}
+      {connectedCount > 0 && (
+        <div
+          className="px-5 py-3 flex flex-wrap gap-2 border-b"
+          style={{ borderColor: "rgba(255,255,255,0.05)", background: "rgba(255,255,255,0.02)" }}
+        >
+          {accounts.map((a) => {
+            const meta = GAMING_PLATFORM_META[a.platform];
+            if (!meta) return null;
+            const isReview = a.status === "pending_review" || !a.status;
+            const url = !isReview ? meta.profileUrl?.replace("{username}", a.username) : undefined;
+            const el = (
+              <span
+                className="inline-flex items-center gap-1.5 pl-2 pr-3 py-1.5 rounded-full text-[11px] font-bold"
+                style={{
+                  background: isReview ? "rgba(251,191,36,0.08)" : meta.bg,
+                  border: `1px solid ${isReview ? "rgba(251,191,36,0.25)" : meta.border}`,
+                }}
+              >
+                <span className="w-3.5 h-3.5 shrink-0" style={{ color: isReview ? "#fbbf24" : "#22d3ee" }}>
+                  {GAMING_PLATFORM_SVG[a.platform]}
                 </span>
-              );
-              return url
-                ? <a key={a.platform} href={url} target="_blank" rel="noopener noreferrer" className="hover:brightness-125 hover:scale-105 transition-all">{el}</a>
-                : <div key={a.platform}>{el}</div>;
-            })}
+                <span style={{ color: isReview ? "#fbbf24" : "#22d3ee" }}>{meta.shortLabel}</span>
+                <span className="font-mono text-[10px]" style={{ color: isReview ? "rgba(251,191,36,0.65)" : "rgba(255,255,255,0.5)" }}>
+                  {a.username}
+                </span>
+                {isReview && (
+                  <span
+                    className="text-[8px] font-black uppercase tracking-wider px-1 py-px rounded"
+                    style={{ background: "rgba(251,191,36,0.15)", color: "#fbbf24" }}
+                  >
+                    Review
+                  </span>
+                )}
+              </span>
+            );
+            return url
+              ? <a key={a.platform} href={url} target="_blank" rel="noopener noreferrer" className="hover:brightness-125 hover:scale-105 transition-all">{el}</a>
+              : <div key={a.platform}>{el}</div>;
+          })}
+        </div>
+      )}
+
+      {/* Platform cards */}
+      <div className="p-4 space-y-2">
+        {connectedCount === 0 && !isLoading && (
+          <div
+            className="rounded-xl border px-4 py-3 mb-1 flex items-start gap-2.5"
+            style={{ borderColor: "rgba(234,179,8,0.3)", background: "rgba(234,179,8,0.06)" }}
+          >
+            <span className="text-amber-400 mt-0.5 shrink-0">⚠️</span>
+            <p className="text-[11px] text-amber-300/80 leading-relaxed">
+              <strong className="text-amber-300">Link a gaming account to unlock posting & bidding.</strong>{" "}
+              Enter your real platform username — our team will verify within 24 hours.
+              Keep your profile <strong className="text-amber-300">Public</strong> so we can confirm real gaming activity.
+            </p>
           </div>
         )}
 
-        {/* Platform cards */}
-        <div className="p-4 space-y-2.5">
-          {connectedCount === 0 && !isLoading && (
-            <div
-              className="rounded-xl border px-4 py-3 mb-2 flex items-start gap-2.5"
-              style={{ borderColor: "rgba(234,179,8,0.3)", background: "rgba(234,179,8,0.06)" }}
-            >
-              <span className="text-amber-400 mt-0.5 shrink-0">⚠️</span>
-              <p className="text-[11px] text-amber-300/80 leading-relaxed">
-                <strong className="text-amber-300">Link a gaming account via official OAuth</strong> — we verify your real gaming profile within 24 hours.{" "}
-                <strong className="text-amber-300">No fake accounts accepted.</strong> Keep your profile <strong className="text-amber-300">Public</strong> during review so we can confirm real gaming activity.
-              </p>
-            </div>
-          )}
+        {isLoading ? (
+          <div className="space-y-2">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-16 rounded-2xl animate-pulse" style={{ background: "rgba(255,255,255,0.04)" }} />
+            ))}
+          </div>
+        ) : (
+          GAMING_PLATFORM_ORDER.map((platform) => {
+            const meta = GAMING_PLATFORM_META[platform];
+            const hints = PLATFORM_HINTS[platform];
+            const accountData = connectedMap[platform];
+            const isConnected = !!accountData;
+            const isReview = isConnected && (accountData.status === "pending_review" || !accountData.status);
+            const username = accountData?.username;
+            const isExpanded = expanding === platform;
+            const inputValue = inputVals[platform] ?? "";
 
-          {isLoading ? (
-            <div className="space-y-2.5">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="h-[72px] rounded-2xl animate-pulse" style={{ background: "rgba(255,255,255,0.04)" }} />
-              ))}
-            </div>
-          ) : (
-            GAMING_PLATFORM_ORDER.map((platform) => {
-              const meta = GAMING_PLATFORM_META[platform];
-              const accountData = connectedMap[platform];
-              const isConnected = !!accountData;
-              const isReview = isConnected && (accountData.status === "pending_review" || !accountData.status);
-              const username = accountData?.username;
-
-              return (
-                <div key={platform}>
-                  <div
-                    className="rounded-2xl overflow-hidden transition-all duration-200"
-                    style={{
-                      border: isConnected
-                        ? isReview
-                          ? "1px solid rgba(251,191,36,0.30)"
-                          : "1px solid rgba(34,211,238,0.35)"
-                        : "1px solid rgba(255,255,255,0.06)",
-                      background: isConnected
-                        ? isReview
-                          ? "linear-gradient(135deg, rgba(251,191,36,0.06), rgba(0,0,0,0.4))"
-                          : "linear-gradient(135deg, rgba(34,211,238,0.08), rgba(0,0,0,0.4))"
-                        : "rgba(255,255,255,0.03)",
-                      boxShadow: isConnected
-                        ? isReview
-                          ? "0 0 20px -8px rgba(251,191,36,0.3)"
-                          : "0 0 20px -8px rgba(34,211,238,0.4)"
-                        : "none",
-                    }}
-                  >
-                    <div className="flex items-center gap-0">
-                      {/* Icon panel */}
+            return (
+              <div key={platform}>
+                {/* Main card row */}
+                <div
+                  className="rounded-2xl overflow-hidden transition-all duration-200"
+                  style={{
+                    border: isConnected
+                      ? isReview ? "1px solid rgba(251,191,36,0.30)" : "1px solid rgba(34,211,238,0.35)"
+                      : isExpanded ? "1px solid rgba(34,211,238,0.22)" : "1px solid rgba(255,255,255,0.06)",
+                    background: isConnected
+                      ? isReview
+                        ? "linear-gradient(135deg, rgba(251,191,36,0.06), rgba(0,0,0,0.4))"
+                        : "linear-gradient(135deg, rgba(34,211,238,0.08), rgba(0,0,0,0.4))"
+                      : isExpanded ? "rgba(34,211,238,0.03)" : "rgba(255,255,255,0.03)",
+                    boxShadow: isConnected
+                      ? isReview ? "0 0 20px -8px rgba(251,191,36,0.3)" : "0 0 20px -8px rgba(34,211,238,0.4)"
+                      : "none",
+                  }}
+                >
+                  <div className="flex items-center">
+                    {/* Icon */}
+                    <div
+                      className="w-14 h-14 shrink-0 flex items-center justify-center"
+                      style={{
+                        background: isConnected
+                          ? isReview ? "rgba(251,191,36,0.10)" : "rgba(34,211,238,0.12)"
+                          : isExpanded ? "rgba(34,211,238,0.06)" : "rgba(255,255,255,0.04)",
+                        borderRight: `1px solid ${
+                          isConnected
+                            ? isReview ? "rgba(251,191,36,0.18)" : "rgba(34,211,238,0.20)"
+                            : "rgba(255,255,255,0.06)"
+                        }`,
+                      }}
+                    >
                       <div
-                        className="w-16 h-16 shrink-0 flex items-center justify-center relative overflow-hidden"
+                        className="w-6 h-6"
                         style={{
-                          background: isConnected
-                            ? isReview ? "rgba(251,191,36,0.10)" : "rgba(34,211,238,0.12)"
-                            : "rgba(255,255,255,0.04)",
-                          borderRight: `1px solid ${
-                            isConnected
-                              ? isReview ? "rgba(251,191,36,0.18)" : "rgba(34,211,238,0.25)"
-                              : "rgba(255,255,255,0.06)"
-                          }`,
+                          color: isConnected
+                            ? isReview ? "#fbbf24" : "#22d3ee"
+                            : isExpanded ? "rgba(34,211,238,0.5)" : "rgba(255,255,255,0.18)",
                         }}
                       >
-                        <div
-                          className="relative w-7 h-7"
-                          style={{ color: isConnected ? (isReview ? "#fbbf24" : "#22d3ee") : "rgba(255,255,255,0.2)" }}
-                        >
-                          {GAMING_PLATFORM_SVG[platform]}
-                        </div>
-                      </div>
-
-                      {/* Info */}
-                      <div className="flex-1 min-w-0 px-4 py-3">
-                        <div
-                          className="text-sm font-extrabold leading-tight"
-                          style={{ color: isConnected ? (isReview ? "#fbbf24" : "#22d3ee") : "rgba(255,255,255,0.65)" }}
-                        >
-                          {meta.label}
-                        </div>
-                        {isConnected ? (
-                          isReview ? (
-                            <div className="mt-1">
-                              <div className="flex items-center gap-1.5">
-                                <span className="text-[10px]">🕐</span>
-                                <span className="text-[11px] font-bold text-amber-400/90 uppercase tracking-wide">Under Review</span>
-                              </div>
-                              <div className="text-[10px] text-muted-foreground/40 mt-0.5 font-mono">{username}</div>
-                              <div className="text-[9px] text-amber-300/50 mt-0.5 leading-relaxed">We'll verify your real gaming activity within 24 hours · Keep your profile Public</div>
-                            </div>
-                          ) : (
-                            <div className="flex items-center gap-1.5 mt-1">
-                              <span className="inline-block w-1.5 h-1.5 rounded-full shrink-0 animate-pulse" style={{ background: "#4ade80" }} />
-                              <span className="text-[11px] font-mono font-semibold text-green-300 truncate">{username}</span>
-                              <span
-                                className="text-[9px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-wider"
-                                style={{ background: "rgba(74,222,128,0.15)", color: "#4ade80", border: "1px solid rgba(74,222,128,0.3)" }}
-                              >
-                                Verified
-                              </span>
-                            </div>
-                          )
-                        ) : (
-                          <div className="text-[11px] text-muted-foreground/40 mt-0.5">
-                            Not linked — click to verify via OAuth
-                          </div>
-                        )}
-                      </div>
-
-                      {/* CTA */}
-                      <div className="pr-3 shrink-0">
-                        {isConnected ? (
-                          <button
-                            onClick={() => handleDisconnect(platform)}
-                            disabled={disconnect.isPending}
-                            className="text-[10px] font-bold uppercase tracking-widest px-2.5 py-1.5 rounded-xl transition-all hover:bg-red-500/15 hover:text-red-300 disabled:opacity-40"
-                            style={{ color: "rgba(248,113,113,0.6)", border: "1px solid rgba(248,113,113,0.18)" }}
-                          >
-                            {disconnect.isPending ? "···" : "Remove"}
-                          </button>
-                        ) : (
-                          <button
-                            onClick={() => openModal(platform)}
-                            className="text-[11px] font-extrabold uppercase tracking-wide px-3.5 py-1.5 rounded-xl transition-all hover:brightness-110 active:scale-95"
-                            style={{
-                              background: "rgba(34,211,238,0.15)",
-                              border: "1px solid rgba(34,211,238,0.3)",
-                              color: "#22d3ee",
-                            }}
-                          >
-                            Link
-                          </button>
-                        )}
+                        {GAMING_PLATFORM_SVG[platform]}
                       </div>
                     </div>
+
+                    {/* Info */}
+                    <div className="flex-1 min-w-0 px-3 py-2.5">
+                      <div
+                        className="text-[13px] font-extrabold leading-tight"
+                        style={{
+                          color: isConnected
+                            ? isReview ? "#fbbf24" : "#22d3ee"
+                            : isExpanded ? "rgba(34,211,238,0.75)" : "rgba(255,255,255,0.6)",
+                        }}
+                      >
+                        {meta.label}
+                      </div>
+                      {isConnected ? (
+                        isReview ? (
+                          <div className="mt-0.5">
+                            <div className="flex items-center gap-1">
+                              <span className="text-[9px]">🕐</span>
+                              <span className="text-[10px] font-bold text-amber-400/85 uppercase tracking-wide">Submitted — Under Review</span>
+                            </div>
+                            <div className="text-[10px] font-mono text-muted-foreground/50 mt-0.5 truncate">{username}</div>
+                            <div className="text-[9px] text-amber-300/45 mt-0.5">Manual verification in progress · up to 24 hours</div>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-1.5 mt-1">
+                            <span className="inline-block w-1.5 h-1.5 rounded-full shrink-0 animate-pulse" style={{ background: "#4ade80" }} />
+                            <span className="text-[11px] font-mono font-semibold text-green-300 truncate">{username}</span>
+                            <span
+                              className="text-[8px] font-black px-1.5 py-0.5 rounded-full uppercase"
+                              style={{ background: "rgba(74,222,128,0.15)", color: "#4ade80", border: "1px solid rgba(74,222,128,0.3)" }}
+                            >
+                              Verified
+                            </span>
+                          </div>
+                        )
+                      ) : (
+                        <div className="text-[10px] text-muted-foreground/35 mt-0.5">
+                          {isExpanded ? "Enter username below ↓" : "Not submitted"}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Action */}
+                    <div className="pr-3 shrink-0">
+                      {isConnected ? (
+                        <button
+                          onClick={() => handleRemove(platform)}
+                          disabled={disconnect.isPending}
+                          className="text-[10px] font-bold uppercase tracking-widest px-2.5 py-1.5 rounded-xl transition-all hover:bg-red-500/15 hover:text-red-300 disabled:opacity-40"
+                          style={{ color: "rgba(248,113,113,0.55)", border: "1px solid rgba(248,113,113,0.15)" }}
+                        >
+                          {disconnect.isPending ? "···" : "Remove"}
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => {
+                            setExpanding(isExpanded ? null : platform);
+                            if (!isExpanded) setInput(platform, "");
+                          }}
+                          className="text-[11px] font-extrabold uppercase tracking-wide px-3 py-1.5 rounded-xl transition-all hover:brightness-110 active:scale-95"
+                          style={{
+                            background: isExpanded ? "rgba(255,255,255,0.05)" : "rgba(34,211,238,0.13)",
+                            border: "1px solid rgba(34,211,238,0.25)",
+                            color: isExpanded ? "rgba(255,255,255,0.4)" : "#22d3ee",
+                          }}
+                        >
+                          {isExpanded ? "Cancel" : "Link"}
+                        </button>
+                      )}
+                    </div>
                   </div>
+
+                  {/* Expandable input form */}
+                  {isExpanded && (
+                    <div
+                      className="px-4 pb-4 pt-0 border-t"
+                      style={{ borderColor: "rgba(34,211,238,0.10)", background: "rgba(34,211,238,0.03)" }}
+                    >
+                      <p className="text-[10px] text-cyan-300/45 mt-3 mb-2 leading-relaxed">{hints.hint}</p>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          placeholder={hints.placeholder}
+                          value={inputValue}
+                          onChange={(e) => setInput(platform, e.target.value)}
+                          onKeyDown={(e) => e.key === "Enter" && handleSubmit(platform)}
+                          maxLength={64}
+                          className="flex-1 h-9 px-3 text-sm rounded-xl border bg-background/60 focus:outline-none focus:border-cyan-400/50 text-foreground placeholder:text-muted-foreground/30"
+                          style={{ borderColor: "rgba(34,211,238,0.22)" }}
+                          autoFocus
+                        />
+                        <button
+                          onClick={() => handleSubmit(platform)}
+                          disabled={!inputValue.trim() || connect.isPending}
+                          className="h-9 px-3 text-[11px] font-bold rounded-xl transition-all hover:brightness-110 active:scale-95 disabled:opacity-40 whitespace-nowrap"
+                          style={{ background: "rgba(34,211,238,0.18)", border: "1px solid rgba(34,211,238,0.35)", color: "#22d3ee" }}
+                        >
+                          {connect.isPending ? "···" : "Submit for Verification"}
+                        </button>
+                      </div>
+                      <p className="text-[9px] text-muted-foreground/30 mt-2">
+                        🛡️ Enter your real username only — our team will manually verify this within 24 hours.
+                      </p>
+                    </div>
+                  )}
                 </div>
-              );
-            })
-          )}
-        </div>
+              </div>
+            );
+          })
+        )}
       </div>
-    </>
+    </div>
   );
 }
 
@@ -1248,7 +1101,7 @@ function StreamingAccountsSection() {
             <span className="text-sm font-extrabold text-foreground uppercase tracking-widest">Streaming Channels</span>
           </div>
           <p className="text-[11px] text-muted-foreground/60">
-            Link your channels — they'll appear on your profile and bid cards
+            Add your channel usernames — shown as-is on your profile and bid cards, no verification needed
           </p>
         </div>
         {connectedCount > 0 && (

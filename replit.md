@@ -186,5 +186,5 @@ The app is configured for **Vercel-only** deployment. No Railway or separate bac
 
 ### Beta Status
 - Beta banner on all pages (dismissible, purple/violet theme)
-- Notices: test-mode payments · real-time coming soon · simulated OAuth until post-launch
+- Notices: test-mode payments · real-time coming soon · gaming accounts manually verified within 24 hrs
 - Razorpay in test mode — switch to `rzp_live_` keys when ready to go live

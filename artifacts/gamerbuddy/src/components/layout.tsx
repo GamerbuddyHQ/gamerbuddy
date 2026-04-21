@@ -27,7 +27,7 @@ const BETA_BANNER_KEY = "gb_beta_banner_dismissed_v2";
 const BETA_NOTICES = [
   { icon: "💳", text: "Payments are in test mode — no real money moves" },
   { icon: "⚡", text: "Real-time chat & instant updates coming soon" },
-  { icon: "🎮", text: "Gaming account linking is simulated — real OAuth after launch" },
+  { icon: "🎮", text: "Gaming accounts are manually verified by admin within 24 hours — enter your real username" },
 ];
 
 function TestModeBanner() {
