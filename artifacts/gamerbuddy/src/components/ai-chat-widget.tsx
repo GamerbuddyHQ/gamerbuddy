@@ -104,6 +104,12 @@ const RESPONSES: Array<{ patterns: RegExp; reply: string }> = [
     reply: `Gamerbuddy runs on **two separate wallets** — here's the full breakdown 💸\n\n🔵 **Hiring Wallet** — fund this to hire gamers\n• Deposit via **Razorpay** (UPI, GPay, PhonePe, Paytm, cards…)\n• Min deposit: **$10.75** | Max wallet balance: **$1,000**\n• **Cannot be withdrawn** — only spent on game sessions and tips\n\n🟢 **Earnings Wallet** — where your gamer income lands\n• Earn **90%** of every accepted bid when the session completes (10% platform fee)\n• Earnings are credited **immediately** after session completion + both reviews submitted\n• Once your balance hits **$100 USD** → a **"Request Withdrawal"** button appears\n• Click it to submit your request — payouts are processed **manually every Monday**\n• ⏱️ Funds arrive in your account within **5–7 business days** after Monday processing\n\n🔒 The moment a bid is accepted, funds lock into **escrow** — safe and untouchable by either side until the session is done.\n\nHead to **[Wallets](/wallets)** or **[Add Funds](/add-funds)** to get started! 💪`,
   },
 
+  /* ── ACTIVATION FEE ── */
+  {
+    patterns: /activation.*fee|activate.*account|one.?time.*fee|one.?time.*payment|₹149|\$5.*activat|account.*activat|why.*fee.*activat|need.*pay.*activat|how.*activat|account.*locked|unlock.*account/i,
+    reply: `⚡ **Account Activation Fee — One Time Only**\n\nAfter your gaming account is **verified** (24–48 hrs after linking), you'll see an Activation prompt on your Dashboard.\n\nYou pay a **small one-time fee** to fully unlock the platform:\n\n🇮🇳 **India** → **₹149**\n🌍 **Global** → **$5 USD** (~₹420 INR)\n\n**Why does this exist?**\nThis fee filters out fake accounts, bots, and spammers — it keeps Gamerbuddy a **real, high-quality gaming community**. You only pay it once, ever. No recurring charges.\n\n**What it unlocks:**\n• 📋 Post hiring requests\n• 💰 Place bids on requests\n• 🤝 Full access to sessions, chat & earnings\n\n**Region is set automatically** — if your phone starts with +91 or your IP is from India, you get India pricing. Otherwise Global applies.\n\n**Non-refundable** — like a membership activation, it's a permanent one-time unlock. Pay on your **[Dashboard](/dashboard)** after verification. ✅`,
+  },
+
   /* ── PLATFORM FEE ── */
   {
     patterns: /fee|commission|percent|10%|platform.*cut|how much.*charge/i,

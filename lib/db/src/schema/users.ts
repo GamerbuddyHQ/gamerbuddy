@@ -28,6 +28,9 @@ export const usersTable = pgTable("users", {
   trustScore: integer("trust_score").notNull().default(0),
   emailVerified: boolean("email_verified").notNull().default(false),
   phoneVerified: boolean("phone_verified").notNull().default(false),
+  isActivated: boolean("is_activated").notNull().default(false),
+  activationRegion: text("activation_region"),
+  activationPaidAt: timestamp("activation_paid_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

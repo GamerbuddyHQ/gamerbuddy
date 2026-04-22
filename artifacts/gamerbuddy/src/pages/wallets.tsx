@@ -66,6 +66,7 @@ const TX_META: Record<string, { label: string; icon: React.ReactNode; color: str
   platform_fee:   { label: "Platform Fee (10%)", icon: <Receipt className="h-3.5 w-3.5" />,       color: "text-amber-400",   sign: "-" },
   gift_sent:      { label: "Tip Sent",        icon: <Gift className="h-3.5 w-3.5" />,            color: "text-red-400",     sign: "-" },
   gift_received:  { label: "Tip Received",    icon: <Gift className="h-3.5 w-3.5" />,            color: "text-green-400",   sign: "+" },
+  activation_fee: { label: "Account Activation Fee", icon: <ShieldCheck className="h-3.5 w-3.5" />, color: "text-amber-400", sign: "-" },
 };
 
 function txMeta(type: string) {
@@ -313,6 +314,21 @@ export default function WalletsPage() {
                   ${remaining.toFixed(2)} more needed to unlock withdrawals
                 </div>
               )}
+            </div>
+
+            {/* Activation fee note */}
+            <div className="rounded-lg border border-amber-500/15 bg-amber-500/[0.03] px-4 py-3 text-xs space-y-1.5">
+              <div className="flex items-center gap-1.5 font-semibold text-amber-300/80 uppercase tracking-wide text-[10px]">
+                <ShieldCheck className="h-3 w-3 shrink-0" /> One-Time Activation Fee
+              </div>
+              <p className="text-muted-foreground/70 leading-relaxed">
+                To access the full Gamerbuddy platform — including posting requests and placing bids — a one-time, non-refundable activation fee is required after your gaming account is verified. This fee is <strong className="text-foreground/80">not</strong> held in your wallets; it goes directly to Gamerbuddy to cover moderation and platform costs.
+              </p>
+              <ul className="space-y-0.5 text-muted-foreground/60">
+                <li>🇮🇳 <strong className="text-foreground/70">India:</strong> ₹149 (one time)</li>
+                <li>🌍 <strong className="text-foreground/70">Global:</strong> $5 USD (~₹420 INR, one time)</li>
+              </ul>
+              <p className="text-muted-foreground/45 pt-0.5 border-t border-border/20">Paid once — your account stays active permanently.</p>
             </div>
 
             {/* Funds custody disclaimer */}

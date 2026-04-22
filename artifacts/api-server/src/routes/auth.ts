@@ -42,6 +42,8 @@ function formatUser(user: {
   gender?: string | null;
   gamerbuddyId?: string | null;
   emailVerified?: boolean;
+  isActivated?: boolean;
+  activationRegion?: string | null;
   createdAt: Date;
 }) {
   return {
@@ -60,6 +62,8 @@ function formatUser(user: {
     gender: user.gender ?? null,
     gamerbuddyId: user.gamerbuddyId ?? null,
     emailVerified: user.emailVerified ?? false,
+    isActivated: user.isActivated ?? false,
+    activationRegion: user.activationRegion ?? null,
     createdAt: user.createdAt.toISOString(),
   };
 }

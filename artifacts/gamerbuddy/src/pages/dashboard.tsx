@@ -21,6 +21,7 @@ import {
   Sparkles,
   X,
 } from "lucide-react";
+import { ActivationGate } from "@/components/activation-gate";
 
 const DASH_PROFILE_KEY = "gb_dash_profile_banner_v1";
 
@@ -169,8 +170,19 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* ── FINISH PROFILE BANNER — shown for verified users ── */}
-      {user.idVerified && <FinishProfileBanner userName={user.name} />}
+      {/* ── ACTIVATION GATE — shown when verified but activation fee not paid ── */}
+      {user.idVerified && !user.isActivated && (
+        <ActivationGate
+          userEmail={user.email}
+          userPhone={user.phone}
+          onActivated={() => {
+            // Page will re-render via React Query cache invalidation inside the component
+          }}
+        />
+      )}
+
+      {/* ── FINISH PROFILE BANNER — shown for verified AND activated users ── */}
+      {user.idVerified && user.isActivated && <FinishProfileBanner userName={user.name} />}
 
       {/* Verification status banner — shown while pending */}
       {!user.idVerified && (
