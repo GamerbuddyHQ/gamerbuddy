@@ -50,6 +50,14 @@ const SECTIONS = [
     content:
       "Accounts are verified within 24–48 hours after submitting the required gaming account links. During this period, some features — including posting requests and placing bids — may be limited. We reserve the sole right to approve, request additional information, or reject verification applications.",
   },
+  {
+    number: "7",
+    title: "One-Time Account Activation Fee",
+    icon: Zap,
+    iconColor: "text-amber-400",
+    content:
+      "To keep Gamerbuddy safe and enjoyable for real gamers, we charge a small one-time activation fee after a user's gaming account is verified. Unfortunately, some bad actors create fake or bot accounts to abuse the platform. This small fee helps us greatly reduce spam and maintain a high-quality, trustworthy community. India: ₹149 (one-time only). Global: $5 USD (one-time only). This is a one-time payment — users will not be charged again. This fee is non-refundable and is not held in the user's wallets. Thank you for understanding and for helping us build a better gaming community together.",
+  },
 ];
 
 export default function About() {

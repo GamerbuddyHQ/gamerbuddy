@@ -322,13 +322,16 @@ export default function WalletsPage() {
                 <ShieldCheck className="h-3 w-3 shrink-0" /> One-Time Activation Fee
               </div>
               <p className="text-muted-foreground/70 leading-relaxed">
-                To access the full Gamerbuddy platform — including posting requests and placing bids — a one-time, non-refundable activation fee is required after your gaming account is verified. This fee is <strong className="text-foreground/80">not</strong> held in your wallets; it goes directly to Gamerbuddy to cover moderation and platform costs.
+                To keep Gamerbuddy safe and enjoyable for real gamers, we charge a small one-time activation fee. Some bad actors create fake or bot accounts to abuse the platform — this fee helps us greatly reduce spam and maintain a high-quality, trustworthy community.
               </p>
               <ul className="space-y-0.5 text-muted-foreground/60">
-                <li>🇮🇳 <strong className="text-foreground/70">India:</strong> ₹149 (one time)</li>
-                <li>🌍 <strong className="text-foreground/70">Global:</strong> $5 USD (~₹420 INR, one time)</li>
+                <li>🇮🇳 <strong className="text-foreground/70">India:</strong> ₹149 (one-time only)</li>
+                <li>🌍 <strong className="text-foreground/70">Global:</strong> $5 USD (~₹420 INR, one-time only)</li>
               </ul>
-              <p className="text-muted-foreground/45 pt-0.5 border-t border-border/20">Paid once — your account stays active permanently.</p>
+              <p className="text-muted-foreground/60 leading-relaxed">
+                This is a <strong className="text-foreground/70">one-time payment</strong> — you won't be charged again. Thank you for understanding and for helping us build a better gaming community together. ❤️
+              </p>
+              <p className="text-muted-foreground/40 pt-0.5 border-t border-border/20">This fee is not held in your wallets — it goes directly to platform costs. Paid once, active permanently.</p>
             </div>
 
             {/* Funds custody disclaimer */}

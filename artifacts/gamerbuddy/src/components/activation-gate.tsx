@@ -243,13 +243,19 @@ export function ActivationGate({
 
         {/* Why this fee */}
         <div
-          className="flex items-start gap-2.5 rounded-lg px-3 py-2.5 text-xs"
+          className="rounded-lg px-4 py-3.5 space-y-2 text-xs"
           style={{ background: "rgba(168,85,247,0.06)", border: "1px solid rgba(168,85,247,0.16)" }}
         >
-          <ShieldCheck className="h-3.5 w-3.5 text-primary shrink-0 mt-0.5" />
-          <span className="text-muted-foreground leading-relaxed">
-            This small one-time fee helps us maintain a <strong className="text-foreground">safe, high-quality gaming community</strong> for real players worldwide. It filters out fake accounts and bots — keeping Gamerbuddy trustworthy and free of spam.
-          </span>
+          <div className="flex items-center gap-1.5 font-bold text-foreground/90">
+            <ShieldCheck className="h-3.5 w-3.5 text-primary shrink-0" />
+            Why do we charge a one-time activation fee?
+          </div>
+          <p className="text-muted-foreground leading-relaxed">
+            To keep Gamerbuddy <strong className="text-foreground">safe and enjoyable for real gamers</strong>, we charge a small one-time activation fee. Unfortunately, some bad actors create fake or bot accounts to abuse the platform. This small fee helps us greatly reduce spam and maintain a <strong className="text-foreground">high-quality, trustworthy community</strong>.
+          </p>
+          <p className="text-muted-foreground/70 leading-relaxed">
+            This is a <strong className="text-foreground/80">one-time payment</strong> — you won't be charged again. Thank you for understanding and for helping us build a better gaming community together. ❤️
+          </p>
         </div>
 
         {/* What you unlock */}
@@ -275,7 +281,7 @@ export function ActivationGate({
 
         {/* Pricing table */}
         <div className="text-xs text-muted-foreground/70 leading-relaxed">
-          Pay a one-time activation fee to fully activate your account and help keep Gamerbuddy free from fake accounts:
+          One-time only — you'll never be charged again:
           <span className="inline-flex items-center gap-3 ml-2">
             <span className="text-amber-400 font-bold">🇮🇳 India — ₹149</span>
             <span className="text-muted-foreground/40">·</span>
