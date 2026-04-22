@@ -17,6 +17,7 @@ import adminAuthRouter from "./admin-auth";
 import adminCommunityRouter from "./admin-community";
 import modCommunityRouter from "./mod-community";
 import emailOtpRouter from "./email-otp";
+import otpRouter from "./otp";
 
 const router: IRouter = Router();
 
@@ -38,5 +39,6 @@ router.use(adminAuthRouter);
 router.use(adminCommunityRouter);
 router.use(modCommunityRouter);
 router.use(emailOtpRouter);
+router.use(otpRouter);
 
 export default router;

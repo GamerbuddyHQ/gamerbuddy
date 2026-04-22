@@ -1946,59 +1946,55 @@ function VerificationSection({ idVerified, gamingAccountCount, onJustVerified }:
   );
 }
 
-// ── Email OTP Verification Card ───────────────────────────────────────────
-function EmailVerificationSection({ emailVerified, userEmail, onVerified }: {
+// ── Contact OTP Verification Card (Email + Phone) ─────────────────────────
+function ContactVerificationSection({
+  emailVerified,
+  userEmail,
+  userPhone,
+  userCountry,
+  onVerified,
+}: {
   emailVerified: boolean;
   userEmail: string;
-  onVerified: (trustFactor: number) => void;
+  userPhone?: string;
+  userCountry?: string;
+  onVerified: (channel: "email" | "phone", trustFactor: number) => void;
 }) {
   const { toast } = useToast();
+  const isIndia = userCountry === "IN" || userPhone?.startsWith("+91");
+  const [activeChannel, setActiveChannel] = useState<"email" | "phone">(isIndia ? "phone" : "email");
   const [step, setStep] = useState<"idle" | "sending" | "sent" | "verifying">("idle");
   const [otp, setOtp] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
   const [attemptsLeft, setAttemptsLeft] = useState<number | null>(null);
   const [skipped, setSkipped] = useState(false);
 
-  if (emailVerified) {
-    return (
-      <Card style={{ borderColor: "rgba(34,197,94,0.30)", background: "rgba(34,197,94,0.05)", boxShadow: "0 0 20px rgba(34,197,94,0.08)" }}>
-        <CardContent className="pt-5 pb-5">
-          <div className="flex items-center gap-4">
-            <div className="h-12 w-12 rounded-2xl flex items-center justify-center shrink-0"
-              style={{ background: "rgba(34,197,94,0.15)", border: "1px solid rgba(34,197,94,0.35)", boxShadow: "0 0 16px rgba(34,197,94,0.20)" }}>
-              <MailCheck className="h-6 w-6 text-green-400" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2.5 mb-1">
-                <span className="text-sm font-extrabold text-foreground uppercase tracking-wide">Email Verified</span>
-                <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-green-500/15 text-green-400 border border-green-500/30">
-                  <Check className="h-2.5 w-2.5" /> Verified
-                </span>
-              </div>
-              <p className="text-xs text-green-300/70 leading-relaxed">
-                Your email is verified. This boosts your Trust Factor and shows hirers you're a real account.
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
+  const bothVerified = emailVerified;
+  if (bothVerified && skipped) return null;
 
-  if (skipped) return null;
+  const channelContact = activeChannel === "email" ? userEmail : (userPhone ?? "");
 
   async function handleSend() {
+    if (activeChannel === "phone") {
+      toast({ title: "SMS coming soon", description: "Phone verification via SMS will be available shortly. Please use email for now.", variant: "destructive" });
+      return;
+    }
     setStep("sending");
     setErrorMsg("");
     try {
-      const res = await fetch(`${BASE}/auth/email-otp/send`, { method: "POST", credentials: "include" });
+      const res = await fetch(`${BASE}/otp/send`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ channel: activeChannel }),
+      });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Failed to send OTP");
       setStep("sent");
-      toast({ title: "OTP sent!", description: `Check your inbox at ${userEmail}` });
+      toast({ title: "Code sent!", description: `Check your ${activeChannel === "email" ? `inbox at ${userEmail}` : `phone at ${userPhone}`}` });
     } catch (err: any) {
       setStep("idle");
-      setErrorMsg(err.message ?? "Failed to send OTP. Please try again.");
+      setErrorMsg(err.message ?? "Failed to send code. Please try again.");
     }
   }
 
@@ -2008,11 +2004,11 @@ function EmailVerificationSection({ emailVerified, userEmail, onVerified }: {
     setStep("verifying");
     setErrorMsg("");
     try {
-      const res = await fetch(`${BASE}/auth/email-otp/verify`, {
+      const res = await fetch(`${BASE}/otp/verify`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ otp }),
+        body: JSON.stringify({ channel: activeChannel, otp }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -2020,40 +2016,120 @@ function EmailVerificationSection({ emailVerified, userEmail, onVerified }: {
         setAttemptsLeft(data.attemptsRemaining ?? null);
         throw new Error(data.error ?? "Incorrect code");
       }
-      toast({ title: "Email verified!", description: "+5 Trust Factor added to your profile. 🎉" });
-      onVerified(data.user?.trustFactor ?? 0);
+      toast({ title: `${activeChannel === "email" ? "Email" : "Phone"} verified! 🎉`, description: "+5 Trust Factor added to your profile." });
+      onVerified(activeChannel, data.user?.trustFactor ?? 0);
     } catch (err: any) {
       setStep("sent");
       setErrorMsg(err.message ?? "Verification failed.");
     }
   }
 
+  function switchChannel(ch: "email" | "phone") {
+    if (ch === activeChannel) return;
+    setActiveChannel(ch);
+    setStep("idle");
+    setOtp("");
+    setErrorMsg("");
+    setAttemptsLeft(null);
+  }
+
   return (
     <Card style={{ borderColor: "rgba(168,85,247,0.22)", background: "rgba(168,85,247,0.04)" }}>
       <CardContent className="pt-5 pb-5 space-y-4">
+        {/* Header */}
         <div className="flex items-start gap-3.5">
           <div className="h-11 w-11 rounded-xl flex items-center justify-center shrink-0 mt-0.5"
             style={{ background: "rgba(168,85,247,0.15)", border: "1px solid rgba(168,85,247,0.30)" }}>
-            <Mail className="h-5 w-5 text-primary" />
+            <ShieldCheck className="h-5 w-5 text-primary" />
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap mb-1">
-              <span className="text-sm font-extrabold text-foreground uppercase tracking-wide">Verify Your Email</span>
-              <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border text-amber-400 bg-amber-400/10 border-amber-400/30">Optional</span>
+              <span className="text-sm font-extrabold text-foreground uppercase tracking-wide">Verify Your Contact</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border text-amber-400 bg-amber-400/10 border-amber-400/30">Optional · +5 Trust</span>
             </div>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              A 6-digit code will be sent to <span className="text-foreground font-semibold">{userEmail}</span>. Expires in 10 minutes.
+              Confirm your email or phone number to boost your Trust Factor and show hirers you're a real account.
             </p>
           </div>
         </div>
 
-        {/* Soft nudge banner */}
-        {step === "idle" && (
+        {/* Channel selector */}
+        <div className="grid grid-cols-2 gap-2">
+          {/* Email */}
+          <button
+            type="button"
+            onClick={() => switchChannel("email")}
+            className={`flex items-center gap-2.5 rounded-xl px-3 py-2.5 border text-xs font-bold transition-all ${
+              activeChannel === "email"
+                ? "border-primary/60 bg-primary/10 text-foreground"
+                : "border-white/10 bg-white/[0.03] text-muted-foreground hover:border-primary/30"
+            }`}
+          >
+            <div className={`h-7 w-7 rounded-lg flex items-center justify-center shrink-0 ${activeChannel === "email" ? "bg-primary/20" : "bg-white/5"}`}>
+              {emailVerified
+                ? <MailCheck className="h-3.5 w-3.5 text-green-400" />
+                : <Mail className="h-3.5 w-3.5 text-primary" />
+              }
+            </div>
+            <div className="text-left min-w-0">
+              <div className="flex items-center gap-1.5">
+                <span className="uppercase tracking-wider">Email</span>
+                {emailVerified && <span className="text-[9px] bg-green-500/15 text-green-400 border border-green-500/30 rounded-full px-1.5 py-0.5">✓ Verified</span>}
+              </div>
+              <div className="text-[10px] text-muted-foreground/60 truncate font-normal normal-case tracking-normal">{userEmail}</div>
+            </div>
+          </button>
+
+          {/* Phone */}
+          <button
+            type="button"
+            onClick={() => switchChannel("phone")}
+            className={`flex items-center gap-2.5 rounded-xl px-3 py-2.5 border text-xs font-bold transition-all relative ${
+              activeChannel === "phone"
+                ? "border-primary/60 bg-primary/10 text-foreground"
+                : "border-white/10 bg-white/[0.03] text-muted-foreground hover:border-primary/30"
+            }`}
+          >
+            <div className={`h-7 w-7 rounded-lg flex items-center justify-center shrink-0 ${activeChannel === "phone" ? "bg-primary/20" : "bg-white/5"}`}>
+              <Phone className="h-3.5 w-3.5 text-primary" />
+            </div>
+            <div className="text-left min-w-0">
+              <div className="flex items-center gap-1.5">
+                <span className="uppercase tracking-wider">Phone</span>
+                <span className="text-[9px] bg-blue-500/15 text-blue-400 border border-blue-500/25 rounded-full px-1.5 py-0.5">Soon</span>
+              </div>
+              <div className="text-[10px] text-muted-foreground/60 truncate font-normal normal-case tracking-normal">{userPhone || "SMS · Coming soon"}</div>
+            </div>
+          </button>
+        </div>
+
+        {/* Phone "coming soon" notice */}
+        {activeChannel === "phone" && (
+          <div className="flex items-start gap-2.5 rounded-lg px-3 py-2.5 text-xs"
+            style={{ background: "rgba(59,130,246,0.07)", border: "1px solid rgba(59,130,246,0.20)" }}>
+            <Phone className="h-3.5 w-3.5 text-blue-400 shrink-0 mt-0.5" />
+            <span className="text-muted-foreground leading-relaxed">
+              <strong className="text-foreground">SMS verification is coming soon!</strong> We're rolling it out for India (+91) first, then international numbers. Switch to Email for instant verification now.
+            </span>
+          </div>
+        )}
+
+        {/* Email verified nudge */}
+        {activeChannel === "email" && emailVerified && (
+          <div className="flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-xs"
+            style={{ background: "rgba(34,197,94,0.07)", border: "1px solid rgba(34,197,94,0.20)" }}>
+            <MailCheck className="h-3.5 w-3.5 text-green-400 shrink-0" />
+            <span className="text-green-300/80">Your email is already verified. Great job!</span>
+          </div>
+        )}
+
+        {/* Soft nudge for idle email */}
+        {activeChannel === "email" && !emailVerified && step === "idle" && (
           <div className="flex items-start gap-2.5 rounded-lg px-3 py-2.5 text-xs"
             style={{ background: "rgba(168,85,247,0.07)", border: "1px solid rgba(168,85,247,0.18)" }}>
             <Sparkles className="h-3.5 w-3.5 text-primary shrink-0 mt-0.5" />
             <span className="text-muted-foreground leading-relaxed">
-              Verifying your email <strong className="text-foreground">increases your Trust Factor by +5</strong> and helps prevent fake accounts. Hirers trust verified profiles more.
+              A 6-digit code will be sent to <strong className="text-foreground">{userEmail}</strong>. Expires in 10 minutes. Verifying <strong className="text-foreground">adds +5 Trust Factor</strong> instantly.
             </span>
           </div>
         )}
@@ -2065,12 +2141,13 @@ function EmailVerificationSection({ emailVerified, userEmail, onVerified }: {
             <AlertTriangle className="h-3.5 w-3.5 text-red-400 shrink-0 mt-0.5" />
             <span className="text-red-300/90 leading-relaxed">
               {errorMsg}
-              {attemptsLeft !== null && <span className="text-red-400 font-bold"> ({attemptsLeft} attempt{attemptsLeft === 1 ? "" : "s"} remaining)</span>}
+              {attemptsLeft !== null && <span className="text-red-400 font-bold"> ({attemptsLeft} attempt{attemptsLeft === 1 ? "" : "s"} left)</span>}
             </span>
           </div>
         )}
 
-        {step === "idle" && (
+        {/* Action buttons */}
+        {activeChannel === "email" && !emailVerified && step === "idle" && (
           <div className="flex items-center gap-3 flex-wrap">
             <Button
               onClick={handleSend}
@@ -2078,7 +2155,7 @@ function EmailVerificationSection({ emailVerified, userEmail, onVerified }: {
               style={{ background: "linear-gradient(135deg,#7c3aed,#a855f7)", boxShadow: "0 2px 12px rgba(147,51,234,0.30)" }}
             >
               <Mail className="h-3.5 w-3.5" />
-              Send OTP to my Email
+              Send Code to Email
             </Button>
             <button
               onClick={() => setSkipped(true)}
@@ -2089,17 +2166,36 @@ function EmailVerificationSection({ emailVerified, userEmail, onVerified }: {
           </div>
         )}
 
+        {activeChannel === "phone" && (
+          <div className="flex items-center gap-3 flex-wrap">
+            <Button
+              disabled
+              className="flex items-center gap-2 h-9 px-4 font-bold text-xs uppercase tracking-widest opacity-50 cursor-not-allowed"
+              style={{ background: "linear-gradient(135deg,#1d4ed8,#3b82f6)" }}
+            >
+              <Phone className="h-3.5 w-3.5" />
+              Send SMS (Coming Soon)
+            </Button>
+            <button
+              onClick={() => switchChannel("email")}
+              className="text-xs text-primary/80 hover:text-primary underline underline-offset-2 transition-colors font-semibold"
+            >
+              Use Email instead →
+            </button>
+          </div>
+        )}
+
         {step === "sending" && (
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <RefreshCw className="h-3.5 w-3.5 animate-spin text-primary" />
-            Sending code to {userEmail}…
+            Sending code to {channelContact}…
           </div>
         )}
 
         {(step === "sent" || step === "verifying") && (
           <form onSubmit={handleVerify} className="space-y-3">
             <div className="space-y-1.5">
-              <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">6-Digit Code</Label>
+              <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Enter 6-Digit Code</Label>
               <div className="relative">
                 <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary/60" />
                 <Input
@@ -2573,12 +2669,14 @@ export default function Profile() {
         onJustVerified={handleJustVerified}
       />
 
-      {/* ── EMAIL VERIFICATION ── */}
-      <EmailVerificationSection
+      {/* ── CONTACT VERIFICATION (Email + Phone) ── */}
+      <ContactVerificationSection
         emailVerified={emailVerified}
         userEmail={user.email}
-        onVerified={(newTrustFactor) => {
-          setLocalEmailVerified(true);
+        userPhone={user.phone}
+        userCountry={profile?.country ?? undefined}
+        onVerified={(channel, newTrustFactor) => {
+          if (channel === "email") setLocalEmailVerified(true);
         }}
       />
 

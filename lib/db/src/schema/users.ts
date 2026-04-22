@@ -27,6 +27,7 @@ export const usersTable = pgTable("users", {
   moderatorAppointedAt: timestamp("moderator_appointed_at", { withTimezone: true }),
   trustScore: integer("trust_score").notNull().default(0),
   emailVerified: boolean("email_verified").notNull().default(false),
+  phoneVerified: boolean("phone_verified").notNull().default(false),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

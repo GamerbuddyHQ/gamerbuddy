@@ -1,33 +1,30 @@
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
 
-const GMAIL_USER = process.env.GMAIL_USER;
-const GMAIL_PASS = process.env.GMAIL_APP_PASSWORD;
+const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const isDev = process.env.NODE_ENV !== "production";
 
-function createTransport() {
-  if (!GMAIL_USER || !GMAIL_PASS) return null;
-  return nodemailer.createTransport({
-    service: "gmail",
-    auth: { user: GMAIL_USER, pass: GMAIL_PASS },
-  });
+const FROM_ADDRESS = "Gamerbuddy <noreply@gamerbuddy.app>";
+
+function getClient(): Resend | null {
+  if (!RESEND_API_KEY) return null;
+  return new Resend(RESEND_API_KEY);
 }
 
 export async function sendOtpEmail(toEmail: string, otp: string): Promise<void> {
-  const transport = createTransport();
+  const client = getClient();
 
-  if (!transport) {
+  if (!client) {
     if (isDev) {
       console.log(`\n[DEV MODE — EMAIL OTP] To: ${toEmail}  Code: ${otp}\n`);
       return;
     }
-    throw new Error("Email service is not configured. Please set GMAIL_USER and GMAIL_APP_PASSWORD.");
+    throw new Error("Email service not configured. Set RESEND_API_KEY.");
   }
 
-  await transport.sendMail({
-    from: `"Gamerbuddy" <${GMAIL_USER}>`,
+  await client.emails.send({
+    from: FROM_ADDRESS,
     to: toEmail,
-    subject: "Your Gamerbuddy email verification code",
-    text: `Your verification code is: ${otp}\n\nThis code expires in 10 minutes. Do not share it with anyone.`,
+    subject: "Your Gamerbuddy verification code",
     html: `
       <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:32px;background:#0f0f12;border-radius:16px;border:1px solid rgba(168,85,247,0.25);">
         <div style="text-align:center;margin-bottom:24px;">
