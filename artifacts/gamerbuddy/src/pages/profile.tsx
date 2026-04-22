@@ -14,6 +14,7 @@ import {
   useConfirmGalleryPhoto, useDeleteGalleryPhoto,
   requestPhotoUploadUrl, uploadFileToPut, computeFileHash,
   STREAMING_PLATFORM_META, GAMING_PLATFORM_META,
+  BASE,
   type ShopItem, type QuestEntry,
 } from "@/lib/bids-api";
 import { VerifiedBadge } from "@/components/verified-badge";
@@ -30,7 +31,7 @@ import {
   Star, Trophy, Swords, Edit3, Check, X, Palette, Tag,
   Sparkles, Lock, CheckCircle2, Plus, Trash2, Gamepad2,
   Zap, Target, ChevronDown, ChevronUp, Users, Globe, UserRound,
-  Camera, ImagePlus, AlertTriangle, BookOpen,
+  Camera, ImagePlus, AlertTriangle, BookOpen, MailCheck, KeyRound, RefreshCw,
 } from "lucide-react";
 import { TrustMeter, ReputationBadges, computeBadges } from "@/components/reputation-badges";
 import { StreamingAccountsDisplay } from "@/components/streaming-accounts-display";
@@ -1945,6 +1946,213 @@ function VerificationSection({ idVerified, gamingAccountCount, onJustVerified }:
   );
 }
 
+// ── Email OTP Verification Card ───────────────────────────────────────────
+function EmailVerificationSection({ emailVerified, userEmail, onVerified }: {
+  emailVerified: boolean;
+  userEmail: string;
+  onVerified: (trustFactor: number) => void;
+}) {
+  const { toast } = useToast();
+  const [step, setStep] = useState<"idle" | "sending" | "sent" | "verifying">("idle");
+  const [otp, setOtp] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
+  const [attemptsLeft, setAttemptsLeft] = useState<number | null>(null);
+  const [skipped, setSkipped] = useState(false);
+
+  if (emailVerified) {
+    return (
+      <Card style={{ borderColor: "rgba(34,197,94,0.30)", background: "rgba(34,197,94,0.05)", boxShadow: "0 0 20px rgba(34,197,94,0.08)" }}>
+        <CardContent className="pt-5 pb-5">
+          <div className="flex items-center gap-4">
+            <div className="h-12 w-12 rounded-2xl flex items-center justify-center shrink-0"
+              style={{ background: "rgba(34,197,94,0.15)", border: "1px solid rgba(34,197,94,0.35)", boxShadow: "0 0 16px rgba(34,197,94,0.20)" }}>
+              <MailCheck className="h-6 w-6 text-green-400" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2.5 mb-1">
+                <span className="text-sm font-extrabold text-foreground uppercase tracking-wide">Email Verified</span>
+                <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-green-500/15 text-green-400 border border-green-500/30">
+                  <Check className="h-2.5 w-2.5" /> Verified
+                </span>
+              </div>
+              <p className="text-xs text-green-300/70 leading-relaxed">
+                Your email is verified. This boosts your Trust Factor and shows hirers you're a real account.
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (skipped) return null;
+
+  async function handleSend() {
+    setStep("sending");
+    setErrorMsg("");
+    try {
+      const res = await fetch(`${BASE}/auth/email-otp/send`, { method: "POST", credentials: "include" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Failed to send OTP");
+      setStep("sent");
+      toast({ title: "OTP sent!", description: `Check your inbox at ${userEmail}` });
+    } catch (err: any) {
+      setStep("idle");
+      setErrorMsg(err.message ?? "Failed to send OTP. Please try again.");
+    }
+  }
+
+  async function handleVerify(e: React.FormEvent) {
+    e.preventDefault();
+    if (otp.length !== 6) return;
+    setStep("verifying");
+    setErrorMsg("");
+    try {
+      const res = await fetch(`${BASE}/auth/email-otp/verify`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ otp }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setStep("sent");
+        setAttemptsLeft(data.attemptsRemaining ?? null);
+        throw new Error(data.error ?? "Incorrect code");
+      }
+      toast({ title: "Email verified!", description: "+5 Trust Factor added to your profile. 🎉" });
+      onVerified(data.user?.trustFactor ?? 0);
+    } catch (err: any) {
+      setStep("sent");
+      setErrorMsg(err.message ?? "Verification failed.");
+    }
+  }
+
+  return (
+    <Card style={{ borderColor: "rgba(168,85,247,0.22)", background: "rgba(168,85,247,0.04)" }}>
+      <CardContent className="pt-5 pb-5 space-y-4">
+        <div className="flex items-start gap-3.5">
+          <div className="h-11 w-11 rounded-xl flex items-center justify-center shrink-0 mt-0.5"
+            style={{ background: "rgba(168,85,247,0.15)", border: "1px solid rgba(168,85,247,0.30)" }}>
+            <Mail className="h-5 w-5 text-primary" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap mb-1">
+              <span className="text-sm font-extrabold text-foreground uppercase tracking-wide">Verify Your Email</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border text-amber-400 bg-amber-400/10 border-amber-400/30">Optional</span>
+            </div>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              A 6-digit code will be sent to <span className="text-foreground font-semibold">{userEmail}</span>. Expires in 10 minutes.
+            </p>
+          </div>
+        </div>
+
+        {/* Soft nudge banner */}
+        {step === "idle" && (
+          <div className="flex items-start gap-2.5 rounded-lg px-3 py-2.5 text-xs"
+            style={{ background: "rgba(168,85,247,0.07)", border: "1px solid rgba(168,85,247,0.18)" }}>
+            <Sparkles className="h-3.5 w-3.5 text-primary shrink-0 mt-0.5" />
+            <span className="text-muted-foreground leading-relaxed">
+              Verifying your email <strong className="text-foreground">increases your Trust Factor by +5</strong> and helps prevent fake accounts. Hirers trust verified profiles more.
+            </span>
+          </div>
+        )}
+
+        {/* Error */}
+        {errorMsg && (
+          <div className="flex items-start gap-2 rounded-lg px-3 py-2.5 text-xs"
+            style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.22)" }}>
+            <AlertTriangle className="h-3.5 w-3.5 text-red-400 shrink-0 mt-0.5" />
+            <span className="text-red-300/90 leading-relaxed">
+              {errorMsg}
+              {attemptsLeft !== null && <span className="text-red-400 font-bold"> ({attemptsLeft} attempt{attemptsLeft === 1 ? "" : "s"} remaining)</span>}
+            </span>
+          </div>
+        )}
+
+        {step === "idle" && (
+          <div className="flex items-center gap-3 flex-wrap">
+            <Button
+              onClick={handleSend}
+              className="flex items-center gap-2 h-9 px-4 font-bold text-xs uppercase tracking-widest"
+              style={{ background: "linear-gradient(135deg,#7c3aed,#a855f7)", boxShadow: "0 2px 12px rgba(147,51,234,0.30)" }}
+            >
+              <Mail className="h-3.5 w-3.5" />
+              Send OTP to my Email
+            </Button>
+            <button
+              onClick={() => setSkipped(true)}
+              className="text-xs text-muted-foreground/60 hover:text-muted-foreground underline underline-offset-2 transition-colors"
+            >
+              Skip for now
+            </button>
+          </div>
+        )}
+
+        {step === "sending" && (
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <RefreshCw className="h-3.5 w-3.5 animate-spin text-primary" />
+            Sending code to {userEmail}…
+          </div>
+        )}
+
+        {(step === "sent" || step === "verifying") && (
+          <form onSubmit={handleVerify} className="space-y-3">
+            <div className="space-y-1.5">
+              <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">6-Digit Code</Label>
+              <div className="relative">
+                <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary/60" />
+                <Input
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  maxLength={6}
+                  placeholder="123456"
+                  value={otp}
+                  onChange={e => { setOtp(e.target.value.replace(/\D/g, "")); setErrorMsg(""); }}
+                  className="pl-10 font-mono text-lg tracking-[0.4em] bg-background/60 border-primary/30 focus:border-primary/60"
+                  autoFocus
+                  disabled={step === "verifying"}
+                />
+              </div>
+            </div>
+            <div className="flex items-center gap-3 flex-wrap">
+              <Button
+                type="submit"
+                disabled={otp.length !== 6 || step === "verifying"}
+                className="h-9 px-4 font-bold text-xs uppercase tracking-widest"
+                style={{ background: otp.length === 6 ? "linear-gradient(135deg,#059669,#10b981)" : undefined, boxShadow: otp.length === 6 ? "0 2px 12px rgba(16,185,129,0.30)" : undefined }}
+              >
+                {step === "verifying" ? (
+                  <><RefreshCw className="h-3.5 w-3.5 animate-spin mr-1.5" />Verifying…</>
+                ) : (
+                  <><CheckCircle2 className="h-3.5 w-3.5 mr-1.5" />Verify Code</>
+                )}
+              </Button>
+              <button
+                type="button"
+                onClick={() => { setStep("idle"); setOtp(""); setErrorMsg(""); }}
+                className="text-xs text-muted-foreground/60 hover:text-muted-foreground underline underline-offset-2 transition-colors"
+                disabled={step === "verifying"}
+              >
+                Resend / change
+              </button>
+              <button
+                type="button"
+                onClick={() => setSkipped(true)}
+                className="text-xs text-muted-foreground/60 hover:text-muted-foreground underline underline-offset-2 transition-colors"
+                disabled={step === "verifying"}
+              >
+                Skip for now
+              </button>
+            </div>
+          </form>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function Profile() {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -1956,6 +2164,8 @@ export default function Profile() {
   const [editingBio, setEditingBio] = useState(false);
   const [draftBio, setDraftBio] = useState("");
   const [showSetupModal, setShowSetupModal] = useState(false);
+  const [localEmailVerified, setLocalEmailVerified] = useState<boolean | null>(null);
+  const emailVerified = localEmailVerified ?? (user?.emailVerified ?? false);
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [galleryUploading, setGalleryUploading] = useState(false);
   const [confirmDeleteGallery, setConfirmDeleteGallery] = useState<number | null>(null);
@@ -2252,6 +2462,11 @@ export default function Profile() {
                     <span className="text-muted-foreground font-normal text-[10px]">({profile.reviewCount})</span>
                   </span>
                 )}
+                {emailVerified && (
+                  <span className="flex items-center gap-1 text-[11px] font-bold text-green-400 bg-green-500/10 px-2.5 py-0.5 rounded-full border border-green-500/30 cursor-default">
+                    <MailCheck className="w-3 h-3" /> Email Verified
+                  </span>
+                )}
                 {/* Likes/dislikes hidden in Phase 1 */}
               </div>
 
@@ -2356,6 +2571,15 @@ export default function Profile() {
         idVerified={user.idVerified}
         gamingAccountCount={profile?.gamingAccounts?.length ?? 0}
         onJustVerified={handleJustVerified}
+      />
+
+      {/* ── EMAIL VERIFICATION ── */}
+      <EmailVerificationSection
+        emailVerified={emailVerified}
+        userEmail={user.email}
+        onVerified={(newTrustFactor) => {
+          setLocalEmailVerified(true);
+        }}
       />
 
       {/* Quest — Phase 3 Coming Soon */}

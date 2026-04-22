@@ -35,11 +35,13 @@ function formatUser(user: {
   officialIdPath?: string | null;
   points: number;
   trustScore?: number;
+  trustFactor?: number;
   profileBackground?: string | null;
   profileTitle?: string | null;
   country?: string | null;
   gender?: string | null;
   gamerbuddyId?: string | null;
+  emailVerified?: boolean;
   createdAt: Date;
 }) {
   return {
@@ -51,11 +53,13 @@ function formatUser(user: {
     officialIdPath: user.officialIdPath ?? null,
     points: user.points,
     trustScore: user.trustScore ?? 0,
+    trustFactor: user.trustFactor ?? 50,
     profileBackground: user.profileBackground ?? null,
     profileTitle: user.profileTitle ?? null,
     country: user.country ?? null,
     gender: user.gender ?? null,
     gamerbuddyId: user.gamerbuddyId ?? null,
+    emailVerified: user.emailVerified ?? false,
     createdAt: user.createdAt.toISOString(),
   };
 }

@@ -43,6 +43,8 @@ export interface User {
   gender: string | null;
   gamerbuddyId: string | null;
   trustScore?: number;
+  trustFactor?: number;
+  emailVerified?: boolean;
   createdAt: string;
 }
 

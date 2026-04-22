@@ -18,3 +18,4 @@ export * from "./tournaments";
 export * from "./platform_fees";
 export * from "./user_photos";
 export * from "./withdrawal_requests";
+export * from "./email_otps";

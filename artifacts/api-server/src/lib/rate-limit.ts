@@ -123,6 +123,17 @@ export const verifyLimiter = rateLimit({
   handler: jsonMessage("Too many verification requests. Please wait an hour before trying again."),
 });
 
+// ── Email OTP ──────────────────────────────────────────────────────────────
+// 3 sends per hour per user — prevents email flooding.
+export const otpSendLimiter = rateLimit({
+  windowMs: 60 * 60_000,
+  max: 3,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: userOrIpKey,
+  handler: jsonMessage("Too many OTP requests. Please wait an hour before trying again."),
+});
+
 // ── Withdrawal ─────────────────────────────────────────────────────────────
 // 3 per 10-minute window per user — prevents DoS spam on the withdrawal route.
 // The atomic SQL guard in the route already prevents actual double-deduction,
