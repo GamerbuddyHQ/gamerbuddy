@@ -60,7 +60,7 @@ router.get(
           })
           .from(walletTransactionsTable)
           .leftJoin(usersTable, eq(walletTransactionsTable.userId, usersTable.id))
-          .where(gte(sql`${walletTransactionsTable.amount}::numeric`, 500))
+          .where(gte(walletTransactionsTable.amount, 500))
           .orderBy(desc(walletTransactionsTable.createdAt))
           .limit(50),
 
@@ -201,14 +201,14 @@ router.get(
     type FeeRow = {
       id:                       number;
       request_id:               number | null;
-      amount:                   string;
+      amount:                   number | string;
       type:                     string;
       description:              string;
-      created_at:               Date;
+      created_at:               Date | number;
       hirer_region:             string | null;
       game_name:                string | null;
       platform:                 string | null;
-      gross_amount:             string | null;
+      gross_amount:             number | string | null;
       hirer_id:                 number | null;
       hirer_name:               string | null;
       hirer_gb_id:              string | null;
@@ -216,12 +216,12 @@ router.get(
       gamer_name:               string | null;
       gamer_gb_id:              string | null;
       pending_withdrawal_id:    number | null;
-      pending_withdrawal_amount: string | null;
+      pending_withdrawal_amount: number | string | null;
     };
 
-    const [feeRows, completedStats, indiaFees, globalFees] = await Promise.all([
+    const [feeResult, completedStats, indiaFees, globalFees] = await Promise.all([
       // Full ledger — joined with game_requests, hirer, gamer (via accepted bid), pending withdrawal
-      db.execute<FeeRow>(sql`
+      db.$client.execute(`
         SELECT
           pf.id,
           pf.request_id,
@@ -239,18 +239,13 @@ router.get(
           g.id                AS gamer_id,
           g.name              AS gamer_name,
           g.gamerbuddy_id     AS gamer_gb_id,
-          wr.id               AS pending_withdrawal_id,
-          wr.amount           AS pending_withdrawal_amount
+          (SELECT id FROM withdrawal_requests WHERE user_id = g.id AND status = 'pending' ORDER BY created_at ASC LIMIT 1) AS pending_withdrawal_id,
+          (SELECT amount FROM withdrawal_requests WHERE user_id = g.id AND status = 'pending' ORDER BY created_at ASC LIMIT 1) AS pending_withdrawal_amount
         FROM platform_fees pf
         LEFT JOIN game_requests gr ON gr.id = pf.request_id
         LEFT JOIN users h          ON h.id  = gr.user_id
         LEFT JOIN bids  b          ON b.id  = gr.accepted_bid_id
         LEFT JOIN users g          ON g.id  = b.bidder_id
-        LEFT JOIN LATERAL (
-          SELECT id, amount FROM withdrawal_requests
-          WHERE user_id = g.id AND status = 'pending'
-          ORDER BY created_at ASC LIMIT 1
-        ) wr ON TRUE
         ORDER BY pf.created_at DESC
         LIMIT 50
       `),
@@ -276,19 +271,23 @@ router.get(
         .where(sql`${gameRequestsTable.hirerRegion} != 'india' OR ${gameRequestsTable.hirerRegion} IS NULL`),
     ]);
 
-    const fees = feeRows.rows;
+    const fees = feeResult.rows as unknown as FeeRow[];
 
     // Time-bucket totals computed in JS from full ledger
     function bucketTotal(since: Date) {
+      const sinceMs = since.getTime();
       return fees
-        .filter((f) => f.created_at >= since)
-        .reduce((s, f) => s + parseFloat(String(f.amount)), 0);
+        .filter((f: FeeRow) => {
+          const ts = f.created_at instanceof Date ? f.created_at.getTime() : Number(f.created_at);
+          return ts >= sinceMs;
+        })
+        .reduce((s: number, f: FeeRow) => s + parseFloat(String(f.amount)), 0);
     }
     function typeTotal(t: string) {
-      return fees.filter((f) => f.type === t).reduce((s, f) => s + parseFloat(String(f.amount)), 0);
+      return fees.filter((f: FeeRow) => f.type === t).reduce((s: number, f: FeeRow) => s + parseFloat(String(f.amount)), 0);
     }
 
-    const totalFees   = fees.reduce((s, f) => s + parseFloat(String(f.amount)), 0);
+    const totalFees   = fees.reduce((s: number, f: FeeRow) => s + parseFloat(String(f.amount)), 0);
     const todayFees   = bucketTotal(todayStart);
     const weekFees    = bucketTotal(weekStart);
     const monthFees   = bucketTotal(monthStart);
@@ -357,23 +356,23 @@ router.get(
       game_name:                string;
       platform:                 string;
       status:                   string;
-      escrow_amount:            string | null;
+      escrow_amount:            number | string | null;
       hirer_region:             string;
-      created_at:               Date;
-      started_at:               Date | null;
+      created_at:               Date | number;
+      started_at:               Date | number | null;
       hirer_id:                 number | null;
       hirer_name:               string | null;
       hirer_gb_id:              string | null;
-      bid_price:                string | null;
+      bid_price:                number | string | null;
       gamer_id:                 number | null;
       gamer_name:               string | null;
       gamer_gb_id:              string | null;
-      fee_amount:               string | null;
+      fee_amount:               number | string | null;
       pending_withdrawal_id:    number | null;
-      pending_withdrawal_amount: string | null;
+      pending_withdrawal_amount: number | string | null;
     };
 
-    const rawRows = await db.execute<RawRow>(sql`
+    const rawResult = await db.$client.execute(`
       SELECT
         gr.id,
         gr.game_name,
@@ -391,19 +390,13 @@ router.get(
         g.name          AS gamer_name,
         g.gamerbuddy_id AS gamer_gb_id,
         pf.amount       AS fee_amount,
-        wr.id           AS pending_withdrawal_id,
-        wr.amount       AS pending_withdrawal_amount
+        (SELECT id FROM withdrawal_requests WHERE user_id = g.id AND status = 'pending' ORDER BY created_at ASC LIMIT 1) AS pending_withdrawal_id,
+        (SELECT amount FROM withdrawal_requests WHERE user_id = g.id AND status = 'pending' ORDER BY created_at ASC LIMIT 1) AS pending_withdrawal_amount
       FROM game_requests gr
       LEFT JOIN users h              ON h.id  = gr.user_id
       LEFT JOIN bids  b              ON b.id  = gr.accepted_bid_id
       LEFT JOIN users g              ON g.id  = b.bidder_id
       LEFT JOIN platform_fees pf     ON pf.request_id = gr.id
-      LEFT JOIN LATERAL (
-        SELECT id, amount FROM withdrawal_requests
-        WHERE user_id = g.id AND status = 'pending'
-        ORDER BY created_at ASC
-        LIMIT 1
-      ) wr ON TRUE
       ORDER BY gr.created_at DESC
       LIMIT 500
     `);
@@ -422,7 +415,7 @@ router.get(
         .where(eq(withdrawalRequestsTable.status, "pending")),
     ]);
 
-    const rows = Array.isArray(rawRows) ? rawRows : (rawRows as { rows: RawRow[] }).rows;
+    const rows = rawResult.rows as unknown as RawRow[];
 
     res.json({
       summary: {
