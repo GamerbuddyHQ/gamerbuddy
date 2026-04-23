@@ -222,10 +222,14 @@ export default function PostRequest() {
           setLocation("/my-requests");
         },
         onError: (error: any) => {
+          const data = error?.data;
+          const description =
+            (data && typeof data === "object" ? data.error || data.message : null) ||
+            error?.message ||
+            "Failed to post request. Please try again.";
           toast({
             title: "Failed to post",
-            description:
-              error?.error?.message || error?.error?.error || error?.error || "Unknown error",
+            description,
             variant: "destructive",
           });
         },

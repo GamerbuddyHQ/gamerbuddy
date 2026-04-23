@@ -73,62 +73,71 @@ router.post(
   signupLimiter,
   upload.single("officialId"),
   async (req, res): Promise<void> => {
-    // Validate with Zod after multer has parsed multipart body
-    const parsed = SignupSchema.safeParse(req.body);
-    if (!parsed.success) {
-      const errors = parsed.error.errors.map((e) => e.message).join("; ");
-      res.status(400).json({ error: errors });
-      return;
+    try {
+      // Validate with Zod after multer has parsed multipart body
+      const parsed = SignupSchema.safeParse(req.body);
+      if (!parsed.success) {
+        const errors = parsed.error.errors.map((e) => e.message).join("; ");
+        res.status(400).json({ error: errors });
+        return;
+      }
+      const { name, email, password, phone } = parsed.data;
+
+      const [existing] = await db
+        .select({ id: usersTable.id })
+        .from(usersTable)
+        .where(eq(usersTable.email, email));
+
+      if (existing) {
+        res.status(409).json({ error: "Email already registered" });
+        return;
+      }
+
+      const passwordHash = await bcryptjs.hash(password, 10);
+      const officialIdPath = req.file ? `uploads/${req.file.originalname}` : null;
+
+      const [user] = await db
+        .insert(usersTable)
+        .values({
+          name: sanitize(name),
+          email,
+          passwordHash,
+          phone: sanitize(phone),
+          officialIdPath,
+          idVerified: false,
+        })
+        .returning();
+
+      // Generate deterministic GB-XXXXXX ID from the auto-incremented user id
+      const gamerbuddyId = `GB-${String(user.id).padStart(6, "0")}`;
+      await db.update(usersTable).set({ gamerbuddyId }).where(eq(usersTable.id, user.id));
+      user.gamerbuddyId = gamerbuddyId;
+
+      await db.insert(walletsTable).values({
+        userId: user.id,
+        hiringBalance: 0,
+        earningsBalance: 0,
+      });
+
+      const token = crypto.randomBytes(32).toString("hex");
+      const expiresAt = new Date(Date.now() + SESSION_DURATION_MS);
+      await db.insert(sessionsTable).values({ userId: user.id, token, expiresAt });
+
+      res.cookie("session_token", token, sessionCookieOptions(expiresAt));
+
+      req.log.info({ userId: user.id }, "User signed up");
+      res.status(201).json({
+        user: formatUser(user),
+        message: "Account created successfully",
+      });
+    } catch (err) {
+      req.log.error({ err }, "Signup error");
+      const message = err instanceof Error ? err.message : "Signup failed";
+      const status = (err as any)?.status ?? (err as any)?.statusCode ?? 500;
+      res.status(status < 500 ? status : 500).json({
+        error: status < 500 ? message : "Account creation failed. Please try again.",
+      });
     }
-    const { name, email, password, phone } = parsed.data;
-
-    const [existing] = await db
-      .select({ id: usersTable.id })
-      .from(usersTable)
-      .where(eq(usersTable.email, email));
-
-    if (existing) {
-      res.status(409).json({ error: "Email already registered" });
-      return;
-    }
-
-    const passwordHash = await bcryptjs.hash(password, 10);
-    const officialIdPath = req.file ? `uploads/${req.file.originalname}` : null;
-
-    const [user] = await db
-      .insert(usersTable)
-      .values({
-        name: sanitize(name),
-        email,
-        passwordHash,
-        phone: sanitize(phone),
-        officialIdPath,
-        idVerified: false,
-      })
-      .returning();
-
-    // Generate deterministic GB-XXXXXX ID from the auto-incremented user id
-    const gamerbuddyId = `GB-${String(user.id).padStart(6, "0")}`;
-    await db.update(usersTable).set({ gamerbuddyId }).where(eq(usersTable.id, user.id));
-    user.gamerbuddyId = gamerbuddyId;
-
-    await db.insert(walletsTable).values({
-      userId: user.id,
-      hiringBalance: 0,
-      earningsBalance: 0,
-    });
-
-    const token = crypto.randomBytes(32).toString("hex");
-    const expiresAt = new Date(Date.now() + SESSION_DURATION_MS);
-    await db.insert(sessionsTable).values({ userId: user.id, token, expiresAt });
-
-    res.cookie("session_token", token, sessionCookieOptions(expiresAt));
-
-    req.log.info({ userId: user.id }, "User signed up");
-    res.status(201).json({
-      user: formatUser(user),
-      message: "Account created successfully",
-    });
   },
 );
 

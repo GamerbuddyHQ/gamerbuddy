@@ -1,4 +1,4 @@
-import express, { type Express } from "express";
+import express, { type Express, type Request, type Response, type NextFunction } from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import pinoHttp from "pino-http";
@@ -54,5 +54,30 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/api", router);
+
+// ── Global JSON error handler — MUST be last ────────────────────────────────
+// Express identifies error handlers by their 4-argument signature.
+// Without this, unhandled errors render an HTML page that the frontend
+// cannot parse, causing "Unknown error occurred" on the client.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+app.use((err: Error, req: Request, res: Response, _next: NextFunction) => {
+  const status: number =
+    typeof (err as any).status === "number"
+      ? (err as any).status
+      : typeof (err as any).statusCode === "number"
+        ? (err as any).statusCode
+        : 500;
+
+  const message =
+    status < 500
+      ? err.message || "Bad request"
+      : "Internal server error";
+
+  logger.error({ err, url: req.url, method: req.method, status }, "Unhandled request error");
+
+  if (!res.headersSent) {
+    res.status(status).json({ error: message });
+  }
+});
 
 export default app;

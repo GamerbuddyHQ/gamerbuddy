@@ -110,7 +110,8 @@ export default function Login() {
           setLocation("/dashboard");
         },
         onError: (err) => {
-          const body = err as { error?: string; lockedUntil?: string; attemptsRemaining?: number } | undefined;
+          const body = (err as any).data as { error?: string; lockedUntil?: string; attemptsRemaining?: number } | null | undefined;
+          const errorMessage = body?.error || (err as any).message || "Invalid email or password.";
 
           if (body?.lockedUntil) {
             setLockedUntil(body.lockedUntil);
@@ -118,12 +119,12 @@ export default function Login() {
           } else if (typeof body?.attemptsRemaining === "number") {
             setAttemptsRemaining(body.attemptsRemaining);
             if (body.attemptsRemaining <= 0) {
-              toast({ title: "Account locked", description: body.error ?? "Too many failed attempts.", variant: "destructive" });
+              toast({ title: "Account locked", description: errorMessage, variant: "destructive" });
             }
           } else {
             toast({
               title: "Login failed",
-              description: body?.error ?? "Invalid email or password.",
+              description: errorMessage,
               variant: "destructive",
             });
           }
