@@ -6,6 +6,17 @@ import router from "./routes";
 import { logger } from "./lib/logger";
 import { securityHeaders } from "./lib/security-headers";
 
+// ── Startup diagnostic log ────────────────────────────────────────────────────
+// Runs once on cold-start. Visible in Vercel function logs.
+console.log("[gamerbuddy:startup]", JSON.stringify({
+  NODE_ENV:            process.env.NODE_ENV,
+  VERCEL:              process.env.VERCEL,
+  DATABASE_URL_SET:    !!process.env.DATABASE_URL,
+  SESSION_SECRET_SET:  !!process.env.SESSION_SECRET,
+  RAZORPAY_KEY_ID_SET: !!process.env.RAZORPAY_KEY_ID,
+  FRONTEND_URL:        process.env.FRONTEND_URL ?? "(not set)",
+}));
+
 const app: Express = express();
 
 // Replit (and most hosting providers) run behind a reverse proxy.
@@ -73,6 +84,8 @@ app.use((err: Error, req: Request, res: Response, _next: NextFunction) => {
       ? err.message || "Bad request"
       : "Internal server error";
 
+  // console.error ensures visibility in Vercel's function log even if pino fails.
+  console.error("[gamerbuddy:error]", req.method, req.url, "status:", status, err);
   logger.error({ err, url: req.url, method: req.method, status }, "Unhandled request error");
 
   if (!res.headersSent) {
