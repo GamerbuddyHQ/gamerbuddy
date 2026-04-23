@@ -171,7 +171,7 @@ router.post(
   "/admin/security/clear-lockout/:userId",
   requireAdminAuth,
   async (req, res): Promise<void> => {
-    const userId = parseInt(req.params.userId, 10);
+    const userId = parseInt(req.params.userId as string, 10);
     if (isNaN(userId)) {
       res.status(400).json({ error: "Invalid userId" });
       return;
@@ -532,7 +532,7 @@ router.get(
       .from(withdrawalRequestsTable)
       .leftJoin(usersTable, eq(withdrawalRequestsTable.userId, usersTable.id))
       .leftJoin(walletsTable, eq(withdrawalRequestsTable.userId, walletsTable.userId))
-      .where(gte(withdrawalRequestsTable.amount, String(MIN_WR_AMOUNT)))
+      .where(gte(withdrawalRequestsTable.amount, Number(MIN_WR_AMOUNT)))
       .orderBy(
         sql`CASE WHEN ${withdrawalRequestsTable.status} = 'pending' THEN 0 ELSE 1 END`,
         desc(withdrawalRequestsTable.createdAt),
@@ -560,7 +560,7 @@ router.post(
   "/admin/withdrawal-requests/:id/mark-paid",
   requireAdminAuth,
   async (req, res): Promise<void> => {
-    const requestId = parseInt(req.params.id, 10);
+    const requestId = parseInt(req.params.id as string, 10);
     if (isNaN(requestId)) {
       res.status(400).json({ error: "Invalid request ID" });
       return;
@@ -724,7 +724,7 @@ router.post(
   "/admin/users/:id/set-verified",
   requireAdminAuth,
   async (req, res): Promise<void> => {
-    const userId = parseInt(req.params.id, 10);
+    const userId = parseInt(req.params.id as string, 10);
     if (isNaN(userId)) {
       res.status(400).json({ error: "Invalid userId" });
       return;

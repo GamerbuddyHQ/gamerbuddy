@@ -109,7 +109,7 @@ router.get("/mod/auth/me", async (req, res): Promise<void> => {
 
 /* ── POST /mod/community/posts/:id/hide ────────────────────────────────── */
 router.post("/mod/community/posts/:id/hide", requireModOrAdmin, async (req, res): Promise<void> => {
-  const id = parseInt(req.params.id, 10);
+  const id = parseInt(req.params.id as string, 10);
   if (isNaN(id)) { res.status(400).json({ error: "Invalid ID" }); return; }
 
   const [updated] = await db
@@ -126,7 +126,7 @@ router.post("/mod/community/posts/:id/hide", requireModOrAdmin, async (req, res)
 
 /* ── POST /mod/community/posts/:id/restore ──────────────────────────────── */
 router.post("/mod/community/posts/:id/restore", requireModOrAdmin, async (req, res): Promise<void> => {
-  const id = parseInt(req.params.id, 10);
+  const id = parseInt(req.params.id as string, 10);
   if (isNaN(id)) { res.status(400).json({ error: "Invalid ID" }); return; }
 
   const [updated] = await db
@@ -143,7 +143,7 @@ router.post("/mod/community/posts/:id/restore", requireModOrAdmin, async (req, r
 
 /* ── DELETE /mod/community/posts/:id — permanent delete ────────────────── */
 router.delete("/mod/community/posts/:id", requireModOrAdmin, async (req, res): Promise<void> => {
-  const id = parseInt(req.params.id, 10);
+  const id = parseInt(req.params.id as string, 10);
   if (isNaN(id)) { res.status(400).json({ error: "Invalid ID" }); return; }
 
   const [post] = await db.select({ id: suggestionsTable.id }).from(suggestionsTable).where(eq(suggestionsTable.id, id));
@@ -157,7 +157,7 @@ router.delete("/mod/community/posts/:id", requireModOrAdmin, async (req, res): P
 
 /* ── POST /mod/community/posts/:id/pin — toggle pin (max 5) ────────────── */
 router.post("/mod/community/posts/:id/pin", requireModOrAdmin, async (req, res): Promise<void> => {
-  const id = parseInt(req.params.id, 10);
+  const id = parseInt(req.params.id as string, 10);
   if (isNaN(id)) { res.status(400).json({ error: "Invalid ID" }); return; }
 
   const [existing] = await db
@@ -192,7 +192,7 @@ router.post("/mod/community/posts/:id/pin", requireModOrAdmin, async (req, res):
 
 /* ── POST /mod/community/suggestions/:id/comment — post a Mod comment ──── */
 router.post("/mod/community/suggestions/:id/comment", requireModOrAdmin, async (req, res): Promise<void> => {
-  const suggestionId = parseInt(req.params.id, 10);
+  const suggestionId = parseInt(req.params.id as string, 10);
   if (isNaN(suggestionId)) { res.status(400).json({ error: "Invalid suggestion ID" }); return; }
 
   const body = (req.body?.body as string | undefined)?.trim();
@@ -236,7 +236,7 @@ router.post("/mod/community/suggestions/:id/comment", requireModOrAdmin, async (
 
 /* ── POST /mod/community/users/:userId/ban ──────────────────────────────── */
 router.post("/mod/community/users/:userId/ban", requireModOrAdmin, async (req, res): Promise<void> => {
-  const userId = parseInt(req.params.userId, 10);
+  const userId = parseInt(req.params.userId as string, 10);
   if (isNaN(userId)) { res.status(400).json({ error: "Invalid user ID" }); return; }
 
   const [updated] = await db
@@ -253,7 +253,7 @@ router.post("/mod/community/users/:userId/ban", requireModOrAdmin, async (req, r
 
 /* ── POST /mod/community/users/:userId/unban ────────────────────────────── */
 router.post("/mod/community/users/:userId/unban", requireModOrAdmin, async (req, res): Promise<void> => {
-  const userId = parseInt(req.params.userId, 10);
+  const userId = parseInt(req.params.userId as string, 10);
   if (isNaN(userId)) { res.status(400).json({ error: "Invalid user ID" }); return; }
 
   const [updated] = await db

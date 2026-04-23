@@ -384,7 +384,7 @@ function formatBid(
 }
 
 router.get("/requests/:id/bids", async (req, res): Promise<void> => {
-  const requestId = parseInt(req.params.id);
+  const requestId = parseInt(req.params.id as string);
   if (isNaN(requestId)) {
     res.status(400).json({ error: "Invalid request ID" });
     return;
@@ -509,7 +509,7 @@ router.post("/requests/:id/bids", requireAuth, bidLimiter, validate(PlaceBidSche
     return;
   }
 
-  const requestId = parseInt(req.params.id);
+  const requestId = parseInt(req.params.id as string);
   if (isNaN(requestId)) {
     res.status(400).json({ error: "Invalid request ID" });
     return;
@@ -603,8 +603,8 @@ router.post("/requests/:id/bids", requireAuth, bidLimiter, validate(PlaceBidSche
 
 router.post("/requests/:id/bids/:bidId/accept", requireAuth, async (req, res): Promise<void> => {
   const user = req.user!;
-  const requestId = parseInt(req.params.id);
-  const bidId = parseInt(req.params.bidId);
+  const requestId = parseInt(req.params.id as string);
+  const bidId = parseInt(req.params.bidId as string);
   if (isNaN(requestId) || isNaN(bidId)) { res.status(400).json({ error: "Invalid ID" }); return; }
 
   const [gameRequest] = await db.select().from(gameRequestsTable).where(eq(gameRequestsTable.id, requestId));
@@ -744,7 +744,7 @@ router.post("/requests/:id/bids/:bidId/accept", requireAuth, async (req, res): P
 
 router.post("/requests/:id/lock", requireAuth, async (req, res): Promise<void> => {
   const user = req.user!;
-  const requestId = parseInt(req.params.id);
+  const requestId = parseInt(req.params.id as string);
   if (isNaN(requestId)) { res.status(400).json({ error: "Invalid request ID" }); return; }
 
   const [gameRequest] = await db.select().from(gameRequestsTable).where(eq(gameRequestsTable.id, requestId));
@@ -815,7 +815,7 @@ router.post("/requests/:id/lock", requireAuth, async (req, res): Promise<void> =
 
 router.post("/requests/:id/start", requireAuth, async (req, res): Promise<void> => {
   const user = req.user!;
-  const requestId = parseInt(req.params.id);
+  const requestId = parseInt(req.params.id as string);
   if (isNaN(requestId)) { res.status(400).json({ error: "Invalid request ID" }); return; }
 
   const [gameRequest] = await db.select().from(gameRequestsTable).where(eq(gameRequestsTable.id, requestId));
@@ -847,7 +847,7 @@ router.post("/requests/:id/start", requireAuth, async (req, res): Promise<void> 
 
 router.post("/requests/:id/complete", requireAuth, async (req, res): Promise<void> => {
   const user = req.user!;
-  const requestId = parseInt(req.params.id);
+  const requestId = parseInt(req.params.id as string);
   if (isNaN(requestId)) { res.status(400).json({ error: "Invalid request ID" }); return; }
 
   const [gameRequest] = await db.select().from(gameRequestsTable).where(eq(gameRequestsTable.id, requestId));
@@ -1002,7 +1002,7 @@ router.post("/requests/:id/complete", requireAuth, async (req, res): Promise<voi
 
 router.post("/requests/:id/cancel", requireAuth, async (req, res): Promise<void> => {
   const user = req.user!;
-  const requestId = parseInt(req.params.id);
+  const requestId = parseInt(req.params.id as string);
   if (isNaN(requestId)) { res.status(400).json({ error: "Invalid request ID" }); return; }
 
   const [gameRequest] = await db.select().from(gameRequestsTable).where(eq(gameRequestsTable.id, requestId));
@@ -1033,7 +1033,7 @@ router.post("/requests/:id/cancel", requireAuth, async (req, res): Promise<void>
 });
 
 router.get("/requests/:id/reviews", async (req, res): Promise<void> => {
-  const requestId = parseInt(req.params.id);
+  const requestId = parseInt(req.params.id as string);
   if (isNaN(requestId)) { res.status(400).json({ error: "Invalid request ID" }); return; }
 
   const rows = await db
@@ -1057,7 +1057,7 @@ router.get("/requests/:id/reviews", async (req, res): Promise<void> => {
 
 router.post("/requests/:id/reviews", requireAuth, async (req, res): Promise<void> => {
   const user = req.user!;
-  const requestId = parseInt(req.params.id);
+  const requestId = parseInt(req.params.id as string);
   if (isNaN(requestId)) { res.status(400).json({ error: "Invalid request ID" }); return; }
 
   const [gameRequest] = await db.select().from(gameRequestsTable).where(eq(gameRequestsTable.id, requestId));
@@ -1181,7 +1181,7 @@ router.post("/requests/:id/reviews", requireAuth, async (req, res): Promise<void
 
 router.post("/requests/:id/gift", requireAuth, async (req, res): Promise<void> => {
   const user = req.user!;
-  const requestId = parseInt(req.params.id);
+  const requestId = parseInt(req.params.id as string);
   if (isNaN(requestId)) { res.status(400).json({ error: "Invalid request ID" }); return; }
 
   const [gameRequest] = await db.select().from(gameRequestsTable).where(eq(gameRequestsTable.id, requestId));

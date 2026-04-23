@@ -146,7 +146,7 @@ router.patch("/community/suggestions/:id/moderate", requireAuth, async (req, res
     return;
   }
 
-  const suggestionId = parseInt(req.params.id, 10);
+  const suggestionId = parseInt(req.params.id as string, 10);
   if (isNaN(suggestionId)) { res.status(400).json({ error: "Invalid ID" }); return; }
 
   const { action } = req.body as { action?: string };
@@ -183,7 +183,7 @@ router.delete("/community/suggestions/:id", requireAuth, async (req, res): Promi
     return;
   }
 
-  const suggestionId = parseInt(req.params.id, 10);
+  const suggestionId = parseInt(req.params.id as string, 10);
   if (isNaN(suggestionId)) { res.status(400).json({ error: "Invalid ID" }); return; }
 
   const [suggestion] = await db.select().from(suggestionsTable).where(eq(suggestionsTable.id, suggestionId));
@@ -198,7 +198,7 @@ router.delete("/community/suggestions/:id", requireAuth, async (req, res): Promi
 ────────────────────────────────────────────────────────────── */
 router.post("/community/suggestions/:id/vote", requireAuth, async (req, res): Promise<void> => {
   const user = req.user!;
-  const suggestionId = parseInt(req.params.id, 10);
+  const suggestionId = parseInt(req.params.id as string, 10);
   const { vote } = req.body as { vote?: string };
 
   if (!vote || !["up", "down"].includes(vote)) {
@@ -232,7 +232,7 @@ router.post("/community/suggestions/:id/vote", requireAuth, async (req, res): Pr
    GET /community/suggestions/:id/comments
 ────────────────────────────────────────────────────────────── */
 router.get("/community/suggestions/:id/comments", async (req, res): Promise<void> => {
-  const suggestionId = parseInt(req.params.id, 10);
+  const suggestionId = parseInt(req.params.id as string, 10);
 
   const rows = await db
     .select({
@@ -276,7 +276,7 @@ router.get("/community/suggestions/:id/comments", async (req, res): Promise<void
 ────────────────────────────────────────────────────────────── */
 router.post("/community/suggestions/:id/comments", requireAuth, commentLimiter, validate(PostCommentSchema), async (req, res): Promise<void> => {
   const user = req.user!;
-  const suggestionId = parseInt(req.params.id, 10);
+  const suggestionId = parseInt(req.params.id as string, 10);
   const { body, parentId } = req.body as { body: string; parentId?: number | null };
 
   const cleanBody = sanitizeComment(body);

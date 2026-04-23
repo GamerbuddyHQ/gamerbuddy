@@ -55,9 +55,14 @@ export default function Signup() {
           setLocation("/dashboard");
         },
         onError: (error) => {
+          const data = (error as any).data;
+          const description =
+            (data && typeof data === "object" ? data.error || data.message : null) ||
+            (error as any).message ||
+            "Signup failed. Please check your connection and try again.";
           toast({
             title: "Signup failed",
-            description: error.error?.message || error.error?.error || "Unknown error occurred",
+            description,
             variant: "destructive",
           });
         },
