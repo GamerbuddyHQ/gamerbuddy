@@ -27,7 +27,12 @@ const PHASES = [
       {
         icon: Shield,
         title: "Account Creation + Gaming Account Linking",
-        desc: "Sign up and link at least one gaming account (Steam, Epic, PSN, Xbox, or Nintendo Switch). Accounts are reviewed within 24–48 hours — verification unlocks posting, bidding, and hiring.",
+        desc: "Sign up and link at least one gaming account (Steam, Epic, PSN, Xbox, or Nintendo Switch). Accounts are reviewed within 24–48 hours. After verification, a small one-time activation fee is required to fully unlock posting, bidding, and hiring — paid once, never again.",
+      },
+      {
+        icon: Zap,
+        title: "One-Time Account Activation Fee",
+        desc: "To keep Gamerbuddy safe and enjoyable for real gamers, a small one-time fee is charged after verification — 🇮🇳 ₹149 for India, 🌍 $5 for Global. This protects against fake/bot accounts and spam, keeping the community high-quality and trustworthy. Paid once only — you'll never be charged again. ❤️",
       },
       {
         icon: Hash,
@@ -92,7 +97,7 @@ const PHASES = [
       {
         icon: FileText,
         title: "Professional Disclaimer with Funds Holding Note",
-        desc: "Clean 6-section disclaimer covering early development, performance guarantees, funds holding, session recording, community rules, and verification — legally clear and user-readable.",
+        desc: "Clean 7-section disclaimer covering early development, performance guarantees, funds holding, session recording, community rules, verification, and the one-time activation fee — legally clear and user-readable.",
       },
     ],
   },
@@ -250,7 +255,7 @@ export default function Roadmap() {
           </span>
         </div>
         <p className="text-sm sm:text-[15px] text-foreground/80 leading-[1.75]">
-          <strong className="text-foreground">Phase 1 is fully live.</strong> User registration with 24–48hr verification, unique GB-XXXXXX IDs, profile photos with anti-AI enforcement, regional minimum fees (₹200/hr India · $5/hr global), request posting &amp; bidding, in-app messaging, dual wallets with 10% platform fee, manual payouts ($100 threshold), reviews &amp; Trust Factor, connected gaming accounts display, optional gender filter, Community tab with voting, full Community Guidelines, and a professional 6-section Disclaimer.
+          <strong className="text-foreground">Phase 1 is fully live.</strong> User registration with 24–48hr verification, one-time account activation fee (🇮🇳 ₹149 India · 🌍 $5 Global — once only), unique GB-XXXXXX IDs, profile photos with anti-AI enforcement, regional minimum fees (₹200/hr India · $5/hr global), request posting &amp; bidding, in-app messaging, dual wallets with 10% platform fee, manual payouts ($100 threshold), reviews &amp; Trust Factor, connected gaming accounts display, optional gender filter, Community tab with voting, full Community Guidelines, and a professional 7-section Disclaimer.
         </p>
         <p className="text-sm text-muted-foreground/60 leading-[1.75]">
           We're now building Phase 2 — tournaments, bulk hiring (3–100 gamers), automatic payouts, and advanced real-time features. Your Community votes directly shape what gets prioritised next. 🚀

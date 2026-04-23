@@ -1,0 +1,47 @@
+Update the entire platform to properly reflect all recent changes for Phase 1, especially the one-time activation fee and related explanations. Make sure everything is consistent before we move to Vercel.
+
+Key Changes to Apply:
+
+1. **One-time Activation Fee (Region-based):**
+   - India: ₹149 (one-time, non-refundable)
+   - Global: $5 (one-time, non-refundable)
+   - This fee is required after 24-48hr verification to make the account "Fully Active" (able to post requests or bid).
+
+2. **Friendly Explanation Text** (use this exact wording everywhere it appears):
+   "To keep Gamerbuddy safe and enjoyable for real gamers, we charge a small one-time activation fee. Unfortunately, some bad actors create fake/bot accounts or try to abuse the platform. This small fee helps us greatly reduce spam and maintain a high-quality, trustworthy community.
+
+   - India: ₹149 (one-time only)
+   - Global: $5 (one-time only)
+
+   This is a one-time payment — you won’t be charged again.
+   Thank you for understanding and for helping us build a better gaming community together. ❤️"
+
+3. **Update All Places:**
+   - Activation screen after verification
+   - Wallet page
+   - "How it Works" / Getting Started section
+   - AI Assistant (add full knowledge of this fee, region detection, and the friendly explanation)
+   - Disclaimer / About page (short version)
+   - Signup/verification success messages
+
+4. **AI Assistant Updates:**
+   Make the AI Support fully aware of:
+   - The region-based one-time activation fee (₹149 India / $5 Global)
+   - Why it exists (anti-bot/spam protection)
+   - That it's one-time only
+   - The full friendly explanation above
+   - Current Phase 1 flow: Signup → Link gaming account → 24-48hr verification → Pay activation fee → Complete profile → Top up Hiring Wallet (min ~₹900/$10.75) → Start hiring or getting hired.
+
+5. **General Consistency:**
+   - Ensure fee detection works based on phone country code (+91 = India) or IP.
+   - Keep language friendly, transparent, and appreciative.
+   - Test the full new user flow with both Indian and Global test accounts.
+
+Apply all these updates cleanly now.
+
+After applying, do a quick test:
+- Try signup flow for Indian and non-Indian users
+- Check that correct fee shows
+- Ask the AI Assistant: "What is the activation fee?" and "Why do I need to pay the activation fee?"
+
+Confirm everything is consistent and ready for Vercel deployment.

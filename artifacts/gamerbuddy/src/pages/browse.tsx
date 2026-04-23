@@ -690,9 +690,9 @@ function EmptyState({ hasFilters, onClear }: { hasFilters: boolean; onClear: () 
 function HowItWorksSection() {
   const { isDark } = useTheme();
   const steps = [
-    { num: "01", icon: <Search className="h-5 w-5" />, color: "#a855f7", title: "Browse Missions",  desc: "Find requests that match your skills, platform, and schedule. Filters help you zero in fast." },
-    { num: "02", icon: <Gavel  className="h-5 w-5" />, color: "#22d3ee", title: "Place Your Bid",   desc: "Set your price and pitch yourself directly — no middlemen, no agency cuts." },
-    { num: "03", icon: <Trophy className="h-5 w-5" />, color: "#facc15", title: "Play & Get Paid",  desc: "Complete the quest, collect your review, and withdraw your 90% earnings." },
+    { num: "01", icon: <Search className="h-5 w-5" />, color: "#a855f7", title: "Verify & Activate",  desc: "Link a gaming account → 24–48hr review → pay a one-time activation fee (🇮🇳 ₹149 / 🌍 $5) — then you're fully unlocked." },
+    { num: "02", icon: <Gavel  className="h-5 w-5" />, color: "#22d3ee", title: "Browse & Bid",       desc: "Find requests that match your skills and platform. Set your price and pitch yourself — no middlemen." },
+    { num: "03", icon: <Trophy className="h-5 w-5" />, color: "#facc15", title: "Play & Get Paid",    desc: "Complete the quest, collect your review, and withdraw your 90% earnings." },
   ];
 
   return (
