@@ -1,3 +1,4 @@
+/// <reference path="../artifacts/api-server/src/types/express.d.ts" />
 /**
  * Vercel Serverless Function — API entry point
  *
