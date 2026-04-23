@@ -1,8 +1,8 @@
-import { sqliteTable, integer, text, real } from "drizzle-orm/sqlite-core";
+import { pgTable, integer, text, real, timestamp, serial } from "drizzle-orm/pg-core";
 import { usersTable } from "./users";
 
-export const tournamentsTable = sqliteTable("tournaments", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const tournamentsTable = pgTable("tournaments", {
+  id: serial("id").primaryKey(),
   hostId: integer("host_id").notNull().references(() => usersTable.id),
   title: text("title").notNull(),
   gameName: text("game_name").notNull(),
@@ -20,13 +20,13 @@ export const tournamentsTable = sqliteTable("tournaments", {
   country: text("country").notNull().default("any"),
   region: text("region").notNull().default("any"),
   genderPreference: text("gender_preference").notNull().default("any"),
-  createdAt: integer("created_at", { mode: "timestamp" }).notNull().$defaultFn(() => new Date()),
-  startedAt: integer("started_at", { mode: "timestamp" }),
-  completedAt: integer("completed_at", { mode: "timestamp" }),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  startedAt: timestamp("started_at"),
+  completedAt: timestamp("completed_at"),
 });
 
-export const tournamentRegistrationsTable = sqliteTable("tournament_registrations", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const tournamentRegistrationsTable = pgTable("tournament_registrations", {
+  id: serial("id").primaryKey(),
   tournamentId: integer("tournament_id").notNull().references(() => tournamentsTable.id),
   userId: integer("user_id").notNull().references(() => usersTable.id),
   userName: text("user_name").notNull(),
@@ -34,5 +34,5 @@ export const tournamentRegistrationsTable = sqliteTable("tournament_registration
   placement: integer("placement"),
   prizeWon: real("prize_won"),
   entryFeePaid: real("entry_fee_paid").notNull().default(0),
-  joinedAt: integer("joined_at", { mode: "timestamp" }).notNull().$defaultFn(() => new Date()),
+  joinedAt: timestamp("joined_at").notNull().defaultNow(),
 });

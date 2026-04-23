@@ -1,13 +1,13 @@
-import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
+import { pgTable, text, integer, timestamp, serial } from "drizzle-orm/pg-core";
 import { usersTable } from "./users";
 
-export const questEntriesTable = sqliteTable("quest_entries", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const questEntriesTable = pgTable("quest_entries", {
+  id: serial("id").primaryKey(),
   userId: integer("user_id").notNull().references(() => usersTable.id, { onDelete: "cascade" }),
   gameName: text("game_name").notNull(),
   helpType: text("help_type").notNull(),
   playstyle: text("playstyle").notNull(),
-  createdAt: integer("created_at", { mode: "timestamp" }).notNull().$defaultFn(() => new Date()),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
 export type QuestEntry = typeof questEntriesTable.$inferSelect;

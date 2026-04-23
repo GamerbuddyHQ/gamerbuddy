@@ -1,12 +1,12 @@
-import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
+import { pgTable, text, integer, timestamp, serial } from "drizzle-orm/pg-core";
 import { usersTable } from "./users";
 
-export const sessionsTable = sqliteTable("sessions", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const sessionsTable = pgTable("sessions", {
+  id: serial("id").primaryKey(),
   userId: integer("user_id").notNull().references(() => usersTable.id),
   token: text("token").notNull().unique(),
-  createdAt: integer("created_at", { mode: "timestamp" }).notNull().$defaultFn(() => new Date()),
-  expiresAt: integer("expires_at", { mode: "timestamp" }).notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  expiresAt: timestamp("expires_at").notNull(),
 });
 
 export type Session = typeof sessionsTable.$inferSelect;

@@ -221,7 +221,7 @@ router.get(
 
     const [feeResult, completedStats, indiaFees, globalFees] = await Promise.all([
       // Full ledger — joined with game_requests, hirer, gamer (via accepted bid), pending withdrawal
-      db.$client.execute(`
+      db.execute(sql.raw(`
         SELECT
           pf.id,
           pf.request_id,
@@ -248,7 +248,7 @@ router.get(
         LEFT JOIN users g          ON g.id  = b.bidder_id
         ORDER BY pf.created_at DESC
         LIMIT 50
-      `),
+      `)),
 
       // Completed session / quest counts
       db
@@ -372,7 +372,7 @@ router.get(
       pending_withdrawal_amount: number | string | null;
     };
 
-    const rawResult = await db.$client.execute(`
+    const rawResult = await db.execute(sql.raw(`
       SELECT
         gr.id,
         gr.game_name,
@@ -399,7 +399,7 @@ router.get(
       LEFT JOIN platform_fees pf     ON pf.request_id = gr.id
       ORDER BY gr.created_at DESC
       LIMIT 500
-    `);
+    `));
 
     const [completedStats, txStats, feeStats, pendingStats] = await Promise.all([
       db.select({ total: count(gameRequestsTable.id) })

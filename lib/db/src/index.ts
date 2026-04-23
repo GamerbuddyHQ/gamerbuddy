@@ -1,25 +1,40 @@
-import { createClient } from "@libsql/client";
-import { drizzle } from "drizzle-orm/libsql";
+import pg from "pg";
+import { drizzle } from "drizzle-orm/node-postgres";
 import * as schema from "./schema";
-import { DDL_SQL } from "./createTables";
 
-const sqliteClient = createClient({ url: ":memory:" });
+const { Pool } = pg;
 
-export const db = drizzle(sqliteClient, { schema });
+if (!process.env.DATABASE_URL) {
+  throw new Error("[gamerbuddy/db] DATABASE_URL is not set — ensure the database is provisioned");
+}
 
-let _initialized = false;
-let _initPromise: Promise<void> | null = null;
+export const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  max: 3,
+  ssl: { rejectUnauthorized: false },
+});
+
+pool.on("error", (err) => {
+  console.error("[gamerbuddy/db] Unexpected pool client error:", err.message);
+});
+
+export const db = drizzle(pool, { schema });
+
+let _ready = false;
 
 export async function ensureTablesCreated(): Promise<void> {
-  if (_initialized) return;
-  if (!_initPromise) {
-    _initPromise = (async () => {
-      await sqliteClient.executeMultiple(DDL_SQL);
-      console.log("[gamerbuddy] SQLite in-memory tables created.");
-      _initialized = true;
-    })();
+  if (_ready) return;
+  try {
+    const client = await pool.connect();
+    const result = await client.query("SELECT NOW() AS now");
+    client.release();
+    console.log(`[gamerbuddy/db] Neon PostgreSQL connected. Server time: ${result.rows[0].now}`);
+    _ready = true;
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error("[gamerbuddy/db] Failed to connect to database:", msg);
+    throw err;
   }
-  return _initPromise;
 }
 
 export * from "./schema";

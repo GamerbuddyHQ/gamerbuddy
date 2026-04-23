@@ -1,10 +1,10 @@
-import { sqliteTable, integer, text, real } from "drizzle-orm/sqlite-core";
+import { pgTable, integer, text, real, boolean, timestamp, serial } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 import { usersTable } from "./users";
 
-export const gameRequestsTable = sqliteTable("game_requests", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const gameRequestsTable = pgTable("game_requests", {
+  id: serial("id").primaryKey(),
   userId: integer("user_id").notNull().references(() => usersTable.id),
   gameName: text("game_name").notNull(),
   platform: text("platform").notNull(),
@@ -13,13 +13,13 @@ export const gameRequestsTable = sqliteTable("game_requests", {
   status: text("status").notNull().default("open"),
   escrowAmount: real("escrow_amount"),
   acceptedBidId: integer("accepted_bid_id"),
-  startedAt: integer("started_at", { mode: "timestamp" }),
-  createdAt: integer("created_at", { mode: "timestamp" }).notNull().$defaultFn(() => new Date()),
-  isBulkHiring: integer("is_bulk_hiring", { mode: "boolean" }).notNull().default(false),
+  startedAt: timestamp("started_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  isBulkHiring: boolean("is_bulk_hiring").notNull().default(false),
   bulkGamersNeeded: integer("bulk_gamers_needed"),
   preferredCountry: text("preferred_country").default("any"),
   preferredGender: text("preferred_gender").default("any"),
-  expiresAt: integer("expires_at", { mode: "timestamp" }),
+  expiresAt: timestamp("expires_at"),
   hirerRegion: text("hirer_region").notNull().default("international"),
   sessionHours: integer("session_hours"),
   additionalGoals: text("additional_goals"),
