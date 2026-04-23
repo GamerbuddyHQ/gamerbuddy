@@ -53,7 +53,7 @@ export async function recordTransaction(
     userId,
     wallet,
     type,
-    amount: String(round2(Math.abs(amount))),
+    amount: round2(Math.abs(amount)),
     description,
     referenceId: referenceId ?? null,
   });
@@ -153,7 +153,7 @@ router.get("/wallets/transactions", requireAuth, async (req, res): Promise<void>
 
   res.json(txns.map((t) => ({
     ...t,
-    amount: parseFloat(t.amount),
+    amount: t.amount,
     createdAt: t.createdAt.toISOString(),
   })));
 });

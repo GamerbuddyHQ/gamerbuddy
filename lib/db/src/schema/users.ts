@@ -1,15 +1,15 @@
-import { pgTable, text, serial, timestamp, boolean, integer } from "drizzle-orm/pg-core";
+import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
-export const usersTable = pgTable("users", {
-  id: serial("id").primaryKey(),
+export const usersTable = sqliteTable("users", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
   passwordHash: text("password_hash").notNull(),
   phone: text("phone").notNull(),
   officialIdPath: text("official_id_path"),
-  idVerified: boolean("id_verified").notNull().default(false),
+  idVerified: integer("id_verified", { mode: "boolean" }).notNull().default(false),
   points: integer("points").notNull().default(0),
   bio: text("bio"),
   trustFactor: integer("trust_factor").notNull().default(50),
@@ -18,20 +18,20 @@ export const usersTable = pgTable("users", {
   country: text("country"),
   gender: text("gender"),
   loginAttempts: integer("login_attempts").notNull().default(0),
-  lockedUntil:   timestamp("locked_until", { withTimezone: true }),
+  lockedUntil: integer("locked_until", { mode: "timestamp" }),
   profilePhotoUrl: text("profile_photo_url"),
-  galleryPhotoUrls: text("gallery_photo_urls").array().notNull().default([]),
+  galleryPhotoUrls: text("gallery_photo_urls", { mode: "json" }).$type<string[]>().notNull().default([]),
   gamerbuddyId: text("gamerbuddy_id").unique(),
-  communityBanned: boolean("community_banned").notNull().default(false),
-  isModerator: boolean("is_moderator").notNull().default(false),
-  moderatorAppointedAt: timestamp("moderator_appointed_at", { withTimezone: true }),
+  communityBanned: integer("community_banned", { mode: "boolean" }).notNull().default(false),
+  isModerator: integer("is_moderator", { mode: "boolean" }).notNull().default(false),
+  moderatorAppointedAt: integer("moderator_appointed_at", { mode: "timestamp" }),
   trustScore: integer("trust_score").notNull().default(0),
-  emailVerified: boolean("email_verified").notNull().default(false),
-  phoneVerified: boolean("phone_verified").notNull().default(false),
-  isActivated: boolean("is_activated").notNull().default(false),
+  emailVerified: integer("email_verified", { mode: "boolean" }).notNull().default(false),
+  phoneVerified: integer("phone_verified", { mode: "boolean" }).notNull().default(false),
+  isActivated: integer("is_activated", { mode: "boolean" }).notNull().default(false),
   activationRegion: text("activation_region"),
-  activationPaidAt: timestamp("activation_paid_at", { withTimezone: true }),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  activationPaidAt: integer("activation_paid_at", { mode: "timestamp" }),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull().$defaultFn(() => new Date()),
 });
 
 export const insertUserSchema = createInsertSchema(usersTable).omit({

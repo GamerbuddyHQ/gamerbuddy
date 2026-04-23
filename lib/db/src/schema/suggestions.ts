@@ -1,45 +1,45 @@
-import { pgTable, text, serial, timestamp, integer, boolean, jsonb } from "drizzle-orm/pg-core";
+import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
 import { usersTable } from "./users";
 
-export const suggestionsTable = pgTable("suggestions", {
-  id: serial("id").primaryKey(),
+export const suggestionsTable = sqliteTable("suggestions", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
   userId: integer("user_id").notNull().references(() => usersTable.id),
   title: text("title").notNull(),
   body: text("body").notNull(),
   status: text("status").notNull().default("visible"),
   category: text("category").notNull().default("other"),
-  isPinned: boolean("is_pinned").notNull().default(false),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  isPinned: integer("is_pinned", { mode: "boolean" }).notNull().default(false),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull().$defaultFn(() => new Date()),
 });
 
-export const suggestionVotesTable = pgTable("suggestion_votes", {
-  id: serial("id").primaryKey(),
+export const suggestionVotesTable = sqliteTable("suggestion_votes", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
   suggestionId: integer("suggestion_id").notNull().references(() => suggestionsTable.id, { onDelete: "cascade" }),
   userId: integer("user_id").notNull().references(() => usersTable.id),
-  vote: text("vote").notNull(), // 'up' | 'down'
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  vote: text("vote").notNull(),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull().$defaultFn(() => new Date()),
 });
 
-export const suggestionCommentsTable = pgTable("suggestion_comments", {
-  id: serial("id").primaryKey(),
+export const suggestionCommentsTable = sqliteTable("suggestion_comments", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
   suggestionId: integer("suggestion_id").notNull().references(() => suggestionsTable.id, { onDelete: "cascade" }),
   userId: integer("user_id").notNull().references(() => usersTable.id),
   parentId: integer("parent_id"),
   body: text("body").notNull(),
-  isAdminComment: boolean("is_admin_comment").notNull().default(false),
-  isModComment:  boolean("is_mod_comment").notNull().default(false),
-  isPinned: boolean("is_pinned").notNull().default(false),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  isAdminComment: integer("is_admin_comment", { mode: "boolean" }).notNull().default(false),
+  isModComment: integer("is_mod_comment", { mode: "boolean" }).notNull().default(false),
+  isPinned: integer("is_pinned", { mode: "boolean" }).notNull().default(false),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull().$defaultFn(() => new Date()),
 });
 
-export const moderatorActionsTable = pgTable("moderator_actions", {
-  id:          serial("id").primaryKey(),
+export const moderatorActionsTable = sqliteTable("moderator_actions", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
   moderatorId: integer("moderator_id").notNull().references(() => usersTable.id),
-  action:      text("action").notNull(), // hide_post | restore_post | delete_post | pin_post | ban_user | unban_user | mod_comment
-  targetType:  text("target_type").notNull(), // post | user | comment
-  targetId:    integer("target_id").notNull(),
-  meta:        jsonb("meta"),
-  createdAt:   timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  action: text("action").notNull(),
+  targetType: text("target_type").notNull(),
+  targetId: integer("target_id").notNull(),
+  meta: text("meta", { mode: "json" }),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull().$defaultFn(() => new Date()),
 });
 
 export type Suggestion = typeof suggestionsTable.$inferSelect;

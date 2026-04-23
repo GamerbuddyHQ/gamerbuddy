@@ -1,11 +1,11 @@
-import { pgTable, serial, integer, text, timestamp } from "drizzle-orm/pg-core";
+import { sqliteTable, integer, text } from "drizzle-orm/sqlite-core";
 import { usersTable } from "./users";
 
-export const profilePurchasesTable = pgTable("profile_purchases", {
-  id: serial("id").primaryKey(),
+export const profilePurchasesTable = sqliteTable("profile_purchases", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
   userId: integer("user_id").notNull().references(() => usersTable.id),
   itemId: text("item_id").notNull(),
-  purchasedAt: timestamp("purchased_at", { withTimezone: true }).notNull().defaultNow(),
+  purchasedAt: integer("purchased_at", { mode: "timestamp" }).notNull().$defaultFn(() => new Date()),
 });
 
 export type ProfilePurchase = typeof profilePurchasesTable.$inferSelect;

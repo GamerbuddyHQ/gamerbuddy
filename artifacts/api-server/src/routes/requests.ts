@@ -43,16 +43,16 @@ function formatRequest(
     skillLevel: string;
     objectives: string;
     status: string;
-    escrowAmount?: string | null;
+    escrowAmount?: number | null;
     startedAt?: Date | null;
     createdAt: Date;
     bidCount?: number | null;
-    lowestBid?: string | null;
+    lowestBid?: number | null;
     isBulkHiring?: boolean | null;
     bulkGamersNeeded?: number | null;
     acceptedBidsCount?: number | null;
-    avgBidderTrustFactor?: string | null;
-    avgBidderRating?: string | null;
+    avgBidderTrustFactor?: number | null;
+    avgBidderRating?: number | null;
     hasStreamingBidder?: boolean | null;
     hasQuestBidder?: boolean | null;
     preferredCountry?: string | null;
@@ -83,16 +83,16 @@ function formatRequest(
     expectedDuration: (req as any).expectedDuration ?? null,
     playStyle: (req as any).playStyle ?? null,
     status: req.status,
-    escrowAmount: req.escrowAmount ? parseFloat(String(req.escrowAmount)) : null,
+    escrowAmount: req.escrowAmount ?? null,
     startedAt: req.startedAt ? req.startedAt.toISOString() : null,
     createdAt: req.createdAt.toISOString(),
     bidCount: req.bidCount ?? 0,
-    lowestBid: req.lowestBid ? parseFloat(String(req.lowestBid)) : null,
+    lowestBid: req.lowestBid ?? null,
     isBulkHiring: req.isBulkHiring ?? false,
     bulkGamersNeeded: req.bulkGamersNeeded ?? null,
     acceptedBidsCount: req.acceptedBidsCount ?? 0,
-    avgBidderTrustFactor: req.avgBidderTrustFactor ? parseFloat(String(req.avgBidderTrustFactor)) : null,
-    avgBidderRating: req.avgBidderRating ? parseFloat(String(req.avgBidderRating)) : null,
+    avgBidderTrustFactor: req.avgBidderTrustFactor ?? null,
+    avgBidderRating: req.avgBidderRating ?? null,
     hasStreamingBidder: req.hasStreamingBidder ?? false,
     hasQuestBidder: req.hasQuestBidder ?? false,
     preferredCountry: req.preferredCountry ?? "any",
@@ -149,10 +149,10 @@ router.get("/requests", async (req, res): Promise<void> => {
       userIdVerified: usersTable.idVerified,
       userProfilePhotoUrl: usersTable.profilePhotoUrl,
       bidCount: sql<number>`(SELECT COUNT(*) FROM bids WHERE bids.request_id = ${gameRequestsTable.id})`.mapWith(Number),
-      lowestBid: sql<string | null>`(SELECT MIN(price) FROM bids WHERE bids.request_id = ${gameRequestsTable.id} AND bids.status = 'pending')`,
+      lowestBid: sql<number | null>`(SELECT MIN(price) FROM bids WHERE bids.request_id = ${gameRequestsTable.id} AND bids.status = 'pending')`,
       acceptedBidsCount: sql<number>`(SELECT COUNT(*) FROM bids WHERE bids.request_id = ${gameRequestsTable.id} AND bids.status = 'accepted')`.mapWith(Number),
-      avgBidderTrustFactor: sql<string | null>`(SELECT AVG(u.trust_factor) FROM bids b JOIN users u ON u.id = b.bidder_id WHERE b.request_id = ${gameRequestsTable.id} AND b.status != 'rejected')`,
-      avgBidderRating: sql<string | null>`(SELECT AVG(r.rating) FROM bids b JOIN reviews r ON r.reviewee_id = b.bidder_id WHERE b.request_id = ${gameRequestsTable.id} AND b.status != 'rejected')`,
+      avgBidderTrustFactor: sql<number | null>`(SELECT AVG(u.trust_factor) FROM bids b JOIN users u ON u.id = b.bidder_id WHERE b.request_id = ${gameRequestsTable.id} AND b.status != 'rejected')`,
+      avgBidderRating: sql<number | null>`(SELECT AVG(r.rating) FROM bids b JOIN reviews r ON r.reviewee_id = b.bidder_id WHERE b.request_id = ${gameRequestsTable.id} AND b.status != 'rejected')`,
       hasStreamingBidder: sql<boolean>`(EXISTS(SELECT 1 FROM bids b JOIN streaming_accounts sa ON sa.user_id = b.bidder_id WHERE b.request_id = ${gameRequestsTable.id} AND b.status != 'rejected'))`,
       hasQuestBidder: sql<boolean>`(EXISTS(SELECT 1 FROM bids b JOIN quest_entries qe ON qe.user_id = b.bidder_id WHERE b.request_id = ${gameRequestsTable.id} AND b.status != 'rejected'))`,
     })
@@ -340,7 +340,7 @@ function formatBid(
     id: number;
     requestId: number;
     bidderId: number;
-    price: string;
+    price: number;
     message: string;
     status: string;
     discordUsername?: string | null;
@@ -375,7 +375,7 @@ function formatBid(
     bidderGender: bidderGender ?? null,
     bidderGamingAccounts: bidderGamingAccounts ?? [],
     bidderProfilePhotoUrl: bidderProfilePhotoUrl ?? null,
-    price: parseFloat(bid.price),
+    price: bid.price,
     message: bid.message,
     status: bid.status,
     discordUsername: bid.discordUsername ?? null,
@@ -427,7 +427,7 @@ router.get("/requests/:id/bids", async (req, res): Promise<void> => {
   const [sessionCounts, ratingRows, streamingRows, questRows, gamingRows] = await Promise.all([
     // Completed session counts
     bidderIds.length > 0
-      ? db.select({ bidderId: bidsTable.bidderId, count: sql<string>`COUNT(*)::int` })
+      ? db.select({ bidderId: bidsTable.bidderId, count: sql<number>`COUNT(*)`.mapWith(Number) })
           .from(bidsTable)
           .leftJoin(gameRequestsTable, eq(bidsTable.requestId, gameRequestsTable.id))
           .where(and(inArray(bidsTable.bidderId, bidderIds), eq(bidsTable.status, "accepted"), eq(gameRequestsTable.status, "completed")))
@@ -437,7 +437,7 @@ router.get("/requests/:id/bids", async (req, res): Promise<void> => {
     bidderIds.length > 0
       ? db.select({
             revieweeId: reviewsTable.revieweeId,
-            avg: sql<string>`AVG(${reviewsTable.rating})::float`,
+            avg: sql<number>`AVG(${reviewsTable.rating})`.mapWith(Number),
           })
           .from(reviewsTable)
           .where(inArray(reviewsTable.revieweeId, bidderIds))
@@ -581,7 +581,7 @@ router.post("/requests/:id/bids", requireAuth, bidLimiter, validate(PlaceBidSche
     .values({
       requestId,
       bidderId: user.id,
-      price: String(round2(price)),
+      price: round2(price),
       message: sanitize(message),
       status: "pending",
     })
@@ -616,7 +616,7 @@ router.post("/requests/:id/bids/:bidId/accept", requireAuth, async (req, res): P
   if (!bid) { res.status(404).json({ error: "Bid not found" }); return; }
   if (bid.status !== "pending") { res.status(400).json({ error: "This bid is no longer pending" }); return; }
 
-  const bidPrice = parseFloat(bid.price);
+  const bidPrice = bid.price;
 
   const [wallet] = await db.select().from(walletsTable).where(eq(walletsTable.userId, user.id));
   if (!wallet || wallet.hiringBalance < bidPrice) {
@@ -676,14 +676,14 @@ router.post("/requests/:id/bids/:bidId/accept", requireAuth, async (req, res): P
         return;
       }
       await db.update(gameRequestsTable)
-        .set({ status: "in_progress", startedAt: new Date(), escrowAmount: String(groupTotal) })
+        .set({ status: "in_progress", startedAt: new Date(), escrowAmount: groupTotal })
         .where(eq(gameRequestsTable.id, requestId));
       await recordTx(user.id, "hiring", "escrow_held", groupTotal,
         `Group escrow for ${gameRequest.gameName} — ${newAcceptedCount} gamers ($${groupTotal.toFixed(2)} total)`);
     } else {
       // Keep request open, escrow stays 0 until lock
       await db.update(gameRequestsTable)
-        .set({ escrowAmount: "0" })
+        .set({ escrowAmount: 0 })
         .where(eq(gameRequestsTable.id, requestId));
     }
 
@@ -724,7 +724,7 @@ router.post("/requests/:id/bids/:bidId/accept", requireAuth, async (req, res): P
     await db.update(bidsTable).set({ status: "accepted", discordUsername: discordUsername?.trim() || null }).where(eq(bidsTable.id, bidId));
     await db.update(bidsTable).set({ status: "rejected" }).where(and(eq(bidsTable.requestId, requestId), eq(bidsTable.status, "pending")));
     await db.update(gameRequestsTable)
-      .set({ status: "in_progress", escrowAmount: String(bidPrice), acceptedBidId: bidId })
+      .set({ status: "in_progress", escrowAmount: bidPrice, acceptedBidId: bidId })
       .where(eq(gameRequestsTable.id, requestId));
 
     await recordTx(user.id, "hiring", "escrow_held", bidPrice, `Escrow held for session: ${gameRequest.gameName}`);
@@ -793,7 +793,7 @@ router.post("/requests/:id/lock", requireAuth, async (req, res): Promise<void> =
 
   // Set group escrow and transition to in_progress
   await db.update(gameRequestsTable)
-    .set({ status: "in_progress", startedAt: new Date(), escrowAmount: String(groupTotal) })
+    .set({ status: "in_progress", startedAt: new Date(), escrowAmount: groupTotal })
     .where(eq(gameRequestsTable.id, requestId));
 
   // Record single group transaction
@@ -909,7 +909,7 @@ router.post("/requests/:id/complete", requireAuth, async (req, res): Promise<voi
         `Platform fee (10%): Bulk ${gameRequest.gameName} — $${groupTotal.toFixed(2)} × 10%`);
       await db.insert(platformFeesTable).values({
         requestId,
-        amount: String(platformFee),
+        amount: platformFee,
         type: "bulk_session_fee",
         description: `Bulk: ${gameRequest.gameName} — $${groupTotal.toFixed(2)} group total × 10% (${acceptedBids.length} gamers, hirer #${user.id})`,
       });
@@ -957,7 +957,7 @@ router.post("/requests/:id/complete", requireAuth, async (req, res): Promise<voi
     );
     await db.insert(platformFeesTable).values({
       requestId,
-      amount: String(platformFee),
+      amount: platformFee,
       type: "session_fee",
       description: `Session: ${gameRequest.gameName} — $${escrow.toFixed(2)} × 10% (hirer #${user.id} → gamer #${acceptedBid?.bidderId ?? "?"})`
     });
@@ -1230,7 +1230,7 @@ router.post("/requests/:id/gift", requireAuth, async (req, res): Promise<void> =
   // Record in platform ledger
   await db.insert(platformFeesTable).values({
     requestId,
-    amount: String(giftFee),
+    amount: giftFee,
     type: "gift_fee",
     description: `Tip: ${gameRequest.gameName} — $${giftAmount.toFixed(2)} × 10% (hirer #${user.id} → gamer #${acceptedBid.bidderId})`,
   });

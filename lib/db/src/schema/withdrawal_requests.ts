@@ -1,15 +1,15 @@
-import { pgTable, serial, integer, doublePrecision, text, timestamp } from "drizzle-orm/pg-core";
+import { sqliteTable, integer, real, text } from "drizzle-orm/sqlite-core";
 import { usersTable } from "./users";
 
-export const withdrawalRequestsTable = pgTable("withdrawal_requests", {
-  id: serial("id").primaryKey(),
+export const withdrawalRequestsTable = sqliteTable("withdrawal_requests", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
   userId: integer("user_id").notNull().references(() => usersTable.id),
-  amount: doublePrecision("amount").notNull(),
+  amount: real("amount").notNull(),
   status: text("status").notNull().default("pending"),
   country: text("country"),
   payoutDetails: text("payout_details"),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-  paidAt: timestamp("paid_at", { withTimezone: true }),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull().$defaultFn(() => new Date()),
+  paidAt: integer("paid_at", { mode: "timestamp" }),
   adminNote: text("admin_note"),
 });
 

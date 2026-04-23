@@ -1,15 +1,15 @@
-import { pgTable, serial, integer, text, timestamp, unique } from "drizzle-orm/pg-core";
+import { sqliteTable, integer, text, uniqueIndex } from "drizzle-orm/sqlite-core";
 
-export const profileVotesTable = pgTable(
+export const profileVotesTable = sqliteTable(
   "profile_votes",
   {
-    id: serial("id").primaryKey(),
+    id: integer("id").primaryKey({ autoIncrement: true }),
     userId: integer("user_id").notNull(),
     voterId: integer("voter_id").notNull(),
     voteType: text("vote_type").notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    createdAt: integer("created_at", { mode: "timestamp" }).notNull().$defaultFn(() => new Date()),
   },
-  (t) => [unique().on(t.userId, t.voterId)],
+  (t) => [uniqueIndex("profile_votes_user_voter_idx").on(t.userId, t.voterId)],
 );
 
 export type ProfileVote = typeof profileVotesTable.$inferSelect;

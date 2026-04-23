@@ -1,12 +1,12 @@
-import { pgTable, serial, integer, numeric, text, timestamp } from "drizzle-orm/pg-core";
+import { sqliteTable, integer, real, text } from "drizzle-orm/sqlite-core";
 
-export const platformFeesTable = pgTable("platform_fees", {
-  id: serial("id").primaryKey(),
+export const platformFeesTable = sqliteTable("platform_fees", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
   requestId: integer("request_id"),
-  amount: numeric("amount", { precision: 10, scale: 2 }).notNull(),
+  amount: real("amount").notNull(),
   type: text("type").notNull(),
   description: text("description").notNull(),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull().$defaultFn(() => new Date()),
 });
 
 export type PlatformFee = typeof platformFeesTable.$inferSelect;

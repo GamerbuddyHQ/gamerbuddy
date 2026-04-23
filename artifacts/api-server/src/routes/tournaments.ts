@@ -57,7 +57,7 @@ async function recordTx(
   amount: number,
   description: string,
 ) {
-  await db.insert(walletTransactionsTable).values({ userId, wallet, type, amount: String(amount), description });
+  await db.insert(walletTransactionsTable).values({ userId, wallet, type, amount, description });
 }
 
 function formatTournament(
@@ -263,8 +263,8 @@ router.post("/tournaments", requireAuth, tournamentLimiter, validate(PostTournam
       platform:       sanitize(platform),
       tournamentType,
       maxPlayers,
-      prizePool:      String(prize),
-      entryFee:       "0",
+      prizePool:      prize,
+      entryFee:       0,
       rules:          sanitize(rules),
       prizeDistribution: JSON.stringify(distObj),
       status: "open",
@@ -342,7 +342,7 @@ router.post("/tournaments/:id/request-join", requireAuth, async (req, res): Prom
     userId: user.id,
     userName: user.name,
     status: "pending",
-    entryFeePaid: "0",
+    entryFeePaid: 0,
   });
 
   req.log.info({ userId: user.id, tournamentId: id }, "Tournament join request submitted");
@@ -485,7 +485,7 @@ router.patch("/tournaments/:id/declare-winners", requireAuth, async (req, res): 
     await db.update(tournamentRegistrationsTable).set({
       status: "winner",
       placement: w.placement,
-      prizeWon: String(prizeWon),
+      prizeWon,
     }).where(and(
       eq(tournamentRegistrationsTable.tournamentId, id),
       eq(tournamentRegistrationsTable.userId, w.userId),
@@ -497,7 +497,7 @@ router.patch("/tournaments/:id/declare-winners", requireAuth, async (req, res): 
   await db.update(tournamentsTable).set({
     status: "completed",
     completedAt: new Date(),
-    platformFeeCollected: String(platformFee),
+    platformFeeCollected: platformFee,
     winnersData: JSON.stringify(winnersData),
   }).where(eq(tournamentsTable.id, id));
 

@@ -133,13 +133,13 @@ router.get("/users/:id", async (req, res): Promise<void> => {
     .where(eq(gamingAccountsTable.userId, userId)),
 
     // Total completed sessions as gamer (untruncated count)
-    db.select({ count: sql<string>`COUNT(*)::int` })
+    db.select({ count: sql<number>`COUNT(*)`.mapWith(Number) })
     .from(bidsTable)
     .leftJoin(gameRequestsTable, eq(bidsTable.requestId, gameRequestsTable.id))
     .where(and(eq(bidsTable.bidderId, userId), eq(bidsTable.status, "accepted"), eq(gameRequestsTable.status, "completed"))),
 
     // Total completed sessions as hirer (untruncated count)
-    db.select({ count: sql<string>`COUNT(*)::int` })
+    db.select({ count: sql<number>`COUNT(*)`.mapWith(Number) })
     .from(gameRequestsTable)
     .where(and(eq(gameRequestsTable.userId, userId), eq(gameRequestsTable.status, "completed"))),
 
@@ -627,10 +627,10 @@ router.get("/users/:id/votes", requireAuth, async (req, res): Promise<void> => {
   if (isNaN(profileId)) { res.status(400).json({ error: "Invalid user ID" }); return; }
 
   const [likesRow, dislikesRow, myVoteRow] = await Promise.all([
-    db.select({ count: sql<string>`COUNT(*)::int` })
+    db.select({ count: sql<number>`COUNT(*)`.mapWith(Number) })
       .from(profileVotesTable)
       .where(and(eq(profileVotesTable.userId, profileId), eq(profileVotesTable.voteType, "like"))),
-    db.select({ count: sql<string>`COUNT(*)::int` })
+    db.select({ count: sql<number>`COUNT(*)`.mapWith(Number) })
       .from(profileVotesTable)
       .where(and(eq(profileVotesTable.userId, profileId), eq(profileVotesTable.voteType, "dislike"))),
     db.select({ voteType: profileVotesTable.voteType })
