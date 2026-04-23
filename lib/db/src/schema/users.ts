@@ -1,4 +1,4 @@
-import { pgTable, text, serial, timestamp, boolean, integer } from "drizzle-orm/pg-core";
+import { pgTable, text, integer, boolean, timestamp, serial, jsonb } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
@@ -18,20 +18,20 @@ export const usersTable = pgTable("users", {
   country: text("country"),
   gender: text("gender"),
   loginAttempts: integer("login_attempts").notNull().default(0),
-  lockedUntil:   timestamp("locked_until", { withTimezone: true }),
+  lockedUntil: timestamp("locked_until"),
   profilePhotoUrl: text("profile_photo_url"),
-  galleryPhotoUrls: text("gallery_photo_urls").array().notNull().default([]),
+  galleryPhotoUrls: jsonb("gallery_photo_urls").$type<string[]>().notNull().default([]),
   gamerbuddyId: text("gamerbuddy_id").unique(),
   communityBanned: boolean("community_banned").notNull().default(false),
   isModerator: boolean("is_moderator").notNull().default(false),
-  moderatorAppointedAt: timestamp("moderator_appointed_at", { withTimezone: true }),
+  moderatorAppointedAt: timestamp("moderator_appointed_at"),
   trustScore: integer("trust_score").notNull().default(0),
   emailVerified: boolean("email_verified").notNull().default(false),
   phoneVerified: boolean("phone_verified").notNull().default(false),
   isActivated: boolean("is_activated").notNull().default(false),
   activationRegion: text("activation_region"),
-  activationPaidAt: timestamp("activation_paid_at", { withTimezone: true }),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  activationPaidAt: timestamp("activation_paid_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
 export const insertUserSchema = createInsertSchema(usersTable).omit({

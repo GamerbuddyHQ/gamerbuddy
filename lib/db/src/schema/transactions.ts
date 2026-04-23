@@ -1,4 +1,4 @@
-import { pgTable, serial, integer, text, timestamp, numeric } from "drizzle-orm/pg-core";
+import { pgTable, integer, text, real, timestamp, serial } from "drizzle-orm/pg-core";
 import { usersTable } from "./users";
 
 export const walletTransactionsTable = pgTable("wallet_transactions", {
@@ -6,13 +6,10 @@ export const walletTransactionsTable = pgTable("wallet_transactions", {
   userId: integer("user_id").notNull().references(() => usersTable.id),
   wallet: text("wallet").notNull(),
   type: text("type").notNull(),
-  amount: numeric("amount", { precision: 10, scale: 2 }).notNull(),
+  amount: real("amount").notNull(),
   description: text("description").notNull(),
-  // External payment ID (Razorpay paymentId).
-  // A partial unique index (WHERE reference_id IS NOT NULL) is applied at the
-  // DB level — the same external payment can never credit the wallet twice.
   referenceId: text("reference_id"),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
 export type WalletTransaction = typeof walletTransactionsTable.$inferSelect;

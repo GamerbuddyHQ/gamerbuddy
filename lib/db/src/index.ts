@@ -1,36 +1,40 @@
-import { drizzle } from "drizzle-orm/node-postgres";
 import pg from "pg";
+import { drizzle } from "drizzle-orm/node-postgres";
 import * as schema from "./schema";
 
 const { Pool } = pg;
 
 if (!process.env.DATABASE_URL) {
-  // Log loudly to Vercel function logs but do NOT throw at import time.
-  // Throwing here causes FUNCTION_INVOCATION_FAILED on cold-start before
-  // any request is handled — the client sees a generic crash, not a 500.
-  // Instead we let queries fail with a clear error caught by route try-catch.
-  console.error(
-    "[gamerbuddy] FATAL: DATABASE_URL is not set. " +
-    "Add it in Vercel → Project Settings → Environment Variables. " +
-    "All database queries will fail until it is set.",
-  );
+  throw new Error("[gamerbuddy/db] DATABASE_URL is not set — ensure the database is provisioned");
 }
 
-// Serverless-friendly pool: limit max connections per lambda instance so we
-// don't exhaust the database when many invocations run in parallel.
-// SSL is required for cloud Postgres providers (Neon, Supabase, Render, etc.).
-const isServerless = process.env.VERCEL === "1" || process.env.NODE_ENV === "production";
-
 export const pool = new Pool({
-  connectionString: process.env.DATABASE_URL ?? "",
-  max: isServerless ? 2 : 10,
-  idleTimeoutMillis: 30_000,
-  connectionTimeoutMillis: 5_000,
-  ssl: isServerless
-    ? { rejectUnauthorized: false }
-    : false,
+  connectionString: process.env.DATABASE_URL,
+  max: 3,
+  ssl: { rejectUnauthorized: false },
+});
+
+pool.on("error", (err) => {
+  console.error("[gamerbuddy/db] Unexpected pool client error:", err.message);
 });
 
 export const db = drizzle(pool, { schema });
+
+let _ready = false;
+
+export async function ensureTablesCreated(): Promise<void> {
+  if (_ready) return;
+  try {
+    const client = await pool.connect();
+    const result = await client.query("SELECT NOW() AS now");
+    client.release();
+    console.log(`[gamerbuddy/db] Neon PostgreSQL connected. Server time: ${result.rows[0].now}`);
+    _ready = true;
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error("[gamerbuddy/db] Failed to connect to database:", msg);
+    throw err;
+  }
+}
 
 export * from "./schema";

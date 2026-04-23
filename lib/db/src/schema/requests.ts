@@ -1,4 +1,4 @@
-import { pgTable, serial, integer, text, timestamp, numeric, boolean } from "drizzle-orm/pg-core";
+import { pgTable, integer, text, real, boolean, timestamp, serial } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 import { usersTable } from "./users";
@@ -11,15 +11,15 @@ export const gameRequestsTable = pgTable("game_requests", {
   skillLevel: text("skill_level").notNull(),
   objectives: text("objectives").notNull(),
   status: text("status").notNull().default("open"),
-  escrowAmount: numeric("escrow_amount", { precision: 10, scale: 2 }),
+  escrowAmount: real("escrow_amount"),
   acceptedBidId: integer("accepted_bid_id"),
-  startedAt: timestamp("started_at", { withTimezone: true }),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  startedAt: timestamp("started_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
   isBulkHiring: boolean("is_bulk_hiring").notNull().default(false),
   bulkGamersNeeded: integer("bulk_gamers_needed"),
   preferredCountry: text("preferred_country").default("any"),
   preferredGender: text("preferred_gender").default("any"),
-  expiresAt: timestamp("expires_at", { withTimezone: true }),
+  expiresAt: timestamp("expires_at"),
   hirerRegion: text("hirer_region").notNull().default("international"),
   sessionHours: integer("session_hours"),
   additionalGoals: text("additional_goals"),

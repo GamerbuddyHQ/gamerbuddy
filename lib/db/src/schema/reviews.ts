@@ -1,4 +1,4 @@
-import { pgTable, serial, integer, text, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, integer, text, timestamp, serial } from "drizzle-orm/pg-core";
 import { usersTable } from "./users";
 import { gameRequestsTable } from "./requests";
 
@@ -10,7 +10,7 @@ export const reviewsTable = pgTable("reviews", {
   rating: integer("rating").notNull(),
   comment: text("comment"),
   wouldPlayAgain: text("would_play_again"),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
 export type Review = typeof reviewsTable.$inferSelect;

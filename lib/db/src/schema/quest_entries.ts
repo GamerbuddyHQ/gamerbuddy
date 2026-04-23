@@ -1,4 +1,4 @@
-import { pgTable, text, serial, timestamp, integer } from "drizzle-orm/pg-core";
+import { pgTable, text, integer, timestamp, serial } from "drizzle-orm/pg-core";
 import { usersTable } from "./users";
 
 export const questEntriesTable = pgTable("quest_entries", {
@@ -7,7 +7,7 @@ export const questEntriesTable = pgTable("quest_entries", {
   gameName: text("game_name").notNull(),
   helpType: text("help_type").notNull(),
   playstyle: text("playstyle").notNull(),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
 export type QuestEntry = typeof questEntriesTable.$inferSelect;

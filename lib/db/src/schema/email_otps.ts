@@ -1,4 +1,4 @@
-import { pgTable, serial, integer, text, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, integer, text, timestamp, serial } from "drizzle-orm/pg-core";
 import { usersTable } from "./users";
 
 export const emailOtpsTable = pgTable("email_otps", {
@@ -7,8 +7,8 @@ export const emailOtpsTable = pgTable("email_otps", {
   email: text("email").notNull(),
   otpHash: text("otp_hash").notNull(),
   attempts: integer("attempts").notNull().default(0),
-  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  expiresAt: timestamp("expires_at").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
 export type EmailOtp = typeof emailOtpsTable.$inferSelect;

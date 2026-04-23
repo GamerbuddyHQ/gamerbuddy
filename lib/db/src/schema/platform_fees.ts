@@ -1,12 +1,12 @@
-import { pgTable, serial, integer, numeric, text, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, integer, real, text, timestamp, serial } from "drizzle-orm/pg-core";
 
 export const platformFeesTable = pgTable("platform_fees", {
   id: serial("id").primaryKey(),
   requestId: integer("request_id"),
-  amount: numeric("amount", { precision: 10, scale: 2 }).notNull(),
+  amount: real("amount").notNull(),
   type: text("type").notNull(),
   description: text("description").notNull(),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
 export type PlatformFee = typeof platformFeesTable.$inferSelect;

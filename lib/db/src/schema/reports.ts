@@ -1,4 +1,4 @@
-import { pgTable, serial, integer, text, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, integer, text, timestamp, serial } from "drizzle-orm/pg-core";
 import { usersTable } from "./users";
 
 export const reportsTable = pgTable("reports", {
@@ -7,7 +7,7 @@ export const reportsTable = pgTable("reports", {
   reportedUserId: integer("reported_user_id").notNull().references(() => usersTable.id),
   reason: text("reason").notNull(),
   description: text("description"),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
 export type Report = typeof reportsTable.$inferSelect;

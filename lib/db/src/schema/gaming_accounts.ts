@@ -1,4 +1,4 @@
-import { pgTable, serial, integer, text, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, integer, text, timestamp, serial } from "drizzle-orm/pg-core";
 import { usersTable } from "./users";
 
 export const GAMING_PLATFORMS = ["steam", "epic", "psn", "xbox", "switch"] as const;
@@ -10,7 +10,7 @@ export const gamingAccountsTable = pgTable("gaming_accounts", {
   platform: text("platform").notNull(),
   username: text("username").notNull(),
   status: text("status").notNull().default("pending_review"),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
 export type GamingAccount = typeof gamingAccountsTable.$inferSelect;

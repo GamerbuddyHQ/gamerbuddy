@@ -1,4 +1,4 @@
-import { pgTable, text, serial, timestamp, integer, boolean, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, integer, boolean, timestamp, serial, jsonb } from "drizzle-orm/pg-core";
 import { usersTable } from "./users";
 
 export const suggestionsTable = pgTable("suggestions", {
@@ -9,15 +9,15 @@ export const suggestionsTable = pgTable("suggestions", {
   status: text("status").notNull().default("visible"),
   category: text("category").notNull().default("other"),
   isPinned: boolean("is_pinned").notNull().default(false),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
 export const suggestionVotesTable = pgTable("suggestion_votes", {
   id: serial("id").primaryKey(),
   suggestionId: integer("suggestion_id").notNull().references(() => suggestionsTable.id, { onDelete: "cascade" }),
   userId: integer("user_id").notNull().references(() => usersTable.id),
-  vote: text("vote").notNull(), // 'up' | 'down'
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  vote: text("vote").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
 export const suggestionCommentsTable = pgTable("suggestion_comments", {
@@ -27,19 +27,19 @@ export const suggestionCommentsTable = pgTable("suggestion_comments", {
   parentId: integer("parent_id"),
   body: text("body").notNull(),
   isAdminComment: boolean("is_admin_comment").notNull().default(false),
-  isModComment:  boolean("is_mod_comment").notNull().default(false),
+  isModComment: boolean("is_mod_comment").notNull().default(false),
   isPinned: boolean("is_pinned").notNull().default(false),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
 export const moderatorActionsTable = pgTable("moderator_actions", {
-  id:          serial("id").primaryKey(),
+  id: serial("id").primaryKey(),
   moderatorId: integer("moderator_id").notNull().references(() => usersTable.id),
-  action:      text("action").notNull(), // hide_post | restore_post | delete_post | pin_post | ban_user | unban_user | mod_comment
-  targetType:  text("target_type").notNull(), // post | user | comment
-  targetId:    integer("target_id").notNull(),
-  meta:        jsonb("meta"),
-  createdAt:   timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  action: text("action").notNull(),
+  targetType: text("target_type").notNull(),
+  targetId: integer("target_id").notNull(),
+  meta: jsonb("meta"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
 export type Suggestion = typeof suggestionsTable.$inferSelect;

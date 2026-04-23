@@ -1,4 +1,4 @@
-import { pgTable, serial, integer, text, numeric, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, integer, text, real, timestamp, serial } from "drizzle-orm/pg-core";
 import { usersTable } from "./users";
 import { gameRequestsTable } from "./requests";
 
@@ -6,11 +6,11 @@ export const bidsTable = pgTable("bids", {
   id: serial("id").primaryKey(),
   requestId: integer("request_id").notNull().references(() => gameRequestsTable.id),
   bidderId: integer("bidder_id").notNull().references(() => usersTable.id),
-  price: numeric("price", { precision: 10, scale: 2 }).notNull(),
+  price: real("price").notNull(),
   message: text("message").notNull(),
   status: text("status").notNull().default("pending"),
   discordUsername: text("discord_username"),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
 export type Bid = typeof bidsTable.$inferSelect;
