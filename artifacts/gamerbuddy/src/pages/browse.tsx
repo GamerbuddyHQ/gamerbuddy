@@ -168,10 +168,27 @@ function QuickBidPanel({ req, onClose }: { req: GameRequest; onClose: () => void
         </div>
         <div className="flex-1 text-center sm:text-left">
           <div className="font-bold text-amber-300 text-sm">Almost verified — hang tight! 🎮</div>
-          <div className="text-xs text-muted-foreground mt-0.5">Verification is almost complete! Once you're verified (usually within 24–48 hours), you'll be able to place bids and join epic sessions.</div>
+          <div className="text-xs text-muted-foreground mt-0.5">Your gaming account is being reviewed (usually 24–48 hours). Once verified, pay the one-time activation fee to start bidding!</div>
         </div>
         <Button size="sm" variant="outline" onClick={() => setLocation("/profile")} className="text-xs border-amber-500/40 text-amber-300 hover:bg-amber-500/10 shrink-0">
           Check Status
+        </Button>
+      </div>
+    );
+  }
+
+  if (user.idVerified && !(user.isActivated ?? false)) {
+    return (
+      <div className="mt-4 rounded-xl border border-yellow-500/40 bg-yellow-500/8 p-5 flex flex-col sm:flex-row items-center gap-4">
+        <div className="h-10 w-10 rounded-xl bg-yellow-500/15 border border-yellow-500/30 flex items-center justify-center shrink-0">
+          <Zap className="h-5 w-5 text-yellow-400" />
+        </div>
+        <div className="flex-1 text-center sm:text-left">
+          <div className="font-bold text-yellow-300 text-sm">One last step — activate your account! ⚡</div>
+          <div className="text-xs text-muted-foreground mt-0.5">You're verified! Pay the small one-time activation fee (🇮🇳 ₹149 / 🌍 $5) to unlock bidding. Paid once — never again. ❤️</div>
+        </div>
+        <Button size="sm" onClick={() => setLocation("/dashboard")} className="bg-yellow-500 hover:bg-yellow-400 text-black text-xs font-bold shrink-0">
+          Activate Now
         </Button>
       </div>
     );

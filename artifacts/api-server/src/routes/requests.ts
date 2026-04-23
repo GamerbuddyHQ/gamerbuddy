@@ -249,6 +249,13 @@ router.get("/requests/:id", async (req, res): Promise<void> => {
 router.post("/requests", requireAuth, postRequestLimiter, validate(PostRequestSchema), async (req, res): Promise<void> => {
   const user = req.user!;
 
+  if (!user.isActivated) {
+    res.status(403).json({
+      error: "Account not activated. Please complete the one-time activation fee to post requests.",
+    });
+    return;
+  }
+
   const [wallet] = await db
     .select()
     .from(walletsTable)
@@ -494,6 +501,14 @@ router.get("/requests/:id/bids", async (req, res): Promise<void> => {
 
 router.post("/requests/:id/bids", requireAuth, bidLimiter, validate(PlaceBidSchema), async (req, res): Promise<void> => {
   const user = req.user!;
+
+  if (!user.isActivated) {
+    res.status(403).json({
+      error: "Account not activated. Please complete the one-time activation fee to place bids.",
+    });
+    return;
+  }
+
   const requestId = parseInt(req.params.id);
   if (isNaN(requestId)) {
     res.status(400).json({ error: "Invalid request ID" });

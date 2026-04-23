@@ -1990,7 +1990,7 @@ export default function RequestDetail() {
   const acceptedBid = bids.find((b: Bid) => b.status === "accepted");
   const isGamer = myBid?.status === "accepted";
   const sessionStarted = !!(request as any)?.startedAt;
-  const canBid = user && !isHirer && !myBid && request?.status === "open";
+  const canBid = user && !isHirer && !myBid && request?.status === "open" && user.isActivated;
   const canReview = user && (request?.status === "completed" || request?.status === "awaiting_reviews") && (isHirer || isGamer);
   const mustReview = user && request?.status === "awaiting_reviews" && (isHirer || isGamer);
 
@@ -2485,7 +2485,7 @@ export default function RequestDetail() {
         </Card>
       )}
 
-      {user && !isHirer && !myBid && !hasGamingAccount && request?.status === "open" && (
+      {user && !isHirer && !myBid && !user.idVerified && !hasGamingAccount && request?.status === "open" && (
         <Card className="border-amber-500/30 bg-amber-500/5 overflow-hidden">
           <CardContent className="pt-5 pb-5">
             <div className="flex flex-col sm:flex-row items-center gap-4">
@@ -2495,11 +2495,32 @@ export default function RequestDetail() {
               <div className="flex-1 text-center sm:text-left">
                 <p className="font-bold text-amber-300 text-sm">Link a gaming account to place bids 🎮</p>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  Connect at least one gaming account (Steam, Epic, PSN, Xbox, or Nintendo Switch) on your profile. We review within 24 hours — keep your profile Public during review.
+                  Connect at least one gaming account (Steam, Epic, PSN, Xbox, or Nintendo Switch) on your profile. We review within 24–48 hours — keep your profile Public during review.
                 </p>
               </div>
               <Button size="sm" variant="outline" asChild className="border-amber-500/40 text-amber-300 hover:bg-amber-500/10 shrink-0 text-xs">
                 <Link href="/profile#gaming-management">Link Account</Link>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {user && !isHirer && !myBid && user.idVerified && !user.isActivated && request?.status === "open" && (
+        <Card className="border-yellow-500/40 bg-yellow-500/8 overflow-hidden">
+          <CardContent className="pt-5 pb-5">
+            <div className="flex flex-col sm:flex-row items-center gap-4">
+              <div className="h-11 w-11 rounded-xl bg-yellow-500/15 border border-yellow-500/30 flex items-center justify-center shrink-0">
+                <Zap className="h-5 w-5 text-yellow-400" />
+              </div>
+              <div className="flex-1 text-center sm:text-left">
+                <p className="font-bold text-yellow-300 text-sm">One last step — activate your account! ⚡</p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  You're verified! Pay the small one-time activation fee (🇮🇳 ₹149 / 🌍 $5) to unlock bidding. Paid once — never again. ❤️
+                </p>
+              </div>
+              <Button size="sm" asChild className="bg-yellow-500 hover:bg-yellow-400 text-black font-bold shrink-0 text-xs">
+                <Link href="/dashboard">Activate Now</Link>
               </Button>
             </div>
           </CardContent>

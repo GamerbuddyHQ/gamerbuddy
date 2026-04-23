@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
+import { useAuth } from "@/lib/auth";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -142,6 +143,7 @@ const MIN_RATES = {
 
 export default function PostRequest() {
   const [, setLocation] = useLocation();
+  const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const postRequest = usePostRequest();
@@ -228,6 +230,30 @@ export default function PostRequest() {
           });
         },
       }
+    );
+  }
+
+  if (user && user.idVerified && !user.isActivated) {
+    return (
+      <div className="max-w-2xl mx-auto flex flex-col items-center gap-6 py-16 text-center">
+        <div className="h-16 w-16 rounded-2xl bg-yellow-500/15 border border-yellow-500/30 flex items-center justify-center">
+          <Zap className="h-8 w-8 text-yellow-400" />
+        </div>
+        <div>
+          <h1 className="text-2xl font-extrabold text-yellow-300">Activate Your Account First ⚡</h1>
+          <p className="text-muted-foreground mt-2 text-sm max-w-md">
+            You're verified! To post quests and hire gamers, complete the small one-time activation fee
+            — <strong className="text-yellow-300">🇮🇳 ₹149 for India / 🌍 $5 Global</strong>.
+            Paid once, never again. ❤️
+          </p>
+        </div>
+        <button
+          onClick={() => setLocation("/dashboard")}
+          className="px-6 py-3 bg-yellow-500 hover:bg-yellow-400 text-black font-bold rounded-xl text-sm transition-colors"
+        >
+          Go to Dashboard to Activate
+        </button>
+      </div>
     );
   }
 

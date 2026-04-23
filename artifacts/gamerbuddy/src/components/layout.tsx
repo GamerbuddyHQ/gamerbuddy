@@ -22,12 +22,12 @@ import { useAuth as useAuthInner } from "@/lib/auth";
 import { formatDistanceToNow } from "date-fns";
 
 /* ── BETA VERSION BANNER ──────────────────────────────────────────────────── */
-const BETA_BANNER_KEY = "gb_beta_banner_dismissed_v2";
+const BETA_BANNER_KEY = "gb_test_mode_banner_v3";
 
 const BETA_NOTICES = [
-  { icon: "💳", text: "Payments are in test mode — no real money moves" },
-  { icon: "⚡", text: "Real-time chat & instant updates coming soon" },
-  { icon: "🎮", text: "Gaming accounts are manually verified by admin within 24 hours — enter your real username" },
+  { icon: "💳", text: "Payments in test mode — no real money moves" },
+  { icon: "🎮", text: "Gaming accounts are manually reviewed by admin within 24–48 hours" },
+  { icon: "⚡", text: "Real-time chat & live notifications coming in Phase 2" },
 ];
 
 function TestModeBanner() {
@@ -46,26 +46,26 @@ function TestModeBanner() {
     <div
       className="w-full border-b z-50 relative"
       style={{
-        background: "linear-gradient(90deg, rgba(124,58,237,0.12) 0%, rgba(34,211,238,0.08) 100%)",
-        borderColor: "rgba(124,58,237,0.25)",
+        background: "linear-gradient(90deg, rgba(234,179,8,0.12) 0%, rgba(251,146,60,0.08) 100%)",
+        borderColor: "rgba(234,179,8,0.35)",
       }}
     >
       <div className="container flex items-center justify-between gap-3 py-2 px-4">
         <div className="flex items-center gap-3 min-w-0 flex-wrap">
           <div className="flex items-center gap-1.5 shrink-0">
-            <FlaskConical className="h-3.5 w-3.5 text-violet-400 shrink-0" />
+            <FlaskConical className="h-3.5 w-3.5 text-yellow-400 shrink-0" />
             <span
               className="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full"
-              style={{ background: "rgba(124,58,237,0.25)", color: "#a78bfa", border: "1px solid rgba(124,58,237,0.4)" }}
+              style={{ background: "rgba(234,179,8,0.22)", color: "#fde047", border: "1px solid rgba(234,179,8,0.45)" }}
             >
-              Beta
+              Test Mode
             </span>
           </div>
           <div className="flex items-center gap-2 flex-wrap">
             {BETA_NOTICES.map((n, i) => (
               <React.Fragment key={i}>
                 {i > 0 && <span className="text-white/15 hidden sm:inline">·</span>}
-                <span className="text-[11px] text-white/55 whitespace-nowrap">
+                <span className="text-[11px] text-white/60 whitespace-nowrap">
                   <span className="mr-1">{n.icon}</span>{n.text}
                 </span>
               </React.Fragment>
@@ -75,7 +75,7 @@ function TestModeBanner() {
         <button
           onClick={dismiss}
           className="shrink-0 rounded-full p-1 text-white/30 hover:text-white/60 hover:bg-white/08 transition-colors"
-          aria-label="Dismiss beta banner"
+          aria-label="Dismiss test mode banner"
         >
           <X className="h-3.5 w-3.5" />
         </button>
