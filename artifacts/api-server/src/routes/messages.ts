@@ -29,7 +29,7 @@ async function getBidAccess(bidId: number, userId: number) {
 
 router.get("/bids/:bidId/messages", requireAuth, async (req, res): Promise<void> => {
   const user = req.user!;
-  const bidId = parseInt(req.params.bidId);
+  const bidId = parseInt(req.params.bidId as string);
   if (isNaN(bidId)) { res.status(400).json({ error: "Invalid bid ID" }); return; }
 
   const access = await getBidAccess(bidId, user.id);
@@ -61,7 +61,7 @@ router.get("/bids/:bidId/messages", requireAuth, async (req, res): Promise<void>
 
 router.post("/bids/:bidId/messages", requireAuth, messageLimiter, validate(PostMessageSchema), async (req, res): Promise<void> => {
   const user = req.user!;
-  const bidId = parseInt(req.params.bidId);
+  const bidId = parseInt(req.params.bidId as string);
   if (isNaN(bidId)) { res.status(400).json({ error: "Invalid bid ID" }); return; }
 
   const access = await getBidAccess(bidId, user.id);

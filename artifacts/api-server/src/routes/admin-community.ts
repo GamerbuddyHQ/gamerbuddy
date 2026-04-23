@@ -94,7 +94,7 @@ router.get("/admin/community/posts", requireAdminAuth, async (req, res): Promise
 
 /* ── POST /admin/community/posts/:id/hide   — set status = 'hidden' ────── */
 router.post("/admin/community/posts/:id/hide", requireAdminAuth, async (req, res): Promise<void> => {
-  const id = parseInt(req.params.id, 10);
+  const id = parseInt(req.params.id as string, 10);
   if (isNaN(id)) { res.status(400).json({ error: "Invalid ID" }); return; }
 
   const [updated] = await db
@@ -110,7 +110,7 @@ router.post("/admin/community/posts/:id/hide", requireAdminAuth, async (req, res
 
 /* ── POST /admin/community/posts/:id/restore — set status = 'visible' ─── */
 router.post("/admin/community/posts/:id/restore", requireAdminAuth, async (req, res): Promise<void> => {
-  const id = parseInt(req.params.id, 10);
+  const id = parseInt(req.params.id as string, 10);
   if (isNaN(id)) { res.status(400).json({ error: "Invalid ID" }); return; }
 
   const [updated] = await db
@@ -126,7 +126,7 @@ router.post("/admin/community/posts/:id/restore", requireAdminAuth, async (req, 
 
 /* ── DELETE /admin/community/posts/:id — permanent delete ──────────────── */
 router.delete("/admin/community/posts/:id", requireAdminAuth, async (req, res): Promise<void> => {
-  const id = parseInt(req.params.id, 10);
+  const id = parseInt(req.params.id as string, 10);
   if (isNaN(id)) { res.status(400).json({ error: "Invalid ID" }); return; }
 
   const [post] = await db.select({ id: suggestionsTable.id }).from(suggestionsTable).where(eq(suggestionsTable.id, id));
@@ -139,7 +139,7 @@ router.delete("/admin/community/posts/:id", requireAdminAuth, async (req, res): 
 
 /* ── POST /admin/community/posts/:id/pin — toggle pin on a post (max 5 pinned) */
 router.post("/admin/community/posts/:id/pin", requireAdminAuth, async (req, res): Promise<void> => {
-  const id = parseInt(req.params.id, 10);
+  const id = parseInt(req.params.id as string, 10);
   if (isNaN(id)) { res.status(400).json({ error: "Invalid ID" }); return; }
 
   const [existing] = await db
@@ -175,7 +175,7 @@ router.post("/admin/community/posts/:id/pin", requireAdminAuth, async (req, res)
 
 /* ── POST /admin/community/suggestions/:id/comment — admin posts a comment */
 router.post("/admin/community/suggestions/:id/comment", requireAdminAuth, async (req, res): Promise<void> => {
-  const suggestionId = parseInt(req.params.id, 10);
+  const suggestionId = parseInt(req.params.id as string, 10);
   if (isNaN(suggestionId)) { res.status(400).json({ error: "Invalid suggestion ID" }); return; }
 
   const body = (req.body?.body as string | undefined)?.trim();
@@ -219,7 +219,7 @@ router.post("/admin/community/suggestions/:id/comment", requireAdminAuth, async 
 
 /* ── POST /admin/community/comments/:commentId/pin — toggle pin ────────── */
 router.post("/admin/community/comments/:commentId/pin", requireAdminAuth, async (req, res): Promise<void> => {
-  const commentId = parseInt(req.params.commentId, 10);
+  const commentId = parseInt(req.params.commentId as string, 10);
   if (isNaN(commentId)) { res.status(400).json({ error: "Invalid comment ID" }); return; }
 
   const [existing] = await db
@@ -242,7 +242,7 @@ router.post("/admin/community/comments/:commentId/pin", requireAdminAuth, async 
 
 /* ── POST /admin/community/users/:id/ban — set communityBanned = true ─── */
 router.post("/admin/community/users/:id/ban", requireAdminAuth, async (req, res): Promise<void> => {
-  const userId = parseInt(req.params.id, 10);
+  const userId = parseInt(req.params.id as string, 10);
   if (isNaN(userId)) { res.status(400).json({ error: "Invalid user ID" }); return; }
 
   const [updated] = await db
@@ -258,7 +258,7 @@ router.post("/admin/community/users/:id/ban", requireAdminAuth, async (req, res)
 
 /* ── POST /admin/community/users/:id/unban — set communityBanned = false ─ */
 router.post("/admin/community/users/:id/unban", requireAdminAuth, async (req, res): Promise<void> => {
-  const userId = parseInt(req.params.id, 10);
+  const userId = parseInt(req.params.id as string, 10);
   if (isNaN(userId)) { res.status(400).json({ error: "Invalid user ID" }); return; }
 
   const [updated] = await db
@@ -318,7 +318,7 @@ router.get("/admin/community/users/search", requireAdminAuth, async (req, res): 
 
 /* ── POST /admin/community/moderators/:userId — appoint ────────────────── */
 router.post("/admin/community/moderators/:userId", requireAdminAuth, async (req, res): Promise<void> => {
-  const userId = parseInt(req.params.userId, 10);
+  const userId = parseInt(req.params.userId as string, 10);
   if (isNaN(userId)) { res.status(400).json({ error: "Invalid user ID" }); return; }
 
   const [user] = await db
@@ -343,7 +343,7 @@ router.post("/admin/community/moderators/:userId", requireAdminAuth, async (req,
 
 /* ── DELETE /admin/community/moderators/:userId — remove ───────────────── */
 router.delete("/admin/community/moderators/:userId", requireAdminAuth, async (req, res): Promise<void> => {
-  const userId = parseInt(req.params.userId, 10);
+  const userId = parseInt(req.params.userId as string, 10);
   if (isNaN(userId)) { res.status(400).json({ error: "Invalid user ID" }); return; }
 
   const [updated] = await db

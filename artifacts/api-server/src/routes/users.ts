@@ -54,7 +54,7 @@ export const SHOP_ITEMS: Record<string, { id: string; type: "background" | "titl
 };
 
 router.get("/users/:id", async (req, res): Promise<void> => {
-  const userId = parseInt(req.params.id);
+  const userId = parseInt(req.params.id as string);
   if (isNaN(userId)) { res.status(400).json({ error: "Invalid user ID" }); return; }
 
   const [user] = await db.select({
@@ -214,7 +214,7 @@ router.post("/quest", requireAuth, validate(PostQuestSchema), async (req, res): 
 
 router.delete("/quest/:id", requireAuth, async (req, res): Promise<void> => {
   const user = req.user!;
-  const entryId = parseInt(req.params.id);
+  const entryId = parseInt(req.params.id as string);
   if (isNaN(entryId)) { res.status(400).json({ error: "Invalid entry ID" }); return; }
 
   const [entry] = await db.select().from(questEntriesTable).where(and(eq(questEntriesTable.id, entryId), eq(questEntriesTable.userId, user.id)));
@@ -384,7 +384,7 @@ router.post("/profile/gallery", requireAuth, async (req, res): Promise<void> => 
 
 router.delete("/profile/gallery/:index", requireAuth, async (req, res): Promise<void> => {
   const user = req.user!;
-  const index = parseInt(req.params.index);
+  const index = parseInt(req.params.index as string);
   if (isNaN(index) || index < 0) { res.status(400).json({ error: "Invalid index" }); return; }
   const [currentUser] = await db.select({ galleryPhotoUrls: usersTable.galleryPhotoUrls }).from(usersTable).where(eq(usersTable.id, user.id));
   const current = currentUser?.galleryPhotoUrls ?? [];
@@ -516,7 +516,7 @@ router.post("/streaming-accounts", requireAuth, async (req, res): Promise<void> 
 
 router.delete("/streaming-accounts/:platform", requireAuth, async (req, res): Promise<void> => {
   const user = req.user!;
-  const { platform } = req.params;
+  const { platform } = req.params as Record<string, string>;
 
   await db.delete(streamingAccountsTable)
     .where(and(eq(streamingAccountsTable.userId, user.id), eq(streamingAccountsTable.platform, platform)));
@@ -592,7 +592,7 @@ router.post("/gaming-accounts", requireAuth, async (req, res): Promise<void> => 
 
 router.delete("/gaming-accounts/:platform", requireAuth, async (req, res): Promise<void> => {
   const user = req.user!;
-  const { platform } = req.params;
+  const { platform } = req.params as Record<string, string>;
 
   await db.delete(gamingAccountsTable)
     .where(and(eq(gamingAccountsTable.userId, user.id), eq(gamingAccountsTable.platform, platform)));
@@ -623,7 +623,7 @@ async function havePlayedTogether(viewerId: number, profileId: number): Promise<
 
 router.get("/users/:id/votes", requireAuth, async (req, res): Promise<void> => {
   const viewer = req.user!;
-  const profileId = parseInt(req.params.id);
+  const profileId = parseInt(req.params.id as string);
   if (isNaN(profileId)) { res.status(400).json({ error: "Invalid user ID" }); return; }
 
   const [likesRow, dislikesRow, myVoteRow] = await Promise.all([
@@ -651,7 +651,7 @@ router.get("/users/:id/votes", requireAuth, async (req, res): Promise<void> => {
 
 router.post("/users/:id/vote", requireAuth, async (req, res): Promise<void> => {
   const voter = req.user!;
-  const profileId = parseInt(req.params.id);
+  const profileId = parseInt(req.params.id as string);
   if (isNaN(profileId)) { res.status(400).json({ error: "Invalid user ID" }); return; }
   if (voter.id === profileId) { res.status(400).json({ error: "Cannot vote on your own profile" }); return; }
 

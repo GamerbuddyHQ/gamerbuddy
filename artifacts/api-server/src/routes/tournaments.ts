@@ -208,7 +208,7 @@ router.get("/tournaments", async (req, res): Promise<void> => {
 
 /* ── GET /tournaments/:id ── single */
 router.get("/tournaments/:id", async (req, res): Promise<void> => {
-  const id = parseInt(req.params.id);
+  const id = parseInt(req.params.id as string);
   if (isNaN(id)) { res.status(400).json({ error: "Invalid ID" }); return; }
 
   const [row] = await db
@@ -282,7 +282,7 @@ router.post("/tournaments", requireAuth, tournamentLimiter, validate(PostTournam
 /* ── POST /tournaments/:id/request-join ── submit participation request */
 router.post("/tournaments/:id/request-join", requireAuth, async (req, res): Promise<void> => {
   const user = req.user!;
-  const id = parseInt(req.params.id);
+  const id = parseInt(req.params.id as string);
   if (isNaN(id)) { res.status(400).json({ error: "Invalid ID" }); return; }
 
   const [t] = await db.select().from(tournamentsTable).where(eq(tournamentsTable.id, id));
@@ -352,8 +352,8 @@ router.post("/tournaments/:id/request-join", requireAuth, async (req, res): Prom
 /* ── POST /tournaments/:id/approve-request/:userId ── host approves a pending request */
 router.post("/tournaments/:id/approve-request/:targetUserId", requireAuth, async (req, res): Promise<void> => {
   const host = req.user!;
-  const id = parseInt(req.params.id);
-  const targetUserId = parseInt(req.params.targetUserId);
+  const id = parseInt(req.params.id as string);
+  const targetUserId = parseInt(req.params.targetUserId as string);
   if (isNaN(id) || isNaN(targetUserId)) { res.status(400).json({ error: "Invalid ID" }); return; }
 
   const [t] = await db.select().from(tournamentsTable).where(eq(tournamentsTable.id, id));
@@ -401,8 +401,8 @@ router.post("/tournaments/:id/approve-request/:targetUserId", requireAuth, async
 /* ── POST /tournaments/:id/reject-request/:userId ── host rejects a pending request */
 router.post("/tournaments/:id/reject-request/:targetUserId", requireAuth, async (req, res): Promise<void> => {
   const host = req.user!;
-  const id = parseInt(req.params.id);
-  const targetUserId = parseInt(req.params.targetUserId);
+  const id = parseInt(req.params.id as string);
+  const targetUserId = parseInt(req.params.targetUserId as string);
   if (isNaN(id) || isNaN(targetUserId)) { res.status(400).json({ error: "Invalid ID" }); return; }
 
   const [t] = await db.select().from(tournamentsTable).where(eq(tournamentsTable.id, id));
@@ -427,7 +427,7 @@ router.post("/tournaments/:id/reject-request/:targetUserId", requireAuth, async 
 /* ── PATCH /tournaments/:id/declare-winners ── */
 router.patch("/tournaments/:id/declare-winners", requireAuth, async (req, res): Promise<void> => {
   const user = req.user!;
-  const id = parseInt(req.params.id);
+  const id = parseInt(req.params.id as string);
   if (isNaN(id)) { res.status(400).json({ error: "Invalid ID" }); return; }
 
   const [t] = await db.select().from(tournamentsTable).where(eq(tournamentsTable.id, id));
@@ -508,7 +508,7 @@ router.patch("/tournaments/:id/declare-winners", requireAuth, async (req, res): 
 /* ── DELETE /tournaments/:id ── cancel */
 router.delete("/tournaments/:id", requireAuth, async (req, res): Promise<void> => {
   const user = req.user!;
-  const id = parseInt(req.params.id);
+  const id = parseInt(req.params.id as string);
   if (isNaN(id)) { res.status(400).json({ error: "Invalid ID" }); return; }
 
   const [t] = await db.select().from(tournamentsTable).where(eq(tournamentsTable.id, id));

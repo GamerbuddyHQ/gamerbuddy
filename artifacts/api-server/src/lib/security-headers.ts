@@ -59,7 +59,7 @@ const isProd = process.env.NODE_ENV === "production";
 //     Tells browsers to rewrite http:// → https:// for sub-resources before
 //     fetching. Only set in production; in development the dev server uses HTTP.
 
-const cspDirectives: Parameters<typeof helmet.contentSecurityPolicy>[0]["directives"] = {
+const cspDirectives: NonNullable<Parameters<typeof helmet.contentSecurityPolicy>[0]>["directives"] = {
   defaultSrc:  ["'self'"],
   scriptSrc:   ["'self'", "https://checkout.razorpay.com"],
   connectSrc:  ["'self'", "https://api.razorpay.com", "https://api.tenor.com", "wss:"],
