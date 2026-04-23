@@ -26,14 +26,14 @@ export async function recalculateTrustFactor(userId: number): Promise<number> {
     db
       .select({
         avg: sql<string>`AVG(${reviewsTable.rating})`,
-        count: sql<string>`COUNT(*)::int`,
+        count: sql<number>`COUNT(*)`.mapWith(Number),
       })
       .from(reviewsTable)
       .where(eq(reviewsTable.revieweeId, userId)),
 
     // Completed sessions as gamer
     db
-      .select({ count: sql<string>`COUNT(*)::int` })
+      .select({ count: sql<number>`COUNT(*)`.mapWith(Number) })
       .from(bidsTable)
       .leftJoin(gameRequestsTable, eq(bidsTable.requestId, gameRequestsTable.id))
       .where(
@@ -46,19 +46,19 @@ export async function recalculateTrustFactor(userId: number): Promise<number> {
 
     // Completed sessions as hirer
     db
-      .select({ count: sql<string>`COUNT(*)::int` })
+      .select({ count: sql<number>`COUNT(*)`.mapWith(Number) })
       .from(gameRequestsTable)
       .where(and(eq(gameRequestsTable.userId, userId), eq(gameRequestsTable.status, "completed"))),
 
     // Likes received
     db
-      .select({ count: sql<string>`COUNT(*)::int` })
+      .select({ count: sql<number>`COUNT(*)`.mapWith(Number) })
       .from(profileVotesTable)
       .where(and(eq(profileVotesTable.userId, userId), eq(profileVotesTable.voteType, "like"))),
 
     // Dislikes received
     db
-      .select({ count: sql<string>`COUNT(*)::int` })
+      .select({ count: sql<number>`COUNT(*)`.mapWith(Number) })
       .from(profileVotesTable)
       .where(and(eq(profileVotesTable.userId, userId), eq(profileVotesTable.voteType, "dislike"))),
   ]);

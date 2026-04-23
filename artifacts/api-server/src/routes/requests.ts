@@ -427,7 +427,7 @@ router.get("/requests/:id/bids", async (req, res): Promise<void> => {
   const [sessionCounts, ratingRows, streamingRows, questRows, gamingRows] = await Promise.all([
     // Completed session counts
     bidderIds.length > 0
-      ? db.select({ bidderId: bidsTable.bidderId, count: sql<string>`COUNT(*)::int` })
+      ? db.select({ bidderId: bidsTable.bidderId, count: sql<number>`COUNT(*)`.mapWith(Number) })
           .from(bidsTable)
           .leftJoin(gameRequestsTable, eq(bidsTable.requestId, gameRequestsTable.id))
           .where(and(inArray(bidsTable.bidderId, bidderIds), eq(bidsTable.status, "accepted"), eq(gameRequestsTable.status, "completed")))
@@ -437,7 +437,7 @@ router.get("/requests/:id/bids", async (req, res): Promise<void> => {
     bidderIds.length > 0
       ? db.select({
             revieweeId: reviewsTable.revieweeId,
-            avg: sql<string>`AVG(${reviewsTable.rating})::float`,
+            avg: sql<number>`AVG(${reviewsTable.rating})`.mapWith(Number),
           })
           .from(reviewsTable)
           .where(inArray(reviewsTable.revieweeId, bidderIds))
