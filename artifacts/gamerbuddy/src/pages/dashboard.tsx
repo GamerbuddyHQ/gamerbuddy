@@ -33,16 +33,16 @@ function FinishProfileBanner({ userName }: { userName: string }) {
     <div
       className="rounded-2xl overflow-hidden"
       style={{
-        border: "1px solid rgba(79,158,255,0.35)",
-        background: "linear-gradient(135deg, rgba(79,158,255,0.07), rgba(56,186,255,0.04))",
-        boxShadow: "0 0 24px rgba(79,158,255,0.07)",
+        border: "1px solid rgba(0,229,205,0.35)",
+        background: "linear-gradient(135deg, rgba(0,229,205,0.07), rgba(0,229,205,0.04))",
+        boxShadow: "0 0 24px rgba(0,229,205,0.07)",
       }}
     >
       <div className="h-1 bg-gradient-to-r from-violet-600 via-purple-400 to-cyan-500" />
       <div className="px-5 py-4 flex items-start gap-4">
         <div
           className="h-10 w-10 rounded-xl bg-primary/15 border border-primary/30 flex items-center justify-center shrink-0 mt-0.5"
-          style={{ boxShadow: "0 0 12px rgba(79,158,255,0.2)" }}
+          style={{ boxShadow: "0 0 12px rgba(0,229,205,0.2)" }}
         >
           <Sparkles className="h-5 w-5 text-primary" />
         </div>
@@ -60,7 +60,7 @@ function FinishProfileBanner({ userName }: { userName: string }) {
             <button
               onClick={() => setLocation("/profile")}
               className="flex items-center gap-1.5 text-xs font-black uppercase tracking-wider px-3 py-1.5 rounded-lg text-white transition-all"
-              style={{ background: "linear-gradient(135deg, #4F9EFF, #2060c8)" }}
+              style={{ background: "linear-gradient(135deg, #00E5CD, #00b0a0)" }}
             >
               <Sparkles className="h-3.5 w-3.5" />
               Finish Setup →
@@ -121,7 +121,7 @@ export default function Dashboard() {
           className="rounded-2xl overflow-hidden"
           style={{
             border: "2px solid rgba(234,179,8,0.5)",
-            background: "linear-gradient(135deg, rgba(234,179,8,0.08), rgba(79,158,255,0.05))",
+            background: "linear-gradient(135deg, rgba(234,179,8,0.08), rgba(0,229,205,0.05))",
             boxShadow: "0 0 24px rgba(234,179,8,0.12)",
           }}
         >
@@ -189,7 +189,7 @@ export default function Dashboard() {
         <div
           className="flex items-start gap-3 rounded-2xl px-5 py-4"
           style={{
-            background: "linear-gradient(135deg, rgba(245,158,11,0.08), rgba(79,158,255,0.06))",
+            background: "linear-gradient(135deg, rgba(245,158,11,0.08), rgba(0,229,205,0.06))",
             border: "1px solid rgba(245,158,11,0.22)",
           }}
         >

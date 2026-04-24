@@ -11,9 +11,9 @@ export default function OurStory() {
           <div
             className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-2"
             style={{
-              background: "linear-gradient(135deg, rgba(79,158,255,0.15), rgba(56,186,255,0.15))",
-              border: "1px solid rgba(79,158,255,0.30)",
-              color: "#4F9EFF",
+              background: "linear-gradient(135deg, rgba(0,229,205,0.15), rgba(0,229,205,0.15))",
+              border: "1px solid rgba(0,229,205,0.30)",
+              color: "#00E5CD",
             }}
           >
             <Heart className="h-3 w-3" />
@@ -22,7 +22,7 @@ export default function OurStory() {
           <h1
             className="text-4xl sm:text-5xl font-black tracking-tight"
             style={{
-              background: "linear-gradient(135deg, #4F9EFF 0%, #4F9EFF 40%, #38BAFF 100%)",
+              background: "linear-gradient(135deg, #00E5CD 0%, #00E5CD 40%, #00E5CD 100%)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
               backgroundClip: "text",
@@ -42,8 +42,8 @@ export default function OurStory() {
         <div
           className="rounded-3xl border p-7 sm:p-9 space-y-6"
           style={{
-            background: "linear-gradient(135deg, rgba(79,158,255,0.04) 0%, rgba(56,186,255,0.04) 100%)",
-            borderColor: "rgba(79,158,255,0.20)",
+            background: "linear-gradient(135deg, rgba(0,229,205,0.04) 0%, rgba(0,229,205,0.04) 100%)",
+            borderColor: "rgba(0,229,205,0.20)",
           }}
         >
           {/* Avatar / identity */}
@@ -51,8 +51,8 @@ export default function OurStory() {
             <div
               className="h-14 w-14 rounded-2xl flex items-center justify-center text-2xl shrink-0"
               style={{
-                background: "linear-gradient(135deg, rgba(79,158,255,0.20), rgba(56,186,255,0.20))",
-                border: "1px solid rgba(79,158,255,0.35)",
+                background: "linear-gradient(135deg, rgba(0,229,205,0.20), rgba(0,229,205,0.20))",
+                border: "1px solid rgba(0,229,205,0.35)",
               }}
             >
               🎮
@@ -61,7 +61,7 @@ export default function OurStory() {
               <p className="font-black text-foreground text-lg leading-tight">Suryakant Ojha</p>
               <p className="text-sm text-muted-foreground font-medium">
                 Known as{" "}
-                <span className="font-bold" style={{ color: "#4F9EFF" }}>
+                <span className="font-bold" style={{ color: "#00E5CD" }}>
                   Dualshot66
                 </span>{" "}
                 in the gaming world
@@ -79,8 +79,8 @@ export default function OurStory() {
             <div
               className="rounded-2xl border-l-4 px-5 py-4 space-y-3"
               style={{
-                borderLeftColor: "#4F9EFF",
-                background: "rgba(79,158,255,0.06)",
+                borderLeftColor: "#00E5CD",
+                background: "rgba(0,229,205,0.06)",
               }}
             >
               <p>
@@ -112,7 +112,7 @@ export default function OurStory() {
 
             <p
               className="text-base font-semibold"
-              style={{ color: "#4F9EFF" }}
+              style={{ color: "#00E5CD" }}
             >
               Gaming saved me once. My hope is that this platform can help others feel less alone and
               create meaningful friendships through play.
@@ -190,12 +190,12 @@ export default function OurStory() {
         <div
           className="rounded-2xl border p-6 text-center space-y-4"
           style={{
-            background: "linear-gradient(135deg, rgba(56,186,255,0.05) 0%, rgba(79,158,255,0.05) 100%)",
-            borderColor: "rgba(56,186,255,0.20)",
+            background: "linear-gradient(135deg, rgba(0,229,205,0.05) 0%, rgba(0,229,205,0.05) 100%)",
+            borderColor: "rgba(0,229,205,0.20)",
           }}
         >
           <div className="space-y-1">
-            <p className="text-xs font-black uppercase tracking-widest" style={{ color: "#38BAFF" }}>
+            <p className="text-xs font-black uppercase tracking-widest" style={{ color: "#00E5CD" }}>
               Be Part of the Story
             </p>
             <h3 className="text-lg font-black text-foreground">
@@ -210,8 +210,8 @@ export default function OurStory() {
               href="/browse"
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white transition-all hover:scale-105 active:scale-95"
               style={{
-                background: "linear-gradient(135deg, #4F9EFF 0%, #38BAFF 100%)",
-                boxShadow: "0 4px 20px rgba(79,158,255,0.30)",
+                background: "linear-gradient(135deg, #00E5CD 0%, #00E5CD 100%)",
+                boxShadow: "0 4px 20px rgba(0,229,205,0.30)",
               }}
             >
               <Gamepad2 className="h-4 w-4 shrink-0" />
@@ -220,7 +220,7 @@ export default function OurStory() {
             <Link
               href="/signup"
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold border transition-all hover:scale-105 active:scale-95 text-foreground"
-              style={{ borderColor: "rgba(79,158,255,0.40)", background: "rgba(79,158,255,0.06)" }}
+              style={{ borderColor: "rgba(0,229,205,0.40)", background: "rgba(0,229,205,0.06)" }}
             >
               Join Free
             </Link>

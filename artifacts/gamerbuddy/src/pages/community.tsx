@@ -70,9 +70,9 @@ const CATEGORY_CONFIG: Record<SuggestionCategory, {
   border: string;
   color: string;
 }> = {
-  feature: { label: "Feature Request", Icon: Zap,         bg: "rgba(79,158,255,0.12)",  border: "rgba(79,158,255,0.40)", color: "#4F9EFF" },
+  feature: { label: "Feature Request", Icon: Zap,         bg: "rgba(0,229,205,0.12)",  border: "rgba(0,229,205,0.40)", color: "#00E5CD" },
   bug:     { label: "Bug Report",      Icon: Bug,         bg: "rgba(239,68,68,0.10)",   border: "rgba(239,68,68,0.38)",  color: "#f87171" },
-  ui:      { label: "UI Improvement",  Icon: Palette,     bg: "rgba(56,186,255,0.10)",  border: "rgba(56,186,255,0.38)", color: "#38BAFF" },
+  ui:      { label: "UI Improvement",  Icon: Palette,     bg: "rgba(0,229,205,0.10)",  border: "rgba(0,229,205,0.38)", color: "#00E5CD" },
   other:   { label: "Other",           Icon: HelpCircle,  bg: "rgba(100,116,139,0.12)", border: "rgba(100,116,139,0.35)",color: "#94a3b8" },
 };
 
@@ -297,7 +297,7 @@ function EmojiPicker({ onPick, onClose }: { onPick: (e: string) => void; onClose
     <div
       ref={ref}
       className="absolute bottom-full mb-2 left-0 z-50 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-150"
-      style={{ width: 296, background: "hsl(var(--card))", border: "1px solid rgba(79,158,255,0.35)", boxShadow: "0 8px 40px rgba(79,158,255,0.18), 0 2px 12px rgba(0,0,0,0.5)" }}
+      style={{ width: 296, background: "hsl(var(--card))", border: "1px solid rgba(0,229,205,0.35)", boxShadow: "0 8px 40px rgba(0,229,205,0.18), 0 2px 12px rgba(0,0,0,0.5)" }}
     >
       {/* Search bar */}
       <div className="px-2 pt-2 pb-1">
@@ -307,7 +307,7 @@ function EmojiPicker({ onPick, onClose }: { onPick: (e: string) => void; onClose
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search emojis…"
           className="w-full rounded-lg px-3 py-1.5 text-xs bg-background/70 border outline-none transition-colors text-foreground placeholder:text-muted-foreground/40"
-          style={{ borderColor: "rgba(79,158,255,0.30)" }}
+          style={{ borderColor: "rgba(0,229,205,0.30)" }}
         />
       </div>
 
@@ -320,8 +320,8 @@ function EmojiPicker({ onPick, onClose }: { onPick: (e: string) => void; onClose
               onClick={() => setTab(i)}
               className="flex-1 py-1.5 text-[10px] font-bold rounded-lg transition-all"
               style={{
-                color: tab === i ? "#4F9EFF" : "rgba(148,163,184,0.5)",
-                background: tab === i ? "rgba(79,158,255,0.12)" : "transparent",
+                color: tab === i ? "#00E5CD" : "rgba(148,163,184,0.5)",
+                background: tab === i ? "rgba(0,229,205,0.12)" : "transparent",
               }}
             >
               {cat.label}
@@ -417,7 +417,7 @@ function GifPicker({ onPick, onClose }: { onPick: (gif: TenorGif) => void; onClo
     <div
       ref={ref}
       className="absolute bottom-full mb-2 left-0 z-50 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-150"
-      style={{ width: 316, background: "hsl(var(--card))", border: "1px solid rgba(56,186,255,0.35)", boxShadow: "0 8px 40px rgba(56,186,255,0.15), 0 2px 12px rgba(0,0,0,0.5)" }}
+      style={{ width: 316, background: "hsl(var(--card))", border: "1px solid rgba(0,229,205,0.35)", boxShadow: "0 8px 40px rgba(0,229,205,0.15), 0 2px 12px rgba(0,0,0,0.5)" }}
     >
       {/* Search bar */}
       <div className="p-2 pb-1">
@@ -429,7 +429,7 @@ function GifPicker({ onPick, onClose }: { onPick: (gif: TenorGif) => void; onClo
             onChange={(e) => { setQuery(e.target.value); setActiveTag(null); }}
             placeholder="Search GIFs…"
             className="w-full rounded-xl pl-8 pr-3 py-1.5 text-xs outline-none transition-colors text-foreground placeholder:text-muted-foreground/40 bg-background/70"
-            style={{ border: "1px solid rgba(56,186,255,0.30)" }}
+            style={{ border: "1px solid rgba(0,229,205,0.30)" }}
           />
         </div>
       </div>
@@ -442,9 +442,9 @@ function GifPicker({ onPick, onClose }: { onPick: (gif: TenorGif) => void; onClo
             onClick={() => handleTagClick(tag)}
             className="px-2 py-0.5 rounded-full text-[10px] font-bold transition-all"
             style={{
-              background: activeTag === tag ? "rgba(56,186,255,0.22)" : "rgba(56,186,255,0.07)",
-              border: `1px solid ${activeTag === tag ? "rgba(56,186,255,0.55)" : "rgba(56,186,255,0.20)"}`,
-              color: activeTag === tag ? "#38BAFF" : "rgba(148,163,184,0.65)",
+              background: activeTag === tag ? "rgba(0,229,205,0.22)" : "rgba(0,229,205,0.07)",
+              border: `1px solid ${activeTag === tag ? "rgba(0,229,205,0.55)" : "rgba(0,229,205,0.20)"}`,
+              color: activeTag === tag ? "#00E5CD" : "rgba(148,163,184,0.65)",
             }}
           >
             {tag}
@@ -474,7 +474,7 @@ function GifPicker({ onPick, onClose }: { onPick: (gif: TenorGif) => void; onClo
                 key={g.id}
                 onClick={() => onPick(g)}
                 className="rounded-xl overflow-hidden aspect-square transition-all hover:opacity-90 hover:scale-[0.97] active:scale-95 focus:outline-none focus:ring-2"
-                style={{ focusRingColor: "rgba(56,186,255,0.5)" }}
+                style={{ focusRingColor: "rgba(0,229,205,0.5)" }}
               >
                 <img src={g.preview} alt={g.title} className="w-full h-full object-cover" loading="lazy" decoding="async" />
               </button>
@@ -484,7 +484,7 @@ function GifPicker({ onPick, onClose }: { onPick: (gif: TenorGif) => void; onClo
       </div>
 
       {/* Footer */}
-      <div className="px-2 py-1 border-t flex items-center justify-end" style={{ borderColor: "rgba(56,186,255,0.10)" }}>
+      <div className="px-2 py-1 border-t flex items-center justify-end" style={{ borderColor: "rgba(0,229,205,0.10)" }}>
         <span className="text-[9px] text-muted-foreground/25 font-medium tracking-wide">Powered by Tenor</span>
       </div>
     </div>
@@ -593,7 +593,7 @@ function CommentInputBox({
       {/* Textarea */}
       <div
         className="rounded-xl overflow-hidden transition-all"
-        style={{ border: "1px solid rgba(79,158,255,0.35)", background: "rgba(0,0,0,0.3)" }}
+        style={{ border: "1px solid rgba(0,229,205,0.35)", background: "rgba(0,0,0,0.3)" }}
       >
         <textarea
           ref={textareaRef}
@@ -614,7 +614,7 @@ function CommentInputBox({
                 src={selectedGif.preview}
                 alt="Selected GIF"
                 className="rounded-xl"
-                style={{ maxHeight: 110, maxWidth: 200, display: "block", border: "1px solid rgba(56,186,255,0.25)" }}
+                style={{ maxHeight: 110, maxWidth: 200, display: "block", border: "1px solid rgba(0,229,205,0.25)" }}
                 loading="lazy"
               />
               {onGifClear && (
@@ -627,7 +627,7 @@ function CommentInputBox({
               )}
               <div
                 className="absolute bottom-1 left-1 px-1.5 py-0.5 rounded text-[8px] font-bold"
-                style={{ background: "rgba(0,0,0,0.7)", color: "rgba(56,186,255,0.9)" }}
+                style={{ background: "rgba(0,0,0,0.7)", color: "rgba(0,229,205,0.9)" }}
               >GIF</div>
             </div>
           </div>
@@ -646,7 +646,7 @@ function CommentInputBox({
               className="h-7 w-7 flex items-center justify-center rounded-lg text-[17px] transition-all hover:scale-110 active:scale-95"
               title="Add emoji"
               style={{
-                background: showEmoji ? "rgba(79,158,255,0.18)" : "transparent",
+                background: showEmoji ? "rgba(0,229,205,0.18)" : "transparent",
                 filter: showEmoji ? "none" : "grayscale(30%)",
               }}
             >😀</button>
@@ -662,9 +662,9 @@ function CommentInputBox({
                 className="h-6 px-2 flex items-center justify-center rounded-md text-[10px] font-black transition-all hover:scale-105 active:scale-95"
                 title="Add GIF"
                 style={{
-                  background: showGif ? "rgba(56,186,255,0.18)" : "rgba(56,186,255,0.07)",
-                  border: `1px solid ${showGif ? "rgba(56,186,255,0.5)" : "rgba(56,186,255,0.22)"}`,
-                  color: showGif ? "#38BAFF" : "rgba(56,186,255,0.65)",
+                  background: showGif ? "rgba(0,229,205,0.18)" : "rgba(0,229,205,0.07)",
+                  border: `1px solid ${showGif ? "rgba(0,229,205,0.5)" : "rgba(0,229,205,0.22)"}`,
+                  color: showGif ? "#00E5CD" : "rgba(0,229,205,0.65)",
                   letterSpacing: "0.08em",
                 }}
               >GIF</button>
@@ -810,7 +810,7 @@ function CommentItem({ comment, suggestionId, depth = 0, isAdmin = false }: { co
   return (
     <div className={depth > 0 ? "pl-4 border-l border-border/25" : ""}>
       {comment.isPinned && depth === 0 && (
-        <div className="flex items-center gap-1.5 pt-2.5 pb-0.5 text-[10px] font-semibold" style={{ color: "rgba(79,158,255,0.75)" }}>
+        <div className="flex items-center gap-1.5 pt-2.5 pb-0.5 text-[10px] font-semibold" style={{ color: "rgba(0,229,205,0.75)" }}>
           <Pin className="h-3 w-3" /> Pinned by Admin
         </div>
       )}
@@ -818,9 +818,9 @@ function CommentItem({ comment, suggestionId, depth = 0, isAdmin = false }: { co
         {comment.isAdminComment ? (
           <div
             className="rounded-full flex items-center justify-center shrink-0"
-            style={{ width: 26, height: 26, background: "rgba(79,158,255,0.18)", border: "1px solid rgba(79,158,255,0.35)" }}
+            style={{ width: 26, height: 26, background: "rgba(0,229,205,0.18)", border: "1px solid rgba(0,229,205,0.35)" }}
           >
-            <Shield className="h-3.5 w-3.5" style={{ color: "rgba(79,158,255,0.9)" }} />
+            <Shield className="h-3.5 w-3.5" style={{ color: "rgba(0,229,205,0.9)" }} />
           </div>
         ) : comment.isModComment ? (
           <div
@@ -843,7 +843,7 @@ function CommentItem({ comment, suggestionId, depth = 0, isAdmin = false }: { co
             {comment.isAdminComment && (
               <span
                 className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full"
-                style={{ background: "rgba(79,158,255,0.18)", color: "rgba(79,158,255,0.9)", border: "1px solid rgba(79,158,255,0.3)" }}
+                style={{ background: "rgba(0,229,205,0.18)", color: "rgba(0,229,205,0.9)", border: "1px solid rgba(0,229,205,0.3)" }}
               >
                 Official
               </span>
@@ -872,7 +872,7 @@ function CommentItem({ comment, suggestionId, depth = 0, isAdmin = false }: { co
                 onClick={() => pinMutation.mutate()}
                 disabled={pinMutation.isPending}
                 className="flex items-center gap-1 text-[10px] font-semibold transition-colors"
-                style={{ color: comment.isPinned ? "rgba(79,158,255,0.8)" : "rgba(255,255,255,0.3)" }}
+                style={{ color: comment.isPinned ? "rgba(0,229,205,0.8)" : "rgba(255,255,255,0.3)" }}
                 title={comment.isPinned ? "Unpin comment" : "Pin comment"}
               >
                 {comment.isPinned ? <PinOff className="h-3 w-3" /> : <Pin className="h-3 w-3" />}
@@ -965,13 +965,13 @@ function CommentsPanel({ suggestion }: { suggestion: Suggestion }) {
   };
 
   return (
-    <div className="border-t px-4 sm:px-5 py-4 space-y-4" style={{ borderColor: "rgba(79,158,255,0.12)", background: "rgba(0,0,0,0.25)" }}>
+    <div className="border-t px-4 sm:px-5 py-4 space-y-4" style={{ borderColor: "rgba(0,229,205,0.12)", background: "rgba(0,0,0,0.25)" }}>
       {isAdmin && (
         <div
           className="rounded-lg p-3 space-y-2"
-          style={{ background: "rgba(79,158,255,0.07)", border: "1px solid rgba(79,158,255,0.25)" }}
+          style={{ background: "rgba(0,229,205,0.07)", border: "1px solid rgba(0,229,205,0.25)" }}
         >
-          <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider" style={{ color: "rgba(79,158,255,0.8)" }}>
+          <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider" style={{ color: "rgba(0,229,205,0.8)" }}>
             <Shield className="h-3 w-3" /> Official Admin Comment
           </div>
           <textarea
@@ -980,7 +980,7 @@ function CommentsPanel({ suggestion }: { suggestion: Suggestion }) {
             placeholder="Post an official response from Player4Hire Team…"
             rows={2}
             className="w-full rounded-md px-3 py-2 text-[12px] resize-none bg-background/50 border text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1"
-            style={{ borderColor: "rgba(79,158,255,0.3)", focusRingColor: "rgba(79,158,255,0.5)" }}
+            style={{ borderColor: "rgba(0,229,205,0.3)", focusRingColor: "rgba(0,229,205,0.5)" }}
             onKeyDown={(e) => {
               if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
                 const body = adminCommentText.trim();
@@ -997,7 +997,7 @@ function CommentsPanel({ suggestion }: { suggestion: Suggestion }) {
                 if (body) adminCommentMutation.mutate(body);
               }}
               className="h-7 text-[11px] gap-1.5"
-              style={{ background: "rgba(79,158,255,0.8)" }}
+              style={{ background: "rgba(0,229,205,0.8)" }}
             >
               {adminCommentMutation.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Shield className="h-3 w-3" />}
               Post as Official
@@ -1129,12 +1129,12 @@ function AdminToolbar({ suggestion }: { suggestion: Suggestion }) {
   return (
     <div
       className="border-t"
-      style={{ borderColor: "rgba(79,158,255,0.14)", background: "rgba(8,3,18,0.70)" }}
+      style={{ borderColor: "rgba(0,229,205,0.14)", background: "rgba(8,3,18,0.70)" }}
     >
       {/* ── Header strip ── */}
       <div
         className="flex items-center justify-between gap-3 px-4 py-2.5 border-b flex-wrap"
-        style={{ borderColor: "rgba(79,158,255,0.10)", background: "rgba(79,158,255,0.05)" }}
+        style={{ borderColor: "rgba(0,229,205,0.10)", background: "rgba(0,229,205,0.05)" }}
       >
         <div className="flex items-center gap-2">
           <Shield className="h-3.5 w-3.5 text-primary/70 shrink-0" />
@@ -1448,7 +1448,7 @@ function SuggestionCard({ suggestion, isAdmin }: { suggestion: Suggestion; isAdm
               onClick={() => setExpanded((v) => !v)}
               className="ml-auto flex items-center gap-1.5 text-[11px] font-semibold transition-all duration-150 active:scale-95 rounded-lg px-2.5 py-1"
               style={expanded
-                ? { background: "rgba(79,158,255,0.14)", border: "1px solid rgba(79,158,255,0.30)", color: "#4F9EFF" }
+                ? { background: "rgba(0,229,205,0.14)", border: "1px solid rgba(0,229,205,0.30)", color: "#00E5CD" }
                 : { background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.45)" }
               }
             >
@@ -1521,7 +1521,7 @@ function SubmitForm({ onSuccess }: { onSuccess: () => void }) {
           <Button variant="outline" size="sm" className="text-xs border-border/50" onClick={() => { setSubmitted(false); onSuccess(); }}>
             Close Form
           </Button>
-          <Button size="sm" className="text-xs" style={{ background: "rgba(79,158,255,0.25)", border: "1px solid rgba(79,158,255,0.40)", color: "#4F9EFF" }} onClick={() => setSubmitted(false)}>
+          <Button size="sm" className="text-xs" style={{ background: "rgba(0,229,205,0.25)", border: "1px solid rgba(0,229,205,0.40)", color: "#00E5CD" }} onClick={() => setSubmitted(false)}>
             <Plus className="h-3 w-3 mr-1" /> Add Another Idea
           </Button>
         </div>
@@ -1536,13 +1536,13 @@ function SubmitForm({ onSuccess }: { onSuccess: () => void }) {
     <div
       className="rounded-2xl border p-5 space-y-4"
       style={{
-        background: "linear-gradient(135deg,rgba(79,158,255,0.07) 0%,rgba(0,0,0,0.3) 100%)",
-        borderColor: "rgba(79,158,255,0.35)",
-        boxShadow: "0 0 0 1px rgba(79,158,255,0.08), 0 8px 32px rgba(0,0,0,0.4)",
+        background: "linear-gradient(135deg,rgba(0,229,205,0.07) 0%,rgba(0,0,0,0.3) 100%)",
+        borderColor: "rgba(0,229,205,0.35)",
+        boxShadow: "0 0 0 1px rgba(0,229,205,0.08), 0 8px 32px rgba(0,0,0,0.4)",
       }}
     >
       <div className="flex items-center gap-2">
-        <div className="h-6 w-6 rounded-lg flex items-center justify-center" style={{ background: "rgba(79,158,255,0.25)", border: "1px solid rgba(79,158,255,0.40)" }}>
+        <div className="h-6 w-6 rounded-lg flex items-center justify-center" style={{ background: "rgba(0,229,205,0.25)", border: "1px solid rgba(0,229,205,0.40)" }}>
           <Lightbulb className="h-3.5 w-3.5 text-primary" />
         </div>
         <span className="text-[13px] font-bold text-white">New Suggestion</span>
@@ -1615,7 +1615,7 @@ function SubmitForm({ onSuccess }: { onSuccess: () => void }) {
           className="w-full font-bold"
           disabled={!canSubmit}
           onClick={() => submitMutation.mutate()}
-          style={{ background: "linear-gradient(135deg,#4F9EFF,#2060c8)", boxShadow: "0 0 20px rgba(79,158,255,0.3)" }}
+          style={{ background: "linear-gradient(135deg,#00E5CD,#00b0a0)", boxShadow: "0 0 20px rgba(0,229,205,0.3)" }}
         >
           <Send className="h-4 w-4 mr-2" />
           {submitMutation.isPending ? "Posting…" : "Post Suggestion"}
@@ -1655,7 +1655,7 @@ function AdminQueue({ suggestions, isAdmin }: { suggestions: Suggestion[]; isAdm
   ];
 
   const TABS: { value: "pending" | "hidden" | "spam"; label: string; count: number; dotColor: string }[] = [
-    { value: "pending", label: "All Pending", count: totalPending, dotColor: "#4F9EFF" },
+    { value: "pending", label: "All Pending", count: totalPending, dotColor: "#00E5CD" },
     { value: "hidden",  label: "Hidden",      count: hidden.length, dotColor: "#fbbf24" },
     { value: "spam",    label: "Spam",         count: spam.length,   dotColor: "#f87171" },
   ];
@@ -1664,10 +1664,10 @@ function AdminQueue({ suggestions, isAdmin }: { suggestions: Suggestion[]; isAdm
     <div
       className="rounded-2xl border overflow-hidden"
       style={{
-        borderColor: totalPending > 0 ? "rgba(79,158,255,0.50)" : "rgba(79,158,255,0.28)",
+        borderColor: totalPending > 0 ? "rgba(0,229,205,0.50)" : "rgba(0,229,205,0.28)",
         background: "rgba(6,3,15,0.90)",
         boxShadow: totalPending > 0
-          ? "0 0 40px rgba(79,158,255,0.12), inset 0 1px 0 rgba(79,158,255,0.12)"
+          ? "0 0 40px rgba(0,229,205,0.12), inset 0 1px 0 rgba(0,229,205,0.12)"
           : "0 0 24px rgba(0,0,0,0.40)",
       }}
     >
@@ -1679,7 +1679,7 @@ function AdminQueue({ suggestions, isAdmin }: { suggestions: Suggestion[]; isAdm
         <div className="flex items-center gap-3">
           <div
             className="h-10 w-10 rounded-xl flex items-center justify-center shrink-0"
-            style={{ background: "linear-gradient(135deg,rgba(79,158,255,0.28),rgba(79,158,255,0.10))", border: "1px solid rgba(79,158,255,0.55)" }}
+            style={{ background: "linear-gradient(135deg,rgba(0,229,205,0.28),rgba(0,229,205,0.10))", border: "1px solid rgba(0,229,205,0.55)" }}
           >
             <ShieldAlert className="h-5 w-5 text-primary" />
           </div>
@@ -1714,18 +1714,18 @@ function AdminQueue({ suggestions, isAdmin }: { suggestions: Suggestion[]; isAdm
       </button>
 
       {open && (
-        <div className="border-t" style={{ borderColor: "rgba(79,158,255,0.14)" }}>
+        <div className="border-t" style={{ borderColor: "rgba(0,229,205,0.14)" }}>
 
           {/* ── Stats row ── */}
           <div
             className="grid grid-cols-3"
-            style={{ borderBottom: "1px solid rgba(79,158,255,0.12)" }}
+            style={{ borderBottom: "1px solid rgba(0,229,205,0.12)" }}
           >
             {STATS.map(({ label, count, cfg, desc }, i) => (
               <div
                 key={label}
                 className="flex flex-col items-center py-4 gap-1.5"
-                style={{ borderRight: i < 2 ? "1px solid rgba(79,158,255,0.10)" : "none" }}
+                style={{ borderRight: i < 2 ? "1px solid rgba(0,229,205,0.10)" : "none" }}
               >
                 <div className="flex items-center gap-1.5">
                   <span className="text-2xl font-black tabular-nums" style={{ color: cfg.color }}>{count}</span>
@@ -1742,7 +1742,7 @@ function AdminQueue({ suggestions, isAdmin }: { suggestions: Suggestion[]; isAdm
           {/* ── Tab bar ── */}
           <div
             className="flex items-center gap-2 px-4 py-3"
-            style={{ borderBottom: "1px solid rgba(79,158,255,0.10)", background: "rgba(0,0,0,0.20)" }}
+            style={{ borderBottom: "1px solid rgba(0,229,205,0.10)", background: "rgba(0,0,0,0.20)" }}
           >
             <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/35 mr-1 shrink-0">
               Filter:
@@ -1755,9 +1755,9 @@ function AdminQueue({ suggestions, isAdmin }: { suggestions: Suggestion[]; isAdm
                   onClick={() => setTab(value)}
                   className="flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1.5 rounded-lg transition-all duration-150 active:scale-95"
                   style={active ? {
-                    background: "rgba(79,158,255,0.18)",
-                    border: "1px solid rgba(79,158,255,0.45)",
-                    color: "#4F9EFF",
+                    background: "rgba(0,229,205,0.18)",
+                    border: "1px solid rgba(0,229,205,0.45)",
+                    color: "#00E5CD",
                   } : {
                     background: "rgba(255,255,255,0.03)",
                     border: "1px solid rgba(255,255,255,0.07)",
@@ -1769,7 +1769,7 @@ function AdminQueue({ suggestions, isAdmin }: { suggestions: Suggestion[]; isAdm
                     <span
                       className="inline-flex items-center justify-center h-4 min-w-[16px] px-1 rounded-full text-[9px] font-black"
                       style={active
-                        ? { background: "rgba(79,158,255,0.30)", color: "#e9d5ff" }
+                        ? { background: "rgba(0,229,205,0.30)", color: "#e9d5ff" }
                         : { background: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.40)" }
                       }
                     >
@@ -1836,7 +1836,7 @@ export default function CommunityPage() {
       {/* Subtle bg glow */}
       <div
         className="pointer-events-none fixed inset-0 -z-10 opacity-30"
-        style={{ background: "radial-gradient(ellipse 55% 35% at 30% 15%,rgba(79,158,255,0.10) 0%,transparent 60%)" }}
+        style={{ background: "radial-gradient(ellipse 55% 35% at 30% 15%,rgba(0,229,205,0.10) 0%,transparent 60%)" }}
       />
 
       {/* ── Page header ── */}
@@ -1844,7 +1844,7 @@ export default function CommunityPage() {
         <div className="flex items-center gap-2 mb-3">
           <span
             className="text-[10px] font-black uppercase tracking-[0.2em] px-2.5 py-1 rounded-full"
-            style={{ background: "rgba(79,158,255,0.12)", border: "1px solid rgba(79,158,255,0.30)", color: "#4F9EFF" }}
+            style={{ background: "rgba(0,229,205,0.12)", border: "1px solid rgba(0,229,205,0.30)", color: "#00E5CD" }}
           >
             Community
           </span>
@@ -1868,7 +1868,7 @@ export default function CommunityPage() {
               <Button
                 onClick={() => setShowForm(true)}
                 className="font-bold whitespace-nowrap"
-                style={{ background: "linear-gradient(135deg,#4F9EFF,#2060c8)", boxShadow: "0 0 18px rgba(79,158,255,0.32)" }}
+                style={{ background: "linear-gradient(135deg,#00E5CD,#00b0a0)", boxShadow: "0 0 18px rgba(0,229,205,0.32)" }}
               >
                 <Plus className="h-4 w-4 mr-1.5" /> New Idea
               </Button>
@@ -1915,10 +1915,10 @@ export default function CommunityPage() {
               onClick={() => setSort(value)}
               className="flex-1 flex items-center justify-center gap-1.5 px-2 sm:px-3 py-3 sm:py-2.5 rounded-lg text-[12px] font-bold transition-all duration-200 active:scale-95"
               style={active ? {
-                background: "linear-gradient(135deg,rgba(79,158,255,0.28),rgba(79,158,255,0.18))",
-                border: "1px solid rgba(79,158,255,0.55)",
-                color: "#4F9EFF",
-                boxShadow: "0 0 16px rgba(79,158,255,0.20)",
+                background: "linear-gradient(135deg,rgba(0,229,205,0.28),rgba(0,229,205,0.18))",
+                border: "1px solid rgba(0,229,205,0.55)",
+                color: "#00E5CD",
+                boxShadow: "0 0 16px rgba(0,229,205,0.20)",
               } : {
                 color: "rgba(255,255,255,0.42)",
                 border: "1px solid transparent",
@@ -1956,9 +1956,9 @@ export default function CommunityPage() {
       {!isLoading && !isError && visibleSuggestions.length === 0 && (
         <div
           className="rounded-2xl border p-12 flex flex-col items-center gap-4 text-center"
-          style={{ borderColor: "rgba(79,158,255,0.15)", background: "rgba(79,158,255,0.03)" }}
+          style={{ borderColor: "rgba(0,229,205,0.15)", background: "rgba(0,229,205,0.03)" }}
         >
-          <div className="h-14 w-14 rounded-full flex items-center justify-center" style={{ background: "rgba(79,158,255,0.12)", border: "1px solid rgba(79,158,255,0.25)" }}>
+          <div className="h-14 w-14 rounded-full flex items-center justify-center" style={{ background: "rgba(0,229,205,0.12)", border: "1px solid rgba(0,229,205,0.25)" }}>
             <Lightbulb className="h-7 w-7 text-primary/70" strokeWidth={1.5} />
           </div>
           <div>
@@ -1966,7 +1966,7 @@ export default function CommunityPage() {
             <div className="text-sm text-muted-foreground/50 mt-1">Be the first to share an idea!</div>
           </div>
           {user ? (
-            <Button size="sm" onClick={() => setShowForm(true)} style={{ background: "rgba(79,158,255,0.20)", border: "1px solid rgba(79,158,255,0.40)", color: "#4F9EFF" }}>
+            <Button size="sm" onClick={() => setShowForm(true)} style={{ background: "rgba(0,229,205,0.20)", border: "1px solid rgba(0,229,205,0.40)", color: "#00E5CD" }}>
               <Plus className="h-3.5 w-3.5 mr-1.5" /> Post an Idea
             </Button>
           ) : (

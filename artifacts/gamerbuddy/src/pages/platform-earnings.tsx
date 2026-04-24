@@ -85,8 +85,8 @@ const SAMPLE: PlatformEarnings = {
 function fmtUSD(n: number) { return `$${n.toFixed(2)}`; }
 
 const TYPE_META: Record<string, { label: string; color: string }> = {
-  session_fee:      { label: "Session Fee",     color: "#4F9EFF" },
-  bulk_session_fee: { label: "Bulk Session",    color: "#38BAFF" },
+  session_fee:      { label: "Session Fee",     color: "#00E5CD" },
+  bulk_session_fee: { label: "Bulk Session",    color: "#00E5CD" },
   gift_fee:         { label: "Tip Fee",         color: "#fb923c" },
 };
 
@@ -222,14 +222,14 @@ function PayoutModal({
 
             {/* You Keep */}
             <div className="flex items-center justify-between px-4 py-4 border-b border-border/40"
-              style={{ background: "rgba(79,158,255,0.06)", borderColor: "rgba(79,158,255,0.15)" }}>
+              style={{ background: "rgba(0,229,205,0.06)", borderColor: "rgba(0,229,205,0.15)" }}>
               <div>
-                <p className="text-sm font-bold" style={{ color: "#4F9EFF" }}>You Keep (10% Platform Fee)</p>
-                <p className="text-[11px] mt-0.5" style={{ color: "rgba(79,158,255,0.55)" }}>
+                <p className="text-sm font-bold" style={{ color: "#00E5CD" }}>You Keep (10% Platform Fee)</p>
+                <p className="text-[11px] mt-0.5" style={{ color: "rgba(0,229,205,0.55)" }}>
                   → Transfer to <span className="font-mono font-bold">creedx112@okicici</span> via Razorpay
                 </p>
               </div>
-              <span className="text-2xl font-black tabular-nums" style={{ color: "#4F9EFF" }}>
+              <span className="text-2xl font-black tabular-nums" style={{ color: "#00E5CD" }}>
                 {fmtUSD(fee.amount)}
               </span>
             </div>
@@ -449,15 +449,15 @@ export default function PlatformEarnings() {
           </div>
           {/* You Keep All-Time */}
           <div className="rounded-2xl border flex items-center gap-4 px-6 py-4"
-            style={{ borderColor: "rgba(79,158,255,0.30)", background: "rgba(79,158,255,0.06)" }}>
+            style={{ borderColor: "rgba(0,229,205,0.30)", background: "rgba(0,229,205,0.06)" }}>
             <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0"
-              style={{ background: "rgba(79,158,255,0.15)", border: "1px solid rgba(79,158,255,0.30)" }}>
-              <Wallet className="h-5 w-5" style={{ color: "#4F9EFF" }} />
+              style={{ background: "rgba(0,229,205,0.15)", border: "1px solid rgba(0,229,205,0.30)" }}>
+              <Wallet className="h-5 w-5" style={{ color: "#00E5CD" }} />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-[10px] font-black uppercase tracking-widest" style={{ color: "rgba(79,158,255,0.70)" }}>You Keep (All Time)</p>
-              <p className="text-3xl font-black tabular-nums leading-tight" style={{ color: "#4F9EFF" }}>{fmtUSD(totalAllTimeKeep)}</p>
-              <p className="text-[11px] mt-0.5" style={{ color: "rgba(79,158,255,0.50)" }}>
+              <p className="text-[10px] font-black uppercase tracking-widest" style={{ color: "rgba(0,229,205,0.70)" }}>You Keep (All Time)</p>
+              <p className="text-3xl font-black tabular-nums leading-tight" style={{ color: "#00E5CD" }}>{fmtUSD(totalAllTimeKeep)}</p>
+              <p className="text-[11px] mt-0.5" style={{ color: "rgba(0,229,205,0.50)" }}>
                 10% platform fee · transfer to <span className="font-mono font-bold">creedx112@okicici</span>
               </p>
             </div>
@@ -562,9 +562,9 @@ export default function PlatformEarnings() {
                         <span className="text-muted-foreground/25 text-lg font-light">→</span>
                         {/* You Keep */}
                         <div className="rounded-xl border px-3 py-2 text-center min-w-[72px]"
-                          style={{ background: "rgba(79,158,255,0.08)", borderColor: "rgba(79,158,255,0.25)" }}>
-                          <p className="text-[9px] font-black uppercase tracking-wider" style={{ color: "rgba(79,158,255,0.65)" }}>You Keep</p>
-                          <p className="text-sm font-bold tabular-nums" style={{ color: "#4F9EFF" }}>{fmtUSD(fee.amount)}</p>
+                          style={{ background: "rgba(0,229,205,0.08)", borderColor: "rgba(0,229,205,0.25)" }}>
+                          <p className="text-[9px] font-black uppercase tracking-wider" style={{ color: "rgba(0,229,205,0.65)" }}>You Keep</p>
+                          <p className="text-sm font-bold tabular-nums" style={{ color: "#00E5CD" }}>{fmtUSD(fee.amount)}</p>
                         </div>
                         <span className="text-muted-foreground/25 text-lg font-light">→</span>
                         {/* You Send */}
@@ -612,12 +612,12 @@ export default function PlatformEarnings() {
           </div>
           {/* 10% — You Keep */}
           <div className="rounded-2xl border px-6 py-6 flex items-center gap-5"
-            style={{ borderColor: "rgba(79,158,255,0.25)", background: "rgba(79,158,255,0.04)" }}>
-            <div className="text-5xl font-black tabular-nums leading-none shrink-0" style={{ color: "#4F9EFF" }}>10%</div>
+            style={{ borderColor: "rgba(0,229,205,0.25)", background: "rgba(0,229,205,0.04)" }}>
+            <div className="text-5xl font-black tabular-nums leading-none shrink-0" style={{ color: "#00E5CD" }}>10%</div>
             <div>
-              <p className="text-base font-extrabold uppercase tracking-wide" style={{ color: "#4F9EFF" }}>You Keep</p>
-              <p className="text-xs mt-1 leading-relaxed" style={{ color: "rgba(79,158,255,0.55)" }}>
-                Platform fee goes to <strong className="font-mono" style={{ color: "rgba(79,158,255,0.8)" }}>creedx112@okicici</strong> via Razorpay. Same split applies to all tips and bulk sessions.
+              <p className="text-base font-extrabold uppercase tracking-wide" style={{ color: "#00E5CD" }}>You Keep</p>
+              <p className="text-xs mt-1 leading-relaxed" style={{ color: "rgba(0,229,205,0.55)" }}>
+                Platform fee goes to <strong className="font-mono" style={{ color: "rgba(0,229,205,0.8)" }}>creedx112@okicici</strong> via Razorpay. Same split applies to all tips and bulk sessions.
               </p>
             </div>
           </div>
@@ -643,8 +643,8 @@ export default function PlatformEarnings() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {[
               { label: "Today",      value: fmtUSD(d.todayFees),  sub: `${d.completedSessions} sessions all-time`, icon: <Clock className="h-5 w-5" />,         color: "#22c55e" },
-              { label: "This Week",  value: fmtUSD(d.weekFees),   sub: `🇮🇳 India: ${fmtUSD(d.india.total)}`,      icon: <CalendarDays className="h-5 w-5" />,  color: "#38BAFF" },
-              { label: "This Month", value: fmtUSD(d.monthFees),  sub: `🌍 Global: ${fmtUSD(d.global.total)}`,    icon: <CalendarRange className="h-5 w-5" />, color: "#4F9EFF" },
+              { label: "This Week",  value: fmtUSD(d.weekFees),   sub: `🇮🇳 India: ${fmtUSD(d.india.total)}`,      icon: <CalendarDays className="h-5 w-5" />,  color: "#00E5CD" },
+              { label: "This Month", value: fmtUSD(d.monthFees),  sub: `🌍 Global: ${fmtUSD(d.global.total)}`,    icon: <CalendarRange className="h-5 w-5" />, color: "#00E5CD" },
             ].map((card) => (
               <div key={card.label} className="rounded-2xl border px-5 py-5 flex items-center gap-4"
                 style={{ background: `${card.color}07`, borderColor: `${card.color}25` }}>
@@ -665,8 +665,8 @@ export default function PlatformEarnings() {
         {/* All-time + geo strip */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {[
-            { label: "Total All-Time", value: fmtUSD(d.totalFees),   color: "#4F9EFF", icon: <DollarSign className="h-4 w-4" /> },
-            { label: "Session Fees",   value: fmtUSD(d.sessionFees), color: "#38BAFF", icon: <ShieldCheck className="h-4 w-4" /> },
+            { label: "Total All-Time", value: fmtUSD(d.totalFees),   color: "#00E5CD", icon: <DollarSign className="h-4 w-4" /> },
+            { label: "Session Fees",   value: fmtUSD(d.sessionFees), color: "#00E5CD", icon: <ShieldCheck className="h-4 w-4" /> },
             { label: "Bulk Fees",      value: fmtUSD(d.bulkFees),    color: "#60a5fa", icon: <Layers className="h-4 w-4" /> },
             { label: "Tip Fees",       value: fmtUSD(d.giftFees),    color: "#fb923c", icon: <Gift className="h-4 w-4" /> },
           ].map((card) => (
@@ -714,14 +714,14 @@ export default function PlatformEarnings() {
                     <th className="text-left px-4 py-3 font-bold uppercase tracking-widest text-muted-foreground/50 whitespace-nowrap">Game · Platform</th>
                     <th className="text-left px-4 py-3 font-bold uppercase tracking-widest text-muted-foreground/50 whitespace-nowrap">Hirer → Gamer</th>
                     <th className="text-right px-4 py-3 font-bold uppercase tracking-widest text-muted-foreground/50 whitespace-nowrap">Gross</th>
-                    <th className="text-right px-4 py-3 font-bold uppercase tracking-widest whitespace-nowrap" style={{ color: "rgba(79,158,255,0.7)" }}>You Keep (10%)</th>
+                    <th className="text-right px-4 py-3 font-bold uppercase tracking-widest whitespace-nowrap" style={{ color: "rgba(0,229,205,0.7)" }}>You Keep (10%)</th>
                     <th className="text-right px-4 py-3 font-extrabold uppercase tracking-widest whitespace-nowrap text-green-400">You Send (90%) ↓</th>
                     <th className="text-center px-4 py-3 font-bold uppercase tracking-widest text-muted-foreground/50 whitespace-nowrap">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border/15">
                   {visibleFees.map((fee, idx) => {
-                    const meta = TYPE_META[fee.type] ?? { label: fee.type, color: "#4F9EFF" };
+                    const meta = TYPE_META[fee.type] ?? { label: fee.type, color: "#00E5CD" };
                     const isIndia = fee.hirerRegion === "india";
                     const hasWithdrawal = !!fee.pendingWithdrawalId;
                     return (
@@ -753,7 +753,7 @@ export default function PlatformEarnings() {
                           <span className="font-bold text-foreground/70 tabular-nums">{fmtUSD(fee.grossAmount)}</span>
                         </td>
                         <td className="px-4 py-3 text-right whitespace-nowrap">
-                          <span className="font-bold tabular-nums" style={{ color: "#4F9EFF" }}>{fmtUSD(fee.amount)}</span>
+                          <span className="font-bold tabular-nums" style={{ color: "#00E5CD" }}>{fmtUSD(fee.amount)}</span>
                         </td>
                         <td className="px-4 py-4 text-right whitespace-nowrap">
                           <span className="text-base font-black text-green-400 tabular-nums">{fmtUSD(fee.netToGamer)}</span>
@@ -783,8 +783,8 @@ export default function PlatformEarnings() {
                       <div className="text-base font-black text-foreground/80 tabular-nums">{fmtUSD(totalGross)}</div>
                     </td>
                     <td className="px-4 py-4 text-right whitespace-nowrap">
-                      <div className="text-[9px] uppercase tracking-widest font-bold" style={{ color: "rgba(79,158,255,0.55)" }}>You Keep</div>
-                      <div className="text-base font-black tabular-nums" style={{ color: "#4F9EFF" }}>{fmtUSD(totalKeep)}</div>
+                      <div className="text-[9px] uppercase tracking-widest font-bold" style={{ color: "rgba(0,229,205,0.55)" }}>You Keep</div>
+                      <div className="text-base font-black tabular-nums" style={{ color: "#00E5CD" }}>{fmtUSD(totalKeep)}</div>
                     </td>
                     {/* Highlighted "You Need to Send" total */}
                     <td className="px-4 py-4 text-right whitespace-nowrap" style={{ background: "rgba(34,197,94,0.08)" }}>
