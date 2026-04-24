@@ -67,15 +67,15 @@ const BIO_TEMPLATES: { archetype: string; emoji: string; color: string; border: 
   {
     archetype: "Chill Co-op",
     emoji: "🤝",
-    color: "rgba(34,211,238,0.10)",
-    border: "rgba(34,211,238,0.35)",
+    color: "rgba(196,174,244,0.10)",
+    border: "rgba(196,174,244,0.35)",
     text: "Chill gamer happy to help at your own pace. I play mostly RPGs, adventure, and co-op titles — no pressure, good vibes, and solid teamwork. Always on time and easy to communicate with.",
   },
   {
     archetype: "Pro Speedrunner",
     emoji: "⚡",
-    color: "rgba(0,212,255,0.12)",
-    border: "rgba(0,212,255,0.35)",
+    color: "rgba(220,206,64,0.12)",
+    border: "rgba(220,206,64,0.35)",
     text: "Pro-level player across multiple titles with a fast, efficient playstyle. I'll carry you to your goals quickly and share tips along the way. Results-oriented and always prepared.",
   },
   {
@@ -126,7 +126,7 @@ function PostVerificationModal({
         className="w-full max-w-lg rounded-t-3xl sm:rounded-3xl overflow-hidden flex flex-col"
         style={{
           border: "2px solid rgba(52,211,153,0.4)",
-          boxShadow: "0 0 140px rgba(52,211,153,0.10), 0 0 60px rgba(0,212,255,0.08), 0 40px 100px rgba(0,0,0,0.98)",
+          boxShadow: "0 0 140px rgba(52,211,153,0.10), 0 0 60px rgba(220,206,64,0.08), 0 40px 100px rgba(0,0,0,0.98)",
           background: "hsl(var(--card))",
           maxHeight: "92dvh",
         }}
@@ -135,7 +135,7 @@ function PostVerificationModal({
         <div
           className="relative px-6 pt-7 pb-6 text-center shrink-0 overflow-hidden"
           style={{
-            background: "linear-gradient(160deg, rgba(52,211,153,0.18) 0%, rgba(0,212,255,0.12) 50%, rgba(34,211,238,0.08) 100%)",
+            background: "linear-gradient(160deg, rgba(52,211,153,0.18) 0%, rgba(220,206,64,0.12) 50%, rgba(196,174,244,0.08) 100%)",
             borderBottom: "1px solid rgba(52,211,153,0.15)",
           }}
         >
@@ -201,7 +201,7 @@ function PostVerificationModal({
                     width: `${Math.max(score, 3)}%`,
                     background: score >= 80
                       ? "linear-gradient(90deg, #10b981, #34d399)"
-                      : "linear-gradient(90deg, #0099bb, #00D4FF, #22d3ee)",
+                      : "linear-gradient(90deg, #b5a730, #DCCE40, #C4AEF4)",
                   }}
                 >
                   {/* Shimmer */}
@@ -225,7 +225,7 @@ function PostVerificationModal({
                     <div
                       key={item.label}
                       className="flex items-center gap-3 rounded-xl border px-3.5 py-3"
-                      style={{ borderColor: "rgba(0,212,255,0.2)", background: "rgba(0,212,255,0.05)" }}
+                      style={{ borderColor: "rgba(220,206,64,0.2)", background: "rgba(220,206,64,0.05)" }}
                     >
                       <span className="text-xl shrink-0">{item.icon}</span>
                       <div className="flex-1 min-w-0">
@@ -236,7 +236,7 @@ function PostVerificationModal({
                       </div>
                       <span
                         className="text-[10px] font-black px-2 py-0.5 rounded-full shrink-0"
-                        style={{ background: "rgba(0,212,255,0.15)", color: "#00D4FF", border: "1px solid rgba(0,212,255,0.35)" }}
+                        style={{ background: "rgba(220,206,64,0.15)", color: "#DCCE40", border: "1px solid rgba(220,206,64,0.35)" }}
                       >
                         +{item.pts}%
                       </span>
@@ -266,7 +266,7 @@ function PostVerificationModal({
                   </div>
                   <div
                     className="text-[9px] font-bold px-1.5 py-0.5 rounded-full"
-                    style={{ background: "rgba(34,211,238,0.12)", color: "#22d3ee", border: "1px solid rgba(34,211,238,0.3)" }}
+                    style={{ background: "rgba(196,174,244,0.12)", color: "#C4AEF4", border: "1px solid rgba(196,174,244,0.3)" }}
                   >
                     Edit after pasting
                   </div>
@@ -340,8 +340,8 @@ function PostVerificationModal({
               onClick={onComplete}
               className="w-full font-black uppercase tracking-wider text-sm text-white"
               style={{
-                background: "linear-gradient(135deg, #00D4FF 0%, #0099bb 50%, #6d28d9 100%)",
-                boxShadow: "0 0 24px rgba(0,212,255,0.35)",
+                background: "linear-gradient(135deg, #DCCE40 0%, #b5a730 50%, #6d28d9 100%)",
+                boxShadow: "0 0 24px rgba(220,206,64,0.35)",
                 padding: "14px",
               }}
             >
@@ -377,9 +377,9 @@ function ProfileCompletionBanner({ profile }: { profile: any }) {
     <div
       className="rounded-2xl overflow-hidden"
       style={{
-        border: "1px solid rgba(0,212,255,0.35)",
-        background: "linear-gradient(135deg, rgba(0,212,255,0.07), rgba(34,211,238,0.04))",
-        boxShadow: "0 0 30px rgba(0,212,255,0.07)",
+        border: "1px solid rgba(220,206,64,0.35)",
+        background: "linear-gradient(135deg, rgba(220,206,64,0.07), rgba(196,174,244,0.04))",
+        boxShadow: "0 0 30px rgba(220,206,64,0.07)",
       }}
     >
       <div className="h-1 bg-gradient-to-r from-violet-600 via-purple-400 to-cyan-500" />
@@ -389,7 +389,7 @@ function ProfileCompletionBanner({ profile }: { profile: any }) {
           <div className="flex items-start gap-3">
             <div
               className="h-10 w-10 rounded-xl bg-primary/15 border border-primary/30 flex items-center justify-center shrink-0 mt-0.5"
-              style={{ boxShadow: "0 0 12px rgba(0,212,255,0.2)" }}
+              style={{ boxShadow: "0 0 12px rgba(220,206,64,0.2)" }}
             >
               <Sparkles className="h-5 w-5 text-primary" />
             </div>
@@ -400,7 +400,7 @@ function ProfileCompletionBanner({ profile }: { profile: any }) {
                 </span>
                 <span
                   className="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full"
-                  style={{ background: "rgba(0,212,255,0.2)", color: "#00D4FF", border: "1px solid rgba(0,212,255,0.4)" }}
+                  style={{ background: "rgba(220,206,64,0.2)", color: "#DCCE40", border: "1px solid rgba(220,206,64,0.4)" }}
                 >
                   {score}% done
                 </span>
@@ -425,7 +425,7 @@ function ProfileCompletionBanner({ profile }: { profile: any }) {
           <div className="h-2 rounded-full bg-background/50 overflow-hidden">
             <div
               className="h-full rounded-full transition-all duration-700"
-              style={{ width: `${score}%`, background: "linear-gradient(90deg, #00D4FF, #0099bb)" }}
+              style={{ width: `${score}%`, background: "linear-gradient(90deg, #DCCE40, #b5a730)" }}
             />
           </div>
           <div className="text-[10px] text-muted-foreground/50 text-right">
@@ -440,9 +440,9 @@ function ProfileCompletionBanner({ profile }: { profile: any }) {
               key={item.label}
               className="flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-full border"
               style={{
-                background: "rgba(0,212,255,0.08)",
-                borderColor: "rgba(0,212,255,0.25)",
-                color: "rgba(0,212,255,0.9)",
+                background: "rgba(220,206,64,0.08)",
+                borderColor: "rgba(220,206,64,0.25)",
+                color: "rgba(220,206,64,0.9)",
               }}
             >
               <span>{item.icon}</span>
@@ -475,8 +475,8 @@ function CommunityGuidelinesReminder() {
     <div
       className="rounded-2xl overflow-hidden"
       style={{
-        border: "1px solid rgba(34,211,238,0.25)",
-        background: "linear-gradient(135deg, rgba(34,211,238,0.05), rgba(6,182,212,0.03))",
+        border: "1px solid rgba(196,174,244,0.25)",
+        background: "linear-gradient(135deg, rgba(196,174,244,0.05), rgba(6,182,212,0.03))",
       }}
     >
       <div className="h-1 bg-gradient-to-r from-cyan-600 via-cyan-400 to-cyan-600" />
@@ -748,7 +748,7 @@ function GamingAccountsSection() {
     <div
       id="gaming-management"
       className="rounded-2xl border overflow-hidden"
-      style={{ borderColor: "rgba(34,211,238,0.2)", background: "rgba(10,8,20,0.6)" }}
+      style={{ borderColor: "rgba(196,174,244,0.2)", background: "rgba(10,8,20,0.6)" }}
     >
       {/* Header */}
       <div className="px-5 pt-5 pb-4 border-b" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
@@ -766,7 +766,7 @@ function GamingAccountsSection() {
             className="text-[11px] font-black px-3 py-1 rounded-full shrink-0 mt-0.5"
             style={
               connectedCount > 0
-                ? { background: "rgba(34,211,238,0.12)", border: "1px solid rgba(34,211,238,0.3)", color: "#22d3ee" }
+                ? { background: "rgba(196,174,244,0.12)", border: "1px solid rgba(196,174,244,0.3)", color: "#C4AEF4" }
                 : { background: "rgba(234,179,8,0.10)", border: "1px solid rgba(234,179,8,0.30)", color: "#fbbf24" }
             }
           >
@@ -779,14 +779,14 @@ function GamingAccountsSection() {
           style={
             connectedCount === 0
               ? { borderColor: "rgba(234,179,8,0.22)", background: "rgba(234,179,8,0.05)" }
-              : { borderColor: "rgba(34,211,238,0.12)", background: "rgba(34,211,238,0.04)" }
+              : { borderColor: "rgba(196,174,244,0.12)", background: "rgba(196,174,244,0.04)" }
           }
         >
           <span className="text-[13px] shrink-0 mt-px">{connectedCount === 0 ? "🔒" : "✅"}</span>
           <p className="text-[10px] leading-relaxed" style={{ color: connectedCount === 0 ? "rgba(251,191,36,0.75)" : "rgba(103,232,249,0.65)" }}>
             {connectedCount === 0 ? (
               <>
-                <strong style={{ color: connectedCount === 0 ? "#fbbf24" : "#22d3ee" }}>
+                <strong style={{ color: connectedCount === 0 ? "#fbbf24" : "#C4AEF4" }}>
                   Link at least ONE gaming account (Steam, Epic, PSN, Xbox, or Switch) to unlock posting requests and placing bids.
                 </strong>{" "}
                 Enter your exact username below — our team manually verifies within 24 hours. Keep your profile{" "}
@@ -794,10 +794,10 @@ function GamingAccountsSection() {
               </>
             ) : (
               <>
-                <strong style={{ color: "#22d3ee" }}>Gaming account submitted!</strong>{" "}
+                <strong style={{ color: "#C4AEF4" }}>Gaming account submitted!</strong>{" "}
                 Our admin team will manually verify within 24 hours. Keep your profile{" "}
-                <strong style={{ color: "#22d3ee" }}>Public</strong> so we can confirm real gaming activity.
-                Linking more accounts boosts your <strong style={{ color: "#22d3ee" }}>Trust Factor</strong>.
+                <strong style={{ color: "#C4AEF4" }}>Public</strong> so we can confirm real gaming activity.
+                Linking more accounts boosts your <strong style={{ color: "#C4AEF4" }}>Trust Factor</strong>.
               </>
             )}
           </p>
@@ -823,10 +823,10 @@ function GamingAccountsSection() {
                   border: `1px solid ${isReview ? "rgba(251,191,36,0.25)" : meta.border}`,
                 }}
               >
-                <span className="w-3.5 h-3.5 shrink-0" style={{ color: isReview ? "#fbbf24" : "#22d3ee" }}>
+                <span className="w-3.5 h-3.5 shrink-0" style={{ color: isReview ? "#fbbf24" : "#C4AEF4" }}>
                   {GAMING_PLATFORM_SVG[a.platform]}
                 </span>
-                <span style={{ color: isReview ? "#fbbf24" : "#22d3ee" }}>{meta.shortLabel}</span>
+                <span style={{ color: isReview ? "#fbbf24" : "#C4AEF4" }}>{meta.shortLabel}</span>
                 <span className="font-mono text-[10px]" style={{ color: isReview ? "rgba(251,191,36,0.65)" : "rgba(255,255,255,0.5)" }}>
                   {a.username}
                 </span>
@@ -886,15 +886,15 @@ function GamingAccountsSection() {
                   className="rounded-2xl overflow-hidden transition-all duration-200"
                   style={{
                     border: isConnected
-                      ? isReview ? "1px solid rgba(251,191,36,0.30)" : "1px solid rgba(34,211,238,0.35)"
-                      : isExpanded ? "1px solid rgba(34,211,238,0.22)" : "1px solid rgba(255,255,255,0.06)",
+                      ? isReview ? "1px solid rgba(251,191,36,0.30)" : "1px solid rgba(196,174,244,0.35)"
+                      : isExpanded ? "1px solid rgba(196,174,244,0.22)" : "1px solid rgba(255,255,255,0.06)",
                     background: isConnected
                       ? isReview
                         ? "linear-gradient(135deg, rgba(251,191,36,0.06), rgba(0,0,0,0.4))"
-                        : "linear-gradient(135deg, rgba(34,211,238,0.08), rgba(0,0,0,0.4))"
-                      : isExpanded ? "rgba(34,211,238,0.03)" : "rgba(255,255,255,0.03)",
+                        : "linear-gradient(135deg, rgba(196,174,244,0.08), rgba(0,0,0,0.4))"
+                      : isExpanded ? "rgba(196,174,244,0.03)" : "rgba(255,255,255,0.03)",
                     boxShadow: isConnected
-                      ? isReview ? "0 0 20px -8px rgba(251,191,36,0.3)" : "0 0 20px -8px rgba(34,211,238,0.4)"
+                      ? isReview ? "0 0 20px -8px rgba(251,191,36,0.3)" : "0 0 20px -8px rgba(196,174,244,0.4)"
                       : "none",
                   }}
                 >
@@ -904,11 +904,11 @@ function GamingAccountsSection() {
                       className="w-14 h-14 shrink-0 flex items-center justify-center"
                       style={{
                         background: isConnected
-                          ? isReview ? "rgba(251,191,36,0.10)" : "rgba(34,211,238,0.12)"
-                          : isExpanded ? "rgba(34,211,238,0.06)" : "rgba(255,255,255,0.04)",
+                          ? isReview ? "rgba(251,191,36,0.10)" : "rgba(196,174,244,0.12)"
+                          : isExpanded ? "rgba(196,174,244,0.06)" : "rgba(255,255,255,0.04)",
                         borderRight: `1px solid ${
                           isConnected
-                            ? isReview ? "rgba(251,191,36,0.18)" : "rgba(34,211,238,0.20)"
+                            ? isReview ? "rgba(251,191,36,0.18)" : "rgba(196,174,244,0.20)"
                             : "rgba(255,255,255,0.06)"
                         }`,
                       }}
@@ -917,8 +917,8 @@ function GamingAccountsSection() {
                         className="w-6 h-6"
                         style={{
                           color: isConnected
-                            ? isReview ? "#fbbf24" : "#22d3ee"
-                            : isExpanded ? "rgba(34,211,238,0.5)" : "rgba(255,255,255,0.18)",
+                            ? isReview ? "#fbbf24" : "#C4AEF4"
+                            : isExpanded ? "rgba(196,174,244,0.5)" : "rgba(255,255,255,0.18)",
                         }}
                       >
                         {GAMING_PLATFORM_SVG[platform]}
@@ -931,8 +931,8 @@ function GamingAccountsSection() {
                         className="text-[13px] font-extrabold leading-tight"
                         style={{
                           color: isConnected
-                            ? isReview ? "#fbbf24" : "#22d3ee"
-                            : isExpanded ? "rgba(34,211,238,0.75)" : "rgba(255,255,255,0.6)",
+                            ? isReview ? "#fbbf24" : "#C4AEF4"
+                            : isExpanded ? "rgba(196,174,244,0.75)" : "rgba(255,255,255,0.6)",
                         }}
                       >
                         {meta.label}
@@ -985,9 +985,9 @@ function GamingAccountsSection() {
                           }}
                           className="text-[11px] font-extrabold uppercase tracking-wide px-3 py-1.5 rounded-xl transition-all hover:brightness-110 active:scale-95"
                           style={{
-                            background: isExpanded ? "rgba(255,255,255,0.05)" : "rgba(34,211,238,0.13)",
-                            border: "1px solid rgba(34,211,238,0.25)",
-                            color: isExpanded ? "rgba(255,255,255,0.4)" : "#22d3ee",
+                            background: isExpanded ? "rgba(255,255,255,0.05)" : "rgba(196,174,244,0.13)",
+                            border: "1px solid rgba(196,174,244,0.25)",
+                            color: isExpanded ? "rgba(255,255,255,0.4)" : "#C4AEF4",
                           }}
                         >
                           {isExpanded ? "Cancel" : "Link"}
@@ -1000,7 +1000,7 @@ function GamingAccountsSection() {
                   {isExpanded && (
                     <div
                       className="px-4 pb-4 pt-0 border-t"
-                      style={{ borderColor: "rgba(34,211,238,0.10)", background: "rgba(34,211,238,0.03)" }}
+                      style={{ borderColor: "rgba(196,174,244,0.10)", background: "rgba(196,174,244,0.03)" }}
                     >
                       <p className="text-[10px] text-cyan-300/45 mt-3 mb-2 leading-relaxed">{hints.hint}</p>
                       <div className="flex gap-2">
@@ -1012,14 +1012,14 @@ function GamingAccountsSection() {
                           onKeyDown={(e) => e.key === "Enter" && handleSubmit(platform)}
                           maxLength={64}
                           className="flex-1 h-9 px-3 text-sm rounded-xl border bg-background/60 focus:outline-none focus:border-cyan-400/50 text-foreground placeholder:text-muted-foreground/30"
-                          style={{ borderColor: "rgba(34,211,238,0.22)" }}
+                          style={{ borderColor: "rgba(196,174,244,0.22)" }}
                           autoFocus
                         />
                         <button
                           onClick={() => handleSubmit(platform)}
                           disabled={!inputValue.trim() || connect.isPending}
                           className="h-9 px-3 text-[11px] font-bold rounded-xl transition-all hover:brightness-110 active:scale-95 disabled:opacity-40 whitespace-nowrap"
-                          style={{ background: "rgba(34,211,238,0.18)", border: "1px solid rgba(34,211,238,0.35)", color: "#22d3ee" }}
+                          style={{ background: "rgba(196,174,244,0.18)", border: "1px solid rgba(196,174,244,0.35)", color: "#C4AEF4" }}
                         >
                           {connect.isPending ? "···" : "Submit for Verification"}
                         </button>
@@ -1109,7 +1109,7 @@ function StreamingAccountsSection() {
     <div
       id="streaming-management"
       className="rounded-2xl border overflow-hidden"
-      style={{ borderColor: "rgba(0,212,255,0.2)", background: "rgba(10,8,20,0.6)" }}
+      style={{ borderColor: "rgba(220,206,64,0.2)", background: "rgba(10,8,20,0.6)" }}
     >
       {/* ── Header ─────────────────────────────────────── */}
       <div className="px-5 pt-5 pb-4 border-b" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
@@ -1130,7 +1130,7 @@ function StreamingAccountsSection() {
                 ? { background: "rgba(34,197,94,0.12)", border: "1px solid rgba(34,197,94,0.3)", color: "#4ade80" }
                 : connectedCount === 1
                   ? { background: "rgba(251,191,36,0.10)", border: "1px solid rgba(251,191,36,0.28)", color: "#fbbf24" }
-                  : { background: "rgba(0,212,255,0.10)", border: "1px solid rgba(0,212,255,0.25)", color: "#00D4FF" }
+                  : { background: "rgba(220,206,64,0.10)", border: "1px solid rgba(220,206,64,0.25)", color: "#DCCE40" }
             }
           >
             {connectedCount} / {PLATFORM_ORDER.length} {connectedCount >= 2 ? "✓" : "Linked"}
@@ -1143,7 +1143,7 @@ function StreamingAccountsSection() {
           style={
             connectedCount >= 2
               ? { borderColor: "rgba(34,197,94,0.15)", background: "rgba(34,197,94,0.05)" }
-              : { borderColor: "rgba(0,212,255,0.15)", background: "rgba(0,212,255,0.05)" }
+              : { borderColor: "rgba(220,206,64,0.15)", background: "rgba(220,206,64,0.05)" }
           }
         >
           <span className="text-[13px] shrink-0 mt-px">{connectedCount >= 2 ? "🏆" : "📡"}</span>
@@ -1156,11 +1156,11 @@ function StreamingAccountsSection() {
               </>
             ) : (
               <>
-                <strong style={{ color: "#00D4FF" }}>
+                <strong style={{ color: "#DCCE40" }}>
                   Link at least 2 streaming/social accounts (YouTube, Twitch, Kick, etc.) to increase your Trust Factor
                 </strong>{" "}
                 and appear more credible to hirers. Profiles with 2+ streaming accounts get{" "}
-                <strong style={{ color: "#00D4FF" }}>significantly more hire requests.</strong>
+                <strong style={{ color: "#DCCE40" }}>significantly more hire requests.</strong>
               </>
             )}
           </p>
@@ -1387,7 +1387,7 @@ const BG_STYLES: Record<string, string> = {
 };
 
 const BG_ACCENT: Record<string, string> = {
-  "bg-neon-purple":  "rgba(0,212,255,0.6)",
+  "bg-neon-purple":  "rgba(220,206,64,0.6)",
   "bg-cyber-blue":   "rgba(6,182,212,0.6)",
   "bg-fire-red":     "rgba(239,68,68,0.6)",
   "bg-matrix-green": "rgba(34,197,94,0.6)",
@@ -1513,7 +1513,7 @@ function AddQuestForm({ onCancel }: { onCancel: () => void }) {
 
   return (
     <form onSubmit={handleSubmit} className="rounded-xl border border-primary/30 bg-primary/5 p-5 space-y-4"
-      style={{ boxShadow: "0 0 24px rgba(0,212,255,0.06) inset" }}>
+      style={{ boxShadow: "0 0 24px rgba(220,206,64,0.06) inset" }}>
       <div className="text-xs font-bold uppercase tracking-widest text-primary flex items-center gap-2">
         <Plus className="h-3.5 w-3.5" /> Add Game to Quest
       </div>
@@ -1597,7 +1597,7 @@ function AddQuestForm({ onCancel }: { onCancel: () => void }) {
           <X className="h-3.5 w-3.5 mr-1" /> Cancel
         </Button>
         <Button type="submit" size="sm" disabled={!gameName.trim() || !helpType.trim() || !playstyle.trim() || addEntry.isPending}
-          className="bg-primary hover:bg-primary/90 text-xs font-bold uppercase flex-1 shadow-[0_0_12px_rgba(0,212,255,0.2)]">
+          className="bg-primary hover:bg-primary/90 text-xs font-bold uppercase flex-1 shadow-[0_0_12px_rgba(220,206,64,0.2)]">
           {addEntry.isPending ? (
             <span className="flex items-center gap-1.5"><div className="h-3 w-3 rounded-full border-2 border-white/30 border-t-white animate-spin" />Adding…</span>
           ) : (
@@ -1769,7 +1769,7 @@ function ShopSection({
                 key={item.id}
                 className={`rounded-xl border p-3 space-y-2 transition-all ${
                   equippedNow
-                    ? "border-primary/60 bg-primary/10 shadow-[0_0_12px_rgba(0,212,255,0.2)]"
+                    ? "border-primary/60 bg-primary/10 shadow-[0_0_12px_rgba(220,206,64,0.2)]"
                     : "border-border bg-background/40 hover:border-border/80"
                 }`}
               >
@@ -1874,7 +1874,7 @@ function VerificationSection({ idVerified, gamingAccountCount, onJustVerified }:
   if (gamingAccountCount === 0) {
     return (
       <Card className="border-muted/40 bg-card/60 overflow-hidden">
-        <div className="h-0.5 w-full" style={{ background: "linear-gradient(90deg, #00D4FF, #22d3ee)" }} />
+        <div className="h-0.5 w-full" style={{ background: "linear-gradient(90deg, #DCCE40, #C4AEF4)" }} />
         <CardContent className="pt-5 pb-5">
           <div className="flex items-center gap-3.5">
             <div className="h-10 w-10 rounded-xl bg-primary/10 border border-primary/25 flex items-center justify-center shrink-0">
@@ -1894,7 +1894,7 @@ function VerificationSection({ idVerified, gamingAccountCount, onJustVerified }:
 
   return (
     <Card className="border-amber-500/25 bg-card/60 overflow-hidden">
-      <div className="h-0.5 w-full" style={{ background: "linear-gradient(90deg, #f59e0b, #00D4FF, #22d3ee)" }} />
+      <div className="h-0.5 w-full" style={{ background: "linear-gradient(90deg, #f59e0b, #DCCE40, #C4AEF4)" }} />
       <CardContent className="pt-5 pb-5 space-y-4">
         {/* Top row */}
         <div className="flex items-center justify-between gap-4 flex-wrap">
@@ -1931,7 +1931,7 @@ function VerificationSection({ idVerified, gamingAccountCount, onJustVerified }:
         {/* 24h + keep public tip */}
         <div
           className="flex items-start gap-2.5 rounded-lg px-3 py-2.5"
-          style={{ background: "rgba(0,212,255,0.07)", border: "1px solid rgba(0,212,255,0.18)" }}
+          style={{ background: "rgba(220,206,64,0.07)", border: "1px solid rgba(220,206,64,0.18)" }}
         >
           <Clock className="h-3.5 w-3.5 text-primary shrink-0 mt-0.5" />
           <div>
@@ -2034,12 +2034,12 @@ function ContactVerificationSection({
   }
 
   return (
-    <Card style={{ borderColor: "rgba(0,212,255,0.22)", background: "rgba(0,212,255,0.04)" }}>
+    <Card style={{ borderColor: "rgba(220,206,64,0.22)", background: "rgba(220,206,64,0.04)" }}>
       <CardContent className="pt-5 pb-5 space-y-4">
         {/* Header */}
         <div className="flex items-start gap-3.5">
           <div className="h-11 w-11 rounded-xl flex items-center justify-center shrink-0 mt-0.5"
-            style={{ background: "rgba(0,212,255,0.15)", border: "1px solid rgba(0,212,255,0.30)" }}>
+            style={{ background: "rgba(220,206,64,0.15)", border: "1px solid rgba(220,206,64,0.30)" }}>
             <ShieldCheck className="h-5 w-5 text-primary" />
           </div>
           <div className="flex-1 min-w-0">
@@ -2126,7 +2126,7 @@ function ContactVerificationSection({
         {/* Soft nudge for idle email */}
         {activeChannel === "email" && !emailVerified && step === "idle" && (
           <div className="flex items-start gap-2.5 rounded-lg px-3 py-2.5 text-xs"
-            style={{ background: "rgba(0,212,255,0.07)", border: "1px solid rgba(0,212,255,0.18)" }}>
+            style={{ background: "rgba(220,206,64,0.07)", border: "1px solid rgba(220,206,64,0.18)" }}>
             <Sparkles className="h-3.5 w-3.5 text-primary shrink-0 mt-0.5" />
             <span className="text-muted-foreground leading-relaxed">
               A 6-digit code will be sent to <strong className="text-foreground">{userEmail}</strong>. Expires in 10 minutes. Verifying <strong className="text-foreground">adds +5 Trust Factor</strong> instantly.
@@ -2152,7 +2152,7 @@ function ContactVerificationSection({
             <Button
               onClick={handleSend}
               className="flex items-center gap-2 h-9 px-4 font-bold text-xs uppercase tracking-widest"
-              style={{ background: "linear-gradient(135deg,#0099bb,#00D4FF)", boxShadow: "0 2px 12px rgba(0,212,255,0.30)" }}
+              style={{ background: "linear-gradient(135deg,#b5a730,#DCCE40)", boxShadow: "0 2px 12px rgba(220,206,64,0.30)" }}
             >
               <Mail className="h-3.5 w-3.5" />
               Send Code to Email
@@ -2337,7 +2337,7 @@ export default function Profile() {
   const bgId = profile?.profileBackground;
   const titleId = profile?.profileTitle;
   const bgGrad = bgId ? (BG_STYLES[bgId] ?? "from-primary/20 to-secondary/10") : "from-primary/15 via-secondary/10 to-background";
-  const bgAccent = bgId ? (BG_ACCENT[bgId] ?? "rgba(0,212,255,0.4)") : "rgba(0,212,255,0.4)";
+  const bgAccent = bgId ? (BG_ACCENT[bgId] ?? "rgba(220,206,64,0.4)") : "rgba(220,206,64,0.4)";
 
   const currentRank = RANK_BADGES.filter((b) => points >= b.min).pop() ?? RANK_BADGES[0];
   const nextRank = RANK_BADGES.find((b) => points < b.min);
@@ -2690,7 +2690,7 @@ export default function Profile() {
       >
         <div
           className="shrink-0 h-10 w-10 rounded-xl flex items-center justify-center border"
-          style={{ background: "rgba(0,212,255,0.10)", borderColor: "rgba(0,212,255,0.25)" }}
+          style={{ background: "rgba(220,206,64,0.10)", borderColor: "rgba(220,206,64,0.25)" }}
         >
           <span className="text-lg">🗺️</span>
         </div>
@@ -2700,9 +2700,9 @@ export default function Profile() {
             <span
               className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border"
               style={{
-                background: "rgba(0,212,255,0.10)",
-                borderColor: "rgba(0,212,255,0.30)",
-                color: "#00D4FF",
+                background: "rgba(220,206,64,0.10)",
+                borderColor: "rgba(220,206,64,0.30)",
+                color: "#DCCE40",
               }}
             >
               Phase 3 · Coming Soon
@@ -2721,15 +2721,15 @@ export default function Profile() {
         const counterColor =
           draftBio.length >= 280 ? "#f87171" :
           draftBio.length >= 240 ? "#fbbf24" :
-          "#00D4FF";
+          "#DCCE40";
         return (
           <div
             className="rounded-2xl overflow-hidden border"
             style={{
-              borderColor: editingBio ? "rgba(0,212,255,0.40)" : "rgba(255,255,255,0.07)",
+              borderColor: editingBio ? "rgba(220,206,64,0.40)" : "rgba(255,255,255,0.07)",
               background: "rgba(8,6,18,0.65)",
               boxShadow: editingBio
-                ? "0 0 0 1px rgba(0,212,255,0.14), 0 6px 28px rgba(0,212,255,0.10)"
+                ? "0 0 0 1px rgba(220,206,64,0.14), 0 6px 28px rgba(220,206,64,0.10)"
                 : "none",
               transition: "border-color 0.25s, box-shadow 0.25s",
             }}
@@ -2739,7 +2739,7 @@ export default function Profile() {
               className="flex items-center justify-between gap-2 px-4 sm:px-5 py-3 border-b"
               style={{
                 borderColor: "rgba(255,255,255,0.06)",
-                background: editingBio ? "rgba(0,212,255,0.07)" : "rgba(255,255,255,0.02)",
+                background: editingBio ? "rgba(220,206,64,0.07)" : "rgba(255,255,255,0.02)",
                 transition: "background 0.25s",
               }}
             >
@@ -2747,7 +2747,7 @@ export default function Profile() {
               <div className="flex items-center gap-2 min-w-0">
                 <Sparkles
                   className="h-3.5 w-3.5 shrink-0"
-                  style={{ color: editingBio ? "#00D4FF" : "rgba(0,212,255,0.55)" }}
+                  style={{ color: editingBio ? "#DCCE40" : "rgba(220,206,64,0.55)" }}
                 />
                 <span className="text-[11px] font-extrabold uppercase tracking-widest text-white/65 truncate">
                   About Me
@@ -2757,9 +2757,9 @@ export default function Profile() {
                   <span
                     className="shrink-0 text-[9px] font-bold px-2 py-0.5 rounded-full"
                     style={{
-                      background: "rgba(0,212,255,0.12)",
-                      border: "1px solid rgba(0,212,255,0.24)",
-                      color: "#00D4FF",
+                      background: "rgba(220,206,64,0.12)",
+                      border: "1px solid rgba(220,206,64,0.24)",
+                      color: "#DCCE40",
                     }}
                   >
                     {profile.bio.length}/300
@@ -2773,9 +2773,9 @@ export default function Profile() {
                   onClick={() => { setDraftBio(profile?.bio ?? ""); setEditingBio(true); }}
                   className="shrink-0 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg transition-all duration-150 hover:brightness-110 hover:scale-[1.02]"
                   style={{
-                    background: "rgba(0,212,255,0.10)",
-                    border: "1px solid rgba(0,212,255,0.28)",
-                    color: "#00D4FF",
+                    background: "rgba(220,206,64,0.10)",
+                    border: "1px solid rgba(220,206,64,0.28)",
+                    color: "#DCCE40",
                   }}
                 >
                   <Edit3 className="h-3 w-3" />
@@ -2803,9 +2803,9 @@ export default function Profile() {
                     disabled={updateProfile.isPending}
                     className="flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg transition-all duration-150 hover:brightness-110 disabled:opacity-50"
                     style={{
-                      background: "linear-gradient(135deg, rgba(0,212,255,0.28), rgba(0,212,255,0.14))",
-                      border: "1px solid rgba(0,212,255,0.48)",
-                      color: "#00D4FF",
+                      background: "linear-gradient(135deg, rgba(220,206,64,0.28), rgba(220,206,64,0.14))",
+                      border: "1px solid rgba(220,206,64,0.48)",
+                      color: "#DCCE40",
                     }}
                     title="Save bio"
                   >
@@ -2841,7 +2841,7 @@ export default function Profile() {
                         className="h-full rounded-full transition-all duration-150"
                         style={{
                           width: `${charPct}%`,
-                          background: `linear-gradient(90deg, #00D4FF, ${counterColor})`,
+                          background: `linear-gradient(90deg, #DCCE40, ${counterColor})`,
                           boxShadow: `0 0 6px ${counterColor}60`,
                         }}
                       />
@@ -2889,8 +2889,8 @@ export default function Profile() {
                 <div
                   className="rounded-xl px-4 py-4"
                   style={{
-                    background: "linear-gradient(135deg, rgba(0,212,255,0.04) 0%, rgba(0,212,255,0.01) 100%)",
-                    borderLeft: "3px solid rgba(0,212,255,0.35)",
+                    background: "linear-gradient(135deg, rgba(220,206,64,0.04) 0%, rgba(220,206,64,0.01) 100%)",
+                    borderLeft: "3px solid rgba(220,206,64,0.35)",
                   }}
                 >
                   <p
@@ -2911,11 +2911,11 @@ export default function Profile() {
                   <div
                     className="h-12 w-12 rounded-2xl flex items-center justify-center"
                     style={{
-                      background: "linear-gradient(135deg, rgba(0,212,255,0.15), rgba(0,212,255,0.05))",
-                      border: "1.5px dashed rgba(0,212,255,0.30)",
+                      background: "linear-gradient(135deg, rgba(220,206,64,0.15), rgba(220,206,64,0.05))",
+                      border: "1.5px dashed rgba(220,206,64,0.30)",
                     }}
                   >
-                    <Edit3 className="h-5 w-5" style={{ color: "#00D4FF", opacity: 0.7 }} />
+                    <Edit3 className="h-5 w-5" style={{ color: "#DCCE40", opacity: 0.7 }} />
                   </div>
                   <div className="space-y-1 max-w-xs">
                     <p className="text-sm font-semibold" style={{ color: "rgba(255,255,255,0.45)" }}>
@@ -2929,9 +2929,9 @@ export default function Profile() {
                     onClick={() => { setDraftBio(""); setEditingBio(true); }}
                     className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider px-4 py-2 rounded-xl transition-all duration-150 hover:brightness-110 hover:scale-[1.02]"
                     style={{
-                      background: "linear-gradient(135deg, rgba(0,212,255,0.18), rgba(0,212,255,0.08))",
-                      border: "1px solid rgba(0,212,255,0.32)",
-                      color: "#00D4FF",
+                      background: "linear-gradient(135deg, rgba(220,206,64,0.18), rgba(220,206,64,0.08))",
+                      border: "1px solid rgba(220,206,64,0.32)",
+                      color: "#DCCE40",
                     }}
                   >
                     <Edit3 className="h-3 w-3" />
@@ -2959,7 +2959,7 @@ export default function Profile() {
               style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.02)" }}
             >
               <div className="flex items-center gap-2 min-w-0 flex-wrap">
-                <Camera className="h-3.5 w-3.5 shrink-0" style={{ color: "rgba(0,212,255,0.55)" }} />
+                <Camera className="h-3.5 w-3.5 shrink-0" style={{ color: "rgba(220,206,64,0.55)" }} />
                 <span className="text-[11px] font-extrabold uppercase tracking-widest text-white/65">Additional Photos</span>
                 {/* Minimum progress indicator */}
                 <div className="flex items-center gap-1 ml-1">
@@ -2974,7 +2974,7 @@ export default function Profile() {
                     <div
                       key={slot}
                       className="h-1.5 w-4 rounded-full transition-colors duration-300"
-                      style={{ background: galleryCount > slot ? "#00D4FF" : "rgba(255,255,255,0.10)" }}
+                      style={{ background: galleryCount > slot ? "#DCCE40" : "rgba(255,255,255,0.10)" }}
                     />
                   ))}
                   <span className={`text-[9px] font-bold ml-1 ${meetsMinimum ? "text-green-400" : "text-amber-400"}`}>
@@ -2986,9 +2986,9 @@ export default function Profile() {
                 <label
                   className="shrink-0 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg cursor-pointer transition-all duration-150 hover:brightness-110 hover:scale-[1.02]"
                   style={{
-                    background: galleryUploading ? "rgba(100,100,100,0.10)" : "rgba(0,212,255,0.10)",
-                    border: "1px solid rgba(0,212,255,0.28)",
-                    color: galleryUploading ? "#888" : "#00D4FF",
+                    background: galleryUploading ? "rgba(100,100,100,0.10)" : "rgba(220,206,64,0.10)",
+                    border: "1px solid rgba(220,206,64,0.28)",
+                    color: galleryUploading ? "#888" : "#DCCE40",
                   }}
                 >
                   <input
@@ -3038,7 +3038,7 @@ export default function Profile() {
                   <div
                     className="h-12 w-12 rounded-2xl flex items-center justify-center"
                     style={{
-                      background: "linear-gradient(135deg, rgba(245,158,11,0.15), rgba(0,212,255,0.04))",
+                      background: "linear-gradient(135deg, rgba(245,158,11,0.15), rgba(220,206,64,0.04))",
                       border: "1.5px dashed rgba(245,158,11,0.35)",
                     }}
                   >
@@ -3055,7 +3055,7 @@ export default function Profile() {
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   {(profile?.galleryPhotoUrls ?? []).map((url, i) => (
                     <div key={i} className="relative group/gphoto aspect-square rounded-xl overflow-hidden"
-                      style={{ border: "1px solid rgba(0,212,255,0.20)", background: "rgba(0,0,0,0.4)" }}
+                      style={{ border: "1px solid rgba(220,206,64,0.20)", background: "rgba(0,0,0,0.4)" }}
                     >
                       <img
                         src={`/api/storage${url}`}
@@ -3086,8 +3086,8 @@ export default function Profile() {
                     <label
                       className="aspect-square rounded-xl flex flex-col items-center justify-center gap-2 cursor-pointer transition-all duration-150 hover:brightness-125"
                       style={{
-                        border: `1.5px dashed ${galleryCount < 2 ? "rgba(245,158,11,0.40)" : "rgba(0,212,255,0.28)"}`,
-                        background: galleryCount < 2 ? "rgba(245,158,11,0.04)" : "rgba(0,212,255,0.04)",
+                        border: `1.5px dashed ${galleryCount < 2 ? "rgba(245,158,11,0.40)" : "rgba(220,206,64,0.28)"}`,
+                        background: galleryCount < 2 ? "rgba(245,158,11,0.04)" : "rgba(220,206,64,0.04)",
                       }}
                     >
                       <input
@@ -3101,8 +3101,8 @@ export default function Profile() {
                         <div className="h-4 w-4 rounded-full border border-white/20 border-t-white/70 animate-spin" />
                       ) : (
                         <>
-                          <ImagePlus className="h-5 w-5" style={{ color: galleryCount < 2 ? "rgba(245,158,11,0.55)" : "rgba(0,212,255,0.5)" }} />
-                          <span className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: galleryCount < 2 ? "rgba(245,158,11,0.55)" : "rgba(0,212,255,0.5)" }}>
+                          <ImagePlus className="h-5 w-5" style={{ color: galleryCount < 2 ? "rgba(245,158,11,0.55)" : "rgba(220,206,64,0.5)" }} />
+                          <span className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: galleryCount < 2 ? "rgba(245,158,11,0.55)" : "rgba(220,206,64,0.5)" }}>
                             {galleryCount < 2 ? "Required" : "Add"}
                           </span>
                         </>
@@ -3158,7 +3158,7 @@ export default function Profile() {
           className="flex items-center gap-2 px-4 sm:px-5 py-3 border-b"
           style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.02)" }}
         >
-          <Globe className="h-3.5 w-3.5 shrink-0" style={{ color: "rgba(0,212,255,0.55)" }} />
+          <Globe className="h-3.5 w-3.5 shrink-0" style={{ color: "rgba(220,206,64,0.55)" }} />
           <span className="text-[11px] font-extrabold uppercase tracking-widest text-white/65">Location &amp; Identity</span>
           <span className="text-[9px] text-muted-foreground/40 ml-1">(shown on your profile &amp; bids)</span>
         </div>

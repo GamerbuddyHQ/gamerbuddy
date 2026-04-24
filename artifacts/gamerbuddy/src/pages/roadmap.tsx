@@ -106,10 +106,10 @@ const PHASES = [
     tag: "Coming Soon",
     title: "Tournaments, Payouts & Real-Time",
     status: "next" as const,
-    accent: "#22d3ee",
-    bg: "rgba(34,211,238,0.07)",
-    border: "rgba(34,211,238,0.22)",
-    glow: "rgba(34,211,238,0.12)",
+    accent: "#C4AEF4",
+    bg: "rgba(196,174,244,0.07)",
+    border: "rgba(196,174,244,0.22)",
+    glow: "rgba(196,174,244,0.12)",
     bar: "from-cyan-400 to-sky-400",
     Icon: Trophy,
     description:
@@ -177,7 +177,7 @@ const PHASES = [
 
 const STATUS_STYLES = {
   live:   { dot: "#22c55e", pulse: true,  label: "Now Live"    },
-  next:   { dot: "#22d3ee", pulse: false, label: "Coming Soon" },
+  next:   { dot: "#C4AEF4", pulse: false, label: "Coming Soon" },
   future: { dot: "#f59e0b", pulse: false, label: "Future"      },
 };
 
@@ -202,7 +202,7 @@ export default function Roadmap() {
           Our{" "}
           <span
             style={{
-              background: "linear-gradient(135deg, #00D4FF 0%, #22d3ee 100%)",
+              background: "linear-gradient(135deg, #DCCE40 0%, #C4AEF4 100%)",
               WebkitBackgroundClip: "text",
               color: "transparent",
             }}
@@ -240,7 +240,7 @@ export default function Roadmap() {
       <div
         className="rounded-2xl border p-6 space-y-4"
         style={{
-          background: "linear-gradient(135deg, rgba(34,197,94,0.06) 0%, rgba(0,212,255,0.04) 100%)",
+          background: "linear-gradient(135deg, rgba(34,197,94,0.06) 0%, rgba(220,206,64,0.04) 100%)",
           borderColor: "rgba(34,197,94,0.18)",
           boxShadow: "0 0 40px rgba(34,197,94,0.06)",
         }}
@@ -358,9 +358,9 @@ export default function Roadmap() {
       <div
         className="rounded-2xl border p-8 text-center space-y-4"
         style={{
-          background: "linear-gradient(135deg, rgba(0,212,255,0.10) 0%, rgba(34,211,238,0.06) 100%)",
-          borderColor: "rgba(0,212,255,0.28)",
-          boxShadow: "0 0 40px rgba(0,212,255,0.10)",
+          background: "linear-gradient(135deg, rgba(220,206,64,0.10) 0%, rgba(196,174,244,0.06) 100%)",
+          borderColor: "rgba(220,206,64,0.28)",
+          boxShadow: "0 0 40px rgba(220,206,64,0.10)",
         }}
       >
         <div className="flex items-center justify-center gap-2">
@@ -381,9 +381,9 @@ export default function Roadmap() {
           <button
             className="inline-flex items-center gap-2 px-7 py-3 rounded-xl font-bold text-sm transition-all duration-200 hover:scale-105 active:scale-95"
             style={{
-              background: "linear-gradient(135deg, #00D4FF, #0099bb)",
+              background: "linear-gradient(135deg, #DCCE40, #b5a730)",
               color: "#fff",
-              boxShadow: "0 4px 20px rgba(0,212,255,0.35)",
+              boxShadow: "0 4px 20px rgba(220,206,64,0.35)",
             }}
           >
             <Lightbulb className="h-4 w-4" />
@@ -397,17 +397,17 @@ export default function Roadmap() {
       <div
         className="rounded-2xl border p-6 sm:p-8 flex flex-col sm:flex-row items-center gap-6"
         style={{
-          background: "linear-gradient(135deg, rgba(34,211,238,0.06) 0%, rgba(0,212,255,0.04) 100%)",
-          borderColor: "rgba(34,211,238,0.22)",
-          boxShadow: "0 0 30px rgba(34,211,238,0.06)",
+          background: "linear-gradient(135deg, rgba(196,174,244,0.06) 0%, rgba(220,206,64,0.04) 100%)",
+          borderColor: "rgba(196,174,244,0.22)",
+          boxShadow: "0 0 30px rgba(196,174,244,0.06)",
         }}
       >
         <div className="shrink-0 h-14 w-14 rounded-2xl border flex items-center justify-center"
-          style={{ background: "rgba(34,211,238,0.10)", borderColor: "rgba(34,211,238,0.28)" }}>
-          <MessageSquare className="h-7 w-7" style={{ color: "#22d3ee" }} />
+          style={{ background: "rgba(196,174,244,0.10)", borderColor: "rgba(196,174,244,0.28)" }}>
+          <MessageSquare className="h-7 w-7" style={{ color: "#C4AEF4" }} />
         </div>
         <div className="flex-1 text-center sm:text-left space-y-1.5">
-          <p className="text-[11px] font-black uppercase tracking-widest" style={{ color: "#00D4FF" }}>
+          <p className="text-[11px] font-black uppercase tracking-widest" style={{ color: "#DCCE40" }}>
             Need Help or Have Questions?
           </p>
           <h3 className="text-lg sm:text-xl font-black text-foreground">
@@ -423,8 +423,8 @@ export default function Roadmap() {
           rel="noopener noreferrer"
           className="shrink-0 inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm text-white transition-all hover:scale-105 active:scale-95"
           style={{
-            background: "linear-gradient(135deg, #00D4FF 0%, #0099bb 60%, #22d3ee 100%)",
-            boxShadow: "0 4px 24px rgba(0,212,255,0.30)",
+            background: "linear-gradient(135deg, #DCCE40 0%, #b5a730 60%, #C4AEF4 100%)",
+            boxShadow: "0 4px 24px rgba(220,206,64,0.30)",
           }}
         >
           <Globe className="h-4 w-4 shrink-0" />

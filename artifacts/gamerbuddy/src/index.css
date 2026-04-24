@@ -86,74 +86,74 @@
   --radius-xl: calc(var(--radius) + 4px);
 }
 
-/* ── DARK THEME (permanent — light mode removed) ── */
+/* ── AMETHYST DAWN HAZE THEME ── */
 :root {
-  --button-outline: rgba(255,255,255, .10);
-  --badge-outline: rgba(255,255,255, .05);
+  --button-outline: rgba(255,255,255, .12);
+  --badge-outline: rgba(255,255,255, .08);
 
   --opaque-button-border-intensity: 9;
 
-  --elevate-1: rgba(255,255,255, .04);
-  --elevate-2: rgba(255,255,255, .09);
+  --elevate-1: rgba(255,255,255, .05);
+  --elevate-2: rgba(255,255,255, .10);
 
   --text-on-surface: rgba(255, 255, 255, 1);
-  --text-subdued: rgba(255, 255, 255, 0.60);
-  --text-dim: rgba(255, 255, 255, 0.32);
-  --glass-bg: rgba(255, 255, 255, 0.025);
-  --glass-border: rgba(255, 255, 255, 0.06);
-  --glass-btn-bg: rgba(255, 255, 255, 0.07);
-  --glass-btn-border: rgba(255, 255, 255, 0.15);
-  --surface-dark: linear-gradient(145deg, rgba(15,12,30,0.95) 0%, rgba(8,8,20,0.98) 100%);
-  --surface-dark-border: rgba(255, 255, 255, 0.07);
-  --icon-glass-bg: rgba(255, 255, 255, 0.06);
+  --text-subdued: rgba(255, 255, 255, 0.65);
+  --text-dim: rgba(255, 255, 255, 0.38);
+  --glass-bg: rgba(255, 255, 255, 0.04);
+  --glass-border: rgba(255, 255, 255, 0.10);
+  --glass-btn-bg: rgba(255, 255, 255, 0.08);
+  --glass-btn-border: rgba(255, 255, 255, 0.18);
+  --surface-dark: linear-gradient(145deg, rgba(52,28,135,0.97) 0%, rgba(30,15,80,0.99) 100%);
+  --surface-dark-border: rgba(255, 255, 255, 0.09);
+  --icon-glass-bg: rgba(255, 255, 255, 0.07);
 
-  /* Deep dark gaming background */
-  --background: 240 10% 4%;
+  /* Amethyst Dawn Haze — Deep purple gaming background */
+  --background: 254 66% 32%;    /* #341C87 */
   --foreground: 0 0% 98%;
 
-  --border: 240 10% 12%;
+  --border: 270 28% 40%;
 
-  --card: 240 10% 6%;
+  --card: 270 30% 20%;           /* darker than bg for depth */
   --card-foreground: 0 0% 98%;
-  --card-border: 240 10% 12%;
+  --card-border: 270 25% 32%;
 
-  --sidebar: 240 10% 6%;
+  --sidebar: 254 70% 18%;        /* dark navbar — deep purple */
   --sidebar-foreground: 0 0% 98%;
-  --sidebar-border: 240 10% 12%;
-  --sidebar-primary: 190 100% 50%;
-  --sidebar-primary-foreground: 240 10% 4%;
-  --sidebar-accent: 240 10% 12%;
+  --sidebar-border: 270 28% 28%;
+  --sidebar-primary: 55 69% 56%; /* #DCCE40 yellow */
+  --sidebar-primary-foreground: 254 80% 12%;
+  --sidebar-accent: 273 28% 28%;
   --sidebar-accent-foreground: 0 0% 98%;
-  --sidebar-ring: 190 100% 50%;
+  --sidebar-ring: 55 69% 56%;
 
-  --popover: 240 10% 6%;
+  --popover: 270 32% 18%;
   --popover-foreground: 0 0% 98%;
-  --popover-border: 240 10% 12%;
+  --popover-border: 270 25% 30%;
 
-  /* Neon Cyan — Primary Brand Color */
-  --primary: 190 100% 50%;
-  --primary-foreground: 240 10% 4%;
+  /* Vibrant Yellow — Primary Accent (#DCCE40) */
+  --primary: 55 69% 56%;
+  --primary-foreground: 254 80% 12%;
 
-  /* Neon Cyan — Secondary */
-  --secondary: 190 100% 50%;
-  --secondary-foreground: 240 10% 4%;
+  /* Medium Purple — Secondary (#472F5B) */
+  --secondary: 273 32% 27%;
+  --secondary-foreground: 0 0% 98%;
 
-  --muted: 240 10% 12%;
-  --muted-foreground: 240 5% 65%;
+  --muted: 261 25% 30%;
+  --muted-foreground: 261 20% 72%;
 
-  --accent: 240 10% 12%;
+  --accent: 261 30% 35%;
   --accent-foreground: 0 0% 98%;
 
   --destructive: 0 84% 60%;
   --destructive-foreground: 0 0% 98%;
 
-  --input: 240 10% 16%;
-  --ring: 190 100% 50%;
+  --input: 261 25% 28%;
+  --ring: 55 69% 56%;
 
-  --chart-1: 190 100% 50%;
-  --chart-2: 190 100% 50%;
+  --chart-1: 55 69% 56%;         /* yellow #DCCE40 */
+  --chart-2: 259 76% 82%;        /* light purple #C4AEF4 */
   --chart-3: 160 100% 45%;
-  --chart-4: 340 100% 55%;
+  --chart-4: 336 28% 72%;        /* pink/mauve #CCA4B4 */
   --chart-5: 45 100% 55%;
 
   --app-font-sans: 'Space Mono', 'Inter', monospace, sans-serif;
@@ -292,7 +292,7 @@
 :root:not(.dark) .text-cyan-400\/55,
 :root:not(.dark) .text-cyan-400\/65,
 :root:not(.dark) .text-cyan-400\/60 {
-  color: hsl(191 72% 32%);
+  color: hsl(55 69% 38%);
 }
 :root:not(.dark) .text-green-400,
 :root:not(.dark) .text-green-400\/90,
@@ -326,7 +326,7 @@
 :root:not(.dark) .bg-red-500\/5    { background-color: hsl(0 84% 60% / 0.10); }
 :root:not(.dark) .bg-red-500\/6    { background-color: hsl(0 84% 60% / 0.10); }
 :root:not(.dark) .bg-red-500\/8    { background-color: hsl(0 84% 60% / 0.10); }
-:root:not(.dark) .bg-cyan-500\/5   { background-color: hsl(191 91% 36% / 0.10); }
+:root:not(.dark) .bg-cyan-500\/5   { background-color: hsl(55 69% 50% / 0.10); }
 :root:not(.dark) .bg-green-500\/5  { background-color: hsl(142 76% 36% / 0.10); }
 :root:not(.dark) .fill-yellow-400  { fill: hsl(42 80% 35%); }
 :root:not(.dark) .fill-star        { fill: hsl(42 80% 42%); }
@@ -348,7 +348,7 @@
   box-shadow: 0 2px 8px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.04);
 }
 :root:not(.dark) .group.rounded-2xl.border.overflow-hidden:hover {
-  box-shadow: 0 8px 28px rgba(0,212,255,0.14), 0 0 0 1px rgba(0,212,255,0.10);
+  box-shadow: 0 8px 28px rgba(220,206,64,0.14), 0 0 0 1px rgba(220,206,64,0.10);
 }
 
 /* ── Low-opacity muted text — boost for light-mode readability ── */
@@ -383,17 +383,17 @@
 :root:not(.dark) .border-border\/50 { border-color: hsl(220 13% 78%); }
 
 /* ── Primary color tinted backgrounds ── */
-:root:not(.dark) .bg-primary\/5  { background-color: hsl(190 85% 38% / 0.09); }
-:root:not(.dark) .bg-primary\/10 { background-color: hsl(190 85% 38% / 0.12); }
-:root:not(.dark) .bg-primary\/15 { background-color: hsl(190 85% 38% / 0.14); }
-:root:not(.dark) .bg-primary\/20 { background-color: hsl(190 85% 38% / 0.16); }
+:root:not(.dark) .bg-primary\/5  { background-color: hsl(55 69% 45% / 0.09); }
+:root:not(.dark) .bg-primary\/10 { background-color: hsl(55 69% 45% / 0.12); }
+:root:not(.dark) .bg-primary\/15 { background-color: hsl(55 69% 45% / 0.14); }
+:root:not(.dark) .bg-primary\/20 { background-color: hsl(55 69% 45% / 0.16); }
 
 /* ── Status/skill tag backgrounds — more visible on white ── */
 :root:not(.dark) .bg-green-500\/10  { background-color: hsl(142 60% 36% / 0.14); }
 :root:not(.dark) .bg-green-500\/25  { background-color: hsl(142 60% 36% / 0.20); }
 :root:not(.dark) .bg-green-500\/30  { background-color: hsl(142 60% 36% / 0.22); }
-:root:not(.dark) .bg-cyan-500\/10   { background-color: hsl(191 72% 35% / 0.14); }
-:root:not(.dark) .bg-cyan-500\/20   { background-color: hsl(191 72% 35% / 0.18); }
+:root:not(.dark) .bg-cyan-500\/10   { background-color: hsl(55 69% 45% / 0.14); }
+:root:not(.dark) .bg-cyan-500\/20   { background-color: hsl(55 69% 45% / 0.18); }
 
 /* ── Navigation / header elements ── */
 :root:not(.dark) .bg-background\/80 { background-color: hsl(var(--background) / 0.95); }
@@ -408,6 +408,42 @@
 :root:not(.dark) [style*="color: rgba(255, 255, 255"] {
   /* handled via browse.tsx isDark conditionals above */
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   AMETHYST DAWN HAZE — Tailwind cyan class remapping
+   Remap all Tailwind cyan classes to the new palette in dark mode.
+   text-cyan-* → #C4AEF4 (light purple highlight)
+   bg-cyan-*   → yellow (#DCCE40) tinted backgrounds
+   border-cyan-* → yellow tinted borders
+   ═══════════════════════════════════════════════════════════════════ */
+.dark .text-cyan-400,
+.dark .text-cyan-400\/70,
+.dark .text-cyan-400\/60,
+.dark .text-cyan-400\/65,
+.dark .text-cyan-400\/55,
+.dark .text-cyan-400\/80 { color: #C4AEF4; }
+
+.dark .text-cyan-300,
+.dark .text-cyan-300\/80,
+.dark .text-cyan-300\/70,
+.dark .text-cyan-300\/45 { color: #C4AEF4; }
+
+.dark .text-cyan-200\/70 { color: rgba(196,174,244,0.70); }
+
+.dark .bg-cyan-500\/5   { background-color: rgba(220,206,64,0.06); }
+.dark .bg-cyan-500\/10  { background-color: rgba(220,206,64,0.09); }
+.dark .bg-cyan-500\/20  { background-color: rgba(220,206,64,0.13); }
+.dark .bg-cyan-500\/25  { background-color: rgba(220,206,64,0.16); }
+
+.dark .border-cyan-500\/10  { border-color: rgba(220,206,64,0.10); }
+.dark .border-cyan-500\/15  { border-color: rgba(220,206,64,0.15); }
+.dark .border-cyan-500\/20  { border-color: rgba(220,206,64,0.20); }
+.dark .border-cyan-500\/25  { border-color: rgba(220,206,64,0.25); }
+.dark .border-cyan-500\/30  { border-color: rgba(220,206,64,0.30); }
+.dark .border-cyan-500\/40  { border-color: rgba(220,206,64,0.40); }
+.dark .border-cyan-400\/25  { border-color: rgba(220,206,64,0.25); }
+.dark .border-cyan-400\/30  { border-color: rgba(220,206,64,0.30); }
+.dark .border-cyan-400\/50  { border-color: rgba(220,206,64,0.50); }
 
 @keyframes shimmer {
   0% { transform: translateX(-100%); }
