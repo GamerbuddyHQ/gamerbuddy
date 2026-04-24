@@ -17,23 +17,26 @@ function userOrIpKey(req: Request): string {
   return `ip:${ipKeyGenerator(req.ip ?? "unknown")}`;
 }
 
-// ── Login / Signup ─────────────────────────────────────────────────────────
-// 5 per minute per IP — prevents credential stuffing and account farming.
-// No custom keyGenerator: the library's default uses ipKeyGenerator internally.
+// ── Login ──────────────────────────────────────────────────────────────────
+// 10 per 15 minutes per IP — window matches the DB-level lockout (15 min).
+// This means the network-layer limit and the app-level lockout are in sync,
+// so an attacker can't exceed 10 attempts via rapid retries before getting locked out.
 export const loginLimiter = rateLimit({
-  windowMs: 60_000,
-  max: 5,
+  windowMs: 15 * 60_000,
+  max: 10,
   standardHeaders: true,
   legacyHeaders: false,
-  handler: jsonMessage("Too many login attempts. Please wait a minute and try again."),
+  handler: jsonMessage("Too many login attempts. Please wait 15 minutes and try again."),
 });
 
+// ── Signup ─────────────────────────────────────────────────────────────────
+// 5 per 15 minutes per IP — prevents account farming.
 export const signupLimiter = rateLimit({
-  windowMs: 60_000,
+  windowMs: 15 * 60_000,
   max: 5,
   standardHeaders: true,
   legacyHeaders: false,
-  handler: jsonMessage("Too many signup attempts. Please wait a minute and try again."),
+  handler: jsonMessage("Too many signup attempts. Please wait 15 minutes and try again."),
 });
 
 // ── Bid placement ──────────────────────────────────────────────────────────

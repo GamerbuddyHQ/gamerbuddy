@@ -94,16 +94,24 @@ const trimmedStr = (min: number, max: number, label: string) =>
     .transform((s) => s.trim());
 
 // ─── Auth ─────────────────────────────────────────────────────────────────────
+export const passwordSchema = z
+  .string()
+  .min(8, "Password must be at least 8 characters")
+  .max(128, "Password too long")
+  .refine((p) => /[A-Z]/.test(p), "Password must contain at least one uppercase letter")
+  .refine((p) => /[0-9]/.test(p), "Password must contain at least one number");
+
 export const SignupSchema = z.object({
   name:     trimmedStr(2, 80, "Name"),
   email:    z.string().email("Invalid email address").max(254).toLowerCase().trim(),
-  password: z.string().min(8, "Password must be at least 8 characters").max(128, "Password too long"),
+  password: passwordSchema,
   phone:    trimmedStr(7, 20, "Phone number"),
 });
 
 export const LoginSchema = z.object({
-  email:    z.string().email("Invalid email address").max(254).toLowerCase().trim(),
-  password: z.string().min(1, "Password is required").max(128),
+  email:      z.string().email("Invalid email address").max(254).toLowerCase().trim(),
+  password:   z.string().min(1, "Password is required").max(128),
+  rememberMe: z.boolean().optional(),
 });
 
 // ─── Game requests ────────────────────────────────────────────────────────────
