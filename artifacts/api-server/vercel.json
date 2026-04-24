@@ -1,6 +1,7 @@
 {
   "version": 2,
   "installCommand": "cd ../.. && pnpm install",
+  "buildCommand": "",
   "functions": {
     "api/index.ts": {
       "maxDuration": 30,
