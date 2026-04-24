@@ -5,6 +5,7 @@ import pinoHttp from "pino-http";
 import router from "./routes";
 import { logger } from "./lib/logger";
 import { securityHeaders } from "./lib/security-headers";
+import { ensureTablesCreated } from "@workspace/db";
 
 // ── Startup diagnostic log ────────────────────────────────────────────────────
 // Runs once on cold-start. Visible in Vercel function logs.
@@ -63,6 +64,15 @@ app.use(
 app.use(cookieParser(process.env.SESSION_SECRET));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+app.use(async (_req: Request, _res: Response, next: NextFunction) => {
+  try {
+    await ensureTablesCreated();
+    next();
+  } catch (err) {
+    next(err);
+  }
+});
 
 app.use("/api", router);
 
