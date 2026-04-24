@@ -46,3 +46,6 @@ channel = "stable-25_05"
 
 [userenv.shared]
 ADMIN_PWD_HASH = "$2b$12$MHRHv7pK7Yy.Gibdlnh19eX4k4NXxthWzk4Aru4sUY5nYb87ZN4jC"
+
+[userenv.development]
+FRONTEND_URL = "https://c30bff6a-bc29-46e3-927d-5e0d278b8526-00-31dlq9020v1iv.riker.replit.dev"
