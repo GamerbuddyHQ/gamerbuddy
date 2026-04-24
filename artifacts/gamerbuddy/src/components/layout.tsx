@@ -536,10 +536,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
             )}
             <Link href="/" className="flex items-center group">
               <span className="sm:hidden">
-                <GamerbuddyLogo iconSize={20} textSize="sm" />
+                <GamerbuddyLogo iconSize={30} textSize="lg" />
               </span>
               <span className="hidden sm:flex">
-                <GamerbuddyLogo iconSize={24} textSize="lg" />
+                <GamerbuddyLogo iconSize={38} textSize="2xl" />
               </span>
             </Link>
           </div>
