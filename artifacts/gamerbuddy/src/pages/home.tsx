@@ -153,7 +153,7 @@ function Step({ n, title, desc }: { n: number; title: string; desc: string }) {
       <div
         className="shrink-0 w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm text-white transition-all duration-200 group-hover:scale-105"
         style={{
-          background: "linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(272,90%,48%) 100%)",
+          background: "linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(190,100%,32%) 100%)",
           border: "1px solid hsl(var(--primary) / 0.5)",
           boxShadow: "0 0 18px hsl(var(--primary) / 0.30)",
         }}
@@ -203,7 +203,7 @@ export default function Home() {
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            background: "radial-gradient(ellipse 110% 90% at 50% -5%, rgba(109,40,217,0.28) 0%, rgba(0,212,255,0.10) 35%, transparent 65%)",
+            background: "radial-gradient(ellipse 110% 90% at 50% -5%, rgba(0,100,80,0.35) 0%, rgba(0,212,255,0.10) 35%, transparent 65%)",
             zIndex: 0,
           }}
         />
@@ -229,7 +229,7 @@ export default function Home() {
         <div
           className="absolute top-0 left-1/2 -translate-x-1/2 w-[80vw] h-[50vw] pointer-events-none"
           style={{
-            background: "radial-gradient(ellipse 70% 55% at 50% 0%, rgba(139,92,246,0.25) 0%, transparent 60%)",
+            background: "radial-gradient(ellipse 70% 55% at 50% 0%, rgba(0,140,110,0.22) 0%, transparent 60%)",
             zIndex: 0,
           }}
         />
@@ -253,10 +253,10 @@ export default function Home() {
             <div
               className="inline-flex items-center gap-2.5 rounded-full px-5 py-2 text-sm font-bold"
               style={{
-                background: "rgba(139,92,246,0.18)",
+                background: "rgba(0,180,150,0.15)",
                 border: "1px solid rgba(0,212,255,0.40)",
                 color: "hsl(var(--primary))",
-                boxShadow: "0 0 24px rgba(139,92,246,0.20), inset 0 1px 0 rgba(255,255,255,0.06)",
+                boxShadow: "0 0 24px rgba(0,180,150,0.18), inset 0 1px 0 rgba(255,255,255,0.06)",
               }}
             >
               <Gamepad2 className="h-4 w-4" />
@@ -297,7 +297,7 @@ export default function Home() {
               <button
                 className="relative overflow-hidden group w-full sm:w-auto px-10 py-4 rounded-2xl font-bold text-base lg:text-lg text-white transition-all duration-200 hover:brightness-110 hover:scale-[1.03] active:scale-[0.97]"
                 style={{
-                  background: "linear-gradient(135deg, #0099bb 0%, #0099bb 50%, #6d28d9 100%)",
+                  background: "linear-gradient(135deg, #0099bb 0%, #0099bb 50%, #005c48 100%)",
                   boxShadow: "0 8px 32px rgba(0,212,255,0.55), 0 2px 8px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.12)",
                   minWidth: "210px",
                 }}
@@ -433,7 +433,7 @@ export default function Home() {
         <div
           className="max-w-[1400px] mx-auto rounded-3xl p-8 sm:p-10 lg:p-14 relative overflow-hidden"
           style={{
-            background: "linear-gradient(135deg, rgba(139,92,246,0.09) 0%, rgba(34,211,238,0.05) 100%)",
+            background: "linear-gradient(135deg, rgba(0,150,120,0.08) 0%, rgba(34,211,238,0.05) 100%)",
             border: "1px solid rgba(0,212,255,0.22)",
             boxShadow: "0 4px 40px rgba(0,0,0,0.20)",
           }}
@@ -545,24 +545,24 @@ export default function Home() {
         <div
           className="relative max-w-4xl mx-auto rounded-3xl text-center overflow-hidden px-8 py-14 sm:py-16 lg:py-20"
           style={{
-            background: "linear-gradient(135deg, rgba(109,40,217,0.30) 0%, rgba(0,212,255,0.14) 50%, rgba(34,211,238,0.08) 100%)",
-            border: "1px solid rgba(0,212,255,0.30)",
-            boxShadow: "0 0 80px rgba(139,92,246,0.15), inset 0 0 60px rgba(139,92,246,0.05)",
+            background: "linear-gradient(135deg, rgba(0,80,65,0.75) 0%, rgba(0,140,110,0.28) 50%, rgba(0,100,60,0.18) 100%)",
+            border: "1px solid rgba(0,200,170,0.28)",
+            boxShadow: "0 0 80px rgba(0,160,130,0.18), inset 0 0 60px rgba(0,80,60,0.10)",
           }}
         >
           {/* top glow line */}
           <div
             className="absolute top-0 left-0 right-0 h-px pointer-events-none"
-            style={{ background: "linear-gradient(90deg, transparent, rgba(0,212,255,0.6), transparent)" }}
+            style={{ background: "linear-gradient(90deg, transparent, rgba(0,212,190,0.65), transparent)" }}
           />
           {/* orbs */}
           <div
             className="absolute top-0 right-0 w-72 h-72 rounded-full pointer-events-none"
-            style={{ background: "radial-gradient(circle, rgba(0,212,255,0.18) 0%, transparent 70%)" }}
+            style={{ background: "radial-gradient(circle, rgba(0,180,150,0.18) 0%, transparent 70%)" }}
           />
           <div
             className="absolute bottom-0 left-0 w-56 h-56 rounded-full pointer-events-none"
-            style={{ background: "radial-gradient(circle, rgba(34,211,238,0.10) 0%, transparent 70%)" }}
+            style={{ background: "radial-gradient(circle, rgba(0,130,80,0.14) 0%, transparent 70%)" }}
           />
 
           <div className="relative space-y-5">
@@ -580,8 +580,8 @@ export default function Home() {
                 <button
                   className="relative overflow-hidden group px-10 py-4 rounded-xl font-black text-sm uppercase tracking-widest text-white w-full sm:w-auto transition-all hover:brightness-110 hover:scale-[1.03] active:scale-[0.97]"
                   style={{
-                    background: "linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(272,72%,35%) 100%)",
-                    boxShadow: "0 0 32px rgba(0,212,255,0.45), 0 4px 16px rgba(0,0,0,0.25)",
+                    background: "linear-gradient(135deg, #00D4FF 0%, #00a085 60%, #006650 100%)",
+                    boxShadow: "0 0 32px rgba(0,180,150,0.45), 0 4px 16px rgba(0,0,0,0.30)",
                   }}
                 >
                   <div
