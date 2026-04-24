@@ -3,6 +3,7 @@ import { db, bidsTable, messagesTable, usersTable, gameRequestsTable } from "@wo
 import { eq, asc } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
 import { validate, sanitize, PostMessageSchema } from "../lib/validate";
+import { toIsoRequired } from "../lib/dates";
 import { messageLimiter } from "../lib/rate-limit";
 
 const router: IRouter = Router();
@@ -55,7 +56,7 @@ router.get("/bids/:bidId/messages", requireAuth, async (req, res): Promise<void>
     senderId: m.senderId,
     senderName: m.senderName ?? "Unknown",
     content: m.content,
-    createdAt: m.createdAt.toISOString(),
+    createdAt: toIsoRequired(m.createdAt),
   })));
 });
 
@@ -82,7 +83,7 @@ router.post("/bids/:bidId/messages", requireAuth, messageLimiter, validate(PostM
     senderId: msg.senderId,
     senderName: user.name,
     content: msg.content,
-    createdAt: msg.createdAt.toISOString(),
+    createdAt: toIsoRequired(msg.createdAt),
   };
 
   // No real-time push — clients poll via refetchInterval

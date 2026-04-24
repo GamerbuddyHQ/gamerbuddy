@@ -3,6 +3,7 @@ import { db, walletsTable, walletTransactionsTable, gameRequestsTable, platformF
 import { eq, desc, sql, and, gte, sum } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
 import { withdrawLimiter } from "../lib/rate-limit";
+import { toIso, toIsoRequired } from "../lib/dates";
 
 const router: IRouter = Router();
 
@@ -154,7 +155,7 @@ router.get("/wallets/transactions", requireAuth, async (req, res): Promise<void>
   res.json(txns.map((t) => ({
     ...t,
     amount: t.amount,
-    createdAt: t.createdAt.toISOString(),
+    createdAt: toIsoRequired(t.createdAt),
   })));
 });
 
@@ -333,8 +334,8 @@ router.get("/wallets/withdrawal-request", requireAuth, async (req, res): Promise
         amount: latest.amount,
         status: latest.status,
         country: latest.country,
-        createdAt: latest.createdAt.toISOString(),
-        paidAt: latest.paidAt ? latest.paidAt.toISOString() : null,
+        createdAt: toIsoRequired(latest.createdAt),
+        paidAt: toIso(latest.paidAt),
       }
     : null,
   );
@@ -397,7 +398,7 @@ router.post("/wallets/request-withdrawal", requireAuth, withdrawLimiter, async (
     id: created.id,
     amount: created.amount,
     status: created.status,
-    createdAt: created.createdAt.toISOString(),
+    createdAt: toIsoRequired(created.createdAt),
     message: "Your withdrawal request has been submitted successfully. Payouts are processed manually every Monday. You will receive your money within 5–7 business days after processing.",
   });
 });

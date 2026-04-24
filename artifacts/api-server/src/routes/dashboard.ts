@@ -2,6 +2,7 @@ import { Router, type IRouter } from "express";
 import { db, walletsTable, gameRequestsTable, bidsTable, reviewsTable } from "@workspace/db";
 import { eq, desc, count, and, inArray, not } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
+import { toIsoRequired } from "../lib/dates";
 
 const router: IRouter = Router();
 
@@ -82,7 +83,7 @@ router.get("/dashboard/summary", requireAuth, async (req, res): Promise<void> =>
       email: user.email,
       phone: user.phone,
       idVerified: user.idVerified,
-      createdAt: user.createdAt.toISOString(),
+      createdAt: toIsoRequired(user.createdAt),
     },
     wallets: {
       hiringBalance,
@@ -102,7 +103,7 @@ router.get("/dashboard/summary", requireAuth, async (req, res): Promise<void> =>
       skillLevel: r.skillLevel,
       objectives: r.objectives,
       status: r.status,
-      createdAt: r.createdAt.toISOString(),
+      createdAt: toIsoRequired(r.createdAt),
     })),
   });
 });

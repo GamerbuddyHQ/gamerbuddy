@@ -8,6 +8,7 @@ import { recalculateTrustFactor } from "../trust-factor";
 import { validate, sanitize, PostRequestSchema, PlaceBidSchema } from "../lib/validate";
 import { bidLimiter, postRequestLimiter } from "../lib/rate-limit";
 import { round2, recordTransaction as recordTx, checkBidAnomaly } from "./wallets";
+import { toIso, toIsoRequired } from "../lib/dates";
 
 const router: IRouter = Router();
 
@@ -84,8 +85,8 @@ function formatRequest(
     playStyle: (req as any).playStyle ?? null,
     status: req.status,
     escrowAmount: req.escrowAmount ?? null,
-    startedAt: req.startedAt ? req.startedAt.toISOString() : null,
-    createdAt: req.createdAt.toISOString(),
+    startedAt: toIso(req.startedAt),
+    createdAt: toIsoRequired(req.createdAt),
     bidCount: req.bidCount ?? 0,
     lowestBid: req.lowestBid ?? null,
     isBulkHiring: req.isBulkHiring ?? false,
@@ -97,7 +98,7 @@ function formatRequest(
     hasQuestBidder: req.hasQuestBidder ?? false,
     preferredCountry: req.preferredCountry ?? "any",
     preferredGender: req.preferredGender ?? "any",
-    expiresAt: req.expiresAt ? req.expiresAt.toISOString() : null,
+    expiresAt: toIso(req.expiresAt),
     hirerRegion,
     minBidPerHour: minBidFlat,
     minBidCurrency,
@@ -379,7 +380,7 @@ function formatBid(
     message: bid.message,
     status: bid.status,
     discordUsername: bid.discordUsername ?? null,
-    createdAt: bid.createdAt.toISOString(),
+    createdAt: toIsoRequired(bid.createdAt),
   };
 }
 
@@ -1052,7 +1053,7 @@ router.get("/requests/:id/reviews", async (req, res): Promise<void> => {
     .leftJoin(usersTable, eq(reviewsTable.reviewerId, usersTable.id))
     .where(eq(reviewsTable.requestId, requestId));
 
-  res.json(rows.map((r) => ({ ...r, createdAt: r.createdAt.toISOString() })));
+  res.json(rows.map((r) => ({ ...r, createdAt: toIsoRequired(r.createdAt) })));
 });
 
 router.post("/requests/:id/reviews", requireAuth, async (req, res): Promise<void> => {
@@ -1162,7 +1163,7 @@ router.post("/requests/:id/reviews", requireAuth, async (req, res): Promise<void
     req.log.info({ requestId, hirerId, gamerId }, "Both reviews submitted — session completed, 50 pts awarded each");
     res.status(201).json({
       ...review,
-      createdAt: review.createdAt.toISOString(),
+      createdAt: toIsoRequired(review.createdAt),
       bothReviewed: true,
       pointsAwarded: 50,
       sessionCompleted: true,
@@ -1171,7 +1172,7 @@ router.post("/requests/:id/reviews", requireAuth, async (req, res): Promise<void
     // Only one review submitted so far — waiting on the other party
     res.status(201).json({
       ...review,
-      createdAt: review.createdAt.toISOString(),
+      createdAt: toIsoRequired(review.createdAt),
       bothReviewed: false,
       pointsAwarded: 0,
       sessionCompleted: false,
