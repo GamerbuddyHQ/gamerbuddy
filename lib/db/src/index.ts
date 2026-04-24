@@ -1,11 +1,12 @@
+import { neon, Pool, neonConfig } from "@neondatabase/serverless";
+import { drizzle } from "drizzle-orm/neon-http";
 import ws from "ws";
-import { Pool, neonConfig } from "@neondatabase/serverless";
-import { drizzle } from "drizzle-orm/neon-serverless";
 import * as schema from "./schema";
 
-// Neon's serverless driver uses WebSocket. In Node.js < 22, there is no
-// native globalThis.WebSocket, so we must provide the `ws` library.
-// Setting this unconditionally is safe — on Node.js 22+ it's a no-op preference.
+// Neon WebSocket pool — used only for raw SQL diagnostics (healthz/db, ensureTablesCreated).
+// All Drizzle ORM queries use the HTTP transport (neon-http) instead, which is the
+// correct driver for Vercel/edge serverless environments.  WebSocket pools need a
+// persistent process, which serverless functions don't guarantee.
 neonConfig.webSocketConstructor = ws;
 
 const DATABASE_URL = process.env.DATABASE_URL;
@@ -18,15 +19,17 @@ if (!DATABASE_URL) {
   );
 }
 
+// HTTP client — one-shot HTTP request per query, ideal for serverless.
+const sql = DATABASE_URL
+  ? neon(DATABASE_URL)
+  : neon("postgresql://placeholder:x@placeholder/placeholder");
+
+export const db = drizzle(sql, { schema });
+
+// Keep pool for raw-SQL diagnostics (healthz/db, ensureTablesCreated).
 export const pool = DATABASE_URL
   ? new Pool({ connectionString: DATABASE_URL, max: 3 })
   : null;
-
-export const db = drizzle(
-  // @ts-ignore — pool may be null when DATABASE_URL is missing (warning logged above)
-  pool ?? new Pool({ connectionString: "postgresql://placeholder:x@localhost/placeholder" }),
-  { schema },
-);
 
 if (pool) {
   pool.on("error", (err: Error) => {
@@ -38,17 +41,9 @@ let _ready = false;
 
 export async function ensureTablesCreated(): Promise<void> {
   if (_ready) return;
-  if (!pool) {
-    throw new Error(
-      "[gamerbuddy/db] DATABASE_URL is not configured. " +
-      "Add it to Vercel environment variables and redeploy.",
-    );
-  }
   try {
-    const client = await pool.connect();
-    const result = await client.query("SELECT NOW() AS now");
-    client.release();
-    console.log(`[gamerbuddy/db] Neon connected ✓  server time: ${result.rows[0].now}`);
+    const result = await sql`SELECT NOW() AS now`;
+    console.log(`[gamerbuddy/db] Neon connected ✓  server time: ${result[0].now}`);
     _ready = true;
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
