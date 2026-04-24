@@ -15,10 +15,10 @@ const upload = multer({ storage: multer.memoryStorage() });
 const SESSION_DURATION_MS         = 7  * 24 * 60 * 60 * 1000; // 7 days  (default)
 const REMEMBER_ME_DURATION_MS     = 30 * 24 * 60 * 60 * 1000; // 30 days (remember me)
 
-// On Vercel the frontend and API share the same origin (gamerbuddy-v1.vercel.app),
-// so SameSite=Lax is both correct and more browser-compatible than SameSite=None.
-// SameSite=None is only needed for genuine cross-origin deployments (different domains).
-// We use Secure in any environment where HTTPS is active.
+// The frontend (gamerbuddy-frontend.vercel.app) and API (gamerbuddy-api-server.vercel.app)
+// are on different subdomains of vercel.app, which is a Public Suffix — so browsers treat
+// them as cross-site. SameSite=None;Secure is required for the session cookie to be sent
+// on cross-origin requests from the frontend. In development (HTTP) we fall back to Lax.
 const isHttps =
   process.env.NODE_ENV === "production" ||
   !!process.env.VERCEL ||
@@ -27,7 +27,7 @@ const isHttps =
 function sessionCookieOptions(expiresAt: Date) {
   return {
     httpOnly: true,
-    sameSite: "lax" as const,
+    sameSite: (isHttps ? "none" : "lax") as "none" | "lax",
     secure: isHttps,
     expires: expiresAt,
     path: "/",
@@ -239,7 +239,7 @@ router.post("/auth/logout", async (req, res): Promise<void> => {
     // Clear with matching options so the browser removes the cookie
     res.clearCookie("session_token", {
       httpOnly: true,
-      sameSite: "lax" as const,
+      sameSite: (isHttps ? "none" : "lax") as "none" | "lax",
       secure: isHttps,
       path: "/",
     });
@@ -247,7 +247,12 @@ router.post("/auth/logout", async (req, res): Promise<void> => {
   } catch (err) {
     req.log.error({ err }, "Logout error");
     // Still clear the cookie even on DB error
-    res.clearCookie("session_token", { httpOnly: true, sameSite: "lax", path: "/" });
+    res.clearCookie("session_token", {
+      httpOnly: true,
+      sameSite: (isHttps ? "none" : "lax") as "none" | "lax",
+      secure: isHttps,
+      path: "/",
+    });
     res.json({ success: true, message: "Logged out" });
   }
 });
@@ -275,7 +280,12 @@ router.get("/auth/me", async (req, res): Promise<void> => {
     if (toDate(session.expiresAt) < new Date()) {
       // Clean up expired session
       await db.delete(sessionsTable).where(eq(sessionsTable.token, token)).catch(() => {});
-      res.clearCookie("session_token", { httpOnly: true, sameSite: "lax", path: "/" });
+      res.clearCookie("session_token", {
+        httpOnly: true,
+        sameSite: (isHttps ? "none" : "lax") as "none" | "lax",
+        secure: isHttps,
+        path: "/",
+      });
       res.status(401).json({ error: "Session expired" });
       return;
     }
