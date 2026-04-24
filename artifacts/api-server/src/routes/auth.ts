@@ -12,7 +12,8 @@ import { toDate, toIso, toIsoRequired } from "../lib/dates";
 const router: IRouter = Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
-const SESSION_DURATION_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
+const SESSION_DURATION_MS         = 7  * 24 * 60 * 60 * 1000; // 7 days  (default)
+const REMEMBER_ME_DURATION_MS     = 30 * 24 * 60 * 60 * 1000; // 30 days (remember me)
 
 // On Vercel the frontend and API share the same origin (gamerbuddy-v1.vercel.app),
 // so SameSite=Lax is both correct and more browser-compatible than SameSite=None.
@@ -207,13 +208,16 @@ router.post(
           .where(eq(usersTable.id, user.id));
       }
 
+      const rememberMe = req.body.rememberMe === true;
+      const durationMs = rememberMe ? REMEMBER_ME_DURATION_MS : SESSION_DURATION_MS;
+
       const token = crypto.randomBytes(32).toString("hex");
-      const expiresAt = new Date(Date.now() + SESSION_DURATION_MS);
+      const expiresAt = new Date(Date.now() + durationMs);
       await db.insert(sessionsTable).values({ userId: user.id, token, expiresAt });
 
       res.cookie("session_token", token, sessionCookieOptions(expiresAt));
 
-      req.log.info({ userId: user.id }, "User logged in");
+      req.log.info({ userId: user.id, rememberMe }, "User logged in");
       res.json({
         user: formatUser(user),
         message: "Logged in successfully",

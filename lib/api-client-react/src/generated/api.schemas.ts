@@ -22,7 +22,7 @@ export interface SuccessResponse {
 export interface SignupBody {
   name: string;
   email: string;
-  /** @minLength 6 */
+  /** @minLength 8 — must contain at least one uppercase letter and one number */
   password: string;
   phone: string;
   officialId?: Blob;
@@ -31,6 +31,7 @@ export interface SignupBody {
 export interface LoginBody {
   email: string;
   password: string;
+  rememberMe?: boolean;
 }
 
 export interface User {

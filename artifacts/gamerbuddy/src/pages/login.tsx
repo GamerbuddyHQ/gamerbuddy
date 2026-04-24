@@ -16,14 +16,16 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Gamepad2, ShieldCheck, Lock, AlertTriangle, Trophy, Users, Wallet, Star, FlaskConical, UserCheck, Swords } from "lucide-react";
 
 const API_BASE = (import.meta.env.VITE_API_URL ?? "/api").replace(/\/$/, "");
 
 const loginSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(1, "Password is required"),
+  email:      z.string().email("Invalid email address"),
+  password:   z.string().min(1, "Password is required"),
+  rememberMe: z.boolean().optional(),
 });
 
 function useCountdown(targetISO: string | null): number {
@@ -53,9 +55,9 @@ export default function Login() {
   const { toast } = useToast();
   const loginMutation = useLogin();
 
-  const [lockedUntil, setLockedUntil]         = useState<string | null>(null);
+  const [lockedUntil, setLockedUntil]             = useState<string | null>(null);
   const [attemptsRemaining, setAttemptsRemaining] = useState<number | null>(null);
-  const [testLoading, setTestLoading] = useState<"hirer" | "gamer" | null>(null);
+  const [testLoading, setTestLoading]             = useState<"hirer" | "gamer" | null>(null);
 
   async function handleTestLogin(role: "hirer" | "gamer") {
     setTestLoading(role);
@@ -71,7 +73,9 @@ export default function Login() {
       login(data.user);
       toast({
         title: `Logged in as ${role === "hirer" ? "Test Hirer" : "Test Gamer"}`,
-        description: role === "hirer" ? "Welcome, Alex Rivera! $50 in your hiring wallet." : "Welcome, Jordan \"Byte\" Patel! Trust Factor: 92.",
+        description: role === "hirer"
+          ? "Welcome, Alex Rivera! $50 in your hiring wallet."
+          : 'Welcome, Jordan "Byte" Patel! Trust Factor: 92.',
       });
       setLocation("/browse");
     } catch (err: any) {
@@ -86,7 +90,7 @@ export default function Login() {
 
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
-    defaultValues: { email: "", password: "" },
+    defaultValues: { email: "", password: "", rememberMe: false },
   });
 
   const ADMIN_EMAIL = "gamerbuddyhq@gmail.com";
@@ -100,17 +104,22 @@ export default function Login() {
     }
 
     loginMutation.mutate(
-      { data: values },
+      { data: { email: values.email, password: values.password, rememberMe: values.rememberMe ?? false } },
       {
         onSuccess: (data) => {
           setLockedUntil(null);
           setAttemptsRemaining(null);
           login(data.user);
-          toast({ title: "Welcome back", description: "Successfully logged in." });
+          const sessionLabel = values.rememberMe ? "30-day session started." : "Successfully logged in.";
+          toast({ title: "Welcome back", description: sessionLabel });
           setLocation("/dashboard");
         },
         onError: (err) => {
-          const body = (err as any).data as { error?: string; lockedUntil?: string; attemptsRemaining?: number } | null | undefined;
+          const body = (err as any).data as {
+            error?: string;
+            lockedUntil?: string;
+            attemptsRemaining?: number;
+          } | null | undefined;
           const errorMessage = body?.error || (err as any).message || "Invalid email or password.";
 
           if (body?.lockedUntil) {
@@ -122,11 +131,7 @@ export default function Login() {
               toast({ title: "Account locked", description: errorMessage, variant: "destructive" });
             }
           } else {
-            toast({
-              title: "Login failed",
-              description: errorMessage,
-              variant: "destructive",
-            });
+            toast({ title: "Login failed", description: errorMessage, variant: "destructive" });
           }
         },
       }
@@ -135,9 +140,9 @@ export default function Login() {
 
   const featureItems = [
     { icon: Trophy, label: "Skill-based matchmaking", desc: "Find players at your exact level" },
-    { icon: Wallet, label: "Razorpay escrow", desc: "Funds held safely until the game ends" },
-    { icon: Users, label: "Verified community", desc: "Real gamers with linked accounts" },
-    { icon: Star, label: "10% platform fee only", desc: "The rest goes straight to you" },
+    { icon: Wallet, label: "Razorpay escrow",         desc: "Funds held safely until the game ends" },
+    { icon: Users,  label: "Verified community",      desc: "Real gamers with linked accounts" },
+    { icon: Star,   label: "10% platform fee only",   desc: "The rest goes straight to you" },
   ];
 
   return (
@@ -147,10 +152,7 @@ export default function Login() {
         {/* ── Left: Login Form ── */}
         <div>
           <Card className="border-primary/20 bg-card/50 backdrop-blur-sm overflow-hidden">
-            <div
-              className="h-1 w-full"
-              style={{ background: "linear-gradient(90deg, #7c3aed, #a855f7, #22d3ee)" }}
-            />
+            <div className="h-1 w-full" style={{ background: "linear-gradient(90deg, #7c3aed, #a855f7, #22d3ee)" }} />
 
             <CardHeader className="space-y-2 text-center pt-8 pb-4">
               <div className="flex justify-center mb-2">
@@ -170,6 +172,7 @@ export default function Login() {
             </CardHeader>
 
             <CardContent className="px-6 space-y-4">
+              {/* Lockout banner */}
               {isLocked && (
                 <div
                   className="flex items-start gap-3 rounded-xl px-4 py-3.5 text-sm"
@@ -186,6 +189,7 @@ export default function Login() {
                 </div>
               )}
 
+              {/* Attempts warning */}
               {!isLocked && attemptsRemaining !== null && attemptsRemaining > 0 && (
                 <div
                   className="flex items-start gap-3 rounded-xl px-4 py-3 text-sm"
@@ -193,7 +197,7 @@ export default function Login() {
                 >
                   <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0 text-amber-400" />
                   <p className="text-amber-300/90 text-xs leading-relaxed">
-                    Incorrect password.{" "}
+                    Incorrect credentials.{" "}
                     <span className="font-bold text-amber-300">
                       {attemptsRemaining} attempt{attemptsRemaining === 1 ? "" : "s"} remaining
                     </span>{" "}
@@ -211,12 +215,19 @@ export default function Login() {
                       <FormItem>
                         <FormLabel className="text-xs uppercase tracking-widest text-muted-foreground font-bold">Email</FormLabel>
                         <FormControl>
-                          <Input placeholder="gamer@example.com" autoComplete="email" disabled={isLocked} {...field} className="bg-background/60" />
+                          <Input
+                            placeholder="gamer@example.com"
+                            autoComplete="email"
+                            disabled={isLocked}
+                            {...field}
+                            className="bg-background/60"
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
+
                   <FormField
                     control={form.control}
                     name="password"
@@ -224,12 +235,46 @@ export default function Login() {
                       <FormItem>
                         <FormLabel className="text-xs uppercase tracking-widest text-muted-foreground font-bold">Password</FormLabel>
                         <FormControl>
-                          <Input type="password" placeholder="••••••••" autoComplete="current-password" disabled={isLocked} {...field} className="bg-background/60" />
+                          <Input
+                            type="password"
+                            placeholder="••••••••"
+                            autoComplete="current-password"
+                            disabled={isLocked}
+                            {...field}
+                            className="bg-background/60"
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
+
+                  {/* ── Remember Me ── */}
+                  <FormField
+                    control={form.control}
+                    name="rememberMe"
+                    render={({ field }) => (
+                      <FormItem className="flex items-center gap-2.5 space-y-0">
+                        <FormControl>
+                          <Checkbox
+                            id="rememberMe"
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                            disabled={isLocked}
+                            className="border-primary/40 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                          />
+                        </FormControl>
+                        <label
+                          htmlFor="rememberMe"
+                          className="text-xs text-muted-foreground cursor-pointer select-none leading-none"
+                        >
+                          Remember me{" "}
+                          <span className="text-muted-foreground/50">(stay signed in for 30 days)</span>
+                        </label>
+                      </FormItem>
+                    )}
+                  />
+
                   <Button
                     type="submit"
                     className="w-full font-black uppercase tracking-widest mt-2 py-5"
@@ -243,7 +288,11 @@ export default function Login() {
                     }}
                     disabled={loginMutation.isPending || isLocked}
                   >
-                    {isLocked ? `Locked · ${fmtCountdown(secsLeft)}` : loginMutation.isPending ? "Authenticating..." : "Log In"}
+                    {isLocked
+                      ? `Locked · ${fmtCountdown(secsLeft)}`
+                      : loginMutation.isPending
+                        ? "Authenticating..."
+                        : "Log In"}
                   </Button>
                 </form>
               </Form>
@@ -262,76 +311,77 @@ export default function Login() {
 
           {/* ── Test Login Panel (dev only) ── */}
           {import.meta.env.DEV && (
-          <div
-            className="mt-4 rounded-2xl overflow-hidden"
-            style={{ border: "1.5px dashed rgba(251,191,36,0.45)", background: "rgba(251,191,36,0.04)" }}
-          >
-            <div className="flex items-center gap-2.5 px-5 py-3 border-b border-amber-400/20">
-              <FlaskConical className="h-4 w-4 text-amber-400 shrink-0" />
-              <span className="text-xs font-black uppercase tracking-widest text-amber-400">Quick Test Login</span>
-              <span className="ml-auto text-[10px] text-amber-300/60 italic">Dev mode only</span>
-            </div>
-            <div className="px-5 py-4 space-y-3">
-              <div
-                className="flex items-start gap-2 rounded-lg px-3 py-2 text-xs"
-                style={{ background: "rgba(251,191,36,0.08)", border: "1px solid rgba(251,191,36,0.22)" }}
-              >
-                <AlertTriangle className="h-3.5 w-3.5 mt-0.5 shrink-0 text-amber-400" />
-                <span className="text-amber-300/80 leading-relaxed">
-                  <span className="font-bold text-amber-300">For testing only.</span> These accounts are seeded automatically. Do not use in production.
-                </span>
+            <div
+              className="mt-4 rounded-2xl overflow-hidden"
+              style={{ border: "1.5px dashed rgba(251,191,36,0.45)", background: "rgba(251,191,36,0.04)" }}
+            >
+              <div className="flex items-center gap-2.5 px-5 py-3 border-b border-amber-400/20">
+                <FlaskConical className="h-4 w-4 text-amber-400 shrink-0" />
+                <span className="text-xs font-black uppercase tracking-widest text-amber-400">Quick Test Login</span>
+                <span className="ml-auto text-[10px] text-amber-300/60 italic">Dev mode only</span>
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                <button
-                  onClick={() => handleTestLogin("hirer")}
-                  disabled={testLoading !== null}
-                  className="relative flex flex-col items-start gap-2 rounded-xl px-4 py-3.5 text-left transition-all duration-200 hover:scale-[1.02] active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
-                  style={{
-                    background: "linear-gradient(135deg, rgba(59,130,246,0.20) 0%, rgba(99,102,241,0.15) 100%)",
-                    border: "1.5px solid rgba(99,102,241,0.40)",
-                    boxShadow: "0 2px 12px rgba(99,102,241,0.15)",
-                  }}
+              <div className="px-5 py-4 space-y-3">
+                <div
+                  className="flex items-start gap-2 rounded-lg px-3 py-2 text-xs"
+                  style={{ background: "rgba(251,191,36,0.08)", border: "1px solid rgba(251,191,36,0.22)" }}
                 >
-                  <div className="flex items-center gap-2 w-full">
-                    <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(99,102,241,0.25)" }}>
-                      <UserCheck className="h-3.5 w-3.5 text-indigo-300" />
+                  <AlertTriangle className="h-3.5 w-3.5 mt-0.5 shrink-0 text-amber-400" />
+                  <span className="text-amber-300/80 leading-relaxed">
+                    <span className="font-bold text-amber-300">For testing only.</span>{" "}
+                    These accounts are seeded automatically. Do not use in production.
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    onClick={() => handleTestLogin("hirer")}
+                    disabled={testLoading !== null}
+                    className="relative flex flex-col items-start gap-2 rounded-xl px-4 py-3.5 text-left transition-all duration-200 hover:scale-[1.02] active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
+                    style={{
+                      background: "linear-gradient(135deg, rgba(59,130,246,0.20) 0%, rgba(99,102,241,0.15) 100%)",
+                      border: "1.5px solid rgba(99,102,241,0.40)",
+                      boxShadow: "0 2px 12px rgba(99,102,241,0.15)",
+                    }}
+                  >
+                    <div className="flex items-center gap-2 w-full">
+                      <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(99,102,241,0.25)" }}>
+                        <UserCheck className="h-3.5 w-3.5 text-indigo-300" />
+                      </div>
+                      <span className="text-xs font-black text-indigo-200 uppercase tracking-wide">
+                        {testLoading === "hirer" ? "Logging in…" : "Test Hirer"}
+                      </span>
                     </div>
-                    <span className="text-xs font-black text-indigo-200 uppercase tracking-wide">
-                      {testLoading === "hirer" ? "Logging in…" : "Test Hirer"}
-                    </span>
-                  </div>
-                  <div className="pl-9 space-y-0.5">
-                    <p className="text-[10px] font-bold text-white/80">Alex Rivera · Male, 28</p>
-                    <p className="text-[10px] text-indigo-200/60">$50 hiring wallet · ready to post quests</p>
-                  </div>
-                </button>
+                    <div className="pl-9 space-y-0.5">
+                      <p className="text-[10px] font-bold text-white/80">Alex Rivera · Male, 28</p>
+                      <p className="text-[10px] text-indigo-200/60">$50 hiring wallet · ready to post quests</p>
+                    </div>
+                  </button>
 
-                <button
-                  onClick={() => handleTestLogin("gamer")}
-                  disabled={testLoading !== null}
-                  className="relative flex flex-col items-start gap-2 rounded-xl px-4 py-3.5 text-left transition-all duration-200 hover:scale-[1.02] active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
-                  style={{
-                    background: "linear-gradient(135deg, rgba(168,85,247,0.20) 0%, rgba(236,72,153,0.12) 100%)",
-                    border: "1.5px solid rgba(168,85,247,0.40)",
-                    boxShadow: "0 2px 12px rgba(168,85,247,0.15)",
-                  }}
-                >
-                  <div className="flex items-center gap-2 w-full">
-                    <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(168,85,247,0.25)" }}>
-                      <Swords className="h-3.5 w-3.5 text-purple-300" />
+                  <button
+                    onClick={() => handleTestLogin("gamer")}
+                    disabled={testLoading !== null}
+                    className="relative flex flex-col items-start gap-2 rounded-xl px-4 py-3.5 text-left transition-all duration-200 hover:scale-[1.02] active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
+                    style={{
+                      background: "linear-gradient(135deg, rgba(168,85,247,0.20) 0%, rgba(236,72,153,0.12) 100%)",
+                      border: "1.5px solid rgba(168,85,247,0.40)",
+                      boxShadow: "0 2px 12px rgba(168,85,247,0.15)",
+                    }}
+                  >
+                    <div className="flex items-center gap-2 w-full">
+                      <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(168,85,247,0.25)" }}>
+                        <Swords className="h-3.5 w-3.5 text-purple-300" />
+                      </div>
+                      <span className="text-xs font-black text-purple-200 uppercase tracking-wide">
+                        {testLoading === "gamer" ? "Logging in…" : "Test Gamer"}
+                      </span>
                     </div>
-                    <span className="text-xs font-black text-purple-200 uppercase tracking-wide">
-                      {testLoading === "gamer" ? "Logging in…" : "Test Gamer"}
-                    </span>
-                  </div>
-                  <div className="pl-9 space-y-0.5">
-                    <p className="text-[10px] font-bold text-white/80">Jordan "Byte" Patel · Male, 24</p>
-                    <p className="text-[10px] text-purple-200/60">Trust 92 · Steam + Epic · Pro carry</p>
-                  </div>
-                </button>
+                    <div className="pl-9 space-y-0.5">
+                      <p className="text-[10px] font-bold text-white/80">Jordan "Byte" Patel · Male, 24</p>
+                      <p className="text-[10px] text-purple-200/60">Trust 92 · Steam + Epic · Pro carry</p>
+                    </div>
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
           )}
         </div>
 
@@ -384,6 +434,7 @@ export default function Login() {
             <span>All transactions secured with industry-grade encryption and Razorpay escrow</span>
           </div>
         </div>
+
       </div>
     </div>
   );

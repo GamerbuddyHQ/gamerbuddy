@@ -16,15 +16,63 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Gamepad2, ShieldCheck, Gamepad, Trophy, Users, Wallet, Star } from "lucide-react";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Gamepad2, ShieldCheck, Gamepad, Trophy, Users, Wallet, Star, Check, X } from "lucide-react";
 
 const signupSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-  phone: z.string().min(10, "Valid phone number required"),
+  name:     z.string().min(2, "Name must be at least 2 characters"),
+  email:    z.string().email("Invalid email address"),
+  password: z
+    .string()
+    .min(8, "Password must be at least 8 characters")
+    .refine((p) => /[A-Z]/.test(p), "Must contain at least one uppercase letter")
+    .refine((p) => /[0-9]/.test(p), "Must contain at least one number"),
+  phone:    z.string().min(7, "Valid phone number required"),
 });
+
+type PasswordRule = { label: string; test: (v: string) => boolean };
+
+const PASSWORD_RULES: PasswordRule[] = [
+  { label: "At least 8 characters",      test: (v) => v.length >= 8 },
+  { label: "One uppercase letter (A–Z)",  test: (v) => /[A-Z]/.test(v) },
+  { label: "One number (0–9)",            test: (v) => /[0-9]/.test(v) },
+];
+
+function PasswordStrength({ password }: { password: string }) {
+  if (!password) return null;
+  const passed = PASSWORD_RULES.filter((r) => r.test(password)).length;
+  const color = passed === 3 ? "#22c55e" : passed === 2 ? "#f59e0b" : "#ef4444";
+  const label = passed === 3 ? "Strong" : passed === 2 ? "Fair" : "Weak";
+
+  return (
+    <div className="mt-2 space-y-1.5">
+      <div className="flex gap-1">
+        {PASSWORD_RULES.map((_, i) => (
+          <div
+            key={i}
+            className="flex-1 h-1 rounded-full transition-all duration-300"
+            style={{ background: i < passed ? color : "rgba(255,255,255,0.1)" }}
+          />
+        ))}
+      </div>
+      <div className="space-y-1">
+        {PASSWORD_RULES.map((rule) => {
+          const ok = rule.test(password);
+          return (
+            <div key={rule.label} className="flex items-center gap-1.5">
+              {ok
+                ? <Check className="h-3 w-3 text-green-500 shrink-0" />
+                : <X className="h-3 w-3 text-red-500 shrink-0" />}
+              <span className={`text-[11px] ${ok ? "text-green-400" : "text-muted-foreground"}`}>
+                {rule.label}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
 export default function Signup() {
   const [, setLocation] = useLocation();
@@ -34,13 +82,10 @@ export default function Signup() {
 
   const form = useForm<z.infer<typeof signupSchema>>({
     resolver: zodResolver(signupSchema),
-    defaultValues: {
-      name: "",
-      email: "",
-      password: "",
-      phone: "",
-    },
+    defaultValues: { name: "", email: "", password: "", phone: "" },
   });
+
+  const passwordValue = form.watch("password");
 
   function onSubmit(values: z.infer<typeof signupSchema>) {
     signupMutation.mutate(
@@ -50,7 +95,7 @@ export default function Signup() {
           login(data.user);
           toast({
             title: "Welcome to Gamerbuddy! 🎮",
-            description: "Build your Trust Score by completing quests, getting great reviews, and keeping your profile complete. There is no maximum — the higher your score, the more hirers choose you.",
+            description: "Build your Trust Score by completing quests, getting great reviews, and keeping your profile complete.",
           });
           setLocation("/dashboard");
         },
@@ -60,28 +105,24 @@ export default function Signup() {
             (data && typeof data === "object" ? data.error || data.message : null) ||
             (error as any).message ||
             "Signup failed. Please check your connection and try again.";
-          toast({
-            title: "Signup failed",
-            description,
-            variant: "destructive",
-          });
+          toast({ title: "Signup failed", description, variant: "destructive" });
         },
       }
     );
   }
 
   const perks = [
-    { icon: Trophy, title: "Ranked by skill", desc: "Compete and earn based on your real gaming stats" },
-    { icon: Wallet, title: "Escrow-protected pay", desc: "Money held safely — released only after match" },
-    { icon: Users, title: "Live community", desc: "10,000+ verified gamers across every platform" },
-    { icon: Star, title: "No hidden fees", desc: "Just 10% when you win — keep the rest" },
+    { icon: Trophy, title: "Ranked by skill",       desc: "Compete and earn based on your real gaming stats" },
+    { icon: Wallet, title: "Escrow-protected pay",  desc: "Money held safely — released only after match" },
+    { icon: Users,  title: "Live community",         desc: "10,000+ verified gamers across every platform" },
+    { icon: Star,   title: "No hidden fees",         desc: "Just 10% when you win — keep the rest" },
   ];
 
   return (
     <div className="w-full max-w-[1400px] mx-auto px-4 mt-6 mb-16 lg:mt-12">
       <div className="grid lg:grid-cols-2 gap-8 lg:gap-14 items-start">
 
-        {/* ── Right: Branding Panel on desktop, shown above form on mobile ── */}
+        {/* ── Branding panel (desktop left) ── */}
         <div className="order-2 lg:order-1 hidden lg:flex flex-col gap-7 lg:sticky lg:top-8">
           <div>
             <div className="flex items-center gap-3 mb-4">
@@ -131,13 +172,10 @@ export default function Signup() {
           </div>
         </div>
 
-        {/* ── Left: Signup Form ── */}
+        {/* ── Signup form ── */}
         <div className="order-1 lg:order-2">
           <Card className="border-primary/20 bg-card/50 backdrop-blur-sm overflow-hidden">
-            <div
-              className="h-1 w-full"
-              style={{ background: "linear-gradient(90deg, #22d3ee, #a855f7, #7c3aed)" }}
-            />
+            <div className="h-1 w-full" style={{ background: "linear-gradient(90deg, #22d3ee, #a855f7, #7c3aed)" }} />
 
             <CardHeader className="space-y-2 text-center pt-8 pb-4">
               <div className="flex justify-center mb-2">
@@ -159,6 +197,7 @@ export default function Signup() {
             <CardContent className="px-6">
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <FormField
                       control={form.control}
@@ -212,6 +251,7 @@ export default function Signup() {
                           <Input type="password" placeholder="••••••••" autoComplete="new-password" {...field} className="bg-background/60" />
                         </FormControl>
                         <FormMessage />
+                        <PasswordStrength password={passwordValue} />
                       </FormItem>
                     )}
                   />
@@ -252,6 +292,7 @@ export default function Signup() {
             </CardFooter>
           </Card>
         </div>
+
       </div>
     </div>
   );
