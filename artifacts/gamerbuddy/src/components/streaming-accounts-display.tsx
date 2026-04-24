@@ -48,10 +48,10 @@ export function StreamingAccountsDisplay({ accounts, className = "", onConnect }
     <div
       className={`rounded-2xl border overflow-hidden ${className}`}
       style={{
-        borderColor: connectedCount > 0 ? "rgba(0,229,205,0.25)" : "rgba(255,255,255,0.07)",
+        borderColor: connectedCount > 0 ? "rgba(255,77,45,0.25)" : "rgba(255,255,255,0.07)",
         background: "rgba(8,6,18,0.75)",
         boxShadow: connectedCount > 0
-          ? "0 0 0 1px rgba(0,229,205,0.06), 0 4px 32px rgba(0,229,205,0.08)"
+          ? "0 0 0 1px rgba(255,77,45,0.06), 0 4px 32px rgba(255,77,45,0.08)"
           : "none",
       }}
     >
@@ -61,7 +61,7 @@ export function StreamingAccountsDisplay({ accounts, className = "", onConnect }
         style={{
           borderColor: "rgba(255,255,255,0.06)",
           background: connectedCount > 0
-            ? "rgba(0,229,205,0.07)"
+            ? "rgba(255,77,45,0.07)"
             : "rgba(255,255,255,0.02)",
         }}
       >
@@ -69,11 +69,11 @@ export function StreamingAccountsDisplay({ accounts, className = "", onConnect }
           <span className="relative flex h-2.5 w-2.5">
             <span
               className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-60"
-              style={{ background: connectedCount > 0 ? "#00E5CD" : "#4b5563" }}
+              style={{ background: connectedCount > 0 ? "#FF4D2D" : "#4b5563" }}
             />
             <span
               className="relative inline-flex rounded-full h-2.5 w-2.5"
-              style={{ background: connectedCount > 0 ? "#00E5CD" : "#4b5563" }}
+              style={{ background: connectedCount > 0 ? "#FF4D2D" : "#4b5563" }}
             />
           </span>
           <span className="text-[11px] font-extrabold uppercase tracking-widest text-white/80">
@@ -258,16 +258,16 @@ export function StreamingAccountsDisplay({ accounts, className = "", onConnect }
               onClick={onConnect}
               className="w-full sm:w-auto shrink-0 flex items-center justify-center gap-1.5 text-[11px] font-bold uppercase tracking-wider px-4 py-2 rounded-xl transition-all duration-200 hover:brightness-115 hover:scale-[1.02] active:scale-[0.98]"
               style={{
-                background: "linear-gradient(135deg, rgba(0,229,205,0.18), rgba(0,229,205,0.08))",
-                border: "1px solid rgba(0,229,205,0.35)",
-                color: "#00E5CD",
-                boxShadow: "0 0 0 0 rgba(0,229,205,0)",
+                background: "linear-gradient(135deg, rgba(255,77,45,0.18), rgba(255,77,45,0.08))",
+                border: "1px solid rgba(255,77,45,0.35)",
+                color: "#FF4D2D",
+                boxShadow: "0 0 0 0 rgba(255,77,45,0)",
               }}
               onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.boxShadow = "0 0 14px rgba(0,229,205,0.3)";
+                (e.currentTarget as HTMLElement).style.boxShadow = "0 0 14px rgba(255,77,45,0.3)";
               }}
               onMouseLeave={(e) => {
-                (e.currentTarget as HTMLElement).style.boxShadow = "0 0 0 0 rgba(0,229,205,0)";
+                (e.currentTarget as HTMLElement).style.boxShadow = "0 0 0 0 rgba(255,77,45,0)";
               }}
             >
               <Radio className="h-3 w-3" />

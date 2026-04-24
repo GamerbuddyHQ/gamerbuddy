@@ -12,8 +12,8 @@ export default function SocialsPage() {
       className="min-h-[70vh] flex items-center justify-center py-16 px-4"
       style={{
         background: isDark
-          ? "radial-gradient(ellipse 70% 60% at 50% 0%, rgba(0,229,205,0.07) 0%, transparent 70%)"
-          : "radial-gradient(ellipse 70% 60% at 50% 0%, rgba(0,229,205,0.05) 0%, transparent 70%)",
+          ? "radial-gradient(ellipse 70% 60% at 50% 0%, rgba(255,77,45,0.07) 0%, transparent 70%)"
+          : "radial-gradient(ellipse 70% 60% at 50% 0%, rgba(255,77,45,0.05) 0%, transparent 70%)",
       }}
     >
       <div className="w-full max-w-xl mx-auto text-center space-y-10">
@@ -23,9 +23,9 @@ export default function SocialsPage() {
           <div
             className="inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.2em] px-4 py-2 rounded-full"
             style={{
-              background: "rgba(0,229,205,0.12)",
-              border: "1px solid rgba(0,229,205,0.35)",
-              color: "#00E5CD",
+              background: "rgba(255,77,45,0.12)",
+              border: "1px solid rgba(255,77,45,0.35)",
+              color: "#FF4D2D",
             }}
           >
             <span className="h-2 w-2 rounded-full bg-primary animate-pulse" />
@@ -37,7 +37,7 @@ export default function SocialsPage() {
         <div className="space-y-4">
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-black uppercase tracking-tight leading-tight">
             Stay{" "}
-            <span style={{ color: isDark ? "#00E5CD" : "hsl(228,60%,45%)" }}>
+            <span style={{ color: isDark ? "#FF4D2D" : "hsl(228,60%,45%)" }}>
               Connected
             </span>{" "}
             with Player4Hire
@@ -55,8 +55,8 @@ export default function SocialsPage() {
             rel="noopener noreferrer"
             className="group relative w-full flex items-center justify-center gap-3 rounded-2xl px-8 py-5 font-black text-lg text-white transition-all duration-300 hover:scale-[1.03] hover:brightness-110 active:scale-[0.97]"
             style={{
-              background: "linear-gradient(135deg, #00E5CD 0%, #00b0a0 50%, #00E5CD 100%)",
-              boxShadow: "0 0 50px rgba(0,229,205,0.50), 0 6px 30px rgba(0,229,205,0.25), inset 0 1px 0 rgba(255,255,255,0.20)",
+              background: "linear-gradient(135deg, #FF4D2D 0%, #cc3a1e 50%, #FF4D2D 100%)",
+              boxShadow: "0 0 50px rgba(255,77,45,0.50), 0 6px 30px rgba(255,77,45,0.25), inset 0 1px 0 rgba(255,255,255,0.20)",
             }}
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} className="h-6 w-6 shrink-0">

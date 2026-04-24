@@ -219,7 +219,7 @@ function ChatPanel({
               <div key={msg.id} className={`flex ${isMe ? "justify-end" : "justify-start"}`}>
                 <div className={`max-w-[78%] rounded-2xl px-3.5 py-2 text-sm shadow-sm ${
                   isMe
-                    ? "bg-primary text-white rounded-br-none shadow-[0_0_12px_rgba(0,229,205,0.3)]"
+                    ? "bg-primary text-white rounded-br-none shadow-[0_0_12px_rgba(255,77,45,0.3)]"
                     : "bg-card border border-border/60 text-foreground rounded-bl-none"
                 }`}>
                   {!isMe && <div className="text-[11px] font-bold text-secondary mb-0.5">{msg.senderName}</div>}
@@ -247,7 +247,7 @@ function ChatPanel({
         />
         <Button
           size="sm"
-          className="h-9 px-3 bg-primary hover:bg-primary/90 shadow-[0_0_12px_rgba(0,229,205,0.4)]"
+          className="h-9 px-3 bg-primary hover:bg-primary/90 shadow-[0_0_12px_rgba(255,77,45,0.4)]"
           onClick={handleSend}
           disabled={!draft.trim() || send.isPending}
         >
@@ -726,14 +726,14 @@ function BulkProgressCard({
   const barGradient = isFull
     ? "linear-gradient(90deg, #16a34a 0%, #22c55e 60%, #4ade80 100%)"
     : pct >= 50
-    ? "linear-gradient(90deg, #00b0a0 0%, #00E5CD 40%, #00E5CD 100%)"
-    : "linear-gradient(90deg, #00b0a0 0%, #00E5CD 70%, #00E5CD 100%)";
+    ? "linear-gradient(90deg, #cc3a1e 0%, #FF4D2D 40%, #FF4D2D 100%)"
+    : "linear-gradient(90deg, #cc3a1e 0%, #FF4D2D 70%, #FF4D2D 100%)";
 
   const barGlow = isFull
     ? "0 0 20px rgba(34,197,94,0.55), 0 0 50px rgba(34,197,94,0.15)"
     : pct >= 50
-    ? "0 0 20px rgba(0,229,205,0.5), 0 0 40px rgba(0,229,205,0.18)"
-    : "0 0 16px rgba(0,229,205,0.55), 0 0 40px rgba(0,229,205,0.12)";
+    ? "0 0 20px rgba(255,77,45,0.5), 0 0 40px rgba(255,77,45,0.18)"
+    : "0 0 16px rgba(255,77,45,0.55), 0 0 40px rgba(255,77,45,0.12)";
 
   // Use segmented blocks when ≤ 30 slots, otherwise smooth bar with ticks
   const useSegments = bulkSlotsNeeded <= 30;
@@ -759,7 +759,7 @@ function BulkProgressCard({
         <div className="flex items-baseline gap-1.5">
           <span
             className="text-4xl font-black tabular-nums"
-            style={{ color: isFull ? "#4ade80" : pct >= 50 ? "#00E5CD" : "#00E5CD" }}
+            style={{ color: isFull ? "#4ade80" : pct >= 50 ? "#FF4D2D" : "#FF4D2D" }}
           >
             {acceptedBidsCount}
           </span>
@@ -788,10 +788,10 @@ function BulkProgressCard({
                       ? isFull
                         ? "linear-gradient(180deg, #4ade80, #16a34a)"
                         : i / bulkSlotsNeeded >= 0.5
-                        ? "linear-gradient(180deg, #00E5CD, #00E5CD)"
-                        : "linear-gradient(180deg, #00E5CD, #00b0a0)"
+                        ? "linear-gradient(180deg, #FF4D2D, #FF4D2D)"
+                        : "linear-gradient(180deg, #FF4D2D, #cc3a1e)"
                       : "rgba(255,255,255,0.05)",
-                    boxShadow: filled ? (isFull ? "0 0 6px rgba(74,222,128,0.5)" : "0 0 6px rgba(0,229,205,0.4)") : "none",
+                    boxShadow: filled ? (isFull ? "0 0 6px rgba(74,222,128,0.5)" : "0 0 6px rgba(255,77,45,0.4)") : "none",
                     border: filled ? "none" : "1px solid rgba(255,255,255,0.05)",
                   }}
                 />
@@ -949,7 +949,7 @@ function BulkSelectionBar({
         style={{
           background: "linear-gradient(135deg, rgba(76,0,130,0.97) 0%, rgba(12,0,26,0.98) 100%)",
           backdropFilter: "blur(24px)",
-          boxShadow: "0 0 50px rgba(0,229,205,0.3), 0 25px 60px rgba(0,0,0,0.6)",
+          boxShadow: "0 0 50px rgba(255,77,45,0.3), 0 25px 60px rgba(0,0,0,0.6)",
         }}
       >
         {/* Left: gamer count + cost breakdown */}
@@ -1000,8 +1000,8 @@ function BulkSelectionBar({
             size="sm"
             className="text-white font-black uppercase text-xs h-8 px-5"
             style={{
-              background: "linear-gradient(135deg, #00b0a0 0%, #00E5CD 100%)",
-              boxShadow: "0 0 20px rgba(0,229,205,0.5)",
+              background: "linear-gradient(135deg, #cc3a1e 0%, #FF4D2D 100%)",
+              boxShadow: "0 0 20px rgba(255,77,45,0.5)",
             }}
             onClick={onAccept}
             disabled={isPending || wouldExceed}
@@ -1093,16 +1093,16 @@ function BidCard({
         className={`group rounded-2xl border overflow-hidden transition-all duration-300 ${
           isAccepted                  ? "border-green-500/45 shadow-[0_0_28px_rgba(34,197,94,0.10)]" :
           isRejected                  ? "border-border/25 opacity-45" :
-          isSelected                  ? "border-purple-500/65 shadow-[0_0_32px_rgba(0,229,205,0.18)]" :
+          isSelected                  ? "border-purple-500/65 shadow-[0_0_32px_rgba(255,77,45,0.18)]" :
           dualPrefMatch && isHirer    ? "border-emerald-400/70 shadow-[0_0_44px_rgba(16,185,129,0.28)]" :
           fullyMatches  && isHirer    ? "border-emerald-500/50 shadow-[0_0_28px_rgba(16,185,129,0.12)]" :
           partialMatch  && isHirer    ? "border-amber-500/35" :
           isMe                        ? "border-secondary/40" :
-          "border-border/60 hover:border-primary/30 hover:shadow-[0_0_24px_rgba(0,229,205,0.08)]"
+          "border-border/60 hover:border-primary/30 hover:shadow-[0_0_24px_rgba(255,77,45,0.08)]"
         }`}
         style={{
           background: isAccepted        ? "linear-gradient(135deg,rgba(34,197,94,0.05) 0%,rgba(0,0,0,0.55) 100%)" :
-                      isSelected        ? "linear-gradient(135deg,rgba(0,229,205,0.07) 0%,rgba(0,0,0,0.55) 100%)" :
+                      isSelected        ? "linear-gradient(135deg,rgba(255,77,45,0.07) 0%,rgba(0,0,0,0.55) 100%)" :
                       dualPrefMatch && isHirer ? "linear-gradient(135deg,rgba(16,185,129,0.11) 0%,rgba(5,150,105,0.04) 60%,rgba(0,0,0,0.55) 100%)" :
                       fullyMatches && isHirer  ? "linear-gradient(135deg,rgba(16,185,129,0.06) 0%,rgba(0,0,0,0.55) 100%)" :
                       isMe            ? "linear-gradient(135deg,rgba(6,182,212,0.05) 0%,rgba(0,0,0,0.55) 100%)" :
@@ -1120,8 +1120,8 @@ function BidCard({
               : fullyMatches && isHirer
               ? "linear-gradient(90deg,transparent 0%,#10b981 40%,#10b981 60%,transparent 100%)"
               : isMe
-              ? "linear-gradient(90deg,transparent 0%,#00E5CD 40%,#00E5CD 60%,transparent 100%)"
-              : "linear-gradient(90deg,transparent 0%,#00E5CD 40%,#00E5CD 60%,transparent 100%)",
+              ? "linear-gradient(90deg,transparent 0%,#FF4D2D 40%,#FF4D2D 60%,transparent 100%)"
+              : "linear-gradient(90deg,transparent 0%,#FF4D2D 40%,#FF4D2D 60%,transparent 100%)",
             opacity: isRejected ? 0.2 : dualPrefMatch && isHirer ? 1 : 0.7,
           }}
         />
@@ -1136,7 +1136,7 @@ function BidCard({
                 onClick={(e) => { e.stopPropagation(); onToggleSelect!(); }}
                 className={`h-5 w-5 rounded-[5px] border-2 flex-shrink-0 flex items-center justify-center transition-all mt-3 ${
                   isSelected
-                    ? "bg-purple-500 border-purple-500 shadow-[0_0_8px_rgba(0,229,205,0.6)]"
+                    ? "bg-purple-500 border-purple-500 shadow-[0_0_8px_rgba(255,77,45,0.6)]"
                     : "bg-transparent border-white/20 hover:border-purple-400/60"
                 }`}
               >
@@ -1148,9 +1148,9 @@ function BidCard({
             <div
               className="h-10 w-10 sm:h-12 sm:w-12 rounded-2xl shrink-0 flex items-center justify-center text-base sm:text-lg font-black select-none overflow-hidden"
               style={{
-                background: isAccepted ? "rgba(34,197,94,0.15)" : isMe ? "rgba(0,229,205,0.15)" : "rgba(0,229,205,0.15)",
-                border: `1.5px solid ${isAccepted ? "rgba(34,197,94,0.35)" : isMe ? "rgba(0,229,205,0.35)" : "rgba(0,229,205,0.35)"}`,
-                color: isAccepted ? "#4ade80" : isMe ? "#00E5CD" : "#00E5CD",
+                background: isAccepted ? "rgba(34,197,94,0.15)" : isMe ? "rgba(255,77,45,0.15)" : "rgba(255,77,45,0.15)",
+                border: `1.5px solid ${isAccepted ? "rgba(34,197,94,0.35)" : isMe ? "rgba(255,77,45,0.35)" : "rgba(255,77,45,0.35)"}`,
+                color: isAccepted ? "#4ade80" : isMe ? "#FF4D2D" : "#FF4D2D",
               }}
             >
               {bid.bidderProfilePhotoUrl ? (
@@ -1343,8 +1343,8 @@ function BidCard({
           <div
             className="rounded-xl px-4 py-3"
             style={{
-              borderLeft: "3px solid rgba(0,229,205,0.35)",
-              background: "linear-gradient(135deg,rgba(0,229,205,0.04) 0%,rgba(0,0,0,0.15) 100%)",
+              borderLeft: "3px solid rgba(255,77,45,0.35)",
+              background: "linear-gradient(135deg,rgba(255,77,45,0.04) 0%,rgba(0,0,0,0.15) 100%)",
             }}
           >
             <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.78)" }}>
@@ -1362,12 +1362,12 @@ function BidCard({
             <div
               className="rounded-xl overflow-hidden"
               style={{
-                borderLeft: "3px solid rgba(0,229,205,0.40)",
-                background: "linear-gradient(135deg,rgba(0,229,205,0.05) 0%,rgba(6,182,212,0.02) 100%)",
+                borderLeft: "3px solid rgba(255,77,45,0.40)",
+                background: "linear-gradient(135deg,rgba(255,77,45,0.05) 0%,rgba(6,182,212,0.02) 100%)",
               }}
             >
               <div className="px-4 py-3 space-y-1.5">
-                <span className="block text-[9px] font-extrabold uppercase tracking-[0.12em]" style={{ color: "rgba(0,229,205,0.65)" }}>
+                <span className="block text-[9px] font-extrabold uppercase tracking-[0.12em]" style={{ color: "rgba(255,77,45,0.65)" }}>
                   About this gamer
                 </span>
                 <p className="text-[13px] leading-relaxed" style={{ color: "rgba(255,255,255,0.70)", fontStyle: "italic" }}>
@@ -1519,7 +1519,7 @@ function ReviewChips({ comment, onToggle }: { comment: string; onToggle: (chip: 
               onClick={() => onToggle(chip)}
               className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold border transition-all select-none"
               style={active
-                ? { background: "rgba(0,229,205,0.2)", borderColor: "rgba(0,229,205,0.6)", color: "#00E5CD" }
+                ? { background: "rgba(255,77,45,0.2)", borderColor: "rgba(255,77,45,0.6)", color: "#FF4D2D" }
                 : { background: "rgba(255,255,255,0.03)", borderColor: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.45)" }
               }
             >
@@ -1617,7 +1617,7 @@ function ReviewPanel({ requestId, currentUserId, awaitingReviews }: { requestId:
 
   return (
     <div className="rounded-2xl overflow-hidden border-2 border-yellow-500/40"
-      style={{ background: "linear-gradient(135deg, rgba(234,179,8,0.05), rgba(0,229,205,0.04))", boxShadow: "0 0 28px rgba(234,179,8,0.10)" }}>
+      style={{ background: "linear-gradient(135deg, rgba(234,179,8,0.05), rgba(255,77,45,0.04))", boxShadow: "0 0 28px rgba(234,179,8,0.10)" }}>
       <div className="h-1 bg-gradient-to-r from-yellow-600 via-amber-400 to-yellow-600 animate-pulse" />
       <div className="p-5 space-y-4">
         <div className="flex items-center justify-between">
@@ -2304,8 +2304,8 @@ export default function RequestDetail() {
               <Button
                 className="w-full font-bold uppercase text-sm py-5"
                 style={{
-                  background: "linear-gradient(135deg, #00b0a0 0%, #00E5CD 100%)",
-                  boxShadow: "0 0 20px rgba(0,229,205,0.4)",
+                  background: "linear-gradient(135deg, #cc3a1e 0%, #FF4D2D 100%)",
+                  boxShadow: "0 0 20px rgba(255,77,45,0.4)",
                 }}
                 onClick={handleLockRoster}
                 disabled={lockSession.isPending}
@@ -2331,7 +2331,7 @@ export default function RequestDetail() {
                 Once you've completed the objectives, click <strong className="text-white">Mark Quest as Completed</strong> to notify the hirer. They'll confirm and release your payment.
               </p>
               <Button
-                className="bg-primary font-bold uppercase text-sm shadow-[0_0_16px_rgba(0,229,205,0.3)] hover:shadow-[0_0_24px_rgba(0,229,205,0.5)] transition-all"
+                className="bg-primary font-bold uppercase text-sm shadow-[0_0_16px_rgba(255,77,45,0.3)] hover:shadow-[0_0_24px_rgba(255,77,45,0.5)] transition-all"
                 onClick={handleStartSession}
                 disabled={startSession.isPending}
               >
@@ -2784,12 +2784,12 @@ export default function RequestDetail() {
               <div
                 className="rounded-2xl border overflow-hidden"
                 style={{
-                  borderColor: activeTags.length > 0 ? "rgba(0,229,205,0.40)" : "rgba(255,255,255,0.09)",
+                  borderColor: activeTags.length > 0 ? "rgba(255,77,45,0.40)" : "rgba(255,255,255,0.09)",
                   background: "rgba(7,5,16,0.94)",
                   backdropFilter: "blur(20px)",
                   WebkitBackdropFilter: "blur(20px)",
                   boxShadow: activeTags.length > 0
-                    ? "0 6px 32px rgba(0,0,0,0.50), 0 0 0 1px rgba(0,229,205,0.10)"
+                    ? "0 6px 32px rgba(0,0,0,0.50), 0 0 0 1px rgba(255,77,45,0.10)"
                     : "0 4px 24px rgba(0,0,0,0.38)",
                   transition: "border-color 0.3s, box-shadow 0.3s",
                 }}
@@ -2799,19 +2799,19 @@ export default function RequestDetail() {
                   className="flex items-center justify-between px-4 py-2.5 border-b"
                   style={{
                     borderColor: "rgba(255,255,255,0.06)",
-                    background: activeTags.length > 0 ? "rgba(0,229,205,0.06)" : "rgba(255,255,255,0.02)",
+                    background: activeTags.length > 0 ? "rgba(255,77,45,0.06)" : "rgba(255,255,255,0.02)",
                     transition: "background 0.25s",
                   }}
                 >
                   <div className="flex items-center gap-2">
-                    <SlidersHorizontal className="h-3.5 w-3.5" style={{ color: activeTags.length > 0 ? "#00E5CD" : "rgba(255,255,255,0.35)" }} />
+                    <SlidersHorizontal className="h-3.5 w-3.5" style={{ color: activeTags.length > 0 ? "#FF4D2D" : "rgba(255,255,255,0.35)" }} />
                     <span className="text-[11px] font-extrabold uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.55)" }}>
                       Sort &amp; Filter
                     </span>
                     {activeTags.length > 0 && (
                       <span
                         className="text-[9px] font-black px-1.5 py-0.5 rounded-full"
-                        style={{ background: "rgba(0,229,205,0.25)", color: "#00E5CD", border: "1px solid rgba(0,229,205,0.40)" }}
+                        style={{ background: "rgba(255,77,45,0.25)", color: "#FF4D2D", border: "1px solid rgba(255,77,45,0.40)" }}
                       >
                         {activeTags.length} active
                       </span>
@@ -2853,10 +2853,10 @@ export default function RequestDetail() {
                           onClick={() => setBidSort(key)}
                           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all duration-200 active:scale-95"
                           style={active ? {
-                            background: "rgba(0,229,205,0.22)",
-                            border: "1px solid rgba(0,229,205,0.55)",
-                            color: "#00E5CD",
-                            boxShadow: "0 0 12px rgba(0,229,205,0.22)",
+                            background: "rgba(255,77,45,0.22)",
+                            border: "1px solid rgba(255,77,45,0.55)",
+                            color: "#FF4D2D",
+                            boxShadow: "0 0 12px rgba(255,77,45,0.22)",
                           } : {
                             background: "rgba(255,255,255,0.04)",
                             border: "1px solid rgba(255,255,255,0.08)",
@@ -2952,10 +2952,10 @@ export default function RequestDetail() {
                       onClick={() => setBidHasStreaming((v) => !v)}
                       className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all duration-200 active:scale-95"
                       style={bidHasStreaming ? {
-                        background: "rgba(0,229,205,0.20)",
-                        border: "1px solid rgba(0,229,205,0.55)",
-                        color: "#00E5CD",
-                        boxShadow: "0 0 12px rgba(0,229,205,0.20)",
+                        background: "rgba(255,77,45,0.20)",
+                        border: "1px solid rgba(255,77,45,0.55)",
+                        color: "#FF4D2D",
+                        boxShadow: "0 0 12px rgba(255,77,45,0.20)",
                       } : {
                         background: "rgba(255,255,255,0.04)",
                         border: "1px solid rgba(255,255,255,0.08)",
@@ -2963,7 +2963,7 @@ export default function RequestDetail() {
                       }}
                     >
                       {bidHasStreaming
-                        ? <CheckCircle2 className="h-3 w-3 shrink-0" style={{ color: "#00E5CD" }} />
+                        ? <CheckCircle2 className="h-3 w-3 shrink-0" style={{ color: "#FF4D2D" }} />
                         : <Tv className="h-3 w-3 shrink-0 opacity-50" />
                       }
                       Has Streaming
@@ -2999,11 +2999,11 @@ export default function RequestDetail() {
                   <div
                     className="flex items-center gap-2 px-4 py-2.5 flex-wrap border-t"
                     style={{
-                      borderColor: "rgba(0,229,205,0.15)",
-                      background: "rgba(0,229,205,0.04)",
+                      borderColor: "rgba(255,77,45,0.15)",
+                      background: "rgba(255,77,45,0.04)",
                     }}
                   >
-                    <span className="text-[9px] font-extrabold uppercase tracking-widest shrink-0" style={{ color: "rgba(0,229,205,0.60)" }}>
+                    <span className="text-[9px] font-extrabold uppercase tracking-widest shrink-0" style={{ color: "rgba(255,77,45,0.60)" }}>
                       Active:
                     </span>
                     {activeTags.map((tag, idx) => (
@@ -3027,7 +3027,7 @@ export default function RequestDetail() {
                       key={filteredBids.length}
                       className="text-[10px] ml-auto tabular-nums"
                       style={{
-                        color: filteredBids.length < bids.length ? "rgba(0,229,205,0.70)" : "rgba(255,255,255,0.28)",
+                        color: filteredBids.length < bids.length ? "rgba(255,77,45,0.70)" : "rgba(255,255,255,0.28)",
                         fontWeight: filteredBids.length < bids.length ? 700 : 400,
                         animation: "count-up 0.18s ease-out both",
                       }}
@@ -3051,9 +3051,9 @@ export default function RequestDetail() {
             {!loadingBids && bids.length > 0 && filteredBids.length === 0 && (
               <div
                 className="text-center py-8 rounded-xl border"
-                style={{ borderColor: "rgba(0,229,205,0.15)", background: "rgba(0,229,205,0.03)" }}
+                style={{ borderColor: "rgba(255,77,45,0.15)", background: "rgba(255,77,45,0.03)" }}
               >
-                <SlidersHorizontal className="h-7 w-7 mx-auto mb-2" style={{ color: "rgba(0,229,205,0.40)" }} />
+                <SlidersHorizontal className="h-7 w-7 mx-auto mb-2" style={{ color: "rgba(255,77,45,0.40)" }} />
                 <p className="text-sm font-semibold" style={{ color: "rgba(255,255,255,0.45)" }}>No bids match your filters</p>
                 <p className="text-xs mt-1" style={{ color: "rgba(255,255,255,0.25)" }}>Try adjusting or resetting the filters above</p>
               </div>

@@ -61,7 +61,7 @@ const TYPE_ICON: Record<TournamentType, React.FC<{ className?: string; style?: R
   h2h: Swords, squad: Users, ffa: Crown,
 };
 const TYPE_COLOR: Record<TournamentType, string> = {
-  h2h: "#f87171", squad: "#00E5CD", ffa: "#fbbf24",
+  h2h: "#f87171", squad: "#FF4D2D", ffa: "#fbbf24",
 };
 const TYPE_LABEL: Record<TournamentType, string> = {
   h2h: "Head-to-Head", squad: "Squad", ffa: "Free-for-All",
@@ -374,7 +374,7 @@ function EmptyState({ tab }: { tab: "hosted" | "joined" }) {
   return (
     <div className="py-14 flex flex-col items-center gap-4 text-center">
       <div className="h-16 w-16 rounded-2xl flex items-center justify-center"
-        style={{ background: "rgba(0,229,205,0.08)", border: "1.5px solid rgba(0,229,205,0.18)" }}>
+        style={{ background: "rgba(255,77,45,0.08)", border: "1.5px solid rgba(255,77,45,0.18)" }}>
         {tab === "hosted" ? <Trophy className="h-7 w-7 text-yellow-400/40" /> : <UserCheck className="h-7 w-7 text-primary/40" />}
       </div>
       <div>
@@ -390,7 +390,7 @@ function EmptyState({ tab }: { tab: "hosted" | "joined" }) {
       <Button asChild size="sm" className="font-bold text-xs px-5 h-8"
         style={tab === "hosted"
           ? { background: "linear-gradient(135deg,#fbbf24,#f59e0b)", color: "#000" }
-          : { background: "linear-gradient(135deg,#00E5CD,#00b0a0)", color: "#fff" }}>
+          : { background: "linear-gradient(135deg,#FF4D2D,#cc3a1e)", color: "#fff" }}>
         <Link href="/tournaments">
           {tab === "hosted" ? <><Plus className="h-3.5 w-3.5 mr-1.5" /> Host a Tournament</> : <><Zap className="h-3.5 w-3.5 mr-1.5" /> Browse Tournaments</>}
         </Link>
@@ -442,7 +442,7 @@ export default function MyTournamentsPage() {
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Background glow */}
       <div className="pointer-events-none fixed inset-0 -z-10"
-        style={{ background: "radial-gradient(ellipse 55% 25% at 50% 0%,rgba(0,229,205,0.07) 0%,transparent 55%)" }} />
+        style={{ background: "radial-gradient(ellipse 55% 25% at 50% 0%,rgba(255,77,45,0.07) 0%,transparent 55%)" }} />
 
       {/* ── Header ── */}
       <div className="flex items-center justify-between gap-4">
@@ -454,7 +454,7 @@ export default function MyTournamentsPage() {
           <p className="text-[12px] text-muted-foreground/45">Track your hosted and joined events</p>
         </div>
         <Button asChild size="sm" className="font-bold text-xs h-8 px-4"
-          style={{ background: "linear-gradient(135deg,rgba(0,229,205,0.20),rgba(0,229,205,0.10))", border: "1px solid rgba(0,229,205,0.35)", color: "#00E5CD" }}>
+          style={{ background: "linear-gradient(135deg,rgba(255,77,45,0.20),rgba(255,77,45,0.10))", border: "1px solid rgba(255,77,45,0.35)", color: "#FF4D2D" }}>
           <Link href="/tournaments"><Zap className="h-3.5 w-3.5 mr-1.5" /> Browse All</Link>
         </Button>
       </div>
@@ -471,10 +471,10 @@ export default function MyTournamentsPage() {
               onClick={() => setTab(t)}
               className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-[13px] font-bold transition-all duration-200"
               style={active ? {
-                background: "linear-gradient(135deg,rgba(0,229,205,0.22),rgba(0,229,205,0.10))",
-                border: "1px solid rgba(0,229,205,0.40)",
-                color: "#00E5CD",
-                boxShadow: "0 0 20px rgba(0,229,205,0.12)",
+                background: "linear-gradient(135deg,rgba(255,77,45,0.22),rgba(255,77,45,0.10))",
+                border: "1px solid rgba(255,77,45,0.40)",
+                color: "#FF4D2D",
+                boxShadow: "0 0 20px rgba(255,77,45,0.12)",
               } : {
                 background: "transparent",
                 border: "1px solid transparent",
@@ -486,8 +486,8 @@ export default function MyTournamentsPage() {
               {!isLoading && (
                 <span className="text-[10px] font-black px-1.5 py-0.5 rounded-full ml-0.5"
                   style={active ? {
-                    background: "rgba(0,229,205,0.30)",
-                    border: "1px solid rgba(0,229,205,0.40)",
+                    background: "rgba(255,77,45,0.30)",
+                    border: "1px solid rgba(255,77,45,0.40)",
                     color: "#d8b4fe",
                   } : {
                     background: "rgba(255,255,255,0.06)",
@@ -575,8 +575,8 @@ export default function MyTournamentsPage() {
       {!isLoading && !isError && data && (
         <div className="flex items-center justify-center gap-6 py-1">
           {[
-            { label: "Hosted", value: hostedCount, color: "#00E5CD" },
-            { label: "Joined", value: joinedCount, color: "#00E5CD" },
+            { label: "Hosted", value: hostedCount, color: "#FF4D2D" },
+            { label: "Joined", value: joinedCount, color: "#FF4D2D" },
             {
               label: "Wins",
               value: data.joined.filter(({ registration }) => registration.status === "winner").length,

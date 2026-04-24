@@ -26,7 +26,7 @@ export default function ComingSoon({
           <div
             className="absolute inset-0 rounded-full"
             style={{
-              background: "radial-gradient(circle at center, rgba(0,229,205,0.18) 0%, transparent 72%)",
+              background: "radial-gradient(circle at center, rgba(255,77,45,0.18) 0%, transparent 72%)",
               filter: "blur(12px)",
               transform: "scale(1.6)",
             }}
@@ -34,12 +34,12 @@ export default function ComingSoon({
           <div
             className="relative flex items-center justify-center h-20 w-20 rounded-[22px]"
             style={{
-              background: "linear-gradient(135deg, rgba(0,229,205,0.14) 0%, rgba(0,229,205,0.08) 100%)",
-              border: "1px solid rgba(0,229,205,0.22)",
+              background: "linear-gradient(135deg, rgba(255,77,45,0.14) 0%, rgba(255,77,45,0.08) 100%)",
+              border: "1px solid rgba(255,77,45,0.22)",
               backdropFilter: "blur(12px)",
             }}
           >
-            <Sparkles className="h-8 w-8" style={{ color: "rgba(0,229,205,0.75)" }} />
+            <Sparkles className="h-8 w-8" style={{ color: "rgba(255,77,45,0.75)" }} />
           </div>
         </div>
 
@@ -48,16 +48,16 @@ export default function ComingSoon({
           <span
             className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-[11px] font-bold tracking-widest uppercase"
             style={{
-              background: "rgba(0,229,205,0.10)",
-              color: "rgba(0,229,205,0.85)",
+              background: "rgba(255,77,45,0.10)",
+              color: "rgba(255,77,45,0.85)",
               letterSpacing: "0.12em",
             }}
           >
             <span
               className="h-1.5 w-1.5 rounded-full shrink-0"
               style={{
-                background: "#00E5CD",
-                boxShadow: "0 0 5px rgba(0,229,205,0.8)",
+                background: "#FF4D2D",
+                boxShadow: "0 0 5px rgba(255,77,45,0.8)",
               }}
             />
             Phase {phase} · Coming Soon
@@ -94,14 +94,14 @@ export default function ComingSoon({
           </div>
           <div
             className="flex-1 flex items-center gap-2.5 px-4 py-3.5"
-            style={{ background: "rgba(0,229,205,0.05)" }}
+            style={{ background: "rgba(255,77,45,0.05)" }}
           >
             <span
               className="h-2 w-2 rounded-full shrink-0"
-              style={{ background: "rgba(0,229,205,0.6)", boxShadow: "0 0 5px rgba(0,229,205,0.4)" }}
+              style={{ background: "rgba(255,77,45,0.6)", boxShadow: "0 0 5px rgba(255,77,45,0.4)" }}
             />
             <div className="text-left">
-              <div className="text-[10px] font-black uppercase tracking-widest" style={{ color: "rgba(0,229,205,0.70)" }}>Phase {phase}</div>
+              <div className="text-[10px] font-black uppercase tracking-widest" style={{ color: "rgba(255,77,45,0.70)" }}>Phase {phase}</div>
               <div className="text-[11px] text-muted-foreground/45 mt-0.5 truncate">{feature}</div>
             </div>
           </div>
@@ -113,9 +113,9 @@ export default function ComingSoon({
             <button
               className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl font-bold text-sm transition-all hover:brightness-110 active:scale-95"
               style={{
-                background: "linear-gradient(135deg, #00b0a0, #00b0a0)",
+                background: "linear-gradient(135deg, #cc3a1e, #cc3a1e)",
                 color: "#fff",
-                boxShadow: "0 4px 20px rgba(0,229,205,0.30)",
+                boxShadow: "0 4px 20px rgba(255,77,45,0.30)",
               }}
             >
               <Rocket className="h-4 w-4" />

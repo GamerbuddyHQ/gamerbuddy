@@ -334,7 +334,7 @@ export default function UserProfilePage() {
       {/* Profile banner */}
       <div
         className={`rounded-2xl border border-border overflow-hidden bg-gradient-to-br ${bgGrad}`}
-        style={{ boxShadow: "0 0 40px rgba(0,229,205,0.06)" }}
+        style={{ boxShadow: "0 0 40px rgba(255,77,45,0.06)" }}
       >
         {/* Header strip */}
         <div className="h-20 sm:h-24 bg-gradient-to-r from-primary/20 via-secondary/15 to-transparent" />
@@ -344,7 +344,7 @@ export default function UserProfilePage() {
           <div className="flex items-end gap-4 -mt-8 mb-4">
             <div
               className="h-16 w-16 sm:h-20 sm:w-20 rounded-2xl border-2 border-primary/40 flex items-center justify-center shrink-0 text-2xl font-black text-primary uppercase overflow-hidden"
-              style={{ background: profile.profilePhotoUrl ? "transparent" : "rgba(0,229,205,0.15)", backdropFilter: "blur(8px)" }}
+              style={{ background: profile.profilePhotoUrl ? "transparent" : "rgba(255,77,45,0.15)", backdropFilter: "blur(8px)" }}
             >
               {profile.profilePhotoUrl ? (
                 <img
@@ -454,17 +454,17 @@ export default function UserProfilePage() {
       {gamingAccounts.length > 0 && (
         <div
           className="rounded-2xl overflow-hidden border"
-          style={{ borderColor: "rgba(0,229,205,0.20)", background: "rgba(8,6,18,0.65)" }}
+          style={{ borderColor: "rgba(255,77,45,0.20)", background: "rgba(8,6,18,0.65)" }}
         >
           <div
             className="flex items-center gap-2.5 px-5 py-3.5 border-b"
-            style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(0,229,205,0.05)" }}
+            style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(255,77,45,0.05)" }}
           >
             <span className="text-[11px] font-extrabold uppercase tracking-widest text-white/70">🎮 Gaming Accounts</span>
           </div>
           <div className="px-5 py-4 flex flex-wrap gap-2">
             {gamingAccounts.map((acc: GamingAccount) => {
-              const meta = GAMING_PLATFORM_META[acc.platform] ?? { label: acc.platform, emoji: "🎮", color: "#00E5CD", bg: "rgba(0,229,205,0.12)", border: "rgba(0,229,205,0.30)" };
+              const meta = GAMING_PLATFORM_META[acc.platform] ?? { label: acc.platform, emoji: "🎮", color: "#FF4D2D", bg: "rgba(255,77,45,0.12)", border: "rgba(255,77,45,0.30)" };
               const href = meta.profileUrl?.replace("{username}", acc.username);
               const inner = (
                 <div
@@ -498,7 +498,7 @@ export default function UserProfilePage() {
       <div
         className="rounded-2xl overflow-hidden border"
         style={{
-          borderColor: profile.bio ? "rgba(0,229,205,0.2)" : "rgba(255,255,255,0.06)",
+          borderColor: profile.bio ? "rgba(255,77,45,0.2)" : "rgba(255,255,255,0.06)",
           background: "rgba(8,6,18,0.65)",
         }}
       >
@@ -507,12 +507,12 @@ export default function UserProfilePage() {
           className="flex items-center gap-2.5 px-5 py-3.5 border-b"
           style={{
             borderColor: "rgba(255,255,255,0.06)",
-            background: profile.bio ? "rgba(0,229,205,0.05)" : "rgba(255,255,255,0.015)",
+            background: profile.bio ? "rgba(255,77,45,0.05)" : "rgba(255,255,255,0.015)",
           }}
         >
           <FileText
             className="h-3.5 w-3.5 shrink-0"
-            style={{ color: profile.bio ? "rgba(0,229,205,0.75)" : "rgba(255,255,255,0.25)" }}
+            style={{ color: profile.bio ? "rgba(255,77,45,0.75)" : "rgba(255,255,255,0.25)" }}
           />
           <span className="text-[11px] font-extrabold uppercase tracking-widest text-white/70">
             About
@@ -525,8 +525,8 @@ export default function UserProfilePage() {
             <div
               className="rounded-xl px-4 py-4"
               style={{
-                background: "linear-gradient(135deg, rgba(0,229,205,0.04) 0%, rgba(0,229,205,0.01) 100%)",
-                borderLeft: "3px solid rgba(0,229,205,0.35)",
+                background: "linear-gradient(135deg, rgba(255,77,45,0.04) 0%, rgba(255,77,45,0.01) 100%)",
+                borderLeft: "3px solid rgba(255,77,45,0.35)",
               }}
             >
               <p
@@ -546,11 +546,11 @@ export default function UserProfilePage() {
               <div
                 className="h-10 w-10 rounded-2xl flex items-center justify-center"
                 style={{
-                  background: "rgba(0,229,205,0.06)",
-                  border: "1.5px dashed rgba(0,229,205,0.22)",
+                  background: "rgba(255,77,45,0.06)",
+                  border: "1.5px dashed rgba(255,77,45,0.22)",
                 }}
               >
-                <FileText className="h-4 w-4" style={{ color: "rgba(0,229,205,0.45)" }} />
+                <FileText className="h-4 w-4" style={{ color: "rgba(255,77,45,0.45)" }} />
               </div>
               <p className="text-sm text-white/30 italic">This gamer hasn't added a bio yet.</p>
             </div>
@@ -615,7 +615,7 @@ export default function UserProfilePage() {
           <div className="p-4 grid grid-cols-2 sm:grid-cols-4 gap-3">
             {profile.galleryPhotoUrls.map((url, i) => (
               <div key={i} className="aspect-square rounded-xl overflow-hidden"
-                style={{ border: "1px solid rgba(0,229,205,0.20)", background: "rgba(0,0,0,0.4)" }}
+                style={{ border: "1px solid rgba(255,77,45,0.20)", background: "rgba(0,0,0,0.4)" }}
               >
                 <img
                   src={`/api/storage${url}`}
