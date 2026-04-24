@@ -1,81 +1,7 @@
-import React, { useEffect, useRef } from "react";
+import React from "react";
 import { Link } from "wouter";
 import { Gamepad2, Users, Coins, Zap, Shield, Star, Trophy, ChevronRight } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
-
-/* ── floating particles canvas ─────────────────────────────── */
-function ParticleCanvas() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    let animId: number;
-    const particles: {
-      x: number; y: number; size: number;
-      vx: number; vy: number; alpha: number; color: string;
-    }[] = [];
-
-    const resize = () => {
-      canvas.width = canvas.offsetWidth;
-      canvas.height = canvas.offsetHeight;
-    };
-    resize();
-    window.addEventListener("resize", resize);
-
-    const COLORS = ["rgba(161,255,79,", "rgba(161,255,79,", "rgba(161,255,79,", "rgba(161,255,79,"];
-
-    for (let i = 0; i < 70; i++) {
-      particles.push({
-        x: Math.random() * (canvas.width || 1280),
-        y: Math.random() * (canvas.height || 700),
-        size: Math.random() * 2 + 0.3,
-        vx: (Math.random() - 0.5) * 0.22,
-        vy: -(Math.random() * 0.35 + 0.12),
-        alpha: Math.random() * 0.55 + 0.10,
-        color: COLORS[Math.floor(Math.random() * COLORS.length)],
-      });
-    }
-
-    const animate = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      particles.forEach((p) => {
-        p.x += p.vx;
-        p.y += p.vy;
-        p.alpha -= 0.0006;
-        if (p.y < 0 || p.alpha <= 0) {
-          p.x = Math.random() * canvas.width;
-          p.y = canvas.height + 10;
-          p.alpha = Math.random() * 0.55 + 0.10;
-          p.vy = -(Math.random() * 0.35 + 0.12);
-          p.vx = (Math.random() - 0.5) * 0.22;
-        }
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.fillStyle = p.color + p.alpha + ")";
-        ctx.fill();
-      });
-      animId = requestAnimationFrame(animate);
-    };
-    animate();
-
-    return () => {
-      cancelAnimationFrame(animId);
-      window.removeEventListener("resize", resize);
-    };
-  }, []);
-
-  return (
-    <canvas
-      ref={canvasRef}
-      className="absolute inset-0 w-full h-full pointer-events-none"
-      style={{ zIndex: 1 }}
-    />
-  );
-}
 
 /* ── feature card ───────────────────────────────────────────── */
 function FeatureCard({
@@ -197,54 +123,6 @@ export default function Home() {
 
       {/* ═══════════════════ HERO ═══════════════════ */}
       <section className="relative flex flex-col items-center justify-center text-center px-4 pt-14 pb-12 lg:pt-24 lg:pb-16 overflow-hidden min-h-[600px] lg:min-h-[720px]">
-        <ParticleCanvas />
-
-        {/* Wide cinematic backdrop */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background: "radial-gradient(ellipse 110% 90% at 50% -5%, rgba(100,160,45,0.35) 0%, rgba(161,255,79,0.10) 35%, transparent 65%)",
-            zIndex: 0,
-          }}
-        />
-        {/* Left orb */}
-        <div
-          className="absolute top-[-15%] left-[-12%] w-[75vw] h-[75vw] rounded-full pointer-events-none"
-          style={{
-            background: "radial-gradient(circle, rgba(161,255,79,0.15) 0%, transparent 58%)",
-            animation: "float-slow 11s ease-in-out infinite",
-            zIndex: 0,
-          }}
-        />
-        {/* Right orb */}
-        <div
-          className="absolute bottom-[-10%] right-[-10%] w-[60vw] h-[60vw] rounded-full pointer-events-none"
-          style={{
-            background: "radial-gradient(circle, rgba(161,255,79,0.09) 0%, transparent 58%)",
-            animation: "float-slow-reverse 13s ease-in-out infinite",
-            zIndex: 0,
-          }}
-        />
-        {/* Centre crown glow */}
-        <div
-          className="absolute top-0 left-1/2 -translate-x-1/2 w-[80vw] h-[50vw] pointer-events-none"
-          style={{
-            background: "radial-gradient(ellipse 70% 55% at 50% 0%, rgba(110,68,255,0.22) 0%, transparent 60%)",
-            zIndex: 0,
-          }}
-        />
-
-        {/* Dot grid */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            backgroundImage: "radial-gradient(circle, rgba(161,255,79,0.12) 1px, transparent 1px)",
-            backgroundSize: "38px 38px",
-            zIndex: 0,
-            maskImage: "radial-gradient(ellipse 95% 75% at 50% 30%, black 5%, transparent 100%)",
-          }}
-        />
-
         {/* Content */}
         <div className="relative w-full max-w-5xl mx-auto" style={{ zIndex: 2 }}>
 
@@ -321,7 +199,6 @@ export default function Home() {
                   background: "rgba(255,255,255,0.06)",
                   border: "1.5px solid rgba(255,255,255,0.18)",
                   color: "rgba(226,232,240,0.85)",
-                  backdropFilter: "blur(10px)",
                   boxShadow: "0 2px 16px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.06)",
                   minWidth: "210px",
                 }}
@@ -443,15 +320,6 @@ export default function Home() {
             className="absolute top-0 left-0 right-0 h-px pointer-events-none"
             style={{ background: "linear-gradient(90deg, transparent, rgba(161,255,79,0.5), rgba(161,255,79,0.3), transparent)" }}
           />
-          {/* corner glows */}
-          <div
-            className="absolute top-0 left-0 w-80 h-80 rounded-full pointer-events-none"
-            style={{ background: "radial-gradient(circle, rgba(161,255,79,0.10) 0%, transparent 65%)" }}
-          />
-          <div
-            className="absolute bottom-0 right-0 w-64 h-64 rounded-full pointer-events-none"
-            style={{ background: "radial-gradient(circle, rgba(161,255,79,0.07) 0%, transparent 65%)" }}
-          />
 
           <div className="relative grid grid-cols-1 md:grid-cols-2 gap-10 lg:gap-16">
             {/* Divider */}
@@ -555,15 +423,6 @@ export default function Home() {
             className="absolute top-0 left-0 right-0 h-px pointer-events-none"
             style={{ background: "linear-gradient(90deg, transparent, rgba(0,212,190,0.65), transparent)" }}
           />
-          {/* orbs */}
-          <div
-            className="absolute top-0 right-0 w-72 h-72 rounded-full pointer-events-none"
-            style={{ background: "radial-gradient(circle, rgba(161,255,79,0.18) 0%, transparent 70%)" }}
-          />
-          <div
-            className="absolute bottom-0 left-0 w-56 h-56 rounded-full pointer-events-none"
-            style={{ background: "radial-gradient(circle, rgba(161,255,79,0.14) 0%, transparent 70%)" }}
-          />
 
           <div className="relative space-y-5">
             <div className="text-[10px] font-black uppercase tracking-[0.25em] text-primary/80 mb-1">
@@ -601,7 +460,6 @@ export default function Home() {
                     border: "1.5px solid rgba(255,255,255,0.18)",
                     background: "rgba(255,255,255,0.05)",
                     color: "rgba(226,232,240,0.80)",
-                    backdropFilter: "blur(8px)",
                   }}
                 >
                   {t.home.cta2}

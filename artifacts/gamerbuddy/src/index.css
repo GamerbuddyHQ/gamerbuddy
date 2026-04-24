@@ -494,15 +494,6 @@
   to { width: 100%; }
 }
 
-@keyframes float-slow {
-  0%, 100% { transform: translateY(0px) scale(1); }
-  50% { transform: translateY(-28px) scale(1.04); }
-}
-
-@keyframes float-slow-reverse {
-  0%, 100% { transform: translateY(0px) scale(1); }
-  50% { transform: translateY(22px) scale(0.97); }
-}
 
 @keyframes drift-up {
   0% { transform: translateY(0) translateX(0); opacity: 0; }
