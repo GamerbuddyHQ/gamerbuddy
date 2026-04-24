@@ -309,7 +309,7 @@ function LangComingSoonModal({ onClose }: { onClose: () => void }) {
           <button
             onClick={onClose}
             className="w-full py-2.5 rounded-xl font-black uppercase tracking-widest text-sm text-[#0A0A0E] transition-all hover:brightness-105"
-            style={{ background: "linear-gradient(135deg, #E8FF00 0%, #d4eb00 100%)", boxShadow: "0 4px 16px rgba(232,255,0,0.28)" }}
+            style={{ background: "linear-gradient(135deg, #E8FF00 0%, #d4eb00 100%)", boxShadow: "0 3px 10px rgba(0,0,0,0.40)" }}
           >
             Got it!
           </button>
@@ -726,7 +726,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   className="h-9 px-4 flex items-center text-[13px] font-bold text-[#0A0A0E] rounded-xl transition-all hover:brightness-105 active:scale-95"
                   style={{
                     background: "linear-gradient(135deg, #E8FF00 0%, #d4eb00 100%)",
-                    boxShadow: "0 4px 14px rgba(232,255,0,0.30)",
+                    boxShadow: "0 3px 10px rgba(0,0,0,0.40)",
                   }}
                 >
                   {t.nav.signUp}
@@ -848,7 +848,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   <Link
                     href="/signup"
                     className="flex items-center justify-center w-full py-3.5 rounded-xl font-black text-[15px] text-[#0A0A0E] transition-all hover:brightness-105"
-                    style={{ background: "linear-gradient(135deg, #E8FF00 0%, #d4eb00 100%)", boxShadow: "0 4px 16px rgba(232,255,0,0.30)" }}
+                    style={{ background: "linear-gradient(135deg, #E8FF00 0%, #d4eb00 100%)", boxShadow: "0 3px 10px rgba(0,0,0,0.40)" }}
                   >
                     {t.nav.signUp}
                   </Link>

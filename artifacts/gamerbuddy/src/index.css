@@ -469,12 +469,10 @@
 .dark [class*="bg-primary"]:not([class*="foreground"]):not([class*="muted"]) {
   background-color: #E8FF00 !important;
   color: #0A0A0E !important;
-  box-shadow: 0 0 10px rgba(232,255,0,0.35), 0 2px 14px rgba(232,255,0,0.20);
 }
 .dark .bg-primary:hover,
 .dark [class*="bg-primary"]:not([class*="foreground"]):not([class*="muted"]):hover {
   background-color: #d4eb00 !important;
-  box-shadow: 0 0 18px rgba(232,255,0,0.45), 0 4px 24px rgba(232,255,0,0.28);
 }
 
 /* Card hover shadow — gold subtle */

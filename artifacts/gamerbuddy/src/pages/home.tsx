@@ -272,8 +272,8 @@ export default function Home() {
               <button
                 className="relative overflow-hidden group w-full sm:w-auto px-10 py-4 rounded-2xl font-bold text-base lg:text-lg text-[#0A0A0E] transition-all duration-200 hover:brightness-105 hover:scale-[1.03] active:scale-[0.97]"
                 style={{
-                  background: "linear-gradient(135deg, #E8FF00 0%, #bbd600 100%)",
-                  boxShadow: "0 8px 28px rgba(232,255,0,0.32), 0 2px 8px rgba(0,0,0,0.40), inset 0 1px 0 rgba(255,255,255,0.18)",
+                  background: "linear-gradient(135deg, #E8FF00 0%, #d4eb00 100%)",
+                  boxShadow: "0 4px 14px rgba(0,0,0,0.45)",
                   minWidth: "210px",
                 }}
               >
@@ -510,15 +510,15 @@ export default function Home() {
         <div
           className="relative max-w-4xl mx-auto rounded-3xl text-center overflow-hidden px-8 py-14 sm:py-16 lg:py-20"
           style={{
-            background: "linear-gradient(135deg, rgba(45,75,18,0.75) 0%, rgba(110,68,255,0.28) 50%, rgba(80,130,35,0.18) 100%)",
-            border: "1px solid rgba(0,200,170,0.28)",
-            boxShadow: "0 0 80px rgba(110,68,255,0.18), inset 0 0 60px rgba(0,80,60,0.10)",
+            background: "#111111",
+            border: "1px solid rgba(232,255,0,0.22)",
+            boxShadow: "0 4px 32px rgba(0,0,0,0.50)",
           }}
         >
           {/* top glow line */}
           <div
             className="absolute top-0 left-0 right-0 h-px pointer-events-none"
-            style={{ background: "linear-gradient(90deg, transparent, rgba(0,212,190,0.65), transparent)" }}
+            style={{ background: "linear-gradient(90deg, transparent, rgba(232,255,0,0.30), transparent)" }}
           />
 
           <div className="relative space-y-5">
@@ -536,8 +536,8 @@ export default function Home() {
                 <button
                   className="relative overflow-hidden group px-10 py-4 rounded-xl font-black text-sm uppercase tracking-widest text-[#0A0A0E] w-full sm:w-auto transition-all hover:brightness-105 hover:scale-[1.03] active:scale-[0.97]"
                   style={{
-                    background: "linear-gradient(135deg, #E8FF00 0%, #bbd600 100%)",
-                    boxShadow: "0 0 32px rgba(232,255,0,0.45), 0 4px 16px rgba(0,0,0,0.30)",
+                    background: "linear-gradient(135deg, #E8FF00 0%, #d4eb00 100%)",
+                    boxShadow: "0 4px 14px rgba(0,0,0,0.45)",
                   }}
                 >
                   <div
