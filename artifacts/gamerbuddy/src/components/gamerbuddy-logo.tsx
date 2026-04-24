@@ -1,8 +1,8 @@
 import React from "react";
 
 /**
- * Player4Hire icon — P4H monogram in yellow (#DCCE40) on a deep purple disc.
- * Amethyst Dawn Haze palette: #341C87 bg, #DCCE40 accent.
+ * Player4Hire icon — P4H monogram in periwinkle (#ACB5FF) on a deep purple disc.
+ * Moon Dust palette: #05060F bg, #ACB5FF periwinkle accent.
  * Scales cleanly from 16 px favicon to 48 px+ hero use.
  */
 export function GamerbuddyIcon({
@@ -24,20 +24,20 @@ export function GamerbuddyIcon({
     >
       <defs>
         <radialGradient id="p4hBg" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="#2a1670" />
-          <stop offset="100%" stopColor="#1a0d4a" />
+          <stop offset="0%" stopColor="#050610" />
+          <stop offset="100%" stopColor="#030408" />
         </radialGradient>
 
         <radialGradient id="p4hHalo" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="#DCCE40" stopOpacity="0.28" />
-          <stop offset="65%" stopColor="#DCCE40" stopOpacity="0.06" />
-          <stop offset="100%" stopColor="#DCCE40" stopOpacity="0" />
+          <stop offset="0%" stopColor="#ACB5FF" stopOpacity="0.28" />
+          <stop offset="65%" stopColor="#ACB5FF" stopOpacity="0.06" />
+          <stop offset="100%" stopColor="#ACB5FF" stopOpacity="0" />
         </radialGradient>
 
         <linearGradient id="p4hRing" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#DCCE40" stopOpacity="0.50" />
-          <stop offset="50%" stopColor="#DCCE40" />
-          <stop offset="100%" stopColor="#C4AEF4" stopOpacity="0.60" />
+          <stop offset="0%" stopColor="#ACB5FF" stopOpacity="0.50" />
+          <stop offset="50%" stopColor="#ACB5FF" />
+          <stop offset="100%" stopColor="#8EC1DE" stopOpacity="0.60" />
         </linearGradient>
 
         <filter id="p4hGlow" x="-70%" y="-70%" width="240%" height="240%">
@@ -74,7 +74,7 @@ export function GamerbuddyIcon({
         fontSize="10"
         fontWeight="900"
         letterSpacing="-0.5"
-        fill="#DCCE40"
+        fill="#ACB5FF"
         filter="url(#p4hGlow)"
       >
         P4H
@@ -84,7 +84,7 @@ export function GamerbuddyIcon({
 }
 
 /**
- * Full Player4Hire wordmark: icon + "Player" (white) "4Hire" (yellow #DCCE40).
+ * Full Player4Hire wordmark: icon + "Player" (white) "4Hire" (yellow #ACB5FF).
  * textSize controls the type scale. iconOnly hides the text.
  */
 export function GamerbuddyLogo({
@@ -118,7 +118,7 @@ export function GamerbuddyLogo({
           style={{ letterSpacing: "0.01em" }}
         >
           <span style={{ color: "#e2e8f0" }}>Player</span>
-          <span style={{ color: "#DCCE40" }}>4Hire</span>
+          <span style={{ color: "#ACB5FF" }}>4Hire</span>
         </span>
       )}
     </span>

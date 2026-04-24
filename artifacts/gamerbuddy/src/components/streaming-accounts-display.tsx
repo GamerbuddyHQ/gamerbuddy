@@ -48,10 +48,10 @@ export function StreamingAccountsDisplay({ accounts, className = "", onConnect }
     <div
       className={`rounded-2xl border overflow-hidden ${className}`}
       style={{
-        borderColor: connectedCount > 0 ? "rgba(220,206,64,0.25)" : "rgba(255,255,255,0.07)",
+        borderColor: connectedCount > 0 ? "rgba(172,181,255,0.25)" : "rgba(255,255,255,0.07)",
         background: "rgba(8,6,18,0.75)",
         boxShadow: connectedCount > 0
-          ? "0 0 0 1px rgba(220,206,64,0.06), 0 4px 32px rgba(220,206,64,0.08)"
+          ? "0 0 0 1px rgba(172,181,255,0.06), 0 4px 32px rgba(172,181,255,0.08)"
           : "none",
       }}
     >
@@ -61,7 +61,7 @@ export function StreamingAccountsDisplay({ accounts, className = "", onConnect }
         style={{
           borderColor: "rgba(255,255,255,0.06)",
           background: connectedCount > 0
-            ? "rgba(220,206,64,0.07)"
+            ? "rgba(172,181,255,0.07)"
             : "rgba(255,255,255,0.02)",
         }}
       >
@@ -69,11 +69,11 @@ export function StreamingAccountsDisplay({ accounts, className = "", onConnect }
           <span className="relative flex h-2.5 w-2.5">
             <span
               className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-60"
-              style={{ background: connectedCount > 0 ? "#DCCE40" : "#4b5563" }}
+              style={{ background: connectedCount > 0 ? "#ACB5FF" : "#4b5563" }}
             />
             <span
               className="relative inline-flex rounded-full h-2.5 w-2.5"
-              style={{ background: connectedCount > 0 ? "#DCCE40" : "#4b5563" }}
+              style={{ background: connectedCount > 0 ? "#ACB5FF" : "#4b5563" }}
             />
           </span>
           <span className="text-[11px] font-extrabold uppercase tracking-widest text-white/80">
@@ -258,16 +258,16 @@ export function StreamingAccountsDisplay({ accounts, className = "", onConnect }
               onClick={onConnect}
               className="w-full sm:w-auto shrink-0 flex items-center justify-center gap-1.5 text-[11px] font-bold uppercase tracking-wider px-4 py-2 rounded-xl transition-all duration-200 hover:brightness-115 hover:scale-[1.02] active:scale-[0.98]"
               style={{
-                background: "linear-gradient(135deg, rgba(220,206,64,0.18), rgba(220,206,64,0.08))",
-                border: "1px solid rgba(220,206,64,0.35)",
-                color: "#DCCE40",
-                boxShadow: "0 0 0 0 rgba(220,206,64,0)",
+                background: "linear-gradient(135deg, rgba(172,181,255,0.18), rgba(172,181,255,0.08))",
+                border: "1px solid rgba(172,181,255,0.35)",
+                color: "#ACB5FF",
+                boxShadow: "0 0 0 0 rgba(172,181,255,0)",
               }}
               onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.boxShadow = "0 0 14px rgba(220,206,64,0.3)";
+                (e.currentTarget as HTMLElement).style.boxShadow = "0 0 14px rgba(172,181,255,0.3)";
               }}
               onMouseLeave={(e) => {
-                (e.currentTarget as HTMLElement).style.boxShadow = "0 0 0 0 rgba(220,206,64,0)";
+                (e.currentTarget as HTMLElement).style.boxShadow = "0 0 0 0 rgba(172,181,255,0)";
               }}
             >
               <Radio className="h-3 w-3" />
