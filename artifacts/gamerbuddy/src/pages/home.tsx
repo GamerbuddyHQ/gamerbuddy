@@ -373,8 +373,8 @@ export default function Home() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
             <FeatureCard
               icon={<Users className="h-6 w-6" />}
-              iconBg="bg-cyan-500/15"
-              iconColor="text-cyan-400"
+              iconBg="bg-[#1A1A1A]"
+              iconColor="text-[#E8FF00]"
               glowColor="rgba(232,255,0,0.8)"
               title="Find Teammates"
               desc="Post a request for any game, platform, and skill level. Get matched with friendly, verified players instantly."
@@ -382,8 +382,8 @@ export default function Home() {
             />
             <FeatureCard
               icon={<Coins className="h-6 w-6" />}
-              iconBg="bg-primary/15"
-              iconColor="text-primary"
+              iconBg="bg-[#1A1A1A]"
+              iconColor="text-[#E8FF00]"
               glowColor="rgba(232,255,0,0.8)"
               title="Get Paid to Play"
               desc="Accept requests, complete gaming sessions, and withdraw your earnings. Turn your skills into real money."
@@ -391,8 +391,8 @@ export default function Home() {
             />
             <FeatureCard
               icon={<Zap className="h-6 w-6" />}
-              iconBg="bg-yellow-500/15"
-              iconColor="text-yellow-400"
+              iconBg="bg-[#1A1A1A]"
+              iconColor="text-[#E8FF00]"
               glowColor="rgba(234,179,8,0.8)"
               title="Instant Action"
               desc="No waiting. Browse live requests, bid in seconds, and jump into the game. Real-time notifications built in."
@@ -481,10 +481,10 @@ export default function Home() {
         <div className="max-w-[1400px] mx-auto">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             {[
-              { icon: <Shield className="h-5 w-5 text-green-400" />, label: "Escrow Protected", sub: "Funds held until session complete", bg: "rgba(34,197,94,0.08)", border: "rgba(34,197,94,0.20)" },
-              { icon: <Star className="h-5 w-5 text-yellow-400" />, label: "Verified Reviews", sub: "Both sides must leave a review", bg: "rgba(234,179,8,0.08)", border: "rgba(234,179,8,0.20)" },
-              { icon: <Zap className="h-5 w-5 text-cyan-400" />, label: "Instant Alerts", sub: "Real-time bids, starts, and payments", bg: "rgba(232,255,0,0.08)", border: "rgba(232,255,0,0.20)" },
-              { icon: <Trophy className="h-5 w-5 text-amber-400" />, label: "Transparent 10% Fee", sub: "Gamers keep 90% — no hidden charges", bg: "rgba(245,158,11,0.08)", border: "rgba(245,158,11,0.20)" },
+              { icon: <Shield className="h-5 w-5 text-[#E8FF00]" />, label: "Escrow Protected", sub: "Funds held until session complete", bg: "rgba(232,255,0,0.04)", border: "rgba(232,255,0,0.18)" },
+              { icon: <Star className="h-5 w-5 text-[#E8FF00]" />, label: "Verified Reviews", sub: "Both sides must leave a review", bg: "rgba(232,255,0,0.04)", border: "rgba(232,255,0,0.18)" },
+              { icon: <Zap className="h-5 w-5 text-[#E8FF00]" />, label: "Instant Alerts", sub: "Real-time bids, starts, and payments", bg: "rgba(232,255,0,0.04)", border: "rgba(232,255,0,0.18)" },
+              { icon: <Trophy className="h-5 w-5 text-[#E8FF00]" />, label: "Transparent 10% Fee", sub: "Gamers keep 90% — no hidden charges", bg: "rgba(232,255,0,0.04)", border: "rgba(232,255,0,0.18)" },
             ].map(({ icon, label, sub, bg, border }) => (
               <div
                 key={label}
@@ -493,7 +493,7 @@ export default function Home() {
               >
                 <div
                   className="w-11 h-11 rounded-xl flex items-center justify-center"
-                  style={{ background: "rgba(255,255,255,0.05)" }}
+                  style={{ background: "#1A1A1A" }}
                 >
                   {icon}
                 </div>
