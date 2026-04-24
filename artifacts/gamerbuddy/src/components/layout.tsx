@@ -535,11 +535,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
               </button>
             )}
             <Link href="/" className="flex items-center group navbar-logo">
-              <span className="sm:hidden">
-                <GamerbuddyLogo iconSize={30} textSize="lg" />
-              </span>
-              <span className="hidden sm:flex">
-                <GamerbuddyLogo iconSize={38} textSize="2xl" />
+              <span
+                className="font-extrabold leading-none select-none brand-text sm:text-2xl text-xl"
+                style={{ letterSpacing: "0.01em" }}
+              >
+                <span style={{ color: "#e2e8f0" }}>Player</span>
+                <span style={{ color: "#4F9EFF" }}>4</span>
+                <span style={{ color: "#e2e8f0" }}>Hire</span>
               </span>
             </Link>
           </div>
