@@ -668,7 +668,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 >
                   <UserIcon className="h-4 w-4 shrink-0" />
                   <span className="text-[13px] font-semibold max-w-[80px] truncate hidden lg:block">
-                    {user.name.split(" ")[0]}
+                    {(user.name ?? "User").split(" ")[0]}
                   </span>
                   <ChevronRight className={["h-3 w-3 shrink-0 opacity-50 transition-transform duration-200", userMenuOpen ? "rotate-90" : ""].join(" ")} />
                 </button>

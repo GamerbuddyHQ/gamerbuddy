@@ -49,8 +49,24 @@ app.use(
   }),
 );
 
+// FRONTEND_URL may be a comma-separated list of allowed origins so that
+// both the stable Vercel production URL and any preview-deployment URLs
+// can be whitelisted without touching code.
+// e.g. FRONTEND_URL=https://gamerbuddy.vercel.app,https://gamerbuddy-preview.vercel.app
+const allowedOrigins = new Set(
+  (process.env.FRONTEND_URL || "http://localhost:5173")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean),
+);
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL || "http://localhost:5173",
+  origin: (origin, callback) => {
+    // Server-to-server / curl / Postman send no Origin — always allow.
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.has(origin)) return callback(null, true);
+    callback(new Error(`CORS: origin not allowed: ${origin}`));
+  },
   credentials: true,
 }));
 app.use(cookieParser(process.env.SESSION_SECRET));
