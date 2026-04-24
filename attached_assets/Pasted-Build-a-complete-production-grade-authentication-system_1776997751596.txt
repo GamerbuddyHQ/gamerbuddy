@@ -1,0 +1,82 @@
+Build a complete, production-grade authentication system for "Gamerbuddy" — a dark-themed gaming marketplace website. The stack must be fully compatible with Vercel (deployment), GitHub (version control), and Neon (serverless PostgreSQL).
+
+---
+
+## TECH STACK
+- **Framework**: Next.js 14 (App Router)
+- **Auth Library**: NextAuth.js v5 (Auth.js)
+- **Database**: Neon (PostgreSQL via @neondatabase/serverless)
+- **ORM**: Drizzle ORM
+- **Styling**: Tailwind CSS
+- **Validation**: Zod
+- **Password Hashing**: bcryptjs
+
+---
+
+## DATABASE SCHEMA (Neon/Drizzle)
+Create a `users` table with:
+- id (uuid, primary key)
+- fullName (text, not null)
+- gamertag (text, unique, not null)
+- email (text, unique, not null)
+- passwordHash (text, nullable — null for OAuth users)
+- phoneNumber (text, nullable)
+- avatarUrl (text, nullable)
+- isVerified (boolean, default false)
+- role (enum: 'gamer' | 'admin', default 'gamer')
+- createdAt (timestamp, default now())
+- updatedAt (timestamp)
+
+Also create a NextAuth-compatible `sessions`, `accounts`, and `verificationTokens` table using the Drizzle adapter schema.
+
+---
+
+## AUTH FEATURES TO IMPLEMENT
+
+### 1. SIGN UP (`/signup`)
+- Fields: Full Name / Gamertag, Email, Phone Number, Password
+- Zod validation (min lengths, email format, phone format, password strength: 8+ chars, 1 uppercase, 1 number)
+- Show inline red error messages matching the existing UI (e.g., "Name must be at least 2 characters")
+- Hash password with bcryptjs (salt rounds: 12)
+- Check for duplicate email/gamertag before insert
+- On success: create session and redirect to `/dashboard`
+
+### 2. LOGIN (`/login`)
+- Fields: Email, Password
+- Validate credentials against DB
+- Return generic error "Invalid email or password" (never reveal which is wrong)
+- On success: create secure session (JWT strategy), redirect to `/dashboard`
+- "Remember me" checkbox — extend session to 30 days if checked
+
+### 3. LOGOUT
+- Server Action or API route `/api/auth/signout`
+- Clears session cookie
+- Redirects to homepage `/`
+- Add a logout button in the nav/dashboard that calls this
+
+### 4. PROTECTED ROUTES
+- Middleware (`middleware.ts`) that protects `/dashboard`, `/profile`, `/post-request`, `/bids`
+- Unauthenticated users get redirected to `/login?callbackUrl=...`
+- After login, redirect back to original page
+
+### 5. SESSION & USER CONTEXT
+- `useSession()` hook available client-side
+- `getServerSession()` available server-side in Server Components
+- Expose: id, fullName, gamertag, email, avatarUrl, isVerified, role
+
+---
+
+## SECURITY REQUIREMENTS
+- Passwords hashed with bcryptjs — NEVER stored in plain text
+- JWT secret from environment variable `NEXTAUTH_SECRET`
+- CSRF protection built-in via NextAuth
+- Rate limiting on `/api/auth/signin` — max 5 attempts per IP per 15 min (use `@upstash/ratelimit` or simple in-memory fallback)
+- HTTP-only, secure, SameSite=Strict session cookies
+- Input sanitization before DB queries
+- SQL injection protection via Drizzle parameterized queries
+- No sensitive data in JWT payload (no password hash, no phone)
+
+---
+
+## ENVIRONMENT VARIABLES NEEDED
+Create a `.env.local` template with:
