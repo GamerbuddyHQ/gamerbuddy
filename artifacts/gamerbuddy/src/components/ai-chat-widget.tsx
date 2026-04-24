@@ -355,7 +355,7 @@ function renderMarkdown(text: string) {
   return lines.map((line, i) => {
     const processed = line
       .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
-      .replace(/`(.*?)`/g, "<code style='font-size:11px;background:rgba(255,77,45,0.15);padding:1px 4px;border-radius:4px'>$1</code>");
+      .replace(/`(.*?)`/g, "<code style='font-size:11px;background:rgba(161,255,79,0.15);padding:1px 4px;border-radius:4px'>$1</code>");
     return (
       <span key={i}>
         <span dangerouslySetInnerHTML={{ __html: processed }} />
@@ -429,7 +429,7 @@ export function AIChatWidget() {
       <button
         onClick={() => setOpen(true)}
         className="fixed bottom-5 right-5 z-50 flex items-center gap-2.5 rounded-full px-4 py-3 font-bold text-sm text-white shadow-2xl transition-all hover:scale-105 active:scale-95"
-        style={{ background: "linear-gradient(135deg, #cc3a1e 0%, #FF4D2D 50%, #cc3a1e 100%)", boxShadow: "0 0 24px rgba(255,77,45,0.45), 0 4px 20px rgba(0,0,0,0.4)" }}
+        style={{ background: "linear-gradient(135deg, #88cc33 0%, #A1FF4F 50%, #88cc33 100%)", boxShadow: "0 0 24px rgba(161,255,79,0.45), 0 4px 20px rgba(0,0,0,0.4)" }}
         aria-label="Open AI Support"
       >
         <div className="relative">
@@ -449,14 +449,14 @@ export function AIChatWidget() {
         width: "clamp(320px, 90vw, 390px)",
         height: minimized ? "56px" : "clamp(420px, 70vh, 560px)",
         background: "linear-gradient(180deg, #0d0620 0%, #080415 100%)",
-        border: "1px solid rgba(255,77,45,0.25)",
-        boxShadow: "0 0 40px rgba(255,77,45,0.18), 0 8px 32px rgba(0,0,0,0.6)",
+        border: "1px solid rgba(161,255,79,0.25)",
+        boxShadow: "0 0 40px rgba(161,255,79,0.18), 0 8px 32px rgba(0,0,0,0.6)",
       }}
     >
       {/* Header */}
       <div
         className="flex items-center justify-between px-4 py-3 shrink-0"
-        style={{ background: "linear-gradient(90deg, rgba(255,77,45,0.6) 0%, rgba(255,77,45,0.4) 100%)", borderBottom: "1px solid rgba(255,77,45,0.2)" }}
+        style={{ background: "linear-gradient(90deg, rgba(161,255,79,0.6) 0%, rgba(161,255,79,0.4) 100%)", borderBottom: "1px solid rgba(161,255,79,0.2)" }}
       >
         <div className="flex items-center gap-2.5">
           <div className="relative">
@@ -498,8 +498,8 @@ export function AIChatWidget() {
                   className="shrink-0 h-7 w-7 rounded-full flex items-center justify-center mt-0.5"
                   style={
                     msg.role === "assistant"
-                      ? { background: "rgba(255,77,45,0.15)", border: "1px solid rgba(255,77,45,0.3)" }
-                      : { background: "rgba(255,77,45,0.15)", border: "1px solid rgba(255,77,45,0.3)" }
+                      ? { background: "rgba(161,255,79,0.15)", border: "1px solid rgba(161,255,79,0.3)" }
+                      : { background: "rgba(161,255,79,0.15)", border: "1px solid rgba(161,255,79,0.3)" }
                   }
                 >
                   {msg.role === "assistant"
@@ -510,8 +510,8 @@ export function AIChatWidget() {
                   className="max-w-[82%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed"
                   style={
                     msg.role === "assistant"
-                      ? { background: "rgba(255,77,45,0.08)", border: "1px solid rgba(255,77,45,0.15)", color: "rgba(255,255,255,0.88)" }
-                      : { background: "rgba(255,77,45,0.12)", border: "1px solid rgba(255,77,45,0.2)", color: "rgba(255,255,255,0.92)" }
+                      ? { background: "rgba(161,255,79,0.08)", border: "1px solid rgba(161,255,79,0.15)", color: "rgba(255,255,255,0.88)" }
+                      : { background: "rgba(161,255,79,0.12)", border: "1px solid rgba(161,255,79,0.2)", color: "rgba(255,255,255,0.92)" }
                   }
                 >
                   {renderMarkdown(msg.text)}
@@ -521,10 +521,10 @@ export function AIChatWidget() {
 
             {typing && (
               <div className="flex gap-2">
-                <div className="shrink-0 h-7 w-7 rounded-full flex items-center justify-center" style={{ background: "rgba(255,77,45,0.15)", border: "1px solid rgba(255,77,45,0.3)" }}>
+                <div className="shrink-0 h-7 w-7 rounded-full flex items-center justify-center" style={{ background: "rgba(161,255,79,0.15)", border: "1px solid rgba(161,255,79,0.3)" }}>
                   <Bot className="h-3.5 w-3.5 text-primary" />
                 </div>
-                <div className="rounded-2xl px-4 py-3" style={{ background: "rgba(255,77,45,0.08)", border: "1px solid rgba(255,77,45,0.15)" }}>
+                <div className="rounded-2xl px-4 py-3" style={{ background: "rgba(161,255,79,0.08)", border: "1px solid rgba(161,255,79,0.15)" }}>
                   <div className="flex gap-1.5 items-center h-4">
                     {[0, 1, 2].map((i) => (
                       <div key={i} className="h-1.5 w-1.5 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: `${i * 0.15}s` }} />
@@ -559,8 +559,8 @@ export function AIChatWidget() {
               rel="noopener noreferrer"
               className="flex items-center justify-center gap-2 w-full py-2 rounded-xl text-[11px] font-bold text-white transition-all hover:scale-[1.02] active:scale-[0.98]"
               style={{
-                background: "linear-gradient(135deg, #FF4D2D 0%, #cc3a1e 60%, #FF4D2D 100%)",
-                boxShadow: "0 0 14px rgba(255,77,45,0.25)",
+                background: "linear-gradient(135deg, #A1FF4F 0%, #88cc33 60%, #A1FF4F 100%)",
+                boxShadow: "0 0 14px rgba(161,255,79,0.25)",
               }}
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} className="h-3.5 w-3.5 shrink-0">
@@ -571,10 +571,10 @@ export function AIChatWidget() {
           </div>
 
           {/* Input */}
-          <div className="px-3.5 pb-3.5 pt-2 shrink-0" style={{ borderTop: "1px solid rgba(255,77,45,0.12)" }}>
+          <div className="px-3.5 pb-3.5 pt-2 shrink-0" style={{ borderTop: "1px solid rgba(161,255,79,0.12)" }}>
             <div
               className="flex items-center gap-2 rounded-xl px-3.5 py-2"
-              style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,77,45,0.2)" }}
+              style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(161,255,79,0.2)" }}
             >
               <input
                 className="flex-1 bg-transparent text-sm text-white placeholder:text-white/30 outline-none"
@@ -589,7 +589,7 @@ export function AIChatWidget() {
                 disabled={!input.trim()}
                 className="h-7 w-7 rounded-lg flex items-center justify-center transition-all shrink-0"
                 style={input.trim()
-                  ? { background: "rgba(255,77,45,0.25)", border: "1px solid rgba(255,77,45,0.4)", color: "#FF4D2D" }
+                  ? { background: "rgba(161,255,79,0.25)", border: "1px solid rgba(161,255,79,0.4)", color: "#A1FF4F" }
                   : { background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.2)" }}
               >
                 <Send className="h-3.5 w-3.5" />

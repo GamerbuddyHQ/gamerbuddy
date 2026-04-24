@@ -47,12 +47,12 @@ const BADGE_PALETTE: Record<string, BadgeColors> = {
     iconGlow: "drop-shadow(0 0 4px rgba(96,165,250,0.70))",
   },
   "beginner-friendly": {
-    text: "#FF4D2D",
-    bg: "linear-gradient(135deg,rgba(255,77,45,0.22) 0%,rgba(255,77,45,0.08) 100%)",
-    border: "rgba(255,77,45,0.50)",
-    glow: "0 0 14px rgba(255,77,45,0.30),0 0 4px rgba(255,77,45,0.18),inset 0 1px 0 rgba(255,255,255,0.06)",
-    glowCompact: "0 0 8px rgba(255,77,45,0.25)",
-    iconGlow: "drop-shadow(0 0 4px rgba(255,77,45,0.70))",
+    text: "#A1FF4F",
+    bg: "linear-gradient(135deg,rgba(161,255,79,0.22) 0%,rgba(161,255,79,0.08) 100%)",
+    border: "rgba(161,255,79,0.50)",
+    glow: "0 0 14px rgba(161,255,79,0.30),0 0 4px rgba(161,255,79,0.18),inset 0 1px 0 rgba(255,255,255,0.06)",
+    glowCompact: "0 0 8px rgba(161,255,79,0.25)",
+    iconGlow: "drop-shadow(0 0 4px rgba(161,255,79,0.70))",
   },
 };
 

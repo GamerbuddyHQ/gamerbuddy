@@ -69,7 +69,7 @@ const MAX_PRIZE = 10000;
 /* ── Config ── */
 const TYPE_CONFIG: Record<TournamentType, { label: string; desc: string; icon: React.FC<{ className?: string }>; color: string; defaultPlayers: number }> = {
   h2h:   { label: "Head-to-Head", desc: "1v1 or small bracket",       icon: Swords,  color: "#f87171", defaultPlayers: 2 },
-  squad: { label: "Squad Battle",  desc: "Team-based clash",           icon: Users,   color: "#FF4D2D", defaultPlayers: 4 },
+  squad: { label: "Squad Battle",  desc: "Team-based clash",           icon: Users,   color: "#A1FF4F", defaultPlayers: 4 },
   ffa:   { label: "Free-for-All",  desc: "Multi-player battle royale", icon: Crown,   color: "#fbbf24", defaultPlayers: 8 },
 };
 
@@ -105,13 +105,13 @@ function Tip({ text, wide }: { text: string; wide?: boolean }) {
         className={`pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 rounded-xl text-[11px] font-medium leading-snug opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-[200] text-center ${wide ? "w-64" : "w-48"}`}
         style={{
           background: "rgba(15,8,35,0.98)",
-          border: "1px solid rgba(255,77,45,0.35)",
+          border: "1px solid rgba(161,255,79,0.35)",
           color: "rgba(255,255,255,0.78)",
-          boxShadow: "0 8px 24px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,77,45,0.10)",
+          boxShadow: "0 8px 24px rgba(0,0,0,0.6), 0 0 0 1px rgba(161,255,79,0.10)",
         }}
       >
         {text}
-        <span className="absolute top-full left-1/2 -translate-x-1/2 -mt-px border-4 border-transparent" style={{ borderTopColor: "rgba(255,77,45,0.35)" }} />
+        <span className="absolute top-full left-1/2 -translate-x-1/2 -mt-px border-4 border-transparent" style={{ borderTopColor: "rgba(161,255,79,0.35)" }} />
       </span>
     </span>
   );
@@ -126,7 +126,7 @@ function ChipRow({ chips, active, onSelect, color = "purple" }: {
 }) {
   const activeStyle = color === "gold"
     ? { background: "rgba(251,191,36,0.22)", border: "1px solid rgba(251,191,36,0.55)", color: "#fbbf24" }
-    : { background: "rgba(255,77,45,0.22)", border: "1px solid rgba(255,77,45,0.55)", color: "#FF4D2D" };
+    : { background: "rgba(161,255,79,0.22)", border: "1px solid rgba(161,255,79,0.55)", color: "#A1FF4F" };
   const inactiveStyle = { background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.09)", color: "rgba(255,255,255,0.38)" };
   return (
     <div className="flex flex-wrap gap-1.5 mt-2">
@@ -265,7 +265,7 @@ function ReqBadge({ country, region, gender }: { country: string; region: string
       )}
       {hasGender && (
         <span className="inline-flex items-center gap-1 text-[9px] font-bold px-1.5 py-0.5 rounded-md"
-          style={{ background: "rgba(255,77,45,0.10)", border: "1px solid rgba(255,77,45,0.25)", color: "#FF4D2D" }}>
+          style={{ background: "rgba(161,255,79,0.10)", border: "1px solid rgba(161,255,79,0.25)", color: "#A1FF4F" }}>
           {GENDER_MAP[gender]?.icon} {GENDER_MAP[gender]?.label ?? gender}
         </span>
       )}
@@ -372,7 +372,7 @@ function TournamentCard({ tournament, currentUser }: { tournament: Tournament; c
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded-md" style={{ background: `${tcfg.color}18`, color: tcfg.color, border: `1px solid ${tcfg.color}35` }}>
                   {tcfg.label}
                 </span>
-                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md text-primary/80" style={{ background: "rgba(255,77,45,0.10)", border: "1px solid rgba(255,77,45,0.22)" }}>
+                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md text-primary/80" style={{ background: "rgba(161,255,79,0.10)", border: "1px solid rgba(161,255,79,0.22)" }}>
                   {tournament.gameName}
                 </span>
                 <span className="text-[10px] text-muted-foreground/45 flex items-center gap-1">
@@ -406,18 +406,18 @@ function TournamentCard({ tournament, currentUser }: { tournament: Tournament; c
             <span className="text-[11px] text-muted-foreground/50 font-medium flex items-center gap-1.5">
               <Users className="h-3 w-3" />
               {isOpen && !isFull
-                ? <><span className="font-extrabold" style={{ color: pct > 60 ? "#fbbf24" : "#FF4D2D" }}>{tournament.slotsLeft}</span> slots left</>
+                ? <><span className="font-extrabold" style={{ color: pct > 60 ? "#fbbf24" : "#A1FF4F" }}>{tournament.slotsLeft}</span> slots left</>
                 : isFull ? <span className="font-bold text-red-400/80">All slots filled</span>
                 : "Participants"}
             </span>
-            <span className="text-[12px] font-extrabold tabular-nums" style={{ color: pct >= 100 ? "#f87171" : pct > 60 ? "#fbbf24" : "#FF4D2D" }}>
+            <span className="text-[12px] font-extrabold tabular-nums" style={{ color: pct >= 100 ? "#f87171" : pct > 60 ? "#fbbf24" : "#A1FF4F" }}>
               {tournament.currentPlayers}/{tournament.maxPlayers}
             </span>
           </div>
           <div className="h-2.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
             <div className="h-full rounded-full transition-all duration-700" style={{
               width: `${pct}%`,
-              background: pct >= 100 ? "linear-gradient(90deg,#f87171,#ef4444)" : pct > 75 ? "linear-gradient(90deg,#f97316,#ea580c)" : pct > 40 ? "linear-gradient(90deg,#fbbf24,#f59e0b)" : "linear-gradient(90deg,#FF4D2D,#cc3a1e)",
+              background: pct >= 100 ? "linear-gradient(90deg,#f87171,#ef4444)" : pct > 75 ? "linear-gradient(90deg,#f97316,#ea580c)" : pct > 40 ? "linear-gradient(90deg,#fbbf24,#f59e0b)" : "linear-gradient(90deg,#A1FF4F,#88cc33)",
             }} />
           </div>
         </div>
@@ -442,7 +442,7 @@ function TournamentCard({ tournament, currentUser }: { tournament: Tournament; c
                 onClick={() => joinMutation.mutate()}
                 disabled={joinMutation.isPending || isFull}
                 className="flex-1 font-extrabold text-[13px] py-2.5 h-auto"
-                style={{ background: "linear-gradient(135deg,#FF4D2D,#cc3a1e)", boxShadow: "0 0 20px rgba(255,77,45,0.30)" }}
+                style={{ background: "linear-gradient(135deg,#A1FF4F,#88cc33)", boxShadow: "0 0 20px rgba(161,255,79,0.30)" }}
               >
                 {joinMutation.isPending
                   ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Sending…</>
@@ -466,7 +466,7 @@ function TournamentCard({ tournament, currentUser }: { tournament: Tournament; c
           )}
 
           {!currentUserId && isOpen && (
-            <Button asChild className="flex-1 font-bold py-2.5 h-auto" style={{ background: "linear-gradient(135deg,#FF4D2D,#cc3a1e)" }}>
+            <Button asChild className="flex-1 font-bold py-2.5 h-auto" style={{ background: "linear-gradient(135deg,#A1FF4F,#88cc33)" }}>
               <Link href="/login"><Zap className="h-4 w-4 mr-1.5" />Log in to Join</Link>
             </Button>
           )}
@@ -494,7 +494,7 @@ function TournamentCard({ tournament, currentUser }: { tournament: Tournament; c
 
           {isHost && (
             <span className="flex items-center gap-1.5 px-3 py-2.5 rounded-xl text-[12px] font-bold"
-              style={{ background: "rgba(255,77,45,0.10)", border: "1px solid rgba(255,77,45,0.28)", color: "#FF4D2D" }}>
+              style={{ background: "rgba(161,255,79,0.10)", border: "1px solid rgba(161,255,79,0.28)", color: "#A1FF4F" }}>
               <Shield className="h-3.5 w-3.5" /> Your Tournament
             </span>
           )}
@@ -592,14 +592,14 @@ function CreateTournamentForm({ onClose, onSuccess }: { onClose: () => void; onS
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
       <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl border"
-        style={{ background: "rgba(8,4,18,0.98)", borderColor: "rgba(255,77,45,0.40)", boxShadow: "0 0 60px rgba(255,77,45,0.20), 0 24px 80px rgba(0,0,0,0.8)" }}>
+        style={{ background: "rgba(8,4,18,0.98)", borderColor: "rgba(161,255,79,0.40)", boxShadow: "0 0 60px rgba(161,255,79,0.20), 0 24px 80px rgba(0,0,0,0.8)" }}>
 
         {/* Header */}
         <div className="sticky top-0 z-10 flex items-center justify-between px-6 py-4 border-b"
-          style={{ background: "rgba(8,4,18,0.98)", borderColor: "rgba(255,77,45,0.20)" }}>
+          style={{ background: "rgba(8,4,18,0.98)", borderColor: "rgba(161,255,79,0.20)" }}>
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-xl flex items-center justify-center"
-              style={{ background: "linear-gradient(135deg,rgba(255,77,45,0.30),rgba(255,77,45,0.12))", border: "1px solid rgba(255,77,45,0.50)" }}>
+              style={{ background: "linear-gradient(135deg,rgba(161,255,79,0.30),rgba(161,255,79,0.12))", border: "1px solid rgba(161,255,79,0.50)" }}>
               <Trophy className="h-5 w-5 text-primary" />
             </div>
             <div>
@@ -688,7 +688,7 @@ function CreateTournamentForm({ onClose, onSuccess }: { onClose: () => void; onS
             <p className="text-[11px] text-muted-foreground/40 mb-3">
               Only players matching these requirements can join. Set to "Any" for open access.
             </p>
-            <div className="space-y-3 p-4 rounded-xl" style={{ background: "rgba(255,77,45,0.04)", border: "1px solid rgba(255,77,45,0.14)" }}>
+            <div className="space-y-3 p-4 rounded-xl" style={{ background: "rgba(161,255,79,0.04)", border: "1px solid rgba(161,255,79,0.14)" }}>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <p className="text-[10px] font-bold text-muted-foreground/50 mb-1.5 flex items-center gap-1">
@@ -749,9 +749,9 @@ function CreateTournamentForm({ onClose, onSuccess }: { onClose: () => void; onS
                 return (
                   <button key={p.key} type="button" onClick={() => setDistPreset(p.key)}
                     className="py-3 px-2 rounded-xl text-center transition-all duration-150 active:scale-95 space-y-1.5"
-                    style={active ? { background: "rgba(255,77,45,0.16)", border: "1.5px solid rgba(255,77,45,0.55)" }
+                    style={active ? { background: "rgba(161,255,79,0.16)", border: "1.5px solid rgba(161,255,79,0.55)" }
                       : { background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.07)" }}>
-                    <p className="text-[11px] font-extrabold" style={{ color: active ? "#FF4D2D" : "rgba(255,255,255,0.45)" }}>{p.label}</p>
+                    <p className="text-[11px] font-extrabold" style={{ color: active ? "#A1FF4F" : "rgba(255,255,255,0.45)" }}>{p.label}</p>
                     {p.key !== "custom" && (
                       <div className="flex gap-px h-2 rounded-sm overflow-hidden mx-2">
                         {p.first > 0 && <div style={{ width: `${p.first}%`, background: "#fbbf24" }} />}
@@ -760,17 +760,17 @@ function CreateTournamentForm({ onClose, onSuccess }: { onClose: () => void; onS
                       </div>
                     )}
                     {p.key !== "custom"
-                      ? <p className="text-[9px]" style={{ color: active ? "rgba(255,77,45,0.65)" : "rgba(255,255,255,0.22)" }}>
+                      ? <p className="text-[9px]" style={{ color: active ? "rgba(161,255,79,0.65)" : "rgba(255,255,255,0.22)" }}>
                           {[p.first > 0 && `🥇${p.first}%`, p.second > 0 && `🥈${p.second}%`, p.third > 0 && `🥉${p.third}%`].filter(Boolean).join(" ")}
                         </p>
-                      : <p className="text-[9px]" style={{ color: active ? "rgba(255,77,45,0.65)" : "rgba(255,255,255,0.22)" }}>set your own %</p>}
+                      : <p className="text-[9px]" style={{ color: active ? "rgba(161,255,79,0.65)" : "rgba(255,255,255,0.22)" }}>set your own %</p>}
                   </button>
                 );
               })}
             </div>
             <DistBar first={dist.first} second={dist.second} third={dist.third} net={netPrizeEst} />
             {distPreset === "custom" && (
-              <div className="mt-3 p-4 rounded-xl space-y-3" style={{ background: "rgba(255,77,45,0.05)", border: "1px solid rgba(255,77,45,0.15)" }}>
+              <div className="mt-3 p-4 rounded-xl space-y-3" style={{ background: "rgba(161,255,79,0.05)", border: "1px solid rgba(161,255,79,0.15)" }}>
                 {[
                   { emoji: "🥇", label: "1st Place", val: customFirst, set: setCustomFirst, color: "#fbbf24" },
                   { emoji: "🥈", label: "2nd Place", val: customSecond, set: setCustomSecond, color: "#94a3b8" },
@@ -823,7 +823,7 @@ function CreateTournamentForm({ onClose, onSuccess }: { onClose: () => void; onS
           {/* Submit */}
           <Button className="w-full font-extrabold text-[14px] py-3 h-auto" disabled={!canSubmit}
             onClick={() => createMutation.mutate()}
-            style={{ background: "linear-gradient(135deg,#FF4D2D,#cc3a1e)", boxShadow: "0 0 24px rgba(255,77,45,0.35)" }}>
+            style={{ background: "linear-gradient(135deg,#A1FF4F,#88cc33)", boxShadow: "0 0 24px rgba(161,255,79,0.35)" }}>
             {createMutation.isPending
               ? <><Loader2 className="h-5 w-5 mr-2 animate-spin" />Creating Tournament…</>
               : <><Trophy className="h-5 w-5 mr-2" />Host This Tournament — Lock in ${prize > 0 ? prize.toFixed(0) : "0"} Prize Pool</>}
@@ -895,7 +895,7 @@ export default function TournamentsPage() {
 
       {/* Hero header */}
       <div className="rounded-3xl p-6 sm:p-8 relative overflow-hidden"
-        style={{ background: "linear-gradient(135deg,rgba(255,77,45,0.12) 0%,rgba(251,191,36,0.08) 50%,rgba(0,0,0,0.5) 100%)", border: "1px solid rgba(255,77,45,0.25)", boxShadow: "0 0 50px rgba(255,77,45,0.10)" }}>
+        style={{ background: "linear-gradient(135deg,rgba(161,255,79,0.12) 0%,rgba(251,191,36,0.08) 50%,rgba(0,0,0,0.5) 100%)", border: "1px solid rgba(161,255,79,0.25)", boxShadow: "0 0 50px rgba(161,255,79,0.10)" }}>
         <Trophy className="absolute -right-4 -top-4 h-32 w-32 text-yellow-400/05" />
         <div className="flex items-start justify-between gap-4">
           <div>
@@ -954,12 +954,12 @@ export default function TournamentsPage() {
             {FILTERS.map(({ value, label, count }) => (
               <button key={value} onClick={() => setFilter(value)}
                 className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-[11px] font-bold transition-all duration-150 active:scale-95 whitespace-nowrap"
-                style={filter === value ? { background: "linear-gradient(135deg,rgba(255,77,45,0.28),rgba(255,77,45,0.18))", border: "1px solid rgba(255,77,45,0.55)", color: "#FF4D2D" }
+                style={filter === value ? { background: "linear-gradient(135deg,rgba(161,255,79,0.28),rgba(161,255,79,0.18))", border: "1px solid rgba(161,255,79,0.55)", color: "#A1FF4F" }
                   : { color: "rgba(255,255,255,0.40)", border: "1px solid transparent" }}>
                 {label}
                 {count !== undefined && count > 0 && (
                   <span className="text-[9px] font-black px-1 rounded-full"
-                    style={filter === value ? { background: "rgba(255,77,45,0.35)", color: "#e9d5ff" } : { background: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.35)" }}>
+                    style={filter === value ? { background: "rgba(161,255,79,0.35)", color: "#e9d5ff" } : { background: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.35)" }}>
                     {count}
                   </span>
                 )}
@@ -972,7 +972,7 @@ export default function TournamentsPage() {
           {SORT_OPTIONS.map((o) => (
             <button key={o.value} onClick={() => setSort(o.value)}
               className="px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all"
-              style={sort === o.value ? { background: "rgba(255,77,45,0.18)", border: "1px solid rgba(255,77,45,0.40)", color: "#FF4D2D" }
+              style={sort === o.value ? { background: "rgba(161,255,79,0.18)", border: "1px solid rgba(161,255,79,0.40)", color: "#A1FF4F" }
                 : { background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.35)" }}>
               {o.label}
             </button>

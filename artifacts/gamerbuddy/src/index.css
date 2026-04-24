@@ -86,7 +86,7 @@
   --radius-xl: calc(var(--radius) + 4px);
 }
 
-/* ── OBSIDIAN EMBER THEME ── */
+/* ── INK GAMES VIBE THEME ── */
 :root {
   --button-outline: rgba(255,255,255, .10);
   --badge-outline: rgba(255,255,255, .06);
@@ -99,62 +99,62 @@
   --text-on-surface: rgba(255, 255, 255, 1);
   --text-subdued: rgba(255, 255, 255, 0.60);
   --text-dim: rgba(255, 255, 255, 0.32);
-  --glass-bg: rgba(255, 77, 45, 0.04);
-  --glass-border: rgba(255, 77, 45, 0.07);
-  --glass-btn-bg: rgba(255, 77, 45, 0.06);
-  --glass-btn-border: rgba(255, 77, 45, 0.14);
-  --surface-dark: linear-gradient(145deg, rgba(31,24,18,0.97) 0%, rgba(10,8,8,0.99) 100%);
-  --surface-dark-border: rgba(255, 77, 45, 0.07);
-  --icon-glass-bg: rgba(255, 77, 45, 0.05);
+  --glass-bg: rgba(161, 255, 79, 0.03);
+  --glass-border: rgba(161, 255, 79, 0.07);
+  --glass-btn-bg: rgba(255, 59, 92, 0.06);
+  --glass-btn-border: rgba(255, 59, 92, 0.14);
+  --surface-dark: linear-gradient(145deg, rgba(17,24,32,0.97) 0%, rgba(10,14,17,0.99) 100%);
+  --surface-dark-border: rgba(161, 255, 79, 0.06);
+  --icon-glass-bg: rgba(161, 255, 79, 0.05);
 
-  /* Obsidian Ember — Near-black warm background */
-  --background: 0 11% 4%;       /* #0A0808 */
-  --foreground: 41 70% 86%;     /* #F4E4C1 ivory */
+  /* Ink Games Vibe — Near-black cool background */
+  --background: 206 26% 5%;     /* #0A0E11 */
+  --foreground: 240 2% 90%;      /* #E5E5E6 cool white */
 
-  --border: 28 25% 18%;
+  --border: 210 20% 16%;
 
-  --card: 28 26% 10%;            /* #1F1812 */
-  --card-foreground: 41 70% 86%;
-  --card-border: 28 20% 16%;
+  --card: 208 24% 8%;             /* #111820 */
+  --card-foreground: 240 2% 90%;
+  --card-border: 210 18% 14%;
 
-  --sidebar: 0 15% 4%;           /* darker than bg */
-  --sidebar-foreground: 41 70% 86%;
-  --sidebar-border: 28 20% 12%;
-  --sidebar-primary: 9 100% 59%;    /* #FF4D2D ember */
-  --sidebar-primary-foreground: 0 20% 6%;
-  --sidebar-accent: 28 25% 10%;
-  --sidebar-accent-foreground: 41 70% 86%;
-  --sidebar-ring: 9 100% 59%;
+  --sidebar: 208 30% 4%;          /* darker than bg */
+  --sidebar-foreground: 240 2% 90%;
+  --sidebar-border: 210 18% 10%;
+  --sidebar-primary: 350 100% 62%;  /* #FF3B5C crimson */
+  --sidebar-primary-foreground: 206 26% 5%;
+  --sidebar-accent: 208 22% 10%;
+  --sidebar-accent-foreground: 240 2% 90%;
+  --sidebar-ring: 350 100% 62%;
 
-  --popover: 28 30% 7%;
-  --popover-foreground: 41 70% 86%;
-  --popover-border: 28 20% 14%;
+  --popover: 210 28% 6%;
+  --popover-foreground: 240 2% 90%;
+  --popover-border: 210 18% 12%;
 
-  /* Ember Orange-Red — Primary Accent (#FF4D2D) */
-  --primary: 9 100% 59%;
-  --primary-foreground: 0 20% 6%;
+  /* Crimson CTA — Primary Accent (#FF3B5C) */
+  --primary: 350 100% 62%;
+  --primary-foreground: 206 26% 5%;
 
-  /* Burnt Copper — Secondary */
-  --secondary: 28 26% 10%;
-  --secondary-foreground: 41 70% 86%;
+  /* Dark Panel — Secondary */
+  --secondary: 208 25% 10%;
+  --secondary-foreground: 240 2% 90%;
 
-  --muted: 28 20% 8%;
-  --muted-foreground: 38 30% 62%;
+  --muted: 208 20% 8%;
+  --muted-foreground: 210 15% 62%;
 
-  --accent: 28 30% 12%;
-  --accent-foreground: 41 70% 86%;
+  --accent: 208 25% 12%;
+  --accent-foreground: 240 2% 90%;
 
   --destructive: 0 84% 60%;
-  --destructive-foreground: 41 70% 86%;
+  --destructive-foreground: 240 2% 90%;
 
-  --input: 28 25% 10%;
-  --ring: 9 100% 59%;
+  --input: 208 22% 10%;
+  --ring: 350 100% 62%;
 
-  --chart-1: 9 100% 59%;         /* ember #FF4D2D */
-  --chart-2: 38 47% 60%;         /* gold #C9A66B */
+  --chart-1: 92 100% 66%;        /* neon green #A1FF4F */
+  --chart-2: 350 100% 62%;       /* crimson #FF3B5C */
   --chart-3: 160 100% 45%;
-  --chart-4: 28 50% 37%;         /* copper #8C5A2E */
-  --chart-5: 9 100% 59%;         /* ember #FF4D2D */
+  --chart-4: 254 100% 63%;       /* purple #6E44FF */
+  --chart-5: 254 100% 63%;       /* purple #6E44FF */
 
   --app-font-sans: 'Space Mono', 'Inter', monospace, sans-serif;
   --app-font-serif: Georgia, serif;
@@ -292,7 +292,7 @@
 :root:not(.dark) .text-cyan-400\/55,
 :root:not(.dark) .text-cyan-400\/65,
 :root:not(.dark) .text-cyan-400\/60 {
-  color: hsl(9 90% 42%);
+  color: hsl(92 90% 40%);
 }
 :root:not(.dark) .text-green-400,
 :root:not(.dark) .text-green-400\/90,
@@ -305,7 +305,7 @@
 }
 :root:not(.dark) .text-purple-400,
 :root:not(.dark) .text-purple-400\/80 {
-  color: hsl(28 50% 40%);
+  color: hsl(210 25% 38%);
 }
 /* Bare hover:text-white has no dark backing in light mode — text becomes invisible.
    Override it to foreground color so it stays readable. */
@@ -326,7 +326,7 @@
 :root:not(.dark) .bg-red-500\/5    { background-color: hsl(0 84% 60% / 0.10); }
 :root:not(.dark) .bg-red-500\/6    { background-color: hsl(0 84% 60% / 0.10); }
 :root:not(.dark) .bg-red-500\/8    { background-color: hsl(0 84% 60% / 0.10); }
-:root:not(.dark) .bg-cyan-500\/5   { background-color: hsl(9 90% 42% / 0.08); }
+:root:not(.dark) .bg-cyan-500\/5   { background-color: hsl(92 90% 45% / 0.08); }
 :root:not(.dark) .bg-green-500\/5  { background-color: hsl(142 76% 36% / 0.10); }
 :root:not(.dark) .fill-yellow-400  { fill: hsl(42 80% 35%); }
 :root:not(.dark) .fill-star        { fill: hsl(42 80% 42%); }
@@ -348,7 +348,7 @@
   box-shadow: 0 2px 8px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.04);
 }
 :root:not(.dark) .group.rounded-2xl.border.overflow-hidden:hover {
-  box-shadow: 0 8px 28px rgba(255,77,45,0.14), 0 0 0 1px rgba(255,77,45,0.10);
+  box-shadow: 0 8px 28px rgba(161,255,79,0.14), 0 0 0 1px rgba(161,255,79,0.10);
 }
 
 /* ── Low-opacity muted text — boost for light-mode readability ── */
@@ -384,16 +384,16 @@
 
 /* ── Primary color tinted backgrounds ── */
 :root:not(.dark) .bg-primary\/5  { background-color: hsl(234 90% 65% / 0.08); }
-:root:not(.dark) .bg-primary\/10 { background-color: hsl(9 90% 42% / 0.10); }
-:root:not(.dark) .bg-primary\/15 { background-color: hsl(9 90% 42% / 0.12); }
-:root:not(.dark) .bg-primary\/20 { background-color: hsl(9 90% 42% / 0.14); }
+:root:not(.dark) .bg-primary\/10 { background-color: hsl(92 90% 45% / 0.10); }
+:root:not(.dark) .bg-primary\/15 { background-color: hsl(92 90% 45% / 0.12); }
+:root:not(.dark) .bg-primary\/20 { background-color: hsl(92 90% 45% / 0.14); }
 
 /* ── Status/skill tag backgrounds — more visible on white ── */
 :root:not(.dark) .bg-green-500\/10  { background-color: hsl(142 60% 36% / 0.14); }
 :root:not(.dark) .bg-green-500\/25  { background-color: hsl(142 60% 36% / 0.20); }
 :root:not(.dark) .bg-green-500\/30  { background-color: hsl(142 60% 36% / 0.22); }
-:root:not(.dark) .bg-cyan-500\/10   { background-color: hsl(9 90% 42% / 0.12); }
-:root:not(.dark) .bg-cyan-500\/20   { background-color: hsl(9 90% 42% / 0.14); }
+:root:not(.dark) .bg-cyan-500\/10   { background-color: hsl(92 90% 45% / 0.12); }
+:root:not(.dark) .bg-cyan-500\/20   { background-color: hsl(92 90% 45% / 0.14); }
 
 /* ── Navigation / header elements ── */
 :root:not(.dark) .bg-background\/80 { background-color: hsl(var(--background) / 0.95); }
@@ -410,67 +410,77 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   OBSIDIAN EMBER — Tailwind warm class remapping
+   INK GAMES VIBE — Tailwind neon class remapping
    Remap all Tailwind cyan classes to the new palette in dark mode.
-   text-cyan-* → #FF4D2D (#FF4D2D teal-cyan highlight)
-   bg-cyan-*   → #FF4D2D teal tinted backgrounds
-   border-cyan-* → #FF4D2D teal tinted borders
+   text-cyan-* → #A1FF4F (#A1FF4F teal-cyan highlight)
+   bg-cyan-*   → #A1FF4F teal tinted backgrounds
+   border-cyan-* → #A1FF4F teal tinted borders
    ═══════════════════════════════════════════════════════════════════ */
 .dark .text-cyan-400,
 .dark .text-cyan-400\/70,
 .dark .text-cyan-400\/60,
 .dark .text-cyan-400\/65,
 .dark .text-cyan-400\/55,
-.dark .text-cyan-400\/80 { color: #FF4D2D; }
+.dark .text-cyan-400\/80 { color: #A1FF4F; }
 
 .dark .text-cyan-300,
 .dark .text-cyan-300\/80,
 .dark .text-cyan-300\/70,
-.dark .text-cyan-300\/45 { color: #FF4D2D; }
+.dark .text-cyan-300\/45 { color: #A1FF4F; }
 
-.dark .text-cyan-200\/70 { color: rgba(255,77,45,0.70); }
+.dark .text-cyan-200\/70 { color: rgba(161,255,79,0.70); }
 
-.dark .bg-cyan-500\/5   { background-color: rgba(255,77,45,0.06); }
-.dark .bg-cyan-500\/10  { background-color: rgba(255,77,45,0.09); }
-.dark .bg-cyan-500\/20  { background-color: rgba(255,77,45,0.13); }
-.dark .bg-cyan-500\/25  { background-color: rgba(255,77,45,0.16); }
+.dark .bg-cyan-500\/5   { background-color: rgba(161,255,79,0.06); }
+.dark .bg-cyan-500\/10  { background-color: rgba(161,255,79,0.09); }
+.dark .bg-cyan-500\/20  { background-color: rgba(161,255,79,0.13); }
+.dark .bg-cyan-500\/25  { background-color: rgba(161,255,79,0.16); }
 
-.dark .border-cyan-500\/10  { border-color: rgba(255,77,45,0.10); }
-.dark .border-cyan-500\/15  { border-color: rgba(255,77,45,0.15); }
-.dark .border-cyan-500\/20  { border-color: rgba(255,77,45,0.20); }
-.dark .border-cyan-500\/25  { border-color: rgba(255,77,45,0.25); }
-.dark .border-cyan-500\/30  { border-color: rgba(255,77,45,0.30); }
-.dark .border-cyan-500\/40  { border-color: rgba(255,77,45,0.40); }
-.dark .border-cyan-400\/25  { border-color: rgba(255,77,45,0.25); }
-.dark .border-cyan-400\/30  { border-color: rgba(255,77,45,0.30); }
-.dark .border-cyan-400\/50  { border-color: rgba(255,77,45,0.50); }
+.dark .border-cyan-500\/10  { border-color: rgba(161,255,79,0.10); }
+.dark .border-cyan-500\/15  { border-color: rgba(161,255,79,0.15); }
+.dark .border-cyan-500\/20  { border-color: rgba(161,255,79,0.20); }
+.dark .border-cyan-500\/25  { border-color: rgba(161,255,79,0.25); }
+.dark .border-cyan-500\/30  { border-color: rgba(161,255,79,0.30); }
+.dark .border-cyan-500\/40  { border-color: rgba(161,255,79,0.40); }
+.dark .border-cyan-400\/25  { border-color: rgba(161,255,79,0.25); }
+.dark .border-cyan-400\/30  { border-color: rgba(161,255,79,0.30); }
+.dark .border-cyan-400\/50  { border-color: rgba(161,255,79,0.50); }
 
 /* ═══════════════════════════════════════════════════════════════════
-   OBSIDIAN EMBER — Glow & forge effects
+   INK GAMES VIBE — Glow & neon effects
+   Neon green (#A1FF4F) for logo/highlights, crimson (#FF3B5C) for CTAs
    ═══════════════════════════════════════════════════════════════════ */
 
-/* Navbar logo: neon glow on the P4H icon and brand text */
-.dark .navbar-logo svg {
-  filter: drop-shadow(0 0 6px rgba(255,77,45,0.55)) drop-shadow(0 0 14px rgba(255,77,45,0.25));
-}
-.dark .navbar-logo .brand-text {
-  text-shadow: 0 0 10px rgba(255,77,45,0.55), 0 0 24px rgba(255,77,45,0.22);
+/* text-primary → neon green (overrides crimson CSS variable for text uses) */
+.dark .text-primary,
+.dark [class*="text-primary"]:not([class*="foreground"]) {
+  color: #A1FF4F;
 }
 
-/* Primary button — vibrant punch with electric glow */
+/* Navbar logo: neon green glow */
+.dark .navbar-logo svg {
+  filter: drop-shadow(0 0 6px rgba(161,255,79,0.60)) drop-shadow(0 0 16px rgba(161,255,79,0.28));
+}
+.dark .navbar-logo .brand-text {
+  text-shadow: 0 0 10px rgba(161,255,79,0.60), 0 0 28px rgba(161,255,79,0.25);
+}
+
+/* Primary button — crimson punch with crimson glow */
 .dark .bg-primary,
 .dark [class*="bg-primary"]:not([class*="foreground"]):not([class*="muted"]) {
-  box-shadow: 0 0 12px rgba(255,77,45,0.40), 0 2px 16px rgba(255,77,45,0.25);
+  background-color: #FF3B5C !important;
+  color: #0A0E11 !important;
+  box-shadow: 0 0 12px rgba(255,59,92,0.45), 0 2px 16px rgba(255,59,92,0.28);
 }
 .dark .bg-primary:hover,
 .dark [class*="bg-primary"]:not([class*="foreground"]):not([class*="muted"]):hover {
-  box-shadow: 0 0 18px rgba(255,77,45,0.55), 0 4px 24px rgba(255,77,45,0.35);
+  background-color: #e83352 !important;
+  box-shadow: 0 0 20px rgba(255,59,92,0.60), 0 4px 28px rgba(255,59,92,0.38);
 }
 
-/* Card hover shadow — electric blue instead of neutral */
+/* Card hover shadow — neon green subtle */
 .dark .card-hover:hover,
 .dark [class*="hover:shadow"]:hover {
-  box-shadow: 0 8px 32px rgba(255,77,45,0.18), 0 2px 8px rgba(0,0,0,0.40);
+  box-shadow: 0 8px 32px rgba(161,255,79,0.14), 0 2px 8px rgba(0,0,0,0.50);
 }
 
 @keyframes shimmer {

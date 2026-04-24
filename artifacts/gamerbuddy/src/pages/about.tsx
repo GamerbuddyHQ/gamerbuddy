@@ -69,7 +69,7 @@ export default function About() {
         <div className="flex items-center gap-3">
           <div
             className="h-12 w-12 rounded-2xl flex items-center justify-center border border-primary/30"
-            style={{ background: "linear-gradient(135deg, rgba(255,77,45,0.2) 0%, rgba(88,28,135,0.1) 100%)" }}
+            style={{ background: "linear-gradient(135deg, rgba(161,255,79,0.2) 0%, rgba(88,28,135,0.1) 100%)" }}
           >
             <Gamepad2 className="h-6 w-6 text-primary" />
           </div>
@@ -86,19 +86,19 @@ export default function About() {
         <div
           className="rounded-2xl border p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4"
           style={{
-            background: "linear-gradient(135deg, rgba(255,77,45,0.07) 0%, rgba(255,77,45,0.07) 100%)",
-            borderColor: "rgba(255,77,45,0.25)",
+            background: "linear-gradient(135deg, rgba(161,255,79,0.07) 0%, rgba(161,255,79,0.07) 100%)",
+            borderColor: "rgba(161,255,79,0.25)",
           }}
         >
           <div className="flex items-center gap-3 flex-1 min-w-0">
             <div
               className="h-10 w-10 rounded-xl flex items-center justify-center shrink-0"
-              style={{ background: "rgba(255,77,45,0.15)", border: "1px solid rgba(255,77,45,0.30)" }}
+              style={{ background: "rgba(161,255,79,0.15)", border: "1px solid rgba(161,255,79,0.30)" }}
             >
-              <Heart className="h-5 w-5" style={{ color: "#FF4D2D" }} />
+              <Heart className="h-5 w-5" style={{ color: "#A1FF4F" }} />
             </div>
             <div>
-              <p className="text-xs font-black uppercase tracking-widest mb-0.5" style={{ color: "#FF4D2D" }}>
+              <p className="text-xs font-black uppercase tracking-widest mb-0.5" style={{ color: "#A1FF4F" }}>
                 Founder's Note
               </p>
               <p className="text-sm text-muted-foreground leading-snug">
@@ -110,8 +110,8 @@ export default function About() {
             href="/our-story"
             className="shrink-0 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-black text-white whitespace-nowrap transition-all hover:scale-105 active:scale-95"
             style={{
-              background: "linear-gradient(135deg, #FF4D2D 0%, #cc3a1e 60%, #FF4D2D 100%)",
-              boxShadow: "0 4px 20px rgba(255,77,45,0.35), 0 0 0 1px rgba(255,77,45,0.20)",
+              background: "linear-gradient(135deg, #A1FF4F 0%, #88cc33 60%, #A1FF4F 100%)",
+              boxShadow: "0 4px 20px rgba(161,255,79,0.35), 0 0 0 1px rgba(161,255,79,0.20)",
             }}
           >
             <Heart className="h-4 w-4" />
@@ -197,7 +197,7 @@ export default function About() {
                 <div className="flex flex-col items-center gap-1.5 shrink-0 pt-0.5">
                   <div
                     className="h-8 w-8 rounded-xl flex items-center justify-center border border-primary/25 font-black text-sm text-primary"
-                    style={{ background: "rgba(255,77,45,0.1)" }}
+                    style={{ background: "rgba(161,255,79,0.1)" }}
                   >
                     {section.number}
                   </div>
@@ -218,14 +218,14 @@ export default function About() {
       {/* ── Community Guidelines & Behavior Rules ── */}
       <div
         className="rounded-2xl border p-5 space-y-5"
-        style={{ background: "rgba(255,77,45,0.03)", borderColor: "rgba(255,77,45,0.15)" }}
+        style={{ background: "rgba(161,255,79,0.03)", borderColor: "rgba(161,255,79,0.15)" }}
       >
         <div className="flex items-start gap-4">
           {/* Icon */}
           <div className="flex flex-col items-center gap-1.5 shrink-0 pt-0.5">
             <div
               className="h-8 w-8 rounded-xl flex items-center justify-center border border-cyan-400/30"
-              style={{ background: "rgba(255,77,45,0.1)" }}
+              style={{ background: "rgba(161,255,79,0.1)" }}
             >
               <BookOpen className="h-4 w-4 text-cyan-400" />
             </div>
@@ -327,21 +327,21 @@ export default function About() {
       <div
         className="rounded-2xl border p-6 sm:p-8 flex flex-col sm:flex-row items-center gap-6"
         style={{
-          background: "linear-gradient(135deg, rgba(255,77,45,0.07) 0%, rgba(255,77,45,0.04) 100%)",
-          borderColor: "rgba(255,77,45,0.22)",
-          boxShadow: "0 0 30px rgba(255,77,45,0.08)",
+          background: "linear-gradient(135deg, rgba(161,255,79,0.07) 0%, rgba(161,255,79,0.04) 100%)",
+          borderColor: "rgba(161,255,79,0.22)",
+          boxShadow: "0 0 30px rgba(161,255,79,0.08)",
         }}
       >
         <div
           className="shrink-0 h-14 w-14 rounded-2xl border flex items-center justify-center"
-          style={{ background: "rgba(255,77,45,0.12)", borderColor: "rgba(255,77,45,0.30)" }}
+          style={{ background: "rgba(161,255,79,0.12)", borderColor: "rgba(161,255,79,0.30)" }}
         >
-          <svg viewBox="0 0 24 24" fill="none" stroke="#FF4D2D" strokeWidth={2.2} className="h-7 w-7">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#A1FF4F" strokeWidth={2.2} className="h-7 w-7">
             <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" />
           </svg>
         </div>
         <div className="flex-1 text-center sm:text-left space-y-1.5">
-          <p className="text-[11px] font-black uppercase tracking-widest" style={{ color: "#FF4D2D" }}>
+          <p className="text-[11px] font-black uppercase tracking-widest" style={{ color: "#A1FF4F" }}>
             Questions? We've Got You
           </p>
           <h3 className="text-lg sm:text-xl font-black text-foreground">
@@ -357,8 +357,8 @@ export default function About() {
           rel="noopener noreferrer"
           className="shrink-0 inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm text-white transition-all hover:scale-105 active:scale-95"
           style={{
-            background: "linear-gradient(135deg, #FF4D2D 0%, #cc3a1e 60%, #FF4D2D 100%)",
-            boxShadow: "0 4px 24px rgba(255,77,45,0.30)",
+            background: "linear-gradient(135deg, #A1FF4F 0%, #88cc33 60%, #A1FF4F 100%)",
+            boxShadow: "0 4px 24px rgba(161,255,79,0.30)",
           }}
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} className="h-4 w-4 shrink-0">

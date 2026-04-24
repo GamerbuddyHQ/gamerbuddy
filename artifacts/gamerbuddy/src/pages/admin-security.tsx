@@ -177,9 +177,9 @@ function Section({
 
 /* ── TX type pill ────────────────────────────────────────────────────────── */
 const TX_COLORS: Record<string, string> = {
-  deposit:      "#FF4D2D",
+  deposit:      "#A1FF4F",
   withdrawal:   "#f97316",
-  escrow_held:  "#FF4D2D",
+  escrow_held:  "#A1FF4F",
   payout:       "#22c55e",
   gift:         "#ec4899",
   request_fee:  "#eab308",
@@ -199,7 +199,7 @@ function TxPill({ type }: { type: string }) {
 }
 
 function WalletPill({ wallet }: { wallet: string }) {
-  const color = wallet === "hiring" ? "#FF4D2D" : "#FF4D2D";
+  const color = wallet === "hiring" ? "#A1FF4F" : "#A1FF4F";
   return (
     <span
       className="text-[10px] font-semibold px-1.5 py-0.5 rounded uppercase tracking-wide"
@@ -679,7 +679,7 @@ export default function AdminSecurity() {
           <div>
             <div className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground/50 mb-3">User Overview</div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <StatCard icon={Users}      label="Total Users"         value={data.users.total}    sub="All registered accounts"   color="#FF4D2D" />
+              <StatCard icon={Users}      label="Total Users"         value={data.users.total}    sub="All registered accounts"   color="#A1FF4F" />
               <StatCard icon={BadgeCheck} label="Verified Users"      value={data.users.verified} sub="ID verified accounts"      color="#22c55e" />
               <StatCard icon={User}       label="Pending Verification" value={data.users.pending} sub="Awaiting ID review"        color="#f59e0b" />
               <StatCard icon={UserX}      label="Banned Users"        value={data.users.banned}   sub="Community banned accounts" color="#ef4444" />
@@ -692,7 +692,7 @@ export default function AdminSecurity() {
               <StatCard icon={Lock}          label="Locked Accounts" value={lockedCount}  sub={lockedCount ? "Currently locked out" : "All clear"} color="#ef4444" />
               <StatCard icon={AlertTriangle} label="Failed Logins"   value={warningCount} sub="Accounts with attempts"  color="#f59e0b" />
               <StatCard icon={Flag}          label="User Reports"    value={reportCount}  sub="Total reports filed"     color="#f97316" />
-              <StatCard icon={TrendingUp}    label="Large Txns"      value={largeTxCount} sub="Transactions ≥ $500"     color="#FF4D2D" />
+              <StatCard icon={TrendingUp}    label="Large Txns"      value={largeTxCount} sub="Transactions ≥ $500"     color="#A1FF4F" />
             </div>
           </div>
         </>
@@ -847,7 +847,7 @@ export default function AdminSecurity() {
           icon={Activity}
           title="Wallet Transaction Log"
           count={txTotal}
-          color="#FF4D2D"
+          color="#A1FF4F"
           defaultOpen={false}
         >
           <p className="text-xs text-muted-foreground/50 mb-1">
@@ -860,14 +860,14 @@ export default function AdminSecurity() {
       {/* ── Platform Earnings link ── */}
       <div
         className="rounded-2xl border px-6 py-5 flex items-center justify-between gap-4"
-        style={{ borderColor: "rgba(255,77,45,0.25)", background: "rgba(255,77,45,0.04)" }}
+        style={{ borderColor: "rgba(161,255,79,0.25)", background: "rgba(161,255,79,0.04)" }}
       >
         <div className="flex items-center gap-3">
           <div
             className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
-            style={{ background: "rgba(255,77,45,0.12)", border: "1px solid rgba(255,77,45,0.25)" }}
+            style={{ background: "rgba(161,255,79,0.12)", border: "1px solid rgba(161,255,79,0.25)" }}
           >
-            <DollarSign className="h-5 w-5" style={{ color: "#FF4D2D" }} />
+            <DollarSign className="h-5 w-5" style={{ color: "#A1FF4F" }} />
           </div>
           <div>
             <div className="text-sm font-extrabold text-foreground">Platform Earnings</div>
@@ -879,7 +879,7 @@ export default function AdminSecurity() {
         <a
           href="/admin/platform-earnings"
           className="shrink-0 inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold uppercase tracking-widest border transition-all hover:opacity-80"
-          style={{ borderColor: "rgba(255,77,45,0.40)", color: "#FF4D2D", background: "rgba(255,77,45,0.08)" }}
+          style={{ borderColor: "rgba(161,255,79,0.40)", color: "#A1FF4F", background: "rgba(161,255,79,0.08)" }}
         >
           View Earnings →
         </a>
