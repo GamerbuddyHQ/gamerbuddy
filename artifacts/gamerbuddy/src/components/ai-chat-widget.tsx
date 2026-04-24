@@ -428,13 +428,13 @@ export function AIChatWidget() {
     return (
       <button
         onClick={() => setOpen(true)}
-        className="fixed bottom-5 right-5 z-50 flex items-center gap-2.5 rounded-full px-4 py-3 font-bold text-sm text-white shadow-2xl transition-all hover:scale-105 active:scale-95"
-        style={{ background: "linear-gradient(135deg, #C5A46E 0%, #E8FF00 50%, #C5A46E 100%)", boxShadow: "0 0 24px rgba(232,255,0,0.45), 0 4px 20px rgba(0,0,0,0.4)" }}
+        className="fixed bottom-5 right-5 z-50 flex items-center gap-2.5 rounded-full px-4 py-3 font-bold text-sm text-[#E8FF00] transition-all hover:scale-105 active:scale-95"
+        style={{ background: "#1A1A1A", boxShadow: "0 4px 12px rgba(0,0,0,0.50)", border: "1px solid rgba(232,255,0,0.20)" }}
         aria-label="Open AI Support"
       >
         <div className="relative">
-          <MessageSquare className="h-5 w-5" />
-          <span className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-green-400 border-2 border-purple-700 animate-pulse" />
+          <MessageSquare className="h-5 w-5 text-[#E8FF00]" />
+          <span className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-green-400 border-2 border-[#1A1A1A] animate-pulse" />
         </div>
         <span className="hidden sm:inline">AI Support</span>
       </button>
