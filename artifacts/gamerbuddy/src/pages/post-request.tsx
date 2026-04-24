@@ -506,7 +506,7 @@ export default function PostRequest() {
                               onClick={() => field.onChange(value)}
                               className={`relative flex flex-col items-center gap-1.5 rounded-lg border py-3 px-2 text-xs font-semibold transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed
                                 ${isSelected
-                                  ? "border-primary/60 bg-primary/10 text-primary shadow-[0_0_12px_rgba(172,181,255,0.25)] scale-[1.03]"
+                                  ? "border-primary/60 bg-primary/10 text-primary shadow-[0_0_12px_rgba(79,158,255,0.25)] scale-[1.03]"
                                   : "border-border bg-background/60 text-muted-foreground hover:border-primary/40 hover:text-white"
                                 }`}
                             >
@@ -547,7 +547,7 @@ export default function PostRequest() {
                             onClick={() => field.onChange(value)}
                             className={`flex items-start gap-2.5 rounded-lg border p-3 text-left transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed
                               ${isSelected
-                                ? `${color} shadow-[0_0_10px_rgba(172,181,255,0.15)] scale-[1.02]`
+                                ? `${color} shadow-[0_0_10px_rgba(79,158,255,0.15)] scale-[1.02]`
                                 : "border-border bg-background/60 hover:border-primary/30"
                               }`}
                           >
@@ -624,7 +624,7 @@ export default function PostRequest() {
               {/* ── Minimum Hiring Fee ── */}
               <div
                 className="rounded-xl border p-5 space-y-4"
-                style={{ borderColor: "rgba(172,181,255,0.30)", background: "rgba(172,181,255,0.04)" }}
+                style={{ borderColor: "rgba(79,158,255,0.30)", background: "rgba(79,158,255,0.04)" }}
               >
                 <div className="flex items-center gap-2">
                   {hirerRegion === "india" ? (
@@ -807,7 +807,7 @@ export default function PostRequest() {
                 </div>
                 <Button
                   type="submit"
-                  className="w-full bg-primary hover:bg-primary/90 text-white font-extrabold uppercase tracking-widest text-base py-6 shadow-[0_0_20px_rgba(172,181,255,0.3)] hover:shadow-[0_0_30px_rgba(172,181,255,0.5)] transition-all disabled:opacity-50 disabled:shadow-none"
+                  className="w-full bg-primary hover:bg-primary/90 text-white font-extrabold uppercase tracking-widest text-base py-6 shadow-[0_0_20px_rgba(79,158,255,0.3)] hover:shadow-[0_0_30px_rgba(79,158,255,0.5)] transition-all disabled:opacity-50 disabled:shadow-none"
                   disabled={!canPost || postRequest.isPending}
                 >
                   {postRequest.isPending ? (

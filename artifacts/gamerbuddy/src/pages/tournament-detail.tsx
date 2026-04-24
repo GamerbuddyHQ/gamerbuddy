@@ -60,7 +60,7 @@ type Tournament = {
 /* ── Config ── */
 const TYPE_CONFIG: Record<TournamentType, { label: string; desc: string; icon: React.FC<{ className?: string }>; color: string }> = {
   h2h:   { label: "Head-to-Head", desc: "1v1 bracket",      icon: Swords, color: "#f87171" },
-  squad: { label: "Squad Battle",  desc: "Team-based clash", icon: Users,  color: "#ACB5FF" },
+  squad: { label: "Squad Battle",  desc: "Team-based clash", icon: Users,  color: "#4F9EFF" },
   ffa:   { label: "Free-for-All",  desc: "Battle royale",   icon: Crown,  color: "#fbbf24" },
 };
 
@@ -189,9 +189,9 @@ function DeclareWinnersModal({ tournament, onClose, onDone }: {
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/75 backdrop-blur-sm" onClick={onClose} />
       <div className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-3xl border"
-        style={{ background: "rgba(8,4,18,0.98)", borderColor: "rgba(172,181,255,0.40)", boxShadow: "0 0 60px rgba(172,181,255,0.20), 0 24px 80px rgba(0,0,0,0.8)" }}>
+        style={{ background: "rgba(8,4,18,0.98)", borderColor: "rgba(79,158,255,0.40)", boxShadow: "0 0 60px rgba(79,158,255,0.20), 0 24px 80px rgba(0,0,0,0.8)" }}>
         <div className="sticky top-0 z-10 flex items-center justify-between px-5 py-4 border-b"
-          style={{ background: "rgba(8,4,18,0.98)", borderColor: "rgba(172,181,255,0.20)" }}>
+          style={{ background: "rgba(8,4,18,0.98)", borderColor: "rgba(79,158,255,0.20)" }}>
           <div>
             <h2 className="text-[15px] font-extrabold text-white flex items-center gap-2"><Trophy className="h-4 w-4 text-yellow-400" />Declare Winners & Distribute Prizes</h2>
             <p className="text-[11px] text-muted-foreground/50 mt-0.5">Review the full calculation, then assign placements</p>
@@ -573,7 +573,7 @@ export default function TournamentDetailPage() {
 
   return (
     <div className="max-w-4xl mx-auto space-y-5 pb-12">
-      <div className="pointer-events-none fixed inset-0 -z-10" style={{ background: "radial-gradient(ellipse 50% 30% at 50% 0%,rgba(172,181,255,0.08) 0%,transparent 60%)" }} />
+      <div className="pointer-events-none fixed inset-0 -z-10" style={{ background: "radial-gradient(ellipse 50% 30% at 50% 0%,rgba(79,158,255,0.08) 0%,transparent 60%)" }} />
 
       <Link href="/tournaments" className="inline-flex items-center gap-1.5 text-[12px] text-muted-foreground/50 hover:text-white/70 transition-colors">
         <ArrowLeft className="h-3.5 w-3.5" /> Back to Tournaments
@@ -583,7 +583,7 @@ export default function TournamentDetailPage() {
 
       {/* ── Hero header ── */}
       <div className="rounded-3xl overflow-hidden border"
-        style={{ background: "rgba(10,5,20,0.95)", borderColor: tournament.status === "open" ? "rgba(172,181,255,0.30)" : "rgba(255,255,255,0.08)", boxShadow: tournament.status === "open" ? "0 0 50px rgba(172,181,255,0.10)" : "0 8px 40px rgba(0,0,0,0.5)", borderLeft: `4px solid ${tcfg.color}` }}>
+        style={{ background: "rgba(10,5,20,0.95)", borderColor: tournament.status === "open" ? "rgba(79,158,255,0.30)" : "rgba(255,255,255,0.08)", boxShadow: tournament.status === "open" ? "0 0 50px rgba(79,158,255,0.10)" : "0 8px 40px rgba(0,0,0,0.5)", borderLeft: `4px solid ${tcfg.color}` }}>
         {/* Prize header bar */}
         <div className="px-6 py-4 flex items-center justify-between gap-3 flex-wrap"
           style={{ background: "linear-gradient(135deg,rgba(251,191,36,0.09),rgba(0,0,0,0.3))", borderBottom: "1px solid rgba(251,191,36,0.14)" }}>
@@ -622,7 +622,7 @@ export default function TournamentDetailPage() {
 
           {/* Eligibility requirements */}
           {hasReqs && (
-            <div className="rounded-xl px-4 py-3 space-y-2" style={{ background: "rgba(172,181,255,0.06)", border: "1px solid rgba(172,181,255,0.18)" }}>
+            <div className="rounded-xl px-4 py-3 space-y-2" style={{ background: "rgba(79,158,255,0.06)", border: "1px solid rgba(79,158,255,0.18)" }}>
               <p className="text-[10px] font-black uppercase tracking-widest text-primary/60">Player Requirements</p>
               <div className="flex gap-2 flex-wrap">
                 {tournament.country && tournament.country !== "any" && (
@@ -636,7 +636,7 @@ export default function TournamentDetailPage() {
                   </span>
                 )}
                 {tournament.genderPreference && tournament.genderPreference !== "any" && (
-                  <span className="inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-lg" style={{ background: "rgba(172,181,255,0.10)", border: "1px solid rgba(172,181,255,0.25)", color: "#ACB5FF" }}>
+                  <span className="inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-lg" style={{ background: "rgba(79,158,255,0.10)", border: "1px solid rgba(79,158,255,0.25)", color: "#4F9EFF" }}>
                     {GENDER_MAP[tournament.genderPreference]?.icon} {GENDER_MAP[tournament.genderPreference]?.label ?? tournament.genderPreference}
                   </span>
                 )}
@@ -650,7 +650,7 @@ export default function TournamentDetailPage() {
             {[
               { label: "Net Prize",    value: `$${tournament.netPrize.toFixed(2)}`,   color: "#4ade80" },
               { label: "Platform Fee", value: `$${tournament.platformFee.toFixed(2)}`, color: "#f87171" },
-              { label: "Entry",        value: "Free",                                  color: "#ACB5FF" },
+              { label: "Entry",        value: "Free",                                  color: "#4F9EFF" },
             ].map(({ label, value, color }) => (
               <div key={label} className="rounded-xl px-3.5 py-3 text-center" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
                 <p className="text-[10px] text-muted-foreground/40 uppercase tracking-wider">{label}</p>
@@ -663,12 +663,12 @@ export default function TournamentDetailPage() {
           <div>
             <div className="flex items-center justify-between mb-2">
               <span className="text-[12px] font-bold text-muted-foreground/60 flex items-center gap-1.5"><Users className="h-3.5 w-3.5" /> Players</span>
-              <span className="text-[14px] font-extrabold" style={{ color: pct >= 100 ? "#f87171" : pct > 60 ? "#fbbf24" : "#ACB5FF" }}>{tournament.currentPlayers} / {tournament.maxPlayers}</span>
+              <span className="text-[14px] font-extrabold" style={{ color: pct >= 100 ? "#f87171" : pct > 60 ? "#fbbf24" : "#4F9EFF" }}>{tournament.currentPlayers} / {tournament.maxPlayers}</span>
             </div>
             <div className="h-3 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.07)" }}>
               <div className="h-full rounded-full transition-all duration-500" style={{
                 width: `${pct}%`,
-                background: pct >= 100 ? "linear-gradient(90deg,#f87171,#ef4444)" : pct > 60 ? "linear-gradient(90deg,#fbbf24,#f59e0b)" : "linear-gradient(90deg,#ACB5FF,#8090cc)",
+                background: pct >= 100 ? "linear-gradient(90deg,#f87171,#ef4444)" : pct > 60 ? "linear-gradient(90deg,#fbbf24,#f59e0b)" : "linear-gradient(90deg,#4F9EFF,#2060c8)",
               }} />
             </div>
             <div className="flex items-center justify-between mt-1.5">
@@ -702,7 +702,7 @@ export default function TournamentDetailPage() {
               eligibility.eligible ? (
                 <Button onClick={() => joinMutation.mutate()} disabled={joinMutation.isPending || isFull}
                   className="flex-1 font-extrabold text-[14px] py-3 h-auto"
-                  style={{ background: "linear-gradient(135deg,#ACB5FF,#8090cc)", boxShadow: "0 0 24px rgba(172,181,255,0.35)" }}>
+                  style={{ background: "linear-gradient(135deg,#4F9EFF,#2060c8)", boxShadow: "0 0 24px rgba(79,158,255,0.35)" }}>
                   {joinMutation.isPending ? <><Loader2 className="h-5 w-5 mr-2 animate-spin" />Sending Request…</>
                     : isFull ? <><Lock className="h-5 w-5 mr-2" />Tournament Full</>
                     : <><UserCheck className="h-5 w-5 mr-2" />Request to Join — Free</>}
@@ -724,7 +724,7 @@ export default function TournamentDetailPage() {
             )}
 
             {!user && tournament.status === "open" && (
-              <Button asChild className="flex-1 font-bold py-3 h-auto" style={{ background: "linear-gradient(135deg,#ACB5FF,#8090cc)" }}>
+              <Button asChild className="flex-1 font-bold py-3 h-auto" style={{ background: "linear-gradient(135deg,#4F9EFF,#2060c8)" }}>
                 <Link href="/login">Log in to Join</Link>
               </Button>
             )}

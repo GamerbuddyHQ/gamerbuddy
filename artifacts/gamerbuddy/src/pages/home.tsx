@@ -26,7 +26,7 @@ function ParticleCanvas() {
     resize();
     window.addEventListener("resize", resize);
 
-    const COLORS = ["rgba(172,181,255,", "rgba(142,193,222,", "rgba(172,181,255,", "rgba(172,181,255,"];
+    const COLORS = ["rgba(79,158,255,", "rgba(56,186,255,", "rgba(79,158,255,", "rgba(79,158,255,"];
 
     for (let i = 0; i < 70; i++) {
       particles.push({
@@ -179,8 +179,8 @@ export default function Home() {
       <div
         className="flex items-center justify-center gap-2.5 px-4 py-2.5 text-sm font-semibold text-center"
         style={{
-          background: "linear-gradient(90deg, rgba(172,181,255,0.12) 0%, rgba(142,193,222,0.10) 100%)",
-          borderBottom: "1px solid rgba(172,181,255,0.20)",
+          background: "linear-gradient(90deg, rgba(79,158,255,0.12) 0%, rgba(56,186,255,0.10) 100%)",
+          borderBottom: "1px solid rgba(79,158,255,0.20)",
         }}
       >
         <span
@@ -203,7 +203,7 @@ export default function Home() {
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            background: "radial-gradient(ellipse 110% 90% at 50% -5%, rgba(70,88,180,0.35) 0%, rgba(172,181,255,0.10) 35%, transparent 65%)",
+            background: "radial-gradient(ellipse 110% 90% at 50% -5%, rgba(27,62,180,0.35) 0%, rgba(79,158,255,0.10) 35%, transparent 65%)",
             zIndex: 0,
           }}
         />
@@ -211,7 +211,7 @@ export default function Home() {
         <div
           className="absolute top-[-15%] left-[-12%] w-[75vw] h-[75vw] rounded-full pointer-events-none"
           style={{
-            background: "radial-gradient(circle, rgba(172,181,255,0.15) 0%, transparent 58%)",
+            background: "radial-gradient(circle, rgba(79,158,255,0.15) 0%, transparent 58%)",
             animation: "float-slow 11s ease-in-out infinite",
             zIndex: 0,
           }}
@@ -220,7 +220,7 @@ export default function Home() {
         <div
           className="absolute bottom-[-10%] right-[-10%] w-[60vw] h-[60vw] rounded-full pointer-events-none"
           style={{
-            background: "radial-gradient(circle, rgba(142,193,222,0.09) 0%, transparent 58%)",
+            background: "radial-gradient(circle, rgba(56,186,255,0.09) 0%, transparent 58%)",
             animation: "float-slow-reverse 13s ease-in-out infinite",
             zIndex: 0,
           }}
@@ -229,7 +229,7 @@ export default function Home() {
         <div
           className="absolute top-0 left-1/2 -translate-x-1/2 w-[80vw] h-[50vw] pointer-events-none"
           style={{
-            background: "radial-gradient(ellipse 70% 55% at 50% 0%, rgba(130,148,235,0.22) 0%, transparent 60%)",
+            background: "radial-gradient(ellipse 70% 55% at 50% 0%, rgba(87,122,235,0.22) 0%, transparent 60%)",
             zIndex: 0,
           }}
         />
@@ -238,7 +238,7 @@ export default function Home() {
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            backgroundImage: "radial-gradient(circle, rgba(172,181,255,0.12) 1px, transparent 1px)",
+            backgroundImage: "radial-gradient(circle, rgba(79,158,255,0.12) 1px, transparent 1px)",
             backgroundSize: "38px 38px",
             zIndex: 0,
             maskImage: "radial-gradient(ellipse 95% 75% at 50% 30%, black 5%, transparent 100%)",
@@ -253,10 +253,10 @@ export default function Home() {
             <div
               className="inline-flex items-center gap-2.5 rounded-full px-5 py-2 text-sm font-bold"
               style={{
-                background: "rgba(142,193,222,0.15)",
-                border: "1px solid rgba(172,181,255,0.40)",
+                background: "rgba(56,186,255,0.15)",
+                border: "1px solid rgba(79,158,255,0.40)",
                 color: "hsl(var(--primary))",
-                boxShadow: "0 0 24px rgba(142,193,222,0.18), inset 0 1px 0 rgba(255,255,255,0.06)",
+                boxShadow: "0 0 24px rgba(56,186,255,0.18), inset 0 1px 0 rgba(255,255,255,0.06)",
               }}
             >
               <Gamepad2 className="h-4 w-4" />
@@ -272,11 +272,11 @@ export default function Home() {
             <span
               className="block text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-[6rem]"
               style={{
-                background: "linear-gradient(135deg, #ACB5FF 0%, #ACB5FF 40%, #8090cc 100%)",
+                background: "linear-gradient(135deg, #4F9EFF 0%, #4F9EFF 40%, #2060c8 100%)",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
                 backgroundClip: "text",
-                filter: "drop-shadow(0 0 32px rgba(172,181,255,0.60))",
+                filter: "drop-shadow(0 0 32px rgba(79,158,255,0.60))",
               }}
             >
               {t.home.headline2}
@@ -297,8 +297,8 @@ export default function Home() {
               <button
                 className="relative overflow-hidden group w-full sm:w-auto px-10 py-4 rounded-2xl font-bold text-base lg:text-lg text-white transition-all duration-200 hover:brightness-110 hover:scale-[1.03] active:scale-[0.97]"
                 style={{
-                  background: "linear-gradient(135deg, #8090cc 0%, #8090cc 50%, #303090 100%)",
-                  boxShadow: "0 8px 32px rgba(172,181,255,0.55), 0 2px 8px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.12)",
+                  background: "linear-gradient(135deg, #2060c8 0%, #2060c8 50%, #051898 100%)",
+                  boxShadow: "0 8px 32px rgba(79,158,255,0.55), 0 2px 8px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.12)",
                   minWidth: "210px",
                 }}
               >
@@ -327,7 +327,7 @@ export default function Home() {
                 }}
                 onMouseEnter={(e) => {
                   (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,0.10)";
-                  (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(172,181,255,0.45)";
+                  (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(79,158,255,0.45)";
                 }}
                 onMouseLeave={(e) => {
                   (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,0.06)";
@@ -401,7 +401,7 @@ export default function Home() {
               icon={<Users className="h-6 w-6" />}
               iconBg="bg-cyan-500/15"
               iconColor="text-cyan-400"
-              glowColor="rgba(142,193,222,0.8)"
+              glowColor="rgba(56,186,255,0.8)"
               title="Find Teammates"
               desc="Post a request for any game, platform, and skill level. Get matched with friendly, verified players instantly."
               tag="Hiring"
@@ -410,7 +410,7 @@ export default function Home() {
               icon={<Coins className="h-6 w-6" />}
               iconBg="bg-primary/15"
               iconColor="text-primary"
-              glowColor="rgba(172,181,255,0.8)"
+              glowColor="rgba(79,158,255,0.8)"
               title="Get Paid to Play"
               desc="Accept requests, complete gaming sessions, and withdraw your earnings. Turn your skills into real money."
               tag="Earnings"
@@ -433,31 +433,31 @@ export default function Home() {
         <div
           className="max-w-[1400px] mx-auto rounded-3xl p-8 sm:p-10 lg:p-14 relative overflow-hidden"
           style={{
-            background: "linear-gradient(135deg, rgba(0,150,120,0.08) 0%, rgba(142,193,222,0.05) 100%)",
-            border: "1px solid rgba(172,181,255,0.22)",
+            background: "linear-gradient(135deg, rgba(0,150,120,0.08) 0%, rgba(56,186,255,0.05) 100%)",
+            border: "1px solid rgba(79,158,255,0.22)",
             boxShadow: "0 4px 40px rgba(0,0,0,0.20)",
           }}
         >
           {/* top glow line */}
           <div
             className="absolute top-0 left-0 right-0 h-px pointer-events-none"
-            style={{ background: "linear-gradient(90deg, transparent, rgba(172,181,255,0.5), rgba(142,193,222,0.3), transparent)" }}
+            style={{ background: "linear-gradient(90deg, transparent, rgba(79,158,255,0.5), rgba(56,186,255,0.3), transparent)" }}
           />
           {/* corner glows */}
           <div
             className="absolute top-0 left-0 w-80 h-80 rounded-full pointer-events-none"
-            style={{ background: "radial-gradient(circle, rgba(172,181,255,0.10) 0%, transparent 65%)" }}
+            style={{ background: "radial-gradient(circle, rgba(79,158,255,0.10) 0%, transparent 65%)" }}
           />
           <div
             className="absolute bottom-0 right-0 w-64 h-64 rounded-full pointer-events-none"
-            style={{ background: "radial-gradient(circle, rgba(142,193,222,0.07) 0%, transparent 65%)" }}
+            style={{ background: "radial-gradient(circle, rgba(56,186,255,0.07) 0%, transparent 65%)" }}
           />
 
           <div className="relative grid grid-cols-1 md:grid-cols-2 gap-10 lg:gap-16">
             {/* Divider */}
             <div
               className="hidden md:block absolute left-1/2 top-0 bottom-0 w-px -translate-x-1/2 pointer-events-none"
-              style={{ background: "linear-gradient(to bottom, transparent, rgba(172,181,255,0.35), rgba(142,193,222,0.20), transparent)" }}
+              style={{ background: "linear-gradient(to bottom, transparent, rgba(79,158,255,0.35), rgba(56,186,255,0.20), transparent)" }}
             />
 
             {/* Left — Hirers */}
@@ -466,8 +466,8 @@ export default function Home() {
                 <div
                   className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest px-3 py-1.5 rounded-full mb-3"
                   style={{
-                    background: "rgba(142,193,222,0.10)",
-                    border: "1px solid rgba(142,193,222,0.30)",
+                    background: "rgba(56,186,255,0.10)",
+                    border: "1px solid rgba(56,186,255,0.30)",
                     color: "rgb(34,211,238)",
                   }}
                 >
@@ -490,8 +490,8 @@ export default function Home() {
                 <div
                   className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest px-3 py-1.5 rounded-full mb-3"
                   style={{
-                    background: "rgba(172,181,255,0.12)",
-                    border: "1px solid rgba(172,181,255,0.35)",
+                    background: "rgba(79,158,255,0.12)",
+                    border: "1px solid rgba(79,158,255,0.35)",
                     color: "hsl(var(--primary))",
                   }}
                 >
@@ -518,7 +518,7 @@ export default function Home() {
             {[
               { icon: <Shield className="h-5 w-5 text-green-400" />, label: "Escrow Protected", sub: "Funds held until session complete", bg: "rgba(34,197,94,0.08)", border: "rgba(34,197,94,0.20)" },
               { icon: <Star className="h-5 w-5 text-yellow-400" />, label: "Verified Reviews", sub: "Both sides must leave a review", bg: "rgba(234,179,8,0.08)", border: "rgba(234,179,8,0.20)" },
-              { icon: <Zap className="h-5 w-5 text-cyan-400" />, label: "Instant Alerts", sub: "Real-time bids, starts, and payments", bg: "rgba(142,193,222,0.08)", border: "rgba(142,193,222,0.20)" },
+              { icon: <Zap className="h-5 w-5 text-cyan-400" />, label: "Instant Alerts", sub: "Real-time bids, starts, and payments", bg: "rgba(56,186,255,0.08)", border: "rgba(56,186,255,0.20)" },
               { icon: <Trophy className="h-5 w-5 text-amber-400" />, label: "Transparent 10% Fee", sub: "Gamers keep 90% — no hidden charges", bg: "rgba(245,158,11,0.08)", border: "rgba(245,158,11,0.20)" },
             ].map(({ icon, label, sub, bg, border }) => (
               <div
@@ -545,9 +545,9 @@ export default function Home() {
         <div
           className="relative max-w-4xl mx-auto rounded-3xl text-center overflow-hidden px-8 py-14 sm:py-16 lg:py-20"
           style={{
-            background: "linear-gradient(135deg, rgba(15,30,135,0.75) 0%, rgba(130,148,235,0.28) 50%, rgba(50,68,165,0.18) 100%)",
+            background: "linear-gradient(135deg, rgba(3,18,135,0.75) 0%, rgba(87,122,235,0.28) 50%, rgba(10,45,165,0.18) 100%)",
             border: "1px solid rgba(0,200,170,0.28)",
-            boxShadow: "0 0 80px rgba(150,168,255,0.18), inset 0 0 60px rgba(0,80,60,0.10)",
+            boxShadow: "0 0 80px rgba(107,142,255,0.18), inset 0 0 60px rgba(0,80,60,0.10)",
           }}
         >
           {/* top glow line */}
@@ -558,11 +558,11 @@ export default function Home() {
           {/* orbs */}
           <div
             className="absolute top-0 right-0 w-72 h-72 rounded-full pointer-events-none"
-            style={{ background: "radial-gradient(circle, rgba(142,193,222,0.18) 0%, transparent 70%)" }}
+            style={{ background: "radial-gradient(circle, rgba(56,186,255,0.18) 0%, transparent 70%)" }}
           />
           <div
             className="absolute bottom-0 left-0 w-56 h-56 rounded-full pointer-events-none"
-            style={{ background: "radial-gradient(circle, rgba(110,128,215,0.14) 0%, transparent 70%)" }}
+            style={{ background: "radial-gradient(circle, rgba(67,102,215,0.14) 0%, transparent 70%)" }}
           />
 
           <div className="relative space-y-5">
@@ -580,8 +580,8 @@ export default function Home() {
                 <button
                   className="relative overflow-hidden group px-10 py-4 rounded-xl font-black text-sm uppercase tracking-widest text-white w-full sm:w-auto transition-all hover:brightness-110 hover:scale-[1.03] active:scale-[0.97]"
                   style={{
-                    background: "linear-gradient(135deg, #ACB5FF 0%, #6070bb 60%, #4050aa 100%)",
-                    boxShadow: "0 0 32px rgba(142,193,222,0.45), 0 4px 16px rgba(0,0,0,0.30)",
+                    background: "linear-gradient(135deg, #4F9EFF 0%, #1845b8 60%, #0830a0 100%)",
+                    boxShadow: "0 0 32px rgba(56,186,255,0.45), 0 4px 16px rgba(0,0,0,0.30)",
                   }}
                 >
                   <div

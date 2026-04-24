@@ -32,10 +32,10 @@ import { ReportButton } from "@/components/report-modal";
 const SKILL_CONFIG: Record<string, { border: string; text: string; bg: string; glow: string; bar: string }> = {
   Beginner:     { border: "border-green-500/40",  text: "text-green-400",  bg: "bg-green-500/10",  glow: "rgba(34,197,94,0.15)",   bar: "#22c55e" },
   Intermediate: { border: "border-yellow-500/40", text: "text-yellow-400", bg: "bg-yellow-500/10", glow: "rgba(234,179,8,0.15)",    bar: "#eab308" },
-  Expert:       { border: "border-primary/40",    text: "text-primary",    bg: "bg-primary/10",    glow: "rgba(172,181,255,0.2)",    bar: "#ACB5FF" },
-  Chill:        { border: "border-cyan-500/40",   text: "text-cyan-400",   bg: "bg-cyan-500/10",   glow: "rgba(142,193,222,0.15)",   bar: "#8EC1DE" },
+  Expert:       { border: "border-primary/40",    text: "text-primary",    bg: "bg-primary/10",    glow: "rgba(79,158,255,0.2)",    bar: "#4F9EFF" },
+  Chill:        { border: "border-cyan-500/40",   text: "text-cyan-400",   bg: "bg-cyan-500/10",   glow: "rgba(56,186,255,0.15)",   bar: "#38BAFF" },
 };
-const DEFAULT_SKILL = { border: "border-primary/30", text: "text-primary", bg: "bg-primary/10", glow: "rgba(172,181,255,0.15)", bar: "#ACB5FF" };
+const DEFAULT_SKILL = { border: "border-primary/30", text: "text-primary", bg: "bg-primary/10", glow: "rgba(79,158,255,0.15)", bar: "#4F9EFF" };
 
 const PLATFORMS = ["PC", "PlayStation", "Xbox", "Nintendo Switch", "Steam Deck", "iOS", "Android"];
 const SKILLS = ["Beginner", "Intermediate", "Expert", "Chill"];
@@ -250,7 +250,7 @@ function QuickBidPanel({ req, onClose }: { req: GameRequest; onClose: () => void
   return (
     <form onSubmit={handleSubmit}
       className="mt-4 rounded-xl border border-primary/25 bg-primary/5 p-5 space-y-4"
-      style={{ boxShadow: "0 0 24px rgba(172,181,255,0.07) inset" }}
+      style={{ boxShadow: "0 0 24px rgba(79,158,255,0.07) inset" }}
     >
       <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-primary">
         <Gavel className="h-3.5 w-3.5" /> Place Your Bid
@@ -360,7 +360,7 @@ function QuickBidPanel({ req, onClose }: { req: GameRequest; onClose: () => void
         <Button type="button" variant="outline" size="sm" onClick={onClose} className="text-xs h-10">Cancel</Button>
         <Button
           type="submit" size="sm" disabled={!canSubmit}
-          className="bg-primary hover:bg-primary/90 flex-1 min-w-[140px] font-bold uppercase tracking-wider text-xs shadow-[0_0_20px_rgba(172,181,255,0.3)] disabled:opacity-50 h-10"
+          className="bg-primary hover:bg-primary/90 flex-1 min-w-[140px] font-bold uppercase tracking-wider text-xs shadow-[0_0_20px_rgba(79,158,255,0.3)] disabled:opacity-50 h-10"
         >
           {state === "submitting" ? (
             <span className="flex items-center gap-1.5">
@@ -431,8 +431,8 @@ function RequestCard({ req }: { req: GameRequest }) {
     <div
       className={`group rounded-2xl border overflow-hidden transition-[transform,border-color,box-shadow] duration-300 will-change-transform ${
         expanded
-          ? "border-primary/55 shadow-[0_12px_64px_rgba(172,181,255,0.28)] translate-y-0"
-          : "border-border/35 hover:border-primary/50 hover:-translate-y-[6px] hover:shadow-[0_20px_64px_rgba(172,181,255,0.22)]"
+          ? "border-primary/55 shadow-[0_12px_64px_rgba(79,158,255,0.28)] translate-y-0"
+          : "border-border/35 hover:border-primary/50 hover:-translate-y-[6px] hover:shadow-[0_20px_64px_rgba(79,158,255,0.22)]"
       }`}
       style={{
         background: isDark
@@ -494,7 +494,7 @@ function RequestCard({ req }: { req: GameRequest }) {
                         src={`/api/storage${req.userProfilePhotoUrl}`}
                         alt={req.userName}
                         className="h-4 w-4 rounded-full object-cover shrink-0"
-                        style={{ border: "1px solid rgba(172,181,255,0.35)" }}
+                        style={{ border: "1px solid rgba(79,158,255,0.35)" }}
                         onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
                       />
                     ) : (
@@ -596,7 +596,7 @@ function RequestCard({ req }: { req: GameRequest }) {
                 {req.lowestBid && (
                   <div
                     className="inline-flex items-center gap-2 rounded-xl border px-4 py-2.5 text-xs"
-                    style={{ borderColor: "rgba(142,193,222,0.22)", background: "rgba(142,193,222,0.06)" }}
+                    style={{ borderColor: "rgba(56,186,255,0.22)", background: "rgba(56,186,255,0.06)" }}
                   >
                     <TrendingDown className="h-3.5 w-3.5 text-cyan-400/65 shrink-0" />
                     <span className="text-muted-foreground/60">
@@ -630,7 +630,7 @@ function RequestCard({ req }: { req: GameRequest }) {
                 {!expanded && (
                   <div
                     className="absolute -inset-[7px] rounded-[22px] opacity-45 transition-opacity duration-300 group-hover:opacity-65"
-                    style={{ background: "linear-gradient(135deg, #ACB5FF, #8090cc)", filter: "blur(16px)" }}
+                    style={{ background: "linear-gradient(135deg, #4F9EFF, #2060c8)", filter: "blur(16px)" }}
                   />
                 )}
                 <button
@@ -642,7 +642,7 @@ function RequestCard({ req }: { req: GameRequest }) {
                   }`}
                   style={
                     !expanded
-                      ? { background: "linear-gradient(135deg, #ACB5FF 0%, #8090cc 100%)", boxShadow: "0 6px 40px rgba(172,181,255,0.65), inset 0 1px 0 rgba(255,255,255,0.18)" }
+                      ? { background: "linear-gradient(135deg, #4F9EFF 0%, #2060c8 100%)", boxShadow: "0 6px 40px rgba(79,158,255,0.65), inset 0 1px 0 rgba(255,255,255,0.18)" }
                       : {}
                   }
                 >
@@ -677,7 +677,7 @@ function EmptyState({ hasFilters, onClear }: { hasFilters: boolean; onClear: () 
     <div className="space-y-6">
       <div
         className="rounded-2xl border border-dashed border-border/50 p-12 text-center"
-        style={{ background: "radial-gradient(ellipse at 50% 0%, rgba(172,181,255,0.04) 0%, transparent 70%)" }}
+        style={{ background: "radial-gradient(ellipse at 50% 0%, rgba(79,158,255,0.04) 0%, transparent 70%)" }}
       >
         <div className="w-20 h-20 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto mb-4">
           <Swords className="h-9 w-9 text-primary/40" />
@@ -694,7 +694,7 @@ function EmptyState({ hasFilters, onClear }: { hasFilters: boolean; onClear: () 
           {hasFilters && (
             <Button variant="outline" size="sm" className="text-xs" onClick={onClear}>Clear Filters</Button>
           )}
-          <Button size="sm" className="bg-primary text-white text-xs shadow-[0_0_16px_rgba(172,181,255,0.3)]" onClick={() => setLocation("/post-request")}>
+          <Button size="sm" className="bg-primary text-white text-xs shadow-[0_0_16px_rgba(79,158,255,0.3)]" onClick={() => setLocation("/post-request")}>
             Post a Request
           </Button>
         </div>
@@ -707,8 +707,8 @@ function EmptyState({ hasFilters, onClear }: { hasFilters: boolean; onClear: () 
 function HowItWorksSection() {
   const { isDark } = useTheme();
   const steps = [
-    { num: "01", icon: <Search className="h-5 w-5" />, color: "#ACB5FF", title: "Verify & Activate",  desc: "Link a gaming account → 24–48hr review → pay a one-time activation fee (🇮🇳 ₹149 / 🌍 $5) — then you're fully unlocked." },
-    { num: "02", icon: <Gavel  className="h-5 w-5" />, color: "#8EC1DE", title: "Browse & Bid",       desc: "Find requests that match your skills and platform. Set your price and pitch yourself — no middlemen." },
+    { num: "01", icon: <Search className="h-5 w-5" />, color: "#4F9EFF", title: "Verify & Activate",  desc: "Link a gaming account → 24–48hr review → pay a one-time activation fee (🇮🇳 ₹149 / 🌍 $5) — then you're fully unlocked." },
+    { num: "02", icon: <Gavel  className="h-5 w-5" />, color: "#38BAFF", title: "Browse & Bid",       desc: "Find requests that match your skills and platform. Set your price and pitch yourself — no middlemen." },
     { num: "03", icon: <Trophy className="h-5 w-5" />, color: "#facc15", title: "Play & Get Paid",    desc: "Complete the quest, collect your review, and withdraw your 90% earnings." },
   ];
 
@@ -716,13 +716,13 @@ function HowItWorksSection() {
     <div
       className="rounded-2xl border p-5 sm:p-6 space-y-4"
       style={{
-        borderColor: isDark ? "rgba(172,181,255,0.18)" : "rgba(172,181,255,0.20)",
+        borderColor: isDark ? "rgba(79,158,255,0.18)" : "rgba(79,158,255,0.20)",
         background: isDark
-          ? "linear-gradient(135deg, rgba(172,181,255,0.05) 0%, rgba(142,193,222,0.03) 100%)"
-          : "linear-gradient(135deg, rgba(172,181,255,0.04) 0%, rgba(142,193,222,0.02) 100%)",
+          ? "linear-gradient(135deg, rgba(79,158,255,0.05) 0%, rgba(56,186,255,0.03) 100%)"
+          : "linear-gradient(135deg, rgba(79,158,255,0.04) 0%, rgba(56,186,255,0.02) 100%)",
         boxShadow: isDark
-          ? "0 0 40px rgba(172,181,255,0.08), 0 0 80px rgba(142,193,222,0.04)"
-          : "0 0 32px rgba(172,181,255,0.07), 0 2px 16px rgba(0,0,0,0.04)",
+          ? "0 0 40px rgba(79,158,255,0.08), 0 0 80px rgba(56,186,255,0.04)"
+          : "0 0 32px rgba(79,158,255,0.07), 0 2px 16px rgba(0,0,0,0.04)",
       }}
     >
       {/* Heading */}
@@ -794,7 +794,7 @@ function FillerSection() {
           { icon: <Shield className="h-3.5 w-3.5" style={{ color: "#4ade80" }} />, text: "Verified gamers only" },
           { icon: <Star className="h-3.5 w-3.5" style={{ color: "#facc15" }} />, text: "Rated after every quest" },
           { icon: <Users className="h-3.5 w-3.5 text-primary" />, text: "2,450+ gamers registered" },
-          { icon: <Target className="h-3.5 w-3.5" style={{ color: "#8EC1DE" }} />, text: "Escrow-secured payments" },
+          { icon: <Target className="h-3.5 w-3.5" style={{ color: "#38BAFF" }} />, text: "Escrow-secured payments" },
         ].map((t) => (
           <div key={t.text} className="flex items-center gap-1.5 text-[11px] text-muted-foreground/40 font-medium">
             {t.icon} {t.text}
@@ -825,8 +825,8 @@ const LEVEL_OPTIONS = [
   { value: "all",          label: "All Levels",        dot: "rgba(255,255,255,0.25)" },
   { value: "Beginner",     label: "Beginner-Friendly", dot: "#22c55e" },
   { value: "Intermediate", label: "Decent",            dot: "#eab308" },
-  { value: "Expert",       label: "Best / Expert",     dot: "#ACB5FF" },
-  { value: "Chill",        label: "Chill",             dot: "#8EC1DE" },
+  { value: "Expert",       label: "Best / Expert",     dot: "#4F9EFF" },
+  { value: "Chill",        label: "Chill",             dot: "#38BAFF" },
 ];
 
 /* ── MAIN PAGE ───────────────────────────────────────────────────────────── */
@@ -920,7 +920,7 @@ export default function Browse() {
       <div
         className="pointer-events-none fixed inset-0 -z-10 opacity-30"
         style={{
-          background: "radial-gradient(ellipse 60% 40% at 70% 10%, rgba(172,181,255,0.08) 0%, transparent 60%), radial-gradient(ellipse 40% 30% at 20% 80%, rgba(142,193,222,0.04) 0%, transparent 50%)",
+          background: "radial-gradient(ellipse 60% 40% at 70% 10%, rgba(79,158,255,0.08) 0%, transparent 60%), radial-gradient(ellipse 40% 30% at 20% 80%, rgba(56,186,255,0.04) 0%, transparent 50%)",
         }}
       />
 
@@ -941,7 +941,7 @@ export default function Browse() {
           <p className="text-muted-foreground mt-2 text-sm">
             Find open missions and place your bid — no page reload needed.
           </p>
-          <p className="mt-1.5 text-[11px] font-semibold" style={{ color: "rgba(172,181,255,0.55)" }}>
+          <p className="mt-1.5 text-[11px] font-semibold" style={{ color: "rgba(79,158,255,0.55)" }}>
             Phase 1: Core 1-on-1 Hiring Only &nbsp;·&nbsp; Bulk Hiring &amp; Tournaments arriving in Phase 2
           </p>
         </div>
@@ -954,8 +954,8 @@ export default function Browse() {
               className="flex items-center gap-2.5 rounded-xl border border-primary/30 px-4 py-2.5"
               style={{
                 background: isDark
-                  ? "linear-gradient(135deg, rgba(172,181,255,0.1) 0%, rgba(0,0,0,0.3) 100%)"
-                  : "linear-gradient(135deg, rgba(172,181,255,0.10) 0%, rgba(172,181,255,0.04) 100%)",
+                  ? "linear-gradient(135deg, rgba(79,158,255,0.1) 0%, rgba(0,0,0,0.3) 100%)"
+                  : "linear-gradient(135deg, rgba(79,158,255,0.10) 0%, rgba(79,158,255,0.04) 100%)",
                 animation: "count-up 0.18s ease-out both",
               }}
             >
@@ -987,12 +987,12 @@ export default function Browse() {
       <div
         className="rounded-2xl border overflow-hidden filter-panel-animate sm:sticky sm:top-16 sm:z-40"
         style={{
-          borderColor: hasFilters ? "rgba(172,181,255,0.40)" : isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.10)",
+          borderColor: hasFilters ? "rgba(79,158,255,0.40)" : isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.10)",
           background: isDark ? "rgba(7,5,16,0.96)" : "hsl(var(--card))",
           backdropFilter: "blur(24px)",
           WebkitBackdropFilter: "blur(24px)",
           boxShadow: hasFilters
-            ? "0 6px 32px rgba(0,0,0,0.20), 0 0 0 1px rgba(172,181,255,0.10)"
+            ? "0 6px 32px rgba(0,0,0,0.20), 0 0 0 1px rgba(79,158,255,0.10)"
             : "0 4px 24px rgba(0,0,0,0.12)",
           transition: "border-color 0.3s, box-shadow 0.3s",
         }}
@@ -1002,19 +1002,19 @@ export default function Browse() {
           className="flex items-center justify-between px-6 py-4 border-b"
           style={{
             borderColor: isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.08)",
-            background: hasFilters ? "rgba(172,181,255,0.07)" : isDark ? "rgba(255,255,255,0.025)" : "rgba(0,0,0,0.02)",
+            background: hasFilters ? "rgba(79,158,255,0.07)" : isDark ? "rgba(255,255,255,0.025)" : "rgba(0,0,0,0.02)",
             transition: "background 0.3s",
           }}
         >
           <div className="flex items-center gap-2.5">
-            <SlidersHorizontal className="h-4 w-4" style={{ color: hasFilters ? "#ACB5FF" : isDark ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.40)" }} />
+            <SlidersHorizontal className="h-4 w-4" style={{ color: hasFilters ? "#4F9EFF" : isDark ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.40)" }} />
             <span className="text-xs font-extrabold uppercase tracking-widest" style={{ color: isDark ? "rgba(255,255,255,0.55)" : "rgba(0,0,0,0.55)" }}>
               Sort &amp; Filter
             </span>
             {hasFilters && (
               <span
                 className="text-[10px] font-black px-2 py-0.5 rounded-full"
-                style={{ background: "rgba(172,181,255,0.25)", color: "#ACB5FF", border: "1px solid rgba(172,181,255,0.40)" }}
+                style={{ background: "rgba(79,158,255,0.25)", color: "#4F9EFF", border: "1px solid rgba(79,158,255,0.40)" }}
               >
                 {activeTags.length} active
               </span>
@@ -1085,10 +1085,10 @@ export default function Browse() {
                   onClick={() => setSort(value)}
                   className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 active:scale-95"
                   style={active ? {
-                    background: "rgba(172,181,255,0.20)",
-                    border: "1px solid rgba(172,181,255,0.50)",
-                    color: "#ACB5FF",
-                    boxShadow: "0 0 16px rgba(172,181,255,0.22)",
+                    background: "rgba(79,158,255,0.20)",
+                    border: "1px solid rgba(79,158,255,0.50)",
+                    color: "#4F9EFF",
+                    boxShadow: "0 0 16px rgba(79,158,255,0.22)",
                   } : {
                     background: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)",
                     border: isDark ? "1px solid rgba(255,255,255,0.10)" : "1px solid rgba(0,0,0,0.12)",
@@ -1179,7 +1179,7 @@ export default function Browse() {
           <div className="flex flex-wrap gap-2">
             {([
               { label: "Verified Poster", Icon: Shield, on: verifiedPosterOnly, set: () => setVerifiedPosterOnly(v => !v), activeStyle: { bg: "rgba(34,197,94,0.18)",   border: "rgba(34,197,94,0.50)",   color: "#4ade80", glow: "rgba(34,197,94,0.16)"   } },
-              { label: "Easy Wins",       Icon: Flame,  on: noBidsOnly,         set: () => setNoBidsOnly(v => !v),         activeStyle: { bg: "rgba(142,193,222,0.15)", border: "rgba(142,193,222,0.45)", color: "#8EC1DE", glow: "rgba(142,193,222,0.14)" } },
+              { label: "Easy Wins",       Icon: Flame,  on: noBidsOnly,         set: () => setNoBidsOnly(v => !v),         activeStyle: { bg: "rgba(56,186,255,0.15)", border: "rgba(56,186,255,0.45)", color: "#38BAFF", glow: "rgba(56,186,255,0.14)" } },
               { label: "Show Expired",    Icon: Clock,  on: showExpired,        set: () => setShowExpired(v => !v),        activeStyle: { bg: "rgba(239,68,68,0.15)",  border: "rgba(239,68,68,0.45)",  color: "#f87171", glow: "rgba(239,68,68,0.14)"  } },
             ] as const).map(({ label, Icon, on, set, activeStyle }) => (
               <button
@@ -1212,8 +1212,8 @@ export default function Browse() {
           <div
             className="border-t"
             style={{
-              borderColor: "rgba(172,181,255,0.18)",
-              background: "linear-gradient(180deg,rgba(172,181,255,0.06) 0%,rgba(172,181,255,0.02) 100%)",
+              borderColor: "rgba(79,158,255,0.18)",
+              background: "linear-gradient(180deg,rgba(79,158,255,0.06) 0%,rgba(79,158,255,0.02) 100%)",
             }}
           >
             {/* Section header: label + count + result summary */}
@@ -1221,25 +1221,25 @@ export default function Browse() {
               <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse shrink-0" />
               <span
                 className="text-[10px] font-extrabold uppercase tracking-[0.14em] shrink-0"
-                style={{ color: "rgba(172,181,255,0.75)" }}
+                style={{ color: "rgba(79,158,255,0.75)" }}
               >
                 Active Filters
               </span>
               <span
                 className="text-[9px] font-black px-1.5 py-0.5 rounded-full shrink-0"
-                style={{ background: "rgba(172,181,255,0.22)", color: "#ACB5FF", border: "1px solid rgba(172,181,255,0.38)" }}
+                style={{ background: "rgba(79,158,255,0.22)", color: "#4F9EFF", border: "1px solid rgba(79,158,255,0.38)" }}
               >
                 {activeTags.length}
               </span>
               {/* Divider line */}
-              <span className="flex-1 h-px mx-1" style={{ background: "rgba(172,181,255,0.12)" }} />
+              <span className="flex-1 h-px mx-1" style={{ background: "rgba(79,158,255,0.12)" }} />
               {/* Result count */}
               <span className="text-[10px] font-semibold shrink-0 tabular-nums" style={{ color: isDark ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.45)" }}>
                 {requests?.length === allRequests?.length
                   ? `${allRequests?.length ?? 0} open`
                   : (
                     <>
-                      <span style={{ color: isDark ? "rgba(172,181,255,0.80)" : "hsl(228 60% 45%)" }}>{requests?.length ?? 0}</span>
+                      <span style={{ color: isDark ? "rgba(79,158,255,0.80)" : "hsl(228 60% 45%)" }}>{requests?.length ?? 0}</span>
                       <span style={{ color: isDark ? "rgba(255,255,255,0.25)" : "rgba(0,0,0,0.35)" }}> / {allRequests?.length ?? 0} match</span>
                     </>
                   )}

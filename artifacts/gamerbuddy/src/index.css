@@ -120,26 +120,26 @@
   --sidebar: 234 55% 6%;         /* dark navy navbar */
   --sidebar-foreground: 0 0% 98%;
   --sidebar-border: 230 30% 12%;
-  --sidebar-primary: 234 100% 84%;  /* #ACB5FF periwinkle */
-  --sidebar-primary-foreground: 234 60% 10%;
+  --sidebar-primary: 213 100% 66%;  /* #4F9EFF periwinkle */
+  --sidebar-primary-foreground: 220 80% 8%;
   --sidebar-accent: 230 35% 12%;
   --sidebar-accent-foreground: 0 0% 98%;
-  --sidebar-ring: 234 100% 84%;
+  --sidebar-ring: 213 100% 66%;
 
   --popover: 230 45% 7%;
   --popover-foreground: 0 0% 98%;
   --popover-border: 230 30% 13%;
 
-  /* Soft Periwinkle — Primary Accent (#ACB5FF) */
-  --primary: 234 100% 84%;
-  --primary-foreground: 234 60% 8%;
+  /* Electric Blue — Primary Accent (#4F9EFF) */
+  --primary: 213 100% 66%;
+  --primary-foreground: 220 80% 8%;
 
   /* Deep Blue — Secondary (#0305FF deeper navy) */
   --secondary: 230 40% 12%;
   --secondary-foreground: 0 0% 98%;
 
   --muted: 230 30% 12%;
-  --muted-foreground: 228 35% 68%;
+  --muted-foreground: 220 45% 72%;
 
   --accent: 230 35% 14%;
   --accent-foreground: 0 0% 98%;
@@ -148,12 +148,12 @@
   --destructive-foreground: 0 0% 98%;
 
   --input: 230 35% 12%;
-  --ring: 234 100% 84%;
+  --ring: 213 100% 66%;
 
-  --chart-1: 234 100% 84%;       /* periwinkle #ACB5FF */
-  --chart-2: 202 55% 71%;        /* sky blue #8EC1DE */
+  --chart-1: 213 100% 66%;       /* periwinkle #4F9EFF */
+  --chart-2: 200 100% 61%;        /* sky blue #38BAFF */
   --chart-3: 160 100% 45%;
-  --chart-4: 230 100% 79%;       /* soft blue-purple #96A8FF */
+  --chart-4: 228 100% 72%;       /* soft blue-purple #6B8EFF */
   --chart-5: 240 100% 51%;       /* deep blue #0305FF */
 
   --app-font-sans: 'Space Mono', 'Inter', monospace, sans-serif;
@@ -348,7 +348,7 @@
   box-shadow: 0 2px 8px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.04);
 }
 :root:not(.dark) .group.rounded-2xl.border.overflow-hidden:hover {
-  box-shadow: 0 8px 28px rgba(172,181,255,0.14), 0 0 0 1px rgba(172,181,255,0.10);
+  box-shadow: 0 8px 28px rgba(79,158,255,0.14), 0 0 0 1px rgba(79,158,255,0.10);
 }
 
 /* ── Low-opacity muted text — boost for light-mode readability ── */
@@ -412,38 +412,66 @@
 /* ═══════════════════════════════════════════════════════════════════
    MOON DUST — Tailwind cyan class remapping
    Remap all Tailwind cyan classes to the new palette in dark mode.
-   text-cyan-* → #8EC1DE (sky blue highlight)
-   bg-cyan-*   → #ACB5FF (periwinkle) tinted backgrounds
-   border-cyan-* → #ACB5FF periwinkle tinted borders
+   text-cyan-* → #38BAFF (sky blue highlight)
+   bg-cyan-*   → #4F9EFF (periwinkle) tinted backgrounds
+   border-cyan-* → #4F9EFF periwinkle tinted borders
    ═══════════════════════════════════════════════════════════════════ */
 .dark .text-cyan-400,
 .dark .text-cyan-400\/70,
 .dark .text-cyan-400\/60,
 .dark .text-cyan-400\/65,
 .dark .text-cyan-400\/55,
-.dark .text-cyan-400\/80 { color: #8EC1DE; }
+.dark .text-cyan-400\/80 { color: #38BAFF; }
 
 .dark .text-cyan-300,
 .dark .text-cyan-300\/80,
 .dark .text-cyan-300\/70,
-.dark .text-cyan-300\/45 { color: #8EC1DE; }
+.dark .text-cyan-300\/45 { color: #38BAFF; }
 
-.dark .text-cyan-200\/70 { color: rgba(142,193,222,0.70); }
+.dark .text-cyan-200\/70 { color: rgba(56,186,255,0.70); }
 
-.dark .bg-cyan-500\/5   { background-color: rgba(172,181,255,0.06); }
-.dark .bg-cyan-500\/10  { background-color: rgba(172,181,255,0.09); }
-.dark .bg-cyan-500\/20  { background-color: rgba(172,181,255,0.13); }
-.dark .bg-cyan-500\/25  { background-color: rgba(172,181,255,0.16); }
+.dark .bg-cyan-500\/5   { background-color: rgba(79,158,255,0.06); }
+.dark .bg-cyan-500\/10  { background-color: rgba(79,158,255,0.09); }
+.dark .bg-cyan-500\/20  { background-color: rgba(79,158,255,0.13); }
+.dark .bg-cyan-500\/25  { background-color: rgba(79,158,255,0.16); }
 
-.dark .border-cyan-500\/10  { border-color: rgba(172,181,255,0.10); }
-.dark .border-cyan-500\/15  { border-color: rgba(172,181,255,0.15); }
-.dark .border-cyan-500\/20  { border-color: rgba(172,181,255,0.20); }
-.dark .border-cyan-500\/25  { border-color: rgba(172,181,255,0.25); }
-.dark .border-cyan-500\/30  { border-color: rgba(172,181,255,0.30); }
-.dark .border-cyan-500\/40  { border-color: rgba(172,181,255,0.40); }
-.dark .border-cyan-400\/25  { border-color: rgba(172,181,255,0.25); }
-.dark .border-cyan-400\/30  { border-color: rgba(172,181,255,0.30); }
-.dark .border-cyan-400\/50  { border-color: rgba(172,181,255,0.50); }
+.dark .border-cyan-500\/10  { border-color: rgba(79,158,255,0.10); }
+.dark .border-cyan-500\/15  { border-color: rgba(79,158,255,0.15); }
+.dark .border-cyan-500\/20  { border-color: rgba(79,158,255,0.20); }
+.dark .border-cyan-500\/25  { border-color: rgba(79,158,255,0.25); }
+.dark .border-cyan-500\/30  { border-color: rgba(79,158,255,0.30); }
+.dark .border-cyan-500\/40  { border-color: rgba(79,158,255,0.40); }
+.dark .border-cyan-400\/25  { border-color: rgba(79,158,255,0.25); }
+.dark .border-cyan-400\/30  { border-color: rgba(79,158,255,0.30); }
+.dark .border-cyan-400\/50  { border-color: rgba(79,158,255,0.50); }
+
+/* ═══════════════════════════════════════════════════════════════════
+   MOON DUST ENERGETIC — Glow & neon effects
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Navbar logo: neon glow on the P4H icon and brand text */
+.dark .navbar-logo svg {
+  filter: drop-shadow(0 0 6px rgba(79,158,255,0.55)) drop-shadow(0 0 14px rgba(79,158,255,0.25));
+}
+.dark .navbar-logo .brand-text {
+  text-shadow: 0 0 10px rgba(79,158,255,0.55), 0 0 24px rgba(79,158,255,0.22);
+}
+
+/* Primary button — vibrant punch with electric glow */
+.dark .bg-primary,
+.dark [class*="bg-primary"]:not([class*="foreground"]):not([class*="muted"]) {
+  box-shadow: 0 0 12px rgba(79,158,255,0.40), 0 2px 16px rgba(79,158,255,0.25);
+}
+.dark .bg-primary:hover,
+.dark [class*="bg-primary"]:not([class*="foreground"]):not([class*="muted"]):hover {
+  box-shadow: 0 0 18px rgba(79,158,255,0.55), 0 4px 24px rgba(79,158,255,0.35);
+}
+
+/* Card hover shadow — electric blue instead of neutral */
+.dark .card-hover:hover,
+.dark [class*="hover:shadow"]:hover {
+  box-shadow: 0 8px 32px rgba(79,158,255,0.18), 0 2px 8px rgba(0,0,0,0.40);
+}
 
 @keyframes shimmer {
   0% { transform: translateX(-100%); }

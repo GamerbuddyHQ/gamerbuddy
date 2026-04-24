@@ -268,7 +268,7 @@ export default function WalletsPage() {
             </Button>
 
             {!isIndian && (
-              <div className="flex items-start gap-2 rounded-lg border p-3 text-xs" style={{ borderColor: "rgba(142,193,222,0.20)", background: "rgba(142,193,222,0.04)" }}>
+              <div className="flex items-start gap-2 rounded-lg border p-3 text-xs" style={{ borderColor: "rgba(56,186,255,0.20)", background: "rgba(56,186,255,0.04)" }}>
                 <Globe className="h-3.5 w-3.5 shrink-0 mt-0.5" style={{ color: "rgb(103,232,249)" }} />
                 <span style={{ color: "rgb(148,163,184)" }}>
                   International users: we currently support Razorpay. Stripe + more options coming in the next 6 months. 🙏
@@ -448,7 +448,7 @@ export default function WalletsPage() {
                     <div
                       className="rounded-xl border p-4 space-y-2"
                       style={{
-                        background: "linear-gradient(135deg, rgba(34,197,94,0.07) 0%, rgba(142,193,222,0.07) 100%)",
+                        background: "linear-gradient(135deg, rgba(34,197,94,0.07) 0%, rgba(56,186,255,0.07) 100%)",
                         borderColor: "rgba(34,197,94,0.30)",
                       }}
                     >
