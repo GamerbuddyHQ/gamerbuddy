@@ -1,5 +1,6 @@
 import { Router, type IRouter } from "express";
 import { HealthCheckResponse } from "@workspace/api-zod";
+import { pool } from "@workspace/db";
 
 const router: IRouter = Router();
 
@@ -25,6 +26,30 @@ router.get("/healthz/env", (_req, res) => {
     },
     timestamp: new Date().toISOString(),
   });
+});
+
+// DB connectivity diagnostic — runs a real SELECT 1 against Neon and returns
+// the exact error message so we can diagnose connection issues without needing
+// Vercel's log panel. Never exposes credentials.
+router.get("/healthz/db", async (_req, res) => {
+  if (!pool) {
+    res.status(503).json({ status: "error", error: "DATABASE_URL is not set — pool not initialised" });
+    return;
+  }
+  try {
+    const client = await pool.connect();
+    const result = await client.query("SELECT NOW() AS ts, current_database() AS db");
+    client.release();
+    res.json({
+      status: "ok",
+      serverTime: result.rows[0].ts,
+      database: result.rows[0].db,
+    });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    const code = (err as any)?.code ?? null;
+    res.status(503).json({ status: "error", error: msg, code });
+  }
 });
 
 export default router;
