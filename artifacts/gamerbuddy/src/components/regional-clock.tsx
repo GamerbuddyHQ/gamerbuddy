@@ -429,7 +429,7 @@ export function RegionalClock() {
       {open && (
         <div
           className="absolute right-0 top-full mt-2 w-[280px] rounded-2xl border border-border/70 bg-popover z-[200] flex flex-col overflow-hidden"
-          style={{ boxShadow: "0 16px 48px rgba(0,0,0,0.32), 0 0 0 1px rgba(161,255,79,0.12)", maxHeight: "min(580px, 88dvh)" }}
+          style={{ boxShadow: "0 16px 48px rgba(0,0,0,0.32), 0 0 0 1px rgba(232,255,0,0.12)", maxHeight: "min(580px, 88dvh)" }}
         >
           {/* Header */}
           <div className="flex items-center justify-between px-3.5 py-2.5 border-b border-border/60 bg-primary/5 shrink-0">
@@ -445,7 +445,7 @@ export function RegionalClock() {
           {/* Hero */}
           <div
             className="px-4 pt-3.5 pb-3 border-b border-border/40 shrink-0"
-            style={{ background: "linear-gradient(135deg, rgba(161,255,79,0.08) 0%, rgba(161,255,79,0.02) 100%)" }}
+            style={{ background: "linear-gradient(135deg, rgba(232,255,0,0.08) 0%, rgba(232,255,0,0.02) 100%)" }}
           >
             <p className="text-[9px] font-black uppercase tracking-widest text-primary/50 mb-2 flex items-center gap-1.5">
               <Pin className="h-2.5 w-2.5 fill-primary/40" />
@@ -466,11 +466,11 @@ export function RegionalClock() {
             </p>
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3 min-w-0">
-                <span className="text-[32px] leading-none shrink-0" style={{ filter: "drop-shadow(0 0 8px rgba(161,255,79,0.4))" }}>
+                <span className="text-[32px] leading-none shrink-0" style={{ filter: "drop-shadow(0 0 8px rgba(232,255,0,0.4))" }}>
                   {primary.flag}
                 </span>
                 <div className="min-w-0">
-                  <div className="font-black tabular-nums leading-none" style={{ fontSize: "38px", letterSpacing: "-0.04em", color: "hsl(var(--primary))", textShadow: "0 0 24px rgba(161,255,79,0.5)" }}>
+                  <div className="font-black tabular-nums leading-none" style={{ fontSize: "38px", letterSpacing: "-0.04em", color: "hsl(var(--primary))", textShadow: "0 0 24px rgba(232,255,0,0.5)" }}>
                     {primaryTime}
                   </div>
                   <div className="text-[11px] text-primary/55 font-bold mt-1 truncate">

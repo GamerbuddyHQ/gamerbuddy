@@ -86,7 +86,7 @@
   --radius-xl: calc(var(--radius) + 4px);
 }
 
-/* ── INK GAMES VIBE THEME ── */
+/* ── TESORO MERCENARY ELITE THEME ── */
 :root {
   --button-outline: rgba(255,255,255, .10);
   --badge-outline: rgba(255,255,255, .06);
@@ -99,59 +99,59 @@
   --text-on-surface: rgba(255, 255, 255, 1);
   --text-subdued: rgba(255, 255, 255, 0.60);
   --text-dim: rgba(255, 255, 255, 0.32);
-  --glass-bg: rgba(161, 255, 79, 0.03);
-  --glass-border: rgba(161, 255, 79, 0.07);
-  --glass-btn-bg: rgba(255, 59, 92, 0.06);
-  --glass-btn-border: rgba(255, 59, 92, 0.14);
-  --surface-dark: linear-gradient(145deg, rgba(17,24,32,0.97) 0%, rgba(10,14,17,0.99) 100%);
-  --surface-dark-border: rgba(161, 255, 79, 0.06);
-  --icon-glass-bg: rgba(161, 255, 79, 0.05);
+  --glass-bg: rgba(232, 255, 0, 0.03);
+  --glass-border: rgba(232, 255, 0, 0.07);
+  --glass-btn-bg: rgba(232, 255, 0, 0.06);
+  --glass-btn-border: rgba(232, 255, 0, 0.14);
+  --surface-dark: linear-gradient(145deg, rgba(14,14,17,0.97) 0%, rgba(10,10,14,0.99) 100%);
+  --surface-dark-border: rgba(232, 255, 0, 0.06);
+  --icon-glass-bg: rgba(232, 255, 0, 0.05);
 
   /* Ink Games Vibe — Near-black cool background */
-  --background: 206 26% 5%;     /* #0A0E11 */
-  --foreground: 240 2% 90%;      /* #E5E5E6 cool white */
+  --background: 240 17% 5%;     /* #0A0A0E */
+  --foreground: 31 72% 97%;      /* #FDF8F3 warm cream */
 
-  --border: 210 20% 16%;
+  --border: 240 12% 14%;
 
-  --card: 208 24% 8%;             /* #111820 */
-  --card-foreground: 240 2% 90%;
-  --card-border: 210 18% 14%;
+  --card: 240 8% 7%;              /* ~#101013 */
+  --card-foreground: 31 72% 97%;
+  --card-border: 240 10% 12%;
 
-  --sidebar: 208 30% 4%;          /* darker than bg */
-  --sidebar-foreground: 240 2% 90%;
-  --sidebar-border: 210 18% 10%;
-  --sidebar-primary: 350 100% 62%;  /* #FF3B5C crimson */
+  --sidebar: 240 20% 4%;          /* void black */
+  --sidebar-foreground: 31 72% 97%;
+  --sidebar-border: 240 12% 9%;
+  --sidebar-primary: 65 100% 50%;   /* #E8FF00 gold */
   --sidebar-primary-foreground: 206 26% 5%;
-  --sidebar-accent: 208 22% 10%;
-  --sidebar-accent-foreground: 240 2% 90%;
-  --sidebar-ring: 350 100% 62%;
+  --sidebar-accent: 240 10% 9%;
+  --sidebar-accent-foreground: 31 72% 97%;
+  --sidebar-ring: 65 100% 50%;
 
-  --popover: 210 28% 6%;
-  --popover-foreground: 240 2% 90%;
-  --popover-border: 210 18% 12%;
+  --popover: 240 17% 6%;
+  --popover-foreground: 31 72% 97%;
+  --popover-border: 240 10% 11%;
 
-  /* Crimson CTA — Primary Accent (#FF3B5C) */
-  --primary: 350 100% 62%;
-  --primary-foreground: 206 26% 5%;
+  /* Gold CTA — Primary Accent (#E8FF00) */
+  --primary: 65 100% 50%;
+  --primary-foreground: 240 17% 5%;
 
   /* Dark Panel — Secondary */
-  --secondary: 208 25% 10%;
-  --secondary-foreground: 240 2% 90%;
+  --secondary: 240 10% 9%;
+  --secondary-foreground: 31 72% 97%;
 
-  --muted: 208 20% 8%;
-  --muted-foreground: 210 15% 62%;
+  --muted: 240 8% 7%;
+  --muted-foreground: 31 15% 58%;
 
-  --accent: 208 25% 12%;
-  --accent-foreground: 240 2% 90%;
+  --accent: 240 10% 10%;
+  --accent-foreground: 31 72% 97%;
 
   --destructive: 0 84% 60%;
   --destructive-foreground: 240 2% 90%;
 
-  --input: 208 22% 10%;
-  --ring: 350 100% 62%;
+  --input: 240 10% 9%;
+  --ring: 65 100% 50%;
 
-  --chart-1: 92 100% 66%;        /* neon green #A1FF4F */
-  --chart-2: 350 100% 62%;       /* crimson #FF3B5C */
+  --chart-1: 65 100% 50%;        /* gold #E8FF00 */
+  --chart-2: 37 40% 60%;         /* muted gold #C5A46E */
   --chart-3: 160 100% 45%;
   --chart-4: 254 100% 63%;       /* purple #6E44FF */
   --chart-5: 254 100% 63%;       /* purple #6E44FF */
@@ -348,7 +348,7 @@
   box-shadow: 0 2px 8px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.04);
 }
 :root:not(.dark) .group.rounded-2xl.border.overflow-hidden:hover {
-  box-shadow: 0 8px 28px rgba(161,255,79,0.14), 0 0 0 1px rgba(161,255,79,0.10);
+  box-shadow: 0 8px 28px rgba(232,255,0,0.14), 0 0 0 1px rgba(232,255,0,0.10);
 }
 
 /* ── Low-opacity muted text — boost for light-mode readability ── */
@@ -410,77 +410,77 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   INK GAMES VIBE — Tailwind neon class remapping
+   TESORO MERCENARY ELITE — Tailwind neon class remapping
    Remap all Tailwind cyan classes to the new palette in dark mode.
-   text-cyan-* → #A1FF4F (#A1FF4F teal-cyan highlight)
-   bg-cyan-*   → #A1FF4F teal tinted backgrounds
-   border-cyan-* → #A1FF4F teal tinted borders
+   text-cyan-* → #E8FF00 (#E8FF00 teal-cyan highlight)
+   bg-cyan-*   → #E8FF00 teal tinted backgrounds
+   border-cyan-* → #E8FF00 teal tinted borders
    ═══════════════════════════════════════════════════════════════════ */
 .dark .text-cyan-400,
 .dark .text-cyan-400\/70,
 .dark .text-cyan-400\/60,
 .dark .text-cyan-400\/65,
 .dark .text-cyan-400\/55,
-.dark .text-cyan-400\/80 { color: #A1FF4F; }
+.dark .text-cyan-400\/80 { color: #E8FF00; }
 
 .dark .text-cyan-300,
 .dark .text-cyan-300\/80,
 .dark .text-cyan-300\/70,
-.dark .text-cyan-300\/45 { color: #A1FF4F; }
+.dark .text-cyan-300\/45 { color: #E8FF00; }
 
-.dark .text-cyan-200\/70 { color: rgba(161,255,79,0.70); }
+.dark .text-cyan-200\/70 { color: rgba(232,255,0,0.70); }
 
-.dark .bg-cyan-500\/5   { background-color: rgba(161,255,79,0.06); }
-.dark .bg-cyan-500\/10  { background-color: rgba(161,255,79,0.09); }
-.dark .bg-cyan-500\/20  { background-color: rgba(161,255,79,0.13); }
-.dark .bg-cyan-500\/25  { background-color: rgba(161,255,79,0.16); }
+.dark .bg-cyan-500\/5   { background-color: rgba(232,255,0,0.06); }
+.dark .bg-cyan-500\/10  { background-color: rgba(232,255,0,0.09); }
+.dark .bg-cyan-500\/20  { background-color: rgba(232,255,0,0.13); }
+.dark .bg-cyan-500\/25  { background-color: rgba(232,255,0,0.16); }
 
-.dark .border-cyan-500\/10  { border-color: rgba(161,255,79,0.10); }
-.dark .border-cyan-500\/15  { border-color: rgba(161,255,79,0.15); }
-.dark .border-cyan-500\/20  { border-color: rgba(161,255,79,0.20); }
-.dark .border-cyan-500\/25  { border-color: rgba(161,255,79,0.25); }
-.dark .border-cyan-500\/30  { border-color: rgba(161,255,79,0.30); }
-.dark .border-cyan-500\/40  { border-color: rgba(161,255,79,0.40); }
-.dark .border-cyan-400\/25  { border-color: rgba(161,255,79,0.25); }
-.dark .border-cyan-400\/30  { border-color: rgba(161,255,79,0.30); }
-.dark .border-cyan-400\/50  { border-color: rgba(161,255,79,0.50); }
+.dark .border-cyan-500\/10  { border-color: rgba(232,255,0,0.10); }
+.dark .border-cyan-500\/15  { border-color: rgba(232,255,0,0.15); }
+.dark .border-cyan-500\/20  { border-color: rgba(232,255,0,0.20); }
+.dark .border-cyan-500\/25  { border-color: rgba(232,255,0,0.25); }
+.dark .border-cyan-500\/30  { border-color: rgba(232,255,0,0.30); }
+.dark .border-cyan-500\/40  { border-color: rgba(232,255,0,0.40); }
+.dark .border-cyan-400\/25  { border-color: rgba(232,255,0,0.25); }
+.dark .border-cyan-400\/30  { border-color: rgba(232,255,0,0.30); }
+.dark .border-cyan-400\/50  { border-color: rgba(232,255,0,0.50); }
 
 /* ═══════════════════════════════════════════════════════════════════
-   INK GAMES VIBE — Glow & neon effects
-   Neon green (#A1FF4F) for logo/highlights, crimson (#FF3B5C) for CTAs
+   TESORO MERCENARY ELITE — Glow effects
+   Electric gold (#E8FF00) for logo/highlights/CTAs, dark bg
    ═══════════════════════════════════════════════════════════════════ */
 
-/* text-primary → neon green (overrides crimson CSS variable for text uses) */
+/* text-primary → electric gold */
 .dark .text-primary,
 .dark [class*="text-primary"]:not([class*="foreground"]) {
-  color: #A1FF4F;
+  color: #E8FF00;
 }
 
-/* Navbar logo: neon green glow */
+/* Navbar logo: gold glow */
 .dark .navbar-logo svg {
-  filter: drop-shadow(0 0 6px rgba(161,255,79,0.60)) drop-shadow(0 0 16px rgba(161,255,79,0.28));
+  filter: drop-shadow(0 0 5px rgba(232,255,0,0.45)) drop-shadow(0 0 14px rgba(232,255,0,0.20));
 }
 .dark .navbar-logo .brand-text {
-  text-shadow: 0 0 10px rgba(161,255,79,0.60), 0 0 28px rgba(161,255,79,0.25);
+  text-shadow: 0 0 8px rgba(232,255,0,0.50), 0 0 24px rgba(232,255,0,0.20);
 }
 
-/* Primary button — crimson punch with crimson glow */
+/* Primary button — gold elite with gold glow */
 .dark .bg-primary,
 .dark [class*="bg-primary"]:not([class*="foreground"]):not([class*="muted"]) {
-  background-color: #FF3B5C !important;
-  color: #0A0E11 !important;
-  box-shadow: 0 0 12px rgba(255,59,92,0.45), 0 2px 16px rgba(255,59,92,0.28);
+  background-color: #E8FF00 !important;
+  color: #0A0A0E !important;
+  box-shadow: 0 0 10px rgba(232,255,0,0.35), 0 2px 14px rgba(232,255,0,0.20);
 }
 .dark .bg-primary:hover,
 .dark [class*="bg-primary"]:not([class*="foreground"]):not([class*="muted"]):hover {
-  background-color: #e83352 !important;
-  box-shadow: 0 0 20px rgba(255,59,92,0.60), 0 4px 28px rgba(255,59,92,0.38);
+  background-color: #d4eb00 !important;
+  box-shadow: 0 0 18px rgba(232,255,0,0.45), 0 4px 24px rgba(232,255,0,0.28);
 }
 
-/* Card hover shadow — neon green subtle */
+/* Card hover shadow — gold subtle */
 .dark .card-hover:hover,
 .dark [class*="hover:shadow"]:hover {
-  box-shadow: 0 8px 32px rgba(161,255,79,0.14), 0 2px 8px rgba(0,0,0,0.50);
+  box-shadow: 0 8px 32px rgba(232,255,0,0.08), 0 2px 8px rgba(0,0,0,0.50);
 }
 
 @keyframes shimmer {

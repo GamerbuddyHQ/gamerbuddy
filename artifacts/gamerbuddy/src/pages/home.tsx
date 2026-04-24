@@ -61,20 +61,20 @@ type FloatingEntry = {
 };
 
 const GAMING_ICONS: FloatingEntry[] = [
-  { render: (s,c) => <Gamepad2    size={s} color={c} />, left:  7, top: 10, size: 26, opacity: 0.22, variant: 1, dur: 14, delay:  0, color: '#A1FF4F' },
-  { render: (s,c) => <NintendoSwitch size={s} color={c} />, left: 86, top: 14, size: 24, opacity: 0.18, variant: 2, dur: 18, delay:  2, color: '#A1FF4F' },
-  { render: (s,c) => <PSController size={s} color={c} />, left: 14, top: 70, size: 28, opacity: 0.20, variant: 3, dur: 20, delay:  1, color: '#A1FF4F' },
+  { render: (s,c) => <Gamepad2    size={s} color={c} />, left:  7, top: 10, size: 26, opacity: 0.22, variant: 1, dur: 14, delay:  0, color: '#E8FF00' },
+  { render: (s,c) => <NintendoSwitch size={s} color={c} />, left: 86, top: 14, size: 24, opacity: 0.18, variant: 2, dur: 18, delay:  2, color: '#E8FF00' },
+  { render: (s,c) => <PSController size={s} color={c} />, left: 14, top: 70, size: 28, opacity: 0.20, variant: 3, dur: 20, delay:  1, color: '#E8FF00' },
   { render: (s,c) => <XboxController size={s} color={c} />, left: 79, top: 62, size: 24, opacity: 0.17, variant: 1, dur: 17, delay:  4, color: '#ffffff' },
   { render: (s,c) => <JoystickSVG  size={s} color={c} />, left: 48, top:  6, size: 20, opacity: 0.16, variant: 2, dur: 22, delay:  7, color: '#ffffff' },
-  { render: (s,c) => <Headphones   size={s} color={c} />, left: 91, top: 42, size: 22, opacity: 0.19, variant: 3, dur: 15, delay:  3, color: '#A1FF4F' },
+  { render: (s,c) => <Headphones   size={s} color={c} />, left: 91, top: 42, size: 22, opacity: 0.19, variant: 3, dur: 15, delay:  3, color: '#E8FF00' },
   { render: (s,c) => <Keyboard     size={s} color={c} />, left: 24, top: 82, size: 24, opacity: 0.16, variant: 1, dur: 21, delay:  5, color: '#ffffff' },
-  { render: (s,c) => <Mouse        size={s} color={c} />, left: 70, top: 80, size: 20, opacity: 0.20, variant: 2, dur: 13, delay:  6, color: '#A1FF4F' },
+  { render: (s,c) => <Mouse        size={s} color={c} />, left: 70, top: 80, size: 20, opacity: 0.20, variant: 2, dur: 13, delay:  6, color: '#E8FF00' },
   { render: (s,c) => <Smartphone   size={s} color={c} />, left:  4, top: 48, size: 18, opacity: 0.15, variant: 3, dur: 19, delay:  9, color: '#ffffff' },
-  { render: (s,c) => <Crosshair    size={s} color={c} />, left: 61, top: 87, size: 22, opacity: 0.18, variant: 1, dur: 24, delay:  2, color: '#A1FF4F' },
+  { render: (s,c) => <Crosshair    size={s} color={c} />, left: 61, top: 87, size: 22, opacity: 0.18, variant: 1, dur: 24, delay:  2, color: '#E8FF00' },
   { render: (s,c) => <Monitor      size={s} color={c} />, left: 35, top: 12, size: 20, opacity: 0.15, variant: 2, dur: 16, delay: 10, color: '#ffffff' },
-  { render: (s,c) => <Gamepad2     size={s} color={c} />, left: 74, top: 28, size: 18, opacity: 0.13, variant: 3, dur: 26, delay: 12, color: '#A1FF4F' },
+  { render: (s,c) => <Gamepad2     size={s} color={c} />, left: 74, top: 28, size: 18, opacity: 0.13, variant: 3, dur: 26, delay: 12, color: '#E8FF00' },
   { render: (s,c) => <Headphones   size={s} color={c} />, left: 18, top: 32, size: 16, opacity: 0.14, variant: 1, dur: 23, delay: 14, color: '#ffffff' },
-  { render: (s,c) => <Crosshair    size={s} color={c} />, left: 55, top: 55, size: 16, opacity: 0.12, variant: 2, dur: 28, delay:  8, color: '#A1FF4F' },
+  { render: (s,c) => <Crosshair    size={s} color={c} />, left: 55, top: 55, size: 16, opacity: 0.12, variant: 2, dur: 28, delay:  8, color: '#E8FF00' },
   { render: (s,c) => <Mouse        size={s} color={c} />, left: 40, top: 40, size: 14, opacity: 0.11, variant: 3, dur: 30, delay: 16, color: '#ffffff' },
 ];
 
@@ -173,9 +173,9 @@ function Step({ n, title, desc }: { n: number; title: string; desc: string }) {
   return (
     <div className="flex gap-4 items-start group">
       <div
-        className="shrink-0 w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm text-white transition-all duration-200 group-hover:scale-105"
+        className="shrink-0 w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm text-[#0A0A0E] transition-all duration-200 group-hover:scale-105"
         style={{
-          background: "linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(190,100%,32%) 100%)",
+          background: "linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(55,100%,42%) 100%)",
           border: "1px solid hsl(var(--primary) / 0.5)",
           boxShadow: "0 0 18px hsl(var(--primary) / 0.30)",
         }}
@@ -201,8 +201,8 @@ export default function Home() {
       <div
         className="flex items-center justify-center gap-2.5 px-4 py-2.5 text-sm font-semibold text-center"
         style={{
-          background: "linear-gradient(90deg, rgba(161,255,79,0.12) 0%, rgba(161,255,79,0.10) 100%)",
-          borderBottom: "1px solid rgba(161,255,79,0.20)",
+          background: "linear-gradient(90deg, rgba(232,255,0,0.12) 0%, rgba(232,255,0,0.10) 100%)",
+          borderBottom: "1px solid rgba(232,255,0,0.20)",
         }}
       >
         <span
@@ -228,10 +228,10 @@ export default function Home() {
             <div
               className="inline-flex items-center gap-2.5 rounded-full px-5 py-2 text-sm font-bold"
               style={{
-                background: "rgba(161,255,79,0.15)",
-                border: "1px solid rgba(161,255,79,0.40)",
+                background: "rgba(232,255,0,0.15)",
+                border: "1px solid rgba(232,255,0,0.40)",
                 color: "hsl(var(--primary))",
-                boxShadow: "0 0 24px rgba(161,255,79,0.18), inset 0 1px 0 rgba(255,255,255,0.06)",
+                boxShadow: "0 0 24px rgba(232,255,0,0.18), inset 0 1px 0 rgba(255,255,255,0.06)",
               }}
             >
               <Gamepad2 className="h-4 w-4" />
@@ -247,11 +247,11 @@ export default function Home() {
             <span
               className="block text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-[6rem]"
               style={{
-                background: "linear-gradient(135deg, #A1FF4F 0%, #A1FF4F 40%, #88cc33 100%)",
+                background: "linear-gradient(135deg, #E8FF00 0%, #E8FF00 40%, #C5A46E 100%)",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
                 backgroundClip: "text",
-                filter: "drop-shadow(0 0 32px rgba(161,255,79,0.60))",
+                filter: "drop-shadow(0 0 32px rgba(232,255,0,0.60))",
               }}
             >
               {t.home.headline2}
@@ -270,10 +270,10 @@ export default function Home() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-5 mb-6">
             <Link href="/signup">
               <button
-                className="relative overflow-hidden group w-full sm:w-auto px-10 py-4 rounded-2xl font-bold text-base lg:text-lg text-white transition-all duration-200 hover:brightness-110 hover:scale-[1.03] active:scale-[0.97]"
+                className="relative overflow-hidden group w-full sm:w-auto px-10 py-4 rounded-2xl font-bold text-base lg:text-lg text-[#0A0A0E] transition-all duration-200 hover:brightness-105 hover:scale-[1.03] active:scale-[0.97]"
                 style={{
-                  background: "linear-gradient(135deg, #FF3B5C 0%, #cc2a47 100%)",
-                  boxShadow: "0 8px 32px rgba(255,59,92,0.50), 0 2px 8px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.12)",
+                  background: "linear-gradient(135deg, #E8FF00 0%, #bbd600 100%)",
+                  boxShadow: "0 8px 28px rgba(232,255,0,0.32), 0 2px 8px rgba(0,0,0,0.40), inset 0 1px 0 rgba(255,255,255,0.18)",
                   minWidth: "210px",
                 }}
               >
@@ -301,7 +301,7 @@ export default function Home() {
                 }}
                 onMouseEnter={(e) => {
                   (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,0.10)";
-                  (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(161,255,79,0.45)";
+                  (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(232,255,0,0.45)";
                 }}
                 onMouseLeave={(e) => {
                   (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,0.06)";
@@ -375,7 +375,7 @@ export default function Home() {
               icon={<Users className="h-6 w-6" />}
               iconBg="bg-cyan-500/15"
               iconColor="text-cyan-400"
-              glowColor="rgba(161,255,79,0.8)"
+              glowColor="rgba(232,255,0,0.8)"
               title="Find Teammates"
               desc="Post a request for any game, platform, and skill level. Get matched with friendly, verified players instantly."
               tag="Hiring"
@@ -384,7 +384,7 @@ export default function Home() {
               icon={<Coins className="h-6 w-6" />}
               iconBg="bg-primary/15"
               iconColor="text-primary"
-              glowColor="rgba(161,255,79,0.8)"
+              glowColor="rgba(232,255,0,0.8)"
               title="Get Paid to Play"
               desc="Accept requests, complete gaming sessions, and withdraw your earnings. Turn your skills into real money."
               tag="Earnings"
@@ -407,22 +407,22 @@ export default function Home() {
         <div
           className="max-w-[1400px] mx-auto rounded-3xl p-8 sm:p-10 lg:p-14 relative overflow-hidden"
           style={{
-            background: "linear-gradient(135deg, rgba(0,150,120,0.08) 0%, rgba(161,255,79,0.05) 100%)",
-            border: "1px solid rgba(161,255,79,0.22)",
+            background: "linear-gradient(135deg, rgba(0,150,120,0.08) 0%, rgba(232,255,0,0.05) 100%)",
+            border: "1px solid rgba(232,255,0,0.22)",
             boxShadow: "0 4px 40px rgba(0,0,0,0.20)",
           }}
         >
           {/* top glow line */}
           <div
             className="absolute top-0 left-0 right-0 h-px pointer-events-none"
-            style={{ background: "linear-gradient(90deg, transparent, rgba(161,255,79,0.5), rgba(161,255,79,0.3), transparent)" }}
+            style={{ background: "linear-gradient(90deg, transparent, rgba(232,255,0,0.5), rgba(232,255,0,0.3), transparent)" }}
           />
 
           <div className="relative grid grid-cols-1 md:grid-cols-2 gap-10 lg:gap-16">
             {/* Divider */}
             <div
               className="hidden md:block absolute left-1/2 top-0 bottom-0 w-px -translate-x-1/2 pointer-events-none"
-              style={{ background: "linear-gradient(to bottom, transparent, rgba(161,255,79,0.35), rgba(161,255,79,0.20), transparent)" }}
+              style={{ background: "linear-gradient(to bottom, transparent, rgba(232,255,0,0.35), rgba(232,255,0,0.20), transparent)" }}
             />
 
             {/* Left — Hirers */}
@@ -431,8 +431,8 @@ export default function Home() {
                 <div
                   className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest px-3 py-1.5 rounded-full mb-3"
                   style={{
-                    background: "rgba(161,255,79,0.10)",
-                    border: "1px solid rgba(161,255,79,0.30)",
+                    background: "rgba(232,255,0,0.10)",
+                    border: "1px solid rgba(232,255,0,0.30)",
                     color: "rgb(34,211,238)",
                   }}
                 >
@@ -455,8 +455,8 @@ export default function Home() {
                 <div
                   className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest px-3 py-1.5 rounded-full mb-3"
                   style={{
-                    background: "rgba(161,255,79,0.12)",
-                    border: "1px solid rgba(161,255,79,0.35)",
+                    background: "rgba(232,255,0,0.12)",
+                    border: "1px solid rgba(232,255,0,0.35)",
                     color: "hsl(var(--primary))",
                   }}
                 >
@@ -483,7 +483,7 @@ export default function Home() {
             {[
               { icon: <Shield className="h-5 w-5 text-green-400" />, label: "Escrow Protected", sub: "Funds held until session complete", bg: "rgba(34,197,94,0.08)", border: "rgba(34,197,94,0.20)" },
               { icon: <Star className="h-5 w-5 text-yellow-400" />, label: "Verified Reviews", sub: "Both sides must leave a review", bg: "rgba(234,179,8,0.08)", border: "rgba(234,179,8,0.20)" },
-              { icon: <Zap className="h-5 w-5 text-cyan-400" />, label: "Instant Alerts", sub: "Real-time bids, starts, and payments", bg: "rgba(161,255,79,0.08)", border: "rgba(161,255,79,0.20)" },
+              { icon: <Zap className="h-5 w-5 text-cyan-400" />, label: "Instant Alerts", sub: "Real-time bids, starts, and payments", bg: "rgba(232,255,0,0.08)", border: "rgba(232,255,0,0.20)" },
               { icon: <Trophy className="h-5 w-5 text-amber-400" />, label: "Transparent 10% Fee", sub: "Gamers keep 90% — no hidden charges", bg: "rgba(245,158,11,0.08)", border: "rgba(245,158,11,0.20)" },
             ].map(({ icon, label, sub, bg, border }) => (
               <div
@@ -534,10 +534,10 @@ export default function Home() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center pt-3">
               <Link href="/signup">
                 <button
-                  className="relative overflow-hidden group px-10 py-4 rounded-xl font-black text-sm uppercase tracking-widest text-white w-full sm:w-auto transition-all hover:brightness-110 hover:scale-[1.03] active:scale-[0.97]"
+                  className="relative overflow-hidden group px-10 py-4 rounded-xl font-black text-sm uppercase tracking-widest text-[#0A0A0E] w-full sm:w-auto transition-all hover:brightness-105 hover:scale-[1.03] active:scale-[0.97]"
                   style={{
-                    background: "linear-gradient(135deg, #FF3B5C 0%, #cc2a47 100%)",
-                    boxShadow: "0 0 32px rgba(255,59,92,0.45), 0 4px 16px rgba(0,0,0,0.30)",
+                    background: "linear-gradient(135deg, #E8FF00 0%, #bbd600 100%)",
+                    boxShadow: "0 0 32px rgba(232,255,0,0.45), 0 4px 16px rgba(0,0,0,0.30)",
                   }}
                 >
                   <div
