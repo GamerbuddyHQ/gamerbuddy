@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -17,7 +17,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Gamepad2, ShieldCheck, Gamepad, Trophy, Users, Wallet, Star, Check, X } from "lucide-react";
+import { Gamepad2, ShieldCheck, Gamepad, Trophy, Users, Wallet, Star, Check, X, Eye, EyeOff } from "lucide-react";
 
 const signupSchema = z.object({
   name:     z.string().min(2, "Name must be at least 2 characters"),
@@ -86,6 +86,7 @@ export default function Signup() {
   });
 
   const passwordValue = form.watch("password");
+  const [showPassword, setShowPassword] = useState(false);
 
   function onSubmit(values: z.infer<typeof signupSchema>) {
     signupMutation.mutate(
@@ -248,7 +249,24 @@ export default function Signup() {
                       <FormItem>
                         <FormLabel className="text-xs uppercase tracking-widest text-muted-foreground font-bold">Password</FormLabel>
                         <FormControl>
-                          <Input type="password" placeholder="••••••••" autoComplete="new-password" {...field} className="bg-background/60" />
+                          <div className="relative">
+                            <Input
+                              type={showPassword ? "text" : "password"}
+                              placeholder="••••••••"
+                              autoComplete="new-password"
+                              {...field}
+                              className="bg-background/60 pr-10"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowPassword((v) => !v)}
+                              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-white transition-colors"
+                              tabIndex={-1}
+                              aria-label={showPassword ? "Hide password" : "Show password"}
+                            >
+                              {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                            </button>
+                          </div>
                         </FormControl>
                         <FormMessage />
                         <PasswordStrength password={passwordValue} />

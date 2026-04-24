@@ -18,7 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Gamepad2, ShieldCheck, Lock, AlertTriangle, Trophy, Users, Wallet, Star, FlaskConical, UserCheck, Swords } from "lucide-react";
+import { Gamepad2, ShieldCheck, Lock, AlertTriangle, Trophy, Users, Wallet, Star, FlaskConical, UserCheck, Swords, Eye, EyeOff } from "lucide-react";
 
 const API_BASE = (import.meta.env.VITE_API_URL ?? "/api").replace(/\/$/, "");
 
@@ -58,6 +58,7 @@ export default function Login() {
   const [lockedUntil, setLockedUntil]             = useState<string | null>(null);
   const [attemptsRemaining, setAttemptsRemaining] = useState<number | null>(null);
   const [testLoading, setTestLoading]             = useState<"hirer" | "gamer" | null>(null);
+  const [showPassword, setShowPassword]           = useState(false);
 
   async function handleTestLogin(role: "hirer" | "gamer") {
     setTestLoading(role);
@@ -235,14 +236,25 @@ export default function Login() {
                       <FormItem>
                         <FormLabel className="text-xs uppercase tracking-widest text-muted-foreground font-bold">Password</FormLabel>
                         <FormControl>
-                          <Input
-                            type="password"
-                            placeholder="••••••••"
-                            autoComplete="current-password"
-                            disabled={isLocked}
-                            {...field}
-                            className="bg-background/60"
-                          />
+                          <div className="relative">
+                            <Input
+                              type={showPassword ? "text" : "password"}
+                              placeholder="••••••••"
+                              autoComplete="current-password"
+                              disabled={isLocked}
+                              {...field}
+                              className="bg-background/60 pr-10"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowPassword((v) => !v)}
+                              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-white transition-colors"
+                              tabIndex={-1}
+                              aria-label={showPassword ? "Hide password" : "Show password"}
+                            >
+                              {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                            </button>
+                          </div>
                         </FormControl>
                         <FormMessage />
                       </FormItem>
