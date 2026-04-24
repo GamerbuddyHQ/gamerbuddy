@@ -65,13 +65,12 @@ app.use(cookieParser(process.env.SESSION_SECRET));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use(async (_req: Request, _res: Response, next: NextFunction) => {
-  try {
-    await ensureTablesCreated();
-    next();
-  } catch (err) {
-    next(err);
-  }
+// ── Non-blocking DB readiness check ─────────────────────────────────────────
+// Fire-and-forget on module load: ensures tables exist and warms the
+// WebSocket connection. Individual route handlers have their own try/catch,
+// so we do NOT block every request with this check.
+ensureTablesCreated().catch((err) => {
+  console.error("[gamerbuddy:db-init-error]", err);
 });
 
 app.use("/api", router);

@@ -3,6 +3,7 @@ import multer from "multer";
 import { db, usersTable, reviewsTable, gameRequestsTable, bidsTable, profilePurchasesTable, questEntriesTable, streamingAccountsTable, gamingAccountsTable, profileVotesTable, userPhotosTable, STREAMING_PLATFORMS, GAMING_PLATFORMS } from "@workspace/db";
 import { eq, desc, and, ne, sql, or } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
+import { toIso, toIsoRequired } from "../lib/dates";
 import { recalculateTrustFactor } from "../trust-factor";
 import { awardTrustPoints } from "../trust-score";
 import { validate, sanitize, UpdateProfileSchema, PostQuestSchema } from "../lib/validate";
@@ -167,20 +168,20 @@ router.get("/users/:id", async (req, res): Promise<void> => {
 
   res.json({
     ...user,
-    createdAt: user.createdAt.toISOString(),
+    createdAt: toIsoRequired(user.createdAt),
     profilePhotoUrl: user.profilePhotoUrl ?? null,
     galleryPhotoUrls: user.galleryPhotoUrls ?? [],
     avgRating,
     reviewCount: reviews.length,
     wouldPlayAgainPercent,
-    reviews: reviews.map((r) => ({ ...r, createdAt: r.createdAt.toISOString() })),
-    sessionsAsHirer: completedAsHirer.map((s) => ({ ...s, createdAt: s.createdAt.toISOString() })),
-    sessionsAsGamer: completedAsGamer.map((s) => ({ ...s, createdAt: s.createdAt?.toISOString() })),
+    reviews: reviews.map((r) => ({ ...r, createdAt: toIsoRequired(r.createdAt) })),
+    sessionsAsHirer: completedAsHirer.map((s) => ({ ...s, createdAt: toIsoRequired(s.createdAt) })),
+    sessionsAsGamer: completedAsGamer.map((s) => ({ ...s, createdAt: toIso(s.createdAt) })),
     sessionsAsGamerCount,
     sessionsAsHirerCount,
     beginnerFriendly,
     purchasedItems: purchases.map((p) => p.itemId),
-    questEntries: questEntries.map((q) => ({ ...q, createdAt: q.createdAt.toISOString() })),
+    questEntries: questEntries.map((q) => ({ ...q, createdAt: toIsoRequired(q.createdAt) })),
     streamingAccounts,
     gamingAccounts,
   });
@@ -189,7 +190,7 @@ router.get("/users/:id", async (req, res): Promise<void> => {
 router.get("/quest", requireAuth, async (req, res): Promise<void> => {
   const user = req.user!;
   const entries = await db.select().from(questEntriesTable).where(eq(questEntriesTable.userId, user.id)).orderBy(questEntriesTable.createdAt);
-  res.json(entries.map((q) => ({ ...q, createdAt: q.createdAt.toISOString() })));
+  res.json(entries.map((q) => ({ ...q, createdAt: toIsoRequired(q.createdAt) })));
 });
 
 router.post("/quest", requireAuth, validate(PostQuestSchema), async (req, res): Promise<void> => {
@@ -209,7 +210,7 @@ router.post("/quest", requireAuth, validate(PostQuestSchema), async (req, res): 
     playstyle: sanitize(playstyle),
   }).returning();
 
-  res.status(201).json({ ...entry, createdAt: entry.createdAt.toISOString() });
+  res.status(201).json({ ...entry, createdAt: toIsoRequired(entry.createdAt) });
 });
 
 router.delete("/quest/:id", requireAuth, async (req, res): Promise<void> => {
@@ -441,7 +442,7 @@ router.get("/profile/purchases", requireAuth, async (req, res): Promise<void> =>
     .from(profilePurchasesTable)
     .where(eq(profilePurchasesTable.userId, user.id))
     .orderBy(desc(profilePurchasesTable.purchasedAt));
-  res.json(purchases.map((p) => ({ ...p, purchasedAt: p.purchasedAt.toISOString() })));
+  res.json(purchases.map((p) => ({ ...p, purchasedAt: toIsoRequired(p.purchasedAt) })));
 });
 
 router.post("/profile/purchase", requireAuth, async (req, res): Promise<void> => {
@@ -474,7 +475,7 @@ router.post("/profile/purchase", requireAuth, async (req, res): Promise<void> =>
 
   res.status(201).json({
     success: true,
-    purchase: { ...purchase, purchasedAt: purchase.purchasedAt.toISOString() },
+    purchase: { ...purchase, purchasedAt: toIsoRequired(purchase.purchasedAt) },
     newPoints: fresh.points - item.cost,
   });
 });
