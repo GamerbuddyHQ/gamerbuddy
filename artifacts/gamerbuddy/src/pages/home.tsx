@@ -26,7 +26,7 @@ function ParticleCanvas() {
     resize();
     window.addEventListener("resize", resize);
 
-    const COLORS = ["rgba(168,85,247,", "rgba(34,211,238,", "rgba(124,58,237,", "rgba(192,132,252,"];
+    const COLORS = ["rgba(0,212,255,", "rgba(34,211,238,", "rgba(0,212,255,", "rgba(0,212,255,"];
 
     for (let i = 0; i < 70; i++) {
       particles.push({
@@ -179,8 +179,8 @@ export default function Home() {
       <div
         className="flex items-center justify-center gap-2.5 px-4 py-2.5 text-sm font-semibold text-center"
         style={{
-          background: "linear-gradient(90deg, rgba(168,85,247,0.12) 0%, rgba(34,211,238,0.10) 100%)",
-          borderBottom: "1px solid rgba(168,85,247,0.20)",
+          background: "linear-gradient(90deg, rgba(0,212,255,0.12) 0%, rgba(34,211,238,0.10) 100%)",
+          borderBottom: "1px solid rgba(0,212,255,0.20)",
         }}
       >
         <span
@@ -188,7 +188,7 @@ export default function Home() {
           style={{ background: "#22c55e", boxShadow: "0 0 6px rgba(34,197,94,0.6)", animation: "pulse 1.5s infinite" }}
         />
         <span style={{ color: "var(--text-on-surface)", opacity: 0.82 }}>
-          Gamerbuddy is currently in Phase 1 — Core Hiring Only. Tournaments and more features are coming soon!{" "}
+          Player4Hire is currently in Phase 1 — Core Hiring Only. Tournaments and more features are coming soon!{" "}
           <Link href="/roadmap" className="font-semibold hover:underline" style={{ color: "hsl(var(--primary))" }}>
             View Roadmap →
           </Link>
@@ -203,7 +203,7 @@ export default function Home() {
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            background: "radial-gradient(ellipse 110% 90% at 50% -5%, rgba(109,40,217,0.28) 0%, rgba(168,85,247,0.10) 35%, transparent 65%)",
+            background: "radial-gradient(ellipse 110% 90% at 50% -5%, rgba(109,40,217,0.28) 0%, rgba(0,212,255,0.10) 35%, transparent 65%)",
             zIndex: 0,
           }}
         />
@@ -211,7 +211,7 @@ export default function Home() {
         <div
           className="absolute top-[-15%] left-[-12%] w-[75vw] h-[75vw] rounded-full pointer-events-none"
           style={{
-            background: "radial-gradient(circle, rgba(168,85,247,0.15) 0%, transparent 58%)",
+            background: "radial-gradient(circle, rgba(0,212,255,0.15) 0%, transparent 58%)",
             animation: "float-slow 11s ease-in-out infinite",
             zIndex: 0,
           }}
@@ -238,7 +238,7 @@ export default function Home() {
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            backgroundImage: "radial-gradient(circle, rgba(168,85,247,0.12) 1px, transparent 1px)",
+            backgroundImage: "radial-gradient(circle, rgba(0,212,255,0.12) 1px, transparent 1px)",
             backgroundSize: "38px 38px",
             zIndex: 0,
             maskImage: "radial-gradient(ellipse 95% 75% at 50% 30%, black 5%, transparent 100%)",
@@ -254,7 +254,7 @@ export default function Home() {
               className="inline-flex items-center gap-2.5 rounded-full px-5 py-2 text-sm font-bold"
               style={{
                 background: "rgba(139,92,246,0.18)",
-                border: "1px solid rgba(168,85,247,0.40)",
+                border: "1px solid rgba(0,212,255,0.40)",
                 color: "hsl(var(--primary))",
                 boxShadow: "0 0 24px rgba(139,92,246,0.20), inset 0 1px 0 rgba(255,255,255,0.06)",
               }}
@@ -272,11 +272,11 @@ export default function Home() {
             <span
               className="block text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-[6rem]"
               style={{
-                background: "linear-gradient(135deg, #c084fc 0%, #a855f7 40%, #7c3aed 100%)",
+                background: "linear-gradient(135deg, #00D4FF 0%, #00D4FF 40%, #0099bb 100%)",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
                 backgroundClip: "text",
-                filter: "drop-shadow(0 0 32px rgba(168,85,247,0.60))",
+                filter: "drop-shadow(0 0 32px rgba(0,212,255,0.60))",
               }}
             >
               {t.home.headline2}
@@ -297,8 +297,8 @@ export default function Home() {
               <button
                 className="relative overflow-hidden group w-full sm:w-auto px-10 py-4 rounded-2xl font-bold text-base lg:text-lg text-white transition-all duration-200 hover:brightness-110 hover:scale-[1.03] active:scale-[0.97]"
                 style={{
-                  background: "linear-gradient(135deg, #9333ea 0%, #7c3aed 50%, #6d28d9 100%)",
-                  boxShadow: "0 8px 32px rgba(124,58,237,0.55), 0 2px 8px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.12)",
+                  background: "linear-gradient(135deg, #0099bb 0%, #0099bb 50%, #6d28d9 100%)",
+                  boxShadow: "0 8px 32px rgba(0,212,255,0.55), 0 2px 8px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.12)",
                   minWidth: "210px",
                 }}
               >
@@ -327,7 +327,7 @@ export default function Home() {
                 }}
                 onMouseEnter={(e) => {
                   (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,0.10)";
-                  (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(168,85,247,0.45)";
+                  (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(0,212,255,0.45)";
                 }}
                 onMouseLeave={(e) => {
                   (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,0.06)";
@@ -345,7 +345,7 @@ export default function Home() {
           {/* Trust cluster — tight to buttons */}
           <div className="space-y-2">
             <p className="text-center text-xs" style={{ color: "rgba(148,163,184,0.65)" }}>
-              Verification helps keep Gamerbuddy safe — it usually takes 24–48 hours
+              Verification helps keep Player4Hire safe — it usually takes 24–48 hours
             </p>
             <div className="flex items-center justify-center gap-2">
               <div className="flex items-center gap-0.5">
@@ -389,7 +389,7 @@ export default function Home() {
               <div className="h-px w-12 bg-gradient-to-l from-transparent to-primary/50" />
             </div>
             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-foreground leading-tight mb-3">
-              How Gamerbuddy Works
+              How Player4Hire Works
             </h2>
             <p className="text-sm sm:text-base text-muted-foreground max-w-lg mx-auto leading-relaxed">
               Post a request, get bids from verified gamers, play together — funds held in escrow until your session is complete.
@@ -410,7 +410,7 @@ export default function Home() {
               icon={<Coins className="h-6 w-6" />}
               iconBg="bg-primary/15"
               iconColor="text-primary"
-              glowColor="rgba(168,85,247,0.8)"
+              glowColor="rgba(0,212,255,0.8)"
               title="Get Paid to Play"
               desc="Accept requests, complete gaming sessions, and withdraw your earnings. Turn your skills into real money."
               tag="Earnings"
@@ -434,19 +434,19 @@ export default function Home() {
           className="max-w-[1400px] mx-auto rounded-3xl p-8 sm:p-10 lg:p-14 relative overflow-hidden"
           style={{
             background: "linear-gradient(135deg, rgba(139,92,246,0.09) 0%, rgba(34,211,238,0.05) 100%)",
-            border: "1px solid rgba(168,85,247,0.22)",
+            border: "1px solid rgba(0,212,255,0.22)",
             boxShadow: "0 4px 40px rgba(0,0,0,0.20)",
           }}
         >
           {/* top glow line */}
           <div
             className="absolute top-0 left-0 right-0 h-px pointer-events-none"
-            style={{ background: "linear-gradient(90deg, transparent, rgba(168,85,247,0.5), rgba(34,211,238,0.3), transparent)" }}
+            style={{ background: "linear-gradient(90deg, transparent, rgba(0,212,255,0.5), rgba(34,211,238,0.3), transparent)" }}
           />
           {/* corner glows */}
           <div
             className="absolute top-0 left-0 w-80 h-80 rounded-full pointer-events-none"
-            style={{ background: "radial-gradient(circle, rgba(168,85,247,0.10) 0%, transparent 65%)" }}
+            style={{ background: "radial-gradient(circle, rgba(0,212,255,0.10) 0%, transparent 65%)" }}
           />
           <div
             className="absolute bottom-0 right-0 w-64 h-64 rounded-full pointer-events-none"
@@ -457,7 +457,7 @@ export default function Home() {
             {/* Divider */}
             <div
               className="hidden md:block absolute left-1/2 top-0 bottom-0 w-px -translate-x-1/2 pointer-events-none"
-              style={{ background: "linear-gradient(to bottom, transparent, rgba(168,85,247,0.35), rgba(34,211,238,0.20), transparent)" }}
+              style={{ background: "linear-gradient(to bottom, transparent, rgba(0,212,255,0.35), rgba(34,211,238,0.20), transparent)" }}
             />
 
             {/* Left — Hirers */}
@@ -490,8 +490,8 @@ export default function Home() {
                 <div
                   className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest px-3 py-1.5 rounded-full mb-3"
                   style={{
-                    background: "rgba(168,85,247,0.12)",
-                    border: "1px solid rgba(168,85,247,0.35)",
+                    background: "rgba(0,212,255,0.12)",
+                    border: "1px solid rgba(0,212,255,0.35)",
                     color: "hsl(var(--primary))",
                   }}
                 >
@@ -545,20 +545,20 @@ export default function Home() {
         <div
           className="relative max-w-4xl mx-auto rounded-3xl text-center overflow-hidden px-8 py-14 sm:py-16 lg:py-20"
           style={{
-            background: "linear-gradient(135deg, rgba(109,40,217,0.30) 0%, rgba(124,58,237,0.14) 50%, rgba(34,211,238,0.08) 100%)",
-            border: "1px solid rgba(168,85,247,0.30)",
+            background: "linear-gradient(135deg, rgba(109,40,217,0.30) 0%, rgba(0,212,255,0.14) 50%, rgba(34,211,238,0.08) 100%)",
+            border: "1px solid rgba(0,212,255,0.30)",
             boxShadow: "0 0 80px rgba(139,92,246,0.15), inset 0 0 60px rgba(139,92,246,0.05)",
           }}
         >
           {/* top glow line */}
           <div
             className="absolute top-0 left-0 right-0 h-px pointer-events-none"
-            style={{ background: "linear-gradient(90deg, transparent, rgba(168,85,247,0.6), transparent)" }}
+            style={{ background: "linear-gradient(90deg, transparent, rgba(0,212,255,0.6), transparent)" }}
           />
           {/* orbs */}
           <div
             className="absolute top-0 right-0 w-72 h-72 rounded-full pointer-events-none"
-            style={{ background: "radial-gradient(circle, rgba(168,85,247,0.18) 0%, transparent 70%)" }}
+            style={{ background: "radial-gradient(circle, rgba(0,212,255,0.18) 0%, transparent 70%)" }}
           />
           <div
             className="absolute bottom-0 left-0 w-56 h-56 rounded-full pointer-events-none"
@@ -573,7 +573,7 @@ export default function Home() {
               Your Next Session<br />Starts Here
             </h2>
             <p className="text-muted-foreground text-base max-w-md mx-auto leading-relaxed">
-              Join thousands of gamers worldwide already hiring and earning on Gamerbuddy. Free to sign up.
+              Join thousands of gamers worldwide already hiring and earning on Player4Hire. Free to sign up.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center pt-3">
               <Link href="/signup">
@@ -581,7 +581,7 @@ export default function Home() {
                   className="relative overflow-hidden group px-10 py-4 rounded-xl font-black text-sm uppercase tracking-widest text-white w-full sm:w-auto transition-all hover:brightness-110 hover:scale-[1.03] active:scale-[0.97]"
                   style={{
                     background: "linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(272,72%,35%) 100%)",
-                    boxShadow: "0 0 32px rgba(168,85,247,0.45), 0 4px 16px rgba(0,0,0,0.25)",
+                    boxShadow: "0 0 32px rgba(0,212,255,0.45), 0 4px 16px rgba(0,0,0,0.25)",
                   }}
                 >
                   <div

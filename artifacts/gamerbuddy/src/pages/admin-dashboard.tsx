@@ -256,7 +256,7 @@ export default function AdminDashboard() {
         <div className="px-4 md:px-8 h-14 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Shield className="w-5 h-5 text-primary" />
-            <span className="font-bold tracking-tight">Gamerbuddy Admin</span>
+            <span className="font-bold tracking-tight">Player4Hire Admin</span>
             <span className="hidden sm:inline text-xs text-muted-foreground/50 ml-2">
               {new Date().toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
             </span>

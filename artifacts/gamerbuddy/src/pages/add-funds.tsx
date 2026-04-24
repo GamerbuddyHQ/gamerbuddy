@@ -89,7 +89,7 @@ function ProcessingOverlay() {
     <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50 p-4">
       <div
         className="rounded-2xl w-full max-w-xs p-7 text-center space-y-6 shadow-2xl"
-        style={{ background: "linear-gradient(160deg, #1a0a42 0%, #0a0a1a 100%)", border: "1px solid rgba(168,85,247,0.3)" }}
+        style={{ background: "linear-gradient(160deg, #1a0a42 0%, #0a0a1a 100%)", border: "1px solid rgba(0,212,255,0.3)" }}
       >
         <div className="relative mx-auto w-20 h-20">
           <div className="absolute inset-0 rounded-full border-4 border-primary/10 animate-ping" style={{ animationDuration: "1.5s" }} />
@@ -149,7 +149,7 @@ function SuccessScreen({
         <div className="text-4xl font-black text-white">${amount.toFixed(2)}</div>
         <div className="text-muted-foreground text-sm mt-1">added to your Hiring Wallet</div>
       </div>
-      <div className="rounded-2xl overflow-hidden mb-5" style={{ border: "1px solid rgba(168,85,247,0.2)", background: "linear-gradient(160deg, rgba(168,85,247,0.05) 0%, rgba(0,0,0,0.4) 100%)" }}>
+      <div className="rounded-2xl overflow-hidden mb-5" style={{ border: "1px solid rgba(0,212,255,0.2)", background: "linear-gradient(160deg, rgba(0,212,255,0.05) 0%, rgba(0,0,0,0.4) 100%)" }}>
         <div className="px-5 py-3 border-b border-border/40 flex items-center justify-between">
           <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Transaction Receipt</span>
           <span className="text-xs text-primary font-mono font-bold">{txnRef}</span>
@@ -186,7 +186,7 @@ function SuccessScreen({
         </button>
         <button
           onClick={onPostRequest}
-          className="rounded-xl bg-primary py-3.5 font-extrabold text-sm text-white uppercase tracking-wider shadow-[0_0_20px_rgba(168,85,247,0.3)] hover:bg-primary/90 transition-all"
+          className="rounded-xl bg-primary py-3.5 font-extrabold text-sm text-white uppercase tracking-wider shadow-[0_0_20px_rgba(0,212,255,0.3)] hover:bg-primary/90 transition-all"
         >
           Post a Request
         </button>
@@ -234,7 +234,7 @@ function ErrorScreen({ error, onRetry, onBack }: { error: string; onRetry: () =>
         </button>
         <button
           onClick={onRetry}
-          className="flex-1 rounded-xl bg-primary py-3.5 font-extrabold text-sm text-white uppercase tracking-wider shadow-[0_0_20px_rgba(168,85,247,0.3)] hover:bg-primary/90 transition-all flex items-center justify-center gap-2"
+          className="flex-1 rounded-xl bg-primary py-3.5 font-extrabold text-sm text-white uppercase tracking-wider shadow-[0_0_20px_rgba(0,212,255,0.3)] hover:bg-primary/90 transition-all flex items-center justify-center gap-2"
         >
           <RefreshCw className="h-4 w-4" /> Try Again
         </button>
@@ -275,11 +275,11 @@ function RazorpayPanel({
         key: order.keyId,
         amount: Math.round(order.amountInr * 100),
         currency: order.currency,
-        name: "Gamerbuddy",
+        name: "Player4Hire",
         description: `Hiring Wallet — $${amount.toFixed(2)} top-up`,
         order_id: order.orderId,
         prefill: { email: userEmail ?? "" },
-        theme: { color: "#a855f7" },
+        theme: { color: "#00D4FF" },
         modal: {
           ondismiss: () => {
             setLoading(false);
@@ -381,7 +381,7 @@ function RazorpayPanel({
         className={`w-full relative overflow-hidden rounded-xl py-4 font-extrabold text-base uppercase tracking-widest transition-all ${
           loading
             ? "bg-primary/30 text-white/40 cursor-not-allowed"
-            : "bg-primary text-white hover:bg-primary/90 shadow-[0_0_28px_rgba(168,85,247,0.4)]"
+            : "bg-primary text-white hover:bg-primary/90 shadow-[0_0_28px_rgba(0,212,255,0.4)]"
         }`}
       >
         <div className="flex items-center justify-center gap-2.5">
@@ -567,7 +567,7 @@ export default function AddFunds() {
               <span className="text-foreground font-medium">Razorpay</span>, which works great for UPI and Indian cards.
               We know <span className="text-foreground font-medium">Stripe</span> is popular globally and we plan to add it —
               plus more payment options — <span className="text-foreground font-medium">within the next 6 months</span>.
-              Thank you for supporting Gamerbuddy! 🙏
+              Thank you for supporting Player4Hire! 🙏
             </p>
           </div>
         </div>
@@ -594,7 +594,7 @@ export default function AddFunds() {
                   disabled
                     ? "border-border/30 bg-background/20 text-muted-foreground/30 cursor-not-allowed"
                     : amount === String(preset)
-                    ? "border-primary bg-primary/20 text-foreground shadow-[0_0_14px_rgba(168,85,247,0.3)]"
+                    ? "border-primary bg-primary/20 text-foreground shadow-[0_0_14px_rgba(0,212,255,0.3)]"
                     : "border-border/60 bg-background/40 text-muted-foreground hover:border-primary/40 hover:text-foreground"
                 }`}
               >
@@ -676,7 +676,7 @@ export default function AddFunds() {
         disabled={!isValidAmount}
         className={`w-full rounded-xl py-4 font-extrabold text-base uppercase tracking-widest transition-all ${
           isValidAmount
-            ? "bg-primary text-white hover:bg-primary/90 shadow-[0_0_24px_rgba(168,85,247,0.35)]"
+            ? "bg-primary text-white hover:bg-primary/90 shadow-[0_0_24px_rgba(0,212,255,0.35)]"
             : "bg-primary/20 text-white/30 cursor-not-allowed"
         }`}
       >

@@ -64,7 +64,7 @@ const ACTION_COLORS: Record<string, string> = {
   hide_post:    "rgba(251,191,36,0.15)",
   restore_post: "rgba(34,197,94,0.15)",
   delete_post:  "rgba(239,68,68,0.15)",
-  pin_post:     "rgba(168,85,247,0.15)",
+  pin_post:     "rgba(0,212,255,0.15)",
   ban_user:     "rgba(239,68,68,0.15)",
   unban_user:   "rgba(34,197,94,0.15)",
   mod_comment:  "rgba(99,102,241,0.15)",
@@ -74,7 +74,7 @@ const ACTION_TEXT_COLORS: Record<string, string> = {
   hide_post:    "#fbbf24",
   restore_post: "#22c55e",
   delete_post:  "#ef4444",
-  pin_post:     "#a855f7",
+  pin_post:     "#00D4FF",
   ban_user:     "#ef4444",
   unban_user:   "#22c55e",
   mod_comment:  "#818cf8",
@@ -113,9 +113,9 @@ function Avatar({ url, name, size = 40 }: { url: string | null; name: string; si
       className="rounded-xl flex items-center justify-center shrink-0 font-black text-white"
       style={{
         width: size, height: size,
-        background: "linear-gradient(135deg, rgba(168,85,247,0.5) 0%, rgba(139,92,246,0.5) 100%)",
+        background: "linear-gradient(135deg, rgba(0,212,255,0.5) 0%, rgba(139,92,246,0.5) 100%)",
         fontSize: size * 0.35,
-        border: "1px solid rgba(168,85,247,0.30)",
+        border: "1px solid rgba(0,212,255,0.30)",
       }}
     >
       {initials}
@@ -147,7 +147,7 @@ function AdminNav({ onLogout }: { onLogout: () => void }) {
             <Shield className="w-4 h-4 text-primary" />
           </div>
           <div>
-            <div className="text-sm font-black tracking-tight text-foreground">Gamerbuddy Admin</div>
+            <div className="text-sm font-black tracking-tight text-foreground">Player4Hire Admin</div>
             <div className="text-[10px] text-muted-foreground/60 uppercase tracking-widest">Management Console</div>
           </div>
         </div>
@@ -264,9 +264,9 @@ function CurrentModerators() {
                 <Badge
                   className="text-[9px] font-black uppercase tracking-widest shrink-0"
                   style={{
-                    background: "rgba(168,85,247,0.15)",
-                    color: "#a855f7",
-                    border: "1px solid rgba(168,85,247,0.30)",
+                    background: "rgba(0,212,255,0.15)",
+                    color: "#00D4FF",
+                    border: "1px solid rgba(0,212,255,0.30)",
                   }}
                 >
                   MOD
@@ -569,7 +569,7 @@ export default function AdminModerators() {
         <div className="flex items-center gap-3">
           <div
             className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
-            style={{ background: "rgba(168,85,247,0.15)", border: "1px solid rgba(168,85,247,0.30)" }}
+            style={{ background: "rgba(0,212,255,0.15)", border: "1px solid rgba(0,212,255,0.30)" }}
           >
             <UserCheck className="w-5 h-5 text-primary" />
           </div>

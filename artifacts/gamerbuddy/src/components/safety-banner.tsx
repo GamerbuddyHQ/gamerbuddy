@@ -17,13 +17,13 @@ const WARNINGS = [
   },
   {
     icon: ShieldCheck,
-    title: "Keep all payments through Gamerbuddy",
-    body: "We suggest completing all hires and payments through the Gamerbuddy platform. Using our built-in escrow system is the safest and simplest option for everyone — it protects both hirers and gamers.",
+    title: "Keep all payments through Player4Hire",
+    body: "We suggest completing all hires and payments through the Player4Hire platform. Using our built-in escrow system is the safest and simplest option for everyone — it protects both hirers and gamers.",
   },
   {
     icon: Video,
     title: "Session recording is your responsibility",
-    body: "Gamerbuddy does not record gameplay sessions. If you want a record of the session, enable recording on your own device before starting.",
+    body: "Player4Hire does not record gameplay sessions. If you want a record of the session, enable recording on your own device before starting.",
   },
   {
     icon: UserX,
@@ -63,7 +63,7 @@ export function SafetyBanner({ variant = "full", showSelfHire = true, storageKey
         <ShieldAlert className="h-4 w-4 shrink-0 mt-0.5 text-amber-400" />
         <span className="text-amber-300/90 flex-1">
           <strong className="text-amber-300">Safety reminder:</strong>{" "}
-          Never share account passwords, and keep all payments through Gamerbuddy's secure escrow — it's the safest and simplest choice for everyone.
+          Never share account passwords, and keep all payments through Player4Hire's secure escrow — it's the safest and simplest choice for everyone.
         </span>
         <button onClick={handleDismiss} className="text-amber-400/50 hover:text-amber-400 transition-colors shrink-0 mt-0.5">
           <X className="h-4 w-4" />
@@ -99,7 +99,7 @@ export function SafetyBanner({ variant = "full", showSelfHire = true, storageKey
       {!expanded && (
         <div className="px-4 pb-3 text-xs text-amber-300/70 border-t border-amber-500/20 pt-2.5 flex flex-wrap gap-x-4 gap-y-1">
           <span className="flex items-center gap-1.5"><Lock className="h-3 w-3 text-amber-400/70" /> Never share account passwords</span>
-          <span className="flex items-center gap-1.5"><ShieldCheck className="h-3 w-3 text-amber-400/70" /> Keep payments through Gamerbuddy</span>
+          <span className="flex items-center gap-1.5"><ShieldCheck className="h-3 w-3 text-amber-400/70" /> Keep payments through Player4Hire</span>
           <span className="flex items-center gap-1.5"><Video className="h-3 w-3 text-amber-400/70" /> Recording is your responsibility</span>
           {showSelfHire && <span className="flex items-center gap-1.5"><UserX className="h-3 w-3 text-amber-400/70" /> You cannot hire yourself</span>}
         </div>

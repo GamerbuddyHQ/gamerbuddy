@@ -12,8 +12,8 @@ export default function SocialsPage() {
       className="min-h-[70vh] flex items-center justify-center py-16 px-4"
       style={{
         background: isDark
-          ? "radial-gradient(ellipse 70% 60% at 50% 0%, rgba(168,85,247,0.07) 0%, transparent 70%)"
-          : "radial-gradient(ellipse 70% 60% at 50% 0%, rgba(124,58,237,0.05) 0%, transparent 70%)",
+          ? "radial-gradient(ellipse 70% 60% at 50% 0%, rgba(0,212,255,0.07) 0%, transparent 70%)"
+          : "radial-gradient(ellipse 70% 60% at 50% 0%, rgba(0,212,255,0.05) 0%, transparent 70%)",
       }}
     >
       <div className="w-full max-w-xl mx-auto text-center space-y-10">
@@ -23,9 +23,9 @@ export default function SocialsPage() {
           <div
             className="inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.2em] px-4 py-2 rounded-full"
             style={{
-              background: "rgba(168,85,247,0.12)",
-              border: "1px solid rgba(168,85,247,0.35)",
-              color: "#a855f7",
+              background: "rgba(0,212,255,0.12)",
+              border: "1px solid rgba(0,212,255,0.35)",
+              color: "#00D4FF",
             }}
           >
             <span className="h-2 w-2 rounded-full bg-primary animate-pulse" />
@@ -37,13 +37,13 @@ export default function SocialsPage() {
         <div className="space-y-4">
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-black uppercase tracking-tight leading-tight">
             Stay{" "}
-            <span style={{ color: isDark ? "#a855f7" : "hsl(272,72%,42%)" }}>
+            <span style={{ color: isDark ? "#00D4FF" : "hsl(272,72%,42%)" }}>
               Connected
             </span>{" "}
-            with Gamerbuddy
+            with Player4Hire
           </h1>
           <p className="text-muted-foreground text-base sm:text-lg max-w-md mx-auto leading-relaxed">
-            Everything Gamerbuddy — every platform, every update, all social links — in one central place.
+            Everything Player4Hire — every platform, every update, all social links — in one central place.
           </p>
         </div>
 
@@ -55,8 +55,8 @@ export default function SocialsPage() {
             rel="noopener noreferrer"
             className="group relative w-full flex items-center justify-center gap-3 rounded-2xl px-8 py-5 font-black text-lg text-white transition-all duration-300 hover:scale-[1.03] hover:brightness-110 active:scale-[0.97]"
             style={{
-              background: "linear-gradient(135deg, #a855f7 0%, #7c3aed 50%, #22d3ee 100%)",
-              boxShadow: "0 0 50px rgba(168,85,247,0.50), 0 6px 30px rgba(34,211,238,0.25), inset 0 1px 0 rgba(255,255,255,0.20)",
+              background: "linear-gradient(135deg, #00D4FF 0%, #0099bb 50%, #22d3ee 100%)",
+              boxShadow: "0 0 50px rgba(0,212,255,0.50), 0 6px 30px rgba(34,211,238,0.25), inset 0 1px 0 rgba(255,255,255,0.20)",
             }}
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} className="h-6 w-6 shrink-0">

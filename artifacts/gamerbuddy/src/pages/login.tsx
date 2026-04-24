@@ -153,16 +153,16 @@ export default function Login() {
         {/* ── Left: Login Form ── */}
         <div>
           <Card className="border-primary/20 bg-card/50 backdrop-blur-sm overflow-hidden">
-            <div className="h-1 w-full" style={{ background: "linear-gradient(90deg, #7c3aed, #a855f7, #22d3ee)" }} />
+            <div className="h-1 w-full" style={{ background: "linear-gradient(90deg, #0099bb, #00D4FF, #22d3ee)" }} />
 
             <CardHeader className="space-y-2 text-center pt-8 pb-4">
               <div className="flex justify-center mb-2">
                 <div
                   className="w-14 h-14 rounded-2xl flex items-center justify-center"
                   style={{
-                    background: "linear-gradient(135deg, rgba(168,85,247,0.2), rgba(34,211,238,0.1))",
-                    border: "1px solid rgba(168,85,247,0.3)",
-                    boxShadow: "0 0 24px rgba(168,85,247,0.15)",
+                    background: "linear-gradient(135deg, rgba(0,212,255,0.2), rgba(34,211,238,0.1))",
+                    border: "1px solid rgba(0,212,255,0.3)",
+                    boxShadow: "0 0 24px rgba(0,212,255,0.15)",
                   }}
                 >
                   <Gamepad2 className="h-7 w-7 text-primary" />
@@ -295,8 +295,8 @@ export default function Login() {
                       border: "1px solid rgba(239,68,68,0.30)",
                       color: "rgba(239,68,68,0.70)",
                     } : {
-                      background: "linear-gradient(135deg, #9333ea 0%, #7c3aed 100%)",
-                      boxShadow: "0 4px 20px rgba(147,51,234,0.35)",
+                      background: "linear-gradient(135deg, #0099bb 0%, #0099bb 100%)",
+                      boxShadow: "0 4px 20px rgba(0,212,255,0.35)",
                     }}
                     disabled={loginMutation.isPending || isLocked}
                   >
@@ -373,13 +373,13 @@ export default function Login() {
                     disabled={testLoading !== null}
                     className="relative flex flex-col items-start gap-2 rounded-xl px-4 py-3.5 text-left transition-all duration-200 hover:scale-[1.02] active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
                     style={{
-                      background: "linear-gradient(135deg, rgba(168,85,247,0.20) 0%, rgba(236,72,153,0.12) 100%)",
-                      border: "1.5px solid rgba(168,85,247,0.40)",
-                      boxShadow: "0 2px 12px rgba(168,85,247,0.15)",
+                      background: "linear-gradient(135deg, rgba(0,212,255,0.20) 0%, rgba(236,72,153,0.12) 100%)",
+                      border: "1.5px solid rgba(0,212,255,0.40)",
+                      boxShadow: "0 2px 12px rgba(0,212,255,0.15)",
                     }}
                   >
                     <div className="flex items-center gap-2 w-full">
-                      <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(168,85,247,0.25)" }}>
+                      <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(0,212,255,0.25)" }}>
                         <Swords className="h-3.5 w-3.5 text-purple-300" />
                       </div>
                       <span className="text-xs font-black text-purple-200 uppercase tracking-wide">
@@ -403,12 +403,12 @@ export default function Login() {
             <div className="flex items-center gap-3 mb-4">
               <div
                 className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0"
-                style={{ background: "linear-gradient(135deg, rgba(168,85,247,0.25), rgba(34,211,238,0.15))", border: "1px solid rgba(168,85,247,0.35)" }}
+                style={{ background: "linear-gradient(135deg, rgba(0,212,255,0.25), rgba(34,211,238,0.15))", border: "1px solid rgba(0,212,255,0.35)" }}
               >
                 <Gamepad2 className="h-6 w-6 text-primary" />
               </div>
               <div>
-                <h2 className="text-2xl font-black text-white tracking-tight">Gamerbuddy</h2>
+                <h2 className="text-2xl font-black text-white tracking-tight">Player4Hire</h2>
                 <p className="text-sm text-muted-foreground">The gaming marketplace built for players</p>
               </div>
             </div>
@@ -422,11 +422,11 @@ export default function Login() {
               <div
                 key={label}
                 className="flex items-start gap-3.5 p-4 rounded-xl"
-                style={{ background: "rgba(168,85,247,0.06)", border: "1px solid rgba(168,85,247,0.12)" }}
+                style={{ background: "rgba(0,212,255,0.06)", border: "1px solid rgba(0,212,255,0.12)" }}
               >
                 <div
                   className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 mt-0.5"
-                  style={{ background: "rgba(168,85,247,0.15)", border: "1px solid rgba(168,85,247,0.25)" }}
+                  style={{ background: "rgba(0,212,255,0.15)", border: "1px solid rgba(0,212,255,0.25)" }}
                 >
                   <Icon className="h-4 w-4 text-primary" />
                 </div>

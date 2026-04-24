@@ -22,7 +22,7 @@ const PHASES = [
     bar: "from-green-500 to-emerald-400",
     Icon: Gamepad2,
     description:
-      "Everything currently live on Gamerbuddy — from user accounts and profiles to payments, messaging, community, and full safety protections.",
+      "Everything currently live on Player4Hire — from user accounts and profiles to payments, messaging, community, and full safety protections.",
     items: [
       {
         icon: Shield,
@@ -32,7 +32,7 @@ const PHASES = [
       {
         icon: Zap,
         title: "One-Time Account Activation Fee",
-        desc: "To keep Gamerbuddy safe and enjoyable for real gamers, a small one-time fee is charged after verification — 🇮🇳 ₹149 for India, 🌍 $5 for Global. This protects against fake/bot accounts and spam, keeping the community high-quality and trustworthy. Paid once only — you'll never be charged again. ❤️",
+        desc: "To keep Player4Hire safe and enjoyable for real gamers, a small one-time fee is charged after verification — 🇮🇳 ₹149 for India, 🌍 $5 for Global. This protects against fake/bot accounts and spam, keeping the community high-quality and trustworthy. Paid once only — you'll never be charged again. ❤️",
       },
       {
         icon: Hash,
@@ -202,7 +202,7 @@ export default function Roadmap() {
           Our{" "}
           <span
             style={{
-              background: "linear-gradient(135deg, #a855f7 0%, #22d3ee 100%)",
+              background: "linear-gradient(135deg, #00D4FF 0%, #22d3ee 100%)",
               WebkitBackgroundClip: "text",
               color: "transparent",
             }}
@@ -212,7 +212,7 @@ export default function Roadmap() {
         </h1>
 
         <p className="text-muted-foreground text-base sm:text-lg max-w-lg mx-auto leading-relaxed">
-          We're building Gamerbuddy step by step to create the best co-op gaming experience.
+          We're building Player4Hire step by step to create the best co-op gaming experience.
         </p>
 
         {/* Quick status pills */}
@@ -240,7 +240,7 @@ export default function Roadmap() {
       <div
         className="rounded-2xl border p-6 space-y-4"
         style={{
-          background: "linear-gradient(135deg, rgba(34,197,94,0.06) 0%, rgba(168,85,247,0.04) 100%)",
+          background: "linear-gradient(135deg, rgba(34,197,94,0.06) 0%, rgba(0,212,255,0.04) 100%)",
           borderColor: "rgba(34,197,94,0.18)",
           boxShadow: "0 0 40px rgba(34,197,94,0.06)",
         }}
@@ -358,9 +358,9 @@ export default function Roadmap() {
       <div
         className="rounded-2xl border p-8 text-center space-y-4"
         style={{
-          background: "linear-gradient(135deg, rgba(168,85,247,0.10) 0%, rgba(34,211,238,0.06) 100%)",
-          borderColor: "rgba(168,85,247,0.28)",
-          boxShadow: "0 0 40px rgba(168,85,247,0.10)",
+          background: "linear-gradient(135deg, rgba(0,212,255,0.10) 0%, rgba(34,211,238,0.06) 100%)",
+          borderColor: "rgba(0,212,255,0.28)",
+          boxShadow: "0 0 40px rgba(0,212,255,0.10)",
         }}
       >
         <div className="flex items-center justify-center gap-2">
@@ -371,7 +371,7 @@ export default function Roadmap() {
         </div>
 
         <h3 className="text-xl sm:text-2xl font-black text-foreground">
-          Got an idea for Gamerbuddy?
+          Got an idea for Player4Hire?
         </h3>
         <p className="text-muted-foreground text-sm sm:text-base max-w-md mx-auto leading-relaxed">
           Every great feature started as a suggestion. Share yours and the community votes on what gets built next.
@@ -381,9 +381,9 @@ export default function Roadmap() {
           <button
             className="inline-flex items-center gap-2 px-7 py-3 rounded-xl font-bold text-sm transition-all duration-200 hover:scale-105 active:scale-95"
             style={{
-              background: "linear-gradient(135deg, #a855f7, #7c3aed)",
+              background: "linear-gradient(135deg, #00D4FF, #0099bb)",
               color: "#fff",
-              boxShadow: "0 4px 20px rgba(168,85,247,0.35)",
+              boxShadow: "0 4px 20px rgba(0,212,255,0.35)",
             }}
           >
             <Lightbulb className="h-4 w-4" />
@@ -397,7 +397,7 @@ export default function Roadmap() {
       <div
         className="rounded-2xl border p-6 sm:p-8 flex flex-col sm:flex-row items-center gap-6"
         style={{
-          background: "linear-gradient(135deg, rgba(34,211,238,0.06) 0%, rgba(168,85,247,0.04) 100%)",
+          background: "linear-gradient(135deg, rgba(34,211,238,0.06) 0%, rgba(0,212,255,0.04) 100%)",
           borderColor: "rgba(34,211,238,0.22)",
           boxShadow: "0 0 30px rgba(34,211,238,0.06)",
         }}
@@ -407,7 +407,7 @@ export default function Roadmap() {
           <MessageSquare className="h-7 w-7" style={{ color: "#22d3ee" }} />
         </div>
         <div className="flex-1 text-center sm:text-left space-y-1.5">
-          <p className="text-[11px] font-black uppercase tracking-widest" style={{ color: "#a855f7" }}>
+          <p className="text-[11px] font-black uppercase tracking-widest" style={{ color: "#00D4FF" }}>
             Need Help or Have Questions?
           </p>
           <h3 className="text-lg sm:text-xl font-black text-foreground">
@@ -423,8 +423,8 @@ export default function Roadmap() {
           rel="noopener noreferrer"
           className="shrink-0 inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm text-white transition-all hover:scale-105 active:scale-95"
           style={{
-            background: "linear-gradient(135deg, #a855f7 0%, #7c3aed 60%, #22d3ee 100%)",
-            boxShadow: "0 4px 24px rgba(168,85,247,0.30)",
+            background: "linear-gradient(135deg, #00D4FF 0%, #0099bb 60%, #22d3ee 100%)",
+            boxShadow: "0 4px 24px rgba(0,212,255,0.30)",
           }}
         >
           <Globe className="h-4 w-4 shrink-0" />

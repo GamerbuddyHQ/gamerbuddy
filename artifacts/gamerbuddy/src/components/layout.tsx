@@ -175,7 +175,7 @@ function NotificationBell() {
       >
         <Bell className="h-4 w-4 text-muted-foreground" />
         {unread > 0 && (
-          <span className="absolute -top-1 -right-1 h-4 min-w-[1rem] px-0.5 rounded-full bg-primary text-white text-[9px] font-black flex items-center justify-center leading-none shadow-[0_0_8px_rgba(168,85,247,0.6)]">
+          <span className="absolute -top-1 -right-1 h-4 min-w-[1rem] px-0.5 rounded-full bg-primary text-white text-[9px] font-black flex items-center justify-center leading-none shadow-[0_0_8px_rgba(0,212,255,0.6)]">
             {unread > 99 ? "99+" : unread}
           </span>
         )}
@@ -265,26 +265,26 @@ function LangComingSoonModal({ onClose }: { onClose: () => void }) {
         className="relative w-full max-w-sm rounded-2xl overflow-hidden shadow-2xl"
         style={{
           background: "linear-gradient(160deg, #0d0620 0%, #080415 100%)",
-          border: "1px solid rgba(168,85,247,0.30)",
-          boxShadow: "0 0 60px rgba(168,85,247,0.20), 0 20px 60px rgba(0,0,0,0.8)",
+          border: "1px solid rgba(0,212,255,0.30)",
+          boxShadow: "0 0 60px rgba(0,212,255,0.20), 0 20px 60px rgba(0,0,0,0.8)",
         }}
       >
-        <div className="h-1 w-full" style={{ background: "linear-gradient(90deg, #22d3ee, #a855f7, #7c3aed)" }} />
+        <div className="h-1 w-full" style={{ background: "linear-gradient(90deg, #22d3ee, #00D4FF, #0099bb)" }} />
         <div className="p-6">
           <div className="flex items-center gap-3 mb-4">
             <div
               className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0"
-              style={{ background: "rgba(168,85,247,0.15)", border: "1px solid rgba(168,85,247,0.30)" }}
+              style={{ background: "rgba(0,212,255,0.15)", border: "1px solid rgba(0,212,255,0.30)" }}
             >
               <Globe className="h-5 w-5 text-primary" />
             </div>
             <div>
               <h3 className="text-base font-extrabold text-white uppercase tracking-tight leading-none">Multi-language support</h3>
-              <p className="text-[11px] text-muted-foreground mt-0.5">Coming soon to Gamerbuddy</p>
+              <p className="text-[11px] text-muted-foreground mt-0.5">Coming soon to Player4Hire</p>
             </div>
           </div>
           <p className="text-sm text-muted-foreground leading-relaxed mb-4">
-            We're working hard to add <span className="text-white font-semibold">Hindi, Spanish, French, German, Portuguese</span> and more languages to Gamerbuddy.
+            We're working hard to add <span className="text-white font-semibold">Hindi, Spanish, French, German, Portuguese</span> and more languages to Player4Hire.
           </p>
           <p className="text-xs text-muted-foreground/70 leading-relaxed mb-5">
             Thank you for your patience! The site is currently available in <span className="text-primary font-semibold">English</span>.
@@ -300,7 +300,7 @@ function LangComingSoonModal({ onClose }: { onClose: () => void }) {
               <span
                 key={l.label}
                 className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold"
-                style={{ background: "rgba(168,85,247,0.10)", border: "1px solid rgba(168,85,247,0.25)", color: "rgba(192,132,252,0.80)" }}
+                style={{ background: "rgba(0,212,255,0.10)", border: "1px solid rgba(0,212,255,0.25)", color: "rgba(0,212,255,0.80)" }}
               >
                 {l.flag} {l.label}
               </span>
@@ -309,7 +309,7 @@ function LangComingSoonModal({ onClose }: { onClose: () => void }) {
           <button
             onClick={onClose}
             className="w-full py-2.5 rounded-xl font-black uppercase tracking-widest text-sm text-white transition-all hover:brightness-110"
-            style={{ background: "linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)", boxShadow: "0 4px 16px rgba(147,51,234,0.30)" }}
+            style={{ background: "linear-gradient(135deg, #0099bb 0%, #00D4FF 100%)", boxShadow: "0 4px 16px rgba(0,212,255,0.30)" }}
           >
             Got it!
           </button>
@@ -380,7 +380,7 @@ function LangSelector() {
                     key={l.code}
                     onClick={() => handleSelect(l.code)}
                     className="w-full flex items-center gap-3 px-3 py-2.5 text-left transition-colors hover:bg-primary/10"
-                    style={isActive ? { color: "#c084fc" } : { color: "rgba(255,255,255,0.70)" }}
+                    style={isActive ? { color: "#00D4FF" } : { color: "rgba(255,255,255,0.70)" }}
                   >
                     <span className="text-lg w-6 text-center leading-none">{l.flag}</span>
                     <div className="flex-1 min-w-0">
@@ -390,7 +390,7 @@ function LangSelector() {
                     {isComingSoon ? (
                       <span
                         className="text-[9px] font-black uppercase tracking-wide px-1.5 py-0.5 rounded-full shrink-0"
-                        style={{ background: "rgba(168,85,247,0.15)", color: "rgba(192,132,252,0.80)", border: "1px solid rgba(168,85,247,0.25)" }}
+                        style={{ background: "rgba(0,212,255,0.15)", color: "rgba(0,212,255,0.80)", border: "1px solid rgba(0,212,255,0.25)" }}
                       >
                         Soon
                       </span>
@@ -440,9 +440,9 @@ function MobileLangPicker({ onPick }: { onPick: () => void }) {
               onClick={() => handleSelect(l.code)}
               className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl border text-left transition-colors relative"
               style={isActive ? {
-                background: "rgba(168,85,247,0.15)",
-                borderColor: "rgba(168,85,247,0.40)",
-                color: "#c084fc",
+                background: "rgba(0,212,255,0.15)",
+                borderColor: "rgba(0,212,255,0.40)",
+                color: "#00D4FF",
               } : {
                 background: "rgba(255,255,255,0.03)",
                 borderColor: "rgba(255,255,255,0.08)",
@@ -453,7 +453,7 @@ function MobileLangPicker({ onPick }: { onPick: () => void }) {
               <div className="flex-1 min-w-0">
                 <span className="text-[12px] font-bold truncate block">{l.nativeLabel}</span>
                 {isComingSoon && (
-                  <span className="text-[9px] font-black uppercase tracking-wide" style={{ color: "rgba(192,132,252,0.70)" }}>Soon</span>
+                  <span className="text-[9px] font-black uppercase tracking-wide" style={{ color: "rgba(0,212,255,0.70)" }}>Soon</span>
                 )}
               </div>
             </button>
@@ -517,7 +517,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-[100dvh] flex flex-col bg-background text-foreground font-sans">
       <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-background/85 backdrop-blur-md">
-        {/* thin purple accent line at top */}
+        {/* thin cyan accent line at top */}
         <div className="h-[2px] bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
 
         <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 flex h-14 items-center gap-3">
@@ -564,14 +564,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
                     {...(elProps as any)}
                     className="text-[13px] font-black whitespace-nowrap transition-all duration-200 px-3.5 py-1.5 rounded-full"
                     style={isActive ? {
-                      background: "linear-gradient(135deg, #a855f7 0%, #7c3aed 60%, #22d3ee 100%)",
-                      border: "1px solid rgba(168,85,247,0.70)",
+                      background: "linear-gradient(135deg, #00D4FF 0%, #0099bb 60%, #22d3ee 100%)",
+                      border: "1px solid rgba(0,212,255,0.70)",
                       color: "#fff",
-                      boxShadow: "0 0 16px rgba(168,85,247,0.35), 0 0 4px rgba(34,211,238,0.15)",
+                      boxShadow: "0 0 16px rgba(0,212,255,0.35), 0 0 4px rgba(34,211,238,0.15)",
                     } : {
-                      background: "linear-gradient(135deg, rgba(168,85,247,0.10) 0%, rgba(34,211,238,0.10) 100%)",
-                      border: "1px solid rgba(168,85,247,0.35)",
-                      color: "rgba(192,132,252,0.85)",
+                      background: "linear-gradient(135deg, rgba(0,212,255,0.10) 0%, rgba(34,211,238,0.10) 100%)",
+                      border: "1px solid rgba(0,212,255,0.35)",
+                      color: "rgba(0,212,255,0.85)",
                     }}
                   >
                     {item.label}
@@ -586,14 +586,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
                     href={item.href}
                     className="text-[13px] font-semibold whitespace-nowrap transition-all duration-200 px-3.5 py-1.5 rounded-full"
                     style={isActive ? {
-                      background: "rgba(168,85,247,0.18)",
-                      border: "1px solid rgba(168,85,247,0.55)",
-                      color: "#c084fc",
-                      boxShadow: "0 0 12px rgba(168,85,247,0.20)",
+                      background: "rgba(0,212,255,0.18)",
+                      border: "1px solid rgba(0,212,255,0.55)",
+                      color: "#00D4FF",
+                      boxShadow: "0 0 12px rgba(0,212,255,0.20)",
                     } : {
-                      background: "rgba(168,85,247,0.06)",
-                      border: "1px solid rgba(168,85,247,0.25)",
-                      color: "rgba(192,132,252,0.65)",
+                      background: "rgba(0,212,255,0.06)",
+                      border: "1px solid rgba(0,212,255,0.25)",
+                      color: "rgba(0,212,255,0.65)",
                     }}
                   >
                     {item.label}
@@ -676,7 +676,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 {userMenuOpen && (
                   <div
                     className="absolute right-0 top-full mt-2 rounded-2xl border border-border/70 bg-popover z-[200] overflow-hidden"
-                    style={{ width: 200, boxShadow: "0 16px 48px rgba(0,0,0,0.32), 0 0 0 1px rgba(168,85,247,0.10)" }}
+                    style={{ width: 200, boxShadow: "0 16px 48px rgba(0,0,0,0.32), 0 0 0 1px rgba(0,212,255,0.10)" }}
                   >
                     <div className="h-0.5 bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
                     <div className="px-3 pt-2.5 pb-1">
@@ -723,8 +723,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   href="/signup"
                   className="h-9 px-4 flex items-center text-[13px] font-bold text-white rounded-xl transition-all hover:brightness-110 active:scale-95"
                   style={{
-                    background: "linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)",
-                    boxShadow: "0 4px 14px rgba(147,51,234,0.35)",
+                    background: "linear-gradient(135deg, #0099bb 0%, #00D4FF 100%)",
+                    boxShadow: "0 4px 14px rgba(0,212,255,0.35)",
                   }}
                 >
                   {t.nav.signUp}
@@ -779,12 +779,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
                     href={item.href}
                     className="flex items-center gap-3 px-4 py-3.5 rounded-xl border font-black text-[15px] transition-all"
                     style={isActive ? {
-                      background: "linear-gradient(135deg, #a855f7 0%, #7c3aed 60%, #22d3ee 100%)",
-                      borderColor: "rgba(168,85,247,0.70)", color: "#fff",
-                      boxShadow: "0 0 20px rgba(168,85,247,0.30)",
+                      background: "linear-gradient(135deg, #00D4FF 0%, #0099bb 60%, #22d3ee 100%)",
+                      borderColor: "rgba(0,212,255,0.70)", color: "#fff",
+                      boxShadow: "0 0 20px rgba(0,212,255,0.30)",
                     } : {
-                      background: "linear-gradient(135deg, rgba(168,85,247,0.10) 0%, rgba(34,211,238,0.10) 100%)",
-                      borderColor: "rgba(168,85,247,0.35)", color: "rgba(192,132,252,0.90)",
+                      background: "linear-gradient(135deg, rgba(0,212,255,0.10) 0%, rgba(34,211,238,0.10) 100%)",
+                      borderColor: "rgba(0,212,255,0.35)", color: "rgba(0,212,255,0.90)",
                     }}
                   >
                     <item.icon className="h-5 w-5 shrink-0" />
@@ -800,10 +800,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
                     href={item.href}
                     className="flex items-center gap-3 px-4 py-3.5 rounded-xl border font-semibold text-[15px] transition-all"
                     style={isActive ? {
-                      background: "rgba(168,85,247,0.14)", borderColor: "rgba(168,85,247,0.55)", color: "#c084fc",
-                      boxShadow: "0 0 16px rgba(168,85,247,0.16)",
+                      background: "rgba(0,212,255,0.14)", borderColor: "rgba(0,212,255,0.55)", color: "#00D4FF",
+                      boxShadow: "0 0 16px rgba(0,212,255,0.16)",
                     } : {
-                      background: "rgba(168,85,247,0.05)", borderColor: "rgba(168,85,247,0.28)", color: "rgba(192,132,252,0.75)",
+                      background: "rgba(0,212,255,0.05)", borderColor: "rgba(0,212,255,0.28)", color: "rgba(0,212,255,0.75)",
                     }}
                   >
                     <item.icon className="h-5 w-5 shrink-0" />
@@ -846,7 +846,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   <Link
                     href="/signup"
                     className="flex items-center justify-center w-full py-3.5 rounded-xl font-black text-[15px] text-white transition-all hover:brightness-110"
-                    style={{ background: "linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)", boxShadow: "0 4px 16px rgba(147,51,234,0.30)" }}
+                    style={{ background: "linear-gradient(135deg, #0099bb 0%, #00D4FF 100%)", boxShadow: "0 4px 16px rgba(0,212,255,0.30)" }}
                   >
                     {t.nav.signUp}
                   </Link>
@@ -943,13 +943,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
               </div>
 
               <p className="text-xs text-muted-foreground/45 font-medium whitespace-nowrap">
-                © 2026 Gamerbuddy&nbsp;&nbsp;|&nbsp;&nbsp;All Rights Reserved
+                © 2026 Player4Hire&nbsp;&nbsp;|&nbsp;&nbsp;All Rights Reserved
               </p>
             </div>
 
             {/* Full copyright notice */}
             <p className="text-[11px] leading-relaxed text-muted-foreground/30 text-center max-w-2xl mx-auto">
-              © 2026 Gamerbuddy. All Rights Reserved. This website and all its content, design,
+              © 2026 Player4Hire. All Rights Reserved. This website and all its content, design,
               features, and code are protected under copyright law. Unauthorized copying,
               reproduction, or distribution is strictly prohibited.
             </p>

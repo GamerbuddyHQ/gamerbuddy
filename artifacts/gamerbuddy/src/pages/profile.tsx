@@ -74,8 +74,8 @@ const BIO_TEMPLATES: { archetype: string; emoji: string; color: string; border: 
   {
     archetype: "Pro Speedrunner",
     emoji: "⚡",
-    color: "rgba(168,85,247,0.12)",
-    border: "rgba(168,85,247,0.35)",
+    color: "rgba(0,212,255,0.12)",
+    border: "rgba(0,212,255,0.35)",
     text: "Pro-level player across multiple titles with a fast, efficient playstyle. I'll carry you to your goals quickly and share tips along the way. Results-oriented and always prepared.",
   },
   {
@@ -126,7 +126,7 @@ function PostVerificationModal({
         className="w-full max-w-lg rounded-t-3xl sm:rounded-3xl overflow-hidden flex flex-col"
         style={{
           border: "2px solid rgba(52,211,153,0.4)",
-          boxShadow: "0 0 140px rgba(52,211,153,0.10), 0 0 60px rgba(168,85,247,0.08), 0 40px 100px rgba(0,0,0,0.98)",
+          boxShadow: "0 0 140px rgba(52,211,153,0.10), 0 0 60px rgba(0,212,255,0.08), 0 40px 100px rgba(0,0,0,0.98)",
           background: "hsl(var(--card))",
           maxHeight: "92dvh",
         }}
@@ -135,7 +135,7 @@ function PostVerificationModal({
         <div
           className="relative px-6 pt-7 pb-6 text-center shrink-0 overflow-hidden"
           style={{
-            background: "linear-gradient(160deg, rgba(52,211,153,0.18) 0%, rgba(168,85,247,0.12) 50%, rgba(34,211,238,0.08) 100%)",
+            background: "linear-gradient(160deg, rgba(52,211,153,0.18) 0%, rgba(0,212,255,0.12) 50%, rgba(34,211,238,0.08) 100%)",
             borderBottom: "1px solid rgba(52,211,153,0.15)",
           }}
         >
@@ -175,7 +175,7 @@ function PostVerificationModal({
                 Welcome to the Squad! 🎉
               </h2>
               <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed max-w-sm mx-auto">
-                You can now <strong className="text-emerald-400">bid</strong>, <strong className="text-primary">hire</strong>, and access everything on Gamerbuddy. Now let's make your profile <em>unforgettable</em>.
+                You can now <strong className="text-emerald-400">bid</strong>, <strong className="text-primary">hire</strong>, and access everything on Player4Hire. Now let's make your profile <em>unforgettable</em>.
               </p>
             </div>
           </div>
@@ -201,7 +201,7 @@ function PostVerificationModal({
                     width: `${Math.max(score, 3)}%`,
                     background: score >= 80
                       ? "linear-gradient(90deg, #10b981, #34d399)"
-                      : "linear-gradient(90deg, #7c3aed, #a855f7, #22d3ee)",
+                      : "linear-gradient(90deg, #0099bb, #00D4FF, #22d3ee)",
                   }}
                 >
                   {/* Shimmer */}
@@ -225,7 +225,7 @@ function PostVerificationModal({
                     <div
                       key={item.label}
                       className="flex items-center gap-3 rounded-xl border px-3.5 py-3"
-                      style={{ borderColor: "rgba(168,85,247,0.2)", background: "rgba(168,85,247,0.05)" }}
+                      style={{ borderColor: "rgba(0,212,255,0.2)", background: "rgba(0,212,255,0.05)" }}
                     >
                       <span className="text-xl shrink-0">{item.icon}</span>
                       <div className="flex-1 min-w-0">
@@ -236,7 +236,7 @@ function PostVerificationModal({
                       </div>
                       <span
                         className="text-[10px] font-black px-2 py-0.5 rounded-full shrink-0"
-                        style={{ background: "rgba(168,85,247,0.15)", color: "#c084fc", border: "1px solid rgba(168,85,247,0.35)" }}
+                        style={{ background: "rgba(0,212,255,0.15)", color: "#00D4FF", border: "1px solid rgba(0,212,255,0.35)" }}
                       >
                         +{item.pts}%
                       </span>
@@ -340,8 +340,8 @@ function PostVerificationModal({
               onClick={onComplete}
               className="w-full font-black uppercase tracking-wider text-sm text-white"
               style={{
-                background: "linear-gradient(135deg, #a855f7 0%, #7c3aed 50%, #6d28d9 100%)",
-                boxShadow: "0 0 24px rgba(168,85,247,0.35)",
+                background: "linear-gradient(135deg, #00D4FF 0%, #0099bb 50%, #6d28d9 100%)",
+                boxShadow: "0 0 24px rgba(0,212,255,0.35)",
                 padding: "14px",
               }}
             >
@@ -377,9 +377,9 @@ function ProfileCompletionBanner({ profile }: { profile: any }) {
     <div
       className="rounded-2xl overflow-hidden"
       style={{
-        border: "1px solid rgba(168,85,247,0.35)",
-        background: "linear-gradient(135deg, rgba(168,85,247,0.07), rgba(34,211,238,0.04))",
-        boxShadow: "0 0 30px rgba(168,85,247,0.07)",
+        border: "1px solid rgba(0,212,255,0.35)",
+        background: "linear-gradient(135deg, rgba(0,212,255,0.07), rgba(34,211,238,0.04))",
+        boxShadow: "0 0 30px rgba(0,212,255,0.07)",
       }}
     >
       <div className="h-1 bg-gradient-to-r from-violet-600 via-purple-400 to-cyan-500" />
@@ -389,7 +389,7 @@ function ProfileCompletionBanner({ profile }: { profile: any }) {
           <div className="flex items-start gap-3">
             <div
               className="h-10 w-10 rounded-xl bg-primary/15 border border-primary/30 flex items-center justify-center shrink-0 mt-0.5"
-              style={{ boxShadow: "0 0 12px rgba(168,85,247,0.2)" }}
+              style={{ boxShadow: "0 0 12px rgba(0,212,255,0.2)" }}
             >
               <Sparkles className="h-5 w-5 text-primary" />
             </div>
@@ -400,7 +400,7 @@ function ProfileCompletionBanner({ profile }: { profile: any }) {
                 </span>
                 <span
                   className="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full"
-                  style={{ background: "rgba(168,85,247,0.2)", color: "#c084fc", border: "1px solid rgba(168,85,247,0.4)" }}
+                  style={{ background: "rgba(0,212,255,0.2)", color: "#00D4FF", border: "1px solid rgba(0,212,255,0.4)" }}
                 >
                   {score}% done
                 </span>
@@ -425,7 +425,7 @@ function ProfileCompletionBanner({ profile }: { profile: any }) {
           <div className="h-2 rounded-full bg-background/50 overflow-hidden">
             <div
               className="h-full rounded-full transition-all duration-700"
-              style={{ width: `${score}%`, background: "linear-gradient(90deg, #a855f7, #7c3aed)" }}
+              style={{ width: `${score}%`, background: "linear-gradient(90deg, #00D4FF, #0099bb)" }}
             />
           </div>
           <div className="text-[10px] text-muted-foreground/50 text-right">
@@ -440,9 +440,9 @@ function ProfileCompletionBanner({ profile }: { profile: any }) {
               key={item.label}
               className="flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-full border"
               style={{
-                background: "rgba(168,85,247,0.08)",
-                borderColor: "rgba(168,85,247,0.25)",
-                color: "rgba(192,132,252,0.9)",
+                background: "rgba(0,212,255,0.08)",
+                borderColor: "rgba(0,212,255,0.25)",
+                color: "rgba(0,212,255,0.9)",
               }}
             >
               <span>{item.icon}</span>
@@ -565,13 +565,13 @@ const GAMER_RULES = [
   {
     n: 8,
     title: "Understand the 10% Platform Fee",
-    body: "Gamerbuddy deducts a 10% platform fee from every completed Quest/Job. You keep 90% of your agreed price. This is clearly shown before every payment release.",
+    body: "Player4Hire deducts a 10% platform fee from every completed Quest/Job. You keep 90% of your agreed price. This is clearly shown before every payment release.",
     icon: "💸",
   },
   {
     n: 9,
-    title: "Keep All Payments Through Gamerbuddy",
-    body: "For everyone's protection, we encourage all transactions to happen through Gamerbuddy's escrow system. Staying on the platform is the safest and most secure option for both hirers and gamers — and it's the simplest way too.",
+    title: "Keep All Payments Through Player4Hire",
+    body: "For everyone's protection, we encourage all transactions to happen through Player4Hire's escrow system. Staying on the platform is the safest and most secure option for both hirers and gamers — and it's the simplest way too.",
     icon: "🔐",
   },
 ];
@@ -607,7 +607,7 @@ function GamerRulesCard() {
       {open && (
         <div className="px-5 pb-5 space-y-4 border-t border-border/40">
           <p className="text-xs text-muted-foreground leading-relaxed pt-4">
-            If you want to get hired on Gamerbuddy, you must strictly follow these rules. They keep the platform safe, friendly, and professional for everyone.
+            If you want to get hired on Player4Hire, you must strictly follow these rules. They keep the platform safe, friendly, and professional for everyone.
           </p>
 
           <div className="space-y-3">
@@ -1109,7 +1109,7 @@ function StreamingAccountsSection() {
     <div
       id="streaming-management"
       className="rounded-2xl border overflow-hidden"
-      style={{ borderColor: "rgba(168,85,247,0.2)", background: "rgba(10,8,20,0.6)" }}
+      style={{ borderColor: "rgba(0,212,255,0.2)", background: "rgba(10,8,20,0.6)" }}
     >
       {/* ── Header ─────────────────────────────────────── */}
       <div className="px-5 pt-5 pb-4 border-b" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
@@ -1130,7 +1130,7 @@ function StreamingAccountsSection() {
                 ? { background: "rgba(34,197,94,0.12)", border: "1px solid rgba(34,197,94,0.3)", color: "#4ade80" }
                 : connectedCount === 1
                   ? { background: "rgba(251,191,36,0.10)", border: "1px solid rgba(251,191,36,0.28)", color: "#fbbf24" }
-                  : { background: "rgba(168,85,247,0.10)", border: "1px solid rgba(168,85,247,0.25)", color: "#c084fc" }
+                  : { background: "rgba(0,212,255,0.10)", border: "1px solid rgba(0,212,255,0.25)", color: "#00D4FF" }
             }
           >
             {connectedCount} / {PLATFORM_ORDER.length} {connectedCount >= 2 ? "✓" : "Linked"}
@@ -1143,7 +1143,7 @@ function StreamingAccountsSection() {
           style={
             connectedCount >= 2
               ? { borderColor: "rgba(34,197,94,0.15)", background: "rgba(34,197,94,0.05)" }
-              : { borderColor: "rgba(168,85,247,0.15)", background: "rgba(168,85,247,0.05)" }
+              : { borderColor: "rgba(0,212,255,0.15)", background: "rgba(0,212,255,0.05)" }
           }
         >
           <span className="text-[13px] shrink-0 mt-px">{connectedCount >= 2 ? "🏆" : "📡"}</span>
@@ -1156,11 +1156,11 @@ function StreamingAccountsSection() {
               </>
             ) : (
               <>
-                <strong style={{ color: "#c084fc" }}>
+                <strong style={{ color: "#00D4FF" }}>
                   Link at least 2 streaming/social accounts (YouTube, Twitch, Kick, etc.) to increase your Trust Factor
                 </strong>{" "}
                 and appear more credible to hirers. Profiles with 2+ streaming accounts get{" "}
-                <strong style={{ color: "#c084fc" }}>significantly more hire requests.</strong>
+                <strong style={{ color: "#00D4FF" }}>significantly more hire requests.</strong>
               </>
             )}
           </p>
@@ -1387,7 +1387,7 @@ const BG_STYLES: Record<string, string> = {
 };
 
 const BG_ACCENT: Record<string, string> = {
-  "bg-neon-purple":  "rgba(168,85,247,0.6)",
+  "bg-neon-purple":  "rgba(0,212,255,0.6)",
   "bg-cyber-blue":   "rgba(6,182,212,0.6)",
   "bg-fire-red":     "rgba(239,68,68,0.6)",
   "bg-matrix-green": "rgba(34,197,94,0.6)",
@@ -1513,7 +1513,7 @@ function AddQuestForm({ onCancel }: { onCancel: () => void }) {
 
   return (
     <form onSubmit={handleSubmit} className="rounded-xl border border-primary/30 bg-primary/5 p-5 space-y-4"
-      style={{ boxShadow: "0 0 24px rgba(168,85,247,0.06) inset" }}>
+      style={{ boxShadow: "0 0 24px rgba(0,212,255,0.06) inset" }}>
       <div className="text-xs font-bold uppercase tracking-widest text-primary flex items-center gap-2">
         <Plus className="h-3.5 w-3.5" /> Add Game to Quest
       </div>
@@ -1597,7 +1597,7 @@ function AddQuestForm({ onCancel }: { onCancel: () => void }) {
           <X className="h-3.5 w-3.5 mr-1" /> Cancel
         </Button>
         <Button type="submit" size="sm" disabled={!gameName.trim() || !helpType.trim() || !playstyle.trim() || addEntry.isPending}
-          className="bg-primary hover:bg-primary/90 text-xs font-bold uppercase flex-1 shadow-[0_0_12px_rgba(168,85,247,0.2)]">
+          className="bg-primary hover:bg-primary/90 text-xs font-bold uppercase flex-1 shadow-[0_0_12px_rgba(0,212,255,0.2)]">
           {addEntry.isPending ? (
             <span className="flex items-center gap-1.5"><div className="h-3 w-3 rounded-full border-2 border-white/30 border-t-white animate-spin" />Adding…</span>
           ) : (
@@ -1769,7 +1769,7 @@ function ShopSection({
                 key={item.id}
                 className={`rounded-xl border p-3 space-y-2 transition-all ${
                   equippedNow
-                    ? "border-primary/60 bg-primary/10 shadow-[0_0_12px_rgba(168,85,247,0.2)]"
+                    ? "border-primary/60 bg-primary/10 shadow-[0_0_12px_rgba(0,212,255,0.2)]"
                     : "border-border bg-background/40 hover:border-border/80"
                 }`}
               >
@@ -1874,7 +1874,7 @@ function VerificationSection({ idVerified, gamingAccountCount, onJustVerified }:
   if (gamingAccountCount === 0) {
     return (
       <Card className="border-muted/40 bg-card/60 overflow-hidden">
-        <div className="h-0.5 w-full" style={{ background: "linear-gradient(90deg, #a855f7, #22d3ee)" }} />
+        <div className="h-0.5 w-full" style={{ background: "linear-gradient(90deg, #00D4FF, #22d3ee)" }} />
         <CardContent className="pt-5 pb-5">
           <div className="flex items-center gap-3.5">
             <div className="h-10 w-10 rounded-xl bg-primary/10 border border-primary/25 flex items-center justify-center shrink-0">
@@ -1894,7 +1894,7 @@ function VerificationSection({ idVerified, gamingAccountCount, onJustVerified }:
 
   return (
     <Card className="border-amber-500/25 bg-card/60 overflow-hidden">
-      <div className="h-0.5 w-full" style={{ background: "linear-gradient(90deg, #f59e0b, #a855f7, #22d3ee)" }} />
+      <div className="h-0.5 w-full" style={{ background: "linear-gradient(90deg, #f59e0b, #00D4FF, #22d3ee)" }} />
       <CardContent className="pt-5 pb-5 space-y-4">
         {/* Top row */}
         <div className="flex items-center justify-between gap-4 flex-wrap">
@@ -1931,7 +1931,7 @@ function VerificationSection({ idVerified, gamingAccountCount, onJustVerified }:
         {/* 24h + keep public tip */}
         <div
           className="flex items-start gap-2.5 rounded-lg px-3 py-2.5"
-          style={{ background: "rgba(168,85,247,0.07)", border: "1px solid rgba(168,85,247,0.18)" }}
+          style={{ background: "rgba(0,212,255,0.07)", border: "1px solid rgba(0,212,255,0.18)" }}
         >
           <Clock className="h-3.5 w-3.5 text-primary shrink-0 mt-0.5" />
           <div>
@@ -2034,12 +2034,12 @@ function ContactVerificationSection({
   }
 
   return (
-    <Card style={{ borderColor: "rgba(168,85,247,0.22)", background: "rgba(168,85,247,0.04)" }}>
+    <Card style={{ borderColor: "rgba(0,212,255,0.22)", background: "rgba(0,212,255,0.04)" }}>
       <CardContent className="pt-5 pb-5 space-y-4">
         {/* Header */}
         <div className="flex items-start gap-3.5">
           <div className="h-11 w-11 rounded-xl flex items-center justify-center shrink-0 mt-0.5"
-            style={{ background: "rgba(168,85,247,0.15)", border: "1px solid rgba(168,85,247,0.30)" }}>
+            style={{ background: "rgba(0,212,255,0.15)", border: "1px solid rgba(0,212,255,0.30)" }}>
             <ShieldCheck className="h-5 w-5 text-primary" />
           </div>
           <div className="flex-1 min-w-0">
@@ -2126,7 +2126,7 @@ function ContactVerificationSection({
         {/* Soft nudge for idle email */}
         {activeChannel === "email" && !emailVerified && step === "idle" && (
           <div className="flex items-start gap-2.5 rounded-lg px-3 py-2.5 text-xs"
-            style={{ background: "rgba(168,85,247,0.07)", border: "1px solid rgba(168,85,247,0.18)" }}>
+            style={{ background: "rgba(0,212,255,0.07)", border: "1px solid rgba(0,212,255,0.18)" }}>
             <Sparkles className="h-3.5 w-3.5 text-primary shrink-0 mt-0.5" />
             <span className="text-muted-foreground leading-relaxed">
               A 6-digit code will be sent to <strong className="text-foreground">{userEmail}</strong>. Expires in 10 minutes. Verifying <strong className="text-foreground">adds +5 Trust Factor</strong> instantly.
@@ -2152,7 +2152,7 @@ function ContactVerificationSection({
             <Button
               onClick={handleSend}
               className="flex items-center gap-2 h-9 px-4 font-bold text-xs uppercase tracking-widest"
-              style={{ background: "linear-gradient(135deg,#7c3aed,#a855f7)", boxShadow: "0 2px 12px rgba(147,51,234,0.30)" }}
+              style={{ background: "linear-gradient(135deg,#0099bb,#00D4FF)", boxShadow: "0 2px 12px rgba(0,212,255,0.30)" }}
             >
               <Mail className="h-3.5 w-3.5" />
               Send Code to Email
@@ -2337,7 +2337,7 @@ export default function Profile() {
   const bgId = profile?.profileBackground;
   const titleId = profile?.profileTitle;
   const bgGrad = bgId ? (BG_STYLES[bgId] ?? "from-primary/20 to-secondary/10") : "from-primary/15 via-secondary/10 to-background";
-  const bgAccent = bgId ? (BG_ACCENT[bgId] ?? "rgba(168,85,247,0.4)") : "rgba(168,85,247,0.4)";
+  const bgAccent = bgId ? (BG_ACCENT[bgId] ?? "rgba(0,212,255,0.4)") : "rgba(0,212,255,0.4)";
 
   const currentRank = RANK_BADGES.filter((b) => points >= b.min).pop() ?? RANK_BADGES[0];
   const nextRank = RANK_BADGES.find((b) => points < b.min);
@@ -2690,7 +2690,7 @@ export default function Profile() {
       >
         <div
           className="shrink-0 h-10 w-10 rounded-xl flex items-center justify-center border"
-          style={{ background: "rgba(168,85,247,0.10)", borderColor: "rgba(168,85,247,0.25)" }}
+          style={{ background: "rgba(0,212,255,0.10)", borderColor: "rgba(0,212,255,0.25)" }}
         >
           <span className="text-lg">🗺️</span>
         </div>
@@ -2700,9 +2700,9 @@ export default function Profile() {
             <span
               className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border"
               style={{
-                background: "rgba(168,85,247,0.10)",
-                borderColor: "rgba(168,85,247,0.30)",
-                color: "#c084fc",
+                background: "rgba(0,212,255,0.10)",
+                borderColor: "rgba(0,212,255,0.30)",
+                color: "#00D4FF",
               }}
             >
               Phase 3 · Coming Soon
@@ -2721,15 +2721,15 @@ export default function Profile() {
         const counterColor =
           draftBio.length >= 280 ? "#f87171" :
           draftBio.length >= 240 ? "#fbbf24" :
-          "#a855f7";
+          "#00D4FF";
         return (
           <div
             className="rounded-2xl overflow-hidden border"
             style={{
-              borderColor: editingBio ? "rgba(168,85,247,0.40)" : "rgba(255,255,255,0.07)",
+              borderColor: editingBio ? "rgba(0,212,255,0.40)" : "rgba(255,255,255,0.07)",
               background: "rgba(8,6,18,0.65)",
               boxShadow: editingBio
-                ? "0 0 0 1px rgba(168,85,247,0.14), 0 6px 28px rgba(168,85,247,0.10)"
+                ? "0 0 0 1px rgba(0,212,255,0.14), 0 6px 28px rgba(0,212,255,0.10)"
                 : "none",
               transition: "border-color 0.25s, box-shadow 0.25s",
             }}
@@ -2739,7 +2739,7 @@ export default function Profile() {
               className="flex items-center justify-between gap-2 px-4 sm:px-5 py-3 border-b"
               style={{
                 borderColor: "rgba(255,255,255,0.06)",
-                background: editingBio ? "rgba(168,85,247,0.07)" : "rgba(255,255,255,0.02)",
+                background: editingBio ? "rgba(0,212,255,0.07)" : "rgba(255,255,255,0.02)",
                 transition: "background 0.25s",
               }}
             >
@@ -2747,7 +2747,7 @@ export default function Profile() {
               <div className="flex items-center gap-2 min-w-0">
                 <Sparkles
                   className="h-3.5 w-3.5 shrink-0"
-                  style={{ color: editingBio ? "#a855f7" : "rgba(168,85,247,0.55)" }}
+                  style={{ color: editingBio ? "#00D4FF" : "rgba(0,212,255,0.55)" }}
                 />
                 <span className="text-[11px] font-extrabold uppercase tracking-widest text-white/65 truncate">
                   About Me
@@ -2757,9 +2757,9 @@ export default function Profile() {
                   <span
                     className="shrink-0 text-[9px] font-bold px-2 py-0.5 rounded-full"
                     style={{
-                      background: "rgba(168,85,247,0.12)",
-                      border: "1px solid rgba(168,85,247,0.24)",
-                      color: "#c084fc",
+                      background: "rgba(0,212,255,0.12)",
+                      border: "1px solid rgba(0,212,255,0.24)",
+                      color: "#00D4FF",
                     }}
                   >
                     {profile.bio.length}/300
@@ -2773,9 +2773,9 @@ export default function Profile() {
                   onClick={() => { setDraftBio(profile?.bio ?? ""); setEditingBio(true); }}
                   className="shrink-0 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg transition-all duration-150 hover:brightness-110 hover:scale-[1.02]"
                   style={{
-                    background: "rgba(168,85,247,0.10)",
-                    border: "1px solid rgba(168,85,247,0.28)",
-                    color: "#c084fc",
+                    background: "rgba(0,212,255,0.10)",
+                    border: "1px solid rgba(0,212,255,0.28)",
+                    color: "#00D4FF",
                   }}
                 >
                   <Edit3 className="h-3 w-3" />
@@ -2803,9 +2803,9 @@ export default function Profile() {
                     disabled={updateProfile.isPending}
                     className="flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg transition-all duration-150 hover:brightness-110 disabled:opacity-50"
                     style={{
-                      background: "linear-gradient(135deg, rgba(168,85,247,0.28), rgba(168,85,247,0.14))",
-                      border: "1px solid rgba(168,85,247,0.48)",
-                      color: "#c084fc",
+                      background: "linear-gradient(135deg, rgba(0,212,255,0.28), rgba(0,212,255,0.14))",
+                      border: "1px solid rgba(0,212,255,0.48)",
+                      color: "#00D4FF",
                     }}
                     title="Save bio"
                   >
@@ -2841,7 +2841,7 @@ export default function Profile() {
                         className="h-full rounded-full transition-all duration-150"
                         style={{
                           width: `${charPct}%`,
-                          background: `linear-gradient(90deg, #a855f7, ${counterColor})`,
+                          background: `linear-gradient(90deg, #00D4FF, ${counterColor})`,
                           boxShadow: `0 0 6px ${counterColor}60`,
                         }}
                       />
@@ -2889,8 +2889,8 @@ export default function Profile() {
                 <div
                   className="rounded-xl px-4 py-4"
                   style={{
-                    background: "linear-gradient(135deg, rgba(168,85,247,0.04) 0%, rgba(168,85,247,0.01) 100%)",
-                    borderLeft: "3px solid rgba(168,85,247,0.35)",
+                    background: "linear-gradient(135deg, rgba(0,212,255,0.04) 0%, rgba(0,212,255,0.01) 100%)",
+                    borderLeft: "3px solid rgba(0,212,255,0.35)",
                   }}
                 >
                   <p
@@ -2911,11 +2911,11 @@ export default function Profile() {
                   <div
                     className="h-12 w-12 rounded-2xl flex items-center justify-center"
                     style={{
-                      background: "linear-gradient(135deg, rgba(168,85,247,0.15), rgba(168,85,247,0.05))",
-                      border: "1.5px dashed rgba(168,85,247,0.30)",
+                      background: "linear-gradient(135deg, rgba(0,212,255,0.15), rgba(0,212,255,0.05))",
+                      border: "1.5px dashed rgba(0,212,255,0.30)",
                     }}
                   >
-                    <Edit3 className="h-5 w-5" style={{ color: "#a855f7", opacity: 0.7 }} />
+                    <Edit3 className="h-5 w-5" style={{ color: "#00D4FF", opacity: 0.7 }} />
                   </div>
                   <div className="space-y-1 max-w-xs">
                     <p className="text-sm font-semibold" style={{ color: "rgba(255,255,255,0.45)" }}>
@@ -2929,9 +2929,9 @@ export default function Profile() {
                     onClick={() => { setDraftBio(""); setEditingBio(true); }}
                     className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider px-4 py-2 rounded-xl transition-all duration-150 hover:brightness-110 hover:scale-[1.02]"
                     style={{
-                      background: "linear-gradient(135deg, rgba(168,85,247,0.18), rgba(168,85,247,0.08))",
-                      border: "1px solid rgba(168,85,247,0.32)",
-                      color: "#c084fc",
+                      background: "linear-gradient(135deg, rgba(0,212,255,0.18), rgba(0,212,255,0.08))",
+                      border: "1px solid rgba(0,212,255,0.32)",
+                      color: "#00D4FF",
                     }}
                   >
                     <Edit3 className="h-3 w-3" />
@@ -2959,7 +2959,7 @@ export default function Profile() {
               style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.02)" }}
             >
               <div className="flex items-center gap-2 min-w-0 flex-wrap">
-                <Camera className="h-3.5 w-3.5 shrink-0" style={{ color: "rgba(168,85,247,0.55)" }} />
+                <Camera className="h-3.5 w-3.5 shrink-0" style={{ color: "rgba(0,212,255,0.55)" }} />
                 <span className="text-[11px] font-extrabold uppercase tracking-widest text-white/65">Additional Photos</span>
                 {/* Minimum progress indicator */}
                 <div className="flex items-center gap-1 ml-1">
@@ -2974,7 +2974,7 @@ export default function Profile() {
                     <div
                       key={slot}
                       className="h-1.5 w-4 rounded-full transition-colors duration-300"
-                      style={{ background: galleryCount > slot ? "#a855f7" : "rgba(255,255,255,0.10)" }}
+                      style={{ background: galleryCount > slot ? "#00D4FF" : "rgba(255,255,255,0.10)" }}
                     />
                   ))}
                   <span className={`text-[9px] font-bold ml-1 ${meetsMinimum ? "text-green-400" : "text-amber-400"}`}>
@@ -2986,9 +2986,9 @@ export default function Profile() {
                 <label
                   className="shrink-0 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg cursor-pointer transition-all duration-150 hover:brightness-110 hover:scale-[1.02]"
                   style={{
-                    background: galleryUploading ? "rgba(100,100,100,0.10)" : "rgba(168,85,247,0.10)",
-                    border: "1px solid rgba(168,85,247,0.28)",
-                    color: galleryUploading ? "#888" : "#c084fc",
+                    background: galleryUploading ? "rgba(100,100,100,0.10)" : "rgba(0,212,255,0.10)",
+                    border: "1px solid rgba(0,212,255,0.28)",
+                    color: galleryUploading ? "#888" : "#00D4FF",
                   }}
                 >
                   <input
@@ -3038,7 +3038,7 @@ export default function Profile() {
                   <div
                     className="h-12 w-12 rounded-2xl flex items-center justify-center"
                     style={{
-                      background: "linear-gradient(135deg, rgba(245,158,11,0.15), rgba(168,85,247,0.04))",
+                      background: "linear-gradient(135deg, rgba(245,158,11,0.15), rgba(0,212,255,0.04))",
                       border: "1.5px dashed rgba(245,158,11,0.35)",
                     }}
                   >
@@ -3055,7 +3055,7 @@ export default function Profile() {
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   {(profile?.galleryPhotoUrls ?? []).map((url, i) => (
                     <div key={i} className="relative group/gphoto aspect-square rounded-xl overflow-hidden"
-                      style={{ border: "1px solid rgba(168,85,247,0.20)", background: "rgba(0,0,0,0.4)" }}
+                      style={{ border: "1px solid rgba(0,212,255,0.20)", background: "rgba(0,0,0,0.4)" }}
                     >
                       <img
                         src={`/api/storage${url}`}
@@ -3086,8 +3086,8 @@ export default function Profile() {
                     <label
                       className="aspect-square rounded-xl flex flex-col items-center justify-center gap-2 cursor-pointer transition-all duration-150 hover:brightness-125"
                       style={{
-                        border: `1.5px dashed ${galleryCount < 2 ? "rgba(245,158,11,0.40)" : "rgba(168,85,247,0.28)"}`,
-                        background: galleryCount < 2 ? "rgba(245,158,11,0.04)" : "rgba(168,85,247,0.04)",
+                        border: `1.5px dashed ${galleryCount < 2 ? "rgba(245,158,11,0.40)" : "rgba(0,212,255,0.28)"}`,
+                        background: galleryCount < 2 ? "rgba(245,158,11,0.04)" : "rgba(0,212,255,0.04)",
                       }}
                     >
                       <input
@@ -3101,8 +3101,8 @@ export default function Profile() {
                         <div className="h-4 w-4 rounded-full border border-white/20 border-t-white/70 animate-spin" />
                       ) : (
                         <>
-                          <ImagePlus className="h-5 w-5" style={{ color: galleryCount < 2 ? "rgba(245,158,11,0.55)" : "rgba(168,85,247,0.5)" }} />
-                          <span className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: galleryCount < 2 ? "rgba(245,158,11,0.55)" : "rgba(168,85,247,0.5)" }}>
+                          <ImagePlus className="h-5 w-5" style={{ color: galleryCount < 2 ? "rgba(245,158,11,0.55)" : "rgba(0,212,255,0.5)" }} />
+                          <span className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: galleryCount < 2 ? "rgba(245,158,11,0.55)" : "rgba(0,212,255,0.5)" }}>
                             {galleryCount < 2 ? "Required" : "Add"}
                           </span>
                         </>
@@ -3158,7 +3158,7 @@ export default function Profile() {
           className="flex items-center gap-2 px-4 sm:px-5 py-3 border-b"
           style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.02)" }}
         >
-          <Globe className="h-3.5 w-3.5 shrink-0" style={{ color: "rgba(168,85,247,0.55)" }} />
+          <Globe className="h-3.5 w-3.5 shrink-0" style={{ color: "rgba(0,212,255,0.55)" }} />
           <span className="text-[11px] font-extrabold uppercase tracking-widest text-white/65">Location &amp; Identity</span>
           <span className="text-[9px] text-muted-foreground/40 ml-1">(shown on your profile &amp; bids)</span>
         </div>

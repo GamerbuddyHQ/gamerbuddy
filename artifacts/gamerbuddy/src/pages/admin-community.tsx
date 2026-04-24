@@ -43,7 +43,7 @@ type Comment = {
   isAdminComment:  boolean;
   isModComment:    boolean;
   authorName:      string | null;
-  authorGamerbuddyId: string | null;
+  authorPlayer4HireId: string | null;
   replies:         Comment[];
 };
 
@@ -133,10 +133,10 @@ function CommentRow({ comment, postId }: { comment: Comment; postId: number }) {
           </span>
         )}
         <span className="text-xs font-semibold text-foreground/70">
-          {comment.isAdminComment ? "Gamerbuddy Team" : (comment.authorName ?? "Unknown")}
+          {comment.isAdminComment ? "Player4Hire Team" : (comment.authorName ?? "Unknown")}
         </span>
-        {comment.authorGamerbuddyId && !comment.isAdminComment && (
-          <span className="text-[10px] font-mono text-muted-foreground/40">#{comment.authorGamerbuddyId}</span>
+        {comment.authorPlayer4HireId && !comment.isAdminComment && (
+          <span className="text-[10px] font-mono text-muted-foreground/40">#{comment.authorPlayer4HireId}</span>
         )}
         <span className="text-[10px] text-muted-foreground/40 ml-auto">
           {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
@@ -171,7 +171,7 @@ function CommentRow({ comment, postId }: { comment: Comment; postId: number }) {
         <div className="ml-4 space-y-2 border-l-2 border-border/30 pl-3 pt-1">
           {comment.replies.map(r => (
             <div key={r.id} className="text-xs text-foreground/60 space-y-0.5">
-              <span className="font-semibold text-foreground/50">{r.isAdminComment ? "Gamerbuddy Team" : (r.authorName ?? "Unknown")}</span>
+              <span className="font-semibold text-foreground/50">{r.isAdminComment ? "Player4Hire Team" : (r.authorName ?? "Unknown")}</span>
               <p className="leading-relaxed">{r.body}</p>
             </div>
           ))}
@@ -204,7 +204,7 @@ function PostCommentsPanel({ post }: { post: Post }) {
       setAdminText("");
       qc.invalidateQueries({ queryKey: ["admin-post-comments", post.id] });
       qc.invalidateQueries({ queryKey: ["admin-community-posts"] });
-      toast({ title: "✅ Admin Comment Posted", description: "Visible to all users as 'Gamerbuddy Team'." });
+      toast({ title: "✅ Admin Comment Posted", description: "Visible to all users as 'Player4Hire Team'." });
     },
     onError: () => toast({ title: "Error", description: "Could not post admin comment.", variant: "destructive" }),
   });
@@ -219,7 +219,7 @@ function PostCommentsPanel({ post }: { post: Post }) {
         <div className="flex items-center gap-2">
           <Shield className="w-3.5 h-3.5 text-purple-400" />
           <span className="text-xs font-bold text-purple-300 uppercase tracking-widest">Add Admin Comment</span>
-          <span className="text-[10px] text-purple-400/60 font-normal normal-case tracking-normal">— appears as "Gamerbuddy Team" to all users</span>
+          <span className="text-[10px] text-purple-400/60 font-normal normal-case tracking-normal">— appears as "Player4Hire Team" to all users</span>
         </div>
         <Textarea
           value={adminText}
@@ -768,7 +768,7 @@ export default function AdminCommunity() {
               <ul className="list-disc list-inside text-xs text-amber-300/70 space-y-0.5">
                 <li><strong>Expand a post</strong> — click the chevron icon to see full content, comments, and admin controls.</li>
                 <li><strong>📌 Pin Post</strong> — post appears at the very top of the community feed for all users. Max 5 pinned at once.</li>
-                <li><strong>Add Admin Comment</strong> — posts as "Gamerbuddy Team" with an Official badge, visible to all users immediately.</li>
+                <li><strong>Add Admin Comment</strong> — posts as "Player4Hire Team" with an Official badge, visible to all users immediately.</li>
                 <li><strong>Pin Comment</strong> — pinned comments float to the top of the comment list for all users.</li>
                 <li><strong>Hide Post</strong> — soft delete, invisible to users but kept in database. Reversible.</li>
                 <li><strong>Delete Post</strong> — permanent, removes all comments and votes. Irreversible.</li>

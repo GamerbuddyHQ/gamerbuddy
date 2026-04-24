@@ -96,7 +96,7 @@ export function ReportModal({ reportedUserId, reportedUserName, onClose }: Repor
             <div>
               <div className="text-base font-bold text-white mb-1">Report Submitted</div>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Thank you for keeping Gamerbuddy safe. Our team will review this report shortly.
+                Thank you for keeping Player4Hire safe. Our team will review this report shortly.
               </p>
             </div>
             <Button

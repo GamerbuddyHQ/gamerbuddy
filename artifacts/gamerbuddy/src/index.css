@@ -120,21 +120,21 @@
   --sidebar: 240 10% 6%;
   --sidebar-foreground: 0 0% 98%;
   --sidebar-border: 240 10% 12%;
-  --sidebar-primary: 270 100% 60%;
-  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-primary: 190 100% 50%;
+  --sidebar-primary-foreground: 240 10% 4%;
   --sidebar-accent: 240 10% 12%;
   --sidebar-accent-foreground: 0 0% 98%;
-  --sidebar-ring: 270 100% 60%;
+  --sidebar-ring: 190 100% 50%;
 
   --popover: 240 10% 6%;
   --popover-foreground: 0 0% 98%;
   --popover-border: 240 10% 12%;
 
-  /* Electric Purple */
-  --primary: 275 80% 65%;
-  --primary-foreground: 0 0% 100%;
+  /* Neon Cyan — Primary Brand Color */
+  --primary: 190 100% 50%;
+  --primary-foreground: 240 10% 4%;
 
-  /* Neon Cyan */
+  /* Neon Cyan — Secondary */
   --secondary: 190 100% 50%;
   --secondary-foreground: 240 10% 4%;
 
@@ -148,9 +148,9 @@
   --destructive-foreground: 0 0% 98%;
 
   --input: 240 10% 16%;
-  --ring: 275 80% 65%;
+  --ring: 190 100% 50%;
 
-  --chart-1: 275 80% 65%;
+  --chart-1: 190 100% 50%;
   --chart-2: 190 100% 50%;
   --chart-3: 160 100% 45%;
   --chart-4: 340 100% 55%;
@@ -348,7 +348,7 @@
   box-shadow: 0 2px 8px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.04);
 }
 :root:not(.dark) .group.rounded-2xl.border.overflow-hidden:hover {
-  box-shadow: 0 8px 28px rgba(124,58,237,0.14), 0 0 0 1px rgba(124,58,237,0.10);
+  box-shadow: 0 8px 28px rgba(0,212,255,0.14), 0 0 0 1px rgba(0,212,255,0.10);
 }
 
 /* ── Low-opacity muted text — boost for light-mode readability ── */
@@ -383,10 +383,10 @@
 :root:not(.dark) .border-border\/50 { border-color: hsl(220 13% 78%); }
 
 /* ── Primary color tinted backgrounds ── */
-:root:not(.dark) .bg-primary\/5  { background-color: hsl(272 72% 42% / 0.09); }
-:root:not(.dark) .bg-primary\/10 { background-color: hsl(272 72% 42% / 0.12); }
-:root:not(.dark) .bg-primary\/15 { background-color: hsl(272 72% 42% / 0.14); }
-:root:not(.dark) .bg-primary\/20 { background-color: hsl(272 72% 42% / 0.16); }
+:root:not(.dark) .bg-primary\/5  { background-color: hsl(190 85% 38% / 0.09); }
+:root:not(.dark) .bg-primary\/10 { background-color: hsl(190 85% 38% / 0.12); }
+:root:not(.dark) .bg-primary\/15 { background-color: hsl(190 85% 38% / 0.14); }
+:root:not(.dark) .bg-primary\/20 { background-color: hsl(190 85% 38% / 0.16); }
 
 /* ── Status/skill tag backgrounds — more visible on white ── */
 :root:not(.dark) .bg-green-500\/10  { background-color: hsl(142 60% 36% / 0.14); }

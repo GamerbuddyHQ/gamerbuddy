@@ -116,11 +116,11 @@ export function ActivationGate({
         key: order.keyId,
         amount: order.amountInr * 100,
         currency: "INR",
-        name: "Gamerbuddy",
+        name: "Player4Hire",
         description: `One-time Account Activation Fee (${order.label})`,
         order_id: order.orderId,
         prefill: { email: userEmail, contact: userPhone ?? "" },
-        theme: { color: "#a855f7" },
+        theme: { color: "#00D4FF" },
         modal: {
           ondismiss: () => {
             setPaying(false);
@@ -173,7 +173,7 @@ export function ActivationGate({
       className="rounded-2xl overflow-hidden"
       style={{
         border: "1.5px solid rgba(245,158,11,0.40)",
-        background: "linear-gradient(135deg, rgba(245,158,11,0.06), rgba(168,85,247,0.05))",
+        background: "linear-gradient(135deg, rgba(245,158,11,0.06), rgba(0,212,255,0.05))",
         boxShadow: "0 0 32px rgba(245,158,11,0.08)",
       }}
     >
@@ -244,14 +244,14 @@ export function ActivationGate({
         {/* Why this fee */}
         <div
           className="rounded-lg px-4 py-3.5 space-y-2 text-xs"
-          style={{ background: "rgba(168,85,247,0.06)", border: "1px solid rgba(168,85,247,0.16)" }}
+          style={{ background: "rgba(0,212,255,0.06)", border: "1px solid rgba(0,212,255,0.16)" }}
         >
           <div className="flex items-center gap-1.5 font-bold text-foreground/90">
             <ShieldCheck className="h-3.5 w-3.5 text-primary shrink-0" />
             Why do we charge a one-time activation fee?
           </div>
           <p className="text-muted-foreground leading-relaxed">
-            To keep Gamerbuddy <strong className="text-foreground">safe and enjoyable for real gamers</strong>, we charge a small one-time activation fee. Unfortunately, some bad actors create fake or bot accounts to abuse the platform. This small fee helps us greatly reduce spam and maintain a <strong className="text-foreground">high-quality, trustworthy community</strong>.
+            To keep Player4Hire <strong className="text-foreground">safe and enjoyable for real gamers</strong>, we charge a small one-time activation fee. Unfortunately, some bad actors create fake or bot accounts to abuse the platform. This small fee helps us greatly reduce spam and maintain a <strong className="text-foreground">high-quality, trustworthy community</strong>.
           </p>
           <p className="text-muted-foreground/70 leading-relaxed">
             This is a <strong className="text-foreground/80">one-time payment</strong> — you won't be charged again. Thank you for understanding and for helping us build a better gaming community together. ❤️

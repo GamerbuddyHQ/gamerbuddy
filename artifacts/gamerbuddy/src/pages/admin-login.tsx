@@ -9,7 +9,7 @@ function GlowOrb({ className }: { className?: string }) {
   return (
     <div
       className={`absolute rounded-full blur-3xl pointer-events-none ${className}`}
-      style={{ background: "radial-gradient(circle, rgba(168,85,247,0.18) 0%, transparent 70%)" }}
+      style={{ background: "radial-gradient(circle, rgba(0,212,255,0.18) 0%, transparent 70%)" }}
     />
   );
 }
@@ -78,7 +78,7 @@ export default function AdminLogin() {
       <div
         className="absolute inset-0 pointer-events-none opacity-[0.04]"
         style={{
-          backgroundImage: "linear-gradient(rgba(168,85,247,1) 1px, transparent 1px), linear-gradient(90deg, rgba(168,85,247,1) 1px, transparent 1px)",
+          backgroundImage: "linear-gradient(rgba(0,212,255,1) 1px, transparent 1px), linear-gradient(90deg, rgba(0,212,255,1) 1px, transparent 1px)",
           backgroundSize: "48px 48px",
         }}
       />
@@ -90,27 +90,27 @@ export default function AdminLogin() {
             <div
               className="w-20 h-20 rounded-2xl flex items-center justify-center"
               style={{
-                background: "linear-gradient(135deg, rgba(124,58,237,0.25) 0%, rgba(168,85,247,0.15) 100%)",
-                border: "1px solid rgba(168,85,247,0.40)",
-                boxShadow: "0 0 40px rgba(168,85,247,0.30), inset 0 1px 0 rgba(255,255,255,0.08)",
+                background: "linear-gradient(135deg, rgba(0,212,255,0.25) 0%, rgba(0,212,255,0.15) 100%)",
+                border: "1px solid rgba(0,212,255,0.40)",
+                boxShadow: "0 0 40px rgba(0,212,255,0.30), inset 0 1px 0 rgba(255,255,255,0.08)",
               }}
             >
               <Shield className="w-9 h-9 text-primary" />
             </div>
             <div
               className="absolute inset-0 rounded-2xl blur-xl opacity-50 -z-10"
-              style={{ background: "radial-gradient(circle, rgba(168,85,247,0.5) 0%, transparent 70%)" }}
+              style={{ background: "radial-gradient(circle, rgba(0,212,255,0.5) 0%, transparent 70%)" }}
             />
           </div>
 
           <h1
             className="text-3xl font-black tracking-tight text-foreground"
-            style={{ textShadow: "0 0 30px rgba(168,85,247,0.30)" }}
+            style={{ textShadow: "0 0 30px rgba(0,212,255,0.30)" }}
           >
             Admin Access
           </h1>
           <p className="text-sm text-muted-foreground mt-1.5">
-            Gamerbuddy &mdash; Secure Command Center
+            Player4Hire &mdash; Secure Command Center
           </p>
         </div>
 
@@ -119,7 +119,7 @@ export default function AdminLogin() {
           className="rounded-2xl p-6 shadow-2xl"
           style={{
             background: "linear-gradient(160deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.02) 100%)",
-            border: "1px solid rgba(168,85,247,0.20)",
+            border: "1px solid rgba(0,212,255,0.20)",
             boxShadow: "0 20px 60px rgba(0,0,0,0.60), 0 0 0 1px rgba(255,255,255,0.04), inset 0 1px 0 rgba(255,255,255,0.06)",
             backdropFilter: "blur(16px)",
           }}
@@ -127,7 +127,7 @@ export default function AdminLogin() {
           {/* Top accent line */}
           <div
             className="h-0.5 -mx-6 -mt-6 mb-6 rounded-t-2xl"
-            style={{ background: "linear-gradient(90deg, transparent, rgba(168,85,247,0.8), rgba(124,58,237,0.6), transparent)" }}
+            style={{ background: "linear-gradient(90deg, transparent, rgba(0,212,255,0.8), rgba(0,212,255,0.6), transparent)" }}
           />
 
           <form onSubmit={handleSubmit} className="space-y-5">
@@ -201,9 +201,9 @@ export default function AdminLogin() {
               className="w-full h-11 rounded-xl font-black uppercase tracking-widest text-sm text-white transition-all flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed mt-2"
               style={{
                 background: loading
-                  ? "rgba(124,58,237,0.50)"
-                  : "linear-gradient(135deg, #7c3aed 0%, #a855f7 60%, #7c3aed 100%)",
-                boxShadow: loading ? "none" : "0 4px 20px rgba(147,51,234,0.40), 0 0 0 1px rgba(168,85,247,0.30)",
+                  ? "rgba(0,212,255,0.50)"
+                  : "linear-gradient(135deg, #0099bb 0%, #00D4FF 60%, #0099bb 100%)",
+                boxShadow: loading ? "none" : "0 4px 20px rgba(0,212,255,0.40), 0 0 0 1px rgba(0,212,255,0.30)",
               }}
             >
               {loading ? (

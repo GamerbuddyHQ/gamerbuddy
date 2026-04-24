@@ -1,8 +1,8 @@
-# Gamerbuddy
+# Player4Hire
 
 ## Overview
 
-A full-stack gaming marketplace web app where users can hire other gamers to play co-op and multiplayer games. Built with React + Vite (frontend) and Express 5 + PostgreSQL (backend) in a pnpm monorepo.
+A full-stack gaming marketplace web app (formerly "Gamerbuddy") where users can hire other gamers to play co-op and multiplayer games. Brand: Player4Hire, tagline "Hire Your Perfect Gaming Partner", cyan/teal color scheme (#00D4FF). Built with React + Vite (frontend) and Express 5 + PostgreSQL (backend) in a pnpm monorepo.
 
 ## Stack
 
@@ -25,7 +25,7 @@ A full-stack gaming marketplace web app where users can hire other gamers to pla
 
 ## Architecture
 
-- `artifacts/gamerbuddy/` — React + Vite frontend (dark gamer theme, electric purple + neon cyan)
+- `artifacts/gamerbuddy/` — React + Vite frontend (dark gamer theme, neon cyan #00D4FF brand color, Player4Hire branding)
 - `artifacts/api-server/` — Express 5 REST API server
 - `lib/db/` — Drizzle ORM schema + client
 - `lib/api-spec/` — OpenAPI 3.1 specification

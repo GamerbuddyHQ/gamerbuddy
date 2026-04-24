@@ -95,7 +95,7 @@ export default function Signup() {
         onSuccess: (data) => {
           login(data.user);
           toast({
-            title: "Welcome to Gamerbuddy! 🎮",
+            title: "Welcome to Player4Hire! 🎮",
             description: "Build your Trust Score by completing quests, getting great reviews, and keeping your profile complete.",
           });
           setLocation("/dashboard");
@@ -129,12 +129,12 @@ export default function Signup() {
             <div className="flex items-center gap-3 mb-4">
               <div
                 className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0"
-                style={{ background: "linear-gradient(135deg, rgba(34,211,238,0.2), rgba(168,85,247,0.15))", border: "1px solid rgba(168,85,247,0.35)" }}
+                style={{ background: "linear-gradient(135deg, rgba(34,211,238,0.2), rgba(0,212,255,0.15))", border: "1px solid rgba(0,212,255,0.35)" }}
               >
                 <Gamepad2 className="h-6 w-6 text-secondary" />
               </div>
               <div>
-                <h2 className="text-2xl font-black text-white tracking-tight">Join Gamerbuddy</h2>
+                <h2 className="text-2xl font-black text-white tracking-tight">Join Player4Hire</h2>
                 <p className="text-sm text-muted-foreground">Free forever — no ID upload needed</p>
               </div>
             </div>
@@ -148,7 +148,7 @@ export default function Signup() {
               <div
                 key={title}
                 className="flex items-start gap-3.5 p-4 rounded-xl"
-                style={{ background: "rgba(34,211,238,0.04)", border: "1px solid rgba(168,85,247,0.12)" }}
+                style={{ background: "rgba(34,211,238,0.04)", border: "1px solid rgba(0,212,255,0.12)" }}
               >
                 <div
                   className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 mt-0.5"
@@ -176,22 +176,22 @@ export default function Signup() {
         {/* ── Signup form ── */}
         <div className="order-1 lg:order-2">
           <Card className="border-primary/20 bg-card/50 backdrop-blur-sm overflow-hidden">
-            <div className="h-1 w-full" style={{ background: "linear-gradient(90deg, #22d3ee, #a855f7, #7c3aed)" }} />
+            <div className="h-1 w-full" style={{ background: "linear-gradient(90deg, #22d3ee, #00D4FF, #0099bb)" }} />
 
             <CardHeader className="space-y-2 text-center pt-8 pb-4">
               <div className="flex justify-center mb-2">
                 <div
                   className="w-14 h-14 rounded-2xl flex items-center justify-center"
                   style={{
-                    background: "linear-gradient(135deg, rgba(34,211,238,0.15), rgba(168,85,247,0.1))",
-                    border: "1px solid rgba(168,85,247,0.3)",
-                    boxShadow: "0 0 24px rgba(168,85,247,0.15)",
+                    background: "linear-gradient(135deg, rgba(34,211,238,0.15), rgba(0,212,255,0.1))",
+                    border: "1px solid rgba(0,212,255,0.3)",
+                    boxShadow: "0 0 24px rgba(0,212,255,0.15)",
                   }}
                 >
                   <Gamepad2 className="h-7 w-7 text-secondary" />
                 </div>
               </div>
-              <CardTitle className="text-2xl font-extrabold uppercase tracking-tight text-white">Join Gamerbuddy</CardTitle>
+              <CardTitle className="text-2xl font-extrabold uppercase tracking-tight text-white">Join Player4Hire</CardTitle>
               <CardDescription>Create your free account — no ID upload needed</CardDescription>
             </CardHeader>
 
@@ -276,7 +276,7 @@ export default function Signup() {
 
                   <div
                     className="flex items-start gap-3 rounded-xl px-4 py-3.5"
-                    style={{ background: "rgba(168,85,247,0.07)", border: "1px solid rgba(168,85,247,0.2)" }}
+                    style={{ background: "rgba(0,212,255,0.07)", border: "1px solid rgba(0,212,255,0.2)" }}
                   >
                     <Gamepad className="h-4 w-4 text-primary mt-0.5 shrink-0" />
                     <div>
@@ -290,7 +290,7 @@ export default function Signup() {
                   <Button
                     type="submit"
                     className="w-full font-black uppercase tracking-widest mt-2 py-5"
-                    style={{ background: "linear-gradient(135deg, #9333ea 0%, #7c3aed 100%)", boxShadow: "0 4px 20px rgba(147,51,234,0.35)" }}
+                    style={{ background: "linear-gradient(135deg, #0099bb 0%, #0099bb 100%)", boxShadow: "0 4px 20px rgba(0,212,255,0.35)" }}
                     disabled={signupMutation.isPending}
                   >
                     {signupMutation.isPending ? "Creating Account..." : "Create Free Account"}

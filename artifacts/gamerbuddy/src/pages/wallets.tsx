@@ -322,7 +322,7 @@ export default function WalletsPage() {
                 <ShieldCheck className="h-3 w-3 shrink-0" /> One-Time Activation Fee
               </div>
               <p className="text-muted-foreground/70 leading-relaxed">
-                To keep Gamerbuddy safe and enjoyable for real gamers, we charge a small one-time activation fee. Some bad actors create fake or bot accounts to abuse the platform — this fee helps us greatly reduce spam and maintain a high-quality, trustworthy community.
+                To keep Player4Hire safe and enjoyable for real gamers, we charge a small one-time activation fee. Some bad actors create fake or bot accounts to abuse the platform — this fee helps us greatly reduce spam and maintain a high-quality, trustworthy community.
               </p>
               <ul className="space-y-0.5 text-muted-foreground/60">
                 <li>🇮🇳 <strong className="text-foreground/70">India:</strong> ₹149 (one-time only)</li>
@@ -340,7 +340,7 @@ export default function WalletsPage() {
                 <Info className="h-3 w-3 shrink-0" /> Where Your Funds Are Held
               </div>
               <p className="text-muted-foreground/70 leading-relaxed">
-                Funds in your Earnings Wallet are held by <strong className="text-foreground/80">Gamerbuddy</strong> and represent amounts owed to you. These funds remain in our account until you request a withdrawal and we manually process the payout.
+                Funds in your Earnings Wallet are held by <strong className="text-foreground/80">Player4Hire</strong> and represent amounts owed to you. These funds remain in our account until you request a withdrawal and we manually process the payout.
               </p>
               <ul className="space-y-0.5 text-muted-foreground/60">
                 <li>📅 <strong className="text-foreground/70">Payouts processed:</strong> Every Monday</li>
@@ -348,7 +348,7 @@ export default function WalletsPage() {
                 <li>🌍 <strong className="text-foreground/70">International (Bank Transfer):</strong> 5–7 business days</li>
               </ul>
               <p className="text-muted-foreground/45 leading-relaxed pt-0.5 border-t border-border/20">
-                Gamerbuddy is not a bank and does not pay interest on held funds. See our <a href="/about" className="text-cyan-400/60 hover:text-cyan-400 underline underline-offset-2 transition-colors">Disclaimer (Section 5)</a> for the full funds holding and payout policy.
+                Player4Hire is not a bank and does not pay interest on held funds. See our <a href="/about" className="text-cyan-400/60 hover:text-cyan-400 underline underline-offset-2 transition-colors">Disclaimer (Section 5)</a> for the full funds holding and payout policy.
               </p>
             </div>
 

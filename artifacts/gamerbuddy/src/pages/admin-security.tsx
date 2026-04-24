@@ -179,7 +179,7 @@ function Section({
 const TX_COLORS: Record<string, string> = {
   deposit:      "#22d3ee",
   withdrawal:   "#f97316",
-  escrow_held:  "#a855f7",
+  escrow_held:  "#00D4FF",
   payout:       "#22c55e",
   gift:         "#ec4899",
   request_fee:  "#eab308",
@@ -199,7 +199,7 @@ function TxPill({ type }: { type: string }) {
 }
 
 function WalletPill({ wallet }: { wallet: string }) {
-  const color = wallet === "hiring" ? "#a855f7" : "#22d3ee";
+  const color = wallet === "hiring" ? "#00D4FF" : "#22d3ee";
   return (
     <span
       className="text-[10px] font-semibold px-1.5 py-0.5 rounded uppercase tracking-wide"
@@ -554,7 +554,7 @@ function AdminNav() {
       <div className="max-w-[1400px] mx-auto px-4 md:px-8 h-12 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Shield className="w-5 h-5 text-primary" />
-          <span className="font-bold tracking-tight text-foreground">Gamerbuddy Admin</span>
+          <span className="font-bold tracking-tight text-foreground">Player4Hire Admin</span>
           <span className="hidden sm:inline text-xs text-muted-foreground/50 ml-2">
             {new Date().toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
           </span>
@@ -692,7 +692,7 @@ export default function AdminSecurity() {
               <StatCard icon={Lock}          label="Locked Accounts" value={lockedCount}  sub={lockedCount ? "Currently locked out" : "All clear"} color="#ef4444" />
               <StatCard icon={AlertTriangle} label="Failed Logins"   value={warningCount} sub="Accounts with attempts"  color="#f59e0b" />
               <StatCard icon={Flag}          label="User Reports"    value={reportCount}  sub="Total reports filed"     color="#f97316" />
-              <StatCard icon={TrendingUp}    label="Large Txns"      value={largeTxCount} sub="Transactions ≥ $500"     color="#a855f7" />
+              <StatCard icon={TrendingUp}    label="Large Txns"      value={largeTxCount} sub="Transactions ≥ $500"     color="#00D4FF" />
             </div>
           </div>
         </>
@@ -860,14 +860,14 @@ export default function AdminSecurity() {
       {/* ── Platform Earnings link ── */}
       <div
         className="rounded-2xl border px-6 py-5 flex items-center justify-between gap-4"
-        style={{ borderColor: "rgba(168,85,247,0.25)", background: "rgba(168,85,247,0.04)" }}
+        style={{ borderColor: "rgba(0,212,255,0.25)", background: "rgba(0,212,255,0.04)" }}
       >
         <div className="flex items-center gap-3">
           <div
             className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
-            style={{ background: "rgba(168,85,247,0.12)", border: "1px solid rgba(168,85,247,0.25)" }}
+            style={{ background: "rgba(0,212,255,0.12)", border: "1px solid rgba(0,212,255,0.25)" }}
           >
-            <DollarSign className="h-5 w-5" style={{ color: "#a855f7" }} />
+            <DollarSign className="h-5 w-5" style={{ color: "#00D4FF" }} />
           </div>
           <div>
             <div className="text-sm font-extrabold text-foreground">Platform Earnings</div>
@@ -879,7 +879,7 @@ export default function AdminSecurity() {
         <a
           href="/admin/platform-earnings"
           className="shrink-0 inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold uppercase tracking-widest border transition-all hover:opacity-80"
-          style={{ borderColor: "rgba(168,85,247,0.40)", color: "#a855f7", background: "rgba(168,85,247,0.08)" }}
+          style={{ borderColor: "rgba(0,212,255,0.40)", color: "#00D4FF", background: "rgba(0,212,255,0.08)" }}
         >
           View Earnings →
         </a>
