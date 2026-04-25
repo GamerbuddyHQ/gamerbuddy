@@ -120,7 +120,7 @@ export function ActivationGate({
         description: `One-time Account Activation Fee (${order.label})`,
         order_id: order.orderId,
         prefill: { email: userEmail, contact: userPhone ?? "" },
-        theme: { color: "#E8FF00" },
+        theme: { color: "#D4FF00" },
         modal: {
           ondismiss: () => {
             setPaying(false);
@@ -173,7 +173,7 @@ export function ActivationGate({
       className="rounded-2xl overflow-hidden"
       style={{
         border: "1.5px solid rgba(245,158,11,0.40)",
-        background: "linear-gradient(135deg, rgba(245,158,11,0.06), rgba(232,255,0,0.05))",
+        background: "linear-gradient(135deg, rgba(245,158,11,0.06), rgba(212,255,0,0.05))",
         boxShadow: "0 0 32px rgba(245,158,11,0.08)",
       }}
     >
@@ -244,7 +244,7 @@ export function ActivationGate({
         {/* Why this fee */}
         <div
           className="rounded-lg px-4 py-3.5 space-y-2 text-xs"
-          style={{ background: "rgba(232,255,0,0.06)", border: "1px solid rgba(232,255,0,0.16)" }}
+          style={{ background: "rgba(212,255,0,0.06)", border: "1px solid rgba(212,255,0,0.16)" }}
         >
           <div className="flex items-center gap-1.5 font-bold text-foreground/90">
             <ShieldCheck className="h-3.5 w-3.5 text-primary shrink-0" />

@@ -120,18 +120,18 @@
   --sidebar: 0 0% 7%;
   --sidebar-foreground: 30 4% 97%;
   --sidebar-border: 240 6% 14%;
-  --sidebar-primary: 66 100% 50%;
+  --sidebar-primary: 70 100% 50%;
   --sidebar-primary-foreground: 240 17% 5%;
   --sidebar-accent: 240 6% 14%;
   --sidebar-accent-foreground: 30 4% 97%;
-  --sidebar-ring: 66 100% 50%;
+  --sidebar-ring: 70 100% 50%;
 
   --popover: 0 0% 7%;
   --popover-foreground: 30 4% 97%;
   --popover-border: 240 6% 14%;
 
   /* Gold — main accent */
-  --primary: 66 100% 50%;
+  --primary: 70 100% 50%;
   --primary-foreground: 240 17% 5%;
 
   /* Teal — availability / online */
@@ -149,9 +149,9 @@
   --destructive-foreground: 0 0% 100%;
 
   --input: 240 6% 16%;
-  --ring: 66 100% 50%;
+  --ring: 70 100% 50%;
 
-  --chart-1: 66 100% 50%;
+  --chart-1: 70 100% 50%;
   --chart-2: 174 100% 44%;
   --chart-3: 37 43% 60%;
   --chart-4: 350 100% 62%;

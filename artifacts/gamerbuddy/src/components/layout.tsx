@@ -175,7 +175,7 @@ function NotificationBell() {
       >
         <Bell className="h-4 w-4 text-muted-foreground" />
         {unread > 0 && (
-          <span className="absolute -top-1 -right-1 h-4 min-w-[1rem] px-0.5 rounded-full bg-primary text-[#0A0A0E] text-[9px] font-black flex items-center justify-center leading-none shadow-[0_0_8px_rgba(232,255,0,0.6)]">
+          <span className="absolute -top-1 -right-1 h-4 min-w-[1rem] px-0.5 rounded-full text-[#D4FF00] text-[9px] font-black flex items-center justify-center leading-none" style={{ background: "#1A1A1A", border: "1px solid rgba(212,255,0,0.50)" }}>
             {unread > 99 ? "99+" : unread}
           </span>
         )}
@@ -264,17 +264,17 @@ function LangComingSoonModal({ onClose }: { onClose: () => void }) {
       <div
         className="relative w-full max-w-sm rounded-2xl overflow-hidden shadow-2xl"
         style={{
-          background: "linear-gradient(160deg, #0d0620 0%, #080415 100%)",
-          border: "1px solid rgba(232,255,0,0.30)",
-          boxShadow: "0 0 60px rgba(232,255,0,0.20), 0 20px 60px rgba(0,0,0,0.8)",
+          background: "#111111",
+          border: "1px solid rgba(212,255,0,0.20)",
+          boxShadow: "0 8px 40px rgba(0,0,0,0.80)",
         }}
       >
-        <div className="h-px w-full" style={{ background: "linear-gradient(90deg, transparent, rgba(232,255,0,0.45), transparent)" }} />
+        <div className="h-px w-full" style={{ background: "linear-gradient(90deg, transparent, rgba(212,255,0,0.45), transparent)" }} />
         <div className="p-6">
           <div className="flex items-center gap-3 mb-4">
             <div
               className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0"
-              style={{ background: "rgba(232,255,0,0.15)", border: "1px solid rgba(232,255,0,0.30)" }}
+              style={{ background: "rgba(212,255,0,0.15)", border: "1px solid rgba(212,255,0,0.30)" }}
             >
               <Globe className="h-5 w-5 text-primary" />
             </div>
@@ -300,7 +300,7 @@ function LangComingSoonModal({ onClose }: { onClose: () => void }) {
               <span
                 key={l.label}
                 className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold"
-                style={{ background: "rgba(232,255,0,0.10)", border: "1px solid rgba(232,255,0,0.25)", color: "rgba(232,255,0,0.80)" }}
+                style={{ background: "rgba(212,255,0,0.10)", border: "1px solid rgba(212,255,0,0.25)", color: "rgba(212,255,0,0.80)" }}
               >
                 {l.flag} {l.label}
               </span>
@@ -308,8 +308,8 @@ function LangComingSoonModal({ onClose }: { onClose: () => void }) {
           </div>
           <button
             onClick={onClose}
-            className="w-full py-2.5 rounded-xl font-black uppercase tracking-widest text-sm text-[#0A0A0E] transition-all hover:brightness-110"
-            style={{ background: "linear-gradient(135deg, #E8FF00 0%, #C8D100 100%)", boxShadow: "0 3px 14px rgba(0,0,0,0.50)" }}
+            className="w-full py-2.5 rounded-xl font-black uppercase tracking-widest text-sm text-[#D4FF00] transition-all hover:brightness-110"
+            style={{ background: "#1A1A1A", border: "1.5px solid rgba(212,255,0,0.55)", boxShadow: "0 3px 14px rgba(0,0,0,0.50)" }}
           >
             Got it!
           </button>
@@ -380,7 +380,7 @@ function LangSelector() {
                     key={l.code}
                     onClick={() => handleSelect(l.code)}
                     className="w-full flex items-center gap-3 px-3 py-2.5 text-left transition-colors hover:bg-primary/10"
-                    style={isActive ? { color: "#E8FF00" } : { color: "rgba(255,255,255,0.70)" }}
+                    style={isActive ? { color: "#D4FF00" } : { color: "rgba(255,255,255,0.70)" }}
                   >
                     <span className="text-lg w-6 text-center leading-none">{l.flag}</span>
                     <div className="flex-1 min-w-0">
@@ -390,7 +390,7 @@ function LangSelector() {
                     {isComingSoon ? (
                       <span
                         className="text-[9px] font-black uppercase tracking-wide px-1.5 py-0.5 rounded-full shrink-0"
-                        style={{ background: "rgba(232,255,0,0.15)", color: "rgba(232,255,0,0.80)", border: "1px solid rgba(232,255,0,0.25)" }}
+                        style={{ background: "rgba(212,255,0,0.15)", color: "rgba(212,255,0,0.80)", border: "1px solid rgba(212,255,0,0.25)" }}
                       >
                         Soon
                       </span>
@@ -440,9 +440,9 @@ function MobileLangPicker({ onPick }: { onPick: () => void }) {
               onClick={() => handleSelect(l.code)}
               className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl border text-left transition-colors relative"
               style={isActive ? {
-                background: "rgba(232,255,0,0.15)",
-                borderColor: "rgba(232,255,0,0.40)",
-                color: "#E8FF00",
+                background: "rgba(212,255,0,0.15)",
+                borderColor: "rgba(212,255,0,0.40)",
+                color: "#D4FF00",
               } : {
                 background: "rgba(255,255,255,0.03)",
                 borderColor: "rgba(255,255,255,0.08)",
@@ -453,7 +453,7 @@ function MobileLangPicker({ onPick }: { onPick: () => void }) {
               <div className="flex-1 min-w-0">
                 <span className="text-[12px] font-bold truncate block">{l.nativeLabel}</span>
                 {isComingSoon && (
-                  <span className="text-[9px] font-black uppercase tracking-wide" style={{ color: "rgba(232,255,0,0.70)" }}>Soon</span>
+                  <span className="text-[9px] font-black uppercase tracking-wide" style={{ color: "rgba(212,255,0,0.70)" }}>Soon</span>
                 )}
               </div>
             </button>
@@ -540,7 +540,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 style={{ letterSpacing: "0.01em" }}
               >
                 <span style={{ color: "#FDF8F3" }}>Player</span>
-                <span style={{ color: "#E8FF00" }}>4</span>
+                <span style={{ color: "#D4FF00" }}>4</span>
                 <span style={{ color: "#FDF8F3" }}>Hire</span>
               </span>
             </Link>
@@ -566,13 +566,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
                     {...(elProps as any)}
                     className="text-[13px] font-black whitespace-nowrap transition-all duration-200 px-3.5 py-1.5 rounded-full"
                     style={isActive ? {
-                      background: "rgba(232,255,0,0.08)",
-                      border: "1px solid rgba(232,255,0,0.55)",
-                      color: "#E8FF00",
+                      background: "rgba(212,255,0,0.08)",
+                      border: "1px solid rgba(212,255,0,0.55)",
+                      color: "#D4FF00",
                     } : {
                       background: "transparent",
-                      border: "1px solid rgba(232,255,0,0.25)",
-                      color: "rgba(232,255,0,0.60)",
+                      border: "1px solid rgba(212,255,0,0.25)",
+                      color: "rgba(212,255,0,0.60)",
                     }}
                   >
                     {item.label}
@@ -587,14 +587,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
                     href={item.href}
                     className="text-[13px] font-semibold whitespace-nowrap transition-all duration-200 px-3.5 py-1.5 rounded-full"
                     style={isActive ? {
-                      background: "rgba(232,255,0,0.18)",
-                      border: "1px solid rgba(232,255,0,0.55)",
-                      color: "#E8FF00",
-                      boxShadow: "0 0 12px rgba(232,255,0,0.20)",
+                      background: "rgba(212,255,0,0.18)",
+                      border: "1px solid rgba(212,255,0,0.55)",
+                      color: "#D4FF00",
+                      boxShadow: "0 0 12px rgba(212,255,0,0.20)",
                     } : {
-                      background: "rgba(232,255,0,0.06)",
-                      border: "1px solid rgba(232,255,0,0.25)",
-                      color: "rgba(232,255,0,0.65)",
+                      background: "rgba(212,255,0,0.06)",
+                      border: "1px solid rgba(212,255,0,0.25)",
+                      color: "rgba(212,255,0,0.65)",
                     }}
                   >
                     {item.label}
@@ -613,9 +613,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
                     {...(elProps as any)}
                     className="text-[13px] font-bold whitespace-nowrap transition-all duration-200 px-3.5 py-1.5 rounded-full"
                     style={{
-                      background: "rgba(232,255,0,0.07)",
-                      border: "1px solid rgba(232,255,0,0.28)",
-                      color: "rgba(232,255,0,0.75)",
+                      background: "rgba(212,255,0,0.07)",
+                      border: "1px solid rgba(212,255,0,0.28)",
+                      color: "rgba(212,255,0,0.75)",
                     }}
                   >
                     {item.label}
@@ -677,7 +677,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 {userMenuOpen && (
                   <div
                     className="absolute right-0 top-full mt-2 rounded-2xl border border-border/70 bg-popover z-[200] overflow-hidden"
-                    style={{ width: 200, boxShadow: "0 16px 48px rgba(0,0,0,0.32), 0 0 0 1px rgba(232,255,0,0.10)" }}
+                    style={{ width: 200, boxShadow: "0 16px 48px rgba(0,0,0,0.32), 0 0 0 1px rgba(212,255,0,0.10)" }}
                   >
                     <div className="h-0.5 bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
                     <div className="px-3 pt-2.5 pb-1">
@@ -722,9 +722,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 </Link>
                 <Link
                   href="/signup"
-                  className="h-9 px-4 flex items-center text-[13px] font-bold text-[#0A0A0E] rounded-xl transition-all hover:brightness-110 active:scale-95"
+                  className="h-9 px-4 flex items-center text-[13px] font-bold text-[#D4FF00] rounded-xl transition-all hover:brightness-110 active:scale-95"
                   style={{
-                    background: "linear-gradient(135deg, #E8FF00 0%, #C8D100 100%)",
+                    background: "#1A1A1A",
+                    border: "1.5px solid rgba(212,255,0,0.55)",
                     boxShadow: "0 3px 14px rgba(0,0,0,0.50)",
                   }}
                 >
@@ -765,7 +766,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-3 px-4 py-3.5 rounded-xl border font-bold text-[15px] transition-all"
-                    style={{ background: "rgba(232,255,0,0.07)", borderColor: "rgba(232,255,0,0.28)", color: "rgba(232,255,0,0.80)" }}
+                    style={{ background: "rgba(212,255,0,0.07)", borderColor: "rgba(212,255,0,0.28)", color: "rgba(212,255,0,0.80)" }}
                   >
                     <item.icon className="h-5 w-5 shrink-0" />
                     {item.label}
@@ -780,11 +781,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
                     href={item.href}
                     className="flex items-center gap-3 px-4 py-3.5 rounded-xl border font-black text-[15px] transition-all"
                     style={isActive ? {
-                      background: "rgba(232,255,0,0.08)",
-                      borderColor: "rgba(232,255,0,0.55)", color: "#E8FF00",
+                      background: "rgba(212,255,0,0.08)",
+                      borderColor: "rgba(212,255,0,0.55)", color: "#D4FF00",
                     } : {
                       background: "transparent",
-                      borderColor: "rgba(232,255,0,0.25)", color: "rgba(232,255,0,0.60)",
+                      borderColor: "rgba(212,255,0,0.25)", color: "rgba(212,255,0,0.60)",
                     }}
                   >
                     <item.icon className="h-5 w-5 shrink-0" />
@@ -800,10 +801,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
                     href={item.href}
                     className="flex items-center gap-3 px-4 py-3.5 rounded-xl border font-semibold text-[15px] transition-all"
                     style={isActive ? {
-                      background: "rgba(232,255,0,0.14)", borderColor: "rgba(232,255,0,0.55)", color: "#E8FF00",
-                      boxShadow: "0 0 16px rgba(232,255,0,0.16)",
+                      background: "rgba(212,255,0,0.14)", borderColor: "rgba(212,255,0,0.55)", color: "#D4FF00",
+                      boxShadow: "0 0 16px rgba(212,255,0,0.16)",
                     } : {
-                      background: "rgba(232,255,0,0.05)", borderColor: "rgba(232,255,0,0.28)", color: "rgba(232,255,0,0.75)",
+                      background: "rgba(212,255,0,0.05)", borderColor: "rgba(212,255,0,0.28)", color: "rgba(212,255,0,0.75)",
                     }}
                   >
                     <item.icon className="h-5 w-5 shrink-0" />
@@ -845,8 +846,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 <>
                   <Link
                     href="/signup"
-                    className="flex items-center justify-center w-full py-3.5 rounded-xl font-black text-[15px] text-white transition-all hover:brightness-110"
-                    style={{ background: "linear-gradient(135deg, #E8FF00 0%, #C8D100 100%)", boxShadow: "0 3px 14px rgba(255,59,92,0.40)" }}
+                    className="flex items-center justify-center w-full py-3.5 rounded-xl font-black text-[15px] text-[#D4FF00] transition-all hover:brightness-110"
+                    style={{ background: "#1A1A1A", border: "1.5px solid rgba(212,255,0,0.55)", boxShadow: "0 3px 14px rgba(0,0,0,0.50)" }}
                   >
                     {t.nav.signUp}
                   </Link>

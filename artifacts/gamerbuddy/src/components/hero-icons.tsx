@@ -50,7 +50,7 @@ const JoystickSVG = ({ size, color }: { size: number; color: string }) => (
 );
 
 /* ── Icon layout definition ──────────────────────────────────── */
-const GREEN = "#E8FF00";
+const GREEN = "#D4FF00";
 const WHITE = "#ffffff";
 
 type Variant = 1 | 2 | 3;
