@@ -1,103 +1,8 @@
 import React from "react";
 import { Link } from "wouter";
-import { Gamepad2, Users, Coins, Zap, Shield, Star, Trophy, ChevronRight, Monitor, Smartphone, Crosshair, Keyboard, Mouse, Headphones } from "lucide-react";
+import { Gamepad2, Users, Coins, Zap, Shield, Star, Trophy, ChevronRight } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 
-/* ── floating gaming icons ──────────────────────────────────── */
-type IconProps = { size: number; color: string };
-
-const NintendoSwitch = ({ size, color }: IconProps) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="1.5" y="4" width="6.5" height="16" rx="3.5" />
-    <rect x="8.5" y="7.5" width="7" height="9" rx="1" />
-    <rect x="16" y="4" width="6.5" height="16" rx="3.5" />
-    <circle cx="4.75" cy="8.5" r="1" fill={color} stroke="none" />
-    <line x1="3.5" y1="12.5" x2="6" y2="12.5" />
-    <line x1="4.75" y1="11.25" x2="4.75" y2="13.75" />
-    <circle cx="19.25" cy="15.5" r="1" fill={color} stroke="none" />
-  </svg>
-);
-
-const PSController = ({ size, color }: IconProps) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M3.5 9.5c0-2 1.5-3.5 3-3.5h11c1.5 0 3 1.5 3 3.5v4.5l-1.5 3.5H5l-1.5-3.5V9.5z" />
-    <path d="M5 14l-2.5 5" />
-    <path d="M19 14l2.5 5" />
-    <circle cx="8.5" cy="13" r="2" />
-    <circle cx="14.5" cy="10" r="2" />
-    <circle cx="17.5" cy="13" r="0.8" fill={color} stroke="none" />
-    <circle cx="16" cy="10.5" r="0.8" fill={color} stroke="none" />
-  </svg>
-);
-
-const XboxController = ({ size, color }: IconProps) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M4 10c0-2 1.5-4 3-4h10c1.5 0 3 2 3 4v4.5l-2 4H6l-2-4V10z" />
-    <path d="M6 14.5L4 20" />
-    <path d="M18 14.5L20 20" />
-    <circle cx="9" cy="13.5" r="2" />
-    <circle cx="15" cy="10" r="2" />
-    <circle cx="17" cy="13" r="0.75" fill={color} stroke="none" />
-    <circle cx="17" cy="11" r="0.75" fill={color} stroke="none" />
-    <circle cx="16" cy="12" r="0.75" fill={color} stroke="none" />
-    <circle cx="18" cy="12" r="0.75" fill={color} stroke="none" />
-  </svg>
-);
-
-const JoystickSVG = ({ size, color }: IconProps) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="12" cy="7" r="3.5" />
-    <line x1="12" y1="10.5" x2="12" y2="17" />
-    <ellipse cx="12" cy="19" rx="5.5" ry="2" />
-    <line x1="9" y1="5.5" x2="6" y2="3.5" />
-    <line x1="15" y1="5.5" x2="18" y2="3.5" />
-  </svg>
-);
-
-type FloatingEntry = {
-  render: (size: number, color: string) => React.ReactNode;
-  left: number; top: number; size: number;
-  opacity: number; variant: 1|2|3; dur: number; delay: number; color: string;
-};
-
-const GAMING_ICONS: FloatingEntry[] = [
-  { render: (s,c) => <Gamepad2    size={s} color={c} />, left:  7, top: 10, size: 26, opacity: 0.22, variant: 1, dur: 14, delay:  0, color: '#A1FF4F' },
-  { render: (s,c) => <NintendoSwitch size={s} color={c} />, left: 86, top: 14, size: 24, opacity: 0.18, variant: 2, dur: 18, delay:  2, color: '#A1FF4F' },
-  { render: (s,c) => <PSController size={s} color={c} />, left: 14, top: 70, size: 28, opacity: 0.20, variant: 3, dur: 20, delay:  1, color: '#A1FF4F' },
-  { render: (s,c) => <XboxController size={s} color={c} />, left: 79, top: 62, size: 24, opacity: 0.17, variant: 1, dur: 17, delay:  4, color: '#ffffff' },
-  { render: (s,c) => <JoystickSVG  size={s} color={c} />, left: 48, top:  6, size: 20, opacity: 0.16, variant: 2, dur: 22, delay:  7, color: '#ffffff' },
-  { render: (s,c) => <Headphones   size={s} color={c} />, left: 91, top: 42, size: 22, opacity: 0.19, variant: 3, dur: 15, delay:  3, color: '#A1FF4F' },
-  { render: (s,c) => <Keyboard     size={s} color={c} />, left: 24, top: 82, size: 24, opacity: 0.16, variant: 1, dur: 21, delay:  5, color: '#ffffff' },
-  { render: (s,c) => <Mouse        size={s} color={c} />, left: 70, top: 80, size: 20, opacity: 0.20, variant: 2, dur: 13, delay:  6, color: '#A1FF4F' },
-  { render: (s,c) => <Smartphone   size={s} color={c} />, left:  4, top: 48, size: 18, opacity: 0.15, variant: 3, dur: 19, delay:  9, color: '#ffffff' },
-  { render: (s,c) => <Crosshair    size={s} color={c} />, left: 61, top: 87, size: 22, opacity: 0.18, variant: 1, dur: 24, delay:  2, color: '#A1FF4F' },
-  { render: (s,c) => <Monitor      size={s} color={c} />, left: 35, top: 12, size: 20, opacity: 0.15, variant: 2, dur: 16, delay: 10, color: '#ffffff' },
-  { render: (s,c) => <Gamepad2     size={s} color={c} />, left: 74, top: 28, size: 18, opacity: 0.13, variant: 3, dur: 26, delay: 12, color: '#A1FF4F' },
-  { render: (s,c) => <Headphones   size={s} color={c} />, left: 18, top: 32, size: 16, opacity: 0.14, variant: 1, dur: 23, delay: 14, color: '#ffffff' },
-  { render: (s,c) => <Crosshair    size={s} color={c} />, left: 55, top: 55, size: 16, opacity: 0.12, variant: 2, dur: 28, delay:  8, color: '#A1FF4F' },
-  { render: (s,c) => <Mouse        size={s} color={c} />, left: 40, top: 40, size: 14, opacity: 0.11, variant: 3, dur: 30, delay: 16, color: '#ffffff' },
-];
-
-function FloatingGamingIcons() {
-  return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none" style={{ zIndex: 1 }}>
-      {GAMING_ICONS.map((item, i) => (
-        <div
-          key={i}
-          className="absolute"
-          style={{
-            left: `${item.left}%`,
-            top: `${item.top}%`,
-            opacity: item.opacity,
-            animation: `float-icon-${item.variant} ${item.dur}s ease-in-out ${item.delay}s infinite`,
-          }}
-        >
-          {item.render(item.size, item.color)}
-        </div>
-      ))}
-    </div>
-  );
-}
 
 /* ── feature card ───────────────────────────────────────────── */
 function FeatureCard({
@@ -239,7 +144,7 @@ export default function Home() {
 
           {/* Headline */}
           <h1 className="font-black tracking-tight leading-[1.02] mb-5">
-            <span className="block text-white text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-[6rem] drop-shadow-sm">
+            <span className="block text-white text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-[6rem]">
               {t.home.headline1}
             </span>
             <span
@@ -249,7 +154,6 @@ export default function Home() {
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
                 backgroundClip: "text",
-                filter: "drop-shadow(0 0 32px rgba(161,255,79,0.60))",
               }}
             >
               {t.home.headline2}
