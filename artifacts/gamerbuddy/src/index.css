@@ -107,55 +107,55 @@
   --surface-dark-border: rgba(255, 255, 255, 0.07);
   --icon-glass-bg: rgba(255, 255, 255, 0.06);
 
-  /* Ink Games Vibe — near-black base */
-  --background: 206 26% 5%;
-  --foreground: 240 2% 90%;
+  /* Tesoro Mercenary Elite */
+  --background: 240 17% 5%;
+  --foreground: 30 4% 97%;
 
-  --border: 206 15% 14%;
+  --border: 240 6% 14%;
 
-  --card: 206 20% 9%;
-  --card-foreground: 240 2% 90%;
-  --card-border: 206 15% 14%;
+  --card: 0 0% 7%;
+  --card-foreground: 30 4% 97%;
+  --card-border: 240 6% 14%;
 
-  --sidebar: 206 20% 9%;
-  --sidebar-foreground: 240 2% 90%;
-  --sidebar-border: 206 15% 14%;
-  --sidebar-primary: 92 100% 66%;
-  --sidebar-primary-foreground: 206 26% 5%;
-  --sidebar-accent: 206 15% 14%;
-  --sidebar-accent-foreground: 240 2% 90%;
-  --sidebar-ring: 92 100% 66%;
+  --sidebar: 0 0% 7%;
+  --sidebar-foreground: 30 4% 97%;
+  --sidebar-border: 240 6% 14%;
+  --sidebar-primary: 66 100% 50%;
+  --sidebar-primary-foreground: 240 17% 5%;
+  --sidebar-accent: 240 6% 14%;
+  --sidebar-accent-foreground: 30 4% 97%;
+  --sidebar-ring: 66 100% 50%;
 
-  --popover: 206 20% 9%;
-  --popover-foreground: 240 2% 90%;
-  --popover-border: 206 15% 14%;
+  --popover: 0 0% 7%;
+  --popover-foreground: 30 4% 97%;
+  --popover-border: 240 6% 14%;
 
-  /* Neon Chartreuse — main accent */
-  --primary: 92 100% 66%;
-  --primary-foreground: 206 26% 5%;
+  /* Gold — main accent */
+  --primary: 66 100% 50%;
+  --primary-foreground: 240 17% 5%;
 
-  /* Electric Purple — ranks / badges */
-  --secondary: 254 100% 63%;
-  --secondary-foreground: 0 0% 100%;
+  /* Teal — availability / online */
+  --secondary: 174 100% 44%;
+  --secondary-foreground: 240 17% 5%;
 
-  --muted: 206 15% 14%;
-  --muted-foreground: 210 8% 58%;
+  --muted: 240 6% 14%;
+  --muted-foreground: 240 4% 58%;
 
-  --accent: 206 20% 12%;
-  --accent-foreground: 240 2% 90%;
+  --accent: 240 6% 12%;
+  --accent-foreground: 30 4% 97%;
 
-  /* Crimson Red — CTA */
+  /* Destructive stays crimson */
   --destructive: 350 100% 62%;
   --destructive-foreground: 0 0% 100%;
 
-  --input: 206 15% 16%;
-  --ring: 92 100% 66%;
+  --input: 240 6% 16%;
+  --ring: 66 100% 50%;
 
-  --chart-1: 92 100% 66%;
-  --chart-2: 254 100% 63%;
-  --chart-3: 350 100% 62%;
-  --chart-4: 45 100% 55%;
-  --chart-5: 191 91% 36%;
+  --chart-1: 66 100% 50%;
+  --chart-2: 174 100% 44%;
+  --chart-3: 37 43% 60%;
+  --chart-4: 350 100% 62%;
+  --chart-5: 254 100% 63%;
 
   --app-font-sans: 'Space Mono', 'Inter', monospace, sans-serif;
   --app-font-serif: Georgia, serif;
@@ -188,7 +188,7 @@
 
   body {
     @apply font-sans antialiased text-foreground;
-    background-color: #0A0E11;
+    background-color: #0A0A0E;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
