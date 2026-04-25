@@ -2,6 +2,7 @@ import React from "react";
 import { Link } from "wouter";
 import { Gamepad2, Users, Coins, Zap, Shield, Star, Trophy, ChevronRight } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
+import { HeroIcons } from "@/components/hero-icons";
 
 
 /* ── feature card ───────────────────────────────────────────── */
@@ -123,6 +124,7 @@ export default function Home() {
 
       {/* ═══════════════════ HERO ═══════════════════ */}
       <section className="relative flex flex-col items-center justify-center text-center px-4 pt-14 pb-12 lg:pt-24 lg:pb-16 overflow-hidden min-h-[600px] lg:min-h-[720px]">
+        <HeroIcons />
         {/* Content */}
         <div className="relative w-full max-w-5xl mx-auto" style={{ zIndex: 2 }}>
 
