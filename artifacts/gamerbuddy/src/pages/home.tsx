@@ -2,7 +2,6 @@ import React from "react";
 import { Link } from "wouter";
 import { Gamepad2, Users, Coins, Zap, Shield, Star, Trophy, ChevronRight, Monitor, Smartphone, Crosshair, Keyboard, Mouse, Headphones } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
-import { HeroParticles } from "@/components/hero-particles";
 
 /* ── floating gaming icons ──────────────────────────────────── */
 type IconProps = { size: number; color: string };
@@ -219,15 +218,6 @@ export default function Home() {
 
       {/* ═══════════════════ HERO ═══════════════════ */}
       <section className="relative flex flex-col items-center justify-center text-center px-4 pt-14 pb-12 lg:pt-24 lg:pb-16 overflow-hidden min-h-[600px] lg:min-h-[720px]">
-        <HeroParticles />
-        {/* Dark vignette — keeps center text readable */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            zIndex: 1,
-            background: "radial-gradient(ellipse 70% 60% at 50% 50%, transparent 0%, rgba(9,9,11,0.45) 65%, rgba(9,9,11,0.82) 100%)",
-          }}
-        />
         {/* Content */}
         <div className="relative w-full max-w-5xl mx-auto" style={{ zIndex: 2 }}>
 
