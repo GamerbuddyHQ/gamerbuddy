@@ -158,7 +158,6 @@ export default function Home() {
                 WebkitTextFillColor: "transparent",
                 backgroundClip: "text",
                 padding: "0.05em 0.1em 0.08em",
-                textShadow: "0 0 10px rgba(212,255,0,0.40), 0 0 22px rgba(212,255,0,0.15)",
               }}
             >
               {t.home.headline2}
