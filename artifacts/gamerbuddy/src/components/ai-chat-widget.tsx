@@ -429,7 +429,7 @@ export function AIChatWidget() {
       <button
         onClick={() => setOpen(true)}
         className="fixed bottom-5 right-5 z-50 flex items-center gap-2.5 rounded-full px-4 py-3 font-bold text-sm text-[#E8FF00] transition-all hover:scale-105 active:scale-95"
-        style={{ background: "#1A1A1A", boxShadow: "0 4px 12px rgba(0,0,0,0.50)", border: "1px solid rgba(232,255,0,0.20)" }}
+        style={{ background: "#1A1A1A", boxShadow: "0 2px 10px rgba(0,0,0,0.60)" }}
         aria-label="Open AI Support"
       >
         <div className="relative">
@@ -444,26 +444,26 @@ export function AIChatWidget() {
   return (
     <div
       ref={widgetRef}
-      className="fixed bottom-5 right-5 z-50 flex flex-col rounded-2xl shadow-2xl overflow-hidden transition-all duration-300"
+      className="fixed bottom-5 right-5 z-50 flex flex-col rounded-2xl overflow-hidden transition-all duration-300"
       style={{
         width: "clamp(320px, 90vw, 390px)",
         height: minimized ? "56px" : "clamp(420px, 70vh, 560px)",
-        background: "linear-gradient(180deg, #0d0620 0%, #080415 100%)",
-        border: "1px solid rgba(232,255,0,0.25)",
-        boxShadow: "0 0 40px rgba(232,255,0,0.18), 0 8px 32px rgba(0,0,0,0.6)",
+        background: "#111111",
+        border: "1px solid rgba(255,255,255,0.08)",
+        boxShadow: "0 8px 32px rgba(0,0,0,0.75)",
       }}
     >
       {/* Header */}
       <div
         className="flex items-center justify-between px-4 py-3 shrink-0"
-        style={{ background: "linear-gradient(90deg, rgba(232,255,0,0.6) 0%, rgba(232,255,0,0.4) 100%)", borderBottom: "1px solid rgba(232,255,0,0.2)" }}
+        style={{ background: "#1A1A1A", borderBottom: "1px solid rgba(255,255,255,0.08)" }}
       >
         <div className="flex items-center gap-2.5">
           <div className="relative">
             <div className="h-8 w-8 rounded-full bg-primary/20 border border-primary/40 flex items-center justify-center">
               <Sparkles className="h-4 w-4 text-primary" />
             </div>
-            <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-green-400 border-2 border-[#0d0620]" />
+            <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-green-400 border-2 border-[#1A1A1A]" />
           </div>
           <div>
             <div className="text-sm font-extrabold text-white leading-none">Buddy</div>
