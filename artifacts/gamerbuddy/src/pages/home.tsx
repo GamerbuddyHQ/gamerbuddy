@@ -61,20 +61,20 @@ type FloatingEntry = {
 };
 
 const GAMING_ICONS: FloatingEntry[] = [
-  { render: (s,c) => <Gamepad2    size={s} color={c} />, left:  7, top: 10, size: 26, opacity: 0.22, variant: 1, dur: 14, delay:  0, color: '#C8F000' },
-  { render: (s,c) => <NintendoSwitch size={s} color={c} />, left: 86, top: 14, size: 24, opacity: 0.18, variant: 2, dur: 18, delay:  2, color: '#C8F000' },
-  { render: (s,c) => <PSController size={s} color={c} />, left: 14, top: 70, size: 28, opacity: 0.20, variant: 3, dur: 20, delay:  1, color: '#C8F000' },
+  { render: (s,c) => <Gamepad2    size={s} color={c} />, left:  7, top: 10, size: 26, opacity: 0.22, variant: 1, dur: 14, delay:  0, color: '#B15EED' },
+  { render: (s,c) => <NintendoSwitch size={s} color={c} />, left: 86, top: 14, size: 24, opacity: 0.18, variant: 2, dur: 18, delay:  2, color: '#B15EED' },
+  { render: (s,c) => <PSController size={s} color={c} />, left: 14, top: 70, size: 28, opacity: 0.20, variant: 3, dur: 20, delay:  1, color: '#B15EED' },
   { render: (s,c) => <XboxController size={s} color={c} />, left: 79, top: 62, size: 24, opacity: 0.17, variant: 1, dur: 17, delay:  4, color: '#ffffff' },
   { render: (s,c) => <JoystickSVG  size={s} color={c} />, left: 48, top:  6, size: 20, opacity: 0.16, variant: 2, dur: 22, delay:  7, color: '#ffffff' },
-  { render: (s,c) => <Headphones   size={s} color={c} />, left: 91, top: 42, size: 22, opacity: 0.19, variant: 3, dur: 15, delay:  3, color: '#C8F000' },
+  { render: (s,c) => <Headphones   size={s} color={c} />, left: 91, top: 42, size: 22, opacity: 0.19, variant: 3, dur: 15, delay:  3, color: '#B15EED' },
   { render: (s,c) => <Keyboard     size={s} color={c} />, left: 24, top: 82, size: 24, opacity: 0.16, variant: 1, dur: 21, delay:  5, color: '#ffffff' },
-  { render: (s,c) => <Mouse        size={s} color={c} />, left: 70, top: 80, size: 20, opacity: 0.20, variant: 2, dur: 13, delay:  6, color: '#C8F000' },
+  { render: (s,c) => <Mouse        size={s} color={c} />, left: 70, top: 80, size: 20, opacity: 0.20, variant: 2, dur: 13, delay:  6, color: '#B15EED' },
   { render: (s,c) => <Smartphone   size={s} color={c} />, left:  4, top: 48, size: 18, opacity: 0.15, variant: 3, dur: 19, delay:  9, color: '#ffffff' },
-  { render: (s,c) => <Crosshair    size={s} color={c} />, left: 61, top: 87, size: 22, opacity: 0.18, variant: 1, dur: 24, delay:  2, color: '#C8F000' },
+  { render: (s,c) => <Crosshair    size={s} color={c} />, left: 61, top: 87, size: 22, opacity: 0.18, variant: 1, dur: 24, delay:  2, color: '#B15EED' },
   { render: (s,c) => <Monitor      size={s} color={c} />, left: 35, top: 12, size: 20, opacity: 0.15, variant: 2, dur: 16, delay: 10, color: '#ffffff' },
-  { render: (s,c) => <Gamepad2     size={s} color={c} />, left: 74, top: 28, size: 18, opacity: 0.13, variant: 3, dur: 26, delay: 12, color: '#C8F000' },
+  { render: (s,c) => <Gamepad2     size={s} color={c} />, left: 74, top: 28, size: 18, opacity: 0.13, variant: 3, dur: 26, delay: 12, color: '#B15EED' },
   { render: (s,c) => <Headphones   size={s} color={c} />, left: 18, top: 32, size: 16, opacity: 0.14, variant: 1, dur: 23, delay: 14, color: '#ffffff' },
-  { render: (s,c) => <Crosshair    size={s} color={c} />, left: 55, top: 55, size: 16, opacity: 0.12, variant: 2, dur: 28, delay:  8, color: '#C8F000' },
+  { render: (s,c) => <Crosshair    size={s} color={c} />, left: 55, top: 55, size: 16, opacity: 0.12, variant: 2, dur: 28, delay:  8, color: '#B15EED' },
   { render: (s,c) => <Mouse        size={s} color={c} />, left: 40, top: 40, size: 14, opacity: 0.11, variant: 3, dur: 30, delay: 16, color: '#ffffff' },
 ];
 
@@ -173,10 +173,10 @@ function Step({ n, title, desc }: { n: number; title: string; desc: string }) {
   return (
     <div className="flex gap-4 items-start group">
       <div
-        className="shrink-0 w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm text-[#C8F000] transition-all duration-200 group-hover:scale-105"
+        className="shrink-0 w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm text-white transition-all duration-200 group-hover:scale-105"
         style={{
-          background: "#1A1A1A",
-          border: "1px solid rgba(200,240,0,0.45)",
+          background: "linear-gradient(135deg, #7C3AED 0%, #9333EA 100%)",
+          boxShadow: "0 0 14px rgba(124,58,237,0.35)",
         }}
       >
         {n}
@@ -200,8 +200,8 @@ export default function Home() {
       <div
         className="flex items-center justify-center gap-2.5 px-4 py-2.5 text-sm font-semibold text-center"
         style={{
-          background: "linear-gradient(90deg, rgba(200,240,0,0.12) 0%, rgba(200,240,0,0.10) 100%)",
-          borderBottom: "1px solid rgba(200,240,0,0.20)",
+          background: "linear-gradient(90deg, rgba(177,94,237,0.12) 0%, rgba(177,94,237,0.10) 100%)",
+          borderBottom: "1px solid rgba(177,94,237,0.20)",
         }}
       >
         <span
@@ -227,10 +227,10 @@ export default function Home() {
             <div
               className="inline-flex items-center gap-2.5 rounded-full px-5 py-2 text-sm font-bold"
               style={{
-                background: "rgba(200,240,0,0.15)",
-                border: "1px solid rgba(200,240,0,0.40)",
+                background: "rgba(177,94,237,0.15)",
+                border: "1px solid rgba(177,94,237,0.40)",
                 color: "hsl(var(--primary))",
-                boxShadow: "0 0 24px rgba(200,240,0,0.18), inset 0 1px 0 rgba(255,255,255,0.06)",
+                boxShadow: "0 0 24px rgba(177,94,237,0.18), inset 0 1px 0 rgba(255,255,255,0.06)",
               }}
             >
               <Gamepad2 className="h-4 w-4" />
@@ -246,11 +246,11 @@ export default function Home() {
             <span
               className="block text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-[6rem]"
               style={{
-                background: "linear-gradient(135deg, #C8F000 0%, #C8F000 40%, #C5A46E 100%)",
+                background: "linear-gradient(135deg, #B15EED 0%, #B15EED 40%, #7C3AED 100%)",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
                 backgroundClip: "text",
-                filter: "drop-shadow(0 0 32px rgba(200,240,0,0.60))",
+                filter: "drop-shadow(0 0 32px rgba(177,94,237,0.60))",
               }}
             >
               {t.home.headline2}
@@ -269,11 +269,10 @@ export default function Home() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-5 mb-6">
             <Link href="/signup">
               <button
-                className="relative overflow-hidden group w-full sm:w-auto px-10 py-4 rounded-2xl font-bold text-base lg:text-lg text-[#C8F000] transition-all duration-200 hover:brightness-110 hover:scale-[1.03] active:scale-[0.97]"
+                className="relative overflow-hidden group w-full sm:w-auto px-10 py-4 rounded-2xl font-bold text-base lg:text-lg text-white transition-all duration-200 hover:brightness-110 hover:scale-[1.03] active:scale-[0.97]"
                 style={{
-                  background: "#111111",
-                  border: "1.5px solid #C8F000",
-                  boxShadow: "0 4px 14px rgba(0,0,0,0.50)",
+                  background: "linear-gradient(135deg, #7C3AED 0%, #9333EA 100%)",
+                  boxShadow: "0 4px 18px rgba(124,58,237,0.45), 0 2px 8px rgba(0,0,0,0.35)",
                   minWidth: "210px",
                 }}
               >
@@ -301,7 +300,7 @@ export default function Home() {
                 }}
                 onMouseEnter={(e) => {
                   (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,0.10)";
-                  (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(200,240,0,0.45)";
+                  (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(177,94,237,0.45)";
                 }}
                 onMouseLeave={(e) => {
                   (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,0.06)";
@@ -374,8 +373,8 @@ export default function Home() {
             <FeatureCard
               icon={<Users className="h-6 w-6" />}
               iconBg="bg-[#1A1A1A]"
-              iconColor="text-[#C8F000]"
-              glowColor="rgba(200,240,0,0.75)"
+              iconColor="text-[#B15EED]"
+              glowColor="rgba(177,94,237,0.75)"
               title="Find Teammates"
               desc="Post a request for any game, platform, and skill level. Get matched with friendly, verified players instantly."
               tag="Hiring"
@@ -383,8 +382,8 @@ export default function Home() {
             <FeatureCard
               icon={<Coins className="h-6 w-6" />}
               iconBg="bg-[#1A1A1A]"
-              iconColor="text-[#C8F000]"
-              glowColor="rgba(200,240,0,0.75)"
+              iconColor="text-[#B15EED]"
+              glowColor="rgba(177,94,237,0.75)"
               title="Get Paid to Play"
               desc="Accept requests, complete gaming sessions, and withdraw your earnings. Turn your skills into real money."
               tag="Earnings"
@@ -392,7 +391,7 @@ export default function Home() {
             <FeatureCard
               icon={<Zap className="h-6 w-6" />}
               iconBg="bg-[#1A1A1A]"
-              iconColor="text-[#C8F000]"
+              iconColor="text-[#B15EED]"
               glowColor="rgba(234,179,8,0.8)"
               title="Instant Action"
               desc="No waiting. Browse live requests, bid in seconds, and jump into the game. Real-time notifications built in."
@@ -407,22 +406,22 @@ export default function Home() {
         <div
           className="max-w-[1400px] mx-auto rounded-3xl p-8 sm:p-10 lg:p-14 relative overflow-hidden"
           style={{
-            background: "linear-gradient(135deg, rgba(0,150,120,0.08) 0%, rgba(200,240,0,0.05) 100%)",
-            border: "1px solid rgba(200,240,0,0.22)",
+            background: "linear-gradient(135deg, rgba(0,150,120,0.08) 0%, rgba(177,94,237,0.05) 100%)",
+            border: "1px solid rgba(177,94,237,0.22)",
             boxShadow: "0 4px 40px rgba(0,0,0,0.20)",
           }}
         >
           {/* top glow line */}
           <div
             className="absolute top-0 left-0 right-0 h-px pointer-events-none"
-            style={{ background: "linear-gradient(90deg, transparent, rgba(200,240,0,0.5), rgba(200,240,0,0.3), transparent)" }}
+            style={{ background: "linear-gradient(90deg, transparent, rgba(177,94,237,0.5), rgba(177,94,237,0.3), transparent)" }}
           />
 
           <div className="relative grid grid-cols-1 md:grid-cols-2 gap-10 lg:gap-16">
             {/* Divider */}
             <div
               className="hidden md:block absolute left-1/2 top-0 bottom-0 w-px -translate-x-1/2 pointer-events-none"
-              style={{ background: "linear-gradient(to bottom, transparent, rgba(200,240,0,0.35), rgba(200,240,0,0.20), transparent)" }}
+              style={{ background: "linear-gradient(to bottom, transparent, rgba(177,94,237,0.35), rgba(177,94,237,0.20), transparent)" }}
             />
 
             {/* Left — Hirers */}
@@ -431,8 +430,8 @@ export default function Home() {
                 <div
                   className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest px-3 py-1.5 rounded-full mb-3"
                   style={{
-                    background: "rgba(200,240,0,0.10)",
-                    border: "1px solid rgba(200,240,0,0.30)",
+                    background: "rgba(177,94,237,0.10)",
+                    border: "1px solid rgba(177,94,237,0.30)",
                     color: "rgb(34,211,238)",
                   }}
                 >
@@ -455,8 +454,8 @@ export default function Home() {
                 <div
                   className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest px-3 py-1.5 rounded-full mb-3"
                   style={{
-                    background: "rgba(200,240,0,0.12)",
-                    border: "1px solid rgba(200,240,0,0.35)",
+                    background: "rgba(177,94,237,0.12)",
+                    border: "1px solid rgba(177,94,237,0.35)",
                     color: "hsl(var(--primary))",
                   }}
                 >
@@ -481,10 +480,10 @@ export default function Home() {
         <div className="max-w-[1400px] mx-auto">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             {[
-              { icon: <Shield className="h-5 w-5 text-[#C8F000]" />, label: "Escrow Protected", sub: "Funds held until session complete", bg: "rgba(200,240,0,0.04)", border: "rgba(200,240,0,0.18)" },
-              { icon: <Star className="h-5 w-5 text-[#C8F000]" />, label: "Verified Reviews", sub: "Both sides must leave a review", bg: "rgba(200,240,0,0.04)", border: "rgba(200,240,0,0.18)" },
-              { icon: <Zap className="h-5 w-5 text-[#C8F000]" />, label: "Instant Alerts", sub: "Real-time bids, starts, and payments", bg: "rgba(200,240,0,0.04)", border: "rgba(200,240,0,0.18)" },
-              { icon: <Trophy className="h-5 w-5 text-[#C8F000]" />, label: "Transparent 10% Fee", sub: "Gamers keep 90% — no hidden charges", bg: "rgba(200,240,0,0.04)", border: "rgba(200,240,0,0.18)" },
+              { icon: <Shield className="h-5 w-5 text-[#B15EED]" />, label: "Escrow Protected", sub: "Funds held until session complete", bg: "rgba(177,94,237,0.04)", border: "rgba(177,94,237,0.18)" },
+              { icon: <Star className="h-5 w-5 text-[#B15EED]" />, label: "Verified Reviews", sub: "Both sides must leave a review", bg: "rgba(177,94,237,0.04)", border: "rgba(177,94,237,0.18)" },
+              { icon: <Zap className="h-5 w-5 text-[#B15EED]" />, label: "Instant Alerts", sub: "Real-time bids, starts, and payments", bg: "rgba(177,94,237,0.04)", border: "rgba(177,94,237,0.18)" },
+              { icon: <Trophy className="h-5 w-5 text-[#B15EED]" />, label: "Transparent 10% Fee", sub: "Gamers keep 90% — no hidden charges", bg: "rgba(177,94,237,0.04)", border: "rgba(177,94,237,0.18)" },
             ].map(({ icon, label, sub, bg, border }) => (
               <div
                 key={label}
@@ -511,14 +510,14 @@ export default function Home() {
           className="relative max-w-4xl mx-auto rounded-3xl text-center overflow-hidden px-8 py-14 sm:py-16 lg:py-20"
           style={{
             background: "#111111",
-            border: "1px solid rgba(200,240,0,0.22)",
+            border: "1px solid rgba(177,94,237,0.22)",
             boxShadow: "0 4px 32px rgba(0,0,0,0.50)",
           }}
         >
           {/* top glow line */}
           <div
             className="absolute top-0 left-0 right-0 h-px pointer-events-none"
-            style={{ background: "linear-gradient(90deg, transparent, rgba(200,240,0,0.30), transparent)" }}
+            style={{ background: "linear-gradient(90deg, transparent, rgba(177,94,237,0.30), transparent)" }}
           />
 
           <div className="relative space-y-5">
@@ -534,11 +533,10 @@ export default function Home() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center pt-3">
               <Link href="/signup">
                 <button
-                  className="relative overflow-hidden group px-10 py-4 rounded-xl font-black text-sm uppercase tracking-widest text-[#C8F000] w-full sm:w-auto transition-all hover:brightness-110 hover:scale-[1.03] active:scale-[0.97]"
+                  className="relative overflow-hidden group px-10 py-4 rounded-xl font-black text-sm uppercase tracking-widest text-white w-full sm:w-auto transition-all hover:brightness-110 hover:scale-[1.03] active:scale-[0.97]"
                   style={{
-                    background: "#111111",
-                    border: "1.5px solid #C8F000",
-                    boxShadow: "0 4px 14px rgba(0,0,0,0.50)",
+                    background: "linear-gradient(135deg, #7C3AED 0%, #9333EA 100%)",
+                    boxShadow: "0 4px 18px rgba(124,58,237,0.45), 0 2px 8px rgba(0,0,0,0.35)",
                   }}
                 >
                   <div
