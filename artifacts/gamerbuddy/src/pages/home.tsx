@@ -82,7 +82,7 @@ function Step({ n, title, desc }: { n: number; title: string; desc: string }) {
         className="shrink-0 w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm text-[#0A0A0E] transition-all duration-200 group-hover:scale-105"
         style={{
           background: "linear-gradient(135deg, #9E7F00 0%, #E8FF00 100%)",
-          boxShadow: "0 0 14px rgba(232,255,0,0.40)",
+          boxShadow: "0 2px 6px rgba(0,0,0,0.35)",
         }}
       >
         {n}
@@ -177,7 +177,7 @@ export default function Home() {
                 className="relative overflow-hidden group w-full sm:w-auto px-10 py-4 rounded-2xl font-bold text-base lg:text-lg text-[#0A0A0E] transition-all duration-200 hover:brightness-110 hover:scale-[1.03] active:scale-[0.97]"
                 style={{
                   background: "linear-gradient(135deg, #E8FF00 0%, #C8D100 100%)",
-                  boxShadow: "0 4px 18px rgba(232,255,0,0.40), 0 2px 8px rgba(0,0,0,0.35)",
+                  boxShadow: "0 3px 14px rgba(0,0,0,0.50)",
                   minWidth: "210px",
                 }}
               >
@@ -311,9 +311,9 @@ export default function Home() {
         <div
           className="max-w-[1400px] mx-auto rounded-3xl p-8 sm:p-10 lg:p-14 relative overflow-hidden"
           style={{
-            background: "linear-gradient(135deg, rgba(232,255,0,0.06) 0%, rgba(232,255,0,0.03) 100%)",
-            border: "1px solid rgba(232,255,0,0.22)",
-            boxShadow: "0 4px 40px rgba(0,0,0,0.20)",
+            background: "#111111",
+            border: "1px solid rgba(232,255,0,0.18)",
+            boxShadow: "0 4px 40px rgba(0,0,0,0.40)",
           }}
         >
           {/* top glow line */}
@@ -441,7 +441,7 @@ export default function Home() {
                   className="relative overflow-hidden group px-10 py-4 rounded-xl font-black text-sm uppercase tracking-widest text-[#0A0A0E] w-full sm:w-auto transition-all hover:brightness-110 hover:scale-[1.03] active:scale-[0.97]"
                   style={{
                     background: "linear-gradient(135deg, #E8FF00 0%, #C8D100 100%)",
-                    boxShadow: "0 4px 18px rgba(232,255,0,0.40), 0 2px 8px rgba(0,0,0,0.35)",
+                    boxShadow: "0 3px 14px rgba(0,0,0,0.50)",
                   }}
                 >
                   <div
