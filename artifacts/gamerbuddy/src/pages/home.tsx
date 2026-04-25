@@ -83,7 +83,7 @@ function Step({ n, title, desc }: { n: number; title: string; desc: string }) {
         style={{
           background: "#1A1A1A",
           border: "1px solid rgba(212,255,0,0.40)",
-          boxShadow: "0 2px 6px rgba(0,0,0,0.35)",
+          boxShadow: "0 2px 6px rgba(0,0,0,0.35), 0 0 16px rgba(212,255,0,0.20)",
         }}
       >
         {n}
@@ -343,7 +343,7 @@ export default function Home() {
                     color: "rgb(34,211,238)",
                   }}
                 >
-                  <Users className="h-3.5 w-3.5" /> For Hirers
+                  <Users className="h-3.5 w-3.5" style={{ filter: "drop-shadow(0 0 4px rgba(212,255,0,0.65))" }} /> For Hirers
                 </div>
                 <h3 className="text-xl lg:text-2xl font-extrabold text-foreground uppercase tracking-tight leading-tight">
                   Get a Gamer<br className="hidden lg:block" /> in Minutes
@@ -367,7 +367,7 @@ export default function Home() {
                     color: "hsl(var(--primary))",
                   }}
                 >
-                  <Coins className="h-3.5 w-3.5" /> For Gamers
+                  <Coins className="h-3.5 w-3.5" style={{ filter: "drop-shadow(0 0 4px rgba(212,255,0,0.65))" }} /> For Gamers
                 </div>
                 <h3 className="text-xl lg:text-2xl font-extrabold text-foreground uppercase tracking-tight leading-tight">
                   Earn While<br className="hidden lg:block" /> You Play
@@ -400,7 +400,7 @@ export default function Home() {
               >
                 <div
                   className="w-11 h-11 rounded-xl flex items-center justify-center"
-                  style={{ background: "#1A1A1A" }}
+                  style={{ background: "#1A1A1A", boxShadow: "0 0 16px rgba(212,255,0,0.20)" }}
                 >
                   {icon}
                 </div>
