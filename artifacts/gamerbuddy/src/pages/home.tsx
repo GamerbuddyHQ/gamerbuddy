@@ -146,7 +146,7 @@ export default function Home() {
           </div>
 
           {/* Headline */}
-          <h1 className="font-black tracking-tight leading-[1.02] mb-5">
+          <h1 className="font-black tracking-tight leading-[1.02] mb-5 px-6 sm:px-8 overflow-visible">
             <span className="block text-white text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-[6rem]">
               {t.home.headline1}
             </span>
@@ -157,6 +157,7 @@ export default function Home() {
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
                 backgroundClip: "text",
+                padding: "0.05em 0.1em 0.08em",
               }}
             >
               {t.home.headline2}
