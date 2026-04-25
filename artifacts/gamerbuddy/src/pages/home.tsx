@@ -47,10 +47,10 @@ function FeatureCard({
 
       <div className="flex items-start gap-4">
         <div
-          className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${iconBg}`}
-          style={{ boxShadow: `0 0 20px ${glowColor}35` }}
+          className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0"
+          style={{ background: "#1A1A1A", boxShadow: `0 0 16px ${glowColor}30` }}
         >
-          <div className={iconColor}>{icon}</div>
+          <div style={{ color: "#E8FF00" }}>{icon}</div>
         </div>
         <div className="pt-1">
           <div className="flex items-center gap-2 mb-1.5">
@@ -279,7 +279,7 @@ export default function Home() {
               icon={<Users className="h-6 w-6" />}
               iconBg="bg-[#1A1A1A]"
               iconColor="text-[#E8FF00]"
-              glowColor="rgba(232,255,0,0.75)"
+              glowColor="#E8FF00"
               title="Find Teammates"
               desc="Post a request for any game, platform, and skill level. Get matched with friendly, verified players instantly."
               tag="Hiring"
@@ -288,7 +288,7 @@ export default function Home() {
               icon={<Coins className="h-6 w-6" />}
               iconBg="bg-[#1A1A1A]"
               iconColor="text-[#E8FF00]"
-              glowColor="rgba(232,255,0,0.75)"
+              glowColor="#E8FF00"
               title="Get Paid to Play"
               desc="Accept requests, complete gaming sessions, and withdraw your earnings. Turn your skills into real money."
               tag="Earnings"
@@ -297,7 +297,7 @@ export default function Home() {
               icon={<Zap className="h-6 w-6" />}
               iconBg="bg-[#1A1A1A]"
               iconColor="text-[#E8FF00]"
-              glowColor="rgba(232,255,0,0.75)"
+              glowColor="#E8FF00"
               title="Instant Action"
               desc="No waiting. Browse live requests, bid in seconds, and jump into the game. Real-time notifications built in."
               tag="Fast"
