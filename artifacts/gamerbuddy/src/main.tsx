@@ -5,6 +5,6 @@ import "./index.css";
 
 document.documentElement.classList.add("dark");
 
-setBaseUrl(import.meta.env.VITE_API_URL ?? "https://gamerbuddy-api-server.vercel.app");
+setBaseUrl(import.meta.env.VITE_API_URL ?? "");
 
 createRoot(document.getElementById("root")!).render(<App />);
