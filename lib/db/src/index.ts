@@ -20,9 +20,49 @@ if (!DATABASE_URL) {
 }
 
 // HTTP client — one-shot HTTP request per query, ideal for serverless.
-const sql = DATABASE_URL
+const rawSql = DATABASE_URL
   ? neon(DATABASE_URL)
   : neon("postgresql://placeholder:x@placeholder/placeholder");
+
+// Workaround for @neondatabase/serverless@1.1.0 bug:
+// When a SELECT returns 0 rows the HTTP API returns `{fields: null}` instead of
+// `{fields: []}`.  The driver's internal processQueryResult then crashes with
+// "TypeError: Cannot read properties of null (reading 'map')".
+// Intercept that specific rejection at the client level and return an empty
+// result object that is structurally compatible with `fullResults: true` mode
+// (the only mode Drizzle neon-http uses).
+const NEON_EMPTY_RESULT = Object.freeze({
+  command: "SELECT", fields: [] as const, rowCount: 0, rows: [] as const,
+  viaNeonFetch: true, rowAsArray: false,
+});
+function isNeonEmptyResultBug(err: unknown): boolean {
+  if (!(err instanceof TypeError)) return false;
+  return (err.message ?? "").includes("Cannot read properties of null (reading 'map')");
+}
+function patchPromise(result: unknown): unknown {
+  if (result && typeof (result as Promise<unknown>).catch === "function") {
+    return (result as Promise<unknown>).catch((err: unknown) => {
+      if (isNeonEmptyResultBug(err)) return NEON_EMPTY_RESULT;
+      throw err;
+    });
+  }
+  return result;
+}
+
+const sql = new Proxy(rawSql, {
+  apply(target, thisArg, args) {
+    return patchPromise(Reflect.apply(target, thisArg, args));
+  },
+  get(target, prop, receiver) {
+    const value = Reflect.get(target, prop, receiver);
+    // Drizzle neon-http uses `client.query ?? client` as its actual query executor.
+    // We must also patch the `.query` method so empty-result errors are handled there.
+    if (prop === "query" && typeof value === "function") {
+      return (...args: unknown[]) => patchPromise((value as (...a: unknown[]) => unknown)(...args));
+    }
+    return value;
+  },
+}) as typeof rawSql;
 
 export const db = drizzle(sql, { schema });
 

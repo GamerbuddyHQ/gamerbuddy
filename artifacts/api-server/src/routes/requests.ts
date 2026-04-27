@@ -150,10 +150,10 @@ router.get("/requests", async (req, res): Promise<void> => {
       userIdVerified: usersTable.idVerified,
       userProfilePhotoUrl: usersTable.profilePhotoUrl,
       bidCount: sql<number>`(SELECT COUNT(*) FROM bids WHERE bids.request_id = ${gameRequestsTable.id})`.mapWith(Number),
-      lowestBid: sql<number | null>`(SELECT MIN(price) FROM bids WHERE bids.request_id = ${gameRequestsTable.id} AND bids.status = 'pending')`,
+      lowestBid: sql<number | null>`(SELECT MIN(price) FROM bids WHERE bids.request_id = ${gameRequestsTable.id} AND bids.status = 'pending')`.mapWith((v) => v == null ? null : Number(v)),
       acceptedBidsCount: sql<number>`(SELECT COUNT(*) FROM bids WHERE bids.request_id = ${gameRequestsTable.id} AND bids.status = 'accepted')`.mapWith(Number),
-      avgBidderTrustFactor: sql<number | null>`(SELECT AVG(u.trust_factor) FROM bids b JOIN users u ON u.id = b.bidder_id WHERE b.request_id = ${gameRequestsTable.id} AND b.status != 'rejected')`,
-      avgBidderRating: sql<number | null>`(SELECT AVG(r.rating) FROM bids b JOIN reviews r ON r.reviewee_id = b.bidder_id WHERE b.request_id = ${gameRequestsTable.id} AND b.status != 'rejected')`,
+      avgBidderTrustFactor: sql<number | null>`(SELECT AVG(u.trust_factor) FROM bids b JOIN users u ON u.id = b.bidder_id WHERE b.request_id = ${gameRequestsTable.id} AND b.status != 'rejected')`.mapWith((v) => v == null ? null : Number(v)),
+      avgBidderRating: sql<number | null>`(SELECT AVG(r.rating) FROM bids b JOIN reviews r ON r.reviewee_id = b.bidder_id WHERE b.request_id = ${gameRequestsTable.id} AND b.status != 'rejected')`.mapWith((v) => v == null ? null : Number(v)),
       hasStreamingBidder: sql<boolean>`(EXISTS(SELECT 1 FROM bids b JOIN streaming_accounts sa ON sa.user_id = b.bidder_id WHERE b.request_id = ${gameRequestsTable.id} AND b.status != 'rejected'))`,
       hasQuestBidder: sql<boolean>`(EXISTS(SELECT 1 FROM bids b JOIN quest_entries qe ON qe.user_id = b.bidder_id WHERE b.request_id = ${gameRequestsTable.id} AND b.status != 'rejected'))`,
     })

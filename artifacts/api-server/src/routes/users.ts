@@ -72,7 +72,7 @@ router.get("/users/:id", async (req, res): Promise<void> => {
     profileTitle: usersTable.profileTitle,
     profilePhotoUrl: usersTable.profilePhotoUrl,
     galleryPhotoUrls: usersTable.galleryPhotoUrls,
-    createdAt: usersTable.createdAt,
+    createdAt: sql<string>`to_char(${usersTable.createdAt} AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"')`,
   }).from(usersTable).where(eq(usersTable.id, userId));
 
   if (!user) { res.status(404).json({ error: "User not found" }); return; }
@@ -94,7 +94,7 @@ router.get("/users/:id", async (req, res): Promise<void> => {
       rating: reviewsTable.rating,
       comment: reviewsTable.comment,
       wouldPlayAgain: reviewsTable.wouldPlayAgain,
-      createdAt: reviewsTable.createdAt,
+      createdAt: sql<string>`to_char(${reviewsTable.createdAt} AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"')`,
       reviewerName: usersTable.name,
     })
     .from(reviewsTable)
@@ -103,13 +103,23 @@ router.get("/users/:id", async (req, res): Promise<void> => {
     .orderBy(desc(reviewsTable.createdAt))
     .limit(10),
 
-    db.select({ id: gameRequestsTable.id, gameName: gameRequestsTable.gameName, platform: gameRequestsTable.platform, createdAt: gameRequestsTable.createdAt })
+    db.select({
+      id: gameRequestsTable.id,
+      gameName: gameRequestsTable.gameName,
+      platform: gameRequestsTable.platform,
+      createdAt: sql<string>`to_char(${gameRequestsTable.createdAt} AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"')`,
+    })
     .from(gameRequestsTable)
     .where(and(eq(gameRequestsTable.userId, userId), eq(gameRequestsTable.status, "completed")))
     .orderBy(desc(gameRequestsTable.createdAt))
     .limit(10),
 
-    db.select({ requestId: bidsTable.requestId, gameName: gameRequestsTable.gameName, platform: gameRequestsTable.platform, createdAt: bidsTable.createdAt })
+    db.select({
+      requestId: bidsTable.requestId,
+      gameName: gameRequestsTable.gameName,
+      platform: gameRequestsTable.platform,
+      createdAt: sql<string>`to_char(${bidsTable.createdAt} AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"')`,
+    })
     .from(bidsTable)
     .leftJoin(gameRequestsTable, eq(bidsTable.requestId, gameRequestsTable.id))
     .where(and(eq(bidsTable.bidderId, userId), eq(bidsTable.status, "accepted"), eq(gameRequestsTable.status, "completed")))
@@ -120,7 +130,14 @@ router.get("/users/:id", async (req, res): Promise<void> => {
     .from(profilePurchasesTable)
     .where(eq(profilePurchasesTable.userId, userId)),
 
-    db.select()
+    db.select({
+      id:        questEntriesTable.id,
+      userId:    questEntriesTable.userId,
+      gameName:  questEntriesTable.gameName,
+      helpType:  questEntriesTable.helpType,
+      playstyle: questEntriesTable.playstyle,
+      createdAt: sql<string>`to_char(${questEntriesTable.createdAt} AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"')`,
+    })
     .from(questEntriesTable)
     .where(eq(questEntriesTable.userId, userId))
     .orderBy(questEntriesTable.createdAt),
@@ -189,8 +206,19 @@ router.get("/users/:id", async (req, res): Promise<void> => {
 
 router.get("/quest", requireAuth, async (req, res): Promise<void> => {
   const user = req.user!;
-  const entries = await db.select().from(questEntriesTable).where(eq(questEntriesTable.userId, user.id)).orderBy(questEntriesTable.createdAt);
-  res.json(entries.map((q) => ({ ...q, createdAt: toIsoRequired(q.createdAt) })));
+  const entries = await db
+    .select({
+      id:        questEntriesTable.id,
+      userId:    questEntriesTable.userId,
+      gameName:  questEntriesTable.gameName,
+      helpType:  questEntriesTable.helpType,
+      playstyle: questEntriesTable.playstyle,
+      createdAt: sql<string>`to_char(${questEntriesTable.createdAt} AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"')`,
+    })
+    .from(questEntriesTable)
+    .where(eq(questEntriesTable.userId, user.id))
+    .orderBy(questEntriesTable.createdAt);
+  res.json(entries);
 });
 
 router.post("/quest", requireAuth, validate(PostQuestSchema), async (req, res): Promise<void> => {

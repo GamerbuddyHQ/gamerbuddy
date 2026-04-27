@@ -8,6 +8,7 @@ import { db, usersTable, walletTransactionsTable, reportsTable, walletsTable, wi
 import { eq, desc, gt, or, isNotNull, sql, and, gte, inArray, not, count, sum, lt } from "drizzle-orm";
 import { round2, recordTransaction } from "./wallets";
 import { requireAdminAuth } from "./admin-auth";
+import { toIso, toIsoRequired } from "../lib/dates";
 
 const router: IRouter = Router();
 
@@ -127,8 +128,8 @@ router.get(
           : 0;
       return {
         ...u,
-        createdAt:     u.createdAt.toISOString(),
-        lockedUntil:   u.lockedUntil ? u.lockedUntil.toISOString() : null,
+        createdAt:     toIsoRequired(u.createdAt),
+        lockedUntil:   toIso(u.lockedUntil),
         isCurrentlyLocked,
         minutesRemaining,
       };
@@ -149,17 +150,17 @@ router.get(
         largeTransactions: largeTransactions.map((t) => ({
           ...t,
           amount:    parseFloat(String(t.amount)),
-          createdAt: t.createdAt.toISOString(),
+          createdAt: toIsoRequired(t.createdAt),
         })),
         reports: reports.map((r) => ({
           ...r,
-          createdAt: r.createdAt.toISOString(),
+          createdAt: toIsoRequired(r.createdAt),
         })),
       },
       transactions: recentTransactions.map((t) => ({
         ...t,
         amount:    parseFloat(String(t.amount)),
-        createdAt: t.createdAt.toISOString(),
+        createdAt: toIsoRequired(t.createdAt),
       })),
     });
   },
@@ -326,7 +327,7 @@ router.get(
           netToGamer:              netToGamer > 0 ? netToGamer : 0,
           type:                    f.type,
           description:             f.description,
-          createdAt:               f.created_at instanceof Date ? f.created_at.toISOString() : String(f.created_at),
+          createdAt:               f.created_at instanceof Date ? (toIso(f.created_at) ?? String(f.created_at)) : String(f.created_at),
           hirerRegion:             f.hirer_region ?? "international",
           gameName:                f.game_name    ?? null,
           platform:                f.platform     ?? null,
@@ -438,8 +439,8 @@ router.get(
           platformFee:             fee,
           gamerPayout:             gamerAmt,
           hirerRegion:             s.hirer_region ?? "international",
-          createdAt:               s.created_at instanceof Date ? s.created_at.toISOString() : String(s.created_at),
-          startedAt:               s.started_at ? (s.started_at instanceof Date ? s.started_at.toISOString() : String(s.started_at)) : null,
+          createdAt:               s.created_at instanceof Date ? (toIso(s.created_at) ?? String(s.created_at)) : String(s.created_at),
+          startedAt:               s.started_at ? (s.started_at instanceof Date ? (toIso(s.started_at) ?? String(s.started_at)) : String(s.started_at)) : null,
           pendingWithdrawalId:     s.pending_withdrawal_id   ?? null,
           pendingWithdrawalAmount: round2(parseFloat(String(s.pending_withdrawal_amount ?? "0")) || 0),
           hirer: {
@@ -540,8 +541,8 @@ router.get(
         ...r,
         amount: round2(r.amount),
         earningsBalance: round2(r.earningsBalance ?? 0),
-        createdAt: r.createdAt.toISOString(),
-        paidAt: r.paidAt ? r.paidAt.toISOString() : null,
+        createdAt: toIsoRequired(r.createdAt),
+        paidAt: toIso(r.paidAt),
       })),
     });
   },
@@ -704,7 +705,7 @@ router.get(
       pendingCount: pending.length,
       verifications: pending.map((u) => ({
         ...u,
-        createdAt: u.createdAt.toISOString(),
+        createdAt: toIsoRequired(u.createdAt),
       })),
     });
   },

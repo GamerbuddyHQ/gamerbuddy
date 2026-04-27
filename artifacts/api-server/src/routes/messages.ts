@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { db, bidsTable, messagesTable, usersTable, gameRequestsTable } from "@workspace/db";
-import { eq, asc } from "drizzle-orm";
+import { eq, asc, sql } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
 import { validate, sanitize, PostMessageSchema } from "../lib/validate";
 import { toIsoRequired } from "../lib/dates";
@@ -38,11 +38,11 @@ router.get("/bids/:bidId/messages", requireAuth, async (req, res): Promise<void>
 
   const rows = await db
     .select({
-      id: messagesTable.id,
-      bidId: messagesTable.bidId,
-      senderId: messagesTable.senderId,
-      content: messagesTable.content,
-      createdAt: messagesTable.createdAt,
+      id:         messagesTable.id,
+      bidId:      messagesTable.bidId,
+      senderId:   messagesTable.senderId,
+      content:    messagesTable.content,
+      createdAt:  sql<string>`to_char(${messagesTable.createdAt} AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"')`,
       senderName: usersTable.name,
     })
     .from(messagesTable)
@@ -51,12 +51,12 @@ router.get("/bids/:bidId/messages", requireAuth, async (req, res): Promise<void>
     .orderBy(asc(messagesTable.createdAt));
 
   res.json(rows.map((m) => ({
-    id: m.id,
-    bidId: m.bidId,
-    senderId: m.senderId,
+    id:         m.id,
+    bidId:      m.bidId,
+    senderId:   m.senderId,
     senderName: m.senderName ?? "Unknown",
-    content: m.content,
-    createdAt: toIsoRequired(m.createdAt),
+    content:    m.content,
+    createdAt:  m.createdAt,
   })));
 });
 

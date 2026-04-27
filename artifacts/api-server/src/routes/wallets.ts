@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { db, walletsTable, walletTransactionsTable, gameRequestsTable, platformFeesTable, withdrawalRequestsTable } from "@workspace/db";
-import { eq, desc, sql, and, gte, sum } from "drizzle-orm";
+import { eq, desc, sql, and, gte, sum, asc } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
 import { withdrawLimiter } from "../lib/rate-limit";
 import { toIso, toIsoRequired } from "../lib/dates";
@@ -146,17 +146,22 @@ router.get("/wallets", requireAuth, async (req, res): Promise<void> => {
 router.get("/wallets/transactions", requireAuth, async (req, res): Promise<void> => {
   const user = req.user!;
   const txns = await db
-    .select()
+    .select({
+      id:          walletTransactionsTable.id,
+      userId:      walletTransactionsTable.userId,
+      wallet:      walletTransactionsTable.wallet,
+      type:        walletTransactionsTable.type,
+      amount:      walletTransactionsTable.amount,
+      description: walletTransactionsTable.description,
+      referenceId: walletTransactionsTable.referenceId,
+      createdAt:   sql<string>`to_char(${walletTransactionsTable.createdAt} AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"')`,
+    })
     .from(walletTransactionsTable)
     .where(eq(walletTransactionsTable.userId, user.id))
     .orderBy(desc(walletTransactionsTable.createdAt))
     .limit(50);
 
-  res.json(txns.map((t) => ({
-    ...t,
-    amount: t.amount,
-    createdAt: toIsoRequired(t.createdAt),
-  })));
+  res.json(txns.map((t) => ({ ...t, amount: t.amount })));
 });
 
 // ── POST /wallets/deposit (dev/test only — real deposits go via /payments/*) ─
@@ -322,7 +327,14 @@ router.post("/wallets/withdraw", requireAuth, withdrawLimiter, async (req, res):
 router.get("/wallets/withdrawal-request", requireAuth, async (req, res): Promise<void> => {
   const user = req.user!;
   const [latest] = await db
-    .select()
+    .select({
+      id:      withdrawalRequestsTable.id,
+      amount:  withdrawalRequestsTable.amount,
+      status:  withdrawalRequestsTable.status,
+      country: withdrawalRequestsTable.country,
+      createdAt: sql<string>`to_char(${withdrawalRequestsTable.createdAt} AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"')`,
+      paidAt:    sql<string | null>`to_char(${withdrawalRequestsTable.paidAt} AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"')`,
+    })
     .from(withdrawalRequestsTable)
     .where(eq(withdrawalRequestsTable.userId, user.id))
     .orderBy(desc(withdrawalRequestsTable.createdAt))
@@ -330,12 +342,12 @@ router.get("/wallets/withdrawal-request", requireAuth, async (req, res): Promise
 
   res.json(latest
     ? {
-        id: latest.id,
-        amount: latest.amount,
-        status: latest.status,
-        country: latest.country,
-        createdAt: toIsoRequired(latest.createdAt),
-        paidAt: toIso(latest.paidAt),
+        id:        latest.id,
+        amount:    latest.amount,
+        status:    latest.status,
+        country:   latest.country,
+        createdAt: latest.createdAt,
+        paidAt:    latest.paidAt,
       }
     : null,
   );

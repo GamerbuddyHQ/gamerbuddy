@@ -7,14 +7,52 @@ import {
   walletTransactionsTable,
   usersTable,
 } from "@workspace/db/schema";
-import { eq, and, desc, inArray } from "drizzle-orm";
+import { eq, and, desc, inArray, sql } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
 import { validate, sanitize, PostTournamentSchema } from "../lib/validate";
 import { tournamentLimiter } from "../lib/rate-limit";
+import { toIso, toIsoRequired } from "../lib/dates";
 
 const router = Router();
 
 const round2 = (n: number) => Math.round(n * 100) / 100;
+
+const TSFMT = `'YYYY-MM-DD"T"HH24:MI:SS.US"Z"'`;
+
+const tournamentCols = {
+  id:                   tournamentsTable.id,
+  hostId:               tournamentsTable.hostId,
+  title:                tournamentsTable.title,
+  gameName:             tournamentsTable.gameName,
+  platform:             tournamentsTable.platform,
+  tournamentType:       tournamentsTable.tournamentType,
+  maxPlayers:           tournamentsTable.maxPlayers,
+  currentPlayers:       tournamentsTable.currentPlayers,
+  prizePool:            tournamentsTable.prizePool,
+  entryFee:             tournamentsTable.entryFee,
+  rules:                tournamentsTable.rules,
+  prizeDistribution:    tournamentsTable.prizeDistribution,
+  status:               tournamentsTable.status,
+  winnersData:          tournamentsTable.winnersData,
+  platformFeeCollected: tournamentsTable.platformFeeCollected,
+  country:              tournamentsTable.country,
+  region:               tournamentsTable.region,
+  genderPreference:     tournamentsTable.genderPreference,
+  createdAt:    sql<string>`to_char(${tournamentsTable.createdAt} AT TIME ZONE 'UTC', ${sql.raw(TSFMT)})`,
+  startedAt:    sql<string | null>`to_char(${tournamentsTable.startedAt} AT TIME ZONE 'UTC', ${sql.raw(TSFMT)})`,
+  completedAt:  sql<string | null>`to_char(${tournamentsTable.completedAt} AT TIME ZONE 'UTC', ${sql.raw(TSFMT)})`,
+  hostName:             usersTable.name,
+};
+
+type TRow = {
+  id: number; hostId: number; title: string; gameName: string; platform: string;
+  tournamentType: string; maxPlayers: number; currentPlayers: number;
+  prizePool: number; entryFee: number; rules: string; prizeDistribution: string;
+  status: string; winnersData: string | null; platformFeeCollected: number | null;
+  country: string; region: string; genderPreference: string;
+  createdAt: string; startedAt: string | null; completedAt: string | null;
+  hostName: string | null;
+};
 
 const PLATFORM_FEE_RATE = 0.1;
 const MIN_PRIZE_POOL = 100;
@@ -61,8 +99,7 @@ async function recordTx(
 }
 
 function formatTournament(
-  t: typeof tournamentsTable.$inferSelect,
-  hostName: string,
+  t: TRow,
   registrations: (typeof tournamentRegistrationsTable.$inferSelect)[],
 ) {
   const prize = round2(parseFloat(String(t.prizePool)));
@@ -77,7 +114,7 @@ function formatTournament(
   return {
     id: t.id,
     hostId: t.hostId,
-    hostName,
+    hostName: t.hostName ?? "Unknown",
     title: t.title,
     gameName: t.gameName,
     platform: t.platform,
@@ -107,8 +144,18 @@ function formatTournament(
       placement: r.placement,
       prizeWon: r.prizeWon ? round2(parseFloat(String(r.prizeWon))) : null,
       entryFeePaid: round2(parseFloat(String(r.entryFeePaid))),
-      joinedAt: r.joinedAt,
+      joinedAt: toIsoRequired(r.joinedAt),
     })),
+  };
+}
+
+function toTRow(t: typeof tournamentsTable.$inferSelect, hostName: string | null): TRow {
+  return {
+    ...t,
+    createdAt:   toIsoRequired(t.createdAt),
+    startedAt:   toIso(t.startedAt),
+    completedAt: toIso(t.completedAt),
+    hostName,
   };
 }
 
@@ -129,16 +176,16 @@ router.get("/tournaments/my", requireAuth, async (req, res): Promise<void> => {
   const userId = req.user!.id;
 
   const hostedRows = await db
-    .select({ t: tournamentsTable, hostName: usersTable.name })
+    .select(tournamentCols)
     .from(tournamentsTable)
     .leftJoin(usersTable, eq(tournamentsTable.hostId, usersTable.id))
     .where(eq(tournamentsTable.hostId, userId))
     .orderBy(desc(tournamentsTable.createdAt));
 
   const hosted = await Promise.all(
-    hostedRows.map(async ({ t, hostName }) => {
+    hostedRows.map(async (t) => {
       const regs = await db.select().from(tournamentRegistrationsTable).where(eq(tournamentRegistrationsTable.tournamentId, t.id));
-      return formatTournament(t, hostName ?? "Unknown", regs);
+      return formatTournament(t, regs);
     }),
   );
 
@@ -148,18 +195,18 @@ router.get("/tournaments/my", requireAuth, async (req, res): Promise<void> => {
     .where(eq(tournamentRegistrationsTable.userId, userId))
     .orderBy(desc(tournamentRegistrationsTable.joinedAt));
 
-  const joined: { tournament: ReturnType<typeof formatTournament>; registration: { status: string; joinedAt: Date } }[] = [];
+  const joined: { tournament: ReturnType<typeof formatTournament>; registration: { status: string; joinedAt: string } }[] = [];
   for (const reg of myRegs) {
     const [row] = await db
-      .select({ t: tournamentsTable, hostName: usersTable.name })
+      .select(tournamentCols)
       .from(tournamentsTable)
       .leftJoin(usersTable, eq(tournamentsTable.hostId, usersTable.id))
       .where(eq(tournamentsTable.id, reg.tournamentId));
     if (!row) continue;
     const regs = await db.select().from(tournamentRegistrationsTable).where(eq(tournamentRegistrationsTable.tournamentId, reg.tournamentId));
     joined.push({
-      tournament: formatTournament(row.t, row.hostName ?? "Unknown", regs),
-      registration: { status: reg.status, joinedAt: reg.joinedAt },
+      tournament: formatTournament(row, regs),
+      registration: { status: reg.status, joinedAt: toIsoRequired(reg.joinedAt) },
     });
   }
 
@@ -169,15 +216,15 @@ router.get("/tournaments/my", requireAuth, async (req, res): Promise<void> => {
 /* ── GET /tournaments ── list (filtered by user profile when authenticated) ── */
 router.get("/tournaments", async (req, res): Promise<void> => {
   const rows = await db
-    .select({ t: tournamentsTable, hostName: usersTable.name })
+    .select(tournamentCols)
     .from(tournamentsTable)
     .leftJoin(usersTable, eq(tournamentsTable.hostId, usersTable.id))
     .orderBy(desc(tournamentsTable.createdAt));
 
   const all = await Promise.all(
-    rows.map(async ({ t, hostName }) => {
+    rows.map(async (t) => {
       const regs = await db.select().from(tournamentRegistrationsTable).where(eq(tournamentRegistrationsTable.tournamentId, t.id));
-      return { formatted: formatTournament(t, hostName ?? "Unknown", regs), raw: t, regs };
+      return { formatted: formatTournament(t, regs), raw: t, regs };
     }),
   );
 
@@ -212,7 +259,7 @@ router.get("/tournaments/:id", async (req, res): Promise<void> => {
   if (isNaN(id)) { res.status(400).json({ error: "Invalid ID" }); return; }
 
   const [row] = await db
-    .select({ t: tournamentsTable, hostName: usersTable.name })
+    .select(tournamentCols)
     .from(tournamentsTable)
     .leftJoin(usersTable, eq(tournamentsTable.hostId, usersTable.id))
     .where(eq(tournamentsTable.id, id));
@@ -220,7 +267,7 @@ router.get("/tournaments/:id", async (req, res): Promise<void> => {
   if (!row) { res.status(404).json({ error: "Tournament not found" }); return; }
 
   const regs = await db.select().from(tournamentRegistrationsTable).where(eq(tournamentRegistrationsTable.tournamentId, id));
-  res.json(formatTournament(row.t, row.hostName ?? "Unknown", regs));
+  res.json(formatTournament(row, regs));
 });
 
 /* ── POST /tournaments ── create */
@@ -276,7 +323,7 @@ router.post("/tournaments", requireAuth, tournamentLimiter, validate(PostTournam
 
   await recordTx(user.id, "hiring", "tournament_escrow", prize, `Prize pool escrowed for tournament: ${title}`);
   req.log.info({ userId: user.id, tournamentId: tournament.id, prize }, "Tournament created");
-  res.status(201).json(formatTournament(tournament, user.name, []));
+  res.status(201).json(formatTournament(toTRow(tournament, user.name), []));
 });
 
 /* ── POST /tournaments/:id/request-join ── submit participation request */

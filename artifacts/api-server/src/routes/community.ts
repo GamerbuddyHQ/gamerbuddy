@@ -6,7 +6,7 @@ import {
   suggestionCommentsTable,
   usersTable,
 } from "@workspace/db";
-import { eq, sql, and, inArray } from "drizzle-orm";
+import { eq, sql, and, inArray, desc } from "drizzle-orm";
 import { requireAuth, loadUser } from "../middlewares/auth";
 import { validate, sanitizeComment, sanitizeSuggestionText, PostSuggestionSchema, PostCommentSchema } from "../lib/validate";
 import { suggestionLimiter, commentLimiter } from "../lib/rate-limit";
@@ -45,7 +45,7 @@ router.get("/community/suggestions", loadUser, async (req, res): Promise<void> =
       status: suggestionsTable.status,
       category: suggestionsTable.category,
       isPinned: suggestionsTable.isPinned,
-      createdAt: suggestionsTable.createdAt,
+      createdAt: sql<string>`to_char(${suggestionsTable.createdAt} AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"')`,
       userId: suggestionsTable.userId,
       authorName: usersTable.name,
       authorCountry: usersTable.country,
@@ -244,7 +244,7 @@ router.get("/community/suggestions/:id/comments", async (req, res): Promise<void
       isAdminComment: suggestionCommentsTable.isAdminComment,
       isModComment:   suggestionCommentsTable.isModComment,
       isPinned: suggestionCommentsTable.isPinned,
-      createdAt: suggestionCommentsTable.createdAt,
+      createdAt: sql<string>`to_char(${suggestionCommentsTable.createdAt} AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"')`,
       authorName: usersTable.name,
       authorCountry: usersTable.country,
     })

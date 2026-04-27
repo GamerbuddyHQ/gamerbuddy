@@ -1,20 +1,31 @@
 import { Router, type IRouter } from "express";
 import { db, notificationsTable } from "@workspace/db";
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and, desc, sql } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
 
 const router: IRouter = Router();
 
+const TS_FMT = `'YYYY-MM-DD"T"HH24:MI:SS.US"Z"'`;
+
 router.get("/notifications", requireAuth, async (req, res): Promise<void> => {
   const user = req.user!;
   const rows = await db
-    .select()
+    .select({
+      id:      notificationsTable.id,
+      userId:  notificationsTable.userId,
+      type:    notificationsTable.type,
+      title:   notificationsTable.title,
+      message: notificationsTable.message,
+      link:    notificationsTable.link,
+      isRead:  notificationsTable.isRead,
+      createdAt: sql<string>`to_char(${notificationsTable.createdAt} AT TIME ZONE 'UTC', ${sql.raw(TS_FMT)})`,
+    })
     .from(notificationsTable)
     .where(eq(notificationsTable.userId, user.id))
     .orderBy(desc(notificationsTable.createdAt))
     .limit(60);
 
-  res.json(rows.map((n) => ({ ...n, createdAt: n.createdAt.toISOString() })));
+  res.json(rows);
 });
 
 router.get("/notifications/unread-count", requireAuth, async (req, res): Promise<void> => {

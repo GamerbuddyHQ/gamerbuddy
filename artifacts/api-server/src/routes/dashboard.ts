@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { db, walletsTable, gameRequestsTable, bidsTable, reviewsTable } from "@workspace/db";
-import { eq, desc, count, and, inArray, not } from "drizzle-orm";
+import { eq, desc, count, and, inArray, not, sql } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
 import { toIsoRequired } from "../lib/dates";
 
@@ -18,7 +18,16 @@ router.get("/dashboard/summary", requireAuth, async (req, res): Promise<void> =>
     .where(eq(walletsTable.userId, user.id));
 
   const recentRequests = await db
-    .select()
+    .select({
+      id:         gameRequestsTable.id,
+      userId:     gameRequestsTable.userId,
+      gameName:   gameRequestsTable.gameName,
+      platform:   gameRequestsTable.platform,
+      skillLevel: gameRequestsTable.skillLevel,
+      objectives: gameRequestsTable.objectives,
+      status:     gameRequestsTable.status,
+      createdAt:  sql<string>`to_char(${gameRequestsTable.createdAt} AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"')`,
+    })
     .from(gameRequestsTable)
     .where(eq(gameRequestsTable.userId, user.id))
     .orderBy(desc(gameRequestsTable.createdAt))
@@ -95,15 +104,15 @@ router.get("/dashboard/summary", requireAuth, async (req, res): Promise<void> =>
     openRequestsCount: openCountResult?.count ?? 0,
     pendingReviewSessions,
     recentRequests: recentRequests.map((r) => ({
-      id: r.id,
-      userId: r.userId,
-      userName: user.name,
-      gameName: r.gameName,
-      platform: r.platform,
+      id:         r.id,
+      userId:     r.userId,
+      userName:   user.name,
+      gameName:   r.gameName,
+      platform:   r.platform,
       skillLevel: r.skillLevel,
       objectives: r.objectives,
-      status: r.status,
-      createdAt: toIsoRequired(r.createdAt),
+      status:     r.status,
+      createdAt:  r.createdAt,
     })),
   });
 });
