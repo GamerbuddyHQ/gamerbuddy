@@ -53,12 +53,19 @@ app.use(
 // both the stable Vercel production URL and any preview-deployment URLs
 // can be whitelisted without touching code.
 // e.g. FRONTEND_URL=https://gamerbuddy.vercel.app,https://gamerbuddy-preview.vercel.app
-const allowedOrigins = new Set(
-  (process.env.FRONTEND_URL || "http://localhost:5173")
+const allowedOrigins = new Set([
+  // Always-allowed production domains
+  "https://player4hire.com",
+  "https://www.player4hire.com",
+  // Always-allowed dev origins
+  "http://localhost:5173",
+  "http://localhost:18231",
+  // Dynamic extra origins from env (preview URLs, staging, etc.)
+  ...(process.env.FRONTEND_URL || "")
     .split(",")
     .map((s) => s.trim())
     .filter(Boolean),
-);
+]);
 
 app.use(cors({
   origin: (origin, callback) => {
