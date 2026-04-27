@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/lib/auth";
+import { API_BASE } from "@/lib/api-base";
 import { I18nProvider } from "@/lib/i18n";
 import { ThemeProvider } from "@/lib/theme";
 import { Layout } from "@/components/layout";
@@ -74,7 +75,7 @@ function AdminRoute({ component: Component }: { component: React.ComponentType<a
 function AdminCookieRoute({ component: Component }: { component: React.ComponentType<any> }) {
   const [isAdmin, setIsAdmin] = React.useState<boolean | null>(null);
   React.useEffect(() => {
-    fetch(`${(import.meta.env.VITE_API_URL ?? "/api").replace(/\/$/, "")}/admin/auth/me`, { credentials: "include" })
+    fetch(`${API_BASE}/admin/auth/me`, { credentials: "include" })
       .then(r => r.json())
       .then(d => setIsAdmin(!!d.isAdmin))
       .catch(() => setIsAdmin(false));

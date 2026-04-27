@@ -26,7 +26,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
-const BASE = "/api";
+import { API_BASE as BASE } from "@/lib/api-base";
 
 /* ── Admin detection — user ID 1 or admin email ── */
 const ADMIN_EMAILS = ["admin@gamerbuddy.com"];

@@ -1,8 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
-// On Vercel, the API is served from the same domain via /api/* rewrites (no separate server needed).
-// VITE_API_URL can be set to override for local dev against a different API host.
-export const BASE = (import.meta.env.VITE_API_URL ?? "/api").replace(/\/$/, "");
+import { API_BASE } from "@/lib/api-base";
+export const BASE = API_BASE;
 
 export type Bid = {
   id: number;

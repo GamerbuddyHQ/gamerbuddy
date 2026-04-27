@@ -20,7 +20,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Gamepad2, ShieldCheck, Lock, AlertTriangle, Trophy, Users, Wallet, Star, FlaskConical, UserCheck, Swords, Eye, EyeOff } from "lucide-react";
 
-const API_BASE = (import.meta.env.VITE_API_URL ?? "/api").replace(/\/$/, "");
+import { API_BASE } from "@/lib/api-base";
 
 const loginSchema = z.object({
   email:      z.string().email("Invalid email address"),

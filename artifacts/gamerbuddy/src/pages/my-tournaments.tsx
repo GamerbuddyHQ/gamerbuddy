@@ -13,7 +13,7 @@ import { useAuth } from "@/lib/auth";
 import { COUNTRY_MAP, REGION_MAP } from "@/lib/geo-options";
 import { useToast } from "@/hooks/use-toast";
 
-const BASE = "/api";
+import { API_BASE as BASE } from "@/lib/api-base";
 
 /* ── Types ── */
 type TournamentType = "h2h" | "squad" | "ffa";

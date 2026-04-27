@@ -16,7 +16,7 @@ import {
   COUNTRY_TO_REGION, countryLabel, genderLabel, regionLabel,
 } from "@/lib/geo-options";
 
-const BASE = "/api";
+import { API_BASE as BASE } from "@/lib/api-base";
 
 /* ── Types ── */
 type TournamentType = "h2h" | "squad" | "ffa";
