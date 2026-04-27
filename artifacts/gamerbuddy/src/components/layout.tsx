@@ -516,7 +516,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-[100dvh] flex flex-col bg-background text-foreground font-sans">
-      <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-background/85 backdrop-blur-md">
+      <header className="sticky top-0 z-50 w-full bg-background/85 backdrop-blur-md" style={{ borderBottom: "1px solid rgba(212,255,0,0.35)", boxShadow: "0 1px 0 0 rgba(212,255,0,0.15), 0 4px 20px 0 rgba(212,255,0,0.07)" }}>
         {/* thin cyan accent line at top */}
         <div className="h-[2px] bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
 
