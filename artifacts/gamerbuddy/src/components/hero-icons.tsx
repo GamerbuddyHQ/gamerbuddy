@@ -49,6 +49,10 @@ const JoystickSVG = ({ size, color }: { size: number; color: string }) => (
   </svg>
 );
 
+/* ── Glow filters ────────────────────────────────────────────── */
+const GLOW_GREEN = "drop-shadow(0 0 7px #D4FF0070) drop-shadow(0 0 14px #D4FF0030)";
+const GLOW_WHITE = "drop-shadow(0 0 6px rgba(212,255,0,0.25)) drop-shadow(0 0 3px rgba(255,255,255,0.30))";
+
 /* ── Icon layout definition ──────────────────────────────────── */
 const GREEN = "#D4FF00";
 const WHITE = "#ffffff";
@@ -63,25 +67,26 @@ interface IconEntry {
   variant: Variant;
   dur: number;
   delay: number;
+  glow: string;
 }
 
 const ICONS: IconEntry[] = [
-  { el: <Gamepad2      size={24} color={GREEN} />, left:  7, top:  9, opacity: 0.20, variant: 1, dur: 14, delay:  0 },
-  { el: <NintendoSwitch size={22} color={WHITE} />, left: 88, top: 13, opacity: 0.17, variant: 2, dur: 18, delay:  2 },
-  { el: <PSController   size={26} color={GREEN} />, left: 13, top: 68, opacity: 0.19, variant: 3, dur: 20, delay:  1 },
-  { el: <XboxController size={22} color={WHITE} />, left: 80, top: 60, opacity: 0.16, variant: 1, dur: 17, delay:  4 },
-  { el: <JoystickSVG   size={18} color={GREEN} />, left: 47, top:  5, opacity: 0.15, variant: 2, dur: 22, delay:  7 },
-  { el: <Headphones    size={20} color={WHITE} />, left: 92, top: 40, opacity: 0.18, variant: 3, dur: 15, delay:  3 },
-  { el: <Keyboard      size={22} color={WHITE} />, left: 22, top: 80, opacity: 0.15, variant: 1, dur: 21, delay:  5 },
-  { el: <Mouse         size={18} color={GREEN} />, left: 68, top: 78, opacity: 0.19, variant: 2, dur: 13, delay:  6 },
-  { el: <Smartphone    size={16} color={WHITE} />, left:  3, top: 45, opacity: 0.14, variant: 3, dur: 19, delay:  9 },
-  { el: <Crosshair     size={20} color={GREEN} />, left: 60, top: 88, opacity: 0.17, variant: 1, dur: 24, delay:  2 },
-  { el: <Monitor       size={18} color={WHITE} />, left: 33, top: 11, opacity: 0.14, variant: 2, dur: 16, delay: 10 },
-  { el: <Gamepad2      size={16} color={GREEN} />, left: 75, top: 26, opacity: 0.12, variant: 3, dur: 26, delay: 12 },
-  { el: <Headphones    size={14} color={WHITE} />, left: 17, top: 30, opacity: 0.13, variant: 1, dur: 23, delay: 14 },
-  { el: <Crosshair     size={14} color={GREEN} />, left: 54, top: 53, opacity: 0.11, variant: 2, dur: 28, delay:  8 },
-  { el: <Mouse         size={12} color={WHITE} />, left: 40, top: 38, opacity: 0.10, variant: 3, dur: 30, delay: 16 },
-  { el: <NintendoSwitch size={18} color={GREEN} />, left:  5, top: 74, opacity: 0.15, variant: 2, dur: 25, delay: 11 },
+  { el: <Gamepad2       size={28} color={GREEN} />, left:  7, top:  9, opacity: 0.55, variant: 1, dur: 14, delay:  0, glow: GLOW_GREEN },
+  { el: <NintendoSwitch size={26} color={WHITE} />, left: 88, top: 13, opacity: 0.42, variant: 2, dur: 18, delay:  2, glow: GLOW_WHITE },
+  { el: <PSController   size={30} color={GREEN} />, left: 13, top: 68, opacity: 0.50, variant: 3, dur: 20, delay:  1, glow: GLOW_GREEN },
+  { el: <XboxController size={26} color={WHITE} />, left: 80, top: 60, opacity: 0.40, variant: 1, dur: 17, delay:  4, glow: GLOW_WHITE },
+  { el: <JoystickSVG   size={22} color={GREEN} />, left: 47, top:  5, opacity: 0.45, variant: 2, dur: 22, delay:  7, glow: GLOW_GREEN },
+  { el: <Headphones    size={24} color={WHITE} />, left: 92, top: 40, opacity: 0.42, variant: 3, dur: 15, delay:  3, glow: GLOW_WHITE },
+  { el: <Keyboard      size={26} color={WHITE} />, left: 22, top: 80, opacity: 0.38, variant: 1, dur: 21, delay:  5, glow: GLOW_WHITE },
+  { el: <Mouse         size={22} color={GREEN} />, left: 68, top: 78, opacity: 0.48, variant: 2, dur: 13, delay:  6, glow: GLOW_GREEN },
+  { el: <Smartphone    size={20} color={WHITE} />, left:  3, top: 45, opacity: 0.35, variant: 3, dur: 19, delay:  9, glow: GLOW_WHITE },
+  { el: <Crosshair     size={24} color={GREEN} />, left: 60, top: 88, opacity: 0.45, variant: 1, dur: 24, delay:  2, glow: GLOW_GREEN },
+  { el: <Monitor       size={22} color={WHITE} />, left: 33, top: 11, opacity: 0.36, variant: 2, dur: 16, delay: 10, glow: GLOW_WHITE },
+  { el: <Gamepad2      size={20} color={GREEN} />, left: 75, top: 26, opacity: 0.38, variant: 3, dur: 26, delay: 12, glow: GLOW_GREEN },
+  { el: <Headphones    size={18} color={WHITE} />, left: 17, top: 30, opacity: 0.32, variant: 1, dur: 23, delay: 14, glow: GLOW_WHITE },
+  { el: <Crosshair     size={18} color={GREEN} />, left: 54, top: 53, opacity: 0.35, variant: 2, dur: 28, delay:  8, glow: GLOW_GREEN },
+  { el: <Mouse         size={16} color={WHITE} />, left: 40, top: 38, opacity: 0.30, variant: 3, dur: 30, delay: 16, glow: GLOW_WHITE },
+  { el: <NintendoSwitch size={22} color={GREEN} />, left:  5, top: 74, opacity: 0.40, variant: 2, dur: 25, delay: 11, glow: GLOW_GREEN },
 ];
 
 export function HeroIcons() {
@@ -95,6 +100,7 @@ export function HeroIcons() {
             left: `${item.left}%`,
             top: `${item.top}%`,
             opacity: item.opacity,
+            filter: item.glow,
             animation: `float-icon-${item.variant} ${item.dur}s ease-in-out ${item.delay}s infinite`,
             willChange: "transform",
           }}
