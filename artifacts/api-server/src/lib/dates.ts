@@ -1,27 +1,27 @@
 /**
  * Date utility helpers — safe across pg / @neondatabase/serverless Pool / neon-http.
  *
- * @neondatabase/serverless Pool returns timestamps as JavaScript Date objects
- * when used with Drizzle (same as pg). However, edge cases exist where some
- * columns can come back as ISO strings (e.g. after raw sql`` queries or when
- * the pg type parser is bypassed). These helpers handle both shapes safely.
+ * @neondatabase/serverless neon-http returns timestamp columns as invalid Date
+ * objects in some driver versions. These helpers guard against that by using
+ * `isNaN(val.getTime())` before calling `.toISOString()`.
  */
 
 /** Convert a Date | ISO string | null | undefined to a JavaScript Date. */
 export function toDate(val: Date | string | null | undefined): Date {
-  if (val instanceof Date) return val;
+  if (val instanceof Date) return isNaN(val.getTime()) ? new Date(0) : val;
   if (typeof val === "string" && val.length > 0) return new Date(val);
   return new Date(0);
 }
 
 /**
  * Convert a Date | ISO string | null | undefined to an ISO 8601 string.
- * Returns null when the input is nullish.
+ * Returns null when the input is nullish or an invalid Date.
  */
 export function toIso(val: Date | string | null | undefined): string | null {
   if (!val) return null;
   if (typeof val === "string") return val;
-  return val.toISOString();
+  const t = val.getTime();
+  return isNaN(t) ? null : val.toISOString();
 }
 
 /**

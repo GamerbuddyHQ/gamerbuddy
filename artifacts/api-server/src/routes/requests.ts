@@ -45,8 +45,8 @@ function formatRequest(
     objectives: string;
     status: string;
     escrowAmount?: number | null;
-    startedAt?: Date | null;
-    createdAt: Date;
+    startedAt?: Date | string | null;
+    createdAt: Date | string | null;
     bidCount?: number | null;
     lowestBid?: number | null;
     isBulkHiring?: boolean | null;
@@ -58,7 +58,7 @@ function formatRequest(
     hasQuestBidder?: boolean | null;
     preferredCountry?: string | null;
     preferredGender?: string | null;
-    expiresAt?: Date | null;
+    expiresAt?: Date | string | null;
     hirerRegion?: string | null;
     sessionHours?: number | null;
   },
@@ -138,12 +138,12 @@ router.get("/requests", async (req, res): Promise<void> => {
       skillLevel: gameRequestsTable.skillLevel,
       objectives: gameRequestsTable.objectives,
       status: gameRequestsTable.status,
-      createdAt: gameRequestsTable.createdAt,
+      createdAt: sql<string>`to_char(${gameRequestsTable.createdAt} AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"')`,
       isBulkHiring: gameRequestsTable.isBulkHiring,
       bulkGamersNeeded: gameRequestsTable.bulkGamersNeeded,
       preferredCountry: gameRequestsTable.preferredCountry,
       preferredGender: gameRequestsTable.preferredGender,
-      expiresAt: gameRequestsTable.expiresAt,
+      expiresAt: sql<string | null>`to_char(${gameRequestsTable.expiresAt} AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"')`,
       hirerRegion: gameRequestsTable.hirerRegion,
       sessionHours: gameRequestsTable.sessionHours,
       userName: usersTable.name,
@@ -194,7 +194,29 @@ router.get("/requests/my", requireAuth, async (req, res): Promise<void> => {
     );
 
   const result = await db
-    .select()
+    .select({
+      id: gameRequestsTable.id,
+      userId: gameRequestsTable.userId,
+      gameName: gameRequestsTable.gameName,
+      platform: gameRequestsTable.platform,
+      skillLevel: gameRequestsTable.skillLevel,
+      objectives: gameRequestsTable.objectives,
+      status: gameRequestsTable.status,
+      escrowAmount: gameRequestsTable.escrowAmount,
+      startedAt: sql<string | null>`to_char(${gameRequestsTable.startedAt} AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"')`,
+      createdAt: sql<string>`to_char(${gameRequestsTable.createdAt} AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"')`,
+      isBulkHiring: gameRequestsTable.isBulkHiring,
+      bulkGamersNeeded: gameRequestsTable.bulkGamersNeeded,
+      preferredCountry: gameRequestsTable.preferredCountry,
+      preferredGender: gameRequestsTable.preferredGender,
+      expiresAt: sql<string | null>`to_char(${gameRequestsTable.expiresAt} AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"')`,
+      hirerRegion: gameRequestsTable.hirerRegion,
+      sessionHours: gameRequestsTable.sessionHours,
+      acceptedBidId: gameRequestsTable.acceptedBidId,
+      additionalGoals: gameRequestsTable.additionalGoals,
+      expectedDuration: gameRequestsTable.expectedDuration,
+      playStyle: gameRequestsTable.playStyle,
+    })
     .from(gameRequestsTable)
     .where(eq(gameRequestsTable.userId, user.id))
     .orderBy(desc(gameRequestsTable.createdAt));
@@ -221,13 +243,13 @@ router.get("/requests/:id", async (req, res): Promise<void> => {
       objectives: gameRequestsTable.objectives,
       status: gameRequestsTable.status,
       escrowAmount: gameRequestsTable.escrowAmount,
-      startedAt: gameRequestsTable.startedAt,
-      createdAt: gameRequestsTable.createdAt,
+      startedAt: sql<string | null>`to_char(${gameRequestsTable.startedAt} AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"')`,
+      createdAt: sql<string>`to_char(${gameRequestsTable.createdAt} AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"')`,
       isBulkHiring: gameRequestsTable.isBulkHiring,
       bulkGamersNeeded: gameRequestsTable.bulkGamersNeeded,
       preferredCountry: gameRequestsTable.preferredCountry,
       preferredGender: gameRequestsTable.preferredGender,
-      expiresAt: gameRequestsTable.expiresAt,
+      expiresAt: sql<string | null>`to_char(${gameRequestsTable.expiresAt} AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"')`,
       userName: usersTable.name,
       userIdVerified: usersTable.idVerified,
       userProfilePhotoUrl: usersTable.profilePhotoUrl,
@@ -345,7 +367,7 @@ function formatBid(
     message: string;
     status: string;
     discordUsername?: string | null;
-    createdAt: Date;
+    createdAt: Date | string | null;
   },
   bidderName?: string,
   bidderIdVerified?: boolean,
@@ -408,7 +430,7 @@ router.get("/requests/:id/bids", async (req, res): Promise<void> => {
       message: bidsTable.message,
       status: bidsTable.status,
       discordUsername: bidsTable.discordUsername,
-      createdAt: bidsTable.createdAt,
+      createdAt: sql<string>`to_char(${bidsTable.createdAt} AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"')`,
       bidderName: usersTable.name,
       bidderIdVerified: usersTable.idVerified,
       bidderTrustFactor: usersTable.trustFactor,
@@ -1046,7 +1068,7 @@ router.get("/requests/:id/reviews", async (req, res): Promise<void> => {
       rating: reviewsTable.rating,
       comment: reviewsTable.comment,
       wouldPlayAgain: reviewsTable.wouldPlayAgain,
-      createdAt: reviewsTable.createdAt,
+      createdAt: sql<string>`to_char(${reviewsTable.createdAt} AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"')`,
       reviewerName: usersTable.name,
     })
     .from(reviewsTable)
