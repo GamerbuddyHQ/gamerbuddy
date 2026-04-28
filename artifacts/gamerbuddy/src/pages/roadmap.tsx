@@ -189,16 +189,16 @@ const STATUS_ICON = {
 
 export default function Roadmap() {
   return (
-    <div className="max-w-4xl mx-auto space-y-14 pb-16">
+    <div className="max-w-4xl mx-auto space-y-8 sm:space-y-14 pb-16">
 
       {/* ── Hero ── */}
-      <div className="text-center space-y-4 pt-2">
+      <div className="text-center space-y-3 sm:space-y-4 pt-2">
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-primary/30 bg-primary/8 text-primary text-[11px] font-black uppercase tracking-widest">
           <Map className="h-3.5 w-3.5" />
           Product Roadmap
         </div>
 
-        <h1 className="text-4xl sm:text-5xl font-black tracking-tight text-foreground leading-tight">
+        <h1 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight text-foreground leading-tight">
           Our{" "}
           <span
             style={{
@@ -211,12 +211,12 @@ export default function Roadmap() {
           </span>
         </h1>
 
-        <p className="text-muted-foreground text-base sm:text-lg max-w-lg mx-auto leading-relaxed">
+        <p className="text-muted-foreground text-sm sm:text-base md:text-lg max-w-lg mx-auto leading-relaxed">
           We're building Player4Hire step by step to create the best co-op gaming experience.
         </p>
 
         {/* Quick status pills */}
-        <div className="flex flex-wrap items-center justify-center gap-2.5 pt-1">
+        <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
           {PHASES.map((p) => {
             const s = STATUS_STYLES[p.status];
             return (
@@ -226,7 +226,7 @@ export default function Roadmap() {
                 style={{ background: p.bg, borderColor: p.border, color: p.accent }}
               >
                 <span
-                  className="h-1.5 w-1.5 rounded-full"
+                  className="h-1.5 w-1.5 rounded-full shrink-0"
                   style={{ background: s.dot, boxShadow: `0 0 5px ${s.dot}` }}
                 />
                 Phase {p.id}: {s.label}
@@ -238,7 +238,7 @@ export default function Roadmap() {
 
       {/* ── Phase 1 Live Banner ── */}
       <div
-        className="rounded-2xl border p-6 space-y-4"
+        className="rounded-2xl border p-4 sm:p-6 space-y-3 sm:space-y-4"
         style={{
           background: "linear-gradient(135deg, rgba(34,197,94,0.06) 0%, rgba(161,255,79,0.04) 100%)",
           borderColor: "rgba(34,197,94,0.18)",
@@ -250,7 +250,7 @@ export default function Roadmap() {
             className="h-2 w-2 rounded-full shrink-0"
             style={{ background: "#22c55e", boxShadow: "0 0 7px rgba(34,197,94,0.7)", animation: "pulse 1.5s infinite" }}
           />
-          <span className="text-[11px] font-black uppercase tracking-[0.14em] text-green-400/90">
+          <span className="text-xs sm:text-[11px] font-black uppercase tracking-[0.14em] text-green-400/90">
             Phase 1 is live now
           </span>
         </div>
@@ -263,7 +263,7 @@ export default function Roadmap() {
       </div>
 
       {/* ── Phases ── */}
-      <div className="space-y-8">
+      <div className="space-y-6 sm:space-y-8">
         {PHASES.map((phase) => {
           const StatusIcon = STATUS_ICON[phase.status];
           const statusStyle = STATUS_STYLES[phase.status];
@@ -281,34 +281,36 @@ export default function Roadmap() {
               {/* Accent bar */}
               <div className={`h-[3px] w-full bg-gradient-to-r ${phase.bar}`} />
 
-              <div className="p-6 sm:p-8 space-y-6">
-                {/* Header */}
-                <div className="flex items-start justify-between gap-4">
-                  <div className="space-y-1.5">
+              <div className="p-4 sm:p-6 md:p-8 space-y-5 sm:space-y-6">
+                {/* Phase header */}
+                <div className="flex items-start justify-between gap-3">
+                  <div className="space-y-2 flex-1 min-w-0">
+                    {/* Phase number + status badge row */}
                     <div className="flex items-center flex-wrap gap-2">
                       <span
-                        className="text-[11px] font-black uppercase tracking-widest"
+                        className="text-sm font-black uppercase tracking-widest"
                         style={{ color: phase.accent }}
                       >
                         Phase {phase.id}
                       </span>
                       <span
-                        className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full border"
+                        className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-wide px-3 py-1 rounded-full border"
                         style={{ background: phase.bg, borderColor: phase.border, color: phase.accent }}
                       >
-                        <StatusIcon className="h-2.5 w-2.5" />
+                        <StatusIcon className="h-3 w-3" />
                         {statusStyle.label}
                       </span>
                     </div>
 
-                    <h2 className="text-xl sm:text-2xl font-black text-foreground tracking-tight">
+                    <h2 className="text-xl sm:text-2xl font-black text-foreground tracking-tight leading-tight">
                       {phase.title}
                     </h2>
-                    <p className="text-sm text-muted-foreground leading-relaxed max-w-lg">
+                    <p className="text-sm sm:text-[15px] text-muted-foreground leading-relaxed">
                       {phase.description}
                     </p>
                   </div>
 
+                  {/* Phase number badge — visible on sm+ */}
                   <div
                     className="shrink-0 hidden sm:flex items-center justify-center h-14 w-14 rounded-2xl border text-2xl font-black"
                     style={{ background: phase.bg, borderColor: phase.border, color: phase.accent }}
@@ -317,8 +319,8 @@ export default function Roadmap() {
                   </div>
                 </div>
 
-                {/* Feature items */}
-                <div className="grid sm:grid-cols-2 gap-3">
+                {/* Feature items — single column on mobile, 2 cols on sm+ */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-3">
                   {phase.items.map((item) => {
                     const ItemIcon = item.icon;
                     return (
@@ -326,21 +328,23 @@ export default function Roadmap() {
                         key={item.title}
                         className="flex gap-3.5 p-4 rounded-xl border transition-colors"
                         style={{
-                          borderColor: "rgba(255,255,255,0.06)",
-                          background: "rgba(255,255,255,0.02)",
+                          borderColor: "rgba(255,255,255,0.07)",
+                          background: "rgba(255,255,255,0.025)",
                         }}
                       >
+                        {/* Icon */}
                         <div
-                          className="shrink-0 h-8 w-8 rounded-lg flex items-center justify-center border"
+                          className="shrink-0 h-9 w-9 sm:h-8 sm:w-8 rounded-lg flex items-center justify-center border mt-0.5"
                           style={{ background: phase.bg, borderColor: phase.border }}
                         >
                           <ItemIcon className="h-4 w-4" style={{ color: phase.accent }} />
                         </div>
+                        {/* Text */}
                         <div className="min-w-0">
-                          <p className="text-sm font-bold text-foreground leading-snug">
+                          <p className="text-[15px] sm:text-sm font-bold text-foreground leading-snug">
                             {item.title}
                           </p>
-                          <p className="text-xs text-muted-foreground leading-relaxed mt-0.5">
+                          <p className="text-sm sm:text-xs text-muted-foreground leading-relaxed mt-1">
                             {item.desc}
                           </p>
                         </div>
@@ -356,7 +360,7 @@ export default function Roadmap() {
 
       {/* ── Suggest a Feature CTA ── */}
       <div
-        className="rounded-2xl border p-8 text-center space-y-4"
+        className="rounded-2xl border p-5 sm:p-8 text-center space-y-4"
         style={{
           background: "linear-gradient(135deg, rgba(161,255,79,0.10) 0%, rgba(161,255,79,0.06) 100%)",
           borderColor: "rgba(161,255,79,0.28)",
@@ -393,9 +397,9 @@ export default function Roadmap() {
         </Link>
       </div>
 
-      {/* ── Need Help section ── */}
+      {/* ── Need Help / Find us section ── */}
       <div
-        className="rounded-2xl border p-6 sm:p-8 flex flex-col sm:flex-row items-center gap-6"
+        className="rounded-2xl border p-5 sm:p-6 md:p-8 flex flex-col sm:flex-row items-center gap-5 sm:gap-6"
         style={{
           background: "linear-gradient(135deg, rgba(161,255,79,0.06) 0%, rgba(161,255,79,0.04) 100%)",
           borderColor: "rgba(161,255,79,0.22)",
@@ -407,7 +411,7 @@ export default function Roadmap() {
           <MessageSquare className="h-7 w-7" style={{ color: "#A1FF4F" }} />
         </div>
         <div className="flex-1 text-center sm:text-left space-y-1.5">
-          <p className="text-[11px] font-black uppercase tracking-widest" style={{ color: "#A1FF4F" }}>
+          <p className="text-xs sm:text-[11px] font-black uppercase tracking-widest" style={{ color: "#A1FF4F" }}>
             Need Help or Have Questions?
           </p>
           <h3 className="text-lg sm:text-xl font-black text-foreground">
@@ -421,7 +425,7 @@ export default function Roadmap() {
           href="https://www.superr.bio/gamerbuddy"
           target="_blank"
           rel="noopener noreferrer"
-          className="shrink-0 inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm text-white transition-all hover:scale-105 active:scale-95"
+          className="shrink-0 w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-bold text-sm text-white transition-all hover:scale-105 active:scale-95"
           style={{
             background: "linear-gradient(135deg, #A1FF4F 0%, #88cc33 60%, #A1FF4F 100%)",
             boxShadow: "0 4px 24px rgba(161,255,79,0.30)",
@@ -434,7 +438,7 @@ export default function Roadmap() {
 
       {/* ── Early dev note ── */}
       <div
-        className="rounded-xl border px-6 py-5 text-center"
+        className="rounded-xl border px-4 sm:px-6 py-4 sm:py-5 text-center"
         style={{
           borderColor: "rgba(255,255,255,0.07)",
           background: "rgba(255,255,255,0.02)",
