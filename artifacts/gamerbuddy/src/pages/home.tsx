@@ -388,10 +388,10 @@ export default function Home() {
         <div className="max-w-[1400px] mx-auto">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             {[
-              { icon: <Shield className="h-5 w-5 text-[#D4FF00]" />, label: "Escrow Protected", sub: "Funds held until session complete", bg: "rgba(212,255,0,0.04)", border: "rgba(212,255,0,0.18)" },
-              { icon: <Star className="h-5 w-5 text-[#D4FF00]" />, label: "Verified Reviews", sub: "Both sides must leave a review", bg: "rgba(212,255,0,0.04)", border: "rgba(212,255,0,0.18)" },
-              { icon: <Zap className="h-5 w-5 text-[#D4FF00]" />, label: "Instant Alerts", sub: "Real-time bids, starts, and payments", bg: "rgba(212,255,0,0.04)", border: "rgba(212,255,0,0.18)" },
-              { icon: <Trophy className="h-5 w-5 text-[#D4FF00]" />, label: "Transparent 10% Fee", sub: "Gamers keep 90% — no hidden charges", bg: "rgba(212,255,0,0.04)", border: "rgba(212,255,0,0.18)" },
+              { icon: <Shield className="h-7 w-7 text-[#D4FF00]" />, label: "Escrow Protected", sub: "Funds held until session complete", bg: "rgba(212,255,0,0.06)", border: "rgba(212,255,0,0.32)" },
+              { icon: <Star className="h-7 w-7 text-[#D4FF00]" />, label: "Verified Reviews", sub: "Both sides must leave a review", bg: "rgba(212,255,0,0.06)", border: "rgba(212,255,0,0.32)" },
+              { icon: <Zap className="h-7 w-7 text-[#D4FF00]" />, label: "Instant Alerts", sub: "Real-time bids, starts, and payments", bg: "rgba(212,255,0,0.06)", border: "rgba(212,255,0,0.32)" },
+              { icon: <Trophy className="h-7 w-7 text-[#D4FF00]" />, label: "Transparent 10% Fee", sub: "Gamers keep 90% — no hidden charges", bg: "rgba(212,255,0,0.06)", border: "rgba(212,255,0,0.32)" },
             ].map(({ icon, label, sub, bg, border }) => (
               <div
                 key={label}
@@ -399,8 +399,12 @@ export default function Home() {
                 style={{ background: bg, border: `1px solid ${border}` }}
               >
                 <div
-                  className="w-11 h-11 rounded-xl flex items-center justify-center"
-                  style={{ background: "#1A1A1A", boxShadow: "0 0 16px rgba(212,255,0,0.20)" }}
+                  className="w-14 h-14 rounded-xl flex items-center justify-center"
+                  style={{
+                    background: "#1A1A1A",
+                    boxShadow: "0 0 0 1px rgba(212,255,0,0.18), 0 0 18px rgba(212,255,0,0.35), 0 0 36px rgba(212,255,0,0.12)",
+                    filter: "drop-shadow(0 0 6px rgba(212,255,0,0.5))",
+                  }}
                 >
                   {icon}
                 </div>
