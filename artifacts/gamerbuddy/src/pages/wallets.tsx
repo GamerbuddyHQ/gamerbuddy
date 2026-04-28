@@ -325,8 +325,8 @@ export default function WalletsPage() {
                 To keep Player4Hire safe and enjoyable for real gamers, we charge a small one-time activation fee. Some bad actors create fake or bot accounts to abuse the platform — this fee helps us greatly reduce spam and maintain a high-quality, trustworthy community.
               </p>
               <ul className="space-y-0.5 text-muted-foreground/60">
+                <li>🌍 <strong className="text-foreground/70">Global:</strong> $5 USD (one-time only)</li>
                 <li>🇮🇳 <strong className="text-foreground/70">India:</strong> ₹149 (one-time only)</li>
-                <li>🌍 <strong className="text-foreground/70">Global:</strong> $5 USD (~₹420 INR, one-time only)</li>
               </ul>
               <p className="text-muted-foreground/60 leading-relaxed">
                 This is a <strong className="text-foreground/70">one-time payment</strong> — you won't be charged again. Thank you for understanding and for helping us build a better gaming community together. ❤️

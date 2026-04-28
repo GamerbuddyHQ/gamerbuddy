@@ -391,7 +391,7 @@ export default function Signup() {
                     <div>
                       <p className="text-xs font-semibold text-white mb-1">How to fully activate your account</p>
                       <p className="text-[11px] text-muted-foreground leading-relaxed">
-                        After signing up: (1) link a gaming account on your profile, (2) wait 24–48 hrs for verification, then (3) pay a small one-time activation fee (🇮🇳 ₹149 / 🌍 $5) to unlock posting and bidding. Paid once — never again. ❤️
+                        After signing up: (1) link a gaming account on your profile, (2) wait 24–48 hrs for verification, then (3) pay a small one-time activation fee (🌍 $5 / 🇮🇳 ₹149) to unlock posting and bidding. Paid once — never again. ❤️
                       </p>
                     </div>
                   </div>
