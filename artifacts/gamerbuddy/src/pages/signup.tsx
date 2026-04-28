@@ -1,4 +1,113 @@
 import React, { useState } from "react";
+
+/* ── Timezone → E.164 dial-code map ─────────────────────────────────────
+   Mirrors the TZ_TO_NATION map in regional-clock.tsx but maps straight to
+   the international dialling prefix so we can pre-fill the phone field.   */
+const TZ_DIAL: Record<string, string> = {
+  // India
+  "Asia/Kolkata": "+91", "Asia/Calcutta": "+91",
+  // USA / Canada share +1 (NANP)
+  "America/New_York": "+1", "America/Chicago": "+1", "America/Denver": "+1",
+  "America/Los_Angeles": "+1", "America/Phoenix": "+1", "America/Anchorage": "+1",
+  "America/Adak": "+1", "Pacific/Honolulu": "+1",
+  "America/Toronto": "+1", "America/Vancouver": "+1", "America/Winnipeg": "+1",
+  "America/Halifax": "+1", "America/St_Johns": "+1", "America/Edmonton": "+1",
+  // UK
+  "Europe/London": "+44",
+  // Australia
+  "Australia/Sydney": "+61", "Australia/Melbourne": "+61",
+  "Australia/Brisbane": "+61", "Australia/Perth": "+61",
+  "Australia/Adelaide": "+61", "Australia/Darwin": "+61", "Australia/Hobart": "+61",
+  // Europe
+  "Europe/Berlin": "+49",
+  "Europe/Paris": "+33",
+  "Europe/Rome": "+39",
+  "Europe/Madrid": "+34",
+  "Europe/Amsterdam": "+31",
+  "Europe/Stockholm": "+46",
+  "Europe/Oslo": "+47",
+  "Europe/Copenhagen": "+45",
+  "Europe/Warsaw": "+48",
+  "Europe/Kyiv": "+380", "Europe/Kiev": "+380",
+  "Europe/Brussels": "+32",
+  "Europe/Zurich": "+41",
+  "Europe/Vienna": "+43",
+  "Europe/Lisbon": "+351", "Atlantic/Azores": "+351",
+  "Europe/Athens": "+30",
+  "Europe/Dublin": "+353",
+  "Europe/Helsinki": "+358",
+  "Europe/Istanbul": "+90", "Asia/Istanbul": "+90",
+  // Asia-Pacific
+  "Asia/Tokyo": "+81",
+  "Asia/Seoul": "+82",
+  "Asia/Singapore": "+65",
+  "Asia/Shanghai": "+86", "Asia/Chongqing": "+86", "Asia/Harbin": "+86", "Asia/Urumqi": "+86",
+  "Asia/Karachi": "+92",
+  "Asia/Dhaka": "+880",
+  "Asia/Colombo": "+94",
+  "Asia/Kathmandu": "+977",
+  "Asia/Jakarta": "+62", "Asia/Makassar": "+62", "Asia/Jayapura": "+62", "Asia/Pontianak": "+62",
+  "Asia/Kuala_Lumpur": "+60", "Asia/Kuching": "+60",
+  "Asia/Manila": "+63",
+  "Asia/Ho_Chi_Minh": "+84", "Asia/Saigon": "+84",
+  "Asia/Bangkok": "+66",
+  // Middle East
+  "Asia/Dubai": "+971",
+  "Asia/Riyadh": "+966",
+  "Asia/Qatar": "+974",
+  "Asia/Jerusalem": "+972", "Asia/Tel_Aviv": "+972",
+  "Asia/Amman": "+962",
+  "Asia/Beirut": "+961",
+  // Russia
+  "Europe/Moscow": "+7", "Asia/Yekaterinburg": "+7",
+  "Asia/Novosibirsk": "+7", "Asia/Irkutsk": "+7",
+  "Asia/Yakutsk": "+7", "Asia/Vladivostok": "+7",
+  "Europe/Kaliningrad": "+7",
+  // Americas
+  "America/Sao_Paulo": "+55", "America/Manaus": "+55",
+  "America/Fortaleza": "+55", "America/Belem": "+55",
+  "America/Recife": "+55", "America/Maceio": "+55",
+  "America/Mexico_City": "+52", "America/Cancun": "+52",
+  "America/Chihuahua": "+52", "America/Hermosillo": "+52", "America/Tijuana": "+52",
+  "America/Argentina/Buenos_Aires": "+54", "America/Argentina/Cordoba": "+54",
+  "America/Argentina/Mendoza": "+54",
+  "America/Santiago": "+56",
+  "America/Bogota": "+57",
+  "America/Lima": "+51",
+  // Africa
+  "Africa/Johannesburg": "+27",
+  "Africa/Lagos": "+234",
+  "Africa/Nairobi": "+254",
+  "Africa/Cairo": "+20",
+  "Africa/Casablanca": "+212",
+  "Africa/Algiers": "+213",
+  "Africa/Tunis": "+216",
+  "Africa/Accra": "+233",
+  "Africa/Addis_Ababa": "+251",
+  "Africa/Kampala": "+256",
+  "Africa/Dar_es_Salaam": "+255",
+  "Africa/Harare": "+263",
+  "Africa/Luanda": "+244",
+  "Africa/Abidjan": "+225",
+  "Africa/Douala": "+237",
+  "Africa/Dakar": "+221",
+  "Africa/Lusaka": "+260",
+  // Oceania
+  "Pacific/Auckland": "+64", "Pacific/Chatham": "+64",
+  // Misc
+  "Africa/Moroni": "+269", // Comoros / Morocco overlap handled above
+};
+
+function getDialCode(): string {
+  try {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    return TZ_DIAL[tz] ?? "+1";
+  } catch {
+    return "+1";
+  }
+}
+
+const DEFAULT_DIAL = getDialCode();
 import { Link, useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -82,7 +191,7 @@ export default function Signup() {
 
   const form = useForm<z.infer<typeof signupSchema>>({
     resolver: zodResolver(signupSchema),
-    defaultValues: { name: "", email: "", password: "", phone: "" },
+    defaultValues: { name: "", email: "", password: "", phone: DEFAULT_DIAL },
   });
 
   const passwordValue = form.watch("password");
@@ -220,7 +329,7 @@ export default function Signup() {
                         <FormItem>
                           <FormLabel className="text-xs uppercase tracking-widest text-muted-foreground font-bold">Phone Number</FormLabel>
                           <FormControl>
-                            <Input placeholder="+1 (555) 000-0000" autoComplete="tel" {...field} className="bg-background/60" />
+                            <Input placeholder={`${DEFAULT_DIAL} 000-0000`} autoComplete="tel" {...field} className="bg-background/60" />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
