@@ -2516,7 +2516,7 @@ export default function RequestDetail() {
               <div className="flex-1 text-center sm:text-left">
                 <p className="font-bold text-yellow-300 text-sm">One last step — activate your account! ⚡</p>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  You're verified! Pay the small one-time activation fee (🇮🇳 ₹149 / 🌍 $5) to unlock bidding. Paid once — never again. ❤️
+                  You're verified! Pay the small one-time activation fee (🌍 $5 / 🇮🇳 ₹149) to unlock bidding. Paid once — never again. ❤️
                 </p>
               </div>
               <Button size="sm" asChild className="bg-yellow-500 hover:bg-yellow-400 text-black font-bold shrink-0 text-xs">

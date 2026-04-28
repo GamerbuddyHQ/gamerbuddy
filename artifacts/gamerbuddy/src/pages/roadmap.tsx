@@ -32,7 +32,7 @@ const PHASES = [
       {
         icon: Zap,
         title: "One-Time Account Activation Fee",
-        desc: "To keep Player4Hire safe and enjoyable for real gamers, a small one-time fee is charged after verification — 🇮🇳 ₹149 for India, 🌍 $5 for Global. This protects against fake/bot accounts and spam, keeping the community high-quality and trustworthy. Paid once only — you'll never be charged again. ❤️",
+        desc: "To keep Player4Hire safe and enjoyable for real gamers, a small one-time fee is charged after verification — 🌍 $5 for Global, 🇮🇳 ₹149 for India. This protects against fake/bot accounts and spam, keeping the community high-quality and trustworthy. Paid once only — you'll never be charged again. ❤️",
       },
       {
         icon: Hash,
@@ -255,7 +255,7 @@ export default function Roadmap() {
           </span>
         </div>
         <p className="text-sm sm:text-[15px] text-foreground/80 leading-[1.75]">
-          <strong className="text-foreground">Phase 1 is fully live.</strong> User registration with 24–48hr verification, one-time account activation fee (🇮🇳 ₹149 India · 🌍 $5 Global — once only), unique GB-XXXXXX IDs, profile photos with anti-AI enforcement, regional minimum fees (₹200/hr India · $5/hr global), request posting &amp; bidding, in-app messaging, dual wallets with 10% platform fee, manual payouts ($100 threshold), reviews &amp; Trust Factor, connected gaming accounts display, optional gender filter, Community tab with voting, full Community Guidelines, and a professional 7-section Disclaimer.
+          <strong className="text-foreground">Phase 1 is fully live.</strong> User registration with 24–48hr verification, one-time account activation fee (🌍 $5 Global · 🇮🇳 ₹149 India — once only), unique GB-XXXXXX IDs, profile photos with anti-AI enforcement, regional minimum fees (₹200/hr India · $5/hr global), request posting &amp; bidding, in-app messaging, dual wallets with 10% platform fee, manual payouts ($100 threshold), reviews &amp; Trust Factor, connected gaming accounts display, optional gender filter, Community tab with voting, full Community Guidelines, and a professional 7-section Disclaimer.
         </p>
         <p className="text-sm text-muted-foreground/60 leading-[1.75]">
           We're now building Phase 2 — tournaments, bulk hiring (3–100 gamers), automatic payouts, and advanced real-time features. Your Community votes directly shape what gets prioritised next. 🚀
