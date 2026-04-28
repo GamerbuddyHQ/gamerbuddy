@@ -61,6 +61,7 @@ function formatRequest(
     expiresAt?: Date | string | null;
     hirerRegion?: string | null;
     sessionHours?: number | null;
+    userTrustFactor?: number | null;
   },
   userName?: string,
   userIdVerified?: boolean,
@@ -76,6 +77,7 @@ function formatRequest(
     userName: userName ?? "Unknown",
     userIdVerified: userIdVerified ?? false,
     userProfilePhotoUrl: userProfilePhotoUrl ?? null,
+    userTrustFactor: req.userTrustFactor ?? 50,
     gameName: req.gameName,
     platform: req.platform,
     skillLevel: req.skillLevel,
@@ -149,6 +151,7 @@ router.get("/requests", async (req, res): Promise<void> => {
       userName: usersTable.name,
       userIdVerified: usersTable.idVerified,
       userProfilePhotoUrl: usersTable.profilePhotoUrl,
+      userTrustFactor: usersTable.trustFactor,
       bidCount: sql<number>`(SELECT COUNT(*) FROM bids WHERE bids.request_id = ${gameRequestsTable.id})`.mapWith(Number),
       lowestBid: sql<number | null>`(SELECT MIN(price) FROM bids WHERE bids.request_id = ${gameRequestsTable.id} AND bids.status = 'pending')`.mapWith((v) => v == null ? null : Number(v)),
       acceptedBidsCount: sql<number>`(SELECT COUNT(*) FROM bids WHERE bids.request_id = ${gameRequestsTable.id} AND bids.status = 'accepted')`.mapWith(Number),

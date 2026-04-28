@@ -26,6 +26,7 @@ import {
 import { SafetyBanner } from "@/components/safety-banner";
 import { useToast } from "@/hooks/use-toast";
 import { VerifiedBadge } from "@/components/verified-badge";
+import { TrustCardBadge } from "@/components/reputation-badges";
 import { ReportButton } from "@/components/report-modal";
 
 /* ── SKILL CONFIG ────────────────────────────────────────────────────────── */
@@ -501,6 +502,7 @@ function RequestCard({ req }: { req: GameRequest }) {
                       <User className="h-3 w-3 shrink-0" />
                     )}
                     <span className="text-primary/90 font-bold">{req.userName}</span>
+                    <TrustCardBadge trustFactor={req.userTrustFactor ?? 50} compact />
                     <VerifiedBadge idVerified={req.userIdVerified ?? false} variant="icon" />
                     <ReportButton userId={req.userId} userName={req.userName} variant="icon" />
                   </span>

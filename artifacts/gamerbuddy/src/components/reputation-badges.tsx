@@ -1,5 +1,5 @@
 import React from "react";
-import { CheckCircle2, Crown, Shield, Smile, ShieldCheck } from "lucide-react";
+import { CheckCircle2, Crown, Shield, Smile, ShieldCheck, Camera, Gamepad2, MapPin, User, Mail, Phone, FileText, ChevronRight } from "lucide-react";
 
 /* ─── Types ──────────────────────────────────────────────────────── */
 
@@ -152,11 +152,121 @@ function PremiumBadge({ badge: b }: { badge: ReputationBadge }) {
         letterSpacing: "0.08em",
       }}
     >
-      {/* Icon with individual glow */}
       <span className="shrink-0 flex items-center" style={{ filter: b.colors.iconGlow }}>
         <b.Icon className="h-3 w-3" />
       </span>
       {b.label}
+    </span>
+  );
+}
+
+/* ─── Trust Card System ──────────────────────────────────────────── */
+
+export type TrustCardTier = {
+  id: "grey" | "yellow" | "blue" | "gold";
+  label: string;
+  tagline: string;
+  min: number;
+  max: number;
+  color: string;
+  bg: string;
+  border: string;
+  glow: string;
+};
+
+export const TRUST_CARD_TIERS: TrustCardTier[] = [
+  {
+    id: "grey",
+    label: "Grey Card",
+    tagline: "New — proceed with caution",
+    min: 0,
+    max: 25,
+    color: "#9ca3af",
+    bg: "linear-gradient(135deg, rgba(156,163,175,0.14) 0%, rgba(107,114,128,0.07) 100%)",
+    border: "rgba(156,163,175,0.38)",
+    glow: "0 0 8px rgba(156,163,175,0.18)",
+  },
+  {
+    id: "yellow",
+    label: "Yellow Card",
+    tagline: "Building trust",
+    min: 26,
+    max: 50,
+    color: "#fbbf24",
+    bg: "linear-gradient(135deg, rgba(251,191,36,0.16) 0%, rgba(234,179,8,0.07) 100%)",
+    border: "rgba(251,191,36,0.42)",
+    glow: "0 0 10px rgba(251,191,36,0.25)",
+  },
+  {
+    id: "blue",
+    label: "Blue Card",
+    tagline: "Trusted member",
+    min: 51,
+    max: 75,
+    color: "#60a5fa",
+    bg: "linear-gradient(135deg, rgba(96,165,250,0.16) 0%, rgba(59,130,246,0.07) 100%)",
+    border: "rgba(96,165,250,0.42)",
+    glow: "0 0 10px rgba(96,165,250,0.25)",
+  },
+  {
+    id: "gold",
+    label: "Gold Card",
+    tagline: "Elite veteran",
+    min: 76,
+    max: 100,
+    color: "#f59e0b",
+    bg: "linear-gradient(135deg, rgba(245,158,11,0.20) 0%, rgba(217,119,6,0.09) 100%)",
+    border: "rgba(245,158,11,0.50)",
+    glow: "0 0 14px rgba(245,158,11,0.30), 0 0 4px rgba(251,191,36,0.18)",
+  },
+];
+
+export function getTrustCard(trustFactor: number): TrustCardTier {
+  const tf = Math.min(100, Math.max(0, trustFactor));
+  return TRUST_CARD_TIERS.find((t) => tf >= t.min && tf <= t.max) ?? TRUST_CARD_TIERS[0];
+}
+
+export function TrustCardBadge({
+  trustFactor,
+  compact = false,
+}: {
+  trustFactor: number;
+  compact?: boolean;
+}) {
+  const tf = Math.min(100, Math.max(0, trustFactor));
+  const card = getTrustCard(tf);
+
+  if (compact) {
+    return (
+      <span
+        className="inline-flex items-center gap-0.5 text-[9px] font-black uppercase tracking-widest rounded-full px-1.5 py-0.5 shrink-0 select-none"
+        style={{
+          background: card.bg,
+          border: `1px solid ${card.border}`,
+          color: card.color,
+          boxShadow: card.glow,
+        }}
+        title={`${card.label} · ${card.tagline} · Trust Factor: ${tf}/100`}
+      >
+        <span style={{ filter: `drop-shadow(0 0 2px ${card.color}80)`, fontSize: "8px" }}>♦</span>
+        {card.id.charAt(0).toUpperCase() + card.id.slice(1)}
+      </span>
+    );
+  }
+
+  return (
+    <span
+      className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-widest rounded-full px-2.5 py-1 shrink-0 select-none"
+      style={{
+        background: card.bg,
+        border: `1px solid ${card.border}`,
+        color: card.color,
+        boxShadow: card.glow,
+      }}
+      title={`${card.label} · ${card.tagline} · Trust Factor: ${tf}/100`}
+    >
+      <span style={{ filter: `drop-shadow(0 0 3px ${card.color}90)` }}>♦</span>
+      {card.label}
     </span>
   );
 }
@@ -242,14 +352,20 @@ export function TrustMeter({ value }: { value: number }) {
         </div>
       </div>
 
+      {/* Trust Card tier row */}
+      <div className="flex items-center gap-2">
+        <TrustCardBadge trustFactor={capped} />
+        <span className="text-[10px] text-white/35 font-medium">
+          {getTrustCard(capped).tagline}
+        </span>
+      </div>
+
       {/* Bar track */}
       <div className="relative h-4 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.07)" }}>
-        {/* Fill */}
         <div
           className={`h-full rounded-full bg-gradient-to-r ${tfGradient(capped)} transition-all duration-700 relative overflow-hidden`}
           style={{ width: `${capped}%`, boxShadow: `0 0 10px ${color}60, 0 0 4px ${color}40` }}
         >
-          {/* Shimmer sweep */}
           <div
             className="absolute inset-0"
             style={{
@@ -259,22 +375,22 @@ export function TrustMeter({ value }: { value: number }) {
             }}
           />
         </div>
-        {/* Tick marks at 35, 55, 75 */}
-        {[35, 55, 75].map((pct) => (
+        {/* Tier boundary ticks at 25, 50, 75 */}
+        {[25, 50, 75].map((pct) => (
           <div
             key={pct}
             className="absolute top-0 bottom-0 w-px"
-            style={{ left: `${pct}%`, background: "rgba(255,255,255,0.12)" }}
+            style={{ left: `${pct}%`, background: "rgba(255,255,255,0.15)" }}
           />
         ))}
       </div>
 
-      {/* Scale labels */}
+      {/* Tier labels */}
       <div className="flex justify-between text-[9px] font-bold uppercase tracking-wider" style={{ color: "rgba(255,255,255,0.25)" }}>
-        <span>Risky</span>
-        <span>Fair</span>
-        <span>Good</span>
-        <span>Excellent</span>
+        <span style={{ color: "#9ca3af80" }}>Grey</span>
+        <span style={{ color: "#fbbf2480" }}>Yellow</span>
+        <span style={{ color: "#60a5fa80" }}>Blue</span>
+        <span style={{ color: "#f59e0b80" }}>Gold</span>
       </div>
 
       {/* Footnote */}
@@ -283,6 +399,187 @@ export function TrustMeter({ value }: { value: number }) {
         <span style={{ color: "rgba(255,255,255,0.5)" }}>session history</span> &amp;{" "}
         <span style={{ color: "rgba(255,255,255,0.5)" }}>community reviews</span>.
       </p>
+    </div>
+  );
+}
+
+/* ─── Profile Completion Bar ─────────────────────────────────────── */
+
+export type ProfileCompletionField = {
+  id: string;
+  label: string;
+  done: boolean;
+  Icon: React.ComponentType<{ className?: string }>;
+  action?: string;
+  actionLabel?: string;
+};
+
+export function computeProfileCompletion({
+  hasProfilePhoto,
+  hasBio,
+  hasCountry,
+  hasGender,
+  hasGamingAccount,
+  emailVerified,
+  phoneVerified,
+}: {
+  hasProfilePhoto: boolean;
+  hasBio: boolean;
+  hasCountry: boolean;
+  hasGender: boolean;
+  hasGamingAccount: boolean;
+  emailVerified: boolean;
+  phoneVerified: boolean;
+}): { pct: number; fields: ProfileCompletionField[]; nextCard: TrustCardTier | null } {
+  const fields: ProfileCompletionField[] = [
+    { id: "photo",   label: "Profile photo",       done: hasProfilePhoto,   Icon: Camera,    action: "#profile-basics-section", actionLabel: "Add photo" },
+    { id: "bio",     label: "Bio",                  done: hasBio,            Icon: FileText,  action: "#profile-bio-section",    actionLabel: "Write bio" },
+    { id: "gaming",  label: "Gaming account linked",done: hasGamingAccount,  Icon: Gamepad2,  action: "#profile-gaming-section", actionLabel: "Link account" },
+    { id: "email",   label: "Email verified",       done: emailVerified,     Icon: Mail,      action: "#profile-basics-section", actionLabel: "Verify email" },
+    { id: "phone",   label: "Phone verified",       done: phoneVerified,     Icon: Phone,     action: "#profile-basics-section", actionLabel: "Verify phone" },
+    { id: "country", label: "Country set",          done: hasCountry,        Icon: MapPin,    action: "#profile-basics-section", actionLabel: "Set country" },
+    { id: "gender",  label: "Gender set",           done: hasGender,         Icon: User,      action: "#profile-basics-section", actionLabel: "Set gender" },
+  ];
+
+  const doneCount = fields.filter((f) => f.done).length;
+  const pct = Math.round((doneCount / fields.length) * 100);
+
+  return { pct, fields, nextCard: null };
+}
+
+export function ProfileCompletionBar({
+  hasProfilePhoto,
+  hasBio,
+  hasCountry,
+  hasGender,
+  hasGamingAccount,
+  emailVerified,
+  phoneVerified,
+  trustFactor,
+  onScrollTo,
+}: {
+  hasProfilePhoto: boolean;
+  hasBio: boolean;
+  hasCountry: boolean;
+  hasGender: boolean;
+  hasGamingAccount: boolean;
+  emailVerified: boolean;
+  phoneVerified: boolean;
+  trustFactor: number;
+  onScrollTo?: (sectionId: string) => void;
+}) {
+  const { pct, fields } = computeProfileCompletion({
+    hasProfilePhoto, hasBio, hasCountry, hasGender, hasGamingAccount, emailVerified, phoneVerified,
+  });
+
+  const card = getTrustCard(trustFactor);
+  const incompleteFields = fields.filter((f) => !f.done);
+
+  const nextTierIndex = TRUST_CARD_TIERS.findIndex((t) => t.id === card.id);
+  const nextTier = TRUST_CARD_TIERS[nextTierIndex + 1] ?? null;
+
+  const barColor =
+    pct >= 85 ? "#f59e0b" :
+    pct >= 57 ? "#60a5fa" :
+    pct >= 28 ? "#fbbf24" :
+    "#9ca3af";
+
+  return (
+    <div
+      className="rounded-2xl px-4 py-4 space-y-3"
+      style={{
+        background: `linear-gradient(135deg, ${barColor}06 0%, rgba(0,0,0,0.25) 100%)`,
+        border: `1px solid ${barColor}20`,
+        boxShadow: `0 0 0 1px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.03)`,
+      }}
+    >
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <span className="text-[11px] font-extrabold uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.55)" }}>
+          Profile Completion
+        </span>
+        <div className="flex items-center gap-2">
+          <TrustCardBadge trustFactor={trustFactor} />
+          <span className="font-black text-white text-lg leading-none tabular-nums">
+            {pct}
+            <span className="text-white/35 font-normal text-xs">%</span>
+          </span>
+        </div>
+      </div>
+
+      {/* Progress bar */}
+      <div
+        className="relative h-3 rounded-full overflow-hidden"
+        style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.07)" }}
+      >
+        <div
+          className="h-full rounded-full transition-all duration-700 relative overflow-hidden"
+          style={{
+            width: `${pct}%`,
+            background: `linear-gradient(90deg, ${barColor}cc, ${barColor})`,
+            boxShadow: `0 0 8px ${barColor}60`,
+          }}
+        >
+          <div
+            className="absolute inset-0"
+            style={{
+              background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.20) 50%, transparent 100%)",
+              animation: "shimmer 2.5s ease-in-out infinite",
+              backgroundSize: "200% 100%",
+            }}
+          />
+        </div>
+      </div>
+
+      {/* Next card nudge */}
+      {nextTier && (
+        <p className="text-[10px]" style={{ color: "rgba(255,255,255,0.35)" }}>
+          Complete your profile to earn a higher Trust Factor and level up to{" "}
+          <span style={{ color: nextTier.color, fontWeight: 800 }}>{nextTier.label}</span>.
+        </p>
+      )}
+
+      {/* Incomplete fields */}
+      {incompleteFields.length > 0 && (
+        <div className="space-y-1.5 pt-1">
+          {incompleteFields.map((f) => (
+            <button
+              key={f.id}
+              className="w-full flex items-center gap-2 text-left group"
+              onClick={() => {
+                if (f.action && onScrollTo) {
+                  const id = f.action.replace("#", "");
+                  onScrollTo(id);
+                }
+              }}
+            >
+              <div
+                className="h-5 w-5 rounded-full border flex items-center justify-center shrink-0"
+                style={{ borderColor: "rgba(255,255,255,0.12)", background: "rgba(255,255,255,0.04)" }}
+              >
+                <f.Icon className="h-2.5 w-2.5" style={{ color: "rgba(255,255,255,0.30)" }} />
+              </div>
+              <span className="flex-1 text-[11px]" style={{ color: "rgba(255,255,255,0.40)" }}>
+                {f.label}
+              </span>
+              <span
+                className="text-[10px] font-bold group-hover:underline flex items-center gap-0.5 transition-colors"
+                style={{ color: barColor }}
+              >
+                {f.actionLabel}
+                <ChevronRight className="h-2.5 w-2.5" />
+              </span>
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* All done */}
+      {incompleteFields.length === 0 && (
+        <p className="text-[10px] font-bold" style={{ color: "#4ade80" }}>
+          ✓ Profile fully complete — great work!
+        </p>
+      )}
     </div>
   );
 }

@@ -33,7 +33,7 @@ import {
   Zap, Target, ChevronDown, ChevronUp, Users, Globe, UserRound,
   Camera, ImagePlus, AlertTriangle, BookOpen, MailCheck, KeyRound, RefreshCw,
 } from "lucide-react";
-import { TrustMeter, ReputationBadges, computeBadges } from "@/components/reputation-badges";
+import { TrustMeter, ReputationBadges, computeBadges, TrustCardBadge, ProfileCompletionBar } from "@/components/reputation-badges";
 import { StreamingAccountsDisplay } from "@/components/streaming-accounts-display";
 
 /* ── PROFILE COMPLETION HELPERS ────────────────────────────── */
@@ -2529,6 +2529,7 @@ export default function Profile() {
                 <h1 className="text-2xl sm:text-3xl font-extrabold text-white uppercase tracking-tight leading-none">
                   {user.name}
                 </h1>
+                <TrustCardBadge trustFactor={trustFactor} />
                 {titleLabel && (
                   <span className="text-[11px] font-black uppercase tracking-widest text-primary border border-primary/40 bg-primary/10 px-2.5 py-0.5 rounded-full transition-all duration-150 hover:brightness-110">
                     {titleLabel}
@@ -2594,6 +2595,18 @@ export default function Profile() {
               </div>
             </div>
             <TrustMeter value={trustFactor} />
+
+            <ProfileCompletionBar
+              hasProfilePhoto={!!user.profilePhotoUrl}
+              hasBio={!!(profile?.bio?.trim())}
+              hasCountry={!!(profile?.country && profile.country !== "any")}
+              hasGender={!!(profile?.gender && profile.gender !== "any")}
+              hasGamingAccount={(profile?.gamingAccounts?.length ?? 0) > 0}
+              emailVerified={emailVerified}
+              phoneVerified={(user as any).phoneVerified ?? false}
+              trustFactor={trustFactor}
+              onScrollTo={scrollToSection}
+            />
 
             {/* Stats row */}
             <div className="grid grid-cols-3 gap-2 sm:gap-3">

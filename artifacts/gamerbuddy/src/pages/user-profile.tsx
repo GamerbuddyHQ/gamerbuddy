@@ -6,7 +6,7 @@ import {
 } from "@/lib/bids-api";
 import { useToast } from "@/hooks/use-toast";
 import { VerifiedBadge } from "@/components/verified-badge";
-import { TrustMeter, ReputationBadges, computeBadges } from "@/components/reputation-badges";
+import { TrustMeter, ReputationBadges, computeBadges, TrustCardBadge } from "@/components/reputation-badges";
 import { StreamingAccountsDisplay } from "@/components/streaming-accounts-display";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -361,6 +361,7 @@ export default function UserProfilePage() {
               {/* Name + verified */}
               <div className="flex items-center gap-2 flex-wrap">
                 <h1 className="text-xl sm:text-2xl font-black text-white truncate">{profile.name}</h1>
+                <TrustCardBadge trustFactor={trustFactor} />
                 <VerifiedBadge
                   idVerified={profile.idVerified}
                   underReview={!profile.idVerified && gamingAccounts.length > 0}

@@ -40,7 +40,7 @@ import {
 } from "lucide-react";
 import { SafetyBanner } from "@/components/safety-banner";
 import { VerifiedBadge } from "@/components/verified-badge";
-import { TrustChip, ReputationBadges, computeBadges } from "@/components/reputation-badges";
+import { TrustChip, ReputationBadges, computeBadges, TrustCardBadge } from "@/components/reputation-badges";
 
 const PLATFORM_ICON: Record<string, string> = {
   PC: "🖥️", PlayStation: "🎮", Xbox: "🟩", "Nintendo Switch": "🕹️",
@@ -1180,6 +1180,7 @@ function BidCard({
                   underReview={!(bid.bidderIdVerified ?? false) && (bid.bidderGamingAccounts?.length ?? 0) > 0}
                   variant="compact"
                 />
+                <TrustCardBadge trustFactor={bid.bidderTrustFactor ?? 50} compact />
                 {isMe && <span className="text-xs text-secondary font-semibold">(You)</span>}
                 {isAccepted && bid.discordUsername && (
                   <span className="text-xs text-indigo-400 font-semibold flex items-center gap-1">

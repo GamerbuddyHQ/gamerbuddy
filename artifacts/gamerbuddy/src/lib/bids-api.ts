@@ -158,6 +158,7 @@ export type GameRequest = {
   isBulkHiring: boolean;
   bulkGamersNeeded: number | null;
   acceptedBidsCount: number;
+  userTrustFactor?: number | null;
   avgBidderTrustFactor?: number | null;
   avgBidderRating?: number | null;
   hasStreamingBidder?: boolean;
