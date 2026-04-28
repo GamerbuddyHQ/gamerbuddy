@@ -2603,7 +2603,7 @@ export default function Profile() {
               hasGender={!!(profile?.gender && profile.gender !== "any")}
               hasGamingAccount={(profile?.gamingAccounts?.length ?? 0) > 0}
               emailVerified={emailVerified}
-              phoneVerified={(user as any).phoneVerified ?? false}
+              phoneVerified={user.phoneVerified ?? false}
               trustFactor={trustFactor}
               onScrollTo={scrollToSection}
             />

@@ -46,6 +46,7 @@ export interface User {
   trustScore?: number;
   trustFactor?: number;
   emailVerified?: boolean;
+  phoneVerified?: boolean;
   isActivated?: boolean;
   activationRegion?: string | null;
   createdAt: string;

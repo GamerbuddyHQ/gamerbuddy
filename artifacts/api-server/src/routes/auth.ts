@@ -53,6 +53,7 @@ function formatUser(user: DbUser) {
     gender: user.gender ?? null,
     gamerbuddyId: user.gamerbuddyId ?? null,
     emailVerified: user.emailVerified ?? false,
+    phoneVerified: user.phoneVerified ?? false,
     isActivated: user.isActivated ?? false,
     activationRegion: user.activationRegion ?? null,
     // toIsoRequired handles both Date objects and ISO strings from the DB driver
