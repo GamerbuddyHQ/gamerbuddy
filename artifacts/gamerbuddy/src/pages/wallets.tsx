@@ -322,7 +322,7 @@ export default function WalletsPage() {
                 <ShieldCheck className="h-3 w-3 shrink-0" /> One-Time Activation Fee
               </div>
               <p className="text-muted-foreground/70 leading-relaxed">
-                To keep Player4Hire safe and enjoyable for real gamers, we charge a small one-time activation fee. Some bad actors create fake or bot accounts to abuse the platform — this fee helps us greatly reduce spam and maintain a high-quality, trustworthy community.
+                Applies to <strong className="text-foreground/70">both Hirers and Gamers</strong>. To keep Player4Hire safe and enjoyable for real gamers, we charge a small one-time activation fee. Some bad actors create fake or bot accounts to abuse the platform — this fee helps us greatly reduce spam and maintain a high-quality, trustworthy community.
               </p>
               <ul className="space-y-0.5 text-muted-foreground/60">
                 <li>🌍 <strong className="text-foreground/70">Global:</strong> $5 USD (one-time only)</li>

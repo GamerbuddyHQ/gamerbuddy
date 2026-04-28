@@ -137,8 +137,8 @@ const POPULAR_GAMES = [
 ];
 
 const MIN_RATES = {
-  india: { perHour: 200, currency: "INR", symbol: "₹" },
-  international: { perHour: 5, currency: "USD", symbol: "$" },
+  india: { minFlat: 200, currency: "INR", symbol: "₹" },
+  international: { minFlat: 5, currency: "USD", symbol: "$" },
 } as const;
 
 export default function PostRequest() {
@@ -682,7 +682,7 @@ export default function PostRequest() {
                     <div className="text-muted-foreground/70">
                       Gamers bid a flat amount to complete your quest.{" "}
                       <span className={`font-black ${hirerRegion === "india" ? "text-amber-300" : "text-green-300"}`}>
-                        {minRate.symbol}{minRate.perHour.toLocaleString()} {minRate.currency} minimum
+                        {minRate.symbol}{minRate.minFlat.toLocaleString()} {minRate.currency} minimum per objective
                       </span>
                     </div>
                   </div>

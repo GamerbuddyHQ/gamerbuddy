@@ -32,7 +32,7 @@ const PHASES = [
       {
         icon: Zap,
         title: "One-Time Account Activation Fee",
-        desc: "To keep Player4Hire safe and enjoyable for real gamers, a small one-time fee is charged after verification — 🌍 $5 for Global, 🇮🇳 ₹149 for India. This protects against fake/bot accounts and spam, keeping the community high-quality and trustworthy. Paid once only — you'll never be charged again. ❤️",
+        desc: "Applies to both Hirers AND Gamers. After your gaming account is verified, a small one-time fee unlocks posting, bidding, and hiring — 🌍 $5 Global · 🇮🇳 ₹149 India. Paid once only, never charged again. Protects against fake/bot accounts and keeps the community high-quality and trustworthy. ❤️",
       },
       {
         icon: Hash,
@@ -46,8 +46,8 @@ const PHASES = [
       },
       {
         icon: Globe,
-        title: "Regional Minimum Hiring Fee",
-        desc: "₹200 per hour for India, $5 USD per hour for global. Enforced on every request — gamers can bid at or above the floor, never below.",
+        title: "Objective-Based Minimum Bid",
+        desc: "₹200 per objective (India) · $5 USD per objective (Global). Hirers post a fixed budget for a specific objective — gamers bid on it, session ends when the objective is complete. No hourly billing. Gamers cannot bid below the regional floor.",
       },
       {
         icon: Gamepad2,
@@ -255,7 +255,7 @@ export default function Roadmap() {
           </span>
         </div>
         <p className="text-sm sm:text-[15px] text-foreground/80 leading-[1.75]">
-          <strong className="text-foreground">Phase 1 is fully live.</strong> User registration with 24–48hr verification, one-time account activation fee (🌍 $5 Global · 🇮🇳 ₹149 India — once only), unique GB-XXXXXX IDs, profile photos with anti-AI enforcement, regional minimum fees (₹200/hr India · $5/hr global), request posting &amp; bidding, in-app messaging, dual wallets with 10% platform fee, manual payouts ($100 threshold), reviews &amp; Trust Factor, connected gaming accounts display, optional gender filter, Community tab with voting, full Community Guidelines, and a professional 7-section Disclaimer.
+          <strong className="text-foreground">Phase 1 is fully live.</strong> User registration with 24–48hr verification, one-time account activation fee (🌍 $5 Global · 🇮🇳 ₹149 India — once only), unique GB-XXXXXX IDs, profile photos with anti-AI enforcement, objective-based minimum bid (₹200 India · $5 Global per objective), request posting &amp; bidding, in-app messaging, dual wallets with 10% platform fee, manual payouts ($100 threshold), reviews &amp; Trust Factor, connected gaming accounts display, optional gender filter, Community tab with voting, full Community Guidelines, and a professional 7-section Disclaimer.
         </p>
         <p className="text-sm text-muted-foreground/60 leading-[1.75]">
           We're now building Phase 2 — tournaments, bulk hiring (3–100 gamers), automatic payouts, and advanced real-time features. Your Community votes directly shape what gets prioritised next. 🚀

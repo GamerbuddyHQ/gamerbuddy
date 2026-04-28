@@ -56,7 +56,7 @@ const SECTIONS = [
     icon: Zap,
     iconColor: "text-amber-400",
     content:
-      "To keep Player4Hire safe and enjoyable for real gamers, we charge a small one-time activation fee after a user's gaming account is verified. Unfortunately, some bad actors create fake or bot accounts to abuse the platform. This small fee helps us greatly reduce spam and maintain a high-quality, trustworthy community. Global: $5 USD (one-time only). India: ₹149 (one-time only). This is a one-time payment — users will not be charged again. This fee is non-refundable and is not held in the user's wallets. Thank you for understanding and for helping us build a better gaming community together.",
+      "This fee applies to ALL users — both Hirers and Gamers. To keep Player4Hire safe and enjoyable for real gamers, we charge a small one-time activation fee after a user's gaming account is verified. Unfortunately, some bad actors create fake or bot accounts to abuse the platform. This small fee helps us greatly reduce spam and maintain a high-quality, trustworthy community. Global: $5 USD (one-time only). India: ₹149 (one-time only). This is a one-time payment — users will not be charged again. This fee is non-refundable and is not held in the user's wallets. Thank you for understanding and for helping us build a better gaming community together.",
   },
 ];
 
