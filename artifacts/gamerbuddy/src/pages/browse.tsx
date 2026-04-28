@@ -99,7 +99,7 @@ function RequestCardSkeleton() {
       <div className="h-[3px] w-full bg-primary/10" />
       <div className="flex">
         <div className="w-[5px] shrink-0 bg-primary/15" />
-        <div className="flex-1 px-6 py-9 sm:px-9 sm:py-10 md:px-11 md:py-11">
+        <div className="flex-1 px-4 py-5 sm:px-9 sm:py-10 md:px-11 md:py-11">
           <div className="flex items-start gap-7 sm:gap-9">
             {/* Avatar placeholder */}
             <Skeleton className="hidden sm:block w-[68px] h-[68px] md:w-20 md:h-20 rounded-2xl shrink-0 mt-1" />
@@ -454,7 +454,7 @@ function RequestCard({ req }: { req: GameRequest }) {
         <div className="w-[5px] shrink-0" style={{ background: `linear-gradient(180deg, ${skill.bar} 0%, ${skill.bar}22 100%)` }} />
 
         {/* Card body */}
-        <div className="flex-1 px-6 py-9 sm:px-9 sm:py-10 md:px-11 md:py-11">
+        <div className="flex-1 px-4 py-5 sm:px-9 sm:py-10 md:px-11 md:py-11">
           <div className="flex flex-col sm:flex-row sm:items-start gap-7 sm:gap-9">
 
             {/* Game avatar — desktop only */}
@@ -934,9 +934,9 @@ export default function Browse() {
               Live Marketplace
             </span>
           </div>
-          <h1 className="text-4xl md:text-5xl font-extrabold uppercase tracking-tight text-foreground leading-none" style={{ letterSpacing: "-0.02em" }}>
-            <span className="inline-flex items-center gap-3">
-              <Swords className="h-9 w-9 md:h-11 md:w-11 text-primary shrink-0" />
+          <h1 className="text-2xl sm:text-4xl md:text-5xl font-extrabold uppercase tracking-tight text-foreground leading-none" style={{ letterSpacing: "-0.02em" }}>
+            <span className="inline-flex items-center gap-2.5">
+              <Swords className="h-7 w-7 sm:h-9 sm:w-9 md:h-11 md:w-11 text-primary shrink-0" />
               Browse Requests
             </span>
           </h1>
@@ -1001,7 +1001,7 @@ export default function Browse() {
       >
         {/* ── Panel header ── */}
         <div
-          className="flex items-center justify-between px-6 py-4 border-b"
+          className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b"
           style={{
             borderColor: isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.08)",
             background: hasFilters ? "rgba(161,255,79,0.07)" : isDark ? "rgba(255,255,255,0.025)" : "rgba(0,0,0,0.02)",
@@ -1040,7 +1040,7 @@ export default function Browse() {
 
         {/* ── Search + platform row ── */}
         <div
-          className="grid grid-cols-1 sm:grid-cols-3 gap-3 px-6 py-6 border-b"
+          className="grid grid-cols-1 sm:grid-cols-3 gap-3 px-4 sm:px-6 py-4 sm:py-6 border-b"
           style={{
             borderColor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.07)",
             background: isDark ? "rgba(0,0,0,0.14)" : "rgba(0,0,0,0.025)",
@@ -1069,7 +1069,7 @@ export default function Browse() {
 
         {/* ── Sort row ── */}
         <div
-          className="flex flex-col sm:flex-row sm:items-center gap-3 px-6 py-6 border-b"
+          className="flex flex-col sm:flex-row sm:items-center gap-3 px-4 sm:px-6 py-4 sm:py-6 border-b"
           style={{
             borderColor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.07)",
             background: isDark ? "rgba(0,0,0,0.18)" : "rgba(0,0,0,0.02)",
@@ -1107,7 +1107,7 @@ export default function Browse() {
 
         {/* ── Experience level row ── */}
         <div
-          className="flex flex-col sm:flex-row sm:items-center gap-3 px-6 py-6 border-b"
+          className="flex flex-col sm:flex-row sm:items-center gap-3 px-4 sm:px-6 py-4 sm:py-6 border-b"
           style={{
             borderColor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.07)",
             background: isDark ? "rgba(0,0,0,0.12)" : "rgba(0,0,0,0.015)",
@@ -1148,23 +1148,22 @@ export default function Browse() {
 
         {/* ── Nation + Gender filter row ── */}
         <div
-          className="flex flex-col sm:flex-row sm:items-center gap-4 px-6 py-6 border-b"
+          className="flex flex-col sm:flex-row sm:items-start gap-3 px-4 sm:px-6 py-4 sm:py-6 border-b"
           style={{
             borderColor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.07)",
             background: isDark ? "rgba(0,0,0,0.16)" : "rgba(0,0,0,0.02)",
           }}
         >
-          <span className="text-[11px] font-extrabold uppercase tracking-widest shrink-0 sm:w-16 text-muted-foreground/45">
+          <span className="text-[11px] font-extrabold uppercase tracking-widest shrink-0 sm:w-16 sm:pt-2.5 text-muted-foreground/45">
             Nation
           </span>
-          <div className="flex flex-wrap gap-3 items-center flex-1">
-            <div className="w-full sm:w-60">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 flex-1">
+            <div>
+              <span className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground/40 block mb-1.5">Country</span>
               <CountryCombobox value={countryFilter} onValueChange={setCountryFilter} />
             </div>
-            <span className="text-[11px] font-extrabold uppercase tracking-widest text-muted-foreground/45 shrink-0">
-              Gender
-            </span>
-            <div className="w-full sm:w-48">
+            <div>
+              <span className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground/40 block mb-1.5">Gender</span>
               <GenderSelect value={genderFilter} onValueChange={setGenderFilter} />
             </div>
           </div>
@@ -1172,7 +1171,7 @@ export default function Browse() {
 
         {/* ── Toggle filters row ── */}
         <div
-          className="flex flex-col sm:flex-row sm:items-center gap-3 px-6 py-6"
+          className="flex flex-col sm:flex-row sm:items-center gap-3 px-4 sm:px-6 py-4 sm:py-6"
           style={{ background: isDark ? "rgba(0,0,0,0.12)" : "rgba(0,0,0,0.015)" }}
         >
           <span className="text-[11px] font-extrabold uppercase tracking-widest shrink-0 sm:w-16 text-muted-foreground/45">
@@ -1219,7 +1218,7 @@ export default function Browse() {
             }}
           >
             {/* Section header: label + count + result summary */}
-            <div className="flex items-center gap-2 px-6 pt-4 pb-2.5">
+            <div className="flex items-center gap-2 px-4 sm:px-6 pt-4 pb-2.5">
               <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse shrink-0" />
               <span
                 className="text-[10px] font-extrabold uppercase tracking-[0.14em] shrink-0"
@@ -1249,7 +1248,7 @@ export default function Browse() {
             </div>
 
             {/* Tag chips */}
-            <div className="flex flex-wrap gap-2 px-6 pb-5">
+            <div className="flex flex-wrap gap-2 px-4 sm:px-6 pb-4 sm:pb-5">
               {activeTags.map((tag, idx) => (
                 <button
                   key={tag.id}

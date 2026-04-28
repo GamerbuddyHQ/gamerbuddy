@@ -146,12 +146,12 @@ export default function Home() {
           </div>
 
           {/* Headline */}
-          <h1 className="font-black tracking-tight leading-[1.02] mb-5 px-6 sm:px-8 overflow-visible">
-            <span className="block text-white text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-[6rem]">
+          <h1 className="font-black tracking-tight leading-[1.02] mb-5 px-3 sm:px-8 overflow-visible">
+            <span className="block text-white text-4xl sm:text-5xl md:text-7xl lg:text-8xl xl:text-[6rem]">
               {t.home.headline1}
             </span>
             <span
-              className="block text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-[6rem]"
+              className="block text-4xl sm:text-5xl md:text-7xl lg:text-8xl xl:text-[6rem]"
               style={{
                 background: "linear-gradient(135deg, #D4FF00 0%, #D4FF00 55%, #BBDF00 100%)",
                 WebkitBackgroundClip: "text",

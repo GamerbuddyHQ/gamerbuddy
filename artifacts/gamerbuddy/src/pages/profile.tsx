@@ -2453,13 +2453,13 @@ function FlagStatusCard() {
             onChange={e => setDisputeInput(e.target.value)}
             maxLength={2000}
           />
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <span className="text-xs text-muted-foreground">{disputeInput.length}/2000 characters · minimum 20</span>
             <Button
               size="sm"
               disabled={disputeInput.trim().length < 20 || submitDispute.isPending}
               onClick={() => submitDispute.mutate()}
-              className="gap-1.5"
+              className="gap-1.5 self-end sm:self-auto"
             >
               {submitDispute.isPending ? (
                 <><RefreshCw className="w-3.5 h-3.5 animate-spin" /> Submitting…</>

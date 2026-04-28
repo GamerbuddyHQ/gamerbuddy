@@ -520,7 +520,8 @@ export default function AdminDashboard() {
             Tabs
         ════════════════════════════════════════════════ */}
         <div className="px-4 md:px-6 mt-5">
-          <div className="flex flex-wrap gap-1 bg-muted/40 p-1 rounded-xl w-fit border border-border">
+          <div className="overflow-x-auto pb-0.5">
+          <div className="flex gap-1 bg-muted/40 p-1 rounded-xl w-max sm:w-fit border border-border">
             {([
               { key: "withdrawals",      label: "Payouts",          icon: <DollarSign className="w-3.5 h-3.5" /> },
               { key: "verifications",    label: "Verifications",    icon: <BadgeCheck className="w-3.5 h-3.5" /> },
@@ -529,7 +530,7 @@ export default function AdminDashboard() {
               { key: "flagged-accounts", label: "Flagged Accounts", icon: <ShieldAlert className="w-3.5 h-3.5" /> },
             ] as const).map(tab => (
               <button key={tab.key} onClick={() => setActiveTab(tab.key)}
-                className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all flex items-center gap-1.5 ${
+                className={`px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all flex items-center gap-1.5 whitespace-nowrap ${
                   activeTab === tab.key
                     ? "bg-primary text-primary-foreground shadow-sm"
                     : "text-muted-foreground hover:text-foreground"
@@ -552,6 +553,7 @@ export default function AdminDashboard() {
                 })()}
               </button>
             ))}
+          </div>
           </div>
         </div>
 
@@ -1151,23 +1153,23 @@ export default function AdminDashboard() {
           {/* ── Users Tab ── */}
           {activeTab === "users" && (
             <div className="space-y-4">
-              <div className="flex items-center justify-between flex-wrap gap-2">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <h2 className="font-bold text-foreground flex items-center gap-2">
                   <Users className="w-4 h-4 text-primary" />
                   All Users
                   <span className="text-xs text-muted-foreground font-normal">({usersData?.users.length ?? 0} total)</span>
                 </h2>
                 <div className="flex items-center gap-2">
-                  <div className="relative">
+                  <div className="relative flex-1 sm:flex-none">
                     <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
                     <input
                       value={userSearch}
                       onChange={e => setUserSearch(e.target.value)}
                       placeholder="Search by name, email, GB-ID…"
-                      className="pl-8 pr-3 py-1.5 text-sm bg-background border border-border rounded-lg focus:outline-none focus:border-primary/60 w-56"
+                      className="pl-8 pr-3 py-1.5 text-sm bg-background border border-border rounded-lg focus:outline-none focus:border-primary/60 w-full sm:w-56"
                     />
                   </div>
-                  <Button variant="ghost" size="sm" onClick={() => refetchUsers()} className="gap-1 text-xs text-muted-foreground">
+                  <Button variant="ghost" size="sm" onClick={() => refetchUsers()} className="gap-1 text-xs text-muted-foreground shrink-0">
                     <RefreshCw className="w-3.5 h-3.5" /> Refresh
                   </Button>
                 </div>
