@@ -9,6 +9,7 @@ import { awardTrustPoints } from "../trust-score";
 import { validate, sanitize, UpdateProfileSchema, PostQuestSchema } from "../lib/validate";
 import { verifyLimiter } from "../lib/rate-limit";
 import { ObjectStorageService } from "../lib/objectStorage";
+import { createNotification } from "../notifications-helper";
 
 const objectStorageService = new ObjectStorageService();
 
@@ -719,6 +720,92 @@ router.post("/users/:id/vote", requireAuth, async (req, res): Promise<void> => {
   await recalculateTrustFactor(profileId);
 
   res.json({ success: true, action: "added", myVote: voteType });
+});
+
+// ── POST /users/me/dispute-flag — user submits a dispute against their account flag
+router.post("/users/me/dispute-flag", requireAuth, async (req, res): Promise<void> => {
+  const user = req.user!;
+
+  const [flaggedUser] = await db
+    .select({
+      accountFlagStatus:  usersTable.accountFlagStatus,
+      accountFlagReason:  usersTable.accountFlagReason,
+      hasDisputedBefore:  usersTable.hasDisputedBefore,
+      disputeSubmittedAt: usersTable.disputeSubmittedAt,
+    })
+    .from(usersTable)
+    .where(eq(usersTable.id, user.id));
+
+  if (!flaggedUser) { res.status(404).json({ error: "User not found" }); return; }
+
+  if (!flaggedUser.accountFlagStatus || flaggedUser.accountFlagStatus === "resolved") {
+    res.status(400).json({ error: "Your account is not currently flagged" });
+    return;
+  }
+
+  if (flaggedUser.hasDisputedBefore) {
+    res.status(403).json({ error: "You have already used your one allowed dispute for a previous flag. This flag goes directly to admin review." });
+    return;
+  }
+
+  if (flaggedUser.disputeSubmittedAt) {
+    res.status(409).json({ error: "You have already submitted a dispute for this flag. Please wait for admin review." });
+    return;
+  }
+
+  const { disputeText } = req.body as { disputeText?: string };
+  if (!disputeText || disputeText.trim().length < 20) {
+    res.status(400).json({ error: "Please provide a detailed explanation (at least 20 characters)" });
+    return;
+  }
+
+  const now = new Date();
+  await db.update(usersTable)
+    .set({
+      accountFlagStatus:  "disputed",
+      disputeText:        disputeText.trim(),
+      disputeSubmittedAt: now,
+    })
+    .where(eq(usersTable.id, user.id));
+
+  // Notify the user that their dispute was received
+  void createNotification({
+    userId: user.id,
+    type:   "dispute_submitted",
+    title:  "Dispute Submitted",
+    message: "Your dispute has been received. An admin will review your account and the flag reason within 48 hours. You will be notified of the outcome.",
+    link:   "/profile/settings",
+  });
+
+  res.json({ success: true, message: "Your dispute has been submitted. We will review it within 48 hours." });
+});
+
+// ── GET /users/me/flag-status — user checks their flag status
+router.get("/users/me/flag-status", requireAuth, async (req, res): Promise<void> => {
+  const user = req.user!;
+  const [data] = await db
+    .select({
+      accountFlagStatus:  usersTable.accountFlagStatus,
+      accountFlagReason:  usersTable.accountFlagReason,
+      accountFlaggedAt:   usersTable.accountFlaggedAt,
+      disputeText:        usersTable.disputeText,
+      disputeSubmittedAt: usersTable.disputeSubmittedAt,
+      hasDisputedBefore:  usersTable.hasDisputedBefore,
+    })
+    .from(usersTable)
+    .where(eq(usersTable.id, user.id));
+
+  if (!data) { res.status(404).json({ error: "User not found" }); return; }
+  res.json({
+    isFlagged:          !!data.accountFlagStatus && data.accountFlagStatus !== "resolved",
+    accountFlagStatus:  data.accountFlagStatus,
+    accountFlagReason:  data.accountFlagReason,
+    accountFlaggedAt:   data.accountFlaggedAt?.toISOString() ?? null,
+    disputeText:        data.disputeText,
+    disputeSubmittedAt: data.disputeSubmittedAt?.toISOString() ?? null,
+    hasDisputedBefore:  data.hasDisputedBefore,
+    canDispute:         !!data.accountFlagStatus && data.accountFlagStatus !== "resolved" && !data.hasDisputedBefore && !data.disputeSubmittedAt,
+  });
 });
 
 export default router;

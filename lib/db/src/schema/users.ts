@@ -33,6 +33,13 @@ export const usersTable = pgTable("users", {
   activationPaidAt: timestamp("activation_paid_at"),
   strikes: integer("strikes").notNull().default(0),
   flaggedForBan: boolean("flagged_for_ban").notNull().default(false),
+  accountFlagReason: text("account_flag_reason"),
+  accountFlagStatus: text("account_flag_status"),
+  accountFlaggedAt: timestamp("account_flagged_at"),
+  disputeText: text("dispute_text"),
+  disputeSubmittedAt: timestamp("dispute_submitted_at"),
+  hasDisputedBefore: boolean("has_disputed_before").notNull().default(false),
+  permanentBan: boolean("permanent_ban").notNull().default(false),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 

@@ -1,7 +1,7 @@
 import { Router, type IRouter } from "express";
 import { db, gameRequestsTable, walletsTable, usersTable, bidsTable, reviewsTable, streamingAccountsTable, gamingAccountsTable, questEntriesTable, platformFeesTable } from "@workspace/db";
 import { awardTrustPoints } from "../trust-score";
-import { eq, desc, and, sql, inArray, gte, count, gt } from "drizzle-orm";
+import { eq, desc, and, sql, inArray, gte, count, gt, or } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
 import { createNotification, sendEmailNotification } from "../notifications-helper";
 import { recalculateTrustFactor } from "../trust-factor";
@@ -1123,42 +1123,132 @@ router.post("/requests/:id/reviews", requireAuth, async (req, res): Promise<void
     wouldPlayAgain: wpa,
   }).returning();
 
-  // ── Auto fake-review detection ───────────────────────────────────────
-  // Check 3 suspicious patterns asynchronously — don't block response
+  // ── Smart fake-review detection (5 patterns) ─────────────────────────
+  // Runs async — never blocks the review response
   void (async () => {
     try {
       const trimmedComment = comment?.trim() ?? "";
-      const now = new Date();
-      const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+      const now           = new Date();
+      const sevenDaysAgo  = new Date(now.getTime() - 7  * 24 * 60 * 60 * 1000);
       const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
 
-      const [recentReviewCount, reviewerSessions, duplicateComment] = await Promise.all([
-        // Pattern 1: 3+ reviews submitted by same reviewer in last 24 hours
-        db.select({ cnt: count() }).from(reviewsTable)
-          .where(and(eq(reviewsTable.reviewerId, user.id), gte(reviewsTable.createdAt, oneDayAgo))),
-        // Pattern 2: reviewer has 0 completed sessions as gamer
-        db.select({ cnt: count() }).from(bidsTable)
-          .innerJoin(gameRequestsTable, eq(bidsTable.requestId, gameRequestsTable.id))
-          .where(and(eq(bidsTable.bidderId, user.id), eq(bidsTable.status, "accepted"), inArray(gameRequestsTable.status, ["completed", "payment_released"]))),
-        // Pattern 3: identical comment from same reviewer in last 30 days
+      // Fetch reviewer + reviewee account details to avoid extra round-trips
+      const [[reviewer], [reviewee]] = await Promise.all([
+        db.select({ id: usersTable.id, createdAt: usersTable.createdAt }).from(usersTable).where(eq(usersTable.id, user.id)),
+        db.select({ id: usersTable.id, createdAt: usersTable.createdAt }).from(usersTable).where(eq(usersTable.id, revieweeId)),
+      ]);
+
+      const [
+        sessionBetweenUsers,   // completed session specifically between these two
+        duplicateComment,      // identical text reused
+        revieweeRecentStars,   // reviewee's star count in last 7 days
+        reverseReview,         // B→A 5★ already exists (review swap)
+      ] = await Promise.all([
+        // Pattern A: no completed session between THESE two users specifically
+        db.select({ id: gameRequestsTable.id }).from(gameRequestsTable)
+          .innerJoin(bidsTable, eq(bidsTable.requestId, gameRequestsTable.id))
+          .where(and(
+            inArray(gameRequestsTable.status, ["completed", "payment_released"]),
+            eq(bidsTable.status, "accepted"),
+            or(
+              and(eq(gameRequestsTable.userId, user.id),    eq(bidsTable.bidderId, revieweeId)),
+              and(eq(gameRequestsTable.userId, revieweeId), eq(bidsTable.bidderId, user.id))
+            )
+          ))
+          .limit(1),
+
+        // Pattern C: identical comment text from same reviewer in last 30 days
         trimmedComment.length >= 10
           ? db.select({ id: reviewsTable.id }).from(reviewsTable)
               .where(and(eq(reviewsTable.reviewerId, user.id), eq(reviewsTable.comment, trimmedComment), gte(reviewsTable.createdAt, thirtyDaysAgo), gt(reviewsTable.id, 0)))
               .limit(2)
-          : Promise.resolve([]),
+          : Promise.resolve([] as {id: number}[]),
+
+        // Pattern D: reviewee went from 0 → 5+ five-star reviews in 7 days
+        db.select({ cnt: count() }).from(reviewsTable)
+          .where(and(eq(reviewsTable.revieweeId, revieweeId), gte(reviewsTable.rating, 9), gte(reviewsTable.createdAt, sevenDaysAgo))),
+
+        // Pattern E: B already gave A 5★ (review swap check — A is reviewer, B is reviewee)
+        rating >= 9
+          ? db.select({ id: reviewsTable.id, rating: reviewsTable.rating }).from(reviewsTable)
+              .where(and(eq(reviewsTable.reviewerId, revieweeId), eq(reviewsTable.revieweeId, user.id), gte(reviewsTable.rating, 9)))
+              .limit(1)
+          : Promise.resolve([] as {id: number; rating: number}[]),
       ]);
 
-      const reasons: string[] = [];
-      if (Number(recentReviewCount[0]?.cnt ?? 0) >= 3) reasons.push("3+ reviews from same reviewer in 24h");
-      if (Number(reviewerSessions[0]?.cnt ?? 0) === 0) reasons.push("reviewer has no completed sessions");
-      if ((duplicateComment as {id: number}[]).length >= 2) reasons.push("identical comment text submitted before");
+      const reviewerAge   = reviewer ? now.getTime() - new Date(reviewer.createdAt).getTime() : Infinity;
+      const revieweeAge   = reviewee ? now.getTime() - new Date(reviewee.createdAt).getTime() : Infinity;
+      const bothNewAccounts = reviewerAge < 7 * 24 * 60 * 60 * 1000 && revieweeAge < 7 * 24 * 60 * 60 * 1000;
 
-      if (reasons.length > 0) {
+      const reviewReasons: string[] = [];
+      const accountReasons: string[] = [];
+
+      // Pattern A: no completed session between these two users
+      if (sessionBetweenUsers.length === 0) {
+        reviewReasons.push("no completed session exists between reviewer and reviewee");
+        accountReasons.push("Reviewed a user they never had a completed session with");
+      }
+
+      // Pattern B: account < 48 hours old
+      if (reviewerAge < 48 * 60 * 60 * 1000) {
+        reviewReasons.push("reviewer account created less than 48 hours ago");
+        accountReasons.push("Account under 48h old — submitted review immediately");
+      }
+
+      // Pattern C: identical comment text
+      if ((duplicateComment as {id: number}[]).length >= 2) {
+        reviewReasons.push("identical comment text submitted in a previous review");
+        accountReasons.push("Reused identical review comment text");
+      }
+
+      // Pattern D: reviewee 0 → 5+ five-star reviews in 7 days
+      if (Number(revieweeRecentStars[0]?.cnt ?? 0) >= 5) {
+        reviewReasons.push("reviewee received 5+ high ratings within 7 days");
+        accountReasons.push("Received 5+ five-star reviews within 7 days (review bomb suspected)");
+      }
+
+      // Pattern E: review swap — both gave each other 5★ and both accounts are new
+      if (reverseReview.length > 0 && bothNewAccounts) {
+        reviewReasons.push("suspected review swap — mutual 5★ exchange between new accounts");
+        accountReasons.push("Suspected review swap — mutual five-star exchange with new account");
+      }
+
+      // Flag the review if any review-level reason triggered
+      if (reviewReasons.length > 0) {
         await db.update(reviewsTable)
-          .set({ isFlagged: true, flagReason: reasons.join(" · "), flaggedAt: now })
+          .set({ isFlagged: true, flagReason: reviewReasons.join(" · "), flaggedAt: now })
           .where(eq(reviewsTable.id, review.id));
       }
-    } catch (_) { /* non-critical — don't break review submission */ }
+
+      // Flag the reviewer's account if any account-level reason triggered
+      if (accountReasons.length > 0) {
+        // Only flag if not already under review or disputed
+        const [existing] = await db.select({ accountFlagStatus: usersTable.accountFlagStatus, hasDisputedBefore: usersTable.hasDisputedBefore })
+          .from(usersTable).where(eq(usersTable.id, user.id));
+
+        const alreadyFlagged = existing?.accountFlagStatus === "under_review" || existing?.accountFlagStatus === "disputed";
+
+        if (!alreadyFlagged) {
+          const combinedReason = accountReasons.join(" · ");
+          await db.update(usersTable)
+            .set({
+              accountFlagReason:  combinedReason,
+              accountFlagStatus:  "under_review",
+              accountFlaggedAt:   now,
+            })
+            .where(eq(usersTable.id, user.id));
+
+          // Notify the user that their account has been flagged
+          void createNotification({
+            userId: user.id,
+            type:   "account_flagged",
+            title:  "Your Account Has Been Flagged",
+            message: `Our trust system detected suspicious review activity: ${combinedReason}. You may submit a dispute from your profile settings. An admin will review your account within 48 hours.`,
+            link:   "/profile/settings",
+          });
+        }
+      }
+    } catch (_) { /* non-critical — never block review submission */ }
   })();
 
   // Recalculate trust factor from scratch (rating quality + session experience +

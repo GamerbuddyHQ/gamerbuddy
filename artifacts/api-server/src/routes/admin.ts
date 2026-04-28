@@ -9,6 +9,7 @@ import { eq, desc, gt, or, isNotNull, sql, and, gte, inArray, not, count, sum, l
 import { round2, recordTransaction } from "./wallets";
 import { requireAdminAuth } from "./admin-auth";
 import { toIso, toIsoRequired } from "../lib/dates";
+import { createNotification } from "../notifications-helper";
 
 const router: IRouter = Router();
 
@@ -936,6 +937,222 @@ router.delete(
     if (isNaN(id)) { res.status(400).json({ error: "Invalid id" }); return; }
     await db.delete(reviewsTable).where(eq(reviewsTable.id, id));
     res.json({ success: true });
+  },
+);
+
+// ══════════════════════════════════════════════════════════════════════════════
+//  FLAGGED ACCOUNTS — account-level trust & safety actions
+// ══════════════════════════════════════════════════════════════════════════════
+
+// ── GET /admin/flagged-accounts ───────────────────────────────────────────
+router.get(
+  "/admin/flagged-accounts",
+  requireAdminAuth,
+  async (_req, res): Promise<void> => {
+    try {
+      const flagged = await db
+        .select({
+          id:                 usersTable.id,
+          name:               usersTable.name,
+          email:              usersTable.email,
+          gamerbuddyId:       usersTable.gamerbuddyId,
+          idVerified:         usersTable.idVerified,
+          trustFactor:        usersTable.trustFactor,
+          trustScore:         usersTable.trustScore,
+          strikes:            usersTable.strikes,
+          flaggedForBan:      usersTable.flaggedForBan,
+          communityBanned:    usersTable.communityBanned,
+          permanentBan:       usersTable.permanentBan,
+          accountFlagReason:  usersTable.accountFlagReason,
+          accountFlagStatus:  usersTable.accountFlagStatus,
+          accountFlaggedAt:   usersTable.accountFlaggedAt,
+          disputeText:        usersTable.disputeText,
+          disputeSubmittedAt: usersTable.disputeSubmittedAt,
+          hasDisputedBefore:  usersTable.hasDisputedBefore,
+          emailVerified:      usersTable.emailVerified,
+          createdAt:          usersTable.createdAt,
+        })
+        .from(usersTable)
+        .where(inArray(usersTable.accountFlagStatus, ["under_review", "disputed", "resolved"]))
+        .orderBy(desc(usersTable.accountFlaggedAt));
+
+      // Enrich each flagged user with session counts + profile completion
+      const userIds = flagged.map(u => u.id);
+      const [gamerSessions, hirerSessions, gamingAccounts] = userIds.length > 0 ? await Promise.all([
+        db.select({ gamerId: bidsTable.bidderId, cnt: count() })
+          .from(bidsTable)
+          .innerJoin(gameRequestsTable, eq(bidsTable.requestId, gameRequestsTable.id))
+          .where(and(inArray(bidsTable.bidderId, userIds), eq(bidsTable.status, "accepted"), inArray(gameRequestsTable.status, ["completed", "payment_released"])))
+          .groupBy(bidsTable.bidderId),
+        db.select({ hirerId: gameRequestsTable.userId, cnt: count() })
+          .from(gameRequestsTable)
+          .where(and(inArray(gameRequestsTable.userId, userIds), inArray(gameRequestsTable.status, ["completed", "payment_released"])))
+          .groupBy(gameRequestsTable.userId),
+        db.select({ userId: sql<number>`user_id`, cnt: count() })
+          .from(sql`gaming_accounts`)
+          .where(sql`user_id = ANY(${userIds})`)
+          .groupBy(sql`user_id`),
+      ]) : [[], [], []];
+
+      const gamerMap = new Map(gamerSessions.map(s => [s.gamerId, Number(s.cnt)]));
+      const hirerMap = new Map(hirerSessions.map(s => [s.hirerId, Number(s.cnt)]));
+      const gaMap    = new Map(gamingAccounts.map(g => [Number(g.userId), Number(g.cnt)]));
+
+      const result = flagged.map(u => {
+        const tf   = u.trustFactor ?? 50;
+        const tier = tf >= 76 ? "Gold" : tf >= 51 ? "Blue" : tf >= 26 ? "Yellow" : "Grey";
+        const hasGaming   = (gaMap.get(u.id) ?? 0) > 0;
+        const completedF  = [!!u.idVerified, hasGaming, u.emailVerified ?? false].filter(Boolean).length;
+        return {
+          ...u,
+          trustCardTier:   tier,
+          sessionsAsGamer: gamerMap.get(u.id) ?? 0,
+          sessionsAsHirer: hirerMap.get(u.id) ?? 0,
+          createdAt:       toIsoRequired(u.createdAt),
+          accountFlaggedAt: toIso(u.accountFlaggedAt),
+          disputeSubmittedAt: toIso(u.disputeSubmittedAt),
+        };
+      });
+
+      res.json({ flaggedAccounts: result });
+    } catch (err) {
+      console.error("flagged-accounts error:", err);
+      res.status(500).json({ error: "Failed to load flagged accounts" });
+    }
+  },
+);
+
+// ── POST /admin/users/:id/unflag-account ────────────────────────────────
+router.post(
+  "/admin/users/:id/unflag-account",
+  requireAdminAuth,
+  async (req, res): Promise<void> => {
+    const userId = parseInt(req.params.id as string, 10);
+    if (isNaN(userId)) { res.status(400).json({ error: "Invalid userId" }); return; }
+
+    const { adminNote } = req.body as { adminNote?: string };
+
+    const [user] = await db.select({ id: usersTable.id, name: usersTable.name, hasDisputedBefore: usersTable.hasDisputedBefore })
+      .from(usersTable).where(eq(usersTable.id, userId));
+    if (!user) { res.status(404).json({ error: "User not found" }); return; }
+
+    await db.update(usersTable)
+      .set({
+        accountFlagStatus:  "resolved",
+        hasDisputedBefore:  true,   // prevents second dispute on future flags
+        flaggedForBan:      false,
+      })
+      .where(eq(usersTable.id, userId));
+
+    // Notify user of the positive outcome
+    void createNotification({
+      userId,
+      type:    "dispute_resolved",
+      title:   "Account Flag Cleared ✓",
+      message: adminNote?.trim()
+        ? `Good news — your account flag has been reviewed and cleared by our admin team. Note: ${adminNote.trim()}`
+        : "Good news — your account flag has been reviewed and cleared by our admin team. Thank you for your patience.",
+      link: "/profile/settings",
+    });
+
+    req.log.info({ adminAction: "unflag-account", targetUserId: userId }, `Account ${userId} unflagged`);
+    res.json({ success: true, userId, name: user.name });
+  },
+);
+
+// ── POST /admin/users/:id/permanent-ban ──────────────────────────────────
+router.post(
+  "/admin/users/:id/permanent-ban",
+  requireAdminAuth,
+  async (req, res): Promise<void> => {
+    const userId = parseInt(req.params.id as string, 10);
+    if (isNaN(userId)) { res.status(400).json({ error: "Invalid userId" }); return; }
+
+    const { reason } = req.body as { reason?: string };
+
+    const [user] = await db.select({ id: usersTable.id, name: usersTable.name, strikes: usersTable.strikes })
+      .from(usersTable).where(eq(usersTable.id, userId));
+    if (!user) { res.status(404).json({ error: "User not found" }); return; }
+
+    await db.update(usersTable)
+      .set({
+        permanentBan:      true,
+        communityBanned:   true,
+        flaggedForBan:     true,
+        accountFlagStatus: "resolved",
+        strikes:           Math.max(user.strikes ?? 0, 3),
+      })
+      .where(eq(usersTable.id, userId));
+
+    // Notify the banned user
+    void createNotification({
+      userId,
+      type:    "account_flagged",
+      title:   "Account Permanently Banned",
+      message: reason?.trim()
+        ? `Your Player4Hire account has been permanently banned. Reason: ${reason.trim()}. If you believe this is an error, please contact support.`
+        : "Your Player4Hire account has been permanently banned due to repeated Trust & Safety violations. Contact support if you believe this is an error.",
+      link: "/",
+    });
+
+    req.log.info({ adminAction: "permanent-ban", targetUserId: userId, reason }, `User ${userId} permanently banned`);
+    res.json({ success: true, userId, name: user.name });
+  },
+);
+
+// ── POST /admin/flagged-accounts/:userId/resolve-dispute ─────────────────
+// Admin reads a dispute and decides to approve (unflag) or confirm the flag
+router.post(
+  "/admin/flagged-accounts/:userId/resolve-dispute",
+  requireAdminAuth,
+  async (req, res): Promise<void> => {
+    const userId = parseInt(req.params.userId as string, 10);
+    if (isNaN(userId)) { res.status(400).json({ error: "Invalid userId" }); return; }
+
+    const { approve, adminNote } = req.body as { approve?: boolean; adminNote?: string };
+    if (typeof approve !== "boolean") {
+      res.status(400).json({ error: "Body must contain { approve: true | false }" });
+      return;
+    }
+
+    const [user] = await db.select({ id: usersTable.id, name: usersTable.name })
+      .from(usersTable).where(eq(usersTable.id, userId));
+    if (!user) { res.status(404).json({ error: "User not found" }); return; }
+
+    if (approve) {
+      // Dispute approved — clear the flag
+      await db.update(usersTable)
+        .set({ accountFlagStatus: "resolved", flaggedForBan: false, hasDisputedBefore: true })
+        .where(eq(usersTable.id, userId));
+
+      void createNotification({
+        userId,
+        type:    "dispute_resolved",
+        title:   "Dispute Approved — Account Cleared ✓",
+        message: adminNote?.trim()
+          ? `Your dispute was reviewed and approved. Your account flag has been removed. Admin note: ${adminNote.trim()}`
+          : "Your dispute was reviewed and approved. Your account flag has been removed. Thank you for your patience.",
+        link: "/profile/settings",
+      });
+    } else {
+      // Dispute rejected — flag stays; mark hasDisputedBefore so no further disputes
+      await db.update(usersTable)
+        .set({ accountFlagStatus: "under_review", hasDisputedBefore: true })
+        .where(eq(usersTable.id, userId));
+
+      void createNotification({
+        userId,
+        type:    "dispute_resolved",
+        title:   "Dispute Reviewed — Flag Maintained",
+        message: adminNote?.trim()
+          ? `Your dispute was reviewed. After investigation, the account flag has been maintained. Admin note: ${adminNote.trim()}. You may contact support to appeal further.`
+          : "Your dispute was reviewed. After investigation, the account flag has been maintained. Contact support if you wish to appeal further.",
+        link: "/profile/settings",
+      });
+    }
+
+    req.log.info({ adminAction: "resolve-dispute", targetUserId: userId, approve, adminNote }, `Dispute for user ${userId} ${approve ? "approved" : "rejected"}`);
+    res.json({ success: true, userId, name: user.name, approved: approve });
   },
 );
 

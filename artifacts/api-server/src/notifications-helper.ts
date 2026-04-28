@@ -7,7 +7,10 @@ export type NotificationType =
   | "payment_released"
   | "review_received"
   | "session_complete"
-  | "reward_earned";
+  | "reward_earned"
+  | "account_flagged"
+  | "dispute_submitted"
+  | "dispute_resolved";
 
 export async function createNotification(params: {
   userId: number;

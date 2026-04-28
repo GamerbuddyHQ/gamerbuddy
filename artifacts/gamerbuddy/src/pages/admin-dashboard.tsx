@@ -102,6 +102,30 @@ type FlaggedReview = {
   revieweeName: string;
 };
 
+type FlaggedAccount = {
+  id:                 number;
+  name:               string;
+  email:              string;
+  gamerbuddyId:       string | null;
+  idVerified:         boolean;
+  trustFactor:        number;
+  trustScore:         number;
+  trustCardTier:      "Grey" | "Yellow" | "Blue" | "Gold";
+  strikes:            number;
+  flaggedForBan:      boolean;
+  communityBanned:    boolean;
+  permanentBan:       boolean;
+  accountFlagReason:  string | null;
+  accountFlagStatus:  "under_review" | "disputed" | "resolved" | null;
+  accountFlaggedAt:   string | null;
+  disputeText:        string | null;
+  disputeSubmittedAt: string | null;
+  hasDisputedBefore:  boolean;
+  sessionsAsGamer:    number;
+  sessionsAsHirer:    number;
+  createdAt:          string;
+};
+
 /* ── Sample data (shown when DB has no sessions) ───────────────────────── */
 const SAMPLE_SESSIONS: HiringSession[] = [
   { id: 1001, gameName: "BGMI", platform: "Mobile", status: "completed", escrowAmount: 25, platformFee: 2.5, gamerPayout: 22.5, hirerRegion: "india", createdAt: new Date(Date.now() - 1*3600000).toISOString(), startedAt: new Date(Date.now() - 2*3600000).toISOString(), pendingWithdrawalId: 801, pendingWithdrawalAmount: 100, hirer: { id: 2, name: "RahulGamer22", gbId: "GB-00002" }, gamer: { id: 3, name: "ProSniper_X", gbId: "GB-00003" } },
@@ -155,9 +179,12 @@ export default function AdminDashboard() {
   const qc            = useQueryClient();
   const historyRef    = useRef<HTMLDivElement>(null);
 
-  const [activeTab, setActiveTab]       = useState<"withdrawals" | "verifications" | "users" | "flagged-reviews">("withdrawals");
+  const [activeTab, setActiveTab]       = useState<"withdrawals" | "verifications" | "users" | "flagged-reviews" | "flagged-accounts">("withdrawals");
   const [userSearch, setUserSearch]     = useState("");
   const [strikingId, setStrikingId]     = useState<number | null>(null);
+  const [disputeResolveId, setDisputeResolveId] = useState<number | null>(null);
+  const [adminNote, setAdminNote]       = useState("");
+  const [banConfirmId, setBanConfirmId] = useState<number | null>(null);
   const [expandedRow, setExpandedRow]   = useState<number | null>(null);
   const [historyFilter, setHistoryFilter] = useState<"all" | "today" | "week" | "month">("all");
   const [historySearch, setHistorySearch] = useState("");
@@ -203,6 +230,13 @@ export default function AdminDashboard() {
     queryKey: ["admin-flagged-reviews"],
     queryFn:  () => apiFetch(`${BASE}/admin/flagged-reviews`),
     enabled:  !!authData?.isAdmin && activeTab === "flagged-reviews",
+    staleTime: 30_000,
+  });
+
+  const { data: flaggedAcctsData, isLoading: flaggedAcctsLoading, refetch: refetchFlaggedAccts } = useQuery<{ flaggedAccounts: FlaggedAccount[] }>({
+    queryKey: ["admin-flagged-accounts"],
+    queryFn:  () => apiFetch(`${BASE}/admin/flagged-accounts`),
+    enabled:  !!authData?.isAdmin && activeTab === "flagged-accounts",
     staleTime: 30_000,
   });
 
@@ -255,6 +289,55 @@ export default function AdminDashboard() {
       });
     },
     onError: (e: Error) => { toast({ title: "Error", description: e.message, variant: "destructive" }); setStrikingId(null); },
+  });
+
+  const unflagAccount = useMutation({
+    mutationFn: ({ userId, note }: { userId: number; note: string }) =>
+      apiFetch(`${BASE}/admin/users/${userId}/unflag-account`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ adminNote: note }),
+      }),
+    onSuccess: (data: { name: string }) => {
+      qc.invalidateQueries({ queryKey: ["admin-flagged-accounts"] });
+      setDisputeResolveId(null); setAdminNote("");
+      toast({ title: `✓ Account Cleared`, description: `${data.name}'s account flag has been removed.` });
+    },
+    onError: (e: Error) => toast({ title: "Error", description: e.message, variant: "destructive" }),
+  });
+
+  const permanentBan = useMutation({
+    mutationFn: ({ userId, reason }: { userId: number; reason: string }) =>
+      apiFetch(`${BASE}/admin/users/${userId}/permanent-ban`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reason }),
+      }),
+    onSuccess: (data: { name: string }) => {
+      qc.invalidateQueries({ queryKey: ["admin-flagged-accounts"] });
+      qc.invalidateQueries({ queryKey: ["admin-users"] });
+      setBanConfirmId(null); setAdminNote("");
+      toast({ title: `🚫 Permanently Banned`, description: `${data.name} has been permanently banned.`, variant: "destructive" });
+    },
+    onError: (e: Error) => toast({ title: "Error", description: e.message, variant: "destructive" }),
+  });
+
+  const resolveDispute = useMutation({
+    mutationFn: ({ userId, approve, note }: { userId: number; approve: boolean; note: string }) =>
+      apiFetch(`${BASE}/admin/flagged-accounts/${userId}/resolve-dispute`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ approve, adminNote: note }),
+      }),
+    onSuccess: (data: { approved: boolean; name: string }) => {
+      qc.invalidateQueries({ queryKey: ["admin-flagged-accounts"] });
+      setDisputeResolveId(null); setAdminNote("");
+      toast({
+        title: data.approved ? `✓ Dispute Approved — ${data.name} Cleared` : `Dispute Rejected — Flag Maintained`,
+        description: data.approved ? "User notified of positive outcome." : "User notified. Flag stays under review.",
+      });
+    },
+    onError: (e: Error) => toast({ title: "Error", description: e.message, variant: "destructive" }),
   });
 
   const dismissFlag = useMutation({
@@ -439,10 +522,11 @@ export default function AdminDashboard() {
         <div className="px-4 md:px-6 mt-5">
           <div className="flex flex-wrap gap-1 bg-muted/40 p-1 rounded-xl w-fit border border-border">
             {([
-              { key: "withdrawals",     label: "Payouts",      icon: <DollarSign className="w-3.5 h-3.5" /> },
-              { key: "verifications",   label: "Verifications", icon: <BadgeCheck className="w-3.5 h-3.5" /> },
-              { key: "users",           label: "Users",         icon: <Users className="w-3.5 h-3.5" /> },
-              { key: "flagged-reviews", label: "Flagged Reviews", icon: <Flag className="w-3.5 h-3.5" /> },
+              { key: "withdrawals",      label: "Payouts",          icon: <DollarSign className="w-3.5 h-3.5" /> },
+              { key: "verifications",    label: "Verifications",    icon: <BadgeCheck className="w-3.5 h-3.5" /> },
+              { key: "users",            label: "Users",            icon: <Users className="w-3.5 h-3.5" /> },
+              { key: "flagged-reviews",  label: "Flagged Reviews",  icon: <Flag className="w-3.5 h-3.5" /> },
+              { key: "flagged-accounts", label: "Flagged Accounts", icon: <ShieldAlert className="w-3.5 h-3.5" /> },
             ] as const).map(tab => (
               <button key={tab.key} onClick={() => setActiveTab(tab.key)}
                 className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all flex items-center gap-1.5 ${
@@ -461,6 +545,11 @@ export default function AdminDashboard() {
                 {tab.key === "flagged-reviews" && (flaggedData?.flaggedReviews.length ?? 0) > 0 && (
                   <span className="bg-red-500/20 text-red-400 text-xs px-1.5 py-0.5 rounded-full">{flaggedData!.flaggedReviews.length}</span>
                 )}
+                {tab.key === "flagged-accounts" && (() => {
+                  const accts = flaggedAcctsData?.flaggedAccounts ?? [];
+                  const active = accts.filter(a => a.accountFlagStatus !== "resolved").length;
+                  return active > 0 ? <span className="bg-orange-500/20 text-orange-400 text-xs px-1.5 py-0.5 rounded-full">{active}</span> : null;
+                })()}
               </button>
             ))}
           </div>
@@ -868,6 +957,192 @@ export default function AdminDashboard() {
                       </div>
                     </div>
                   ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ── Flagged Accounts Tab ── */}
+          {activeTab === "flagged-accounts" && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <h2 className="font-bold text-foreground flex items-center gap-2">
+                  <ShieldAlert className="w-4 h-4 text-orange-400" />
+                  Flagged Accounts
+                  <span className="text-xs text-muted-foreground font-normal">
+                    ({(flaggedAcctsData?.flaggedAccounts ?? []).filter(a => a.accountFlagStatus !== "resolved").length} active)
+                  </span>
+                </h2>
+                <Button variant="ghost" size="sm" onClick={() => refetchFlaggedAccts()} className="gap-1 text-xs text-muted-foreground">
+                  <RefreshCw className="w-3.5 h-3.5" /> Refresh
+                </Button>
+              </div>
+
+              <div className="text-xs text-muted-foreground bg-muted/30 border border-border rounded-lg px-3 py-2 flex items-start gap-2">
+                <ShieldAlert className="w-4 h-4 text-orange-400 shrink-0 mt-0.5" />
+                <div>Accounts are auto-flagged when smart review patterns trigger. Users are notified and may submit <strong>one dispute</strong> per flag. Use <em>Unflag</em> to clear, <em>Confirm Flag</em> to reject a dispute, or <em>Permanent Ban</em> for repeat offenders.</div>
+              </div>
+
+              {flaggedAcctsLoading ? (
+                <div className="space-y-2">{[...Array(3)].map((_, i) => <Skeleton key={i} className="h-40 w-full" />)}</div>
+              ) : (flaggedAcctsData?.flaggedAccounts ?? []).length === 0 ? (
+                <div className="text-center py-10 text-muted-foreground text-sm border border-dashed border-border rounded-xl">
+                  <CheckCircle2 className="w-8 h-8 text-green-400 mx-auto mb-2" />
+                  No flagged accounts — all clear!
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {(flaggedAcctsData?.flaggedAccounts ?? []).map(acct => {
+                    const statusColors = {
+                      under_review: "border-orange-500/40 bg-orange-500/8 text-orange-400",
+                      disputed:     "border-yellow-500/40 bg-yellow-500/8 text-yellow-400",
+                      resolved:     "border-green-500/40 bg-green-500/8 text-green-400",
+                    };
+                    const statusLabels = { under_review: "Under Review", disputed: "Dispute Submitted", resolved: "Resolved" };
+                    const statusKey = acct.accountFlagStatus ?? "under_review";
+                    const isDisputed = acct.accountFlagStatus === "disputed";
+                    const isResolved = acct.accountFlagStatus === "resolved";
+                    const accountAge = acct.createdAt ? Math.floor((Date.now() - new Date(acct.createdAt).getTime()) / (24 * 60 * 60 * 1000)) : "?";
+
+                    return (
+                      <div key={acct.id} className={`border rounded-xl p-4 space-y-3 transition-colors ${
+                        acct.permanentBan ? "border-red-500/60 bg-red-500/8" :
+                        isResolved ? "border-green-500/30 bg-green-500/5 opacity-70" :
+                        isDisputed ? "border-yellow-500/40 bg-yellow-500/5" :
+                        "border-orange-500/40 bg-orange-500/5"
+                      }`}>
+
+                        {/* Row 1: Name + status + tier */}
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <Link href={`/users/${acct.id}`} className="font-bold text-white hover:text-primary transition-colors">{acct.name}</Link>
+                          <TrustCardBadge trustFactor={acct.trustFactor} compact />
+                          <span className={`text-[10px] border px-1.5 py-0.5 rounded-full font-semibold ${statusColors[statusKey as keyof typeof statusColors]}`}>
+                            {statusLabels[statusKey as keyof typeof statusLabels]}
+                          </span>
+                          {acct.permanentBan && <span className="text-[10px] border border-red-500/60 text-red-400 bg-red-500/10 px-1.5 py-0.5 rounded-full font-bold">PERMANENTLY BANNED</span>}
+                          {acct.communityBanned && !acct.permanentBan && <span className="text-[10px] border border-orange-500/40 text-orange-400 bg-orange-500/10 px-1.5 py-0.5 rounded-full">Comm. Banned</span>}
+                          {acct.idVerified && <span className="text-[10px] border border-green-500/40 text-green-400 bg-green-500/10 px-1.5 py-0.5 rounded-full">✓ Verified</span>}
+                          <span className="text-xs text-muted-foreground ml-auto">{acct.gamerbuddyId ?? `#${acct.id}`}</span>
+                        </div>
+
+                        {/* Row 2: Mini stats */}
+                        <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 text-xs">
+                          {[
+                            { label: "Trust Factor", val: acct.trustFactor, color: "text-primary" },
+                            { label: "Strikes",      val: acct.strikes,     color: acct.strikes >= 3 ? "text-red-400" : acct.strikes > 0 ? "text-orange-400" : "text-white" },
+                            { label: "Gamer Sess",   val: acct.sessionsAsGamer, color: "text-white" },
+                            { label: "Hirer Sess",   val: acct.sessionsAsHirer, color: "text-white" },
+                            { label: "Acct Age",     val: `${accountAge}d`,      color: "text-white" },
+                            { label: "Disputed Before", val: acct.hasDisputedBefore ? "Yes" : "No", color: acct.hasDisputedBefore ? "text-orange-400" : "text-muted-foreground" },
+                          ].map(s => (
+                            <div key={s.label} className="bg-background/50 rounded-lg px-2 py-1.5 text-center border border-border">
+                              <div className={`font-bold text-sm ${s.color}`}>{s.val}</div>
+                              <div className="text-muted-foreground text-[10px]">{s.label}</div>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Flag reason */}
+                        <div className="flex items-start gap-2 bg-background/40 rounded-lg px-3 py-2 border border-orange-500/20">
+                          <AlertTriangle className="w-3.5 h-3.5 text-orange-400 shrink-0 mt-0.5" />
+                          <div>
+                            <div className="text-[10px] text-orange-400 font-semibold mb-0.5">FLAG REASON</div>
+                            <div className="text-xs text-foreground">{acct.accountFlagReason ?? "No reason recorded"}</div>
+                            {acct.accountFlaggedAt && <div className="text-[10px] text-muted-foreground mt-0.5">{formatDistanceToNow(new Date(acct.accountFlaggedAt), { addSuffix: true })}</div>}
+                          </div>
+                        </div>
+
+                        {/* Dispute message — shown when status is disputed */}
+                        {isDisputed && acct.disputeText && (
+                          <div className="flex items-start gap-2 bg-yellow-500/8 rounded-lg px-3 py-2 border border-yellow-500/30">
+                            <User className="w-3.5 h-3.5 text-yellow-400 shrink-0 mt-0.5" />
+                            <div className="flex-1 min-w-0">
+                              <div className="text-[10px] text-yellow-400 font-semibold mb-0.5">
+                                USER DISPUTE — {acct.disputeSubmittedAt ? formatDistanceToNow(new Date(acct.disputeSubmittedAt), { addSuffix: true }) : ""}
+                              </div>
+                              <div className="text-xs text-foreground break-words">"{acct.disputeText}"</div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Admin note input + actions */}
+                        {!isResolved && !acct.permanentBan && (
+                          <div className="space-y-2">
+                            {(disputeResolveId === acct.id || banConfirmId === acct.id) && (
+                              <div className="space-y-1.5">
+                                <input
+                                  value={adminNote}
+                                  onChange={e => setAdminNote(e.target.value)}
+                                  placeholder={banConfirmId === acct.id ? "Ban reason (shown to user)…" : "Admin note for user (optional)…"}
+                                  className="w-full px-3 py-1.5 text-xs bg-background border border-border rounded-lg focus:outline-none focus:border-primary/60"
+                                />
+                              </div>
+                            )}
+                            <div className="flex items-center gap-2 flex-wrap">
+                              {/* Dispute resolution buttons */}
+                              {isDisputed && disputeResolveId === acct.id ? (
+                                <>
+                                  <Button size="sm" variant="ghost" className="h-7 text-xs gap-1 text-green-400 hover:bg-green-500/10 border border-green-500/30"
+                                    disabled={resolveDispute.isPending}
+                                    onClick={() => resolveDispute.mutate({ userId: acct.id, approve: true, note: adminNote })}>
+                                    <CheckCircle2 className="w-3 h-3" /> Approve Dispute
+                                  </Button>
+                                  <Button size="sm" variant="ghost" className="h-7 text-xs gap-1 text-red-400 hover:bg-red-500/10 border border-red-500/30"
+                                    disabled={resolveDispute.isPending}
+                                    onClick={() => resolveDispute.mutate({ userId: acct.id, approve: false, note: adminNote })}>
+                                    <XCircle className="w-3 h-3" /> Reject Dispute
+                                  </Button>
+                                  <Button size="sm" variant="ghost" className="h-7 text-xs text-muted-foreground" onClick={() => { setDisputeResolveId(null); setAdminNote(""); }}>Cancel</Button>
+                                </>
+                              ) : banConfirmId === acct.id ? (
+                                <>
+                                  <Button size="sm" variant="destructive" className="h-7 text-xs gap-1"
+                                    disabled={permanentBan.isPending}
+                                    onClick={() => permanentBan.mutate({ userId: acct.id, reason: adminNote })}>
+                                    {permanentBan.isPending ? "Banning…" : "Confirm Permanent Ban"}
+                                  </Button>
+                                  <Button size="sm" variant="ghost" className="h-7 text-xs text-muted-foreground" onClick={() => { setBanConfirmId(null); setAdminNote(""); }}>Cancel</Button>
+                                </>
+                              ) : (
+                                <>
+                                  {isDisputed && (
+                                    <Button size="sm" variant="ghost" className="h-7 text-xs gap-1 text-yellow-400 hover:bg-yellow-500/10 border border-yellow-500/30"
+                                      onClick={() => { setDisputeResolveId(acct.id); setAdminNote(""); }}>
+                                      <Eye className="w-3 h-3" /> Review Dispute
+                                    </Button>
+                                  )}
+                                  <Button size="sm" variant="ghost" className="h-7 text-xs gap-1 text-green-400 hover:bg-green-500/10 border border-green-500/30"
+                                    disabled={unflagAccount.isPending}
+                                    onClick={() => unflagAccount.mutate({ userId: acct.id, note: "" })}>
+                                    <CheckCircle2 className="w-3 h-3" /> Unflag
+                                  </Button>
+                                  <Button size="sm" variant="ghost" className="h-7 text-xs gap-1 text-orange-400 hover:bg-orange-500/10 border border-orange-500/30"
+                                    onClick={() => setStrikingId(acct.id)}>
+                                    <Zap className="w-3 h-3" /> Strike
+                                  </Button>
+                                  <Button size="sm" variant="ghost" className="h-7 text-xs gap-1 text-red-400 hover:bg-red-500/10 border border-red-500/30"
+                                    onClick={() => { setBanConfirmId(acct.id); setAdminNote(""); }}>
+                                    <XCircle className="w-3 h-3" /> Permanent Ban
+                                  </Button>
+                                </>
+                              )}
+                            </div>
+                            {strikingId === acct.id && (
+                              <div className="flex items-center gap-1.5 mt-1">
+                                <span className="text-xs text-red-400 font-semibold">Confirm issue strike to {acct.name}?</span>
+                                <Button size="sm" variant="destructive" className="h-6 text-xs px-2"
+                                  disabled={issueStrike.isPending}
+                                  onClick={() => issueStrike.mutate({ userId: acct.id, reason: "Flagged account — admin review" })}>
+                                  {issueStrike.isPending ? "…" : "Yes, Strike"}
+                                </Button>
+                                <Button size="sm" variant="ghost" className="h-6 text-xs px-2" onClick={() => setStrikingId(null)}>Cancel</Button>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </div>
