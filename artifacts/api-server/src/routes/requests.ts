@@ -1,7 +1,7 @@
 import { Router, type IRouter } from "express";
 import { db, gameRequestsTable, walletsTable, usersTable, bidsTable, reviewsTable, streamingAccountsTable, gamingAccountsTable, questEntriesTable, platformFeesTable } from "@workspace/db";
 import { awardTrustPoints } from "../trust-score";
-import { eq, desc, and, sql, inArray, gte } from "drizzle-orm";
+import { eq, desc, and, sql, inArray, gte, count, gt } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
 import { createNotification, sendEmailNotification } from "../notifications-helper";
 import { recalculateTrustFactor } from "../trust-factor";
@@ -1122,6 +1122,44 @@ router.post("/requests/:id/reviews", requireAuth, async (req, res): Promise<void
     comment: comment?.trim() || null,
     wouldPlayAgain: wpa,
   }).returning();
+
+  // ── Auto fake-review detection ───────────────────────────────────────
+  // Check 3 suspicious patterns asynchronously — don't block response
+  void (async () => {
+    try {
+      const trimmedComment = comment?.trim() ?? "";
+      const now = new Date();
+      const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+      const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+      const [recentReviewCount, reviewerSessions, duplicateComment] = await Promise.all([
+        // Pattern 1: 3+ reviews submitted by same reviewer in last 24 hours
+        db.select({ cnt: count() }).from(reviewsTable)
+          .where(and(eq(reviewsTable.reviewerId, user.id), gte(reviewsTable.createdAt, oneDayAgo))),
+        // Pattern 2: reviewer has 0 completed sessions as gamer
+        db.select({ cnt: count() }).from(bidsTable)
+          .innerJoin(gameRequestsTable, eq(bidsTable.requestId, gameRequestsTable.id))
+          .where(and(eq(bidsTable.bidderId, user.id), eq(bidsTable.status, "accepted"), inArray(gameRequestsTable.status, ["completed", "payment_released"]))),
+        // Pattern 3: identical comment from same reviewer in last 30 days
+        trimmedComment.length >= 10
+          ? db.select({ id: reviewsTable.id }).from(reviewsTable)
+              .where(and(eq(reviewsTable.reviewerId, user.id), eq(reviewsTable.comment, trimmedComment), gte(reviewsTable.createdAt, thirtyDaysAgo), gt(reviewsTable.id, 0)))
+              .limit(2)
+          : Promise.resolve([]),
+      ]);
+
+      const reasons: string[] = [];
+      if (Number(recentReviewCount[0]?.cnt ?? 0) >= 3) reasons.push("3+ reviews from same reviewer in 24h");
+      if (Number(reviewerSessions[0]?.cnt ?? 0) === 0) reasons.push("reviewer has no completed sessions");
+      if ((duplicateComment as {id: number}[]).length >= 2) reasons.push("identical comment text submitted before");
+
+      if (reasons.length > 0) {
+        await db.update(reviewsTable)
+          .set({ isFlagged: true, flagReason: reasons.join(" · "), flaggedAt: now })
+          .where(eq(reviewsTable.id, review.id));
+      }
+    } catch (_) { /* non-critical — don't break review submission */ }
+  })();
 
   // Recalculate trust factor from scratch (rating quality + session experience +
   // review volume + vote sentiment) — votes are now a permanent formula component

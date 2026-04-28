@@ -13,6 +13,7 @@ import {
   MessageSquare, Clock, Ban, ChevronDown, ChevronUp, ArrowRight,
 } from "lucide-react";
 import { SafetyBanner } from "@/components/safety-banner";
+import { TrustCardBadge } from "@/components/reputation-badges";
 
 const STATUS_STYLE: Record<string, string> = {
   open: "border-green-500/40 text-green-400 bg-green-500/10",
@@ -108,8 +109,9 @@ function RequestBidsPanel({ requestId, requestStatus }: { requestId: number; req
       {acceptedBid && (
         <div className="flex items-center gap-2.5 rounded-lg border border-green-500/30 bg-green-500/5 px-3 py-2 text-sm">
           <CheckCircle2 className="h-4 w-4 text-green-400 shrink-0" />
-          <div>
+          <div className="flex items-center gap-2 flex-wrap">
             <span className="text-green-400 font-bold">{acceptedBid.bidderName}</span>
+            <TrustCardBadge trustFactor={acceptedBid.bidderTrustFactor ?? 50} compact />
             <span className="text-muted-foreground"> accepted · ${acceptedBid.price.toFixed(2)}</span>
           </div>
           <Link href={`/requests/${requestId}`} className="ml-auto text-xs text-secondary underline underline-offset-2 hover:text-secondary/80 flex items-center gap-1">
@@ -137,8 +139,9 @@ function RequestBidsPanel({ requestId, requestStatus }: { requestId: number; req
               "border-border bg-card/40"
             }`}>
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <span className="font-bold text-white text-sm">{bid.bidderName}</span>
+                  <TrustCardBadge trustFactor={bid.bidderTrustFactor ?? 50} compact />
                   <span className={`text-xs px-1.5 py-0.5 rounded border font-semibold ${
                     bid.status === "accepted" ? "border-green-500/40 text-green-400" :
                     bid.status === "rejected" ? "border-border text-muted-foreground" :

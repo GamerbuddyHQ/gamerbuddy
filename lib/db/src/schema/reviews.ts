@@ -1,4 +1,4 @@
-import { pgTable, integer, text, timestamp, serial } from "drizzle-orm/pg-core";
+import { pgTable, integer, text, timestamp, serial, boolean } from "drizzle-orm/pg-core";
 import { usersTable } from "./users";
 import { gameRequestsTable } from "./requests";
 
@@ -10,6 +10,9 @@ export const reviewsTable = pgTable("reviews", {
   rating: integer("rating").notNull(),
   comment: text("comment"),
   wouldPlayAgain: text("would_play_again"),
+  isFlagged: boolean("is_flagged").notNull().default(false),
+  flagReason: text("flag_reason"),
+  flaggedAt: timestamp("flagged_at"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 

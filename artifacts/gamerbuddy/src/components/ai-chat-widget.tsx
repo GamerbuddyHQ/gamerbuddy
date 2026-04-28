@@ -140,6 +140,24 @@ const RESPONSES: Array<{ patterns: RegExp; reply: string }> = [
     reply: `Player4Hire has its own XP system and it slaps 🔥\n\n**+50 points** every time you complete a session and leave a review. Both hirer and gamer earn 50 pts.\n\nPoints level up your **Trust Factor** and profile rank — higher rank = better visibility = more hirers choosing YOU.\n\nSpend points in the **Points Shop** (Steam-style) on your **Profile page**:\n• 🎨 **Profile backgrounds** — unique gradient themes\n• 🏷️ **Custom titles** — shown under your name (e.g. "Elite Carry", "Chill Coach")\n• These are **Phase 1 live** — you can buy and equip them right now!\n\nCheck your points balance and current rank on your **[Profile](/profile)** page. Time to stack those sessions! 💪`,
   },
 
+  /* ── TRUST CARD SYSTEM ── */
+  {
+    patterns: /trust.?card|trust.*tier|grey.*card|yellow.*card|blue.*card|gold.*card|trust.*badge|tier.*trust|reputation.*tier|card.*tier|what.*trust.*card|trust.*level|trust.*rank|♦|diamond.*badge|how.*trust.*work|improve.*trust|raise.*trust/i,
+    reply: `🃏 **Trust Card System — Your Reputation Tier**\n\nEvery Player4Hire account has a **Trust Card** that reflects how much the community trusts you. It's shown as a ♦ colored badge next to your name everywhere on the platform.\n\n**Four tiers based on Trust Factor (0–100):**\n\n♦ **Grey Card** (Trust Factor 0–25)\nNew or inactive account. Build trust by completing your profile and doing sessions.\n\n♦ **Yellow Card** (Trust Factor 26–50)\nDefault starting range. Most new verified users begin here. Complete your profile and get a few great reviews to climb fast.\n\n♦ **Blue Card** (Trust Factor 51–75)\nTrusted member. You've completed sessions, earned good reviews, and built a solid presence.\n\n♦ **Gold Card** (Trust Factor 76–100)\nElite status. Gold-tier gamers and hirers are the most trusted on the platform — hirers actively prefer Gold card bidders.\n\n**How to climb your Trust Card tier:**\n• ✅ Complete your profile (photo, bio, gaming account, country, gender)\n• ⭐ Complete sessions and earn high ratings (9–10 earns extra trust points)\n• 🎮 Link your gaming accounts\n• 📸 Add a profile photo\n• 📧 Verify your email + phone\n• 🔁 Avoid strikes and bad reviews\n\nYour current Trust Factor is shown on your **[Profile](/profile)** page. Keep it high! 🏆`,
+  },
+
+  /* ── PROFILE COMPLETION BAR ── */
+  {
+    patterns: /profile.*complet|complete.*profile|profile.*bar|complet.*bar|what.*missing.*profile|profile.*percent|finish.*profile|profile.*score|profile.*progress/i,
+    reply: `📊 **Profile Completion Bar**\n\nYour profile has a **completion bar** at the top of your **[Profile page](/profile)** that shows how complete your account is — and nudges you toward the next Trust Card tier.\n\n**7 fields tracked:**\n1. 📸 Profile photo\n2. ✍️ Bio\n3. 🎮 Gaming account linked\n4. 📧 Email verified\n5. 📱 Phone verified\n6. 🌍 Country set\n7. 👤 Gender set\n\nEach completed field increases your completion percentage. A fully complete profile:\n• Unlocks more hirer trust — hirers are far more likely to accept bids from complete profiles\n• Helps your Trust Card tier climb faster\n• Shows the community you're a serious, real player\n\nClick any missing item in the bar to jump straight to that section of your profile and fill it in! The bar also shows exactly how many more trust points you need to reach the next card tier (Grey → Yellow → Blue → Gold). 💪`,
+  },
+
+  /* ── STRIKE SYSTEM ── */
+  {
+    patterns: /strike|account.*strike|get.*strike|what.*strike|3.*strike|ban.*strike|why.*banned|account.*flag|flagged.*account|suspend|account.*suspend/i,
+    reply: `⚠️ **Strike System — Account Warnings**\n\nPlayer4Hire uses a **3-strike system** to handle bad actors and policy violations.\n\n**What earns a strike:**\n• Confirmed harassment, threats, or toxic behavior\n• Submitting fake or fraudulent reviews\n• Ghosting confirmed sessions without cancellation\n• Repeated platform policy violations reported by multiple users\n\n**What happens when you receive a strike:**\n• ⚡ **1 strike** — Formal warning. Your Trust Factor drops by 10 points automatically.\n• ⚡⚡ **2 strikes** — Second warning. Another -10 Trust Factor. Yellow or Grey card tier likely.\n• ❌ **3 strikes** — Account flagged for **permanent ban review** by the admin team.\n\n**Strikes are issued by our admin team** after reviewing reports. They are not automatic — every strike involves manual review.\n\n**To avoid strikes:**\n• Always honor confirmed sessions\n• Keep all communication professional\n• Never attempt to submit fake reviews\n• Follow the community guidelines at all times\n\nIf you believe a strike was issued in error, contact our support team via the **[Community tab](/community)** or the report system. 📋`,
+  },
+
   /* ── PROFILE SHOP / CUSTOMISATION ── */
   {
     patterns: /shop|profile.*custom|background|theme.*profile|cosmetic|steam.*style|personaliz/i,

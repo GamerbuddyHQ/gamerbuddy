@@ -4,7 +4,7 @@
  */
 
 import { Router, type IRouter } from "express";
-import { db, usersTable, walletTransactionsTable, reportsTable, walletsTable, withdrawalRequestsTable, platformFeesTable, gameRequestsTable } from "@workspace/db";
+import { db, usersTable, walletTransactionsTable, reportsTable, walletsTable, withdrawalRequestsTable, platformFeesTable, gameRequestsTable, reviewsTable, bidsTable } from "@workspace/db";
 import { eq, desc, gt, or, isNotNull, sql, and, gte, inArray, not, count, sum, lt } from "drizzle-orm";
 import { round2, recordTransaction } from "./wallets";
 import { requireAdminAuth } from "./admin-auth";
@@ -752,6 +752,190 @@ router.post(
       name: updated.name,
       idVerified: updated.idVerified,
     });
+  },
+);
+
+// ── GET /admin/users — full user list with trust stats ────────────────────
+router.get(
+  "/admin/users",
+  requireAdminAuth,
+  async (_req, res): Promise<void> => {
+    try {
+      const users = await db
+        .select({
+          id:            usersTable.id,
+          name:          usersTable.name,
+          email:         usersTable.email,
+          gamerbuddyId:  usersTable.gamerbuddyId,
+          idVerified:    usersTable.idVerified,
+          isActivated:   usersTable.isActivated,
+          trustFactor:   usersTable.trustFactor,
+          trustScore:    usersTable.trustScore,
+          strikes:       usersTable.strikes,
+          flaggedForBan: usersTable.flaggedForBan,
+          communityBanned: usersTable.communityBanned,
+          profilePhotoUrl: usersTable.profilePhotoUrl,
+          bio:           usersTable.bio,
+          country:       usersTable.country,
+          gender:        usersTable.gender,
+          emailVerified: usersTable.emailVerified,
+          phoneVerified: usersTable.phoneVerified,
+          createdAt:     usersTable.createdAt,
+        })
+        .from(usersTable)
+        .orderBy(desc(usersTable.createdAt));
+
+      // For each user fetch wallet balance + session counts
+      const userIds = users.map((u) => u.id);
+      if (userIds.length === 0) { res.json({ users: [] }); return; }
+
+      const [wallets, gamerSessions, hirerSessions, gamingAccounts] = await Promise.all([
+        db.select({ userId: walletsTable.userId, earningsBalance: walletsTable.earningsBalance, hiringBalance: walletsTable.hiringBalance })
+          .from(walletsTable).where(inArray(walletsTable.userId, userIds)),
+        db.select({ gamerId: bidsTable.bidderId, cnt: count() })
+          .from(bidsTable)
+          .innerJoin(gameRequestsTable, eq(bidsTable.requestId, gameRequestsTable.id))
+          .where(and(inArray(bidsTable.bidderId, userIds), eq(bidsTable.status, "accepted"), inArray(gameRequestsTable.status, ["completed", "payment_released"])))
+          .groupBy(bidsTable.bidderId),
+        db.select({ hirerId: gameRequestsTable.userId, cnt: count() })
+          .from(gameRequestsTable)
+          .where(and(inArray(gameRequestsTable.userId, userIds), inArray(gameRequestsTable.status, ["completed", "payment_released"])))
+          .groupBy(gameRequestsTable.userId),
+        db.select({ userId: sql<number>`user_id`, cnt: count() })
+          .from(sql`gaming_accounts`)
+          .where(sql`user_id = ANY(${userIds})`)
+          .groupBy(sql`user_id`),
+      ]);
+
+      const walletMap = new Map(wallets.map((w) => [w.userId, w]));
+      const gamerMap  = new Map(gamerSessions.map((s) => [s.gamerId, Number(s.cnt)]));
+      const hirerMap  = new Map(hirerSessions.map((s) => [s.hirerId, Number(s.cnt)]));
+      const gaMap     = new Map(gamingAccounts.map((g) => [Number(g.userId), Number(g.cnt)]));
+
+      const result = users.map((u) => {
+        const w = walletMap.get(u.id);
+        const hasBio = !!(u.bio?.trim());
+        const hasPhoto = !!u.profilePhotoUrl;
+        const hasCountry = !!(u.country && u.country !== "any");
+        const hasGender = !!(u.gender && u.gender !== "any");
+        const hasGaming = (gaMap.get(u.id) ?? 0) > 0;
+        const completedFields = [hasPhoto, hasBio, hasGaming, u.emailVerified, u.phoneVerified, hasCountry, hasGender].filter(Boolean).length;
+        const profileCompletion = Math.round((completedFields / 7) * 100);
+
+        const tf = u.trustFactor ?? 50;
+        const tier = tf >= 76 ? "Gold" : tf >= 51 ? "Blue" : tf >= 26 ? "Yellow" : "Grey";
+
+        return {
+          id:              u.id,
+          name:            u.name,
+          email:           u.email,
+          gamerbuddyId:    u.gamerbuddyId,
+          idVerified:      u.idVerified,
+          isActivated:     u.isActivated,
+          trustFactor:     tf,
+          trustScore:      u.trustScore ?? 0,
+          trustCardTier:   tier,
+          strikes:         u.strikes ?? 0,
+          flaggedForBan:   u.flaggedForBan ?? false,
+          communityBanned: u.communityBanned ?? false,
+          profileCompletion,
+          earningsBalance: w?.earningsBalance ?? 0,
+          hiringBalance:   w?.hiringBalance ?? 0,
+          sessionsAsGamer: gamerMap.get(u.id) ?? 0,
+          sessionsAsHirer: hirerMap.get(u.id) ?? 0,
+          createdAt:       toIsoRequired(u.createdAt),
+        };
+      });
+
+      res.json({ users: result });
+    } catch (err) {
+      res.status(500).json({ error: "Failed to load users" });
+    }
+  },
+);
+
+// ── POST /admin/users/:id/strike — issue a strike to a user ───────────────
+router.post(
+  "/admin/users/:id/strike",
+  requireAdminAuth,
+  async (req, res): Promise<void> => {
+    const userId = parseInt(req.params.id as string, 10);
+    if (isNaN(userId)) { res.status(400).json({ error: "Invalid userId" }); return; }
+
+    const { reason } = req.body as { reason?: string };
+
+    const [user] = await db.select({ id: usersTable.id, name: usersTable.name, strikes: usersTable.strikes, trustFactor: usersTable.trustFactor })
+      .from(usersTable).where(eq(usersTable.id, userId));
+    if (!user) { res.status(404).json({ error: "User not found" }); return; }
+
+    const newStrikes    = (user.strikes ?? 0) + 1;
+    const newTrust      = Math.max(0, (user.trustFactor ?? 50) - 10);
+    const flaggedForBan = newStrikes >= 3;
+
+    await db.update(usersTable)
+      .set({ strikes: newStrikes, trustFactor: newTrust, flaggedForBan })
+      .where(eq(usersTable.id, userId));
+
+    req.log.info({ adminAction: "strike", targetUserId: userId, newStrikes, newTrust, flaggedForBan, reason }, `Strike issued to user ${userId}`);
+
+    res.json({ success: true, userId, name: user.name, strikes: newStrikes, trustFactor: newTrust, flaggedForBan });
+  },
+);
+
+// ── GET /admin/flagged-reviews — reviews auto-flagged for suspicious activity
+router.get(
+  "/admin/flagged-reviews",
+  requireAdminAuth,
+  async (_req, res): Promise<void> => {
+    try {
+      const flagged = await db
+        .select({
+          id:           reviewsTable.id,
+          requestId:    reviewsTable.requestId,
+          rating:       reviewsTable.rating,
+          comment:      reviewsTable.comment,
+          flagReason:   reviewsTable.flagReason,
+          flaggedAt:    reviewsTable.flaggedAt,
+          createdAt:    reviewsTable.createdAt,
+          reviewerId:   reviewsTable.reviewerId,
+          revieweeId:   reviewsTable.revieweeId,
+          reviewerName: sql<string>`reviewer.name`,
+          revieweeName: sql<string>`reviewee.name`,
+        })
+        .from(reviewsTable)
+        .leftJoin(sql`users reviewer`, sql`reviewer.id = ${reviewsTable.reviewerId}`)
+        .leftJoin(sql`users reviewee`, sql`reviewee.id = ${reviewsTable.revieweeId}`)
+        .where(eq(reviewsTable.isFlagged, true))
+        .orderBy(desc(reviewsTable.flaggedAt));
+
+      res.json({ flaggedReviews: flagged.map((r) => ({ ...r, flaggedAt: toIso(r.flaggedAt), createdAt: toIsoRequired(r.createdAt) })) });
+    } catch (err) {
+      res.status(500).json({ error: "Failed to load flagged reviews" });
+    }
+  },
+);
+
+// ── POST /admin/flagged-reviews/:id/dismiss — clear a flag ────────────────
+router.post(
+  "/admin/flagged-reviews/:id/dismiss",
+  requireAdminAuth,
+  async (req, res): Promise<void> => {
+    const id = parseInt(req.params.id as string, 10);
+    if (isNaN(id)) { res.status(400).json({ error: "Invalid id" }); return; }
+    await db.update(reviewsTable).set({ isFlagged: false, flagReason: null, flaggedAt: null }).where(eq(reviewsTable.id, id));
+    res.json({ success: true });
+  },
+);
+
+// ── DELETE /admin/flagged-reviews/:id — delete a fraudulent review ─────────
+router.delete(
+  "/admin/flagged-reviews/:id",
+  requireAdminAuth,
+  async (req, res): Promise<void> => {
+    const id = parseInt(req.params.id as string, 10);
+    if (isNaN(id)) { res.status(400).json({ error: "Invalid id" }); return; }
+    await db.delete(reviewsTable).where(eq(reviewsTable.id, id));
+    res.json({ success: true });
   },
 );
 

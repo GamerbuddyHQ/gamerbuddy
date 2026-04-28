@@ -11,8 +11,9 @@ import {
   Globe, RefreshCw, AlertTriangle, ChevronDown, ChevronUp,
   BadgeCheck, Eye, XCircle, Wallet, Users, History, Search,
   Gamepad2, ArrowUpDown, TrendingUp, Activity, ExternalLink,
-  CreditCard, ArrowRight, UserCheck,
+  CreditCard, ArrowRight, UserCheck, Zap, Flag, Trash2, ShieldAlert,
 } from "lucide-react";
+import { TrustCardBadge } from "@/components/reputation-badges";
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
 type WithdrawalRequest = {
@@ -64,6 +65,41 @@ type HiringSummary = {
   totalTransacted:     number;
   platformEarnings:    number;
   pendingGamerPayouts: number;
+};
+
+type AdminUser = {
+  id:               number;
+  name:             string;
+  email:            string;
+  gamerbuddyId:     string | null;
+  idVerified:       boolean;
+  isActivated:      boolean;
+  trustFactor:      number;
+  trustScore:       number;
+  trustCardTier:    "Grey" | "Yellow" | "Blue" | "Gold";
+  strikes:          number;
+  flaggedForBan:    boolean;
+  communityBanned:  boolean;
+  profileCompletion: number;
+  earningsBalance:  number;
+  hiringBalance:    number;
+  sessionsAsGamer:  number;
+  sessionsAsHirer:  number;
+  createdAt:        string;
+};
+
+type FlaggedReview = {
+  id:           number;
+  requestId:    number;
+  rating:       number;
+  comment:      string | null;
+  flagReason:   string | null;
+  flaggedAt:    string | null;
+  createdAt:    string;
+  reviewerId:   number;
+  revieweeId:   number;
+  reviewerName: string;
+  revieweeName: string;
 };
 
 /* ── Sample data (shown when DB has no sessions) ───────────────────────── */
@@ -119,7 +155,9 @@ export default function AdminDashboard() {
   const qc            = useQueryClient();
   const historyRef    = useRef<HTMLDivElement>(null);
 
-  const [activeTab, setActiveTab]       = useState<"withdrawals" | "verifications">("withdrawals");
+  const [activeTab, setActiveTab]       = useState<"withdrawals" | "verifications" | "users" | "flagged-reviews">("withdrawals");
+  const [userSearch, setUserSearch]     = useState("");
+  const [strikingId, setStrikingId]     = useState<number | null>(null);
   const [expandedRow, setExpandedRow]   = useState<number | null>(null);
   const [historyFilter, setHistoryFilter] = useState<"all" | "today" | "week" | "month">("all");
   const [historySearch, setHistorySearch] = useState("");
@@ -154,6 +192,20 @@ export default function AdminDashboard() {
     staleTime: 30_000,
   });
 
+  const { data: usersData, isLoading: usersLoading, refetch: refetchUsers } = useQuery<{ users: AdminUser[] }>({
+    queryKey: ["admin-users"],
+    queryFn:  () => apiFetch(`${BASE}/admin/users`),
+    enabled:  !!authData?.isAdmin && activeTab === "users",
+    staleTime: 30_000,
+  });
+
+  const { data: flaggedData, isLoading: flaggedLoading, refetch: refetchFlagged } = useQuery<{ flaggedReviews: FlaggedReview[] }>({
+    queryKey: ["admin-flagged-reviews"],
+    queryFn:  () => apiFetch(`${BASE}/admin/flagged-reviews`),
+    enabled:  !!authData?.isAdmin && activeTab === "flagged-reviews",
+    staleTime: 30_000,
+  });
+
   /* ── mutations ── */
   const markPaid = useMutation({
     mutationFn: (id: number) =>
@@ -181,6 +233,39 @@ export default function AdminDashboard() {
       qc.invalidateQueries({ queryKey: ["admin-verifications"] });
       toast({ title: verified ? "Verified ✓" : "Verification Revoked", description: "User status updated." });
     },
+    onError: (e: Error) => toast({ title: "Error", description: e.message, variant: "destructive" }),
+  });
+
+  const issueStrike = useMutation({
+    mutationFn: ({ userId, reason }: { userId: number; reason: string }) =>
+      apiFetch(`${BASE}/admin/users/${userId}/strike`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reason }),
+      }),
+    onSuccess: (data: { strikes: number; flaggedForBan: boolean; name: string }) => {
+      qc.invalidateQueries({ queryKey: ["admin-users"] });
+      setStrikingId(null);
+      toast({
+        title: `⚡ Strike Issued to ${data.name}`,
+        description: data.flaggedForBan
+          ? `${data.strikes} strikes — account FLAGGED FOR BAN ❌`
+          : `${data.strikes} strike(s) total · Trust Factor reduced by 10`,
+        variant: data.flaggedForBan ? "destructive" : "default",
+      });
+    },
+    onError: (e: Error) => { toast({ title: "Error", description: e.message, variant: "destructive" }); setStrikingId(null); },
+  });
+
+  const dismissFlag = useMutation({
+    mutationFn: (id: number) => apiFetch(`${BASE}/admin/flagged-reviews/${id}/dismiss`, { method: "POST" }),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["admin-flagged-reviews"] }); toast({ title: "Flag dismissed" }); },
+    onError: (e: Error) => toast({ title: "Error", description: e.message, variant: "destructive" }),
+  });
+
+  const deleteReview = useMutation({
+    mutationFn: (id: number) => apiFetch(`${BASE}/admin/flagged-reviews/${id}`, { method: "DELETE" }),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["admin-flagged-reviews"] }); toast({ title: "Review deleted" }); },
     onError: (e: Error) => toast({ title: "Error", description: e.message, variant: "destructive" }),
   });
 
@@ -352,21 +437,29 @@ export default function AdminDashboard() {
             Tabs
         ════════════════════════════════════════════════ */}
         <div className="px-4 md:px-6 mt-5">
-          <div className="flex gap-1 bg-muted/40 p-1 rounded-xl w-fit border border-border">
-            {(["withdrawals", "verifications"] as const).map(tab => (
-              <button key={tab} onClick={() => setActiveTab(tab)}
+          <div className="flex flex-wrap gap-1 bg-muted/40 p-1 rounded-xl w-fit border border-border">
+            {([
+              { key: "withdrawals",     label: "Payouts",      icon: <DollarSign className="w-3.5 h-3.5" /> },
+              { key: "verifications",   label: "Verifications", icon: <BadgeCheck className="w-3.5 h-3.5" /> },
+              { key: "users",           label: "Users",         icon: <Users className="w-3.5 h-3.5" /> },
+              { key: "flagged-reviews", label: "Flagged Reviews", icon: <Flag className="w-3.5 h-3.5" /> },
+            ] as const).map(tab => (
+              <button key={tab.key} onClick={() => setActiveTab(tab.key)}
                 className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all flex items-center gap-1.5 ${
-                  activeTab === tab
+                  activeTab === tab.key
                     ? "bg-primary text-primary-foreground shadow-sm"
                     : "text-muted-foreground hover:text-foreground"
                 }`}>
-                {tab === "withdrawals" ? <DollarSign className="w-3.5 h-3.5" /> : <BadgeCheck className="w-3.5 h-3.5" />}
-                {tab === "withdrawals" ? "Payouts & History" : "Verifications"}
-                {tab === "withdrawals" && pending.length > 0 && (
+                {tab.icon}
+                {tab.label}
+                {tab.key === "withdrawals" && pending.length > 0 && (
                   <span className="bg-amber-500/20 text-amber-400 text-xs px-1.5 py-0.5 rounded-full">{pending.length}</span>
                 )}
-                {tab === "verifications" && verifs.length > 0 && (
+                {tab.key === "verifications" && verifs.length > 0 && (
                   <span className="bg-purple-500/20 text-purple-400 text-xs px-1.5 py-0.5 rounded-full">{verifs.length}</span>
+                )}
+                {tab.key === "flagged-reviews" && (flaggedData?.flaggedReviews.length ?? 0) > 0 && (
+                  <span className="bg-red-500/20 text-red-400 text-xs px-1.5 py-0.5 rounded-full">{flaggedData!.flaggedReviews.length}</span>
                 )}
               </button>
             ))}
@@ -771,6 +864,203 @@ export default function AdminDashboard() {
                         <Button size="sm" variant="outline" onClick={() => setVerified.mutate({ userId: v.id, verified: false })} disabled={setVerified.isPending}
                           className="text-xs gap-1 border-destructive/30 text-destructive hover:bg-destructive/10">
                           <XCircle className="w-3.5 h-3.5" /> Reject
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ── Users Tab ── */}
+          {activeTab === "users" && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <h2 className="font-bold text-foreground flex items-center gap-2">
+                  <Users className="w-4 h-4 text-primary" />
+                  All Users
+                  <span className="text-xs text-muted-foreground font-normal">({usersData?.users.length ?? 0} total)</span>
+                </h2>
+                <div className="flex items-center gap-2">
+                  <div className="relative">
+                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                    <input
+                      value={userSearch}
+                      onChange={e => setUserSearch(e.target.value)}
+                      placeholder="Search by name, email, GB-ID…"
+                      className="pl-8 pr-3 py-1.5 text-sm bg-background border border-border rounded-lg focus:outline-none focus:border-primary/60 w-56"
+                    />
+                  </div>
+                  <Button variant="ghost" size="sm" onClick={() => refetchUsers()} className="gap-1 text-xs text-muted-foreground">
+                    <RefreshCw className="w-3.5 h-3.5" /> Refresh
+                  </Button>
+                </div>
+              </div>
+
+              {usersLoading ? (
+                <div className="space-y-2">{[...Array(5)].map((_, i) => <Skeleton key={i} className="h-16 w-full" />)}</div>
+              ) : (
+                <div className="space-y-2">
+                  {(usersData?.users ?? [])
+                    .filter(u => {
+                      if (!userSearch.trim()) return true;
+                      const q = userSearch.toLowerCase();
+                      return u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q) || (u.gamerbuddyId ?? "").toLowerCase().includes(q);
+                    })
+                    .map(u => {
+                      const tierColor = u.trustCardTier === "Gold" ? "text-yellow-400 border-yellow-500/40 bg-yellow-500/10"
+                        : u.trustCardTier === "Blue" ? "text-blue-400 border-blue-500/40 bg-blue-500/10"
+                        : u.trustCardTier === "Yellow" ? "text-amber-400 border-amber-500/40 bg-amber-500/10"
+                        : "text-slate-400 border-slate-500/40 bg-slate-500/10";
+
+                      return (
+                        <div key={u.id} className={`border rounded-xl p-3 space-y-2 transition-colors ${
+                          u.flaggedForBan ? "border-red-500/50 bg-red-500/5" : "border-border bg-card/40"
+                        }`}>
+                          {/* Row 1: Name + badges */}
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <Link href={`/users/${u.id}`} className="font-bold text-white hover:text-primary transition-colors text-sm">{u.name}</Link>
+                            <TrustCardBadge trustFactor={u.trustFactor} compact />
+                            {u.idVerified && <span className="text-[10px] border border-green-500/40 text-green-400 bg-green-500/10 px-1.5 py-0.5 rounded-full font-semibold">✓ Verified</span>}
+                            {u.isActivated && <span className="text-[10px] border border-blue-500/40 text-blue-400 bg-blue-500/10 px-1.5 py-0.5 rounded-full font-semibold">Activated</span>}
+                            {u.communityBanned && <span className="text-[10px] border border-orange-500/40 text-orange-400 bg-orange-500/10 px-1.5 py-0.5 rounded-full font-semibold">Comm. Banned</span>}
+                            {u.flaggedForBan && <span className="text-[10px] border border-red-500/40 text-red-400 bg-red-500/10 px-1.5 py-0.5 rounded-full font-bold animate-pulse">⚠ FLAGGED FOR BAN</span>}
+                            <span className="text-xs text-muted-foreground ml-auto">{u.gamerbuddyId ?? `#${u.id}`}</span>
+                          </div>
+
+                          {/* Row 2: Stats grid */}
+                          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2 text-xs">
+                            <div className="bg-background/50 rounded-lg px-2 py-1.5 text-center border border-border">
+                              <div className={`font-bold text-sm ${tierColor.split(" ")[0]}`}>{u.trustFactor}</div>
+                              <div className="text-muted-foreground text-[10px]">Trust Factor</div>
+                            </div>
+                            <div className="bg-background/50 rounded-lg px-2 py-1.5 text-center border border-border">
+                              <div className="font-bold text-sm text-white">{u.trustScore}</div>
+                              <div className="text-muted-foreground text-[10px]">Trust Score</div>
+                            </div>
+                            <div className={`rounded-lg px-2 py-1.5 text-center border ${u.strikes > 0 ? "border-red-500/40 bg-red-500/10" : "bg-background/50 border-border"}`}>
+                              <div className={`font-bold text-sm ${u.strikes >= 3 ? "text-red-400" : u.strikes > 0 ? "text-orange-400" : "text-white"}`}>{u.strikes}</div>
+                              <div className="text-muted-foreground text-[10px]">Strikes</div>
+                            </div>
+                            <div className="bg-background/50 rounded-lg px-2 py-1.5 text-center border border-border">
+                              <div className="font-bold text-sm text-white">{u.profileCompletion}%</div>
+                              <div className="text-muted-foreground text-[10px]">Profile</div>
+                            </div>
+                            <div className="bg-background/50 rounded-lg px-2 py-1.5 text-center border border-border">
+                              <div className="font-bold text-sm text-green-400">${(u.earningsBalance ?? 0).toFixed(2)}</div>
+                              <div className="text-muted-foreground text-[10px]">Earnings</div>
+                            </div>
+                            <div className="bg-background/50 rounded-lg px-2 py-1.5 text-center border border-border">
+                              <div className="font-bold text-sm text-blue-400">${(u.hiringBalance ?? 0).toFixed(2)}</div>
+                              <div className="text-muted-foreground text-[10px]">Hiring</div>
+                            </div>
+                            <div className="bg-background/50 rounded-lg px-2 py-1.5 text-center border border-border">
+                              <div className="font-bold text-sm text-white">{u.sessionsAsGamer}G / {u.sessionsAsHirer}H</div>
+                              <div className="text-muted-foreground text-[10px]">Sessions</div>
+                            </div>
+                          </div>
+
+                          {/* Row 3: Actions */}
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-[10px] text-muted-foreground">{u.email}</span>
+                            <div className="ml-auto flex items-center gap-1">
+                              {strikingId === u.id ? (
+                                <div className="flex items-center gap-1">
+                                  <span className="text-xs text-red-400 font-semibold">Confirm strike?</span>
+                                  <Button size="sm" variant="destructive" className="h-6 text-xs px-2"
+                                    disabled={issueStrike.isPending}
+                                    onClick={() => issueStrike.mutate({ userId: u.id, reason: "Admin manual strike" })}>
+                                    {issueStrike.isPending ? "…" : "Yes, Strike"}
+                                  </Button>
+                                  <Button size="sm" variant="ghost" className="h-6 text-xs px-2" onClick={() => setStrikingId(null)}>Cancel</Button>
+                                </div>
+                              ) : (
+                                <Button size="sm" variant="ghost"
+                                  className="h-6 text-xs gap-1 text-orange-400 hover:text-orange-300 hover:bg-orange-500/10 border border-orange-500/30"
+                                  onClick={() => setStrikingId(u.id)}>
+                                  <Zap className="w-3 h-3" /> Issue Strike
+                                </Button>
+                              )}
+                              <Link href={`/users/${u.id}`}>
+                                <Button size="sm" variant="ghost" className="h-6 text-xs gap-1 text-muted-foreground">
+                                  <ExternalLink className="w-3 h-3" /> View
+                                </Button>
+                              </Link>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  {(usersData?.users ?? []).length === 0 && (
+                    <div className="text-center py-8 text-muted-foreground text-sm border border-dashed border-border rounded-xl">No users found</div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ── Flagged Reviews Tab ── */}
+          {activeTab === "flagged-reviews" && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <h2 className="font-bold text-foreground flex items-center gap-2">
+                  <Flag className="w-4 h-4 text-red-400" />
+                  Flagged Reviews
+                  <span className="text-xs text-muted-foreground font-normal">(auto-detected suspicious activity)</span>
+                </h2>
+                <Button variant="ghost" size="sm" onClick={() => refetchFlagged()} className="gap-1 text-xs text-muted-foreground">
+                  <RefreshCw className="w-3.5 h-3.5" /> Refresh
+                </Button>
+              </div>
+
+              <div className="text-xs text-muted-foreground bg-muted/30 border border-border rounded-lg px-3 py-2 flex items-start gap-2">
+                <ShieldAlert className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                <div>Reviews are auto-flagged when: <strong>3+ reviews from same user in 24h</strong>, <strong>reviewer has no completed sessions</strong>, or <strong>identical comment text</strong> reused. Review each flagged item and either dismiss the flag or delete the review.</div>
+              </div>
+
+              {flaggedLoading ? (
+                <div className="space-y-2">{[...Array(3)].map((_, i) => <Skeleton key={i} className="h-24 w-full" />)}</div>
+              ) : (flaggedData?.flaggedReviews ?? []).length === 0 ? (
+                <div className="text-center py-10 text-muted-foreground text-sm border border-dashed border-border rounded-xl">
+                  <CheckCircle2 className="w-8 h-8 text-green-400 mx-auto mb-2" />
+                  No flagged reviews — the system is clean!
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {(flaggedData?.flaggedReviews ?? []).map(r => (
+                    <div key={r.id} className="border border-red-500/30 bg-red-500/5 rounded-xl p-3 space-y-2">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap text-sm">
+                            <span className="font-bold text-white">{r.reviewerName}</span>
+                            <span className="text-muted-foreground">→ reviewed</span>
+                            <span className="font-semibold text-primary">{r.revieweeName}</span>
+                            <span className={`font-bold ${r.rating >= 8 ? "text-green-400" : r.rating >= 5 ? "text-amber-400" : "text-red-400"}`}>
+                              {r.rating}/10 ★
+                            </span>
+                            <span className="text-muted-foreground text-xs">Request #{r.requestId}</span>
+                          </div>
+                          {r.comment && (
+                            <p className="text-xs text-muted-foreground mt-1 italic">"{r.comment}"</p>
+                          )}
+                          <div className="mt-1.5 flex items-center gap-1.5 flex-wrap">
+                            <AlertTriangle className="w-3 h-3 text-amber-400" />
+                            <span className="text-xs text-amber-400 font-semibold">{r.flagReason}</span>
+                          </div>
+                        </div>
+                        <div className="text-xs text-muted-foreground shrink-0">{r.flaggedAt ? formatDistanceToNow(new Date(r.flaggedAt), { addSuffix: true }) : ""}</div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button size="sm" variant="ghost" className="h-7 text-xs gap-1 text-green-400 hover:bg-green-500/10 border border-green-500/30"
+                          disabled={dismissFlag.isPending}
+                          onClick={() => dismissFlag.mutate(r.id)}>
+                          <CheckCircle2 className="w-3 h-3" /> Dismiss Flag
+                        </Button>
+                        <Button size="sm" variant="ghost" className="h-7 text-xs gap-1 text-red-400 hover:bg-red-500/10 border border-red-500/30"
+                          disabled={deleteReview.isPending}
+                          onClick={() => { if (confirm("Permanently delete this review?")) deleteReview.mutate(r.id); }}>
+                          <Trash2 className="w-3 h-3" /> Delete Review
                         </Button>
                       </div>
                     </div>

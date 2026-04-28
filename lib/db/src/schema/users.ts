@@ -31,6 +31,8 @@ export const usersTable = pgTable("users", {
   isActivated: boolean("is_activated").notNull().default(false),
   activationRegion: text("activation_region"),
   activationPaidAt: timestamp("activation_paid_at"),
+  strikes: integer("strikes").notNull().default(0),
+  flaggedForBan: boolean("flagged_for_ban").notNull().default(false),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
