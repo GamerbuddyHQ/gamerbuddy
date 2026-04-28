@@ -283,9 +283,9 @@ export function ActivationGate({
         <div className="text-xs text-muted-foreground/70 leading-relaxed">
           One-time only — you'll never be charged again:
           <span className="inline-flex items-center gap-3 ml-2">
-            <span className="text-amber-400 font-bold">🇮🇳 India — ₹149</span>
-            <span className="text-muted-foreground/40">·</span>
             <span className="text-green-400 font-bold">🌍 Global — $5</span>
+            <span className="text-muted-foreground/40">·</span>
+            <span className="text-amber-400 font-bold">🇮🇳 India — ₹149</span>
           </span>
         </div>
 

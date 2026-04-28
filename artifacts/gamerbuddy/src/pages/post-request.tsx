@@ -247,8 +247,8 @@ export default function PostRequest() {
           <h1 className="text-2xl font-extrabold text-yellow-300">Activate Your Account First ⚡</h1>
           <p className="text-muted-foreground mt-2 text-sm max-w-md">
             You're verified! To post quests and hire gamers, complete the small one-time activation fee
-            — <strong className="text-yellow-300">🌍 $5 Global / 🇮🇳 ₹149 for India</strong>.
-            Paid once, never again. ❤️
+            — <strong className="text-yellow-300">🌍 $5 Global / 🇮🇳 ₹149 India</strong>.
+            This keeps out fake and bot accounts — paid once, never again. ❤️
           </p>
         </div>
         <button

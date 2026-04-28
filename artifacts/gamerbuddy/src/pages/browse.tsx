@@ -185,7 +185,7 @@ function QuickBidPanel({ req, onClose }: { req: GameRequest; onClose: () => void
         </div>
         <div className="flex-1 text-center sm:text-left">
           <div className="font-bold text-yellow-300 text-sm">One last step — activate your account! ⚡</div>
-          <div className="text-xs text-muted-foreground mt-0.5">You're verified! Pay the small one-time activation fee (🌍 $5 / 🇮🇳 ₹149) to unlock bidding. Paid once — never again. ❤️</div>
+          <div className="text-xs text-muted-foreground mt-0.5">You're verified! Pay the small one-time activation fee (🌍 $5 / 🇮🇳 ₹149) to unlock bidding. This keeps out fake and bot accounts — paid once, never again. ❤️</div>
         </div>
         <Button size="sm" onClick={() => setLocation("/dashboard")} className="bg-yellow-500 hover:bg-yellow-400 text-black text-xs font-bold shrink-0">
           Activate Now
@@ -707,7 +707,7 @@ function EmptyState({ hasFilters, onClear }: { hasFilters: boolean; onClear: () 
 function HowItWorksSection() {
   const { isDark } = useTheme();
   const steps = [
-    { num: "01", icon: <Search className="h-5 w-5" />, color: "#A1FF4F", title: "Verify & Activate",  desc: "Link a gaming account → 24–48hr review → pay a one-time activation fee (🌍 $5 / 🇮🇳 ₹149) — then you're fully unlocked." },
+    { num: "01", icon: <Search className="h-5 w-5" />, color: "#A1FF4F", title: "Verify & Activate",  desc: "Link a gaming account → 24–48hr review → pay a one-time activation fee (🌍 $5 / 🇮🇳 ₹149). This one-time fee blocks fake & bot accounts and keeps the community trusted. Paid once — never again." },
     { num: "02", icon: <Gavel  className="h-5 w-5" />, color: "#A1FF4F", title: "Browse & Bid",       desc: "Find requests that match your skills and platform. Set your price and pitch yourself — no middlemen." },
     { num: "03", icon: <Trophy className="h-5 w-5" />, color: "#facc15", title: "Play & Get Paid",    desc: "Complete the quest, collect your review, and withdraw your 90% earnings." },
   ];
