@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { CopyId } from "@/components/copy-id";
 import { useAuth } from "@/lib/auth";
@@ -14,7 +15,7 @@ import {
   useConfirmGalleryPhoto, useDeleteGalleryPhoto,
   requestPhotoUploadUrl, uploadFileToPut, computeFileHash,
   STREAMING_PLATFORM_META, GAMING_PLATFORM_META,
-  BASE,
+  BASE, apiFetch,
   type ShopItem, type QuestEntry,
 } from "@/lib/bids-api";
 import { VerifiedBadge } from "@/components/verified-badge";
@@ -25,7 +26,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
-import { format } from "date-fns";
+import { format, formatDistanceToNow } from "date-fns";
 import {
   User, Mail, Phone, Calendar, ShieldCheck, ShieldAlert, Clock,
   Star, Trophy, Swords, Edit3, Check, X, Palette, Tag,
@@ -2249,6 +2250,234 @@ function ContactVerificationSection({
   );
 }
 
+/* ─────────────────────────────────────────────────────────────────────────
+   FLAG STATUS CARD — shown on profile when account is/was flagged
+───────────────────────────────────────────────────────────────────────── */
+type FlagStatus = {
+  isFlagged:          boolean;
+  accountFlagStatus:  "under_review" | "disputed" | "resolved" | null;
+  accountFlagReason:  string | null;
+  accountFlaggedAt:   string | null;
+  disputeText:        string | null;
+  disputeSubmittedAt: string | null;
+  hasDisputedBefore:  boolean;
+  canDispute:         boolean;
+};
+
+function FlagStatusCard() {
+  const qc = useQueryClient();
+  const { toast } = useToast();
+  const [disputeInput, setDisputeInput] = useState("");
+
+  const { data, isLoading } = useQuery<FlagStatus>({
+    queryKey: ["my-flag-status"],
+    queryFn:  () => apiFetch(`${BASE}/users/me/flag-status`),
+    staleTime: 60_000,
+    retry: false,
+  });
+
+  const submitDispute = useMutation({
+    mutationFn: () => apiFetch(`${BASE}/users/me/dispute-flag`, {
+      method:  "POST",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify({ disputeText: disputeInput }),
+    }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["my-flag-status"] });
+      setDisputeInput("");
+      toast({ title: "Dispute submitted", description: "We'll review your account within 48 hours and notify you of the outcome." });
+    },
+    onError: (e: Error) => toast({ title: "Could not submit", description: e.message, variant: "destructive" }),
+  });
+
+  if (isLoading) return <Skeleton className="h-20 rounded-2xl" />;
+
+  // No flag ever set → show nothing
+  if (!data || (!data.isFlagged && !data.accountFlagStatus)) return null;
+
+  const { accountFlagStatus: status, accountFlagReason, accountFlaggedAt, disputeText, disputeSubmittedAt, hasDisputedBefore, canDispute } = data;
+
+  /* ── State derivation ── */
+  const isResolved       = status === "resolved";
+  const isPending        = status === "disputed";
+  // Rejected: dispute was submitted + hasDisputedBefore + back to under_review
+  const isRejected       = status === "under_review" && !!disputeSubmittedAt && hasDisputedBefore;
+  // Flagged again after being cleared, no second dispute allowed
+  const flaggedNoDispute = status === "under_review" && !canDispute && !disputeSubmittedAt && hasDisputedBefore;
+  // Default: status=under_review + canDispute + first time → show form (handled by last return)
+
+  /* ── Cleared ── */
+  if (isResolved) {
+    return (
+      <Card className="border-green-500/30 bg-green-500/5">
+        <CardContent className="p-4 flex items-start gap-3">
+          <div className="w-9 h-9 rounded-full bg-green-500/15 border border-green-500/30 flex items-center justify-center shrink-0">
+            <CheckCircle2 className="w-5 h-5 text-green-400" />
+          </div>
+          <div>
+            <div className="font-bold text-green-400 text-sm">Account Standing: Cleared ✓</div>
+            <div className="text-xs text-muted-foreground mt-0.5">
+              A previous flag on your account was reviewed and resolved. Your account is in good standing.
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  /* ── Dispute submitted, awaiting admin review ── */
+  if (isPending) {
+    return (
+      <Card className="border-yellow-500/40 bg-yellow-500/5">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-xs uppercase tracking-widest text-yellow-400/80 flex items-center gap-2">
+            <Clock className="h-4 w-4" /> Dispute Under Review
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-sm text-foreground/80">
+            You've submitted a dispute for your account flag. Our team will review it within <strong>48 hours</strong> and notify you of the outcome.
+          </p>
+          {accountFlagReason && (
+            <div className="rounded-lg border border-orange-500/25 bg-orange-500/8 px-3 py-2">
+              <div className="text-[10px] text-orange-400 font-semibold uppercase tracking-wider mb-1">Original Flag Reason</div>
+              <div className="text-xs text-foreground/80">{accountFlagReason}</div>
+            </div>
+          )}
+          {disputeText && (
+            <div className="rounded-lg border border-yellow-500/25 bg-yellow-500/8 px-3 py-2">
+              <div className="text-[10px] text-yellow-400 font-semibold uppercase tracking-wider mb-1">
+                Your Dispute — submitted {disputeSubmittedAt ? formatDistanceToNow(new Date(disputeSubmittedAt), { addSuffix: true }) : ""}
+              </div>
+              <div className="text-xs text-foreground/80 italic">"{disputeText}"</div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    );
+  }
+
+  /* ── Dispute rejected — flag maintained ── */
+  if (isRejected) {
+    return (
+      <Card className="border-red-500/40 bg-red-500/5">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-xs uppercase tracking-widest text-red-400/80 flex items-center gap-2">
+            <ShieldAlert className="h-4 w-4" /> Account Flagged — Dispute Reviewed
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-sm text-foreground/80">
+            Your dispute was reviewed by our team. The account flag has been <strong className="text-red-400">maintained</strong>. No further disputes are allowed for this flag. Please contact support to appeal further.
+          </p>
+          {accountFlagReason && (
+            <div className="rounded-lg border border-orange-500/25 bg-orange-500/8 px-3 py-2">
+              <div className="text-[10px] text-orange-400 font-semibold uppercase tracking-wider mb-1">Flag Reason</div>
+              <div className="text-xs text-foreground/80">{accountFlagReason}</div>
+            </div>
+          )}
+          {disputeText && (
+            <div className="rounded-lg border border-muted bg-background/40 px-3 py-2">
+              <div className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider mb-1">Your Dispute (submitted)</div>
+              <div className="text-xs text-muted-foreground italic">"{disputeText}"</div>
+            </div>
+          )}
+          <div className="text-xs text-muted-foreground">
+            Flagged {accountFlaggedAt ? formatDistanceToNow(new Date(accountFlaggedAt), { addSuffix: true }) : ""}. Check your notifications for the admin's explanation.
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  /* ── Flagged again after being cleared — no second dispute ── */
+  if (flaggedNoDispute) {
+    return (
+      <Card className="border-red-500/40 bg-red-500/5">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-xs uppercase tracking-widest text-red-400/80 flex items-center gap-2">
+            <ShieldAlert className="h-4 w-4" /> Account Flagged — Admin Review
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-sm text-foreground/80">
+            Your account has been flagged again. Because you have already disputed a previous flag, <strong className="text-red-300">no further disputes are allowed</strong> — this goes directly to admin decision. You'll be notified of the outcome.
+          </p>
+          {accountFlagReason && (
+            <div className="rounded-lg border border-orange-500/25 bg-orange-500/8 px-3 py-2">
+              <div className="text-[10px] text-orange-400 font-semibold uppercase tracking-wider mb-1">Flag Reason</div>
+              <div className="text-xs text-foreground/80">{accountFlagReason}</div>
+            </div>
+          )}
+          <div className="text-xs text-muted-foreground">Flagged {accountFlaggedAt ? formatDistanceToNow(new Date(accountFlaggedAt), { addSuffix: true }) : ""}</div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  /* ── Flagged for the first time — can submit dispute ── */
+  return (
+    <Card className="border-orange-500/40 bg-orange-500/5">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-xs uppercase tracking-widest text-orange-400/80 flex items-center gap-2">
+          <ShieldAlert className="h-4 w-4" /> Trust & Safety — Account Flagged
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="flex items-start gap-2.5">
+          <AlertTriangle className="w-4 h-4 text-orange-400 shrink-0 mt-0.5" />
+          <p className="text-sm text-foreground/85">
+            Our automated trust system detected activity that may violate our review policies. Your account has been flagged for admin review.
+            {accountFlaggedAt && <span className="text-muted-foreground"> Flagged {formatDistanceToNow(new Date(accountFlaggedAt), { addSuffix: true })}.</span>}
+          </p>
+        </div>
+
+        {accountFlagReason && (
+          <div className="rounded-lg border border-orange-500/25 bg-orange-500/10 px-3 py-2.5">
+            <div className="text-[10px] text-orange-400 font-semibold uppercase tracking-wider mb-1">Reason Detected</div>
+            <div className="text-xs text-foreground/85">{accountFlagReason}</div>
+          </div>
+        )}
+
+        <div className="border border-border rounded-xl p-4 bg-background/40 space-y-3">
+          <div>
+            <div className="font-semibold text-sm text-foreground mb-0.5">Submit Your Dispute</div>
+            <div className="text-xs text-muted-foreground">
+              If you believe this flag is incorrect, explain what happened. You have <strong className="text-foreground">one dispute per flag</strong> — make it count. An admin will review within 48 hours.
+            </div>
+          </div>
+          <Textarea
+            placeholder="Explain why this flag is incorrect. Be specific — describe the sessions involved, who you reviewed, and why your reviews are legitimate..."
+            className="min-h-[100px] text-sm resize-none bg-background"
+            value={disputeInput}
+            onChange={e => setDisputeInput(e.target.value)}
+            maxLength={2000}
+          />
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-muted-foreground">{disputeInput.length}/2000 characters · minimum 20</span>
+            <Button
+              size="sm"
+              disabled={disputeInput.trim().length < 20 || submitDispute.isPending}
+              onClick={() => submitDispute.mutate()}
+              className="gap-1.5"
+            >
+              {submitDispute.isPending ? (
+                <><RefreshCw className="w-3.5 h-3.5 animate-spin" /> Submitting…</>
+              ) : (
+                <><CheckCircle2 className="w-3.5 h-3.5" /> Submit Dispute</>
+              )}
+            </Button>
+          </div>
+        </div>
+
+        <p className="text-xs text-muted-foreground">
+          ⚠ Submitting a false dispute may result in further Trust Factor penalties. Be honest and thorough.
+        </p>
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function Profile() {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -3364,6 +3593,9 @@ export default function Profile() {
           </CardContent>
         </Card>
       )}
+
+      {/* TRUST & SAFETY FLAG STATUS */}
+      <FlagStatusCard />
 
       {/* ACCOUNT INFO */}
       <Card className="border-border bg-card/40">
